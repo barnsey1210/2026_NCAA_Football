@@ -27,6 +27,7 @@ a{color:inherit;text-decoration:none} button,input,select{font:inherit}
 .section-title{font-size:20px;font-weight:800;margin:4px 0 12px}
 table{width:100%;border-collapse:collapse} th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-size:14px;vertical-align:top} th{font-size:12px;color:#d7e6ff;text-transform:uppercase;letter-spacing:.06em}
 tr:hover td{background:rgba(255,255,255,.03)} .muted{color:var(--muted)} .tag{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px}
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap} th.sortable:hover{color:#fff}.sort-arrow{font-size:11px;color:var(--accent);margin-left:5px}.rank-sort-controls{display:none;gap:8px;align-items:center;margin-top:12px}.rank-sort-controls select{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text)}.rank-sort-controls button{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer}
 .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0} .filters input,.filters select{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
 .hero{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap} .hero-stats{display:flex;gap:10px;flex-wrap:wrap}
 .mini{background:rgba(255,255,255,.03);border:1px solid var(--line);padding:10px 12px;border-radius:14px} .mini .label{font-size:12px;color:var(--muted)} .mini .value{font-size:18px;font-weight:800;margin-top:4px}
@@ -85,6 +86,8 @@ textarea.json-box{width:100%;min-height:120px;padding:12px;border-radius:12px;bo
 }
 @media (max-width:390px){.rank-card-grid{grid-template-columns:1fr}.hero-stats{grid-template-columns:1fr}}
 
+
+@media (max-width:700px){.rank-sort-controls{display:flex}}
 </style>
 </head>
 <body>
@@ -558,6 +561,60 @@ function mountScheduleFilters() {
 function rankValue(value, rank, suffix='') {
   return `${value} <span class="small">(#${rank ?? '—'}${suffix})</span>`;
 }
+const rankSortLabels = {
+  rank: 'Rank', team: 'Team', conference: 'Conference', combo: 'Combo', sp_offense: 'SP Off', sp_defense: 'SP Def', hfa: 'HFA', overall_sos: 'OVR SOS', conf_sos: 'CONF SOS', avg_total_wins: 'Avg Wins'
+};
+let rankSortState = {key:'rank', dir:'asc'};
+function rankSortValue(t, key) {
+  if (key === 'team') return (t.team || '').toLowerCase();
+  if (key === 'conference') return (t.conference || '').toLowerCase();
+  if (key === 'overall_sos') return overallSOSByTeam[t.team];
+  if (key === 'conf_sos') return confSOSByTeam[t.team];
+  return t[key];
+}
+function sortedRankTeams() {
+  const {key, dir} = rankSortState;
+  const mult = dir === 'asc' ? 1 : -1;
+  return [...DB.teams].sort((a,b) => {
+    let av = rankSortValue(a, key), bv = rankSortValue(b, key);
+    const aMissing = av === undefined || av === null || Number.isNaN(av);
+    const bMissing = bv === undefined || bv === null || Number.isNaN(bv);
+    if (aMissing && bMissing) return a.rank - b.rank;
+    if (aMissing) return 1;
+    if (bMissing) return -1;
+    if (typeof av === 'string' || typeof bv === 'string') {
+      const cmp = String(av).localeCompare(String(bv));
+      return cmp !== 0 ? cmp * mult : a.rank - b.rank;
+    }
+    if (av === bv) return a.rank - b.rank;
+    return (av - bv) * mult;
+  });
+}
+function sortArrow(key) {
+  return rankSortState.key === key ? `<span class="sort-arrow">${rankSortState.dir === 'asc' ? '▲' : '▼'}</span>` : '';
+}
+function sortableTh(key, label) {
+  return `<th class="sortable" onclick="setRankSort('${key}')">${label}${sortArrow(key)}</th>`;
+}
+function setRankSort(key) {
+  if (rankSortState.key === key) rankSortState.dir = rankSortState.dir === 'asc' ? 'desc' : 'asc';
+  else {
+    rankSortState.key = key;
+    rankSortState.dir = (key === 'team' || key === 'conference' || key === 'rank' || key === 'sp_defense') ? 'asc' : 'desc';
+  }
+  if ((location.hash || '#/') !== '#rankings') location.hash = '#rankings';
+  else route();
+}
+function mountRankSortControls() {
+  const select = byId('rankSortSelect');
+  const dirBtn = byId('rankSortDirBtn');
+  if (!select || !dirBtn) return;
+  select.value = rankSortState.key;
+  dirBtn.textContent = rankSortState.dir === 'asc' ? 'Ascending' : 'Descending';
+  select.addEventListener('change', e => setRankSort(e.target.value));
+  dirBtn.addEventListener('click', () => { rankSortState.dir = rankSortState.dir === 'asc' ? 'desc' : 'asc'; route(); });
+}
+
 function renderRankMobileCard(t) {
   const confSuffix = t.conference && t.conference !== 'Independent' ? ' conf' : '';
   return `<div class="rank-card">
@@ -581,20 +638,27 @@ function renderRankMobileCard(t) {
   </div>`;
 }
 function renderRankings() {
+  const rankTeams = sortedRankTeams();
   return `
     <div class="page-title">Rankings</div>
-    <div class="page-sub">Laptop view keeps the full table. Phone view switches to compact team cards with the same rankings and SOS values.</div>
+    <div class="page-sub">Laptop view keeps the full sortable table. Phone view switches to compact sortable team cards with the same rankings and SOS values.</div>
     <div class="mobile-actions">
       <a class="pill" href="#schedule">Schedule</a>
       <a class="pill" href="#conferences">Conferences</a>
     </div>
+    <div class="rank-sort-controls">
+      <select id="rankSortSelect">
+        ${Object.entries(rankSortLabels).map(([key,label])=>`<option value="${key}">Sort by ${label}</option>`).join('')}
+      </select>
+      <button id="rankSortDirBtn" type="button">${rankSortState.dir === 'asc' ? 'Ascending' : 'Descending'}</button>
+    </div>
     <div class="card desktop-rankings" style="margin-top:16px">
-      <table><thead><tr><th>Rank</th><th>Team</th><th>Conference</th><th>Combo</th><th>SP Off</th><th>SP Def</th><th>HFA</th><th>OVR SOS</th><th>CONF SOS</th><th>Avg Wins</th></tr></thead><tbody>
-      ${DB.teams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankValue(t.combo.toFixed(1), comboRankByTeam[t.team])}</td><td>${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '')}</td><td>${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td></tr>`).join('')}
+      <table><thead><tr>${sortableTh('rank','Rank')}${sortableTh('team','Team')}${sortableTh('conference','Conference')}${sortableTh('combo','Combo')}${sortableTh('sp_offense','SP Off')}${sortableTh('sp_defense','SP Def')}${sortableTh('hfa','HFA')}${sortableTh('overall_sos','OVR SOS')}${sortableTh('conf_sos','CONF SOS')}${sortableTh('avg_total_wins','Avg Wins')}</tr></thead><tbody>
+      ${rankTeams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankValue(t.combo.toFixed(1), comboRankByTeam[t.team])}</td><td>${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '')}</td><td>${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td></tr>`).join('')}
       </tbody></table>
     </div>
     <div class="card mobile-rankings" style="margin-top:12px">
-      ${DB.teams.map(renderRankMobileCard).join('')}
+      ${rankTeams.map(renderRankMobileCard).join('')}
     </div>
   `;
 }
@@ -944,6 +1008,7 @@ function route() {
   byId('app').innerHTML = html;
   if (hash==='#schedule') mountScheduleFilters();
   if (hash==='#results-center') mountResultsCenter();
+  if (hash==='#rankings') mountRankSortControls();
   if (hash==='#betting') mountBettingFilters();
 }
 function goToTeam() {
