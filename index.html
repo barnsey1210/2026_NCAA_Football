@@ -270,6 +270,12 @@ function linkTeam(name) {
   const t = teamByName[name.toLowerCase()];
   return t ? `<span class="linkish" onclick="location.hash='#team/${t.slug}'">${name}</span>` : name;
 }
+
+function linkTeamWithComboRank(name) {
+  const t = teamByName[String(name || '').toLowerCase()];
+  if (!t) return name || '—';
+  return `${linkTeam(name)} <span class="small">(#${t.rank})</span>`;
+}
 function americanOddsFromProb(p) {
   if (p == null || !isFinite(p) || p <= 0) return '—';
   if (p >= 1) return '-∞';
@@ -294,8 +300,8 @@ function scheduleTable(games) {
   ${games.map(g => `<tr>
     <td>${g.week}</td>
     <td>${fmtDate(g.date)}</td>
-    <td>${linkTeam(g.away_team)}</td>
-    <td>${linkTeam(g.home_team)}</td>
+    <td>${linkTeamWithComboRank(g.away_team)}</td>
+    <td>${linkTeamWithComboRank(g.home_team)}</td>
     <td>${g.is_conference_game ? linkConf(g.home_conference) : '—'}</td>
     <td>${g.neutral_site ? 'Yes' : 'No'}</td>
     <td>${spreadText(g)}</td>
@@ -532,7 +538,7 @@ function renderHome() {
 function renderSchedule() {
   return `
     <div class="page-title">Season Schedule</div>
-    <div class="page-sub">Conference assignments in this view are driven by the latest team-to-conference map from columns L:M.</div>
+    <div class="page-sub">Conference assignments in this view are driven by the latest team-to-conference map from columns L:M. FBS teams show their Combo rank next to the team name.</div>
     <div class="filters">
       <select id="fWeek"><option value="all">All weeks</option>${weeks.map(w=>`<option value="${w}">Week ${w}</option>`).join('')}</select>
       <select id="fConf"><option value="all">All conferences</option>${DB.conferences.map(c=>`<option value="${c.conference}">${c.conference}</option>`).join('')}</select>
