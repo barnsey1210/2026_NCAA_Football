@@ -41,13 +41,18 @@ textarea.json-box{width:100%;min-height:120px;padding:12px;border-radius:12px;bo
 @media (max-width:1100px){.app{grid-template-columns:1fr} .sidebar{border-right:none;border-bottom:1px solid var(--line)} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:700px){.content{padding:16px} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:1fr} .brand{font-size:26px} th,td{font-size:12px;padding:8px 6px}}
 
-.team-with-logo{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;min-width:0}
-.team-logo{width:30px;height:30px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
-.page-title .team-logo{width:46px;height:46px;margin-right:4px}
-.kpi-value .team-logo{width:36px;height:36px}
-th .team-logo,td .team-logo{width:28px;height:28px}
-.rank-card-title .team-logo{width:32px;height:32px}
-@media (max-width:700px){.team-logo{width:26px;height:26px}.page-title .team-logo{width:40px;height:40px}.kpi-value .team-logo{width:32px;height:32px}}
+.team-with-logo{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;min-width:0}
+.team-logo-wrap{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.22);box-shadow:0 2px 8px rgba(0,0,0,.18);flex:0 0 auto;vertical-align:middle}
+.team-logo{width:26px;height:26px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:none}
+.page-title .team-logo-wrap{width:46px;height:46px;border-radius:12px;margin-right:4px}
+.page-title .team-logo{width:36px;height:36px}
+.kpi-value .team-logo-wrap{width:42px;height:42px;border-radius:12px}
+.kpi-value .team-logo{width:32px;height:32px}
+th .team-logo-wrap,td .team-logo-wrap{width:34px;height:34px}
+th .team-logo,td .team-logo{width:26px;height:26px}
+.rank-card-title .team-logo-wrap{width:36px;height:36px;border-radius:10px}
+.rank-card-title .team-logo{width:28px;height:28px}
+@media (max-width:700px){.team-with-logo{gap:7px}.team-logo-wrap{width:30px;height:30px;border-radius:8px}.team-logo{width:23px;height:23px}.page-title .team-logo-wrap{width:40px;height:40px}.page-title .team-logo{width:31px;height:31px}.kpi-value .team-logo-wrap{width:38px;height:38px}.kpi-value .team-logo{width:29px;height:29px}}
 
 /* Mobile/laptop responsive dashboard additions */
 .card{overflow-x:auto}
@@ -299,7 +304,7 @@ function teamImageImg(name) {
   if (!t) return '';
   const folder = TEAM_IMAGE_MODE === "helmet" ? "helmets" : "logos";
   const file = teamImageFileForTeam(t);
-  return `<img class="team-logo" src="${folder}/${file}.png" alt="" loading="lazy" onerror="this.style.display='none'">`;
+  return `<span class="team-logo-wrap"><img class="team-logo" src="${folder}/${file}.png" alt="" loading="lazy" onerror="this.closest('.team-logo-wrap').style.display='none'"></span>`;
 }
 function teamLabel(name) {
   const safe = escapeHtml(name || '—');
