@@ -40,6 +40,15 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap} th.sortable:hove
 textarea.json-box{width:100%;min-height:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
 @media (max-width:1100px){.app{grid-template-columns:1fr} .sidebar{border-right:none;border-bottom:1px solid var(--line)} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:700px){.content{padding:16px} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:1fr} .brand{font-size:26px} th,td{font-size:12px;padding:8px 6px}}
+
+.team-with-helmet{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;min-width:0}
+.team-helmet{width:26px;height:20px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.page-title .team-helmet{width:42px;height:30px;margin-right:2px}
+.kpi-value .team-helmet{width:34px;height:25px}
+th .team-helmet,td .team-helmet{width:24px;height:18px}
+.rank-card-title .team-helmet{width:28px;height:21px}
+@media (max-width:700px){.team-helmet{width:23px;height:17px}.page-title .team-helmet{width:36px;height:26px}.kpi-value .team-helmet{width:30px;height:22px}}
+
 /* Mobile/laptop responsive dashboard additions */
 .card{overflow-x:auto}
 .mobile-rankings{display:none}
@@ -259,7 +268,7 @@ function spreadText(g) {
   const v = g.projected_margin_home;
   if (Math.abs(v) < 0.05) return 'PK';
   const favored = v > 0 ? g.home_team : g.away_team;
-  return favored + ' -' + Math.abs(v).toFixed(1);
+  return `${teamLabel(favored)} -${Math.abs(v).toFixed(1)}`;
 }
 function teamSpreadText(v) {
   if (v == null) return '—';
@@ -270,16 +279,39 @@ function navBtn(hash, label) {
   const active = location.hash === hash || (hash==='#/' && (!location.hash || location.hash==='#'));
   return `<button class="${active?'active':''}" onclick="location.hash='${hash}'">${label}</button>`;
 }
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+const HELMET_FILE_OVERRIDES = {
+  "Texas A&M": "texas-aandm"
+};
+function helmetFileForTeam(t) {
+  if (!t) return null;
+  return HELMET_FILE_OVERRIDES[t.team] || t.slug;
+}
+function teamHelmetImg(name) {
+  const t = teamByName[String(name || '').toLowerCase()];
+  if (!t) return '';
+  const file = helmetFileForTeam(t);
+  return `<img class="team-helmet" src="helmets/${file}.png" alt="" loading="lazy" onerror="this.style.display='none'">`;
+}
+function teamLabel(name) {
+  const safe = escapeHtml(name || '—');
+  const t = teamByName[String(name || '').toLowerCase()];
+  if (!t) return safe;
+  return `<span class="team-with-helmet">${teamHelmetImg(name)}<span>${safe}</span></span>`;
+}
 function linkTeam(name) {
-  const t = teamByName[name.toLowerCase()];
-  return t ? `<span class="linkish" onclick="location.hash='#team/${t.slug}'">${name}</span>` : name;
+  const t = teamByName[String(name || '').toLowerCase()];
+  return t ? `<span class="linkish team-with-helmet" onclick="location.hash='#team/${t.slug}'">${teamHelmetImg(name)}<span>${escapeHtml(name)}</span></span>` : escapeHtml(name || '—');
 }
 
 function linkTeamWithComboRank(name) {
   const t = teamByName[String(name || '').toLowerCase()];
-  if (!t) return name || '—';
+  if (!t) return escapeHtml(name || '—');
   return `${linkTeam(name)} <span class="small">(#${t.rank})</span>`;
 }
+
 function americanOddsFromProb(p) {
   if (p == null || !isFinite(p) || p <= 0) return '—';
   if (p >= 1) return '-∞';
@@ -690,10 +722,10 @@ function renderHome() {
       </div>
     </div>
     <div class="grid cols-4" style="margin-top:16px">
-      <div class="card"><div class="kpi">Top Team</div><div class="kpi-value">${top[0].team}</div><div class="kpi-sub">Rank #${top[0].rank} · Combo ${top[0].combo.toFixed(1)}</div></div>
-      <div class="card"><div class="kpi">Best Avg Wins</div><div class="kpi-value">${[...DB.teams].sort((a,b)=>b.avg_total_wins-a.avg_total_wins)[0].team}</div><div class="kpi-sub">${[...DB.teams].sort((a,b)=>b.avg_total_wins-a.avg_total_wins)[0].avg_total_wins.toFixed(2)} projected wins</div></div>
-      <div class="card"><div class="kpi">Highest Bowl %</div><div class="kpi-value">${[...DB.teams].sort((a,b)=>b.bowl_eligibility_pct-a.bowl_eligibility_pct)[0].team}</div><div class="kpi-sub">${fmtPct([...DB.teams].sort((a,b)=>b.bowl_eligibility_pct-a.bowl_eligibility_pct)[0].bowl_eligibility_pct)}</div></div>
-      <div class="card"><div class="kpi">Strongest League Favorite</div><div class="kpi-value">${titleFavorites[0].favorite.team}</div><div class="kpi-sub">${titleFavorites[0].conference} · ${fmtPct(titleFavorites[0].favorite.conference_title_pct)}</div></div>
+      <div class="card"><div class="kpi">Top Team</div><div class="kpi-value">${teamLabel(top[0].team)}</div><div class="kpi-sub">Rank #${top[0].rank} · Combo ${top[0].combo.toFixed(1)}</div></div>
+      <div class="card"><div class="kpi">Best Avg Wins</div><div class="kpi-value">${teamLabel([...DB.teams].sort((a,b)=>b.avg_total_wins-a.avg_total_wins)[0].team)}</div><div class="kpi-sub">${[...DB.teams].sort((a,b)=>b.avg_total_wins-a.avg_total_wins)[0].avg_total_wins.toFixed(2)} projected wins</div></div>
+      <div class="card"><div class="kpi">Highest Bowl %</div><div class="kpi-value">${teamLabel([...DB.teams].sort((a,b)=>b.bowl_eligibility_pct-a.bowl_eligibility_pct)[0].team)}</div><div class="kpi-sub">${fmtPct([...DB.teams].sort((a,b)=>b.bowl_eligibility_pct-a.bowl_eligibility_pct)[0].bowl_eligibility_pct)}</div></div>
+      <div class="card"><div class="kpi">Strongest League Favorite</div><div class="kpi-value">${teamLabel(titleFavorites[0].favorite.team)}</div><div class="kpi-sub">${titleFavorites[0].conference} · ${fmtPct(titleFavorites[0].favorite.conference_title_pct)}</div></div>
     </div>
     <div class="grid cols-2" style="margin-top:16px">
       <div class="card">
@@ -861,7 +893,7 @@ function renderTeam(slug) {
   return `
     <div class="hero">
       <div>
-        <div class="page-title">${t.team}</div>
+        <div class="page-title">${teamLabel(t.team)}</div>
         <div class="page-sub">${t.conference} · Rank #${t.rank} · Conference sourced from 2026 Schedule columns L:M</div>
       </div>
       <div class="hero-stats">
@@ -974,7 +1006,7 @@ function renderConference(slug) {
     <div class="page-title">${c.conference}</div>
     <div class="page-sub">${c.num_teams} teams · conference mapping refreshed from columns L:M</div>
     <div class="grid cols-3" style="margin-top:16px">
-      <div class="card"><div class="kpi">Favorite</div><div class="kpi-value">${c.teams[0].team}</div><div class="kpi-sub">${fmtPct(c.teams[0].conference_title_pct)} conference title</div></div>
+      <div class="card"><div class="kpi">Favorite</div><div class="kpi-value">${teamLabel(c.teams[0].team)}</div><div class="kpi-sub">${fmtPct(c.teams[0].conference_title_pct)} conference title</div></div>
       <div class="card"><div class="kpi">Average Strength</div><div class="kpi-value">${c.average_strength.toFixed(1)}</div><div class="kpi-sub">Mean Combo rating</div></div>
       <div class="card"><div class="kpi">Conference Games</div><div class="kpi-value">${confGames.length}</div><div class="kpi-sub">Used in current simulation</div></div>
     </div>
