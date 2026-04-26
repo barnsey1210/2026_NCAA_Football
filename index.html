@@ -42,17 +42,26 @@ textarea.json-box{width:100%;min-height:120px;padding:12px;border-radius:12px;bo
 @media (max-width:700px){.content{padding:16px} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:1fr} .brand{font-size:26px} th,td{font-size:12px;padding:8px 6px}}
 
 .team-with-logo{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;min-width:0}
-.team-logo-wrap{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.22);box-shadow:0 2px 8px rgba(0,0,0,.18);flex:0 0 auto;vertical-align:middle}
-.team-logo{width:26px;height:26px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:none}
-.page-title .team-logo-wrap{width:46px;height:46px;border-radius:12px;margin-right:4px}
-.page-title .team-logo{width:36px;height:36px}
-.kpi-value .team-logo-wrap{width:42px;height:42px;border-radius:12px}
-.kpi-value .team-logo{width:32px;height:32px}
+.team-logo-wrap{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 auto;vertical-align:middle}
+.team-logo-wrap.needs-badge{border-radius:9px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.22);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.team-logo{width:30px;height:30px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45))}
+.team-logo-wrap.needs-badge .team-logo{width:26px;height:26px;filter:none}
+.page-title .team-logo-wrap{width:46px;height:46px;margin-right:4px}
+.page-title .team-logo-wrap.needs-badge{border-radius:12px}
+.page-title .team-logo{width:40px;height:40px}
+.page-title .team-logo-wrap.needs-badge .team-logo{width:36px;height:36px}
+.kpi-value .team-logo-wrap{width:42px;height:42px}
+.kpi-value .team-logo-wrap.needs-badge{border-radius:12px}
+.kpi-value .team-logo{width:36px;height:36px}
+.kpi-value .team-logo-wrap.needs-badge .team-logo{width:32px;height:32px}
 th .team-logo-wrap,td .team-logo-wrap{width:34px;height:34px}
-th .team-logo,td .team-logo{width:26px;height:26px}
-.rank-card-title .team-logo-wrap{width:36px;height:36px;border-radius:10px}
-.rank-card-title .team-logo{width:28px;height:28px}
-@media (max-width:700px){.team-with-logo{gap:7px}.team-logo-wrap{width:30px;height:30px;border-radius:8px}.team-logo{width:23px;height:23px}.page-title .team-logo-wrap{width:40px;height:40px}.page-title .team-logo{width:31px;height:31px}.kpi-value .team-logo-wrap{width:38px;height:38px}.kpi-value .team-logo{width:29px;height:29px}}
+th .team-logo,td .team-logo{width:30px;height:30px}
+th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-logo{width:26px;height:26px}
+.rank-card-title .team-logo-wrap{width:36px;height:36px}
+.rank-card-title .team-logo-wrap.needs-badge{border-radius:10px}
+.rank-card-title .team-logo{width:32px;height:32px}
+.rank-card-title .team-logo-wrap.needs-badge .team-logo{width:28px;height:28px}
+@media (max-width:700px){.team-with-logo{gap:7px}.team-logo-wrap{width:30px;height:30px}.team-logo-wrap.needs-badge{border-radius:8px}.team-logo{width:27px;height:27px}.team-logo-wrap.needs-badge .team-logo{width:23px;height:23px}.page-title .team-logo-wrap{width:40px;height:40px}.page-title .team-logo{width:35px;height:35px}.page-title .team-logo-wrap.needs-badge .team-logo{width:31px;height:31px}.kpi-value .team-logo-wrap{width:38px;height:38px}.kpi-value .team-logo{width:33px;height:33px}.kpi-value .team-logo-wrap.needs-badge .team-logo{width:29px;height:29px}}
 
 /* Mobile/laptop responsive dashboard additions */
 .card{overflow-x:auto}
@@ -294,6 +303,30 @@ const TEAM_IMAGE_MODE = "logo";
 const TEAM_IMAGE_FILE_OVERRIDES = {
   "Texas A&M": "texas-aandm"
 };
+
+// Only these darker/blue logos get the light badge.
+// Most logos stay unboxed for a cleaner dark-mode look.
+const LOGO_BADGE_TEAMS = new Set([
+  "Air Force",
+  "Boise State",
+  "BYU",
+  "Duke",
+  "Georgia Tech",
+  "Iowa",
+  "Navy",
+  "North Carolina",
+  "North Dakota State",
+  "Notre Dame",
+  "Penn State",
+  "Pittsburgh",
+  "Rice",
+  "Toledo",
+  "Tulane",
+  "UTEP",
+  "Virginia",
+  "Wake Forest",
+  "West Virginia"
+]);
 function teamImageFileForTeam(t) {
   if (!t) return null;
   return TEAM_IMAGE_FILE_OVERRIDES[t.team] || t.slug;
@@ -304,7 +337,8 @@ function teamImageImg(name) {
   if (!t) return '';
   const folder = TEAM_IMAGE_MODE === "helmet" ? "helmets" : "logos";
   const file = teamImageFileForTeam(t);
-  return `<span class="team-logo-wrap"><img class="team-logo" src="${folder}/${file}.png" alt="" loading="lazy" onerror="this.closest('.team-logo-wrap').style.display='none'"></span>`;
+  const badgeClass = (TEAM_IMAGE_MODE === "logo" && LOGO_BADGE_TEAMS.has(t.team)) ? " needs-badge" : "";
+  return `<span class="team-logo-wrap${badgeClass}"><img class="team-logo" src="${folder}/${file}.png" alt="" loading="lazy" onerror="this.closest('.team-logo-wrap').style.display='none'"></span>`;
 }
 function teamLabel(name) {
   const safe = escapeHtml(name || '—');
