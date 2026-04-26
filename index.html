@@ -41,13 +41,13 @@ textarea.json-box{width:100%;min-height:120px;padding:12px;border-radius:12px;bo
 @media (max-width:1100px){.app{grid-template-columns:1fr} .sidebar{border-right:none;border-bottom:1px solid var(--line)} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:700px){.content{padding:16px} .cols-4,.cols-3,.cols-2,.filters{grid-template-columns:1fr} .brand{font-size:26px} th,td{font-size:12px;padding:8px 6px}}
 
-.team-with-helmet{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;min-width:0}
-.team-helmet{width:26px;height:20px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
-.page-title .team-helmet{width:42px;height:30px;margin-right:2px}
-.kpi-value .team-helmet{width:34px;height:25px}
-th .team-helmet,td .team-helmet{width:24px;height:18px}
-.rank-card-title .team-helmet{width:28px;height:21px}
-@media (max-width:700px){.team-helmet{width:23px;height:17px}.page-title .team-helmet{width:36px;height:26px}.kpi-value .team-helmet{width:30px;height:22px}}
+.team-with-logo{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;min-width:0}
+.team-logo{width:30px;height:30px;object-fit:contain;flex:0 0 auto;vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.page-title .team-logo{width:46px;height:46px;margin-right:4px}
+.kpi-value .team-logo{width:36px;height:36px}
+th .team-logo,td .team-logo{width:28px;height:28px}
+.rank-card-title .team-logo{width:32px;height:32px}
+@media (max-width:700px){.team-logo{width:26px;height:26px}.page-title .team-logo{width:40px;height:40px}.kpi-value .team-logo{width:32px;height:32px}}
 
 /* Mobile/laptop responsive dashboard additions */
 .card{overflow-x:auto}
@@ -282,28 +282,34 @@ function navBtn(hash, label) {
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
-const HELMET_FILE_OVERRIDES = {
+// Team image controls.
+// Use "logo" after uploading a /logos folder, "helmet" to use /helmets, or "none" to hide images.
+const TEAM_IMAGE_MODE = "logo";
+
+const TEAM_IMAGE_FILE_OVERRIDES = {
   "Texas A&M": "texas-aandm"
 };
-function helmetFileForTeam(t) {
+function teamImageFileForTeam(t) {
   if (!t) return null;
-  return HELMET_FILE_OVERRIDES[t.team] || t.slug;
+  return TEAM_IMAGE_FILE_OVERRIDES[t.team] || t.slug;
 }
-function teamHelmetImg(name) {
+function teamImageImg(name) {
+  if (TEAM_IMAGE_MODE === "none") return '';
   const t = teamByName[String(name || '').toLowerCase()];
   if (!t) return '';
-  const file = helmetFileForTeam(t);
-  return `<img class="team-helmet" src="helmets/${file}.png" alt="" loading="lazy" onerror="this.style.display='none'">`;
+  const folder = TEAM_IMAGE_MODE === "helmet" ? "helmets" : "logos";
+  const file = teamImageFileForTeam(t);
+  return `<img class="team-logo" src="${folder}/${file}.png" alt="" loading="lazy" onerror="this.style.display='none'">`;
 }
 function teamLabel(name) {
   const safe = escapeHtml(name || '—');
   const t = teamByName[String(name || '').toLowerCase()];
   if (!t) return safe;
-  return `<span class="team-with-helmet">${teamHelmetImg(name)}<span>${safe}</span></span>`;
+  return `<span class="team-with-logo">${teamImageImg(name)}<span>${safe}</span></span>`;
 }
 function linkTeam(name) {
   const t = teamByName[String(name || '').toLowerCase()];
-  return t ? `<span class="linkish team-with-helmet" onclick="location.hash='#team/${t.slug}'">${teamHelmetImg(name)}<span>${escapeHtml(name)}</span></span>` : escapeHtml(name || '—');
+  return t ? `<span class="linkish team-with-logo" onclick="location.hash='#team/${t.slug}'">${teamImageImg(name)}<span>${escapeHtml(name)}</span></span>` : escapeHtml(name || '—');
 }
 
 function linkTeamWithComboRank(name) {
