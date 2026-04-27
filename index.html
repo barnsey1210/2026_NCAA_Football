@@ -306,9 +306,77 @@ function gameResultParts(g) {
   const winner = ascore === hscore ? 'Tie' : (ascore > hscore ? g.away_team : g.home_team);
   return {winner, margin:hscore-ascore, total:ascore+hscore};
 }
-function marketSpread(g) { return g.market_spread ?? g.sgo_spread ?? g.close_spread ?? null; }
-function marketTotal(g) { return g.market_total ?? g.sgo_total ?? g.close_total ?? null; }
+function firstPresent(...vals) {
+  for (const v of vals) if (v !== undefined && v !== null && v !== '') return v;
+  return null;
+}
+function marketSpread(g) {
+  return firstPresent(g.sgo_home_spread, g.market_home_spread, g.market_spread, g.sgo_spread, g.close_spread);
+}
+function marketSpreadPrice(g) {
+  return firstPresent(g.sgo_home_spread_price, g.market_home_spread_price, g.market_spread_price, g.sgo_spread_price, g.close_spread_price);
+}
+function marketTotal(g) {
+  return firstPresent(g.sgo_game_total, g.sgo_total, g.market_total, g.close_total);
+}
+function marketOverPrice(g) {
+  return firstPresent(g.sgo_over_price, g.market_over_price, g.game_over_price, g.close_over_price);
+}
+function marketUnderPrice(g) {
+  return firstPresent(g.sgo_under_price, g.market_under_price, g.game_under_price, g.close_under_price);
+}
+function market1HSpread(g) {
+  return firstPresent(g.sgo_1h_home_spread, g.sgo_home_1h_spread, g.home_1h_spread, g.market_1h_home_spread, g.one_h_home_spread, g.first_half_home_spread);
+}
+function market1HSpreadPrice(g) {
+  return firstPresent(g.sgo_1h_home_spread_price, g.sgo_home_1h_spread_price, g.home_1h_spread_price, g.market_1h_home_spread_price, g.one_h_home_spread_price, g.first_half_home_spread_price);
+}
+function market1HTotal(g) {
+  return firstPresent(g.sgo_1h_total, g.sgo_one_h_total, g.one_h_total, g.market_1h_total, g.first_half_total);
+}
+function market1HOverPrice(g) {
+  return firstPresent(g.sgo_1h_over_price, g.sgo_one_h_over_price, g.one_h_over_price, g.market_1h_over_price, g.first_half_over_price);
+}
+function market1HUnderPrice(g) {
+  return firstPresent(g.sgo_1h_under_price, g.sgo_one_h_under_price, g.one_h_under_price, g.market_1h_under_price, g.first_half_under_price);
+}
+function fmtAmerican(v) {
+  if (v === null || v === undefined || v === '') return '';
+  const s = String(v).trim();
+  if (!s) return '';
+  const n = Number(s);
+  if (Number.isFinite(n)) return n > 0 ? `+${n}` : `${n}`;
+  return s;
+}
 function fmtMarket(v) { return v == null || v === '' || Number.isNaN(Number(v)) ? '—' : (Number(v)>0?'+':'') + Number(v).toFixed(1); }
+function fmtMarketSpreadCell(g) {
+  const line = marketSpread(g);
+  const price = fmtAmerican(marketSpreadPrice(g));
+  if (line == null || line === '' || Number.isNaN(Number(line))) return '—';
+  return `<div class="proj-market"><span class="line-main">${fmtMarket(line)}</span>${price ? `<span class="line-sub">${price}</span>` : ''}</div>`;
+}
+function fmtMarketTotalCell(g) {
+  const line = marketTotal(g);
+  const over = fmtAmerican(marketOverPrice(g));
+  const under = fmtAmerican(marketUnderPrice(g));
+  if (line == null || line === '' || Number.isNaN(Number(line))) return '—';
+  const prices = [over ? `O ${over}` : '', under ? `U ${under}` : ''].filter(Boolean).join(' / ');
+  return `<div class="proj-market"><span class="line-main">${Number(line).toFixed(1)}</span>${prices ? `<span class="line-sub">${prices}</span>` : ''}</div>`;
+}
+function fmtMarket1HSpreadCell(g) {
+  const line = market1HSpread(g);
+  const price = fmtAmerican(market1HSpreadPrice(g));
+  if (line == null || line === '' || Number.isNaN(Number(line))) return '—';
+  return `<div class="proj-market"><span class="line-main">${fmtMarket(line)}</span>${price ? `<span class="line-sub">${price}</span>` : ''}</div>`;
+}
+function fmtMarket1HTotalCell(g) {
+  const line = market1HTotal(g);
+  const over = fmtAmerican(market1HOverPrice(g));
+  const under = fmtAmerican(market1HUnderPrice(g));
+  if (line == null || line === '' || Number.isNaN(Number(line))) return '—';
+  const prices = [over ? `O ${over}` : '', under ? `U ${under}` : ''].filter(Boolean).join(' / ');
+  return `<div class="proj-market"><span class="line-main">${Number(line).toFixed(1)}</span>${prices ? `<span class="line-sub">${prices}</span>` : ''}</div>`;
+}
 function fmtEdge(v) { return v == null || Number.isNaN(v) ? '—' : `<span class="${v>=0?'edge-pos':'edge-neg'}">${v>0?'+':''}${v.toFixed(1)}</span>`; }
 function setScheduleViewMode(mode) {
   scheduleViewMode = mode;
@@ -509,6 +577,7 @@ function scheduleSortValue(g, key) {
   const st = gameState(g);
   const res = gameResultParts(g);
   const ms = marketSpread(g), mt = marketTotal(g);
+  const h1s = market1HSpread(g), h1t = market1HTotal(g);
   const spreadEdge = ms == null || ms === '' ? null : Number(g.projected_margin_home) - Number(ms);
   const totalEdge = mt == null || mt === '' ? null : Number(g.projected_total) - Number(mt);
   if (key === 'week') return Number(g.week);
@@ -523,6 +592,8 @@ function scheduleSortValue(g, key) {
   if (key === 'proj_total') return Number(g.projected_total);
   if (key === 'market_total') return mt == null || mt === '' ? null : Number(mt);
   if (key === 'total_edge') return totalEdge;
+  if (key === 'one_h_spread') return h1s == null || h1s === '' ? null : Number(h1s);
+  if (key === 'one_h_total') return h1t == null || h1t === '' ? null : Number(h1t);
   if (key === 'home_win') return Number(g.win_prob_home);
   if (key === 'status') return st.status === 'final' ? 1 : 0;
   if (key === 'score') return gameScoreText(g) === '—' ? null : Number(st.home_score) + Number(st.away_score) / 1000;
@@ -570,8 +641,9 @@ function scheduleTable(games, mode='simple') {
   const header = view === 'odds'
     ? [
         scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
-        scheduleTh('proj_spread','Proj Spread'), scheduleTh('market_spread','Market Spread'), scheduleTh('spread_edge','Spread Edge'),
-        scheduleTh('proj_total','Proj Total'), scheduleTh('market_total','Market Total'), scheduleTh('total_edge','Total Edge')
+        scheduleTh('proj_spread','Proj Spread'), scheduleTh('market_spread','SGO Spread'), scheduleTh('spread_edge','Spread Edge'),
+        scheduleTh('proj_total','Proj Total'), scheduleTh('market_total','SGO Total'), scheduleTh('total_edge','Total Edge'),
+        scheduleTh('one_h_spread','SGO 1H Spread'), scheduleTh('one_h_total','SGO 1H Total')
       ].join('')
     : view === 'results'
       ? [
@@ -589,13 +661,15 @@ function scheduleTable(games, mode='simple') {
     const st = gameState(g);
     const res = gameResultParts(g);
     const ms = marketSpread(g), mt = marketTotal(g);
+    const h1s = market1HSpread(g), h1t = market1HTotal(g);
     const spreadEdge = ms == null || ms === '' ? null : Number(g.projected_margin_home) - Number(ms);
     const totalEdge = mt == null || mt === '' ? null : Number(g.projected_total) - Number(mt);
     if (view === 'odds') return `<tr>
       <td>${g.week}</td><td>${fmtDate(g.date)}</td><td>${linkTeamWithComboRank(g.away_team)}</td><td>${linkTeamWithComboRank(g.home_team)}</td>
       <td><span class="line-main">${spreadText(g)}</span></td>
-      <td>${fmtMarket(ms)}</td><td>${fmtEdge(spreadEdge)}</td>
-      <td>${Number(g.projected_total).toFixed(1)}</td><td>${fmtMarket(mt)}</td><td>${fmtEdge(totalEdge)}</td>
+      <td>${fmtMarketSpreadCell(g)}</td><td>${fmtEdge(spreadEdge)}</td>
+      <td>${Number(g.projected_total).toFixed(1)}</td><td>${fmtMarketTotalCell(g)}</td><td>${fmtEdge(totalEdge)}</td>
+      <td>${fmtMarket1HSpreadCell(g)}</td><td>${fmtMarket1HTotalCell(g)}</td>
     </tr>`;
     if (view === 'results') return `<tr>
       <td>${g.week}</td><td>${fmtDate(g.date)}</td><td>${linkTeamWithComboRank(g.away_team)}</td><td>${linkTeamWithComboRank(g.home_team)}</td>
@@ -999,7 +1073,7 @@ function renderSchedule() {
   const finalTagged = DB.games.filter(g => gameState(g).status === 'final').length;
   return `
     <div class="page-title">Season Schedule</div>
-    <div class="page-sub">Schedule and projections remain workbook-driven. CFBD game IDs/status fields are embedded from the workbook, with manual browser overrides still available from Results Center.</div>
+    <div class="page-sub">Schedule and projections remain workbook-driven. CFBD game IDs/status fields are embedded from the workbook, with manual browser overrides still available from Results Center. Odds Compare is wired for SGO full-game and 1H spread/total lines and prices when SGO fields are embedded.</div>
     <div class="view-toggle" id="scheduleViewToggle">
       <button data-mode="simple" class="${scheduleViewMode==='simple'?'active':''}">Simple</button>
       <button data-mode="odds" class="${scheduleViewMode==='odds'?'active':''}">Odds Compare</button>
