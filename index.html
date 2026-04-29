@@ -311,7 +311,7 @@ th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-l
 @media (min-width: 1200px){
   .hero-stats{
     display:grid;
-    grid-template-columns:repeat(9, minmax(0, 1fr));
+    grid-template-columns:repeat(8, minmax(0, 1fr));
     gap:8px;
     align-items:stretch;
   }
@@ -619,6 +619,193 @@ th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-l
   }
 }
 
+
+/* Team hero staff panel */
+.staff-hero{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(17,34,72,.60), rgba(9,18,40,.38));
+  padding:10px 12px;
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+  min-width:0;
+}
+.staff-title{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:950;
+  color:#dbeafe;
+  margin-bottom:8px;
+}
+.staff-record-line{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.staff-record-pill{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  padding:3px 8px;
+  font-size:12px;
+  font-weight:850;
+  color:#eaf2ff;
+  background:rgba(255,255,255,.045);
+}
+.staff-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  padding:4px 0;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.staff-role{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:950;
+}
+.staff-name{
+  font-size:13px;
+  font-weight:850;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.staff-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:72px;
+  border-radius:999px;
+  padding:2px 7px;
+  font-size:10px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border:1px solid rgba(148,163,184,.24);
+  color:#cbd5e1;
+  background:rgba(148,163,184,.08);
+}
+.staff-status.returning{
+  color:#4ade80;
+  border-color:rgba(74,222,128,.42);
+  background:rgba(74,222,128,.10);
+}
+.staff-status.new{
+  color:#fb7185;
+  border-color:rgba(251,113,133,.42);
+  background:rgba(251,113,133,.10);
+}
+.staff-status.unverified{
+  color:#fbbf24;
+  border-color:rgba(251,191,36,.35);
+  background:rgba(251,191,36,.08);
+}
+@media (min-width:1200px){
+  .team-hero{
+    grid-template-columns:minmax(230px, 350px) minmax(300px, 430px) minmax(520px, 1fr);
+  }
+}
+
+
+/* Staff panel fit polish */
+@media (min-width:1200px){
+  .team-hero{
+    grid-template-columns:minmax(240px, 330px) minmax(420px, 520px) minmax(560px, 1fr);
+  }
+}
+.staff-row{
+  grid-template-columns:30px minmax(0,1fr) 86px;
+}
+.staff-name{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  line-height:1.15;
+}
+.staff-status{
+  min-width:78px;
+}
+
+
+/* Staff panel record/coaches relabel polish */
+.staff-title-inline{
+  margin-top:8px;
+  margin-bottom:4px;
+}
+.staff-record-line{
+  margin-bottom:6px;
+}
+
+
+/* Team header/staff rework */
+.team-record-subline{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.team-record-subline span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:14px;
+  font-weight:850;
+  color:#dbeafe;
+  background:rgba(255,255,255,.045);
+}
+.team-record-subline b{
+  color:#fff;
+  font-weight:950;
+  margin-left:4px;
+}
+.staff-title-inline{
+  text-align:center;
+  margin-top:0;
+  margin-bottom:8px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.staff-hero{
+  padding-top:14px;
+}
+
+
+/* Team title row conference link */
+.team-title-row{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.team-title-conf{
+  font-size:24px;
+  font-weight:850;
+  color:var(--muted);
+}
+.team-title-conf a{
+  color:#dbeafe;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+@media (max-width:700px){
+  .team-title-conf{
+    font-size:18px;
+  }
+}
+
+
+/* Partial coach continuity status */
+.staff-status.partial{
+  color:#fbbf24;
+  border-color:rgba(251,191,36,.42);
+  background:rgba(251,191,36,.10);
+}
+
 </style>
 </head>
 <body>
@@ -647,6 +834,7 @@ const teamBySlug = Object.fromEntries(DB.teams.map(t => [t.slug, t]));
 const teamByName = Object.fromEntries(DB.teams.map(t => [t.team.toLowerCase(), t]));
 const confBySlug = Object.fromEntries(DB.conferences.map(c => [c.slug, c]));
 const weeks = [...new Set(DB.games.map(g => g.week))].sort((a,b)=>a-b);
+const STAFF_2026 = {"Army":{"record_2025":"7-6","conf_record_2025":"4-5","head_coach":"Jeff Monken","head_coach_status":"returning","offensive_coordinator":"Cody Worley","oc_status":"returning","defensive_coordinator":"Daryl Dixon / Scot Sloan","dc_status":"new","head_coach_first_season":"2014"},"Charlotte":{"record_2025":"1-11","conf_record_2025":"0-8","head_coach":"Tim Albin","head_coach_status":"returning","offensive_coordinator":"Todd Fitch","oc_status":"returning","defensive_coordinator":"Nate Faanes","dc_status":"partial","head_coach_first_season":"2025"},"East Carolina":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Blake Harrell","head_coach_status":"returning","offensive_coordinator":"Jordan Davis","oc_status":"new","defensive_coordinator":"Jordan Hankins","dc_status":"new","head_coach_first_season":"2024"},"FAU":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Zach Kittley","head_coach_status":"returning","offensive_coordinator":"Zach Kittley","oc_status":"new","defensive_coordinator":"Brett Dewhurst","dc_status":"returning","head_coach_first_season":"2025"},"Memphis":{"record_2025":"8-5","conf_record_2025":"4-4","head_coach":"Charles Huff","head_coach_status":"new","offensive_coordinator":"Kevin Decker / David Weeks","oc_status":"new","defensive_coordinator":"Lance Guidry","dc_status":"new","head_coach_first_season":"2026"},"Navy":{"record_2025":"11-2","conf_record_2025":"8-1","head_coach":"Brian Newberry","head_coach_status":"returning","offensive_coordinator":"Drew Cronic","oc_status":"returning","defensive_coordinator":"Ricky Brown / Eric Lewis","dc_status":"new","head_coach_first_season":"2023"},"North Texas":{"record_2025":"12-2","conf_record_2025":"7-1","head_coach":"Neal Brown","head_coach_status":"new","offensive_coordinator":"Mike Bloesch","oc_status":"new","defensive_coordinator":"Bradley Dale Peveto / Matt Powledge","dc_status":"new","head_coach_first_season":"2026"},"Rice":{"record_2025":"5-8","conf_record_2025":"2-6","head_coach":"Scott Abell","head_coach_status":"returning","offensive_coordinator":"Vince Munch","oc_status":"returning","defensive_coordinator":"Jon Kay","dc_status":"returning","head_coach_first_season":"2025"},"USF":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Brian Hartline","head_coach_status":"new","offensive_coordinator":"Tim Beck","oc_status":"new","defensive_coordinator":"Josh Aldridge","dc_status":"new","head_coach_first_season":"2026"},"Temple":{"record_2025":"5-7","conf_record_2025":"3-5","head_coach":"K. C. Keeler","head_coach_status":"returning","offensive_coordinator":"Tyler Walker","oc_status":"returning","defensive_coordinator":"Brian Smith","dc_status":"returning","head_coach_first_season":"2025"},"Tulane":{"record_2025":"11-3","conf_record_2025":"7-1","head_coach":"Will Hall","head_coach_status":"new","offensive_coordinator":"Russ Callaway","oc_status":"new","defensive_coordinator":"Nate Fuqua / Tayler Polk","dc_status":"partial","head_coach_first_season":"2026"},"Tulsa":{"record_2025":"4-8","conf_record_2025":"1-7","head_coach":"Tre Lamb","head_coach_status":"returning","offensive_coordinator":"Kevin Barbay / Ty Darlington","oc_status":"partial","defensive_coordinator":"Mike Gray / Josh Reardon","dc_status":"returning","head_coach_first_season":"2025"},"UAB":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Alex Mortensen","head_coach_status":"returning","offensive_coordinator":"Alex Mortensen","oc_status":"returning","defensive_coordinator":"Todd Grantham","dc_status":"new","head_coach_first_season":"2025"},"UTSA":{"record_2025":"7-6","conf_record_2025":"4-4","head_coach":"Jeff Traylor","head_coach_status":"returning","offensive_coordinator":"Rick Bowie","oc_status":"new","defensive_coordinator":"Jess Loepp","dc_status":"returning","head_coach_first_season":"2020"},"Boston College":{"record_2025":"2-10","conf_record_2025":"1-7","head_coach":"Bill O'Brien","head_coach_status":"returning","offensive_coordinator":"Bill O'Brien","oc_status":"new","defensive_coordinator":"Ted Roof","dc_status":"new","head_coach_first_season":"2024"},"California":{"record_2025":"7-6","conf_record_2025":"4-4","head_coach":"Tosh Lupoi","head_coach_status":"new","offensive_coordinator":"Jordan Somerville","oc_status":"new","defensive_coordinator":"Da'Von Brown / Michael Hutchings","dc_status":"new","head_coach_first_season":"2026"},"Clemson":{"record_2025":"7-6","conf_record_2025":"4-4","head_coach":"Dabo Swinney","head_coach_status":"returning","offensive_coordinator":"Chad Morris","oc_status":"new","defensive_coordinator":"Tom Allen","dc_status":"partial","head_coach_first_season":"2009"},"Duke":{"record_2025":"9-5","conf_record_2025":"6-2","head_coach":"Manny Diaz","head_coach_status":"returning","offensive_coordinator":"Jonathan Brewer","oc_status":"returning","defensive_coordinator":"Jonathan Patke","dc_status":"returning","head_coach_first_season":"2024"},"Florida State":{"record_2025":"5-7","conf_record_2025":"2-6","head_coach":"Mike Norvell","head_coach_status":"returning","offensive_coordinator":"Tim Harris Jr.","oc_status":"new","defensive_coordinator":"Tony White","dc_status":"returning","head_coach_first_season":"2020"},"Georgia Tech":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Brent Key","head_coach_status":"returning","offensive_coordinator":"George Godsey / Chris Weinke","oc_status":"new","defensive_coordinator":"Jason Semore","dc_status":"new","head_coach_first_season":"2022"},"Louisville":{"record_2025":"9-4","conf_record_2025":"4-4","head_coach":"Jeff Brohm","head_coach_status":"returning","offensive_coordinator":"Brian Brohm","oc_status":"returning","defensive_coordinator":"Steve Ellis / Mark Ivey","dc_status":"new","head_coach_first_season":"2023"},"Miami-FL":{"record_2025":"13-3","conf_record_2025":"6-2","head_coach":"Mario Cristobal","head_coach_status":"returning","offensive_coordinator":"Shannon Dawson","oc_status":"returning","defensive_coordinator":"Corey Hetherman","dc_status":"returning","head_coach_first_season":"2022"},"North Carolina":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Bill Belichick","head_coach_status":"returning","offensive_coordinator":"Bobby Petrino","oc_status":"new","defensive_coordinator":"Stephen Belichick","dc_status":"returning","head_coach_first_season":"2025"},"NC State":{"record_2025":"8-5","conf_record_2025":"4-4","head_coach":"Dave Doeren","head_coach_status":"returning","offensive_coordinator":"Kurt Roper","oc_status":"returning","defensive_coordinator":"D. J. Eliot / Charlton Warren","dc_status":"returning","head_coach_first_season":"2013"},"Pittsburgh":{"record_2025":"8-5","conf_record_2025":"6-2","head_coach":"Pat Narduzzi","head_coach_status":"returning","offensive_coordinator":"Kade Bell","oc_status":"returning","defensive_coordinator":"Cory Sanders","dc_status":"new","head_coach_first_season":"2015"},"SMU":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Rhett Lashlee","head_coach_status":"returning","offensive_coordinator":"Garin Justice / D'Eriq King / Rob Likens","oc_status":"partial","defensive_coordinator":"Maurice Crum Jr. / Rickey Hunley Jr.","dc_status":"new","head_coach_first_season":"2022"},"Stanford":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Tavita Pritchard","head_coach_status":"new","offensive_coordinator":"Terry Heffernan","oc_status":"new","defensive_coordinator":"Kris Richard","dc_status":"new","head_coach_first_season":"2026"},"Syracuse":{"record_2025":"3-9","conf_record_2025":"1-7","head_coach":"Fran Brown","head_coach_status":"returning","offensive_coordinator":"Mike Johnson / Jeff Nixon","oc_status":"returning","defensive_coordinator":"Vince Kehres","dc_status":"new","head_coach_first_season":"2024"},"Virginia":{"record_2025":"11-3","conf_record_2025":"7-1","head_coach":"Tony Elliott","head_coach_status":"returning","offensive_coordinator":"Des Kitchings","oc_status":"returning","defensive_coordinator":"John Rudzinski","dc_status":"returning","head_coach_first_season":"2022"},"Virginia Tech":{"record_2025":"3-9","conf_record_2025":"2-6","head_coach":"James Franklin","head_coach_status":"new","offensive_coordinator":"Ty Howle","oc_status":"new","defensive_coordinator":"Brent Pry","dc_status":"new","head_coach_first_season":"2026"},"Wake Forest":{"record_2025":"9-4","conf_record_2025":"4-4","head_coach":"Jake Dickert","head_coach_status":"returning","offensive_coordinator":"Rob Ezell","oc_status":"returning","defensive_coordinator":"Scottie Hazelton","dc_status":"returning","head_coach_first_season":"2025"},"Arizona":{"record_2025":"9-4","conf_record_2025":"6-3","head_coach":"Brent Brennan","head_coach_status":"returning","offensive_coordinator":"Seth Doege","oc_status":"returning","defensive_coordinator":"Danny Gonzales","dc_status":"returning","head_coach_first_season":"2024"},"Arizona State":{"record_2025":"8-5","conf_record_2025":"6-3","head_coach":"Kenny Dillingham","head_coach_status":"returning","offensive_coordinator":"Marcus Arroyo","oc_status":"returning","defensive_coordinator":"Brian Ward","dc_status":"returning","head_coach_first_season":"2023"},"Baylor":{"record_2025":"5-7","conf_record_2025":"3-6","head_coach":"Dave Aranda","head_coach_status":"returning","offensive_coordinator":"Jake Spavital","oc_status":"returning","defensive_coordinator":"Joe Klanderman","dc_status":"new","head_coach_first_season":"2020"},"BYU":{"record_2025":"12-2","conf_record_2025":"8-1","head_coach":"Kalani Sitake","head_coach_status":"returning","offensive_coordinator":"Aaron Roderick","oc_status":"returning","defensive_coordinator":"Kelly Poppinga","dc_status":"new","head_coach_first_season":"2016"},"Cincinnati":{"record_2025":"7-6","conf_record_2025":"5-4","head_coach":"Scott Satterfield","head_coach_status":"returning","offensive_coordinator":"Nic Cardwell / Pete Thomas","oc_status":"new","defensive_coordinator":"Nate Woody","dc_status":"new","head_coach_first_season":"2023"},"Colorado":{"record_2025":"3-9","conf_record_2025":"1-8","head_coach":"Deion Sanders","head_coach_status":"returning","offensive_coordinator":"Brennan Marion","oc_status":"new","defensive_coordinator":"Chris Marve","dc_status":"new","head_coach_first_season":"2023"},"Houston":{"record_2025":"10-3","conf_record_2025":"6-3","head_coach":"Willie Fritz","head_coach_status":"returning","offensive_coordinator":"Slade Nagle","oc_status":"returning","defensive_coordinator":"Austin Armstrong","dc_status":"returning","head_coach_first_season":"2024"},"Iowa State":{"record_2025":"8-4","conf_record_2025":"5-4","head_coach":"Jimmy Rogers","head_coach_status":"new","offensive_coordinator":"Tyler Roehl","oc_status":"new","defensive_coordinator":"Jesse Bobbit","dc_status":"new","head_coach_first_season":"2026"},"Kansas":{"record_2025":"5-7","conf_record_2025":"3-6","head_coach":"Lance Leipold","head_coach_status":"returning","offensive_coordinator":"Andy Kotelnicki / Matt Lubick","oc_status":"partial","defensive_coordinator":"D.K. McDonald","dc_status":"returning","head_coach_first_season":"2021"},"Kansas State":{"record_2025":"6-6","conf_record_2025":"5-4","head_coach":"Collin Klein","head_coach_status":"new","offensive_coordinator":"Sean Gleeson","oc_status":"new","defensive_coordinator":"Jordan Peterson","dc_status":"new","head_coach_first_season":"2026"},"Oklahoma State":{"record_2025":"1-11","conf_record_2025":"0-9","head_coach":"Eric Morris","head_coach_status":"new","offensive_coordinator":"Sean Brophy","oc_status":"new","defensive_coordinator":"Skyler Cassity","dc_status":"new","head_coach_first_season":"2026"},"TCU":{"record_2025":"9-4","conf_record_2025":"5-4","head_coach":"Sonny Dykes","head_coach_status":"returning","offensive_coordinator":"A. J. Ricker / Gordon Sammis","oc_status":"partial","defensive_coordinator":"Andy Avalos","dc_status":"returning","head_coach_first_season":"2022"},"Texas Tech":{"record_2025":"12-2","conf_record_2025":"8-1","head_coach":"Joey McGuire","head_coach_status":"returning","offensive_coordinator":"Mack Leftwich","oc_status":"returning","defensive_coordinator":"Rob Greene / Shiel Wood","dc_status":"partial","head_coach_first_season":"2022"},"UCF":{"record_2025":"5-7","conf_record_2025":"2-7","head_coach":"Scott Frost","head_coach_status":"returning","offensive_coordinator":"Steve Cooper","oc_status":"returning","defensive_coordinator":"Alex Grinch","dc_status":"returning","head_coach_first_season":"2025"},"Utah":{"record_2025":"11-2","conf_record_2025":"7-2","head_coach":"Morgan Scalley","head_coach_status":"new","offensive_coordinator":"Kevin McGiven","oc_status":"new","defensive_coordinator":"Colton Swan","dc_status":"new","head_coach_first_season":"2026"},"West Virginia":{"record_2025":"4-8","conf_record_2025":"2-7","head_coach":"Rich Rodriguez","head_coach_status":"returning","offensive_coordinator":"Rich Rodriguez","oc_status":"returning","defensive_coordinator":"Zac Alley","dc_status":"returning","head_coach_first_season":"2025"},"Illinois":{"record_2025":"9-4","conf_record_2025":"5-4","head_coach":"Bret Bielema","head_coach_status":"returning","offensive_coordinator":"Barry Lunney Jr.","oc_status":"returning","defensive_coordinator":"Bobby Hauck","dc_status":"new","head_coach_first_season":"2021"},"Indiana":{"record_2025":"16-0","conf_record_2025":"9-0","head_coach":"Curt Cignetti","head_coach_status":"returning","offensive_coordinator":"Mike Shanahan","oc_status":"partial","defensive_coordinator":"Bryant Haines","dc_status":"returning","head_coach_first_season":"2024"},"Iowa":{"record_2025":"9-4","conf_record_2025":"6-3","head_coach":"Kirk Ferentz","head_coach_status":"returning","offensive_coordinator":"Tim Lester","oc_status":"returning","defensive_coordinator":"Phil Parker","dc_status":"returning","head_coach_first_season":"1999"},"Maryland":{"record_2025":"4-8","conf_record_2025":"1-8","head_coach":"Mike Locksley","head_coach_status":"returning","offensive_coordinator":"Clint Trickett","oc_status":"new","defensive_coordinator":"Aazaar Abdul-Rahim / Ted Monachino","dc_status":"returning","head_coach_first_season":"2019"},"Michigan":{"record_2025":"9-4","conf_record_2025":"7-2","head_coach":"Kyle Whittingham","head_coach_status":"new","offensive_coordinator":"Jason Beck","oc_status":"new","defensive_coordinator":"Jay Hill","dc_status":"new","head_coach_first_season":"2026"},"Michigan State":{"record_2025":"4-8","conf_record_2025":"1-8","head_coach":"Pat Fitzgerald","head_coach_status":"new","offensive_coordinator":"Nick Sheridan","oc_status":"new","defensive_coordinator":"Max Bullough / Joe Rossi","dc_status":"partial","head_coach_first_season":"2026"},"Minnesota":{"record_2025":"8-5","conf_record_2025":"5-4","head_coach":"P. J. Fleck","head_coach_status":"returning","offensive_coordinator":"Greg Harbaugh Jr. / Matt Simon","oc_status":"returning","defensive_coordinator":"Danny Collins","dc_status":"returning","head_coach_first_season":"2017"},"Nebraska":{"record_2025":"7-6","conf_record_2025":"4-5","head_coach":"Matt Rhule","head_coach_status":"returning","offensive_coordinator":"Dana Holgorsen","oc_status":"returning","defensive_coordinator":"Rob Aurich","dc_status":"new","head_coach_first_season":"2023"},"Northwestern":{"record_2025":"7-6","conf_record_2025":"4-5","head_coach":"David Braun","head_coach_status":"returning","offensive_coordinator":"Chip Kelly","oc_status":"new","defensive_coordinator":"Tim McGarigle","dc_status":"returning","head_coach_first_season":"2023"},"Ohio State":{"record_2025":"12-2","conf_record_2025":"9-0","head_coach":"Ryan Day","head_coach_status":"returning","offensive_coordinator":"Keenan Bailey / Arthur Smith","oc_status":"partial","defensive_coordinator":"Matt Patricia / Tim Walton","dc_status":"returning","head_coach_first_season":"2019"},"Oregon":{"record_2025":"13-2","conf_record_2025":"8-1","head_coach":"Dan Lanning","head_coach_status":"returning","offensive_coordinator":"Drew Mehringer","oc_status":"new","defensive_coordinator":"Chris Hampton","dc_status":"partial","head_coach_first_season":"2022"},"Penn State":{"record_2025":"7-6","conf_record_2025":"3-6","head_coach":"Matt Campbell","head_coach_status":"new","offensive_coordinator":"Taylor Mouser","oc_status":"new","defensive_coordinator":"D'Anton Lynn","dc_status":"new","head_coach_first_season":"2026"},"Purdue":{"record_2025":"2-10","conf_record_2025":"0-9","head_coach":"Barry Odom","head_coach_status":"returning","offensive_coordinator":"Josh Henson","oc_status":"returning","defensive_coordinator":"Kevin Kane","dc_status":"new","head_coach_first_season":"2025"},"Rutgers":{"record_2025":"5-7","conf_record_2025":"2-7","head_coach":"Greg Schiano","head_coach_status":"returning","offensive_coordinator":"Kirk Ciarrocca","oc_status":"returning","defensive_coordinator":"Travis Johansen","dc_status":"new","head_coach_first_season":"2020"},"UCLA":{"record_2025":"3-9","conf_record_2025":"3-6","head_coach":"Bob Chesney","head_coach_status":"new","offensive_coordinator":"Dean Kennedy","oc_status":"new","defensive_coordinator":"Colin Hitschler","dc_status":"new","head_coach_first_season":"2026"},"USC":{"record_2025":"9-4","conf_record_2025":"7-2","head_coach":"Lincoln Riley","head_coach_status":"returning","offensive_coordinator":"Luke Huard","oc_status":"returning","defensive_coordinator":"Gary Patterson","dc_status":"new","head_coach_first_season":"2022"},"Washington":{"record_2025":"9-4","conf_record_2025":"5-4","head_coach":"Jedd Fisch","head_coach_status":"returning","offensive_coordinator":"Jedd Fisch","oc_status":"new","defensive_coordinator":"Ryan Walters","dc_status":"returning","head_coach_first_season":"2024"},"Wisconsin":{"record_2025":"4-8","conf_record_2025":"2-7","head_coach":"Luke Fickell","head_coach_status":"returning","offensive_coordinator":"Jeff Grimes","oc_status":"returning","defensive_coordinator":"Mike Tressel","dc_status":"returning","head_coach_first_season":"2023"},"Delaware":{"record_2025":"7-6","conf_record_2025":"4-4","head_coach":"Ryan Carty","head_coach_status":"returning","offensive_coordinator":"Terence Archer","oc_status":"returning","defensive_coordinator":"Manny Rojas","dc_status":"returning","head_coach_first_season":"2022"},"FIU":{"record_2025":"7-6","conf_record_2025":"5-3","head_coach":"Willie Simmons","head_coach_status":"returning","offensive_coordinator":"Nick Coleman","oc_status":"returning","defensive_coordinator":"Jovan Dewitt","dc_status":"returning","head_coach_first_season":"2025"},"Jacksonville State":{"record_2025":"9-5","conf_record_2025":"7-1","head_coach":"Charles Kelly","head_coach_status":"returning","offensive_coordinator":"Taylor Housewright","oc_status":"new","defensive_coordinator":"Brian Williams","dc_status":"returning","head_coach_first_season":"2025"},"Kennesaw State":{"record_2025":"10-4","conf_record_2025":"7-1","head_coach":"Jerry Mack","head_coach_status":"returning","offensive_coordinator":"Mitch Militello","oc_status":"returning","defensive_coordinator":"Marc Mattioli","dc_status":"returning","head_coach_first_season":"2025"},"Liberty":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Jamey Chadwell","head_coach_status":"returning","offensive_coordinator":"Newland Isaac","oc_status":"partial","defensive_coordinator":"Skylor Magee","dc_status":"partial","head_coach_first_season":"2023"},"Louisiana Tech":{"record_2025":"8-5","conf_record_2025":"5-3","head_coach":"Sonny Cumbie","head_coach_status":"returning","offensive_coordinator":"Nathan Young","oc_status":"new","defensive_coordinator":"Luke Olson","dc_status":"returning","head_coach_first_season":"2022"},"Middle Tennessee":{"record_2025":"3-9","conf_record_2025":"2-6","head_coach":"Derek Mason","head_coach_status":"returning","offensive_coordinator":"Anthony Scelfo","oc_status":"new","defensive_coordinator":"Brian Stewart","dc_status":"returning","head_coach_first_season":"2024"},"Missouri State":{"record_2025":"7-6","conf_record_2025":"5-3","head_coach":"Casey Woods","head_coach_status":"new","offensive_coordinator":"Mark Cala","oc_status":"new","defensive_coordinator":"Jack Curtis","dc_status":"new","head_coach_first_season":"2026"},"New Mexico State":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Tony Sanchez","head_coach_status":"returning","offensive_coordinator":"David Yost","oc_status":"returning","defensive_coordinator":"Joe Morris","dc_status":"returning","head_coach_first_season":"2024"},"Sam Houston":{"record_2025":"2-10","conf_record_2025":"1-7","head_coach":"Phil Longo","head_coach_status":"returning","offensive_coordinator":"Zack Patterson","oc_status":"returning","defensive_coordinator":"Freddie Aughtry-Lindsay","dc_status":"returning","head_coach_first_season":"2025"},"Western Kentucky":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Tyson Helton","head_coach_status":"returning","offensive_coordinator":"Joe Bernardi / Bodie Reeder","oc_status":"new","defensive_coordinator":"Davis Merritt","dc_status":"partial","head_coach_first_season":"2019"},"Notre Dame":{"record_2025":"10-2","conf_record_2025":"0-0","head_coach":"Marcus Freeman","head_coach_status":"returning","offensive_coordinator":"Mike Denbrock","oc_status":"returning","defensive_coordinator":"Chris Ash / Aaron Henry","dc_status":"partial","head_coach_first_season":"2022"},"Connecticut":{"record_2025":"9-4","conf_record_2025":"0-0","head_coach":"Jason Candle","head_coach_status":"new","offensive_coordinator":"Marquel Blackwell / Nunzio Campanile","oc_status":"unverified","defensive_coordinator":"Ryan Manalac","dc_status":"unverified","head_coach_first_season":"2026"},"Akron":{"record_2025":"5-7","conf_record_2025":"4-4","head_coach":"Joe Moorhead","head_coach_status":"returning","offensive_coordinator":"Joe Moorhead","oc_status":"returning","defensive_coordinator":"Tim Tibesar","dc_status":"returning","head_coach_first_season":"2022"},"Ball State":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Mike Uremovich","head_coach_status":"returning","offensive_coordinator":"Mike Uremovich","oc_status":"returning","defensive_coordinator":"Jeff Knowles","dc_status":"returning","head_coach_first_season":"2025"},"Bowling Green":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Eddie George","head_coach_status":"returning","offensive_coordinator":"Greg Nosal","oc_status":"new","defensive_coordinator":"Joe Bowden","dc_status":"new","head_coach_first_season":"2025"},"Buffalo":{"record_2025":"5-7","conf_record_2025":"4-4","head_coach":"Pete Lembo","head_coach_status":"returning","offensive_coordinator":"Tony Tokarz","oc_status":"new","defensive_coordinator":"Brian Dougherty","dc_status":"new","head_coach_first_season":"2024"},"Central Michigan":{"record_2025":"7-6","conf_record_2025":"5-3","head_coach":"Matt Drinkall","head_coach_status":"returning","offensive_coordinator":"Jim Chapin / Derek Fulton","oc_status":"returning","defensive_coordinator":"Sean Cronin","dc_status":"returning","head_coach_first_season":"2025"},"Eastern Michigan":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Chris Creighton","head_coach_status":"returning","offensive_coordinator":"Mike Piatkowski","oc_status":"returning","defensive_coordinator":"Tate Omli / Kasey Teegardin","dc_status":"new","head_coach_first_season":"2014"},"Kent State":{"record_2025":"5-7","conf_record_2025":"4-4","head_coach":"Mark Carney","head_coach_status":"returning","offensive_coordinator":"Clay Patterson","oc_status":"returning","defensive_coordinator":"Cherokee Valeria","dc_status":"returning","head_coach_first_season":"2025"},"Miami-OH":{"record_2025":"7-7","conf_record_2025":"6-2","head_coach":"Chuck Martin","head_coach_status":"returning","offensive_coordinator":"Gus Ragland","oc_status":"new","defensive_coordinator":"Bill Brechin","dc_status":"returning","head_coach_first_season":"2014"},"Ohio":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"John Hauser","head_coach_status":"returning","offensive_coordinator":"Scott Isophording","oc_status":"new","defensive_coordinator":"Kurt Mattix","dc_status":"new","head_coach_first_season":"2025"},"Sacramento State":{"record_2025":"7-5","conf_record_2025":"5-3","head_coach":"Alonzo Carter","head_coach_status":"new","offensive_coordinator":"Eric Kiesau / Eric Scott","oc_status":"unverified","defensive_coordinator":"Adam Clark / Kenwick Thompson","dc_status":"unverified","head_coach_first_season":"2026"},"Toledo":{"record_2025":"8-5","conf_record_2025":"6-2","head_coach":"Mike Jacobs","head_coach_status":"new","offensive_coordinator":"Cris Reisert","oc_status":"new","defensive_coordinator":"Jahmal Brown","dc_status":"new","head_coach_first_season":"2026"},"UMass":{"record_2025":"0-12","conf_record_2025":"0-8","head_coach":"Joe Harasymiak","head_coach_status":"returning","offensive_coordinator":"Max Warner","oc_status":"new","defensive_coordinator":"Jared Keyte","dc_status":"returning","head_coach_first_season":"2025"},"Western Michigan":{"record_2025":"10-4","conf_record_2025":"7-1","head_coach":"Lance Taylor","head_coach_status":"returning","offensive_coordinator":"Walt Bell","oc_status":"returning","defensive_coordinator":"Greer Martini / Duane Vaughn","dc_status":"new","head_coach_first_season":"2023"},"Air Force":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Troy Calhoun","head_coach_status":"returning","offensive_coordinator":"Mike Thiessen","oc_status":"returning","defensive_coordinator":"Steve Russ","dc_status":"new","head_coach_first_season":"2007"},"Hawaii":{"record_2025":"9-4","conf_record_2025":"5-3","head_coach":"Timmy Chang","head_coach_status":"returning","offensive_coordinator":"Anthony Arceneaux","oc_status":"returning","defensive_coordinator":"Dennis Thurman","dc_status":"returning","head_coach_first_season":"2022"},"Nevada":{"record_2025":"3-9","conf_record_2025":"2-6","head_coach":"Jeff Choate","head_coach_status":"returning","offensive_coordinator":"Bret Bartalone","oc_status":"new","defensive_coordinator":"Kane Ioane","dc_status":"returning","head_coach_first_season":"2024"},"New Mexico":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Jason Eck","head_coach_status":"returning","offensive_coordinator":"Luke Schleusner","oc_status":"returning","defensive_coordinator":"Spence Nowinsky","dc_status":"returning","head_coach_first_season":"2025"},"North Dakota State":{"record_2025":"12-1","conf_record_2025":"8-0","head_coach":"Tim Polasek","head_coach_status":"returning","offensive_coordinator":"Dan Larson","oc_status":"unverified","defensive_coordinator":"Grant Olson","dc_status":"unverified","head_coach_first_season":"2024"},"Northern Illinois":{"record_2025":"3-9","conf_record_2025":"2-6","head_coach":"Rob Harley (interim)","head_coach_status":"new","offensive_coordinator":"Tony Petersen","oc_status":"new","defensive_coordinator":"D. J. Bland","dc_status":"new","head_coach_first_season":"2026"},"San Jose State":{"record_2025":"3-9","conf_record_2025":"2-6","head_coach":"Ken Niumatalolo","head_coach_status":"returning","offensive_coordinator":"Craig Stutzmann","oc_status":"returning","defensive_coordinator":"Bojay Filimoeatu","dc_status":"new","head_coach_first_season":"2024"},"UNLV":{"record_2025":"10-4","conf_record_2025":"6-2","head_coach":"Dan Mullen","head_coach_status":"returning","offensive_coordinator":"Corey Dennis","oc_status":"returning","defensive_coordinator":"Paul Guenther","dc_status":"returning","head_coach_first_season":"2025"},"UTEP":{"record_2025":"2-10","conf_record_2025":"1-7","head_coach":"Scotty Walden","head_coach_status":"returning","offensive_coordinator":"Joe Pappalardo / Lanear Sampson","oc_status":"new","defensive_coordinator":"Kyle Beyer / Kelvin Sigler","dc_status":"partial","head_coach_first_season":"2024"},"Wyoming":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Jay Sawvel","head_coach_status":"returning","offensive_coordinator":"Christian Taylor","oc_status":"new","defensive_coordinator":"Aaron Bohl","dc_status":"returning","head_coach_first_season":"2024"},"Boise State":{"record_2025":"9-5","conf_record_2025":"6-2","head_coach":"Spencer Danielson","head_coach_status":"returning","offensive_coordinator":"Nate Potter","oc_status":"partial","defensive_coordinator":"Erik Chinander","dc_status":"partial","head_coach_first_season":"2023"},"Colorado State":{"record_2025":"2-10","conf_record_2025":"1-7","head_coach":"Jim Mora","head_coach_status":"new","offensive_coordinator":"Pryce Tracy","oc_status":"new","defensive_coordinator":"Tyson Summers","dc_status":"returning","head_coach_first_season":"2026"},"Fresno State":{"record_2025":"9-4","conf_record_2025":"5-3","head_coach":"Matt Entz","head_coach_status":"returning","offensive_coordinator":"Josh Davis","oc_status":"returning","defensive_coordinator":"Nick Benedetto","dc_status":"returning","head_coach_first_season":"2025"},"Oregon State":{"record_2025":"2-10","conf_record_2025":"1-1","head_coach":"JaMarcus Shephard","head_coach_status":"new","offensive_coordinator":"Mitch Dahlen","oc_status":"new","defensive_coordinator":"Mike MacIntyre","dc_status":"new","head_coach_first_season":"2026"},"San Diego State":{"record_2025":"9-4","conf_record_2025":"6-2","head_coach":"Sean Lewis","head_coach_status":"returning","offensive_coordinator":"Sean Lewis","oc_status":"returning","defensive_coordinator":"Demetrius Sumler","dc_status":"new","head_coach_first_season":"2024"},"Texas State":{"record_2025":"7-6","conf_record_2025":"3-5","head_coach":"G. J. Kinne","head_coach_status":"returning","offensive_coordinator":"Landon Keopple","oc_status":"returning","defensive_coordinator":"Will Windham","dc_status":"new","head_coach_first_season":"2023"},"Utah State":{"record_2025":"6-7","conf_record_2025":"4-4","head_coach":"Bronco Mendenhall","head_coach_status":"returning","offensive_coordinator":"Robert Anae","oc_status":"new","defensive_coordinator":"Nick Howell","dc_status":"returning","head_coach_first_season":"2025"},"Washington State":{"record_2025":"7-6","conf_record_2025":"1-1","head_coach":"Kirby Moore","head_coach_status":"new","offensive_coordinator":"Matt Miller","oc_status":"new","defensive_coordinator":"Trent Bray","dc_status":"new","head_coach_first_season":"2026"},"Alabama":{"record_2025":"11-4","conf_record_2025":"7-1","head_coach":"Kalen DeBoer","head_coach_status":"returning","offensive_coordinator":"Ryan Grubb","oc_status":"partial","defensive_coordinator":"Maurice Linguist / Kane Wommack","dc_status":"returning","head_coach_first_season":"2024"},"Arkansas":{"record_2025":"2-10","conf_record_2025":"0-8","head_coach":"Ryan Silverfield","head_coach_status":"new","offensive_coordinator":"Tim Cramsey","oc_status":"new","defensive_coordinator":"Ron Roberts","dc_status":"new","head_coach_first_season":"2026"},"Auburn":{"record_2025":"5-7","conf_record_2025":"1-7","head_coach":"Alex Golesh","head_coach_status":"new","offensive_coordinator":"Kodi Burns / Joel Gordon","oc_status":"new","defensive_coordinator":"D.J. Durkin","dc_status":"new","head_coach_first_season":"2026"},"Florida":{"record_2025":"4-8","conf_record_2025":"2-6","head_coach":"Jon Sumrall","head_coach_status":"new","offensive_coordinator":"Buster Faulkner","oc_status":"new","defensive_coordinator":"Brad White","dc_status":"new","head_coach_first_season":"2026"},"Georgia":{"record_2025":"12-2","conf_record_2025":"7-1","head_coach":"Kirby Smart","head_coach_status":"returning","offensive_coordinator":"Mike Bobo","oc_status":"returning","defensive_coordinator":"Travaris Robinson / Glenn Schumann","dc_status":"returning","head_coach_first_season":"2016"},"Kentucky":{"record_2025":"5-7","conf_record_2025":"2-6","head_coach":"Will Stein","head_coach_status":"new","offensive_coordinator":"Joe Sloan","oc_status":"new","defensive_coordinator":"Jay Bateman","dc_status":"new","head_coach_first_season":"2026"},"LSU":{"record_2025":"7-6","conf_record_2025":"3-5","head_coach":"Lane Kiffin","head_coach_status":"new","offensive_coordinator":"Charlie Weis Jr.","oc_status":"new","defensive_coordinator":"Blake Baker","dc_status":"returning","head_coach_first_season":"2026"},"Mississippi State":{"record_2025":"5-8","conf_record_2025":"1-7","head_coach":"Jeff Lebby","head_coach_status":"returning","offensive_coordinator":"Jeff Lebby","oc_status":"returning","defensive_coordinator":"Zach Arnett / Matt Brock","dc_status":"new","head_coach_first_season":"2024"},"Missouri":{"record_2025":"8-5","conf_record_2025":"4-4","head_coach":"Eli Drinkwitz","head_coach_status":"returning","offensive_coordinator":"Chip Lindsey","oc_status":"new","defensive_coordinator":"Corey Batoon / Derek Nicholson","dc_status":"partial","head_coach_first_season":"2020"},"Oklahoma":{"record_2025":"10-3","conf_record_2025":"6-2","head_coach":"Brent Venables","head_coach_status":"returning","offensive_coordinator":"Ben Arbuckle","oc_status":"returning","defensive_coordinator":"Todd Bates","dc_status":"partial","head_coach_first_season":"2022"},"Ole Miss":{"record_2025":"13-2","conf_record_2025":"7-1","head_coach":"Pete Golding","head_coach_status":"returning","offensive_coordinator":"John David Baker","oc_status":"new","defensive_coordinator":"Bryan Brown","dc_status":"partial","head_coach_first_season":"2025"},"South Carolina":{"record_2025":"4-8","conf_record_2025":"1-7","head_coach":"Shane Beamer","head_coach_status":"returning","offensive_coordinator":"Kendal Briles","oc_status":"new","defensive_coordinator":"Torrian Gray / Clayton White","dc_status":"partial","head_coach_first_season":"2021"},"Tennessee":{"record_2025":"8-5","conf_record_2025":"4-4","head_coach":"Josh Heupel","head_coach_status":"returning","offensive_coordinator":"Joey Halzle","oc_status":"returning","defensive_coordinator":"Jim Knowles","dc_status":"new","head_coach_first_season":"2021"},"Texas":{"record_2025":"10-3","conf_record_2025":"6-2","head_coach":"Steve Sarkisian","head_coach_status":"returning","offensive_coordinator":"Kyle Flood","oc_status":"returning","defensive_coordinator":"Will Muschamp / Johnny Nansen","dc_status":"partial","head_coach_first_season":"2021"},"Texas A&M":{"record_2025":"11-2","conf_record_2025":"7-1","head_coach":"Mike Elko","head_coach_status":"returning","offensive_coordinator":"Holmon Wiggins","oc_status":"unverified","defensive_coordinator":"Lyle Hemphill / Elijah Robinson","dc_status":"unverified","head_coach_first_season":"2024"},"Vanderbilt":{"record_2025":"10-3","conf_record_2025":"6-2","head_coach":"Clark Lea","head_coach_status":"returning","offensive_coordinator":"Tim Beck","oc_status":"returning","defensive_coordinator":"Steve Gregory","dc_status":"returning","head_coach_first_season":"2021"},"Appalachian State":{"record_2025":"5-8","conf_record_2025":"2-6","head_coach":"Dowell Loggains","head_coach_status":"returning","offensive_coordinator":"Mike Anthony","oc_status":"new","defensive_coordinator":"D. J. Smith","dc_status":"returning","head_coach_first_season":"2025"},"Arkansas State":{"record_2025":"7-6","conf_record_2025":"5-3","head_coach":"Butch Jones","head_coach_status":"returning","offensive_coordinator":"Garrett Altman","oc_status":"new","defensive_coordinator":"Griffin McCarley","dc_status":"returning","head_coach_first_season":"2021"},"Coastal Carolina":{"record_2025":"6-7","conf_record_2025":"5-3","head_coach":"Ryan Beard","head_coach_status":"new","offensive_coordinator":"Nick Petrino","oc_status":"new","defensive_coordinator":"LD Scott","dc_status":"new","head_coach_first_season":"2026"},"Georgia Southern":{"record_2025":"7-6","conf_record_2025":"4-4","head_coach":"Clay Helton","head_coach_status":"returning","offensive_coordinator":"Ryan Aplin","oc_status":"returning","defensive_coordinator":"Mike Mutz","dc_status":"new","head_coach_first_season":"2022"},"Georgia State":{"record_2025":"1-11","conf_record_2025":"0-8","head_coach":"Dell McGee","head_coach_status":"returning","offensive_coordinator":"Hue Jackson","oc_status":"returning","defensive_coordinator":"Cam Clark / John Haneline","dc_status":"new","head_coach_first_season":"2024"},"James Madison":{"record_2025":"12-2","conf_record_2025":"8-0","head_coach":"Billy Napier","head_coach_status":"new","offensive_coordinator":"Cam Aiken","oc_status":"new","defensive_coordinator":"Robert Bala / Josh Linam","dc_status":"new","head_coach_first_season":"2026"},"Louisiana":{"record_2025":"6-7","conf_record_2025":"5-3","head_coach":"Michael Desormeaux","head_coach_status":"returning","offensive_coordinator":"Tim Leger","oc_status":"returning","defensive_coordinator":"Jim Salgado","dc_status":"returning","head_coach_first_season":"2022"},"UL-Monroe":{"record_2025":"3-9","conf_record_2025":"1-7","head_coach":"Bryant Vincent","head_coach_status":"returning","offensive_coordinator":"Jesse Montalto","oc_status":"new","defensive_coordinator":"Troy Reffett","dc_status":"new","head_coach_first_season":"2024"},"Marshall":{"record_2025":"5-7","conf_record_2025":"3-5","head_coach":"Tony Gibson","head_coach_status":"returning","offensive_coordinator":"Rod Smith","oc_status":"returning","defensive_coordinator":"Brad Lambert","dc_status":"new","head_coach_first_season":"2025"},"Old Dominion":{"record_2025":"10-3","conf_record_2025":"6-2","head_coach":"Ricky Rahne","head_coach_status":"returning","offensive_coordinator":"Kody Cook / Alex Huettel","oc_status":"new","defensive_coordinator":"Blake Seiler","dc_status":"returning","head_coach_first_season":"2020"},"South Alabama":{"record_2025":"4-8","conf_record_2025":"3-5","head_coach":"Major Applewhite","head_coach_status":"returning","offensive_coordinator":"Major Applewhite","oc_status":"new","defensive_coordinator":"Todd Orlando / Jason Washington","dc_status":"partial","head_coach_first_season":"2024"},"Southern Miss":{"record_2025":"7-6","conf_record_2025":"5-3","head_coach":"Blake Anderson","head_coach_status":"returning","offensive_coordinator":"Kyle Cefalo","oc_status":"new","defensive_coordinator":"Joe Bolden","dc_status":"new","head_coach_first_season":"2025"},"Troy":{"record_2025":"8-6","conf_record_2025":"6-2","head_coach":"Gerad Parker","head_coach_status":"returning","offensive_coordinator":"Adam Austin","oc_status":"new","defensive_coordinator":"Dontae Wright","dc_status":"partial","head_coach_first_season":"2024"}};
 const coachBettingRows = DB.coach_betting || [];
 const coach1hBettingRows = DB.coach_1h_betting || [];
 const coach2hBettingRows = DB.coach_2h_betting || [];
@@ -2460,6 +2648,77 @@ function renderKeyGamesHero(teamName, games) {
   </div>`;
 }
 
+
+function staffStatusClass(status) {
+  const s = String(status || '').trim().toLowerCase();
+  if (s === 'returning') return 'returning';
+  if (s === 'new') return 'new';
+  if (s === 'partial') return 'partial';
+  return 'unverified';
+}
+function staffStatusText(status) {
+  const s = String(status || '').trim().toLowerCase();
+  if (s === 'returning') return 'Returning';
+  if (s === 'new') return 'New';
+  if (s === 'partial') return 'Partial';
+  return 'Unverified';
+}
+function staffForTeam(teamName) {
+  return STAFF_2026[teamName] || null;
+}
+function renderStaffHero(teamName) {
+  const s = staffForTeam(teamName);
+  if (!s) {
+    return `<div class="staff-hero">
+      <div class="staff-title">2026 Coaches</div>
+      <div class="small muted">No staff import row mapped.</div>
+    </div>`;
+  }
+
+  const record = s.record_2025 || '—';
+  const confRecord = s.conf_record_2025 || '—';
+
+  return `<div class="staff-hero">
+    <div class="staff-title staff-title-inline">2026 Coaches</div>
+    <div class="staff-row">
+      <div class="staff-role">HC</div>
+      <div class="staff-name">${escapeHtml(s.head_coach || '—')}</div>
+      <div class="staff-status ${staffStatusClass(s.head_coach_status)}">${staffStatusText(s.head_coach_status)}</div>
+    </div>
+    <div class="staff-row">
+      <div class="staff-role">OC</div>
+      <div class="staff-name">${escapeHtml(s.offensive_coordinator || '—')}</div>
+      <div class="staff-status ${staffStatusClass(s.oc_status)}">${staffStatusText(s.oc_status)}</div>
+    </div>
+    <div class="staff-row">
+      <div class="staff-role">DC</div>
+      <div class="staff-name">${escapeHtml(s.defensive_coordinator || '—')}</div>
+      <div class="staff-status ${staffStatusClass(s.dc_status)}">${staffStatusText(s.dc_status)}</div>
+    </div>
+  </div>`;
+}
+
+
+function fmtProjectedRecord(wins, games) {
+  const w = Number(wins);
+  const g = Number(games);
+  if (!Number.isFinite(w) || !Number.isFinite(g)) return '—';
+  const losses = Math.max(0, g - w);
+  return `${w.toFixed(1)}-${losses.toFixed(1)}`;
+}
+
+
+function renderTeamHeaderRecordLine(teamName) {
+  const s = staffForTeam(teamName);
+  if (!s) return '';
+  const overall = s.record_2025 || '—';
+  const conf = s.conf_record_2025 || '—';
+  return `<div class="team-record-subline">
+    <span>2025 Overall: <b>${escapeHtml(overall)}</b></span>
+    <span>2025 Conf: <b>${escapeHtml(conf)}</b></span>
+  </div>`;
+}
+
 function renderTeam(slug) {
   const t = teamBySlug[slug];
   if (!t) return `<div class="page-title">Team not found</div>`;
@@ -2469,9 +2728,13 @@ function renderTeam(slug) {
   return `
     <div class="hero team-hero">
       <div>
-        <div class="page-title">${teamLabel(t.team)}</div>
-        <div class="page-sub">${t.conference} · Rank #${t.rank}</div>
+        <div class="team-title-row">
+          <div class="page-title">${teamLabel(t.team)}</div>
+          <div class="team-title-conf">${linkConf(t.conference)}</div>
+        </div>
+        ${renderTeamHeaderRecordLine(t.team)}
       </div>
+      ${renderStaffHero(t.team)}
       ${renderKeyGamesHero(t.team, games)}
       <div class="hero-stats">
         ${(() => {
@@ -2488,14 +2751,13 @@ function renderTeam(slug) {
           const winConfRank = competitionRankByMetric(t.team, confTeams, x => x.conference_title_pct, true);
 
           return `
-            ${miniSummary('Actual Record', `${actual.wins}-${actual.losses}`, actualRank, allTotal)}
-            ${miniSummary('Conf Record', `${actual.conf_wins}-${actual.conf_losses}`, confRecordRank, confTotal)}
+            ${miniSummary('2026 Record', `${actual.wins}-${actual.losses}`, actualRank, allTotal)}
+            ${miniSummary('2026 Conf Record', `${actual.conf_wins}-${actual.conf_losses}`, confRecordRank, confTotal)}
             ${miniSummary('Power Rating', t.combo.toFixed(1), comboRankByTeam[t.team], allTotal)}
-            ${miniSummary('Proj Wins', t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team], allTotal)}
-            ${miniSummary('Proj Conf Wins', t.avg_conference_wins.toFixed(2), projConfWinsRank, confTotal)}
+            ${miniSummary('Proj Record', fmtProjectedRecord(t.avg_total_wins, games.length), avgWinsRankByTeam[t.team], allTotal)}
+            ${miniSummary('Proj Conf Record', fmtProjectedRecord(t.avg_conference_wins, confGames.length), projConfWinsRank, confTotal)}
             ${miniSummary('Overall SOS Adj', fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team], allTotal, true)}
             ${miniSummary('Conf SOS Adj', fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], confTotal, true)}
-            ${miniSummary('Title Gm %', fmtPct(t.make_title_game_pct), makeTitleRank, confTotal)}
             ${miniSummary('Win Conf %', fmtPct(t.conference_title_pct), winConfRank, confTotal)}
           `;
         })()}
