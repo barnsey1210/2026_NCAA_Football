@@ -2037,9 +2037,7 @@ function scheduleSpreadTh(key, label) {
 function scheduleSpreadCell(g) {
   const useLab = !ratingLabWeightsAreDefault();
   const txt = useLab ? labSpreadText(g) : spreadText(g);
-  const official = spreadText(g);
-  const sub = useLab ? `<div class="small muted">official: ${official}</div>` : '';
-  return `<div class="schedule-spread-cell"><div class="line-main">${txt}</div>${sub}</div>`;
+  return `<div class="schedule-spread-cell"><div class="line-main">${txt}</div></div>`;
 }
 
 function scheduleTable(games, mode='simple') {
