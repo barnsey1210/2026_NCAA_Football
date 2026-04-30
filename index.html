@@ -983,6 +983,27 @@ th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-l
   font-weight:950;
 }
 
+
+/* Rankings safe color coding */
+.rank-color{
+  font-weight:850;
+}
+.rank-color-good{
+  color:#9be7b2;
+}
+.rank-color-mid{
+  color:#eadc8a;
+}
+.rank-color-bad{
+  color:#ee9aa8;
+}
+.rank-color-neutral{
+  color:#cbd5e1;
+}
+.rank-color .muted{
+  opacity:.72;
+}
+
 </style>
 </head>
 <body>
@@ -2839,11 +2860,11 @@ function ratingsWeightLabPanel() {
     <summary>
       <div>
         <b>Rating Weights</b>
-        <span class="small muted">Display-only controls · click to expand</span>
+        <span class="small muted">Official/default: ${ratingLabDefaultWeightSummaryText()} · click to expand</span>
       </div>
       <span class="rating-lab-summary-pill">Click to expand · Custom ${Math.round(labTotal*100)}% · Default ${Math.round(officialTotal*100)}%</span>
     </summary>
-    <div class="small muted rating-lab-note">Official Power Rating/projections use Python/default weights: ${ratingLabDefaultWeightSummaryText()}. Custom weights on this page are display-only unless ratings_config.json is changed and the site is rebuilt.</div>
+    <div class="small muted rating-lab-note">Custom weights on this page are display-only unless ratings_config.json is changed and the site is rebuilt.</div>
     <div class="rating-weight-total">Draft total: <span id="ratingLabDraftTotal">${Math.round(labTotal*100)}%</span></div>
     ${rows}
     <div class="rating-weight-actions">
@@ -2865,14 +2886,14 @@ function rankingsPowerRatingTh(key, label) {
 }
 function rankingsPowerRatingCell(t) {
   const useLab = !ratingLabWeightsAreDefault();
-  if (!useLab) return rankValue(t.combo.toFixed(1), comboRankByTeam[t.team]);
+  if (!useLab) return rankValueColored(t.combo.toFixed(1), comboRankByTeam[t.team]);
 
   const r = calcRatingLab(t.team);
   const ranks = ratingLabRanks();
-  if (!r || r.rating == null) return rankValue(t.combo.toFixed(1), comboRankByTeam[t.team]);
+  if (!r || r.rating == null) return rankValueColored(t.combo.toFixed(1), comboRankByTeam[t.team]);
 
   return `<div class="rankings-power-cell">
-    <div>${Number(r.rating).toFixed(1)} <span class="muted">(#${ranks[t.team] || '—'})</span></div>
+    <div>${rankValueColored(Number(r.rating).toFixed(1), ranks[t.team])}</div>
     <div class="small muted">official: ${t.combo.toFixed(1)} (#${comboRankByTeam[t.team] || '—'})</div>
   </div>`;
 }
@@ -2889,16 +2910,38 @@ function renderRankMobileCard(t) {
     </div>
     <div class="rank-card-grid">
       <div class="rank-stat"><div class="label">Power Rating</div><div class="value">${rankingsPowerRatingCell(t)}</div></div>
-      <div class="rank-stat"><div class="label">Avg Wins</div><div class="value">${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</div></div>
-      <div class="rank-stat"><div class="label">OVR SOS</div><div class="value">${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</div></div>
+      <div class="rank-stat"><div class="label">Avg Wins</div><div class="value">${rankValueColored(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</div></div>
+      <div class="rank-stat"><div class="label">OVR SOS</div><div class="value">${rankValueColored(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team], '', true, 138)}</div></div>
       <div class="rank-stat"><div class="label">CONF SOS</div><div class="value">${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], confSuffix)}</div></div>
-      <div class="rank-stat"><div class="label">SP Off</div><div class="value">${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</div></div>
-      <div class="rank-stat"><div class="label">SP Def</div><div class="value">${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</div></div>
-      <div class="rank-stat"><div class="label">HFA</div><div class="value">${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</div></div>
+      <div class="rank-stat"><div class="label">SP Off</div><div class="value">${rankValueColored(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</div></div>
+      <div class="rank-stat"><div class="label">SP Def</div><div class="value">${rankValueColored(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</div></div>
+      <div class="rank-stat"><div class="label">HFA</div><div class="value">${rankValueColored(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</div></div>
       <div class="rank-stat"><div class="label">Conf Title</div><div class="value">${fmtPct(t.conference_title_pct)}</div></div>
     </div>
   </div>`;
 }
+
+function rankColorClass(rank, inverse=false, total=138) {
+  const r = Number(rank);
+  if (!Number.isFinite(r)) return 'rank-color-neutral';
+  const pct = r / Number(total || 138);
+
+  // Normal: #1 is best. Inverse: #1 is hardest/worst, useful for SOS.
+  if (!inverse) {
+    if (pct <= 0.25) return 'rank-color-good';
+    if (pct <= 0.65) return 'rank-color-mid';
+    return 'rank-color-bad';
+  }
+  if (pct <= 0.25) return 'rank-color-bad';
+  if (pct <= 0.65) return 'rank-color-mid';
+  return 'rank-color-good';
+}
+
+function rankValueColored(value, rank, suffix='', inverse=false, total=138) {
+  const cls = rankColorClass(rank, inverse, total);
+  return `<span class="rank-color ${cls}">${value} <span class="muted">(#${rank ?? '—'}${suffix})</span></span>`;
+}
+
 function renderRankings() {
   const rankTeams = sortedRankTeams();
   return `
@@ -2917,7 +2960,7 @@ function renderRankings() {
     <div class="card desktop-rankings" style="margin-top:16px">
       ${ratingsWeightLabPanel()}
     <table><thead><tr>${sortableTh('rank','Rank')}${sortableTh('team','Team')}${sortableTh('conference','Conference')}${rankingsPowerRatingTh('combo','Power Rating')}${sortableTh('sp_offense','SP Off')}${sortableTh('sp_defense','SP Def')}${sortableTh('hfa','HFA')}${sortableTh('overall_sos','OVR SOS')}${sortableTh('conf_sos','CONF SOS')}${sortableTh('avg_total_wins','Avg Wins')}</tr></thead><tbody>
-      ${rankTeams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankingsPowerRatingCell(t)}</td><td>${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '')}</td><td>${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td></tr>`).join('')}
+      ${rankTeams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankingsPowerRatingCell(t)}</td><td>${rankValueColored(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValueColored(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValueColored(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValueColored(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team], '', true, 138)}</td><td>${rankValueColored(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '', true, 18)}</td><td>${rankValueColored(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td></tr>`).join('')}
       </tbody></table>
     </div>
     <div class="card mobile-rankings" style="margin-top:12px">
