@@ -1049,6 +1049,218 @@ th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-l
   .rating-trend-grid{grid-template-columns:1fr}
 }
 
+
+/* Futures market visual cleanup */
+.futures-market-legend{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:-4px 0 12px;
+}
+.legend-chip{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:4px 9px;
+  font-weight:900;
+  font-size:11px;
+  border:1px solid rgba(255,255,255,.14);
+}
+.win-total-chip{
+  color:#bfdbfe;
+  background:rgba(59,130,246,.12);
+  border-color:rgba(59,130,246,.35);
+}
+.conf-title-chip{
+  color:#ddd6fe;
+  background:rgba(139,92,246,.12);
+  border-color:rgba(139,92,246,.35);
+}
+.book-header-logo{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  line-height:1.05;
+}
+.book-header-sub{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:900;
+}
+.book-logo-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:26px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.02em;
+  border:1px solid rgba(255,255,255,.20);
+  box-shadow:0 2px 8px rgba(0,0,0,.20);
+}
+.book-logo-dk{
+  color:#052e16;
+  background:linear-gradient(135deg,#64f38c,#16a34a);
+}
+.book-logo-fd{
+  color:#eff6ff;
+  background:linear-gradient(135deg,#38bdf8,#1d4ed8);
+}
+.book-logo-mgm{
+  color:#111827;
+  background:linear-gradient(135deg,#facc15,#b45309);
+}
+.book-logo-caesars{
+  color:#ecfeff;
+  background:linear-gradient(135deg,#22d3ee,#0f766e);
+}
+.book-logo-generic{
+  color:#e5e7eb;
+  background:rgba(148,163,184,.18);
+}
+
+/* Soft grouping for futures market table columns.
+   Current layout:
+   1 Rank, 2 Team, 3 Conf,
+   4-11 win-total projection/market/edge/moves/best,
+   12+ book-level market columns.
+*/
+.card:has(.futures-market-legend) table th:nth-child(n+4):nth-child(-n+11),
+.card:has(.futures-market-legend) table td:nth-child(n+4):nth-child(-n+11){
+  background:rgba(59,130,246,.045);
+}
+.card:has(.futures-market-legend) table th:nth-child(n+12),
+.card:has(.futures-market-legend) table td:nth-child(n+12){
+  background:rgba(139,92,246,.045);
+}
+.card:has(.futures-market-legend) table th:nth-child(12),
+.card:has(.futures-market-legend) table td:nth-child(12){
+  border-left:2px solid rgba(139,92,246,.38);
+}
+.card:has(.futures-market-legend) table th:nth-child(4),
+.card:has(.futures-market-legend) table td:nth-child(4){
+  border-left:2px solid rgba(59,130,246,.38);
+}
+.card:has(.futures-market-legend) table th{
+  vertical-align:middle;
+}
+
+
+/* Real sportsbook logos */
+.sportsbook-logo-wrap{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:26px;
+  border-radius:7px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.20);
+  vertical-align:middle;
+  margin-top:2px;
+}
+.sportsbook-logo{
+  max-width:26px;
+  max-height:22px;
+  object-fit:contain;
+  display:block;
+}
+td .sportsbook-logo-wrap{
+  margin-top:4px;
+}
+th .sportsbook-logo-wrap,
+.book-header-logo .sportsbook-logo-wrap{
+  width:42px;
+  height:30px;
+}
+th .sportsbook-logo,
+.book-header-logo .sportsbook-logo{
+  max-width:34px;
+  max-height:26px;
+}
+
+
+/* Stronger real sportsbook logos */
+.sportsbook-logo-wrap{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  height:30px;
+  border-radius:8px;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(255,255,255,.24);
+  vertical-align:middle;
+  margin-top:3px;
+}
+.sportsbook-logo{
+  max-width:31px;
+  max-height:25px;
+  object-fit:contain;
+  display:block;
+}
+th .sportsbook-logo-wrap{
+  width:48px;
+  height:34px;
+}
+th .sportsbook-logo{
+  max-width:40px;
+  max-height:29px;
+}
+.book-header-sub{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:900;
+  margin-top:4px;
+}
+
+
+/* Futures sportsbook header logos */
+.sportsbook-header-logo{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
+  line-height:1;
+}
+.sportsbook-header-logo .sportsbook-logo-wrap{
+  width:54px;
+  height:38px;
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+}
+.sportsbook-header-logo .sportsbook-logo{
+  max-width:46px;
+  max-height:32px;
+}
+.sportsbook-header-sub{
+  font-size:10px;
+  color:#b8c6e6;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:950;
+  white-space:nowrap;
+}
+
+/* Stronger futures section labels */
+.futures-market-legend{
+  margin:8px 0 18px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.futures-market-legend .legend-chip{
+  font-size:13px;
+  padding:7px 12px;
+}
+
 </style>
 </head>
 <body>
@@ -1583,19 +1795,19 @@ function renderAllBookTables(teamName, m) {
       <table><thead><tr><th>Book</th><th>Line</th><th>Over</th><th>Under</th></tr></thead><tbody>
         ${MARKET_BOOKS.map(b => {
           const r = winByBook[b.key];
-          if (!r) return `<tr><td>${b.label}</td><td colspan="3" class="muted">—</td></tr>`;
+          if (!r) return `<tr><td>${sportsbookLogo(b.label)}</td><td colspan="3" class="muted">—</td></tr>`;
           const overBest = oddsEqual(r.over_odds, m && m.best_over_odds) && isBestBook(r.book, m && m.best_over_book);
           const underBest = oddsEqual(r.under_odds, m && m.best_under_odds) && isBestBook(r.book, m && m.best_under_book);
-          return `<tr><td>${b.label}</td><td>${fmtWins(r.win_total)}</td><td>${renderOddsCell(r.over_odds, overBest)}</td><td>${renderOddsCell(r.under_odds, underBest)}</td></tr>`;
+          return `<tr><td>${sportsbookLogo(b.label)}</td><td>${fmtWins(r.win_total)}</td><td>${renderOddsCell(r.over_odds, overBest)}</td><td>${renderOddsCell(r.under_odds, underBest)}</td></tr>`;
         }).join('')}
       </tbody></table>` : ''}
     ${futRows.length ? `<div class="small" style="font-weight:800;margin:12px 0 4px">Conference Title</div>
       <table><thead><tr><th>Book</th><th>Odds</th><th>Implied %</th></tr></thead><tbody>
         ${MARKET_BOOKS.map(b => {
           const r = futByBook[b.key];
-          if (!r) return `<tr><td>${b.label}</td><td colspan="2" class="muted">—</td></tr>`;
+          if (!r) return `<tr><td>${sportsbookLogo(b.label)}</td><td colspan="2" class="muted">—</td></tr>`;
           const titleBest = oddsEqual(r.american_odds, m && m.best_title_odds) && isBestBook(r.book, m && m.best_title_book);
-          return `<tr><td>${b.label}</td><td>${renderOddsCell(r.american_odds, titleBest)}</td><td>${fmtMarketPct(americanOddsToProb(Number(r.american_odds)))}</td></tr>`;
+          return `<tr><td>${sportsbookLogo(b.label)}</td><td>${renderOddsCell(r.american_odds, titleBest)}</td><td>${fmtMarketPct(americanOddsToProb(Number(r.american_odds)))}</td></tr>`;
         }).join('')}
       </tbody></table>` : ''}
   </div>`;
@@ -1605,6 +1817,47 @@ function americanOddsToProb(odds) {
   if (!isFinite(o) || o === 0) return null;
   return o > 0 ? 100 / (o + 100) : Math.abs(o) / (Math.abs(o) + 100);
 }
+
+function sportsbookLogo(book) {
+  const raw = String(book || '').trim();
+  const b = raw.toLowerCase();
+
+  let src = '';
+  let label = raw || 'Book';
+
+  if (b.includes('fanduel') || b === 'fd' || b === 'fan duel') {
+    src = 'logos/books/fanduel.png';
+    label = 'FanDuel';
+  } else if (b.includes('draftkings') || b === 'dk' || b === 'draft kings') {
+    src = 'logos/books/draftkings.png';
+    label = 'DraftKings';
+  } else if (b.includes('betmgm') || b.includes('mgm')) {
+    src = 'logos/books/betmgm.png';
+    label = 'BetMGM';
+  } else if (b.includes('caesars') || b.includes('caesar') || b === 'cz') {
+    src = 'logos/books/caesars.png';
+    label = 'Caesars';
+  }
+
+  if (!src) return raw || '—';
+
+  return `<span class="sportsbook-logo-wrap" title="${label}">
+    <img class="sportsbook-logo" src="${src}" alt="${label}">
+  </span>`;
+}
+
+function sportsbookHeaderLogo(book, subLabel) {
+  return `<div class="sportsbook-header-logo">${sportsbookLogo(book)}<div class="sportsbook-header-sub">${subLabel || ''}</div></div>`;
+}
+
+function replaceSportsbookNamesWithLogos(html) {
+  return String(html || '')
+    .replaceAll('FanDuel', sportsbookLogo('FanDuel'))
+    .replaceAll('DraftKings', sportsbookLogo('DraftKings'))
+    .replaceAll('BetMGM', sportsbookLogo('BetMGM'))
+    .replaceAll('Caesars', sportsbookLogo('Caesars'));
+}
+
 function renderMarketTeamCard(teamName) {
   const m = marketForTeam(teamName);
   const winRows = rawWinRowsForTeam(teamName);
@@ -1630,8 +1883,8 @@ function renderMarketTeamCard(teamName) {
           <div class="market-compact-metric"><div class="label">Edge</div><div class="value ${fmtSignedClass(winEdge)}">${fmtSigned(winEdge)}</div></div>
         </div>
         <div class="market-compact-lines">
-          <div class="market-compact-line"><span class="label">Best Over</span><strong>${fmtOdds(m && m.best_over_odds)}</strong> <span class="small">${escapeHtml((m && m.best_over_book) || '')}</span></div>
-          <div class="market-compact-line"><span class="label">Best Under</span><strong>${fmtOdds(m && m.best_under_odds)}</strong> <span class="small">${escapeHtml((m && m.best_under_book) || '')}</span></div>
+          <div class="market-compact-line"><span class="label">Best Over</span><strong>${fmtOdds(m && m.best_over_odds)}</strong> <span class="small">${sportsbookLogo((m && m.best_over_book) || '')}</span></div>
+          <div class="market-compact-line"><span class="label">Best Under</span><strong>${fmtOdds(m && m.best_under_odds)}</strong> <span class="small">${sportsbookLogo((m && m.best_under_book) || '')}</span></div>
         </div>
       </div>
 
@@ -1643,7 +1896,7 @@ function renderMarketTeamCard(teamName) {
           <div class="market-compact-metric"><div class="label">Edge</div><div class="value ${titleEdgeClass}">${titleEdgeText}</div></div>
         </div>
         <div class="market-compact-lines">
-          <div class="market-compact-line"><span class="label">Best Odds</span><strong>${fmtOdds(m && m.best_title_odds)}</strong> <span class="small">${escapeHtml((m && m.best_title_book) || '')}</span></div>
+          <div class="market-compact-line"><span class="label">Best Odds</span><strong>${fmtOdds(m && m.best_title_odds)}</strong> <span class="small">${sportsbookLogo((m && m.best_title_book) || '')}</span></div>
           <div class="market-compact-line market-books"><span class="label">Books</span>${escapeHtml((m && m.books_available) || '—')}</div>
         </div>
       </div>
@@ -1683,7 +1936,7 @@ function renderConferenceMarketTable(confName, teams) {
           <td class="${fmtSignedClass(winEdge)}">${fmtSigned(winEdge)}</td>
           ${compactWinBooks(team,m)}
           <td>${fmtMarketPct(projectedTitleProbForMarket(team,m))}</td>
-          <td>${fmtOdds(m && m.best_title_odds)} <span class="small">${escapeHtml((m && m.best_title_book) || '')}</span></td>
+          <td>${fmtOdds(m && m.best_title_odds)} <span class="small">${sportsbookLogo((m && m.best_title_book) || '')}</span></td>
           ${compactTitleBooks(team,m)}
           <td class="${titleEdge == null ? '' : (titleEdge > 0 ? 'pos' : titleEdge < 0 ? 'neg' : '')}">${titleEdge == null ? '—' : fmtMarketPct(titleEdge)}</td>
         </tr>`;
@@ -1809,7 +2062,7 @@ function marketSortableTh(key, label) {
 }
 function compactBestOdds(odds, book) {
   if (odds == null || odds === '') return '—';
-  return `${fmtOdds(odds)} <span class="small">${escapeHtml(book || '')}</span>`;
+  return `${fmtOdds(odds)} <span class="small">${sportsbookLogo(book || '')}</span>`;
 }
 function compactWinBooksForBoard(team, m) {
   const by = bookRowsByKey(rawWinRowsForTeam(team));
@@ -1858,7 +2111,7 @@ function renderMarketBoard() {
       <div class="small muted" style="margin-top:10px">Rows shown: ${rows.length}. Market fields come from market_futures_export.xlsx. Projection fields come from the embedded team data.</div>
     </div>
     <div class="card desktop-rankings" style="margin-top:16px">
-      <div class="section-title">All-Team Futures Market Board</div>
+      <div class="section-title">All-Team Futures Market Board</div><div class="small muted futures-market-legend"><span class="legend-chip win-total-chip">Win totals</span><span class="legend-chip conf-title-chip">Conference title odds</span></div>
       <div style="overflow:auto">
       <table>
         <thead>
@@ -1877,14 +2130,14 @@ function renderMarketBoard() {
             <th>Under Move</th>
             <th>Best Over</th>
             <th>Best Under</th>
-            ${MARKET_BOOKS.map(b=>`<th>${b.label} Win Total</th>`).join('')}
+            ${MARKET_BOOKS.map(b=>`<th>${sportsbookHeaderLogo(b.label,'Win Total')}</th>`).join('')}
             <th>Best Title</th>
             ${marketSortableTh('market_implied_title_prob','Market Title %')}
             ${marketSortableTh('title_edge','Title Edge')}
             <th>Open Title</th>
             <th>Title Move</th>
             <th>Implied Move</th>
-            ${MARKET_BOOKS.map(b=>`<th>${b.label} Title</th>`).join('')}
+            ${MARKET_BOOKS.map(b=>`<th>${sportsbookHeaderLogo(b.label,'Title')}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
@@ -2233,6 +2486,27 @@ function scheduleTable(games, mode='simple') {
 }
 
 
+
+
+function bookLogoBadge(book) {
+  const b = String(book || '').toLowerCase();
+  let cls = 'book-logo-generic', label = book || 'Book';
+
+  if (b.includes('draftkings') || b === 'dk') {
+    cls = 'book-logo-dk'; label = 'DK';
+  } else if (b.includes('fanduel') || b === 'fd') {
+    cls = 'book-logo-fd'; label = 'FD';
+  } else if (b.includes('betmgm') || b.includes('mgm')) {
+    cls = 'book-logo-mgm'; label = 'MGM';
+  } else if (b.includes('caesars') || b.includes('caesar')) {
+    cls = 'book-logo-caesars'; label = 'CZ';
+  }
+
+  return `<span class="book-logo-badge ${cls}" title="${book || label}">${label}</span>`;
+}
+function bookHeaderLogo(book, sub='') {
+  return `<div class="book-header-logo">${bookLogoBadge(book)}${sub ? `<div class="book-header-sub">${sub}</div>` : ''}</div>`;
+}
 
 function fmtMoney(v) {
   if (v == null || Number.isNaN(v)) return '—';
