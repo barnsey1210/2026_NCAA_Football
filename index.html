@@ -912,6 +912,77 @@ th .team-logo-wrap.needs-badge .team-logo,td .team-logo-wrap.needs-badge .team-l
   font-weight:900;
   text-align:center;
 }
+
+/* Schedule lab spread display */
+.lab-spread-cell{
+  min-width:118px;
+}
+.lab-spread-cell .line-main{
+  font-weight:950;
+}
+
+
+/* Ratings Lab input/fix CSS */
+.bad-total{color:#fb7185;font-weight:950}
+.ok-total{color:#4ade80;font-weight:950}
+.rating-weight-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.rating-weight-controls input[type=range]{
+  width:170px;
+}
+.rating-weight-input{
+  width:64px;
+  padding:6px 8px;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.35);
+  background:rgba(15,23,42,.72);
+  color:#e5e7eb;
+  font-weight:900;
+  text-align:center;
+}
+
+
+/* Single-column schedule lab spread */
+.schedule-spread-th{
+  min-width:150px;
+}
+.schedule-spread-weight-note{
+  margin-top:3px;
+  font-size:11px;
+  letter-spacing:0;
+  text-transform:none;
+  color:#93c5fd;
+  font-weight:800;
+  white-space:normal;
+}
+.schedule-spread-cell .line-main{
+  font-weight:950;
+}
+
+
+/* Single-column rankings power rating lab */
+.rankings-power-th{
+  min-width:170px;
+}
+.rankings-power-weight-note{
+  margin-top:3px;
+  font-size:11px;
+  letter-spacing:0;
+  text-transform:none;
+  color:#93c5fd;
+  font-weight:800;
+  white-space:normal;
+}
+.rankings-power-cell{
+  line-height:1.15;
+}
+.rankings-power-cell > div:first-child{
+  font-weight:950;
+}
+
 </style>
 </head>
 <body>
@@ -1943,13 +2014,41 @@ function setScheduleSort(key) {
   }
   drawScheduleTableFromCurrentFilters();
 }
+
+function ratingLabWeightsAreDefault() {
+  const w = getRatingLabWeights();
+  return ratingLabSystems().every(s => Math.round(Number(w[s] || 0) * 100) === Math.round(Number(DEFAULT_RATING_WEIGHTS[s] || 0) * 100));
+}
+function ratingLabWeightSummaryText() {
+  const w = getRatingLabWeights();
+  const parts = ratingLabSystems()
+    .map(s => ({s, pct: Math.round(Number(w[s] || 0) * 100)}))
+    .filter(x => x.pct > 0)
+    .map(x => `${ratingLabLabel(x.s)} ${x.pct}%`);
+  return parts.length ? parts.join(' / ') : 'No active weights';
+}
+function scheduleSpreadTh(key, label) {
+  const note = ratingLabWeightsAreDefault() ? 'Default weights' : `Lab: ${ratingLabWeightSummaryText()}`;
+  return `<th class="sortable schedule-spread-th" onclick="setScheduleSort('${key}')">
+    <div>${label}${scheduleSortArrow(key)}</div>
+    <div class="schedule-spread-weight-note">${note}</div>
+  </th>`;
+}
+function scheduleSpreadCell(g) {
+  const useLab = !ratingLabWeightsAreDefault();
+  const txt = useLab ? labSpreadText(g) : spreadText(g);
+  const official = spreadText(g);
+  const sub = useLab ? `<div class="small muted">official: ${official}</div>` : '';
+  return `<div class="schedule-spread-cell"><div class="line-main">${txt}</div>${sub}</div>`;
+}
+
 function scheduleTable(games, mode='simple') {
   const view = mode || scheduleViewMode || 'simple';
   const sortedGames = sortScheduleGames(games);
   const header = view === 'odds'
     ? [
         scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
-        scheduleTh('proj_spread','Proj Spread'), scheduleTh('market_spread','SGO Spread'), scheduleTh('spread_edge','Spread Edge'),
+        scheduleSpreadTh('proj_spread','Proj Spread'), scheduleTh('market_spread','SGO Spread'), scheduleTh('spread_edge','Spread Edge'),
         scheduleTh('proj_total','Proj Total'), scheduleTh('market_total','SGO Total'), scheduleTh('total_edge','Total Edge'),
         scheduleTh('one_h_spread','SGO 1H Spread'), scheduleTh('one_h_total','SGO 1H Total')
       ].join('')
@@ -1961,7 +2060,7 @@ function scheduleTable(games, mode='simple') {
         ].join('')
       : [
           scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
-          scheduleTh('conf','Conf'), scheduleTh('neutral','Neutral'), scheduleTh('proj_spread','Spread'),
+          scheduleTh('conf','Conf'), scheduleTh('neutral','Neutral'), scheduleSpreadTh('proj_spread','Spread'),
           scheduleTh('proj_total','Total'), scheduleTh('home_win','Home Win %'), scheduleTh('status','Status')
         ].join('');
   return `<div class="card"><table><thead><tr>${header}</tr></thead><tbody>
@@ -1974,7 +2073,7 @@ function scheduleTable(games, mode='simple') {
     const totalEdge = mt == null || mt === '' ? null : Number(g.projected_total) - Number(mt);
     if (view === 'odds') return `<tr>
       <td>${g.week}</td><td>${fmtDate(g.date)}</td><td>${linkTeamWithComboRank(g.away_team)}</td><td>${linkTeamWithComboRank(g.home_team)}</td>
-      <td><span class="line-main">${spreadText(g)}</span></td>
+      <td>${scheduleSpreadCell(g)}</td>
       <td>${fmtMarketSpreadCell(g)}</td><td>${fmtEdge(spreadEdge)}</td>
       <td>${Number(g.projected_total).toFixed(1)}</td><td>${fmtMarketTotalCell(g)}</td><td>${fmtEdge(totalEdge)}</td>
       <td>${fmtMarket1HSpreadCell(g)}</td><td>${fmtMarket1HTotalCell(g)}</td>
@@ -1990,7 +2089,7 @@ function scheduleTable(games, mode='simple') {
       <td>${linkTeamWithComboRank(g.home_team)}</td>
       <td>${g.is_conference_game ? linkConf(g.home_conference) : '—'}</td>
       <td>${g.neutral_site ? 'Yes' : 'No'}</td>
-      <td>${spreadText(g)}</td>
+      <td>${scheduleSpreadCell(g)}</td>
       <td>${Number(g.projected_total).toFixed(1)}</td>
       <td>${fmtPct(g.win_prob_home)}</td>
       <td>${gameStatusChip(g)}</td>
@@ -2382,6 +2481,7 @@ function renderSchedule() {
   return `
     <div class="page-title">Season Schedule</div>
     <div class="page-sub">Schedule and projections remain workbook-driven. CFBD game IDs/status fields are embedded from the workbook, with manual browser overrides still available from Results Center. Odds Compare is wired for SGO full-game and 1H spread/total lines and prices when SGO fields are embedded.</div>
+    ${ratingsWeightLabPanel()}
     <div class="view-toggle" id="scheduleViewToggle">
       <button data-mode="simple" class="${scheduleViewMode==='simple'?'active':''}">Simple</button>
       <button data-mode="odds" class="${scheduleViewMode==='odds'?'active':''}">Odds Compare</button>
@@ -2734,9 +2834,9 @@ function ratingsWeightLabPanel() {
     <summary>
       <div>
         <b>Rating Weights Lab</b>
-        <span class="small muted">Display-only blend controls</span>
+        <span class="small muted">Display-only blend controls · click to expand</span>
       </div>
-      <span class="rating-lab-summary-pill">Lab ${Math.round(labTotal*100)}% · Default ${Math.round(officialTotal*100)}%</span>
+      <span class="rating-lab-summary-pill">Click to expand · Lab ${Math.round(labTotal*100)}% · Default ${Math.round(officialTotal*100)}%</span>
     </summary>
     <div class="small muted rating-lab-note">This changes the Blend Lab column only. Official Power Rating/projections still use the Python/default weights unless ratings_config.json is changed and the site is rebuilt.</div>
     <div class="rating-weight-total">Draft total: <span id="ratingLabDraftTotal">${Math.round(labTotal*100)}%</span></div>
@@ -2750,6 +2850,28 @@ function ratingsWeightLabPanel() {
 }
 function mountRatingsLabPanel() { return; }
 
+
+function rankingsPowerRatingTh(key, label) {
+  const note = ratingLabWeightsAreDefault() ? 'Default weights' : `Lab: ${ratingLabWeightSummaryText()}`;
+  return `<th class="sortable rankings-power-th" onclick="setRankSort('${key}')">
+    <div>${label}${sortArrow(key)}</div>
+    <div class="rankings-power-weight-note">${note}</div>
+  </th>`;
+}
+function rankingsPowerRatingCell(t) {
+  const useLab = !ratingLabWeightsAreDefault();
+  if (!useLab) return rankValue(t.combo.toFixed(1), comboRankByTeam[t.team]);
+
+  const r = calcRatingLab(t.team);
+  const ranks = ratingLabRanks();
+  if (!r || r.rating == null) return rankValue(t.combo.toFixed(1), comboRankByTeam[t.team]);
+
+  return `<div class="rankings-power-cell">
+    <div>${Number(r.rating).toFixed(1)} <span class="muted">(#${ranks[t.team] || '—'})</span></div>
+    <div class="small muted">official: ${t.combo.toFixed(1)} (#${comboRankByTeam[t.team] || '—'})</div>
+  </div>`;
+}
+
 function renderRankMobileCard(t) {
   const confSuffix = t.conference && t.conference !== 'Independent' ? ' conf' : '';
   return `<div class="rank-card">
@@ -2761,8 +2883,7 @@ function renderRankMobileCard(t) {
       <div class="rank-card-rank">Rank #${t.rank}</div>
     </div>
     <div class="rank-card-grid">
-      <div class="rank-stat"><div class="label">Power Rating</div><div class="value">${rankValue(t.combo.toFixed(1), comboRankByTeam[t.team])}</div></div>
-      <div class="rank-stat"><div class="label">Blend Lab</div><div class="value">${equalWeightTestCell(t.team)}</div></div>
+      <div class="rank-stat"><div class="label">Power Rating</div><div class="value">${rankingsPowerRatingCell(t)}</div></div>
       <div class="rank-stat"><div class="label">Avg Wins</div><div class="value">${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</div></div>
       <div class="rank-stat"><div class="label">OVR SOS</div><div class="value">${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</div></div>
       <div class="rank-stat"><div class="label">CONF SOS</div><div class="value">${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], confSuffix)}</div></div>
@@ -2790,8 +2911,8 @@ function renderRankings() {
     </div>
     <div class="card desktop-rankings" style="margin-top:16px">
       ${ratingsWeightLabPanel()}
-    <table><thead><tr>${sortableTh('rank','Rank')}${sortableTh('team','Team')}${sortableTh('conference','Conference')}${sortableTh('combo','Power Rating')}${sortableTh('sp_offense','SP Off')}${sortableTh('sp_defense','SP Def')}${sortableTh('hfa','HFA')}${sortableTh('overall_sos','OVR SOS')}${sortableTh('conf_sos','CONF SOS')}${sortableTh('avg_total_wins','Avg Wins')}<th>Blend Lab</th></tr></thead><tbody>
-      ${rankTeams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankValue(t.combo.toFixed(1), comboRankByTeam[t.team])}</td><td>${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '')}</td><td>${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td><td>${equalWeightTestCell(t.team)}</td></tr>`).join('')}
+    <table><thead><tr>${sortableTh('rank','Rank')}${sortableTh('team','Team')}${sortableTh('conference','Conference')}${rankingsPowerRatingTh('combo','Power Rating')}${sortableTh('sp_offense','SP Off')}${sortableTh('sp_defense','SP Def')}${sortableTh('hfa','HFA')}${sortableTh('overall_sos','OVR SOS')}${sortableTh('conf_sos','CONF SOS')}${sortableTh('avg_total_wins','Avg Wins')}</tr></thead><tbody>
+      ${rankTeams.map(t=>`<tr><td>${t.rank}</td><td>${linkTeam(t.team)}</td><td>${linkConf(t.conference)}</td><td>${rankingsPowerRatingCell(t)}</td><td>${rankValue(t.sp_offense.toFixed(1), spOffRankByTeam[t.team])}</td><td>${rankValue(t.sp_defense.toFixed(1), spDefRankByTeam[t.team])}</td><td>${rankValue(t.hfa.toFixed(1), hfaRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(overallSOSByTeam[t.team]), overallSOSRankByTeam[t.team])}</td><td>${rankValue(fmtSOS(confSOSByTeam[t.team]), confSOSRankByTeam[t.team], t.conference && t.conference !== 'Independent' ? ' conf' : '')}</td><td>${rankValue(t.avg_total_wins.toFixed(2), avgWinsRankByTeam[t.team])}</td></tr>`).join('')}
       </tbody></table>
     </div>
     <div class="card mobile-rankings" style="margin-top:12px">
@@ -2933,6 +3054,53 @@ function gameHomeMargin(g, teamName) {
   }
   return Number.isFinite(margin) ? margin : null;
 }
+
+function ratingLabValueForTeam(teamName) {
+  const r = calcRatingLab(teamName);
+  return r && r.rating != null && Number.isFinite(Number(r.rating)) ? Number(r.rating) : null;
+}
+function gameHomeMarginLab(g) {
+  const home = teamObjByNameSafe(g.home_team);
+  const away = teamObjByNameSafe(g.away_team);
+  if (!home || !away) return null;
+
+  const homeRating = ratingLabValueForTeam(g.home_team);
+  const awayRating = ratingLabValueForTeam(g.away_team);
+
+  if (homeRating == null || awayRating == null) return null;
+
+  let margin = homeRating - awayRating;
+  if (!g.neutral_site) {
+    margin += Number(home.hfa || 0);
+  }
+  return Number.isFinite(margin) ? margin : null;
+}
+function spreadTextFromHomeMargin(g, homeMargin) {
+  if (homeMargin == null || !Number.isFinite(Number(homeMargin))) return '—';
+  const m = Number(homeMargin);
+  if (Math.abs(m) < 0.05) return 'PK';
+  const fav = m > 0 ? g.home_team : g.away_team;
+  const abs = Math.abs(m).toFixed(1).replace(/\.0$/, '');
+  return `${teamLabel(fav)} -${abs}`;
+}
+function labSpreadText(g) {
+  return spreadTextFromHomeMargin(g, gameHomeMarginLab(g));
+}
+function labSpreadDiff(g) {
+  const lab = gameHomeMarginLab(g);
+  const official = Number(g.projected_margin_home);
+  if (lab == null || !Number.isFinite(official)) return null;
+  return lab - official;
+}
+function labSpreadCell(g) {
+  const diff = labSpreadDiff(g);
+  const cls = diff == null ? '' : (diff > 0 ? 'pos' : diff < 0 ? 'neg' : '');
+  return `<div class="lab-spread-cell">
+    <div class="line-main">${labSpreadText(g)}</div>
+    <div class="small ${cls}">${diff == null ? 'vs official: —' : `vs official: ${fmtSigned(diff)}`}</div>
+  </div>`;
+}
+
 function spreadForTeamText(g, teamName) {
   const homeMargin = gameHomeMargin(g, teamName);
   if (homeMargin === null) return '—';
@@ -3179,7 +3347,7 @@ function renderTeam(slug) {
           }
           rows.push(`<tr>
             <td>${g.week}</td><td>${fmtDate(g.date)}</td><td>${linkTeam(opp)}</td><td>${g.neutral_site ? 'Neutral' : (home ? 'Home' : 'Away')}</td>
-            <td>${g.is_conference_game ? 'Yes' : 'No'}</td><td>${oppTeam ? ('#'+oppTeam.rank) : '—'}</td><td>${spreadText(g)}</td><td>${(winp*100).toFixed(1)}%</td><td>${g.projected_total.toFixed(1)}</td><td>${st.status === 'final' ? 'Final' : 'Scheduled'}</td><td>${scoreTxt}</td><td>${resultTxt}</td>
+            <td>${g.is_conference_game ? 'Yes' : 'No'}</td><td>${oppTeam ? ('#'+oppTeam.rank) : '—'}</td><td>${scheduleSpreadCell(g)}</td><td>${(winp*100).toFixed(1)}%</td><td>${g.projected_total.toFixed(1)}</td><td>${st.status === 'final' ? 'Final' : 'Scheduled'}</td><td>${scoreTxt}</td><td>${resultTxt}</td>
           </tr>`);
         }
         return rows.join('');
