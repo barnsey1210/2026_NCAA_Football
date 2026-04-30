@@ -174,12 +174,15 @@ def main():
     run_date = datetime.now().strftime("%Y-%m-%d")
     pulled_at = datetime.now().isoformat(timespec="seconds")
 
+    # Parsed/latest source files.
+    # These filenames can point to 2025 test data now and later be changed to 2026 live files.
+    # Only nonzero-weight / active systems are required by validation.
     system_files = {
         "spplus": SPPLUS_LATEST,
-        "fpi": RATINGS_DIR / "fpi_2026_latest.csv",
-        "teamrankings": RATINGS_DIR / "teamrankings_2026_latest.csv",
-        "kford": RATINGS_DIR / "kford_2026_latest.csv",
-        "bradpowers": RATINGS_DIR / "bradpowers_2026_latest.csv",
+        "fpi": RATINGS_DIR / "fpi_2025_test_latest.csv",
+        "teamrankings": RATINGS_DIR / "teamrankings_2025_test_latest.csv",
+        "kford": RATINGS_DIR / "kford_2025_test_latest.csv",
+        "bradpowers": RATINGS_DIR / "bradpowers_2025_test_latest.csv",
     }
 
     report = []
