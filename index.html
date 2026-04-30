@@ -2019,6 +2019,13 @@ function ratingLabWeightsAreDefault() {
   const w = getRatingLabWeights();
   return ratingLabSystems().every(s => Math.round(Number(w[s] || 0) * 100) === Math.round(Number(DEFAULT_RATING_WEIGHTS[s] || 0) * 100));
 }
+function ratingLabDefaultWeightSummaryText() {
+  return ratingLabSystems()
+    .map(s => ({label: ratingLabLabel(s), pct: Math.round(Number(DEFAULT_RATING_WEIGHTS[s] || 0) * 100)}))
+    .map(x => `${x.label} ${x.pct}%`)
+    .join(', ');
+}
+
 function ratingLabWeightSummaryText() {
   const w = getRatingLabWeights();
   const parts = ratingLabSystems()
@@ -2707,7 +2714,7 @@ function equalWeightTestCell(teamName) {
       <td>${ratingLabLabel(s)}</td>
       <td>${v == null ? '—' : Number(v).toFixed(1)}</td>
       <td>${pct}%</td>
-      <td>${st.updated ? `Updated: ${st.updated}` : '—'}</td>
+      <td>${st.updated ? `File Updated: ${st.updated}` : '—'}</td>
     </tr>`;
   }).join('');
   const partial = r.source_count < ratingLabSystems().length;
@@ -2818,7 +2825,7 @@ function ratingsWeightLabPanel() {
     return `<div class="rating-weight-row compact">
       <div class="rating-weight-label">
         <b>${ratingLabLabel(s)}</b>
-        <span>${pct}% lab · ${defaultPct}% default · Updated: ${st.updated || 'No file'}</span>
+        <span>${pct}% custom · ${defaultPct}% default · File Updated: ${st.updated || 'No file'} · ${st.status || ''}</span>
       </div>
       <div class="rating-weight-controls">
         <input id="ratingLabSlider_${s}" type="range" min="0" max="100" value="${pct}" oninput="setRatingLabDraftPct('${s}', this.value)">
@@ -2831,12 +2838,12 @@ function ratingsWeightLabPanel() {
   return `<details id="ratingsWeightLab" class="card ratings-weight-lab compact" ${isOpen ? 'open' : ''} ontoggle="localStorage.setItem('ratingLabOpen', this.open ? '1' : '0')">
     <summary>
       <div>
-        <b>Rating Weights Lab</b>
-        <span class="small muted">Display-only blend controls · click to expand</span>
+        <b>Rating Weights</b>
+        <span class="small muted">Display-only controls · click to expand</span>
       </div>
-      <span class="rating-lab-summary-pill">Click to expand · Lab ${Math.round(labTotal*100)}% · Default ${Math.round(officialTotal*100)}%</span>
+      <span class="rating-lab-summary-pill">Click to expand · Custom ${Math.round(labTotal*100)}% · Default ${Math.round(officialTotal*100)}%</span>
     </summary>
-    <div class="small muted rating-lab-note">This changes the Blend Lab column only. Official Power Rating/projections still use the Python/default weights unless ratings_config.json is changed and the site is rebuilt.</div>
+    <div class="small muted rating-lab-note">Official Power Rating/projections use Python/default weights: ${ratingLabDefaultWeightSummaryText()}. Custom weights on this page are display-only unless ratings_config.json is changed and the site is rebuilt.</div>
     <div class="rating-weight-total">Draft total: <span id="ratingLabDraftTotal">${Math.round(labTotal*100)}%</span></div>
     ${rows}
     <div class="rating-weight-actions">
