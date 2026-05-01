@@ -1627,6 +1627,198 @@ th .sportsbook-logo{
   white-space:nowrap;
 }
 
+
+/* Mobile Futures Market usability patch v1 */
+@media (max-width: 760px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .page-title {
+    font-size: 26px;
+    line-height: 1.08;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  /* Compact the Futures Market filter card */
+  .market-filter-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    max-width: 100% !important;
+  }
+
+  .market-filter-control,
+  .market-filter-control select,
+  .market-filter-control input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .market-filter-control label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+
+  .market-filter-control select,
+  .market-filter-control input {
+    min-height: 40px;
+    font-size: 15px;
+    padding: 9px 10px;
+    border-radius: 11px;
+  }
+
+  /* Keep the Win Totals / Conference Title buttons usable on iPhone */
+  .market-view-toggle {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 9px !important;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .market-view-toggle::-webkit-scrollbar {
+    display: none;
+  }
+
+  .market-view-toggle button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 10px 13px;
+  }
+
+  /* Make horizontal table scrolling obvious and smooth */
+  .market-table-scroll {
+    position: relative;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    margin-left: -2px;
+    margin-right: -2px;
+    padding-bottom: 8px;
+    border-radius: 14px;
+  }
+
+  .market-table-scroll::before {
+    content: "Swipe sideways to view all sportsbook columns →";
+    display: block;
+    position: sticky;
+    left: 0;
+    z-index: 30;
+    width: max-content;
+    min-width: 100%;
+    padding: 7px 9px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #93c5fd;
+    background: rgba(10, 23, 49, .96);
+    border: 1px solid rgba(96, 165, 250, .18);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .futures-board-table.win-only {
+    min-width: 1040px !important;
+  }
+
+  .futures-board-table.title-only {
+    min-width: 1020px !important;
+  }
+
+  .futures-board-table th,
+  .futures-board-table td {
+    padding: 8px 7px !important;
+    font-size: 12px !important;
+  }
+
+  .futures-board-table th {
+    font-size: 10px !important;
+    line-height: 1.12;
+    letter-spacing: .075em;
+  }
+
+  .futures-board-table thead tr.market-group-row th {
+    height: 38px;
+  }
+
+  .futures-board-table thead tr:nth-child(2) th {
+    top: 38px !important;
+  }
+
+  .futures-board-table .market-sticky-cell {
+    min-width: 70px;
+  }
+
+  .futures-board-table td:nth-child(2),
+  .futures-board-table th:nth-child(2) {
+    min-width: 130px;
+  }
+
+  .futures-board-table td:nth-child(3),
+  .futures-board-table th:nth-child(3) {
+    min-width: 82px;
+  }
+
+  .sportsbook-header-logo {
+    gap: 2px;
+  }
+
+  .sportsbook-header-logo img,
+  .sportsbook-logo,
+  .book-logo {
+    max-width: 38px !important;
+    max-height: 28px !important;
+  }
+
+  .sportsbook-header-sub {
+    font-size: 9px !important;
+    letter-spacing: .06em;
+  }
+
+  .market-header-open-date {
+    font-size: 8.5px !important;
+    white-space: normal !important;
+    line-height: 1.05;
+  }
+
+  .market-main,
+  .book-win-total,
+  .best-price-odds {
+    font-size: 15px !important;
+  }
+
+  .market-sub,
+  .book-win-prices,
+  .market-open-current,
+  .market-move {
+    font-size: 10.5px !important;
+  }
+
+  .book-win-cell {
+    gap: 7px !important;
+  }
+
+  .market-no-source {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
+/* End Mobile Futures Market usability patch v1 */
+
 </style>
 </head>
 <body>
