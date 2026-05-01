@@ -1433,7 +1433,7 @@ th .sportsbook-logo{
   border-color:rgba(167,139,250,.80);
 }
 .futures-board-table.win-only{min-width:1120px;}
-.futures-board-table.title-only{min-width:1180px;}
+.futures-board-table.title-only{min-width:1080px;}
 .futures-board-table.win-only th.market-win-cell,
 .futures-board-table.win-only td.market-win-cell{background:rgba(37,99,235,.22) !important;}
 .futures-board-table.title-only th.market-title-cell,
@@ -1736,7 +1736,7 @@ th .sportsbook-logo{
   }
 
   .futures-board-table.title-only {
-    min-width: 1020px !important;
+    min-width: 980px !important;
   }
 
   .futures-board-table th,
@@ -1818,6 +1818,46 @@ th .sportsbook-logo{
   }
 }
 /* End Mobile Futures Market usability patch v1 */
+
+
+/* Conference futures title-odds layout polish */
+.futures-board-table.title-only .market-title-cell .book-odds-inline{
+  gap:8px;
+}
+.futures-board-table.title-only .market-title-cell .market-sub .market-move{
+  margin-left:0;
+  margin-top:4px;
+}
+
+
+/* Conference title best-odds movement: show open/current plus arrow chip */
+.title-move-stack{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  flex-wrap:wrap;
+}
+.title-move-stack .market-move{
+  margin-left:0;
+}
+
+
+/* Futures market: keep no-market rows visually consistent in all-team views */
+.futures-board-table .market-no-source{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:58px;
+  padding:3px 9px;
+  border-radius:999px;
+  color:#a8b6cf;
+  background:rgba(148,163,184,.10);
+  border:1px solid rgba(148,163,184,.20);
+  font-size:.82em;
+  font-weight:900;
+  white-space:nowrap;
+}
 
 </style>
 </head>
@@ -2215,6 +2255,13 @@ function americanOddsFromProb(p) {
   if (pct < 50) return '+' + Math.round((100 - pct) * 100 / pct);
   return '-' + Math.round(pct * 100 / (100 - pct));
 }
+function americanOddsNumberFromProb(p) {
+  if (p == null || !isFinite(p) || p <= 0) return null;
+  if (p >= 1) return -999999;
+  const pct = Number(p) * 100;
+  if (pct < 50) return Math.round((100 - pct) * 100 / pct);
+  return -Math.round(pct * 100 / (100 - pct));
+}
 function fmtSOS(v) {
   return v == null || !isFinite(v) ? '—' : Number(v).toFixed(1);
 }
@@ -2568,11 +2615,40 @@ function movementKey(parts) {
 }
 const winMovementByTeamBook = Object.fromEntries(winMovementRows.map(r => [movementKey([r.team, r.book]), r]));
 const futuresMovementByTeamConfBook = Object.fromEntries(futuresMovementRows.map(r => [movementKey([r.team, r.conference, r.book]), r]));
+const futuresMovementByTeamBook = Object.fromEntries(futuresMovementRows.map(r => [movementKey([r.team, r.book]), r]));
+function canonicalMarketConf(conf) {
+  const c = String(conf || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const compact = c.replace(/\s+/g, '');
+  const map = {
+    b12: 'big12', bigxii: 'big12', big12: 'big12', bigtwelve: 'big12',
+    b1g: 'bigten', big10: 'bigten', bigten: 'bigten',
+    sec: 'sec', southeastern: 'sec',
+    acc: 'acc', atlanticcoast: 'acc',
+    american: 'american', aac: 'american',
+    mw: 'mountainwest', mountainwest: 'mountainwest',
+    mac: 'mac', cusa: 'cusa', conferenceusa: 'cusa',
+    sunbelt: 'sunbelt', pac12: 'pac12', pacific12: 'pac12', independent: 'independent'
+  };
+  return map[compact] || compact;
+}
+function titleMovementFallback(team, conf, book) {
+  const targetTeam = normMarketTeamName(team);
+  const targetBook = normBookName(book);
+  const targetConf = canonicalMarketConf(conf);
+  return (futuresMovementRows || []).find(r => {
+    if (normMarketTeamName(r.team) !== targetTeam) return false;
+    if (normBookName(r.book) !== targetBook) return false;
+    const rowConf = canonicalMarketConf(r.conference);
+    return !targetConf || !rowConf || rowConf === targetConf;
+  }) || null;
+}
 function winMovementFor(team, book) {
   return winMovementByTeamBook[movementKey([team, book])] || null;
 }
 function titleMovementFor(team, conf, book) {
-  return futuresMovementByTeamConfBook[movementKey([team, conf, book])] || null;
+  return futuresMovementByTeamConfBook[movementKey([team, conf, book])]
+    || futuresMovementByTeamBook[movementKey([team, book])]
+    || titleMovementFallback(team, conf, book);
 }
 function bestWinMovementForTeam(team, m) {
   if (!m) return null;
@@ -2636,6 +2712,24 @@ function bestWinHeader(label) {
   return `${label}<div class="market-header-open-date">${txt}</div>`;
 }
 
+function firstTitleSnapshotDate() {
+  const rows = DB.market_conference_futures_movement || [];
+  let best = null;
+  rows.forEach(r => {
+    const raw = r.first_snapshot_date || r.snapshot_date || '';
+    if (!raw) return;
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return;
+    if (!best || d < best) best = d;
+  });
+  return best;
+}
+function bestTitleHeader() {
+  const d = firstTitleSnapshotDate();
+  const txt = d ? `Line opened: ${formatShortDate(d)}` : 'Line movement';
+  return `Best Title Odds<div class="market-header-open-date">${txt}</div>`;
+}
+
 function openCurrentOddsLabel(openOdds, currentOdds, label='Open') {
   if (openOdds == null || currentOdds == null || openOdds === '' || currentOdds === '') {
     return '<span class="market-move market-move-flat">Open —</span>';
@@ -2652,7 +2746,10 @@ function openCurrentOddsLabel(openOdds, currentOdds, label='Open') {
   return `<span class="market-move ${cls}" title="${escapeHtml(title)}">${fmtOdds(openN)} → ${fmtOdds(curN)}</span>`;
 }
 function marketTotalCell(r) {
-  const total = r.market_total == null ? '—' : fmtWins(r.market_total);
+  if (!r || !r.has_win_market || r.market_total == null || r.market_total === '') {
+    return `<span class="market-no-source">No line</span>`;
+  }
+  const total = fmtWins(r.market_total);
   return `<div class="market-main">${total}</div>`;
 }
 function bestWinTotalForSide(r, side) {
@@ -2676,6 +2773,9 @@ function bothBestWinPricesPositive(r) {
   return r && Number(r.best_over_odds) > 0 && Number(r.best_under_odds) > 0 && sameWinTotalForBestOverUnder(r);
 }
 function bestOverCell(r) {
+  if (!r || !r.has_win_market || r.best_over_odds == null || r.best_over_odds === '' || !r.best_over_book) {
+    return `<span class="market-no-source">No line</span>`;
+  }
   const move = r.win_movement
     ? openCurrentOddsLabel(r.win_movement.opening_over_odds, r.win_movement.current_over_odds, 'Best over odds move')
     : '<span class="market-move market-move-flat">Open —</span>';
@@ -2683,11 +2783,45 @@ function bestOverCell(r) {
   return `<div class="market-main">${compactBookThenOdds(r.best_over_odds, r.best_over_book, cls)}</div><div class="market-sub">${move}</div>`;
 }
 function bestUnderCell(r) {
+  if (!r || !r.has_win_market || r.best_under_odds == null || r.best_under_odds === '' || !r.best_under_book) {
+    return `<span class="market-no-source">No line</span>`;
+  }
   const move = r.win_movement
     ? openCurrentOddsLabel(r.win_movement.opening_under_odds, r.win_movement.current_under_odds, 'Best under odds move')
     : '<span class="market-move market-move-flat">Open —</span>';
   const cls = bothBestWinPricesPositive(r) ? 'both-plus' : '';
   return `<div class="market-main">${compactBookThenOdds(r.best_under_odds, r.best_under_book, cls)}</div><div class="market-sub">${move}</div>`;
+}
+function bestTitleCell(r) {
+  if (!r || !r.has_title_market || r.best_title_odds == null || r.best_title_odds === '' || !r.best_title_book) {
+    return `<span class="market-no-source">No line</span>`;
+  }
+
+  // Look up movement at render time so all conference aliases work (B1G/Big Ten, B12/Big 12, etc.).
+  // If there is no matching movement row, fall back to the current best title odds as the opening value
+  // instead of showing "Open —" for teams that clearly have a market line.
+  const mv = titleMovementFor(r.team, r.conference, r.best_title_book) || r.title_movement || null;
+  const hasMoveRow = !!mv;
+  const openRaw = hasMoveRow ? mv.opening_american_odds : r.best_title_odds;
+  const currentRaw = hasMoveRow ? mv.current_american_odds : r.best_title_odds;
+  const openOdds = Number(openRaw);
+  const currentOdds = Number(currentRaw);
+  const oddsMove = hasMoveRow && isFinite(Number(mv.american_odds_move))
+    ? Number(mv.american_odds_move)
+    : (isFinite(openOdds) && isFinite(currentOdds) ? currentOdds - openOdds : 0);
+
+  let move = '<span class="market-move market-move-flat">Open —</span>';
+  if (isFinite(openOdds) && isFinite(currentOdds)) {
+    if (oddsMove === 0 || openOdds === currentOdds) {
+      move = `<span class="market-move market-move-flat" title="Best title odds opening price from first captured pull">Open ${fmtOdds(openOdds)}</span>`;
+    } else {
+      const cls = oddsMove > 0 ? 'market-move-up' : 'market-move-down';
+      const arrow = oddsMove > 0 ? '▲' : '▼';
+      move = `<span class="market-move ${cls}" title="Best title odds movement from first captured pull to latest captured pull">${fmtOdds(openOdds)} → ${fmtOdds(currentOdds)} ${arrow} ${fmtOddsMove(oddsMove)}</span>`;
+    }
+  }
+
+  return `<div class="market-main">${compactBookThenOdds(r.best_title_odds, r.best_title_book)}</div><div class="market-sub">${move}</div>`;
 }
 function titleMoveCell(r) {
   if (!r.title_movement) return '<span class="muted">—</span>';
@@ -2705,10 +2839,12 @@ function marketBoardRows() {
     const projConfWins = Number(t.avg_conference_wins);
     const projTitle = Number(t.conference_title_pct);
     const marketTotalRaw = m ? marketWinLine(m) : null;
-    const marketTotal = Number(marketTotalRaw);
-    const winEdge = Number.isFinite(projWins) && Number.isFinite(marketTotal) ? projWins - marketTotal : null;
-    const titleMarket = m && m.market_implied_title_prob != null ? Number(m.market_implied_title_prob) : null;
-    const titleEdge = Number.isFinite(projTitle) && Number.isFinite(titleMarket) ? projTitle - titleMarket : null;
+    const hasWinMarket = !!m && marketTotalRaw != null && marketTotalRaw !== '' && marketTotalRaw !== '—' && isFinite(Number(marketTotalRaw));
+    const marketTotal = hasWinMarket ? Number(marketTotalRaw) : null;
+    const winEdge = hasWinMarket && Number.isFinite(projWins) ? projWins - marketTotal : null;
+    const hasTitleMarket = !!m && m.market_implied_title_prob != null && m.market_implied_title_prob !== '' && isFinite(Number(m.market_implied_title_prob));
+    const titleMarket = hasTitleMarket ? Number(m.market_implied_title_prob) : null;
+    const titleEdge = hasTitleMarket && Number.isFinite(projTitle) ? projTitle - titleMarket : null;
     return {
       team: t.team,
       conference: t.conference,
@@ -2717,8 +2853,11 @@ function marketBoardRows() {
       projected_wins: projWins,
       projected_conf_wins: projConfWins,
       projected_title_prob: projTitle,
-      market_total: Number.isFinite(marketTotal) ? marketTotal : null,
+      projected_title_odds: americanOddsNumberFromProb(projTitle),
+      market_total: hasWinMarket ? marketTotal : null,
       win_edge: winEdge,
+      has_win_market: hasWinMarket,
+      has_title_market: hasTitleMarket,
       best_over_odds: m && m.best_over_odds,
       best_over_book: m && m.best_over_book,
       best_under_odds: m && m.best_under_odds,
@@ -2877,12 +3016,11 @@ function renderMarketBoard() {
   const groupTitle = isTitles ? 'Conference Futures' : 'Win Totals';
   const groupClass = isTitles ? 'market-title-head' : 'market-win-head';
   const headerCols = isTitles ? `
-            ${marketSortableTh('projected_conf_wins','Proj Conf Wins','market-title-cell')}
+            ${marketSortableTh('projected_title_odds','Proj Title Odds','market-title-cell')}
             ${marketSortableTh('projected_title_prob','Proj Title %','market-title-cell')}
-            <th class="market-title-cell">Best Title</th>
-            ${marketSortableTh('market_implied_title_prob','Market Title %','market-title-cell')}
+            ${marketSortableTh('market_implied_title_prob','Consensus Market Title %','market-title-cell')}
             ${marketSortableTh('title_edge','Title Edge','market-title-cell')}
-            <th class="market-title-cell">Title Move</th>
+            <th class="market-title-cell">${bestTitleHeader()}</th>
             ${MARKET_BOOKS.map(b=>`<th class="market-title-cell">${sportsbookHeaderLogo(b.label,'Title')}</th>`).join('')}` : `
             ${marketSortableTh('projected_wins','Proj Wins','market-win-cell')}
             ${marketSortableTh('market_total','Consensus Market Wins','market-win-cell')}
@@ -2892,12 +3030,11 @@ function renderMarketBoard() {
             ${MARKET_BOOKS.map(b=>`<th class="market-win-cell">${sportsbookHeaderLogo(b.label,'Win Total')}</th>`).join('')}`;
   const bodyRows = rows.map(r => {
     const marketCols = isTitles ? `
-              <td class="market-title-cell">${fmtWins(r.projected_conf_wins)}</td>
+              <td class="market-title-cell">${fmtOdds(r.projected_title_odds)}</td>
               <td class="market-title-cell">${fmtMarketPct(r.projected_title_prob)}</td>
-              <td class="market-title-cell">${compactBestOdds(r.best_title_odds, r.best_title_book)}</td>
               <td class="market-title-cell">${fmtMarketPct(r.market_implied_title_prob)}</td>
               <td class="market-title-cell ${r.title_edge == null ? '' : (r.title_edge > 0 ? 'pos' : r.title_edge < 0 ? 'neg' : '')}">${r.title_edge == null ? '—' : fmtMarketPct(r.title_edge)}</td>
-              <td class="market-title-cell">${titleMoveCell(r)}</td>
+              <td class="market-title-cell">${bestTitleCell(r)}</td>
               ${compactTitleBooksForBoard(r.team, r.m)}` : `
               <td class="market-win-cell">${fmtWins(r.projected_wins)}</td>
               <td class="market-win-cell">${marketTotalCell(r)}</td>
@@ -2915,7 +3052,7 @@ function renderMarketBoard() {
   }).join('');
   return `
     <div class="page-title">Futures Market</div>
-    <div class="page-sub">All-team board comparing projected wins, projected conference wins, and projected conference title probability against imported win-total and conference-futures prices. Movement columns compare first captured price to latest captured price.</div>
+    <div class="page-sub">All-team board comparing projected wins, projected conference wins, and projected conference title probability against imported win-total and conference-futures prices. Movement labels compare first captured price to latest captured price.</div>
     <div class="mobile-actions">
       <a class="pill" href="#rankings">Rankings</a>
       <a class="pill" href="#conferences">Conferences</a>
