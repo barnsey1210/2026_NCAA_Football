@@ -4322,6 +4322,104 @@ th .sportsbook-logo{
 }
 </style>
 
+
+<style>
+/* Core Power Ratings rank chips */
+.core-rank-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:42px;
+  height:24px;
+  padding:2px 8px;
+  border-radius:8px;
+  font-weight:1000;
+  font-size:13px;
+  line-height:1;
+  border:1px solid rgba(255,255,255,.12);
+  margin-left:6px;
+}
+.core-rank-good{
+  color:#052e16;
+  background:rgba(34,197,94,.82);
+  border-color:rgba(34,197,94,.95);
+}
+.core-rank-mid{
+  color:#422006;
+  background:rgba(250,204,21,.82);
+  border-color:rgba(250,204,21,.95);
+}
+.core-rank-bad{
+  color:#fff;
+  background:rgba(239,68,68,.78);
+  border-color:rgba(239,68,68,.95);
+}
+.core-rank-neutral{
+  color:#dbeafe;
+  background:rgba(148,163,184,.25);
+  border-color:rgba(148,163,184,.28);
+}
+</style>
+
+
+<style>
+/* Solid single-color rank chips */
+.core-rank-chip,
+.ctx-rank-chip,
+.cfb-factor-rank,
+.rank-badge{
+  background-image:none !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+
+.core-rank-good,
+.ctx-rank-good,
+.cfb-rank-good,
+.rank-badge.rank-elite,
+.rank-badge.rank-good{
+  background:#22c55e !important;
+  color:#052e16 !important;
+  border-color:#22c55e !important;
+}
+
+.core-rank-mid,
+.ctx-rank-mid,
+.cfb-rank-mid,
+.rank-badge.rank-mid{
+  background:#eab308 !important;
+  color:#422006 !important;
+  border-color:#eab308 !important;
+}
+
+.core-rank-bad,
+.ctx-rank-bad,
+.cfb-rank-bad,
+.rank-badge.rank-bad{
+  background:#ef4444 !important;
+  color:#ffffff !important;
+  border-color:#ef4444 !important;
+}
+
+.core-rank-neutral,
+.ctx-rank-neutral,
+.cfb-rank-na,
+.rank-badge.rank-na{
+  background:#334155 !important;
+  color:#dbeafe !important;
+  border-color:#475569 !important;
+}
+
+/* Prevent nested old/new chip overlap in Core Power cards */
+.cfb-power-card .core-rank-chip{
+  display:inline-flex !important;
+  min-width:48px !important;
+  width:auto !important;
+  padding:3px 10px !important;
+  border-radius:8px !important;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -11748,6 +11846,52 @@ route();
 
   function run(){
     document.querySelectorAll('.cfb-matchup-header').forEach(addPoints);
+  }
+
+  run();
+  setTimeout(run, 150);
+  setTimeout(run, 500);
+  setTimeout(run, 1000);
+
+  document.addEventListener('click', () => {
+    setTimeout(run, 150);
+    setTimeout(run, 500);
+    setTimeout(run, 1000);
+  });
+})();
+</script>
+
+
+<script>
+(function corePowerRankChips(){
+  function rankClass(n){
+    if (!n || Number.isNaN(n)) return 'core-rank-neutral';
+    if (n <= 35) return 'core-rank-good';
+    if (n <= 80) return 'core-rank-mid';
+    return 'core-rank-bad';
+  }
+
+  function chip(rankText){
+    const n = Number(String(rankText).replace('#','').trim());
+    if (!n || Number.isNaN(n)) return rankText;
+    return `<span class="core-rank-chip ${rankClass(n)}">${rankText}</span>`;
+  }
+
+  function apply(el){
+    if (!el || el.dataset.coreRankChips === '1') return;
+
+    el.innerHTML = el.innerHTML.replace(/(^|>|\s)(#\d{1,3})(?=\s|<|$)/g, function(match, prefix, rank){
+      if (match.includes('core-rank-chip')) return match;
+      return `${prefix}${chip(rank)}`;
+    });
+
+    el.dataset.coreRankChips = '1';
+  }
+
+  function run(){
+    document.querySelectorAll('.cfb-power-card').forEach(card => {
+      card.querySelectorAll('.cfb-power-team, .cfb-power-val, .cfb-power-row, div').forEach(apply);
+    });
   }
 
   run();
