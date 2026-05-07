@@ -4420,6 +4420,89 @@ th .sportsbook-logo{
 }
 </style>
 
+
+<style>
+/* Global matchup UI consistency */
+.cfb-team-proj-points{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin-left:10px !important;
+  padding:4px 10px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(147,197,253,.28) !important;
+  background:rgba(147,197,253,.10) !important;
+  color:#bfdbfe !important;
+  font-size:15px !important;
+  font-weight:1000 !important;
+  line-height:1 !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
+}
+.cfb-team-head.home .cfb-team-proj-points{
+  margin-left:0 !important;
+  margin-right:10px !important;
+}
+.core-rank-chip{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:42px !important;
+  height:24px !important;
+  padding:2px 8px !important;
+  border-radius:8px !important;
+  font-weight:1000 !important;
+  font-size:13px !important;
+  line-height:1 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  margin-left:6px !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+.core-rank-good{background:#22c55e !important;color:#052e16 !important;border-color:#22c55e !important;}
+.core-rank-mid{background:#eab308 !important;color:#422006 !important;border-color:#eab308 !important;}
+.core-rank-bad{background:#ef4444 !important;color:#fff !important;border-color:#ef4444 !important;}
+.core-rank-neutral{background:#334155 !important;color:#dbeafe !important;border-color:#475569 !important;}
+</style>
+
+
+<style>
+/* Season Schedule matchup UI sync */
+.matchup-detail-row .cfb-team-proj-points,
+.matchup-detail-row .matchup-panel .cfb-team-proj-points{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:4px 10px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(147,197,253,.28) !important;
+  background:rgba(147,197,253,.10) !important;
+  color:#bfdbfe !important;
+  font-size:15px !important;
+  font-weight:1000 !important;
+  line-height:1 !important;
+  letter-spacing:.02em !important;
+  white-space:nowrap !important;
+}
+.matchup-detail-row .core-rank-chip,
+.matchup-panel .core-rank-chip{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:42px !important;
+  height:24px !important;
+  padding:2px 8px !important;
+  border-radius:8px !important;
+  font-weight:1000 !important;
+  font-size:13px !important;
+  line-height:1 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  margin-left:6px !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -8360,6 +8443,24 @@ function toggleMatchupRow(id){
     const cell = row.querySelector('td');
     if (cell && g) {
       cell.innerHTML = matchupDetailHtml(g);
+
+      // Apply matchup UI polish immediately after lazy-loading season schedule matchup rows.
+      setTimeout(() => {
+        try {
+          document.dispatchEvent(new Event('click'));
+        } catch (e) {}
+      }, 25);
+      setTimeout(() => {
+        try {
+          document.dispatchEvent(new Event('click'));
+        } catch (e) {}
+      }, 150);
+      setTimeout(() => {
+        try {
+          document.dispatchEvent(new Event('click'));
+        } catch (e) {}
+      }, 400);
+
       row.dataset.loaded = '1';
     }
   }
@@ -11904,6 +12005,436 @@ route();
     setTimeout(run, 500);
     setTimeout(run, 1000);
   });
+})();
+</script>
+
+
+<script>
+(function globalMatchupUiConsistency(){
+  function clean(s){
+    return String(s || '').replace(/\s+/g,' ').trim();
+  }
+
+  function norm(s){
+    return clean(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  }
+
+  function rankClass(n){
+    if (!n || Number.isNaN(n)) return 'core-rank-neutral';
+    if (n <= 35) return 'core-rank-good';
+    if (n <= 80) return 'core-rank-mid';
+    return 'core-rank-bad';
+  }
+
+  function rankChip(rankText){
+    const n = Number(String(rankText).replace('#','').trim());
+    if (!n || Number.isNaN(n)) return rankText;
+    return `<span class="core-rank-chip ${rankClass(n)}">${rankText}</span>`;
+  }
+
+  function chipCoreRanks(panel){
+    if (!panel) return;
+
+    panel.querySelectorAll('.cfb-power-card').forEach(card => {
+      if (card.dataset.globalRankChips === '1') return;
+
+      card.innerHTML = card.innerHTML.replace(/(^|>|\s)(#\d{1,3})(?=\s|<|$)/g, function(match, prefix, rank){
+        if (match.includes('core-rank-chip')) return match;
+        return `${prefix}${rankChip(rank)}`;
+      });
+
+      card.dataset.globalRankChips = '1';
+    });
+  }
+
+  function parseProjection(panel){
+    const text = clean(panel.querySelector('.cfb-game-proj')?.textContent || '');
+    if (!text) return null;
+
+    const totalMatch = text.match(/total\s+([0-9]+(?:\.[0-9]+)?)/i);
+    const spreadMatch = text.match(/^(.+?)\s+(-|\+)?([0-9]+(?:\.[0-9]+)?)/);
+
+    if (!totalMatch || !spreadMatch) return null;
+
+    return {
+      total: Number(totalMatch[1]),
+      namedTeam: clean(spreadMatch[1]),
+      sign: spreadMatch[2] || '-',
+      spread: Math.abs(Number(spreadMatch[3]))
+    };
+  }
+
+  function addProjectedPoints(panel){
+    if (!panel || panel.dataset.globalProjectedPoints === '1') return;
+
+    const proj = parseProjection(panel);
+    if (!proj) return;
+
+    const heads = Array.from(panel.querySelectorAll('.cfb-team-head'));
+    if (heads.length < 2) return;
+
+    const teams = heads.map(h => clean(h.querySelector('.cfb-team-name')?.textContent || ''));
+    if (!teams[0] || !teams[1]) return;
+
+    const namedNorm = norm(proj.namedTeam);
+    let favorite = '';
+    let dog = '';
+
+    for (const team of teams) {
+      const tn = norm(team);
+      const match = tn === namedNorm || tn.includes(namedNorm) || namedNorm.includes(tn);
+      if (!match) continue;
+
+      if (proj.sign === '+') {
+        dog = team;
+        favorite = teams.find(x => x !== team);
+      } else {
+        favorite = team;
+        dog = teams.find(x => x !== team);
+      }
+    }
+
+    if (!favorite || !dog) return;
+
+    const favPts = (proj.total + proj.spread) / 2;
+    const dogPts = (proj.total - proj.spread) / 2;
+    const pts = {};
+    pts[favorite] = favPts;
+    pts[dog] = dogPts;
+
+    heads.forEach(h => {
+      const nameEl = h.querySelector('.cfb-team-name');
+      const team = clean(nameEl?.textContent || '');
+      if (!nameEl || pts[team] == null) return;
+
+      h.querySelectorAll('.cfb-team-proj-points').forEach(x => x.remove());
+
+      const chip = document.createElement('span');
+      chip.className = 'cfb-team-proj-points';
+      chip.textContent = `${Number(pts[team]).toFixed(1)} pts`;
+
+      if (h.classList.contains('home')) {
+        nameEl.parentElement.insertBefore(chip, nameEl);
+      } else {
+        nameEl.insertAdjacentElement('afterend', chip);
+      }
+    });
+
+    panel.dataset.globalProjectedPoints = '1';
+  }
+
+  function processPanel(panel){
+    addProjectedPoints(panel);
+    chipCoreRanks(panel);
+  }
+
+  function run(){
+    document.querySelectorAll('.cfb-matchup-shell, .matchup-panel').forEach(processPanel);
+  }
+
+  run();
+  setTimeout(run, 150);
+  setTimeout(run, 500);
+  setTimeout(run, 1000);
+
+  document.addEventListener('click', () => {
+    setTimeout(run, 150);
+    setTimeout(run, 500);
+    setTimeout(run, 1000);
+  });
+})();
+</script>
+
+
+<script>
+(function syncSeasonScheduleMatchupUi(){
+  function clean(s){
+    return String(s || '').replace(/\s+/g,' ').trim();
+  }
+
+  function norm(s){
+    return clean(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  }
+
+  function rankClass(n){
+    if (!n || Number.isNaN(n)) return 'core-rank-neutral';
+    if (n <= 35) return 'core-rank-good';
+    if (n <= 80) return 'core-rank-mid';
+    return 'core-rank-bad';
+  }
+
+  function rankChip(rankText){
+    const n = Number(String(rankText).replace('#','').trim());
+    if (!n || Number.isNaN(n)) return rankText;
+    return `<span class="core-rank-chip ${rankClass(n)}">${rankText}</span>`;
+  }
+
+  function parseProjection(panel){
+    const text = clean(panel.querySelector('.cfb-game-proj')?.textContent || '');
+    if (!text) return null;
+
+    const totalMatch = text.match(/total\s+([0-9]+(?:\.[0-9]+)?)/i);
+    const spreadMatch = text.match(/^(.+?)\s+(-|\+)?([0-9]+(?:\.[0-9]+)?)/);
+
+    if (!totalMatch || !spreadMatch) return null;
+
+    return {
+      total: Number(totalMatch[1]),
+      namedTeam: clean(spreadMatch[1]),
+      sign: spreadMatch[2] || '-',
+      spread: Math.abs(Number(spreadMatch[3]))
+    };
+  }
+
+  function addProjectedPoints(panel){
+    const proj = parseProjection(panel);
+    if (!proj) return;
+
+    const heads = Array.from(panel.querySelectorAll('.cfb-team-head'));
+    if (heads.length < 2) return;
+
+    const teams = heads.map(h => clean(h.querySelector('.cfb-team-name')?.textContent || ''));
+    if (!teams[0] || !teams[1]) return;
+
+    const namedNorm = norm(proj.namedTeam);
+    let favorite = '';
+    let dog = '';
+
+    for (const team of teams) {
+      const tn = norm(team);
+      const match = tn === namedNorm || tn.includes(namedNorm) || namedNorm.includes(tn);
+      if (!match) continue;
+
+      if (proj.sign === '+') {
+        dog = team;
+        favorite = teams.find(x => x !== team);
+      } else {
+        favorite = team;
+        dog = teams.find(x => x !== team);
+      }
+    }
+
+    if (!favorite || !dog) return;
+
+    const favPts = (proj.total + proj.spread) / 2;
+    const dogPts = (proj.total - proj.spread) / 2;
+
+    const pts = {};
+    pts[favorite] = favPts;
+    pts[dog] = dogPts;
+
+    heads.forEach(h => {
+      const nameEl = h.querySelector('.cfb-team-name');
+      const team = clean(nameEl?.textContent || '');
+      if (!nameEl || pts[team] == null) return;
+
+      h.querySelectorAll('.cfb-team-proj-points').forEach(x => x.remove());
+
+      const chip = document.createElement('span');
+      chip.className = 'cfb-team-proj-points';
+      chip.textContent = `${Number(pts[team]).toFixed(1)} pts`;
+
+      if (h.classList.contains('home')) {
+        nameEl.parentElement.insertBefore(chip, nameEl);
+      } else {
+        nameEl.insertAdjacentElement('afterend', chip);
+      }
+    });
+  }
+
+  function chipCoreRanks(panel){
+    panel.querySelectorAll('.cfb-power-card').forEach(card => {
+      // Replace only plain #rank text, not existing chip text.
+      card.querySelectorAll('*').forEach(el => {
+        if (el.classList && el.classList.contains('core-rank-chip')) return;
+        if (!el.childNodes || !el.childNodes.length) return;
+
+        el.childNodes.forEach(node => {
+          if (node.nodeType !== Node.TEXT_NODE) return;
+          const txt = node.nodeValue;
+          if (!/#\d{1,3}/.test(txt)) return;
+
+          const span = document.createElement('span');
+          span.innerHTML = txt.replace(/#\d{1,3}/g, m => rankChip(m));
+          node.replaceWith(...Array.from(span.childNodes));
+        });
+      });
+    });
+  }
+
+  function processPanel(panel){
+    if (!panel) return;
+    addProjectedPoints(panel);
+    chipCoreRanks(panel);
+  }
+
+  function run(){
+    // Target both schedule detail panels and any cfb matchup shell that appears late.
+    document.querySelectorAll('.matchup-detail-row .matchup-panel, .matchup-detail-row .cfb-matchup-shell, .matchup-panel, .cfb-matchup-shell').forEach(processPanel);
+  }
+
+  run();
+  setTimeout(run, 150);
+  setTimeout(run, 500);
+  setTimeout(run, 1000);
+  setTimeout(run, 1800);
+
+  document.addEventListener('click', () => {
+    setTimeout(run, 150);
+    setTimeout(run, 500);
+    setTimeout(run, 1000);
+    setTimeout(run, 1800);
+  });
+
+  document.addEventListener('change', () => {
+    setTimeout(run, 250);
+    setTimeout(run, 900);
+  });
+})();
+</script>
+
+
+<script>
+(function scheduleMatchupExpandTimingFix(){
+  function clean(s){
+    return String(s || '').replace(/\s+/g,' ').trim();
+  }
+
+  function norm(s){
+    return clean(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  }
+
+  function rankClass(n){
+    if (!n || Number.isNaN(n)) return 'core-rank-neutral';
+    if (n <= 35) return 'core-rank-good';
+    if (n <= 80) return 'core-rank-mid';
+    return 'core-rank-bad';
+  }
+
+  function rankChip(rankText){
+    const n = Number(String(rankText).replace('#','').trim());
+    if (!n || Number.isNaN(n)) return rankText;
+    return `<span class="core-rank-chip ${rankClass(n)}">${rankText}</span>`;
+  }
+
+  function chipCoreRanks(panel){
+    panel.querySelectorAll('.cfb-power-card').forEach(card => {
+      card.querySelectorAll('*').forEach(el => {
+        if (el.classList && el.classList.contains('core-rank-chip')) return;
+        if (!el.childNodes || !el.childNodes.length) return;
+
+        Array.from(el.childNodes).forEach(node => {
+          if (node.nodeType !== Node.TEXT_NODE) return;
+          const txt = node.nodeValue;
+          if (!/#\d{1,3}/.test(txt)) return;
+
+          const span = document.createElement('span');
+          span.innerHTML = txt.replace(/#\d{1,3}/g, m => rankChip(m));
+          node.replaceWith(...Array.from(span.childNodes));
+        });
+      });
+    });
+  }
+
+  function parseProjection(panel){
+    const text = clean(panel.querySelector('.cfb-game-proj')?.textContent || '');
+    if (!text) return null;
+
+    const totalMatch = text.match(/total\s+([0-9]+(?:\.[0-9]+)?)/i);
+    const spreadMatch = text.match(/^(.+?)\s+(-|\+)?([0-9]+(?:\.[0-9]+)?)/);
+
+    if (!totalMatch || !spreadMatch) return null;
+
+    return {
+      total: Number(totalMatch[1]),
+      namedTeam: clean(spreadMatch[1]),
+      sign: spreadMatch[2] || '-',
+      spread: Math.abs(Number(spreadMatch[3]))
+    };
+  }
+
+  function addProjectedPoints(panel){
+    const proj = parseProjection(panel);
+    if (!proj) return;
+
+    const heads = Array.from(panel.querySelectorAll('.cfb-team-head'));
+    if (heads.length < 2) return;
+
+    const teams = heads.map(h => clean(h.querySelector('.cfb-team-name')?.textContent || ''));
+    if (!teams[0] || !teams[1]) return;
+
+    const namedNorm = norm(proj.namedTeam);
+    let favorite = '';
+    let dog = '';
+
+    for (const team of teams) {
+      const tn = norm(team);
+      const match = tn === namedNorm || tn.includes(namedNorm) || namedNorm.includes(tn);
+      if (!match) continue;
+
+      if (proj.sign === '+') {
+        dog = team;
+        favorite = teams.find(x => x !== team);
+      } else {
+        favorite = team;
+        dog = teams.find(x => x !== team);
+      }
+    }
+
+    if (!favorite || !dog) return;
+
+    const favPts = (proj.total + proj.spread) / 2;
+    const dogPts = (proj.total - proj.spread) / 2;
+
+    const pts = {};
+    pts[favorite] = favPts;
+    pts[dog] = dogPts;
+
+    heads.forEach(h => {
+      const nameEl = h.querySelector('.cfb-team-name');
+      const team = clean(nameEl?.textContent || '');
+      if (!nameEl || pts[team] == null) return;
+
+      h.querySelectorAll('.cfb-team-proj-points').forEach(x => x.remove());
+
+      const chip = document.createElement('span');
+      chip.className = 'cfb-team-proj-points';
+      chip.textContent = `${Number(pts[team]).toFixed(1)} pts`;
+
+      if (h.classList.contains('home')) {
+        nameEl.parentElement.insertBefore(chip, nameEl);
+      } else {
+        nameEl.insertAdjacentElement('afterend', chip);
+      }
+    });
+  }
+
+  function polish(){
+    document.querySelectorAll('.matchup-detail-row .matchup-panel, .matchup-detail-row .cfb-matchup-shell, .matchup-panel, .cfb-matchup-shell').forEach(panel => {
+      addProjectedPoints(panel);
+      chipCoreRanks(panel);
+    });
+  }
+
+  function schedulePolish(){
+    [50, 150, 300, 600, 1000, 1600, 2400].forEach(ms => {
+      setTimeout(polish, ms);
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    const txt = clean(e.target && e.target.textContent);
+    const isMatchupClick =
+      e.target.closest('.matchup-toggle') ||
+      /matchup/i.test(txt) ||
+      e.target.closest('.matchup-detail-row') ||
+      e.target.closest('.matchup-panel');
+
+    if (isMatchupClick) schedulePolish();
+  });
+
+  // Initial pass for already-open panels
+  schedulePolish();
 })();
 </script>
 
