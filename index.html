@@ -6537,10 +6537,140 @@ function renderMarketArbsBoard(){
   `;
 }
 
+
+function renderMarketMovesBoard(){
+  const confs = [...new Set(DB.teams.map(t => t.conference).filter(Boolean))].sort();
+  const view = 'moves';
+
+  function readRows(){
+    const el = document.getElementById('daily-market-moves-data');
+    if (!el) return [];
+    try { return JSON.parse(el.textContent || '[]'); }
+    catch(e){ return []; }
+  }
+
+  function moveDate(row){
+    return row.move_date || row.snapshot_latest || '';
+  }
+
+  function moveImpactClass(v){
+    const n = Number(v);
+    if (!Number.isFinite(n)) return '';
+    return n > 0 ? 'imp-pos' : n < 0 ? 'imp-neg' : '';
+  }
+
+  function dateRange(rows){
+    const dates = rows.map(moveDate).filter(Boolean).sort();
+    if (!dates.length) return '';
+    const first = dates[0];
+    const last = dates[dates.length - 1];
+    return first === last ? first : `${first} to ${last}`;
+  }
+
+  const allRows = readRows();
+  const rows = [...allRows].sort((a,b) => {
+    const da = String(moveDate(a));
+    const db = String(moveDate(b));
+    if (da !== db) return db.localeCompare(da);
+    const ia = Math.abs(Number(a.implied_prob_change_pct || 0));
+    const ib = Math.abs(Number(b.implied_prob_change_pct || 0));
+    return ib - ia;
+  });
+
+  const winRows = rows.filter(r => String(r.market || '').toLowerCase().includes('win'));
+  const confRows = rows.filter(r => String(r.market || '').toLowerCase().includes('conference'));
+  const range = dateRange(rows);
+
+  const body = rows.map(r => {
+    const imp = r.implied_prob_change_pct;
+    const impNum = Number(imp);
+    const impText = (imp !== '' && imp != null && Number.isFinite(impNum))
+      ? ` <span class="${moveImpactClass(imp)}">${impNum > 0 ? '+' : ''}${impNum}% implied</span>`
+      : '';
+    const prev = r.previous == null ? '' : String(r.previous);
+    const latest = r.latest == null ? '' : String(r.latest);
+
+    return `
+      <div class="market-move-row">
+        <div class="market-move-date">${escapeHtml(moveDate(r))}</div>
+        <div class="market-move-kind">${escapeHtml(String(r.market || ''))}</div>
+        <div class="market-move-team">${typeof linkTeam === 'function' ? linkTeam(r.team) : escapeHtml(String(r.team || ''))}</div>
+        <div class="market-move-book">${escapeHtml(String(r.book || ''))}</div>
+        <div class="market-move-bet">${escapeHtml(String(r.field || ''))}</div>
+        <div class="market-move-change">${escapeHtml(prev)} → ${escapeHtml(latest)}${impText}</div>
+      </div>`;
+  }).join('');
+
+  const movesHtml = `<div class="market-moves-panel active">
+    <div class="market-moves-sticky">
+      <div class="market-moves-head">
+        <div>
+          <div class="market-moves-head-title">Latest Market Moves</div>
+          <div class="market-moves-head-sub">Last 7 days of current movement data${range ? ` · ${escapeHtml(range)}` : ''}</div>
+        </div>
+        <div class="market-moves-pill-row">
+          <span class="market-moves-pill">7-day moves: <b>${rows.length}</b></span>
+          <span class="market-moves-pill">Win totals: <b>${winRows.length}</b></span>
+          <span class="market-moves-pill">Conf futures: <b>${confRows.length}</b></span>
+          <span class="market-moves-pill">Loaded rows: <b>${allRows.length}</b></span>
+        </div>
+      </div>
+      <div class="market-move-header">
+        <button>Date</button>
+        <button>Market</button>
+        <button>Team</button>
+        <button>Book</button>
+        <button>Bet</button>
+        <button>Move</button>
+      </div>
+    </div>
+    ${rows.length ? `<div class="market-moves-list">${body}</div>` : `<div class="market-move-empty">No recent market moves loaded.</div>`}
+  </div>`;
+
+  return `
+    <div class="page-title">Futures Market</div>
+    <div class="page-sub">All-team board comparing projected wins, projected conference wins, and projected conference title probability against imported win-total and conference-futures prices. Movement labels compare first captured price to latest captured price.</div>
+
+    <div class="mobile-actions">
+      <a class="pill" href="#rankings">Rankings</a>
+      <a class="pill" href="#conferences">Conferences</a>
+      <a class="pill" href="#schedule">Schedule</a>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="section-title">Filters</div>
+      <div class="filter-grid market-filter-grid">
+        <label class="market-filter-control"><span>Conference</span><select id="marketBoardConf">
+          <option value="">All conferences</option>
+          ${confs.map(c=>`<option value="${escapeHtml(c)}" ${getMarketBoardFilters().conf===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+        </select></label>
+        <label class="market-filter-control"><span>Search</span><input id="marketBoardSearch" placeholder="Filter team or conference" value="${escapeHtml(localStorage.getItem('ncaaf_market_board_search') || '')}" /></label>
+        <label class="market-filter-control"><span>Market coverage</span><select id="marketBoardDataFilter">
+          <option value="all" ${getMarketBoardFilters().marketFilter==='all'?'selected':''}>All teams</option>
+          <option value="with_market" ${getMarketBoardFilters().marketFilter==='with_market'?'selected':''}>Only teams with market data</option>
+          <option value="without_market" ${getMarketBoardFilters().marketFilter==='without_market'?'selected':''}>Teams missing market data</option>
+        </select></label>
+      </div>
+      <div class="small muted" style="margin-top:10px">Latest market moves show true daily movement dates from the last 7 days.</div>
+    </div>
+
+    <div class="card desktop-rankings market-board-card" style="margin-top:16px">
+      <div class="section-title">All-Team Futures Market Board</div>
+      <div class="market-view-toggle" role="tablist" aria-label="Futures market view">
+        <button type="button" class="win-view" onclick="setMarketBoardView('wins')">Win totals</button>
+        <button type="button" class="title-view" onclick="setMarketBoardView('titles')">Conference title odds</button>
+        <button type="button" class="market-moves-view-btn active" onclick="setMarketBoardView('moves')">Latest market moves</button>
+        <button type="button" class="arb-view" onclick="setMarketBoardView('arbs')">Arbs / Middles</button>
+      </div>
+      ${movesHtml}
+    </div>
+  `;
+}
 function renderMarketBoard() {
   const rows = sortedMarketBoardRows();
   const confs = [...new Set(DB.teams.map(t => t.conference).filter(Boolean))].sort();
   const view = getMarketBoardView();
+  if (view === 'moves') return renderMarketMovesBoard();
   if (view === 'arbs') return renderMarketArbsBoard();
   const isTitles = view === 'titles';
   const tableClass = isTitles ? 'futures-board-table title-only' : 'futures-board-table win-only';
@@ -11420,135 +11550,94 @@ route();
       return `<button type="button" data-market-move-sort="${key}">${label}<span class="market-move-sort-arrow">${arrow}</span></button>`;
     }).join('')}</div>`;
   }
-  function renderMovesPanel(){
-    const moves = sortMovesList(getMoves());
-    const allMoves = getAllMoves();
-    const total = moves.length;
-    const win = moves.filter(m => m.market === 'Win Total').length;
-    const conf = moves.filter(m => m.market === 'Conference Title').length;
-    const rows = moves.length ? moves.map(m => {
-      const imp = m.implied_prob_change_pct;
-      const impNum = Number(imp);
-      const impText = (imp !== '' && imp != null && !Number.isNaN(impNum))
-        ? ` <span class="${impNum >= 0 ? 'imp-pos' : 'imp-neg'}">${impNum >= 0 ? '+' : ''}${impNum}% implied</span>`
-        : '';
-      const bet = m.bet_label || m.field || '';
-      const moveDate = m.snapshot_latest || m.move_date || m.date || '';
-      return `<div class="market-move-row">
-        <div class="market-move-date">${fmtMoveDate(moveDate)}</div>
-        <div class="market-move-kind">${escapeHtmlLocal(m.market || '')}</div>
-        <div>${linkTeamLocal(m.team || '')}</div>
-        <div class="market-move-book">${escapeHtmlLocal(m.book || '')}</div>
-        <div class="market-move-bet">${escapeHtmlLocal(bet)}</div>
-        <div class="market-move-change">${escapeHtmlLocal(m.previous || '')} → ${escapeHtmlLocal(m.latest || '')}${impText}</div>
+  function readMarketMovesRows(){
+  const el = document.getElementById('daily-market-moves-data');
+  if (!el) return [];
+  try { return JSON.parse(el.textContent || '[]'); }
+  catch(e){ return []; }
+}
+
+function marketMoveDisplayDate(row){
+  return row.move_date || row.snapshot_latest || '';
+}
+
+function marketMoveImpactClass(v){
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '';
+  return n > 0 ? 'imp-pos' : n < 0 ? 'imp-neg' : '';
+}
+
+function marketMoveRange(rows){
+  const dates = rows.map(marketMoveDisplayDate).filter(Boolean).sort();
+  if (!dates.length) return '';
+  const first = dates[0];
+  const last = dates[dates.length - 1];
+  return first === last ? first : `${first} to ${last}`;
+}
+
+function sortMarketMoveRows(rows){
+  return [...rows].sort((a,b) => {
+    const da = String(marketMoveDisplayDate(a));
+    const db = String(marketMoveDisplayDate(b));
+    if (da !== db) return db.localeCompare(da);
+    const ia = Math.abs(Number(a.implied_prob_change_pct || 0));
+    const ib = Math.abs(Number(b.implied_prob_change_pct || 0));
+    return ib - ia;
+  });
+}
+
+function renderMovesPanel(){
+  const allRows = readMarketMovesRows();
+  const rows = sortMarketMoveRows(allRows);
+  const winRows = rows.filter(r => String(r.market || '').toLowerCase().includes('win'));
+  const confRows = rows.filter(r => String(r.market || '').toLowerCase().includes('conference'));
+  const range = marketMoveRange(rows);
+
+  const body = rows.map(r => {
+    const imp = r.implied_prob_change_pct;
+    const impNum = Number(imp);
+    const impText = (imp !== '' && imp != null && Number.isFinite(impNum))
+      ? ` <span class="${marketMoveImpactClass(imp)}">${impNum > 0 ? '+' : ''}${impNum}% implied</span>`
+      : '';
+    const prev = r.previous == null ? '' : String(r.previous);
+    const latest = r.latest == null ? '' : String(r.latest);
+    return `
+      <div class="market-move-row">
+        <div class="market-move-date">${escapeHtml(marketMoveDisplayDate(r))}</div>
+        <div class="market-move-kind">${escapeHtml(String(r.market || ''))}</div>
+        <div class="market-move-team">${typeof linkTeam === 'function' ? linkTeam(r.team) : escapeHtml(String(r.team || ''))}</div>
+        <div class="market-move-book">${escapeHtml(String(r.book || ''))}</div>
+        <div class="market-move-bet">${escapeHtml(String(r.field || ''))}</div>
+        <div class="market-move-change">${escapeHtml(prev)} → ${escapeHtml(latest)}${impText}</div>
       </div>`;
-    }).join('') : '<div class="market-move-empty">No moves found between the latest pull and previous pull.</div>';
-    return `<div class="market-moves-panel" id="marketMovesPanel">
-      <div class="market-moves-sticky">
-        <div class="market-moves-head">
-          <div>
-            <div class="market-moves-head-title">Latest Market Moves</div>
-            <div class="market-moves-head-sub">${escapeHtmlLocal(pullLabel(moves))}</div>
-          </div>
-          <div class="market-moves-pill-row">
-            <span class="market-moves-pill">7-day moves: <b>${total}</b></span>
-            <span class="market-moves-pill">Win totals: <b>${win}</b></span>
-            <span class="market-moves-pill">Conf futures: <b>${conf}</b></span>
-            <span class="market-moves-pill">Loaded rows: <b>${allMoves.length}</b></span>
-          </div>
+  }).join('');
+
+  return `<div class="market-moves-panel active">
+    <div class="market-moves-sticky">
+      <div class="market-moves-head">
+        <div>
+          <div class="market-moves-head-title">Latest Market Moves</div>
+          <div class="market-moves-head-sub">Last 7 days of current movement data${range ? ` · ${escapeHtml(range)}` : ''}</div>
         </div>
-        ${marketMoveHeader()}
+        <div class="market-moves-pill-row">
+          <span class="market-moves-pill">7-day moves: <b>${rows.length}</b></span>
+          <span class="market-moves-pill">Win totals: <b>${winRows.length}</b></span>
+          <span class="market-moves-pill">Conf futures: <b>${confRows.length}</b></span>
+          <span class="market-moves-pill">Loaded rows: <b>${allRows.length}</b></span>
+        </div>
       </div>
-      <div class="market-moves-list">${rows}</div>
-    </div>`;
-  }
-  function bindMoveSortHandlers(){
-    const panel = document.getElementById('marketMovesPanel');
-    if (!panel || panel.__moveSortBound) return;
-    panel.__moveSortBound = true;
-    panel.addEventListener('click', function(e){
-      const btn = e.target && e.target.closest ? e.target.closest('[data-market-move-sort]') : null;
-      if (!btn) return;
-      setCurrentMovesSort(btn.getAttribute('data-market-move-sort'));
-      const wasActive = panel.classList.contains('active');
-      panel.outerHTML = renderMovesPanel();
-      bindMoveSortHandlers();
-      if (wasActive) {
-        const next = document.getElementById('marketMovesPanel');
-        if (next) next.classList.add('active');
-      }
-    });
-  }
-  function hideOldTopCard(){
-    // If the prior installer placed a big Latest Market Moves card above the board, hide it.
-    const all = Array.from(document.querySelectorAll('.card, .market-moves-panel, div'));
-    for (const el of all) {
-      if (el.id === 'marketMovesPanel') continue;
-      const title = (el.querySelector && el.querySelector('.section-title, .page-title, .market-moves-head-title'));
-      const txt = title ? (title.textContent || '').trim().toLowerCase() : '';
-      if (txt === 'latest market moves') {
-        const board = el.closest('.market-board-card');
-        if (!board) el.style.display = 'none';
-      }
-    }
-  }
-  function setMovesView(on){
-    const panel = document.getElementById('marketMovesPanel');
-    const board = document.querySelector('.market-board-card');
-    const btn = document.getElementById('marketMovesViewBtn');
-    const table = board && board.querySelector('.market-table-scroll');
-    const audits = board && board.querySelectorAll('.market-data-audit');
-    if (panel) panel.classList.toggle('active', !!on);
-    if (table) table.style.display = on ? 'none' : '';
-    if (audits) audits.forEach(a => a.style.display = on ? 'none' : '');
-    if (btn) btn.classList.toggle('active', !!on);
-    document.querySelectorAll('.market-view-toggle button:not(#marketMovesViewBtn)').forEach(b => b.classList.toggle('active', !on && b.classList.contains(localStorage.getItem('ncaaf_market_board_view') === 'titles' ? 'title-view' : 'win-view')));
-  }
-  function install(){
-    const board = document.querySelector('.market-board-card');
-    if (!board) return;
-    hideOldTopCard();
-    const toggle = board.querySelector('.market-view-toggle');
-    if (!toggle) return;
-    // Legacy market-moves button injector disabled.
-    // The main Futures Market view now handles wins/titles/moves/arbs directly.
-    return;
-    let btn = document.getElementById('marketMovesViewBtn');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.type = 'button';
-      btn.id = 'marketMovesViewBtn';
-      btn.className = 'market-moves-view-btn';
-      btn.textContent = 'Latest market moves';
-      btn.addEventListener('click', function(){
-        localStorage.setItem('ncaaf_market_board_subview','moves');
-        setMovesView(true);
-      });
-      toggle.appendChild(btn);
-    }
-    if (!document.getElementById('marketMovesPanel')) {
-      toggle.insertAdjacentHTML('afterend', renderMovesPanel());
-    }
-    bindMoveSortHandlers();
-    toggle.querySelectorAll('button:not(#marketMovesViewBtn)').forEach(b => {
-      b.addEventListener('click', function(){
-        localStorage.setItem('ncaaf_market_board_subview','table');
-        setTimeout(()=>setMovesView(false),0);
-      });
-    });
-    setMovesView(localStorage.getItem('ncaaf_market_board_subview') === 'moves');
-  }
-  const oldMount = window.mountMarketBoardControls;
-  if (typeof oldMount === 'function' && !oldMount.__movesPatched) {
-    window.mountMarketBoardControls = function(){
-      oldMount.apply(this, arguments);
-      setTimeout(install, 0);
-    };
-    window.mountMarketBoardControls.__movesPatched = true;
-  }
-  setTimeout(install, 0);
-  setTimeout(install, 300);
-})();
+      <div class="market-move-header">
+        <button>Date</button>
+        <button>Market</button>
+        <button>Team</button>
+        <button>Book</button>
+        <button>Bet</button>
+        <button>Move</button>
+      </div>
+    </div>
+    ${rows.length ? `<div class="market-moves-list">${body}</div>` : `<div class="market-move-empty">No recent market moves loaded.</div>`}
+  </div>`;
+}
 </script>
 
 
