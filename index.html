@@ -5337,6 +5337,10 @@ function defaultPrice(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : -110;
 }
+function priceStatusText(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n !== 0 ? fmtAmerican(n) : '-110 assumed';
+}
 function atsEdgeValue(g) {
   const ms = marketSpread(g);
   if (ms == null || ms === '' || Number.isNaN(Number(ms))) return null;
@@ -5383,16 +5387,27 @@ function marketLabAtsMetrics(g) {
   const edge = atsEdgeValue(g);
   if (edge == null) return {side:'—', ev:'—', score:'—'};
   const prob = atsModelProb(edge);
-  const price = defaultPrice(marketSpreadPrice(g));
+  const rawPrice = marketSpreadPrice(g);
+  const price = defaultPrice(rawPrice);
   const evPct = evFromProbAndOdds(prob, price) * 100;
-  return {side: fmtAtsValueSide(g, edge), ev: fmtEvPct(evPct), score: fmtBetScore(betScore(edge, evPct, g.market_books_count))};
+  return {
+    side: `${fmtAtsValueSide(g, edge)}<div class="small muted">${priceStatusText(rawPrice)}</div>`,
+    ev: fmtEvPct(evPct),
+    score: fmtBetScore(betScore(edge, evPct, g.market_books_count))
+  };
 }
 function marketLabTotalMetrics(g) {
   const edge = totalEdgeValue(g);
   if (edge == null) return {side:'—', ev:'—', score:'—'};
   const prob = totalModelProb(edge);
-  const evPct = evFromProbAndOdds(prob, -110) * 100;
-  return {side: fmtTotalValueSide(edge), ev: fmtEvPct(evPct), score: fmtBetScore(betScore(edge, evPct, g.market_books_count))};
+  const rawPrice = edge >= 0 ? marketOverPrice(g) : marketUnderPrice(g);
+  const price = defaultPrice(rawPrice);
+  const evPct = evFromProbAndOdds(prob, price) * 100;
+  return {
+    side: `${fmtTotalValueSide(edge)}<div class="small muted">${priceStatusText(rawPrice)}</div>`,
+    ev: fmtEvPct(evPct),
+    score: fmtBetScore(betScore(edge, evPct, g.market_books_count))
+  };
 }
 function setScheduleViewMode(mode) {
   scheduleViewMode = mode;
