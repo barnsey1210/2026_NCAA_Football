@@ -6619,7 +6619,7 @@ function marketSpreadHoldBadge(g) {
   if (v < 0) cls = 'market-hold-arb';
   else if (v <= 2) cls = 'market-hold-low';
   else if (v >= 5) cls = 'market-hold-high';
-  return `<div class="market-hold-badge ${cls}" title="Best available spread hold adjusted for spread gaps">${label}</div>`;
+  return `<div class="market-hold-badge ${cls}" title="Synthetic hold using the two best available spread sides. Lower is better for the bettor. Negative hold means bettor edge / arbitrage condition.">${label}</div>`;
 }
 
 function fmtMarketSideLine(team, lineForTeam, price, book) {
