@@ -5293,6 +5293,14 @@ table thead th:first-child{
   color: #e5e7eb;
 }
 
+
+
+.coach-half-edge-cell { line-height:1.25; min-width:150px; }
+.coach-halves-front-card { margin-bottom:14px; border-color:rgba(66,245,139,.28); }
+.coach-half-best { font-size:18px; font-weight:800; margin-bottom:10px; }
+.coach-half-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width: 800px) { .coach-half-grid { grid-template-columns:1fr; } }
+
 </style>
 
 <style>
@@ -6398,7 +6406,7 @@ td .spread-setup-compact .team-logo{
 <div class="app">
 <aside class="sidebar">
 <div class="brand">2026 NCAA<br/>Football</div>
-<div id="last-updated-sub" class="last-updated-sub">Last updated<br><strong>2026-06-06 10:16 PM ET</strong></div>
+<div id="last-updated-sub" class="last-updated-sub">Last updated<br><strong>2026-06-06 11:11 PM ET</strong></div>
 <div class="search-row">
 <input id="teamSearch" list="teamList" placeholder="Search team"/>
 <datalist id="teamList"></datalist>
@@ -6729,6 +6737,144 @@ function fmtMarketSideLine(team, lineForTeam, price, book) {
   if (!team || !lineTxt) return '';
   return `<div class="market-side-line">${teamLogo}<b>${escapeHtml(String(team))} ${lineTxt}</b>${priceTxt ? ` <span class="muted">${priceTxt}</span>` : ''}${bookBadge}</div>`;
 }
+
+
+/* COACH_HALVES_FRONT_EDGE_START */
+function coachHalfRowForTeam(team, half) {
+  const key = half === '2h' ? 'coach_2h_betting' : 'coach_1h_betting';
+  const rows = (DB && DB[key]) || [];
+  const target = typeof normName === 'function' ? normName(team) : String(team || '').toLowerCase().trim();
+  return rows.find(r => {
+    const vals = [r.team, r.current_team, r.Team, r["Current Team"]];
+    return vals.some(v => {
+      const n = typeof normName === 'function' ? normName(v) : String(v || '').toLowerCase().trim();
+      return n && n === target;
+    });
+  }) || null;
+}
+
+function coachHalfNum(row, keys) {
+  if (!row) return null;
+  for (const k of keys) {
+    const n = Number(row[k]);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+function coachHalfRecord(row) {
+  if (!row) return 'No data';
+  if (row.ats_record) return row.ats_record;
+  const w = coachHalfNum(row, ['ats_w']);
+  const l = coachHalfNum(row, ['ats_l']);
+  const p = coachHalfNum(row, ['ats_push']);
+  if (w == null || l == null) return 'No data';
+  return `${w}-${l}-${p || 0}`;
+}
+
+function coachHalfPct(row) {
+  const pct = coachHalfNum(row, ['ats_pct','ats_win_pct','ats_win']);
+  return pct == null ? '—' : `${(pct * 100).toFixed(1)}%`;
+}
+
+function coachHalfMargin(row) {
+  return coachHalfNum(row, ['ats_margin','ats_plus_minus','avg_ats','avg_cover_margin','cover_margin']);
+}
+
+function coachHalfRank(row) {
+  return coachHalfNum(row, ['ats_rank']);
+}
+
+function coachHalfScore(row) {
+  if (!row) return null;
+  const margin = coachHalfMargin(row);
+  const pct = coachHalfNum(row, ['ats_pct','ats_win_pct','ats_win']);
+  const games = coachHalfNum(row, ['ats_games','games']) || 0;
+  const rank = coachHalfRank(row);
+
+  let score = 0;
+  if (margin != null) score += margin;
+  if (pct != null) score += (pct - 0.5) * 20;
+  score += Math.min(3, games / 10);
+  if (rank != null) score += Math.max(0, (70 - rank) / 20);
+  return score;
+}
+
+function coachHalfEdgeForGame(g, half) {
+  const away = coachHalfRowForTeam(g.away_team, half);
+  const home = coachHalfRowForTeam(g.home_team, half);
+  const awayScore = coachHalfScore(away);
+  const homeScore = coachHalfScore(home);
+
+  // Do not manufacture an edge when either side is missing data.
+  if (awayScore == null || homeScore == null) {
+    return {half, away, home, edgeTeam:null, diff:null, signedDiff:null, noData:true};
+  }
+
+  const diff = homeScore - awayScore;
+  const edgeTeam = diff >= 0 ? g.home_team : g.away_team;
+  return {half, away, home, edgeTeam, diff:Math.abs(diff), signedDiff:diff, noData:false};
+}
+
+function coachHalfEdgeSummary(g) {
+  const h1 = coachHalfEdgeForGame(g, '1h');
+  const h2 = coachHalfEdgeForGame(g, '2h');
+  const candidates = [h1, h2].filter(x => x.edgeTeam && Number.isFinite(x.diff));
+  if (!candidates.length) return {best:null, h1, h2};
+  candidates.sort((a,b) => b.diff - a.diff);
+  return {best:candidates[0], h1, h2};
+}
+
+function coachHalfMiniLine(label, row) {
+  if (!row) return `${label}: No data`;
+  const margin = coachHalfMargin(row);
+  const rank = coachHalfRank(row);
+  const rankTxt = rank != null ? ` #${rank}` : '';
+  const marginTxt = margin == null ? '—' : `${margin >= 0 ? '+' : ''}${margin.toFixed(1)}`;
+  return `${label}: ${coachHalfRecord(row)}${rankTxt} · ${coachHalfPct(row)} · ${marginTxt}`;
+}
+
+function fmtCoachHalfEdgeCell(g) {
+  const s = coachHalfEdgeSummary(g);
+  if (!s.best || !Number.isFinite(s.best.diff)) return '<span class="muted">No edge</span>';
+
+  const bestLabel = s.best.half === '1h' ? '1H' : '2H';
+  const edgeCls = s.best.diff >= 3 ? 'edge-pos' : s.best.diff >= 1.5 ? 'chip-warn' : 'muted';
+  const diffTxt = s.best.diff >= 1 ? ` +${s.best.diff.toFixed(1)}` : '';
+
+  return `<span class="coach-half-edge-cell ${edgeCls}"><b>${bestLabel}: ${escapeHtml(s.best.edgeTeam)}</b>${diffTxt}</span>`;
+}
+
+function matchupCoachHalvesCard(g) {
+  const s = coachHalfEdgeSummary(g);
+  const away1 = coachHalfRowForTeam(g.away_team, '1h');
+  const home1 = coachHalfRowForTeam(g.home_team, '1h');
+  const away2 = coachHalfRowForTeam(g.away_team, '2h');
+  const home2 = coachHalfRowForTeam(g.home_team, '2h');
+
+  const best = s.best
+    ? `<span class="edge-pos">${s.best.half === '1h' ? '1H' : '2H'}: ${escapeHtml(s.best.edgeTeam)} +${s.best.diff.toFixed(1)}</span>`
+    : '<span class="muted">No clear coach-half edge</span>';
+
+  return `<div class="card coach-halves-front-card">
+    <div class="section-title">Coach Halves Betting Edge</div>
+    <div class="small" style="margin-bottom:10px">Current 2026 coach history from refreshed SGO 1H/2H ATS records through 2026-01-20.</div>
+    <div class="coach-half-best">Best coach-half lean: ${best}</div>
+    <div class="coach-half-grid">
+      <div>
+        <div class="kpi">1st Half</div>
+        <div class="small"><b>${escapeHtml(g.away_team)}</b> — ${escapeHtml(coachHalfMiniLine('', away1).replace(/^: /,''))}</div>
+        <div class="small"><b>${escapeHtml(g.home_team)}</b> — ${escapeHtml(coachHalfMiniLine('', home1).replace(/^: /,''))}</div>
+      </div>
+      <div>
+        <div class="kpi">2nd Half</div>
+        <div class="small"><b>${escapeHtml(g.away_team)}</b> — ${escapeHtml(coachHalfMiniLine('', away2).replace(/^: /,''))}</div>
+        <div class="small"><b>${escapeHtml(g.home_team)}</b> — ${escapeHtml(coachHalfMiniLine('', home2).replace(/^: /,''))}</div>
+      </div>
+    </div>
+  </div>`;
+}
+/* COACH_HALVES_FRONT_EDGE_END */
 
 function fmtMarketSpreadCompactCell(g) {
   const homeLine = firstPresent(g.market_best_home_spread_home, g.market_spread_home);
@@ -11485,7 +11631,7 @@ function scheduleTable(games, mode='simple') {
         : [
             scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
             scheduleTh('market_spread','Market Spread'), scheduleTh('spread_edge','ATS Edge'),
-            scheduleTh('ats_ev','ATS EV%'), scheduleTh('ats_betscore','BetScore'), '<th>Matchup</th>'
+            '<th>Coach Half Edge</th>', scheduleTh('ats_ev','ATS EV%'), scheduleTh('ats_betscore','BetScore'), '<th>Matchup</th>'
           ].join(''))
       : view === 'results'
       ? [
@@ -11498,7 +11644,7 @@ function scheduleTable(games, mode='simple') {
           scheduleTh('conf','Conf'), scheduleTh('neutral','Neutral'), scheduleSpreadTh('proj_spread','Spread'),
           scheduleTh('proj_total','Total'), scheduleTh('home_win','Home Win %'), scheduleTh('status','Status'), '<th>Matchup</th>'
         ].join('');
-  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'totals' ? 10 : 9) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
+  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'totals' ? 10 : 10) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
   const tableClass = view === 'marketlab' ? `schedule-table schedule-view-marketlab schedule-marketlab-${scheduleMarketLabMode}` : `schedule-table schedule-view-${view}`;
   return `<div class="card schedule-card"><div class="schedule-scroll"><table class="${tableClass}"><thead><tr>${header}</tr></thead><tbody>
   ${sortedGames.map(g => {
@@ -11527,7 +11673,7 @@ function scheduleTable(games, mode='simple') {
         }
         return `<tr>
           <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${marketLabTeamCellWithProj(g, g.away_team)}</td><td>${marketLabTeamCellWithProj(g, g.home_team)}</td>
-          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${ats.side}</td><td>${ats.ev}</td><td>${ats.score}</td>
+          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${ats.side}</td><td>${fmtCoachHalfEdgeCell(g)}</td><td>${ats.ev}</td><td>${ats.score}</td>
           <td>${matchupButton(g)}</td>
         </tr>${matchupScheduleDetailRow(g, colSpan)}`;
       }
