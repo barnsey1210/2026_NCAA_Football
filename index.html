@@ -5301,6 +5301,34 @@ table thead th:first-child{
 .coach-half-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 @media (max-width: 800px) { .coach-half-grid { grid-template-columns:1fr; } }
 
+
+.ats-edge-with-coach { line-height:1.25; }
+.ats-coach-half-support { margin-top:4px; font-size:12px; color:var(--muted); font-weight:750; }
+.ats-coach-half-support .coach-half-edge-cell { font-size:12px; }
+
+
+.total-edge-with-coach { line-height:1.25; }
+.total-coach-support { margin-top:4px; font-size:12px; font-weight:750; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:360px; }
+
+
+.coach-grade-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  padding:0 6px;
+  margin-left:4px;
+  font-size:11px;
+  font-weight:950;
+  line-height:1;
+}
+.coach-grade-badge.edge-pos { border-color:rgba(74,222,128,.4); background:rgba(74,222,128,.10); }
+.coach-grade-badge.chip-warn { border-color:rgba(251,191,36,.45); background:rgba(251,191,36,.10); }
+.coach-grade-badge.edge-neg { border-color:rgba(248,113,113,.45); background:rgba(248,113,113,.10); }
+
 </style>
 
 <style>
@@ -6406,7 +6434,7 @@ td .spread-setup-compact .team-logo{
 <div class="app">
 <aside class="sidebar">
 <div class="brand">2026 NCAA<br/>Football</div>
-<div id="last-updated-sub" class="last-updated-sub">Last updated<br><strong>2026-06-06 11:11 PM ET</strong></div>
+<div id="last-updated-sub" class="last-updated-sub">Last updated<br><strong>2026-06-07 12:52 AM ET</strong></div>
 <div class="search-row">
 <input id="teamSearch" list="teamList" placeholder="Search team"/>
 <datalist id="teamList"></datalist>
@@ -6834,15 +6862,69 @@ function coachHalfMiniLine(label, row) {
   return `${label}: ${coachHalfRecord(row)}${rankTxt} · ${coachHalfPct(row)} · ${marginTxt}`;
 }
 
+
+/* COACH_GRADE_DISPLAY_HELPERS_START */
+function coachDisplayGrade(score, games, kind='ats') {
+  const s = Number(score);
+  const g = Number(games);
+  if (!Number.isFinite(s) || !Number.isFinite(g) || g < 8) {
+    return {grade:'—', cls:'muted', label:'No grade'};
+  }
+
+  let grade = 'C';
+  if (g >= 20 && s >= 6) grade = 'A';
+  else if (s >= 2.5) grade = 'B';
+  else if (s <= -3) grade = 'D';
+
+  const cls = grade === 'A' ? 'edge-pos'
+    : grade === 'B' ? 'chip-warn'
+    : grade === 'D' ? 'edge-neg'
+    : 'muted';
+
+  const sample = g >= 25 ? 'Strong sample' : g >= 15 ? 'Medium sample' : 'Thin sample';
+  return {grade, cls, label:sample};
+}
+
+function coachGradeBadge(gradeObj) {
+  if (!gradeObj || !gradeObj.grade || gradeObj.grade === '—') {
+    return `<span class="coach-grade-badge muted" title="No grade">—</span>`;
+  }
+  return `<span class="coach-grade-badge ${gradeObj.cls}" title="${escapeHtml(gradeObj.label || '')}">${gradeObj.grade}</span>`;
+}
+
+function coachRowForEdgeTeam(g, half, team) {
+  const row = coachHalfRowForTeam(team, half);
+  return row || null;
+}
+
+function coachShortTeamName(team) {
+  return String(team || '')
+    .replace('State', 'St')
+    .replace('University', '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+/* COACH_GRADE_DISPLAY_HELPERS_END */
+
+
 function fmtCoachHalfEdgeCell(g) {
   const s = coachHalfEdgeSummary(g);
-  if (!s.best || !Number.isFinite(s.best.diff)) return '<span class="muted">No edge</span>';
+  if (!s.best || !Number.isFinite(s.best.diff)) return '<span class="muted">—</span>';
 
   const bestLabel = s.best.half === '1h' ? '1H' : '2H';
-  const edgeCls = s.best.diff >= 3 ? 'edge-pos' : s.best.diff >= 1.5 ? 'chip-warn' : 'muted';
-  const diffTxt = s.best.diff >= 1 ? ` +${s.best.diff.toFixed(1)}` : '';
+  const team = String(s.best.edgeTeam || '');
+  const shortTeam = coachShortTeamName(team);
+  const row = coachRowForEdgeTeam(g, s.best.half, team);
+  const games = coachHalfNum(row, ['ats_games','games']) || 0;
+  const score = coachHalfScore(row);
+  const gradeObj = coachDisplayGrade(score, games, 'ats');
 
-  return `<span class="coach-half-edge-cell ${edgeCls}"><b>${bestLabel}: ${escapeHtml(s.best.edgeTeam)}</b>${diffTxt}</span>`;
+  const sampleTxt = typeof coachSampleLabel === 'function' ? coachSampleLabel(games) : `${games} games`;
+  const title = row
+    ? `${bestLabel} ${team}: ${coachHalfRecord(row)} ATS · ${coachHalfPct(row)} · ${sampleTxt}`
+    : `${bestLabel} ${team}: no coach ATS data`;
+
+  return `<span class="coach-half-edge-cell ${gradeObj.cls}" title="${escapeHtml(title)}">${bestLabel} ${escapeHtml(shortTeam)} ${coachGradeBadge(gradeObj)}</span>`;
 }
 
 function matchupCoachHalvesCard(g) {
@@ -7102,7 +7184,16 @@ function fmtTotalValueSide(edge) {
     return book ? ` · ${escapeHtml(String(book))}` : '';
   }
 
-  function marketLabAtsMetrics(g) {
+  function fmtAtsSideWithCoachHalf(g, atsSideHtml) {
+  const coach = fmtCoachHalfEdgeCell(g);
+  if (!coach || coach.includes('muted') || coach.includes('—')) return atsSideHtml;
+  return `<div class="ats-edge-with-coach">
+    <div>${atsSideHtml}</div>
+    <div class="ats-coach-half-support">Coach: ${coach}</div>
+  </div>`;
+}
+
+function marketLabAtsMetrics(g) {
   const m = bestAtsMarket(g);
   const edge = m.edge;
   if (edge == null) return {side:'—', ev:'—', score:'—'};
@@ -7120,6 +7211,103 @@ function fmtTotalValueSide(edge) {
     score: fmtBetScore(betScore(edge, evPct, g.market_books_count))
   };
 }
+
+
+/* COACH_TOTALS_INLINE_SUPPORT_START */
+function coachHalfTotalRecord(row) {
+  if (!row) return 'No data';
+  if (row.ou_record) return row.ou_record;
+  if (row.over_under_record) return row.over_under_record;
+  const o = coachHalfNum(row, ['overs']);
+  const u = coachHalfNum(row, ['unders']);
+  const p = coachHalfNum(row, ['total_push']);
+  if (o == null || u == null) return 'No data';
+  return `${o}-${u}-${p || 0}`;
+}
+
+function coachHalfTotalMargin(row) {
+  return coachHalfNum(row, ['total_margin','avg_total_margin','avg_total']);
+}
+
+function coachHalfOverPct(row) {
+  return coachHalfNum(row, ['over_pct','over']);
+}
+
+function coachHalfTotalScore(row, side) {
+  if (!row) return null;
+  const overPct = coachHalfOverPct(row);
+  const margin = coachHalfTotalMargin(row);
+  const games = coachHalfNum(row, ['over_games','games']) || 0;
+  if (overPct == null && margin == null) return null;
+
+  let score = 0;
+  if (margin != null) score += side === 'Over' ? margin : -margin;
+  if (overPct != null) score += side === 'Over' ? (overPct - 0.5) * 20 : (0.5 - overPct) * 20;
+  score += Math.min(3, games / 10);
+  return score;
+}
+
+function coachTotalSupportForGame(g, totalSide) {
+  const rows = [
+    {half:'1H', team:g.away_team, row:coachHalfRowForTeam(g.away_team, '1h')},
+    {half:'1H', team:g.home_team, row:coachHalfRowForTeam(g.home_team, '1h')},
+    {half:'2H', team:g.away_team, row:coachHalfRowForTeam(g.away_team, '2h')},
+    {half:'2H', team:g.home_team, row:coachHalfRowForTeam(g.home_team, '2h')},
+  ];
+
+  const scored = rows.map(x => ({...x, score:coachHalfTotalScore(x.row, totalSide)}))
+    .filter(x => Number.isFinite(x.score));
+
+  if (!scored.length) return null;
+  scored.sort((a,b) => b.score - a.score);
+  return scored[0];
+}
+
+function fmtCoachTotalSupportCell(g, totalSide) {
+  const best = coachTotalSupportForGame(g, totalSide);
+  if (!best) return '';
+
+  const games = coachHalfNum(best.row, ['over_games','games']) || 0;
+  const gradeObj = coachDisplayGrade(best.score, games, 'total');
+  const shortTeam = coachShortTeamName(best.team);
+
+  const rec = coachHalfTotalRecord(best.row);
+  const overPct = coachHalfOverPct(best.row);
+  const margin = coachHalfTotalMargin(best.row);
+  const overPctTxt = overPct == null ? '—' : `${(overPct * 100).toFixed(1)}% Over`;
+  const marginTxt = margin == null ? '—' : `${margin >= 0 ? '+' : ''}${margin.toFixed(1)}`;
+
+  const title = `Coach half total trend: ${best.half} ${totalSide} ${best.team} · ${rec} · ${overPctTxt} · Total +/- ${marginTxt}`;
+
+  return `<div class="total-coach-support ${gradeObj.cls}" title="${escapeHtml(title)}">
+    Coach O/U: ${best.half} ${escapeHtml(totalSide)} ${escapeHtml(shortTeam)} ${coachGradeBadge(gradeObj)}
+  </div>`;
+}
+
+function fmtTotalSideWithCoachHalf(g, totalSideHtml) {
+  let side = null;
+  try {
+    const m = bestTotalMarket(g);
+    side = m && m.side ? m.side : null;
+  } catch(e) {}
+
+  if (!side) {
+    const edge = totalEdgeValue(g);
+    if (edge != null && Number.isFinite(Number(edge))) side = Number(edge) >= 0 ? 'Over' : 'Under';
+  }
+
+  if (!side) return totalSideHtml;
+
+  const coach = fmtCoachTotalSupportCell(g, side);
+  if (!coach) return totalSideHtml;
+
+  return `<div class="total-edge-with-coach">
+    <div>${totalSideHtml}</div>
+    ${coach}
+  </div>`;
+}
+/* COACH_TOTALS_INLINE_SUPPORT_END */
+
 
 function marketLabTotalMetrics(g) {
   const m = bestTotalMarket(g);
@@ -11631,7 +11819,7 @@ function scheduleTable(games, mode='simple') {
         : [
             scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
             scheduleTh('market_spread','Market Spread'), scheduleTh('spread_edge','ATS Edge'),
-            '<th>Coach Half Edge</th>', scheduleTh('ats_ev','ATS EV%'), scheduleTh('ats_betscore','BetScore'), '<th>Matchup</th>'
+            scheduleTh('ats_ev','ATS EV%'), scheduleTh('ats_betscore','BetScore'), '<th>Matchup</th>'
           ].join(''))
       : view === 'results'
       ? [
@@ -11644,7 +11832,7 @@ function scheduleTable(games, mode='simple') {
           scheduleTh('conf','Conf'), scheduleTh('neutral','Neutral'), scheduleSpreadTh('proj_spread','Spread'),
           scheduleTh('proj_total','Total'), scheduleTh('home_win','Home Win %'), scheduleTh('status','Status'), '<th>Matchup</th>'
         ].join('');
-  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'totals' ? 10 : 10) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
+  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'totals' ? 10 : 9) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
   const tableClass = view === 'marketlab' ? `schedule-table schedule-view-marketlab schedule-marketlab-${scheduleMarketLabMode}` : `schedule-table schedule-view-${view}`;
   return `<div class="card schedule-card"><div class="schedule-scroll"><table class="${tableClass}"><thead><tr>${header}</tr></thead><tbody>
   ${sortedGames.map(g => {
@@ -11667,13 +11855,13 @@ function scheduleTable(games, mode='simple') {
         if (scheduleMarketLabMode === 'totals') {
           return `<tr>
             <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${linkTeamWithComboRank(g.away_team)}</td><td>${linkTeamWithComboRank(g.home_team)}</td>
-            <td>${fmtProjectedTotalSafe(g.projected_total)}</td><td>${fmtMarketTotalTwoSideCell(g)}</td><td>${tot.side}</td><td>${tot.ev}</td><td>${tot.score}</td>
+            <td>${fmtProjectedTotalSafe(g.projected_total)}</td><td>${fmtMarketTotalTwoSideCell(g)}</td><td>${fmtTotalSideWithCoachHalf(g, tot.side)}</td><td>${tot.ev}</td><td>${tot.score}</td>
             <td>${matchupButton(g)}</td>
           </tr>${matchupScheduleDetailRow(g, colSpan)}`;
         }
         return `<tr>
           <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${marketLabTeamCellWithProj(g, g.away_team)}</td><td>${marketLabTeamCellWithProj(g, g.home_team)}</td>
-          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${ats.side}</td><td>${fmtCoachHalfEdgeCell(g)}</td><td>${ats.ev}</td><td>${ats.score}</td>
+          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${fmtAtsSideWithCoachHalf(g, ats.side)}</td><td>${ats.ev}</td><td>${ats.score}</td>
           <td>${matchupButton(g)}</td>
         </tr>${matchupScheduleDetailRow(g, colSpan)}`;
       }
