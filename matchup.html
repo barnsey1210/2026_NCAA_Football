@@ -97,7 +97,7 @@ a{color:inherit}
 .score-banner{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:9px 15px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-weight:1000;font-size:16px}
 .point-label{font-size:10px;fill:#dbeafe;font-weight:1000;text-shadow:0 1px 2px rgba(0,0,0,.75)}
 .point-label.model{fill:#bbf7d0}
-.game-hero{padding:16px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.game-hero{padding:16px 16px 14px;text-align:center;display:flex;flex-direction:column;justify-content:flex-start;gap:8px}
 .kicker{font-size:12px;color:#93c5fd;letter-spacing:.16em;text-transform:uppercase;font-weight:950}
 .match-title{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
 .vs{font-weight:950;color:#94a3b8;font-size:16px}
@@ -142,6 +142,23 @@ tr:nth-child(even) td{background:rgba(148,163,184,.035)}
 .market-lines{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .market-line{padding:9px;border:1px solid rgba(148,163,184,.14);border-radius:12px;background:rgba(2,6,23,.30)}
 .market-line b{display:block;margin-bottom:4px}
+
+.edge-snapshot{margin-top:8px;border:1px solid rgba(148,163,184,.22);background:rgba(2,6,23,.28);border-radius:15px;overflow:hidden;text-align:center}
+.snapshot-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:rgba(30,41,59,.55);border-bottom:1px solid rgba(148,163,184,.18)}
+.snapshot-title .title{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:1000;color:#dbeafe}
+.snapshot-title .summary{font-size:11px;color:#aab4c6;font-weight:900}
+.edge-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.edge-table th{padding:7px 6px;color:#aab4c6;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid rgba(148,163,184,.16)}
+.edge-table td{padding:5px 6px;border-bottom:1px solid rgba(148,163,184,.11);vertical-align:middle;text-align:center}
+.edge-table tr:last-child td{border-bottom:0}
+.edge-table .cat{font-weight:1000;color:#e5e7eb;line-height:1.05}
+.edge-table .subcat{display:block;color:#94a3b8;font-size:8px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+.snap-edge{display:inline-flex;align-items:center;justify-content:center;min-height:22px;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:1000;white-space:nowrap;border:1px solid rgba(148,163,184,.22);background:rgba(148,163,184,.10);color:#aeb8c8}
+.snap-edge.win{background:rgba(34,197,94,.17);border-color:rgba(34,197,94,.42);color:#bbf7d0}
+.snap-edge.total{background:rgba(234,179,8,.15);border-color:rgba(234,179,8,.42);color:#fef3c7}
+.snap-edge.bad{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.36);color:#fecaca}
+.snapshot-note{font-size:10px;color:#94a3b8;margin-top:6px;line-height:1.25}
+
 .game-tags{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .game-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(96,165,250,.25);background:rgba(96,165,250,.10);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000;color:#dbeafe}
 .game-tag.good{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.32);color:#bbf7d0}
@@ -287,6 +304,65 @@ function totalEdge(g){const p=Number(g.projected_total), m=Number(g.market_total
 function moveText(g){const cur=Number(g.market_spread_home), open=Number(g.market_spread_open_home); if(!Number.isFinite(cur)||!Number.isFinite(open)) return {main:'No opener',note:'Opening line unavailable'}; const mv=cur-open; if(Math.abs(mv)<0.25) return {main:'Flat',note:'No meaningful spread move'}; return mv<0?{main:`Toward ${g.home_team}`,note:`Home spread moved ${signed(mv,1)} pts`}:{main:`Toward ${g.away_team}`,note:`Home spread moved ${signed(mv,1)} pts`};}
 function coachEdge(g){const a=coachRow(g.away_team), h=coachRow(g.home_team); const am=Number(a.avg_ats_margin), hm=Number(h.avg_ats_margin); if(!Number.isFinite(am)||!Number.isFinite(hm)) return {team:'No edge',note:'Coach ATS data incomplete'}; const diff=hm-am; if(Math.abs(diff)<0.6) return {team:'No edge',note:'Similar full-game ATS profiles'}; return diff>0?{team:g.home_team,note:`Coach ATS margin edge ${signed(diff,1)}`}:{team:g.away_team,note:`Coach ATS margin edge ${signed(-diff,1)}`};}
 function injuryEdge(g){const r=injuryRow(g.game_id); const away=Number(r.away_injury_score||0), home=Number(r.home_injury_score||0); if(!away&&!home) return {main:'No injury edge',note:'No current impact flagged'}; const diff=away-home; if(Math.abs(diff)<1) return {main:'Balanced injuries',note:`${g.away_team} ${num(away,1)} · ${g.home_team} ${num(home,1)}`}; return diff>0?{main:`${g.home_team} edge`,note:`${g.away_team} more injured by ${num(diff,1)}`}:{main:`${g.away_team} edge`,note:`${g.home_team} more injured by ${num(-diff,1)}`};}
+function checkMarks(v){const n=Math.abs(Number(v)||0); if(n>=6) return '✓✓✓'; if(n>=3) return '✓✓'; if(n>=1.5) return '✓'; return '';}
+function dashEdge(){return '<span class="snap-edge">—</span>';}
+function snapPill(label, cls='win'){return `<span class="snap-edge ${cls}">${esc(label)}</span>`;}
+function edgeCells(edgeTeam, label, cls, awayTeam, homeTeam){
+  if(!edgeTeam||edgeTeam==='Game'||edgeTeam==='No edge'||edgeTeam==='Mixed') return [dashEdge(), snapPill(label||edgeTeam||'No edge', cls||'')];
+  if(edgeTeam===awayTeam) return [snapPill(label, cls||'win'), dashEdge()];
+  if(edgeTeam===homeTeam) return [dashEdge(), snapPill(label, cls||'win')];
+  return [dashEdge(), snapPill(label, cls||'')];
+}
+function rpEdgeOverall(a,h){
+  const ar=returningProdForTeam(a), hr=returningProdForTeam(h); if(!ar||!hr) return {team:null,label:'—'};
+  const diff=Number(ar.overall)-Number(hr.overall); if(!Number.isFinite(diff)||Math.abs(diff)<4) return {team:'Game',label:'No edge',cls:''};
+  const team=diff>0?a:h; return {team,label:`${team} ${checkMarks(diff)||'✓'}`,cls:'win'};
+}
+function rpMatchupEdge(offTeam,defTeam){
+  const off=returningProdForTeam(offTeam), def=returningProdForTeam(defTeam); if(!off||!def) return {team:null,label:'—'};
+  const diff=Number(off.off)-Number(def.def); if(!Number.isFinite(diff)||Math.abs(diff)<4) return {team:'Game',label:'No edge',cls:''};
+  const team=diff>0?offTeam:defTeam; const side=diff>0?'O':'D'; return {team,label:`${team} ${side} ${checkMarks(diff)||'✓'}`,cls:'win'};
+}
+function coachAtsSnapshot(a,h,half){
+  const ar=half==='Game'?coachRow(a):coachHalf(a,half); const hr=half==='Game'?coachRow(h):coachHalf(h,half);
+  const av=Number(ar.avg_ats_margin ?? ar.avg_ats ?? ar.ats_margin); const hv=Number(hr.avg_ats_margin ?? hr.avg_ats ?? hr.ats_margin);
+  if(!Number.isFinite(av)||!Number.isFinite(hv)||Math.abs(av-hv)<0.6) return {team:'Game',label:'No edge',cls:''};
+  const team=av>hv?a:h; return {team,label:`${team} ${checkMarks(Math.abs(av-hv))||'✓'}`,cls:'win'};
+}
+function coachTotalsSnapshot(a,h){
+  const ar=coachRow(a), hr=coachRow(h); const av=Number(ar.avg_total_margin), hv=Number(hr.avg_total_margin);
+  if(!Number.isFinite(av)||!Number.isFinite(hv)) return {team:'Game',label:'—',cls:''};
+  if(av>0.8&&hv>0.8) return {team:'Game',label:`Over ${checkMarks((av+hv)/2)||'✓'}`,cls:'total'};
+  if(av<-0.8&&hv<-0.8) return {team:'Game',label:`Under ${checkMarks((Math.abs(av)+Math.abs(hv))/2)||'✓'}`,cls:'total'};
+  return {team:'Game',label:'Mixed',cls:''};
+}
+function scheduleSpotSnapshot(g){
+  const a=g.away_team,h=g.home_team; const af=situationalFlags(g,a), hf=situationalFlags(g,h);
+  const score=flags=>flags.reduce((s,f)=>s+(f.cls==='good'?1:f.cls==='bad'?-1:0),0);
+  const diff=score(af)-score(hf); if(Math.abs(diff)<1) return {team:'Game',label:'No edge',cls:''};
+  const team=diff>0?a:h; return {team,label:`${team} ${diff>0?'spot':'spot'} ✓`,cls:'win'};
+}
+function injuriesSnapshot(g){
+  const ie=injuryEdge(g); if(String(ie.main).toLowerCase().includes('no injury')||String(ie.main).toLowerCase().includes('balanced')) return {team:'Game',label:String(ie.main).includes('Balanced')?'Balanced':'No edge',cls:''};
+  const team=String(ie.main).replace(' edge',''); return {team,label:`${team} ✓`,cls:'win'};
+}
+function snapshotRow(awayCell,cat,sub,homeCell){return `<tr><td>${awayCell}</td><td class="cat">${esc(cat)}${sub?`<span class="subcat">${esc(sub)}</span>`:''}</td><td>${homeCell}</td></tr>`;}
+function bettingEdgeSnapshot(g){
+  const a=g.away_team,h=g.home_team; const rows=[];
+  const se=spreadEdge(g); let [l,r]=edgeCells(se.team, se.team==='No edge'?'No edge':`${se.team} ${signed(se.pts,1)} ${checkMarks(se.pts)}`, 'win', a, h); rows.push(snapshotRow(l,'Spread Value','',r));
+  const te=totalEdge(g); rows.push(snapshotRow(dashEdge(),'Total Value','', te.side==='No edge'||te.side==='No total'?snapPill('No edge',''):snapPill(`${te.side} ${signed(te.pts,1)}`,'total')));
+  let e=rpEdgeOverall(a,h); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Returning Production','Overall',r));
+  e=rpMatchupEdge(a,h); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,`${a} Off RP`,`vs ${h} Def RP`,r));
+  e=rpMatchupEdge(h,a); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,`${h} Off RP`,`vs ${a} Def RP`,r));
+  e=coachAtsSnapshot(a,h,'Game'); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Coach ATS','Full Game',r));
+  e=coachAtsSnapshot(a,h,'1H'); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Coach ATS','1H',r));
+  e=coachAtsSnapshot(a,h,'2H'); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Coach ATS','2H',r));
+  e=coachTotalsSnapshot(a,h); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Coach Totals','',r));
+  e=scheduleSpotSnapshot(g); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Schedule Spot','',r));
+  e=injuriesSnapshot(g); [l,r]=edgeCells(e.team,e.label,e.cls,a,h); rows.push(snapshotRow(l,'Injuries','',r));
+  return `<div class="edge-snapshot"><div class="snapshot-title"><div class="title">Betting Edge Snapshot</div><div class="summary">Early-season inputs only</div></div><table class="edge-table"><thead><tr><th>${esc(a)} edge</th><th>Category</th><th>${esc(h)} / game edge</th></tr></thead><tbody>${rows.join('')}</tbody></table></div><div class="snapshot-note">Returning production matchup rows compare offense continuity versus opponent defensive continuity.</div>`;
+}
+
 function daysBetween(a,b){if(!a||!b) return null; const da=new Date(a), db=new Date(b); if(isNaN(da)||isNaN(db)) return null; return Math.round((db-da)/(1000*60*60*24));}
 function teamGames(team){return (DB.games||[]).filter(g=>g.home_team===team||g.away_team===team).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));}
 function opponent(g,team){return g.home_team===team?g.away_team:g.home_team;}
@@ -353,6 +429,7 @@ function gameHero(g){const ps=projectedScore(g); const proj=favoriteFromProjecti
   <div class="match-title"><span class="bigline">${teamRankLabel(g.away_team,'team-title-logo')}</span><span class="vs">at</span><span class="bigline">${teamRankLabel(g.home_team,'team-title-logo')}</span></div><div class="center-records"><span class="record-pill">${esc(g.away_team)} ${esc(teamSeasonRecord(g.away_team).overall)} · ATS ${esc(teamSeasonRecord(g.away_team).ats)} · O/U ${esc(teamSeasonRecord(g.away_team).ou)}</span><span class="record-pill">${esc(g.home_team)} ${esc(teamSeasonRecord(g.home_team).overall)} · ATS ${esc(teamSeasonRecord(g.home_team).ats)} · O/U ${esc(teamSeasonRecord(g.home_team).ou)}</span></div>
   <div class="subline"><span>${esc(g.cfbd_venue||'Venue TBD')}</span><span>·</span><span>${g.neutral_site?'Neutral site':'Home field'}</span></div>
   <div class="game-proj-strip"><span class="game-proj-pill market">Market: ${esc(g.market_spread_text||g.market_formatted_spread||'—')}</span><span class="game-proj-pill">Projection: ${esc(spreadText(proj.team, proj.spread))}</span><span class="game-proj-pill total">Total: ${num(g.market_total,1)}</span></div><div class="score-banner">Projected score: ${ps?`${esc(g.away_team)} ${num(ps.away,1)} · ${esc(g.home_team)} ${num(ps.home,1)}`:'—'}</div>
+  ${bettingEdgeSnapshot(g)}
 </div>`;}
 function scheduleTable(team, focusId){const games=(DB.games||[]).filter(g=>g.away_team===team||g.home_team===team).sort((a,b)=>String(a.date).localeCompare(String(b.date))); return `<div class="card"><div class="card-title"><span>${esc(team)} Schedule / Results</span><span class="small">ATS/PGWE fields can populate in-season</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Opp / Rank</th><th>Market</th><th>Proj</th><th>Status</th></tr></thead><tbody>${games.map(g=>{const home=g.home_team===team; const opp=home?g.away_team:g.home_team; const proj=favoriteFromProjection(g); const isFocus=String(g.game_id)===String(focusId); return `<tr style="${isFocus?'outline:2px solid rgba(96,165,250,.35);':''}"><td>${fmtDate(g.date)}</td><td>${home?'vs':'@'} ${teamLabel(opp)} ${rankChip(teamRow(opp).rank)}</td><td>${esc(g.market_spread_text||'—')}</td><td>${esc(spreadText(proj.team, proj.spread))}</td><td>${esc(g.cfbd_completed?'Final':'Scheduled')}</td></tr>`;}).join('')}</tbody></table></div></div>`;}
 function predictive(g){const trows=matchupRows(g); const fields=[['pass_off_edge','Pass Off'],['rush_off_edge','Rush Off'],['pass_protection_edge','Pass Pro'],['pass_rush_edge','Pass Rush'],['explosive_edge','Explosives'],['havoc_edge','Havoc']]; function side(team){const r=trows.find(x=>x.team===team)||{}; return `<div class="summary-item"><b>${esc(team)} vs ${esc(team===g.away_team?g.home_team:g.away_team)}</b>${fields.map(([k,l])=>`<div class="metric-row"><div class="metric-name">${l}</div><div>${signed(r[k],1)}</div><div class="bar"><span style="width:${Math.max(5,Math.min(95,50+(Number(r[k])||0)*8))}%"></span></div><div class="small">${Number(r[k])>0?esc(team):Number(r[k])<0?esc(team===g.away_team?g.home_team:g.away_team):'Even'}</div></div>`).join('')}<div class="small">${esc(r.summary||'No matchup edge row loaded yet.')}</div></div>`;} return `<div class="card"><div class="card-title"><span>Predictive matchup snapshot</span><span class="small">Offense vs opponent defense</span></div><div class="summary-list">${side(g.away_team)}${side(g.home_team)}</div></div>`;}
@@ -407,7 +484,7 @@ function seasonHistoryChart(g, kind){
 function marketCard(g){const se=spreadEdge(g), te=totalEdge(g), mv=moveText(g); const projHomeSpread=-Number(g.projected_margin_home); const spreadEdgePts=Number(se.pts)||0; const totalEdgePts=Number(te.pts)||0; return `<div class="card"><div class="card-title"><span>Market betting data</span><span class="small">spread · total · best books · season history</span></div><div class="market-compact"><div class="market-primary"><div class="market-primary-grid"><div><b>Spread</b><div class="market-big">${esc(g.market_spread_text||g.market_formatted_spread||'—')} ${g.market_spread_price?esc(String(g.market_spread_price)):''} ${sportsbookLogo(g.market_spread_book||g.market_line_source)}</div><div class="open-line">Open: ${Number.isFinite(Number(g.market_spread_open_home))?esc(spreadText(g.home_team, Number(g.market_spread_open_home))):'—'}</div><div class="market-sub">${esc(String(mv.main).replace(/^Toward +/,'Move: '))} — ${esc(mv.note)}</div></div><div class="model-box"><b>Model prediction</b><div>Fair spread: <strong>${esc(modelFairText(g))}</strong></div><div class="edge-diff ${edgeTone(spreadEdgePts)}">Edge: ${esc(se.team)} ${se.team==='No edge'?'':signed(spreadEdgePts,1)}</div></div></div>${seasonHistoryChart(g,'spread')}</div><div class="market-primary"><div class="market-primary-grid"><div><b>Total</b><div class="market-big">${num(g.market_total,1)} · O ${g.market_total_over_price?esc(String(g.market_total_over_price)):'—'} / U ${g.market_total_under_price?esc(String(g.market_total_under_price)):'—'} ${sportsbookLogo(g.market_total_book)}</div><div class="open-line">Open total: ${Number.isFinite(Number(g.market_total_open))?num(g.market_total_open,1):'—'}</div><div class="market-sub">Current total vs opener and projection</div></div><div class="model-box"><b>Model prediction</b><div>Projected total: <strong>${num(g.projected_total,1)}</strong></div><div class="edge-diff ${edgeTone(totalEdgePts)}">Edge: ${esc(te.side)} ${te.side==='No edge'||te.side==='No total'?'':signed(totalEdgePts,1)}</div></div></div>${seasonHistoryChart(g,'total')}</div></div><div class="market-best-grid"><div class="market-best"><b>Best home</b><div>${esc(g.market_best_home_spread_text||'—')} ${g.market_best_home_spread_price?esc(String(g.market_best_home_spread_price)):''}</div><div>${sportsbookLogo(g.market_best_home_spread_book)}</div></div><div class="market-best"><b>Best away</b><div>${esc(g.market_best_away_spread_text||'—')} ${g.market_best_away_spread_price?esc(String(g.market_best_away_spread_price)):''}</div><div>${sportsbookLogo(g.market_best_away_spread_book)}</div></div><div class="market-best"><b>Best over</b><div>${num(g.market_best_over_total,1)} ${g.market_best_over_price?esc(String(g.market_best_over_price)):'—'}</div><div>${sportsbookLogo(g.market_best_over_book)}</div></div><div class="market-best"><b>Best under</b><div>${num(g.market_best_under_total,1)} ${g.market_best_under_price?esc(String(g.market_best_under_price)):'—'}</div><div>${sportsbookLogo(g.market_best_under_book)}</div></div></div><div class="summary-item" style="margin-top:10px"><b>Market freshness</b><div>Updated: ${fmtDateTime(g.market_spread_last_update||g.market_total_last_update||g.market_pulled_at)}</div><div class="market-fresh"><span class="pill">Books</span>${bookStrip(g.market_books_available)}<span class="pill">Source: ${esc(g.market_line_source||'—')}</span>${g.market_spread_hold_pct?`<span class="pill">Hold ${num(g.market_spread_hold_pct,1)}%</span>`:''}</div></div></div>`;}
 function positionCard(g){function row(team){const r=tcRow(team); const keys=['qb','rb','wr','te','ol','dl','lb','db','kp']; return `<tr><td><b>${teamLabel(team)}</b></td>${keys.map(k=>`<td>${num(r[k],1)}</td>`).join('')}</tr>`;} return `<details><summary>More detail: position-group ratings</summary><div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Team</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>OL</th><th>DL</th><th>LB</th><th>DB</th><th>K/P</th></tr></thead><tbody>${row(g.away_team)}${row(g.home_team)}</tbody></table></div></details>`;}
 function bettingRead(g){const se=spreadEdge(g), te=totalEdge(g), ie=injuryEdge(g), ce=coachEdge(g); const spreadPhrase=se.team==='No edge'?'No clear spread edge':`${se.team} lean`; const totalPhrase=te.side==='No edge'?'No clear total edge':`${te.side} lean`; return `<div class="card"><div class="card-title"><span>Betting read summary</span><span class="small">awareness, not auto-bet</span></div><div class="read-box"><p><b>Spread:</b> ${esc(spreadPhrase)}. ${esc(se.note)}.</p><p><b>Total:</b> ${esc(totalPhrase)}. ${esc(te.note)}.</p><p><b>Context:</b> Injury read is ${esc(ie.main.toLowerCase())}; coach read is ${esc(ce.team)}. Confirm late injuries, line movement, and any depth-chart news before kickoff.</p></div></div>`;}
-function render(){const g=findGame(); if(!g){$('#app').innerHTML='<div class="card">No game found.</div>';return;} document.title=`${g.away_team} at ${g.home_team} · Matchup Card`; $('#app').innerHTML=`<div class="hero">${teamHero(g.away_team,'Away')}${gameHero(g)}${teamHero(g.home_team,'Home')}</div>${dashboard(g)}${gameTags(g)}${bettingRead(g)}${marketCard(g)}<div class="grid2">${scheduleTable(g.away_team,g.game_id)}${scheduleTable(g.home_team,g.game_id)}</div>${injuriesCard(g)}${fiveFactorsCard(g)}${coachCard(g)}${positionCard(g)}`;}
+function render(){const g=findGame(); if(!g){$('#app').innerHTML='<div class="card">No game found.</div>';return;} document.title=`${g.away_team} at ${g.home_team} · Matchup Card`; $('#app').innerHTML=`<div class="hero">${teamHero(g.away_team,'Away')}${gameHero(g)}${teamHero(g.home_team,'Home')}</div>${dashboard(g)}${gameTags(g)}${bettingRead(g)}${marketCard(g)}<div class="grid2">${scheduleTable(g.away_team,g.game_id)}${scheduleTable(g.home_team,g.game_id)}</div>${injuriesCard(g)}${coachCard(g)}${positionCard(g)}`;}
 render();
 </script>
 </body>
