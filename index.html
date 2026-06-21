@@ -11850,9 +11850,9 @@ function matchupDetailHtml(g){
   </div>`;
 }
 function matchupButton(g){
-  const gid = matchupGameId(g);
-  const safeId = String(gid).replace(/'/g, "\'");
-  return `<button class="matchup-toggle" type="button" onclick="toggleMatchupRow('${safeId}'); event.stopPropagation();">Matchup</button><div class="small">${matchupCompactLabel(g)}</div>`;
+  const gid = g.game_id || matchupGameId(g);
+  const safeId = encodeURIComponent(String(gid));
+  return `<a class="matchup-toggle" style="text-decoration:none" href="matchup.html?game_id=${safeId}" onclick="event.stopPropagation();">Matchup</a><div class="small">${matchupCompactLabel(g)}</div>`;
 }
 function toggleMatchupRow(id){
   const row = document.getElementById(matchupDomIdFromGameId(id));
