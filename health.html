@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NCAAF Daily Run Health</title>
+<style>
+:root{--bg:#071225;--card:#101b31;--card2:#0b1426;--line:#263852;--text:#e9eef8;--muted:#9aa9bf;--green:#1fbf75;--yellow:#d6ad25;--red:#ff5f57;}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#10213f,#071225 48%,#050b17);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px}
+.wrap{max-width:1280px;margin:0 auto} .hero{border:1px solid var(--line);background:linear-gradient(180deg,#14213a,#0b1426);border-radius:20px;padding:22px 24px;display:flex;justify-content:space-between;gap:16px;align-items:center;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+h1{margin:0;font-size:30px;letter-spacing:-.03em} .sub{color:var(--muted);margin-top:6px;font-weight:700} .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px} .card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(16,27,49,.96),rgba(8,17,34,.96));border-radius:18px;padding:16px;min-height:190px} .wide{grid-column:span 3}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #22324a;padding-bottom:10px;margin-bottom:12px} h2{font-size:15px;letter-spacing:.11em;text-transform:uppercase;margin:0;color:#dbe6f7} .pill{border-radius:999px;padding:6px 10px;font-size:12px;font-weight:950;border:1px solid #344762;background:#17233a;color:#cfd9e8} .pill.ok{background:#0d3b2a;color:#c7ffdc;border-color:#1c8a55} .pill.warn{background:#463912;color:#ffe596;border-color:#937522} .pill.bad{background:#4b1518;color:#ffd0d0;border-color:#b23b3f} .pill.missing{background:#263044;color:#cdd6e5}
+.kv-wrap{display:grid;gap:8px} .kv{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(38,56,82,.45);padding:5px 0;color:var(--muted);font-size:13px} .kv strong{color:var(--text);text-align:right} .mini-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px} .mini{display:inline-flex;align-items:center;border:1px solid #2b3d58;background:#111d32;color:#cbd5e5;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:800} .badtxt{border-color:#994148;color:#ffd0d0;background:#3b1519} .muted{color:var(--muted)}
+.table{width:100%;border-collapse:collapse;margin-top:8px} .table th,.table td{border-bottom:1px solid #253750;padding:9px;text-align:left;font-size:13px} .table th{color:#9fb0c9;text-transform:uppercase;letter-spacing:.12em;font-size:11px} code{background:#101b31;border:1px solid #263852;border-radius:6px;padding:2px 5px}
+@media(max-width:900px){.hero{display:block}.grid{grid-template-columns:1fr}.wide{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div><h1>Daily Run Health</h1><div class="sub">Generated 2026-06-27T10:25:48-04:00</div></div>
+    <div><span class="pill warn">WATCH</span></div>
+  </div>
+  <div class="grid">
+    
+    <section class="card">
+      <div class="card-head"><h2>Projection spread audit</h2><span class="pill ok">OK</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Games</span><strong>902</strong></div><div class='kv'><span>OK</span><strong>764</strong></div><div class='kv'><span>Warn</span><strong>0</strong></div><div class='kv'><span>Bad</span><strong>0</strong></div><div class='kv'><span>Major</span><strong>0</strong></div><div class='kv'><span>Missing team / skipped</span><strong>138</strong></div><div class='kv'><span>Updated</span><strong>2026-06-27T10:16:38-04:00</strong></div></div>
+    </section>
+    
+    
+    <section class="card">
+      <div class="card-head"><h2>Projection total audit</h2><span class="pill warn">WATCH</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Games</span><strong>902</strong></div><div class='kv'><span>OK</span><strong>767</strong></div><div class='kv'><span>Info</span><strong>132</strong></div><div class='kv'><span>Warn</span><strong>1</strong></div><div class='kv'><span>Major</span><strong>2</strong></div><div class='kv'><span>Market totals</span><strong>51</strong></div><div class='kv'><span>Massey totals</span><strong>16</strong></div></div>
+    </section>
+    
+    
+    <section class="card">
+      <div class="card-head"><h2>Weather</h2><span class="pill ok">OK</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Venue rows</span><strong>187</strong></div><div class='kv'><span>Missing real venues</span><strong>0</strong></div><div class='kv'><span>Placeholder venues</span><strong>10</strong></div><div class='kv'><span>Latest rows</span><strong>902</strong></div><div class='kv'><span>History rows</span><strong>0</strong></div><div class='kv'><span>Updated</span><strong>2026-06-27T10:16:37-04:00</strong></div></div>
+    </section>
+    
+    <section class="card wide"><div class="card-head"><h2>Weather status breakdown</h2><span class="pill ok">OK</span></div><div class="mini-row"><span class='mini'>not_in_forecast_window: 892</span><span class='mini'>missing_location: 10</span></div></section>
+    
+    <section class="card">
+      <div class="card-head"><h2>Line / model history</h2><span class="pill ok">OK</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Rows</span><strong>902</strong></div><div class='kv'><span>Unique games</span><strong>902</strong></div><div class='kv'><span>Unique snapshots</span><strong>1</strong></div><div class='kv'><span>Latest snapshot</span><strong>Preseason</strong></div><div class='kv'><span>Updated</span><strong>2026-06-27T10:16:37-04:00</strong></div></div>
+    </section>
+    
+    
+    <section class="card">
+      <div class="card-head"><h2>Injuries</h2><span class="pill ok">OK</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Injury alerts</span><strong>0</strong></div><div class='kv'><span>Team score rows</span><strong>259</strong></div><div class='kv'><span>Teams nonzero</span><strong>0</strong></div><div class='kv'><span>Game rows</span><strong>902</strong></div><div class='kv'><span>Games nonzero</span><strong>0</strong></div><div class='kv'><span>Updated</span><strong>2026-06-27T10:16:37-04:00</strong></div></div>
+    </section>
+    
+    
+    <section class="card">
+      <div class="card-head"><h2>Site output</h2><span class="pill ok">OK</span></div>
+      <div class="kv-wrap"><div class='kv'><span>Index exists</span><strong>Yes</strong></div><div class='kv'><span>Matchup exists</span><strong>Yes</strong></div><div class='kv'><span>Matchup links</span><strong>1</strong></div><div class='kv'><span>Injury overlay data blocks</span><strong>1</strong></div><div class='kv'><span>Injury overlay script blocks</span><strong>1</strong></div><div class='kv'><span>Weather card present</span><strong>Yes</strong></div><div class='kv'><span>Edge snapshot present</span><strong>Yes</strong></div><div class='kv'><span>Matchup updated</span><strong>2026-06-27T10:16:38-04:00</strong></div></div>
+    </section>
+    
+    <section class="card wide"><div class="card-head"><h2>Unsafe marker check</h2><span class="pill ok">OK</span></div><div class="mini-row"><span class='mini '>inject_game_injury_scores.py: No</span><span class='mini '>patch_schedule_injury_ui.py: No</span><span class='mini '>patch_schedule_injury_inline_badge.py: No</span></div></section>
+  </div>
+</div>
+</body>
+</html>
