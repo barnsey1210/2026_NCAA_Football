@@ -12282,7 +12282,11 @@ function renderBetting() {
   }
   function money(v) {
     const n = Number(v || 0);
-    return '$' + n.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:2});
+    return '$' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function money0(v) {
+    const n = Number(v || 0);
+    return '$' + n.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
   }
   function safe(v) {
     return escapeHtml(v == null || v === '' ? '—' : String(v));
@@ -12292,10 +12296,13 @@ function renderBetting() {
     const n = Number(v);
     return n > 0 ? '+' + n : String(n);
   }
+  function rowBy(arr, key, val) {
+    return (arr || []).find(r => String(r[key] || '').toLowerCase() === String(val).toLowerCase()) || {};
+  }
   function betTable(rows) {
-    if (!rows || !rows.length) return '<div class="small">No open bets found.</div>';
+    if (!rows || !rows.length) return '<div class="gdEmpty">No open bets.</div>';
     return `
-      <table>
+      <table class="gdTable">
         <thead>
           <tr>
             <th>Date</th><th>Bet</th><th>Book</th><th>Stake</th><th>Line</th><th>Price</th><th>Type</th><th>Source</th>
@@ -12305,7 +12312,7 @@ function renderBetting() {
           ${rows.map(r=>`
             <tr>
               <td>${safe(r.Date)}</td>
-              <td>${safe(r.Bet)}</td>
+              <td><b>${safe(r.Bet)}</b><div class="gdSubtle">${safe(r.team_guess)} ${safe(r.side)}</div></td>
               <td>${safe(r.Sportsbook)}</td>
               <td>${money(r.stake)}</td>
               <td>${safe(r.bet_line)}</td>
@@ -12319,18 +12326,17 @@ function renderBetting() {
     `;
   }
   function breakdown(rows, labelKey) {
-    if (!rows || !rows.length) return '<div class="small">No rows.</div>';
+    if (!rows || !rows.length) return '<div class="gdEmpty">No rows.</div>';
     return `
-      <table>
-        <thead><tr><th>${safe(labelKey)}</th><th>Bets</th><th>Open</th><th>Stake</th><th>P/L</th></tr></thead>
+      <table class="gdMiniTable">
+        <thead><tr><th>${safe(labelKey)}</th><th>Bets</th><th>Open</th><th>Stake</th></tr></thead>
         <tbody>
           ${rows.map(r=>`
             <tr>
               <td>${safe(r[labelKey])}</td>
               <td>${safe(r.bets)}</td>
               <td>${safe(r.open)}</td>
-              <td>${money(r.stake)}</td>
-              <td>${money(r.profit)}</td>
+              <td>${money0(r.stake)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -12355,63 +12361,187 @@ function renderBetting() {
 
   const s = dash.summary || {};
   const openRows = dash.open_bets || [];
+  const byType = dash.by_bet_description || [];
+  const winTotals = rowBy(byType, 'Bet Description', 'Win Total');
+  const confTitles = rowBy(byType, 'Bet Description', 'Conf Title');
+  const week1 = rowBy(byType, 'Bet Description', 'Week 1');
 
   return `
-    <div class="hero">
-      <div>
-        <div class="page-title">Betting</div>
-        <div class="page-sub">Portfolio dashboard pulled from your Google Sheet. CLV columns are ready for sheet-entered closing lines now and current-market CLV next.</div>
-      </div>
-      <div class="hero-stats">
-        <button class="pill" onclick="setBettingSeason('2026')" style="${bettingSeason==='2026'?'background:#183468;border-color:#4470ba':''}">2026</button>
-        <button class="pill" onclick="setBettingSeason('2025')" style="${bettingSeason==='2025'?'background:#183468;border-color:#4470ba':''}">2025</button>
-        <a class="pill" href="${liveSheet}" target="_blank" rel="noopener">Open Live Google Sheet</a>
-        <a class="pill" href="${liveCsv}" target="_blank" rel="noopener">Open CSV</a>
-      </div>
-    </div>
+    <style>
+      .gdWrap{background:#f6f7f5;color:#102c1d;border-radius:18px;padding:22px;margin-top:4px}
+      .gdTop{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}
+      .gdTitle{font-size:34px;font-weight:900;letter-spacing:-.03em;color:#102c1d}
+      .gdSub{font-size:14px;color:#5f6f65;margin-top:5px;max-width:760px}
+      .gdActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+      .gdBtn{background:#d6ff3f;color:#102c1d;border:1px solid #b9e52e;border-radius:4px;padding:11px 16px;font-weight:900;text-decoration:none}
+      .gdBtn.secondary{background:#fff;border-color:#cfd6d0}
+      .gdGrid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:16px}
+      .gdPanel{background:#fff;border:1px solid #cfd6d0;min-height:260px;display:grid;grid-template-columns:230px 1fr}
+      .gdDark{background:#06351e;color:#fff;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+      .gdDark h3{font-size:23px;margin:0 0 18px;color:#fff}
+      .gdCircle{width:118px;height:118px;border:6px solid #d6ff3f;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:900;margin-bottom:18px}
+      .gdDarkMetric{font-size:15px;color:#d7e8dd;margin-top:10px;font-weight:800}
+      .gdDarkValue{font-size:19px;color:#fff;margin-top:4px}
+      .gdLight{padding:24px}
+      .gdTabs{display:flex;gap:28px;border-bottom:1px solid #cad1cb;margin-bottom:22px}
+      .gdTab{font-size:17px;font-weight:900;color:#888;padding:0 0 10px}
+      .gdTab.active{color:#102c1d;border-bottom:3px solid #102c1d}
+      .gdEmpty{height:140px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#8a8f8b;font-weight:800;font-size:22px;text-align:center}
+      .gdEmpty small{font-size:15px;font-weight:500;margin-top:12px;max-width:380px}
+      .gdGradedRow{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;border-bottom:1px solid #d7ddd8;padding:13px 0}
+      .gdIcon{background:#f2f2ef;color:#102c1d;height:52px;display:flex;align-items:center;justify-content:center;font-weight:900}
+      .gdRowTitle{font-weight:900;color:#202422}
+      .gdRowSub{font-size:14px;color:#4b554f;margin-top:4px}
+      .gdRowRight{text-align:right;color:#2f3531}
+      .gdTiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:28px}
+      .gdTile{background:#fff;border:1px solid #cfd6d0;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px}
+      .gdTileTitle{font-size:21px;font-weight:900;color:#06351e;margin-bottom:22px}
+      .gdTileValue{font-size:36px;font-weight:900;color:#102c1d}
+      .gdTileSub{font-size:13px;color:#78847b;margin-top:8px}
+      .gdSection{background:#fff;border:1px solid #cfd6d0;margin-top:28px;padding:20px}
+      .gdSectionTitle{font-size:22px;font-weight:900;color:#102c1d;margin-bottom:6px}
+      .gdSectionSub{font-size:13px;color:#69766e;margin-bottom:14px}
+      .gdSplit{display:grid;grid-template-columns:2fr 1fr;gap:28px}
+      .gdTable,.gdMiniTable{width:100%;border-collapse:collapse;font-size:13px}
+      .gdTable th,.gdMiniTable th{text-align:left;color:#102c1d;border-bottom:2px solid #cfd6d0;padding:10px 9px;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+      .gdTable td,.gdMiniTable td{border-bottom:1px solid #e3e7e3;padding:10px 9px;color:#18251e;vertical-align:top}
+      .gdSubtle{color:#7a857e;font-size:12px;margin-top:3px}
+      .gdMiniStack{display:grid;gap:18px}
+      @media(max-width:1000px){
+        .gdGrid2,.gdSplit{grid-template-columns:1fr}
+        .gdPanel{grid-template-columns:1fr}
+        .gdTiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .gdTop{flex-direction:column}
+      }
+      @media(max-width:650px){
+        .gdTiles{grid-template-columns:1fr}
+        .gdTitle{font-size:28px}
+      }
+    </style>
 
-    <div class="grid cols-4" style="margin-top:16px">
-      <div class="card"><div class="kpi">Open Bets</div><div class="kpi-value">${safe(s.open)}</div><div class="kpi-sub">${safe(s.bets)} total tracked bets</div></div>
-      <div class="card"><div class="kpi">Open Exposure</div><div class="kpi-value">${money(s.exposure)}</div><div class="kpi-sub">Current risk on open bets</div></div>
-      <div class="card"><div class="kpi">Avg Bet</div><div class="kpi-value">${money(s.avg_bet)}</div><div class="kpi-sub">Across all tracked bets</div></div>
-      <div class="card"><div class="kpi">Realized P/L</div><div class="kpi-value ${Number(s.profit)>0?'pos':Number(s.profit)<0?'neg':''}">${money(s.profit)}</div><div class="kpi-sub">${safe(s.settled)} settled · ${safe(s.wins)}-${safe(s.losses)}${s.pushes?'-'+safe(s.pushes):''}</div></div>
-    </div>
-
-    <div class="grid cols-4" style="margin-top:16px">
-      <div class="card"><div class="kpi">Win Totals</div><div class="kpi-value">${safe((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Win Total')?.bets || 0)}</div><div class="kpi-sub">${money((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Win Total')?.stake || 0)} exposure</div></div>
-      <div class="card"><div class="kpi">Conference Futures</div><div class="kpi-value">${safe((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Conf Title')?.bets || 0)}</div><div class="kpi-sub">${money((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Conf Title')?.stake || 0)} exposure</div></div>
-      <div class="card"><div class="kpi">Week 1</div><div class="kpi-value">${safe((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Week 1')?.bets || 0)}</div><div class="kpi-sub">${money((dash.by_bet_description||[]).find(r=>r['Bet Description']==='Week 1')?.stake || 0)} exposure</div></div>
-      <div class="card"><div class="kpi">Data Quality</div><div class="kpi-value">${safe(s.missing_bet_type || 0)}</div><div class="kpi-sub">Rows missing bet type</div></div>
-    </div>
-
-    <div class="grid cols-3" style="margin-top:16px">
-      <div>
-        <div class="card">
-          <div class="section-title">Open Bets</div>
-          <div class="small">Pulled from Google Sheet. Updated ${safe(dash.updated_at)}</div>
-          <div style="margin-top:12px">${betTable(openRows)}</div>
+    <div class="gdWrap">
+      <div class="gdTop">
+        <div>
+          <div class="gdTitle">Betting Dashboard</div>
+          <div class="gdSub">Portfolio dashboard pulled from your Google Sheet. Built for pending exposure, graded performance, CLV tracking, and current-market comparison.</div>
+        </div>
+        <div class="gdActions">
+          <button class="gdBtn secondary" onclick="setBettingSeason('2026')">2026</button>
+          <button class="gdBtn secondary" onclick="setBettingSeason('2025')">2025</button>
+          <a class="gdBtn" href="${liveSheet}" target="_blank" rel="noopener">Open Live Sheet</a>
+          <a class="gdBtn secondary" href="${liveCsv}" target="_blank" rel="noopener">Open CSV</a>
         </div>
       </div>
-      <div class="card">
-        <div class="section-title">By Sportsbook</div>
-        ${breakdown(dash.by_sportsbook || [], 'Sportsbook')}
-        <div class="section-title" style="margin-top:18px">By Source</div>
-        ${breakdown(dash.by_source || [], 'Source')}
+
+      <div class="gdGrid2">
+        <div>
+          <div class="gdTitle" style="font-size:26px;margin-bottom:12px">Pending Bets</div>
+          <div class="gdPanel">
+            <div class="gdDark">
+              <h3>Open Portfolio</h3>
+              <div class="gdCircle">${safe(s.open)}</div>
+              <div class="gdDarkMetric">Total Risk</div>
+              <div class="gdDarkValue">${money(s.exposure)}</div>
+              <div class="gdDarkMetric">Average Bet</div>
+              <div class="gdDarkValue">${money(s.avg_bet)}</div>
+            </div>
+            <div class="gdLight">
+              <div class="gdTabs">
+                <div class="gdTab active">Today</div>
+                <div class="gdTab">Upcoming</div>
+                <div class="gdTab" style="margin-left:auto">${safe(s.bets)} Total</div>
+              </div>
+              <div class="gdEmpty">
+                ${safe(s.open)} Pending Bets
+                <small>All current bets are futures or upcoming games. They stay here until graded in your sheet.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="gdTitle" style="font-size:26px;margin-bottom:12px">Graded Bets</div>
+          <div class="gdPanel">
+            <div class="gdDark">
+              <h3>Season Results</h3>
+              <div class="gdDarkValue" style="font-size:30px">${money(s.profit)}</div>
+              <div class="gdDarkMetric">Record</div>
+              <div class="gdDarkValue">${safe(s.wins)}-${safe(s.losses)}-${safe(s.pushes)}</div>
+              <div class="gdDarkMetric">ROI</div>
+              <div class="gdDarkValue">${s.roi == null ? '0.00%' : (Number(s.roi)*100).toFixed(2)+'%'}</div>
+            </div>
+            <div class="gdLight">
+              <div class="gdGradedRow">
+                <div class="gdIcon">--</div>
+                <div><div class="gdRowTitle">Today</div><div class="gdRowSub">${money(0)}</div></div>
+                <div class="gdRowRight">0-0-0<br><span class="gdSubtle">0.00% ROI</span></div>
+              </div>
+              <div class="gdGradedRow">
+                <div class="gdIcon">--</div>
+                <div><div class="gdRowTitle">Last 7 Days</div><div class="gdRowSub">${money(0)}</div></div>
+                <div class="gdRowRight">0-0-0<br><span class="gdSubtle">0.00% ROI</span></div>
+              </div>
+              <div class="gdGradedRow">
+                <div class="gdIcon">--</div>
+                <div><div class="gdRowTitle">All Tracked</div><div class="gdRowSub">${money(s.profit)}</div></div>
+                <div class="gdRowRight">${safe(s.wins)}-${safe(s.losses)}-${safe(s.pushes)}<br><span class="gdSubtle">${safe(s.settled)} settled</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="section-title">By Bet Type</div>
-        ${breakdown(dash.by_bet_description || [], 'Bet Description')}
-        <div class="section-title" style="margin-top:18px">CLV Status</div>
-        <div class="list-item"><div><b>Sheet CLV</b><div class="muted">Closing Line / Closing Price columns are ready when filled.</div></div></div>
-        <div class="list-item"><div><b>Current Market CLV</b><div class="muted">Next step: match open bets to current win total and futures market data.</div></div></div>
+
+      <div class="gdTiles">
+        <div class="gdTile">
+          <div class="gdTileTitle">Win Totals</div>
+          <div class="gdTileValue">${safe(winTotals.bets || 0)}</div>
+          <div class="gdTileSub">${money(winTotals.stake || 0)} exposure</div>
+        </div>
+        <div class="gdTile">
+          <div class="gdTileTitle">Conference Futures</div>
+          <div class="gdTileValue">${safe(confTitles.bets || 0)}</div>
+          <div class="gdTileSub">${money(confTitles.stake || 0)} exposure</div>
+        </div>
+        <div class="gdTile">
+          <div class="gdTileTitle">% Bets Beating CLV</div>
+          <div class="gdTileValue">—</div>
+          <div class="gdTileSub">Unlocks after current-market CLV match</div>
+        </div>
+        <div class="gdTile">
+          <div class="gdTileTitle">Expected Edge / Bet</div>
+          <div class="gdTileValue">—</div>
+          <div class="gdTileSub">Next: connect market edge data</div>
+        </div>
+      </div>
+
+      <div class="gdSplit">
+        <div class="gdSection">
+          <div class="gdSectionTitle">Open Bets</div>
+          <div class="gdSectionSub">Pulled from your Google Sheet. Updated ${safe(dash.updated_at)}.</div>
+          ${betTable(openRows)}
+        </div>
+
+        <div class="gdMiniStack">
+          <div class="gdSection">
+            <div class="gdSectionTitle">By Sportsbook</div>
+            ${breakdown(dash.by_sportsbook || [], 'Sportsbook')}
+          </div>
+          <div class="gdSection">
+            <div class="gdSectionTitle">By Bet Type</div>
+            ${breakdown(dash.by_bet_description || [], 'Bet Description')}
+          </div>
+          <div class="gdSection">
+            <div class="gdSectionTitle">By Source</div>
+            ${breakdown(dash.by_source || [], 'Source')}
+          </div>
+        </div>
       </div>
     </div>
   `;
 }
 
 function mountBettingFilters() {
-  // New Google Sheet betting dashboard is rendered directly by renderBetting().
-  // Keep this function as a safe no-op because the site router calls it after mounting the Betting page.
+  // Betting dashboard is rendered directly by renderBetting().
 }
 
 function dashboardCounts() {
@@ -16525,6 +16655,6 @@ function renderMovesPanel(){
 })();
 </script>
 
-<script id="betting-dashboard-data" type="application/json">{"dashboard":{"updated_at":"2026-06-30T11:14:37","summary":{"bets":26,"open":26,"settled":0,"exposure":2028.5,"avg_bet":78.02,"profit":0.0,"roi":null,"wins":0,"losses":0,"pushes":0,"missing_dates":0,"missing_sport":0,"missing_bet_type":4},"by_bet_description":[{"Bet Description":"Win Total","bets":14,"open":14,"stake":1198.5,"profit":0.0,"settled":0},{"Bet Description":"Conf Title","bets":10,"open":10,"stake":610.0,"profit":0.0,"settled":0},{"Bet Description":"Week 1","bets":2,"open":2,"stake":220.0,"profit":0.0,"settled":0}],"by_sportsbook":[{"Sportsbook":"Fan Duel","bets":17,"open":17,"stake":1065.5,"profit":0.0,"settled":0},{"Sportsbook":"Draft Kings","bets":7,"open":7,"stake":758.0,"profit":0.0,"settled":0},{"Sportsbook":"MGM","bets":2,"open":2,"stake":205.0,"profit":0.0,"settled":0}],"by_source":[{"Source":"Powers","bets":17,"open":17,"stake":1428.5,"profit":0.0,"settled":0},{"Source":"Model","bets":9,"open":9,"stake":600.0,"profit":0.0,"settled":0}],"by_sport":[{"Sport":"NCAAF","bets":26,"open":26,"stake":2028.5,"profit":0.0,"settled":0}],"open_bets":[{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":"Total","stake":57.5,"bet_line":5.5,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Auburn under 6.5","Bet Type":"Total","stake":55.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Auburn","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia tech under 6.5","Bet Type":"Total","stake":65.0,"bet_line":6.5,"bet_price":-130.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia Tech","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Colorado under 4.5","Bet Type":"Total","stake":70.0,"bet_line":4.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Colorado","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ohio state over 9.5","Bet Type":"Total","stake":79.0,"bet_line":9.5,"bet_price":-158.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ohio State","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia over 9.5","Bet Type":"Total","stake":69.0,"bet_line":9.5,"bet_price":-138.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ole miss over 7.5","Bet Type":"Total","stake":70.0,"bet_line":7.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ole Miss","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Oregon win B10","Bet Type":"Total","stake":70.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Oregon","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia win SEC","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":390.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"SMU win ACC","Bet Type":"Total","stake":25.0,"bet_line":0.0,"bet_price":700.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Smu","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Texas tech win big 12","Bet Type":"Total","stake":115.0,"bet_line":0.0,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas Tech","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Boise win Pac12","Bet Type":"Total","stake":100.0,"bet_line":0.0,"bet_price":160.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Boise","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Miami OH win Mac","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":420.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Unlv win MW","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":240.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"UNLV","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"north dakota state under 9.5","Bet Type":"Total","stake":100.0,"bet_line":9.5,"bet_price":-135.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"North Dakota State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Navy win American","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":490.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Navy","side":"Yes"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"James Madison ","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"James Madison","side":""},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Miami oh","Bet Type":"Side","stake":110.0,"bet_line":16.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Western Kentucky ","Bet Type":"Side","stake":50.0,"bet_line":0.0,"bet_price":320.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Western Kentucky","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"southern miss under 4.5","Bet Type":"Total","stake":90.0,"bet_line":4.5,"bet_price":-180.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Southern Miss","side":"Under"},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"texas state under 6.5","Bet Type":"Total","stake":50.0,"bet_line":6.5,"bet_price":116.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Model","Sportsbook":"MGM","Sport":"NCAAF","Bet":"Duke ","Bet Type":"Side","stake":110.0,"bet_line":-9.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Duke","side":""},{"Date":"6/25/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":null,"stake":136.0,"bet_line":5.5,"bet_price":-136.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Missouri st under 4.5","Bet Type":null,"stake":152.0,"bet_line":4.5,"bet_price":-152.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Missouri State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Cal under 6.5","Bet Type":null,"stake":110.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"California","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"MGM","Sport":"NCAAF","Bet":"UConn under 5.5 ","Bet Type":null,"stake":95.0,"bet_line":5.5,"bet_price":105.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Uconn","side":"Under"}]}}</script>
+<script id="betting-dashboard-data" type="application/json">{"dashboard":{"updated_at":"2026-06-30T11:55:37","summary":{"bets":26,"open":26,"settled":0,"exposure":2028.5,"avg_bet":78.02,"profit":0.0,"roi":null,"wins":0,"losses":0,"pushes":0,"missing_dates":0,"missing_sport":0,"missing_bet_type":4},"by_bet_description":[{"Bet Description":"Win Total","bets":14,"open":14,"stake":1198.5,"profit":0.0,"settled":0},{"Bet Description":"Conf Title","bets":10,"open":10,"stake":610.0,"profit":0.0,"settled":0},{"Bet Description":"Week 1","bets":2,"open":2,"stake":220.0,"profit":0.0,"settled":0}],"by_sportsbook":[{"Sportsbook":"Fan Duel","bets":17,"open":17,"stake":1065.5,"profit":0.0,"settled":0},{"Sportsbook":"Draft Kings","bets":7,"open":7,"stake":758.0,"profit":0.0,"settled":0},{"Sportsbook":"MGM","bets":2,"open":2,"stake":205.0,"profit":0.0,"settled":0}],"by_source":[{"Source":"Powers","bets":17,"open":17,"stake":1428.5,"profit":0.0,"settled":0},{"Source":"Model","bets":9,"open":9,"stake":600.0,"profit":0.0,"settled":0}],"by_sport":[{"Sport":"NCAAF","bets":26,"open":26,"stake":2028.5,"profit":0.0,"settled":0}],"open_bets":[{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":"Total","stake":57.5,"bet_line":5.5,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Auburn under 6.5","Bet Type":"Total","stake":55.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Auburn","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia tech under 6.5","Bet Type":"Total","stake":65.0,"bet_line":6.5,"bet_price":-130.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia Tech","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Colorado under 4.5","Bet Type":"Total","stake":70.0,"bet_line":4.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Colorado","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ohio state over 9.5","Bet Type":"Total","stake":79.0,"bet_line":9.5,"bet_price":-158.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ohio State","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia over 9.5","Bet Type":"Total","stake":69.0,"bet_line":9.5,"bet_price":-138.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ole miss over 7.5","Bet Type":"Total","stake":70.0,"bet_line":7.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ole Miss","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Oregon win B10","Bet Type":"Total","stake":70.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Oregon","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia win SEC","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":390.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"SMU win ACC","Bet Type":"Total","stake":25.0,"bet_line":0.0,"bet_price":700.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Smu","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Texas tech win big 12","Bet Type":"Total","stake":115.0,"bet_line":0.0,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas Tech","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Boise win Pac12","Bet Type":"Total","stake":100.0,"bet_line":0.0,"bet_price":160.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Boise","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Miami OH win Mac","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":420.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Unlv win MW","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":240.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"UNLV","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"north dakota state under 9.5","Bet Type":"Total","stake":100.0,"bet_line":9.5,"bet_price":-135.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"North Dakota State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Navy win American","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":490.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Navy","side":"Yes"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"James Madison ","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"James Madison","side":""},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Miami oh","Bet Type":"Side","stake":110.0,"bet_line":16.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Western Kentucky ","Bet Type":"Side","stake":50.0,"bet_line":0.0,"bet_price":320.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Western Kentucky","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"southern miss under 4.5","Bet Type":"Total","stake":90.0,"bet_line":4.5,"bet_price":-180.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Southern Miss","side":"Under"},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"texas state under 6.5","Bet Type":"Total","stake":50.0,"bet_line":6.5,"bet_price":116.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Model","Sportsbook":"MGM","Sport":"NCAAF","Bet":"Duke ","Bet Type":"Side","stake":110.0,"bet_line":-9.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Duke","side":""},{"Date":"6/25/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":null,"stake":136.0,"bet_line":5.5,"bet_price":-136.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Missouri st under 4.5","Bet Type":null,"stake":152.0,"bet_line":4.5,"bet_price":-152.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Missouri State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Cal under 6.5","Bet Type":null,"stake":110.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"California","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"MGM","Sport":"NCAAF","Bet":"UConn under 5.5 ","Bet Type":null,"stake":95.0,"bet_line":5.5,"bet_price":105.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Uconn","side":"Under"}]}}</script>
 </body>
 </html>
