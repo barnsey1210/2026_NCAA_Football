@@ -12284,10 +12284,6 @@ function renderBetting() {
     const n = Number(v || 0);
     return '$' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
   }
-  function money0(v) {
-    const n = Number(v || 0);
-    return '$' + n.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
-  }
   function safe(v) {
     return escapeHtml(v == null || v === '' ? '—' : String(v));
   }
@@ -12296,29 +12292,60 @@ function renderBetting() {
     const n = Number(v);
     return n > 0 ? '+' + n : String(n);
   }
+  function pctValue(v) {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return '—';
+    return (Number(v) * 100).toFixed(0) + '%';
+  }
+  function pctSigned(v) {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return '—';
+    const n = Number(v) * 100;
+    return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+  }
+  function fmtClv(v, suffix='') {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return '—';
+    const n = Number(v);
+    const sign = n > 0 ? '+' : '';
+    return sign + n.toFixed(2) + suffix;
+  }
+  function clvClass(v) {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return '';
+    const n = Number(v);
+    return n > 0 ? 'gdPos' : n < 0 ? 'gdNeg' : '';
+  }
   function rowBy(arr, key, val) {
     return (arr || []).find(r => String(r[key] || '').toLowerCase() === String(val).toLowerCase()) || {};
+  }
+  function betCategory(r) {
+    const desc = String(r['Bet Description'] || '').toLowerCase();
+    if (desc.includes('win total')) return 'win-total';
+    if (desc.includes('conf')) return 'future';
+    if (desc.includes('week 1')) return 'week1';
+    return 'other';
+  }
+  function chartPointValue(v) {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return 0;
+    return Number(v);
   }
   function betTable(rows) {
     if (!rows || !rows.length) return '<div class="gdEmpty">No open bets.</div>';
     return `
-      <table class="gdTable">
+      <table class="gdTable" id="gdOpenBetsTable">
         <thead>
           <tr>
-            <th>Date</th><th>Bet</th><th>Book</th><th>Stake</th><th>Line</th><th>Price</th><th>Type</th><th>Source</th>
+            <th>Date</th><th>Bet</th><th>Book</th><th>Stake</th><th>Bet</th><th>Current Market</th><th>CLV</th><th>EV</th>
           </tr>
         </thead>
         <tbody>
           ${rows.map(r=>`
-            <tr>
+            <tr data-bet-filter-row="1" data-bet-type="${betCategory(r)}">
               <td>${safe(r.Date)}</td>
               <td><b>${safe(r.Bet)}</b><div class="gdSubtle">${safe(r.team_guess)} ${safe(r.side)}</div></td>
               <td>${safe(r.Sportsbook)}</td>
               <td>${money(r.stake)}</td>
-              <td>${safe(r.bet_line)}</td>
-              <td>${odds(r.bet_price)}</td>
-              <td>${safe(r['Bet Description'])}</td>
-              <td>${safe(r.Source)}</td>
+              <td>${safe(r.bet_line)} / ${odds(r.bet_price)}<div class="gdSubtle">${safe(r['Bet Description'])} · ${safe(r.Source)}</div></td>
+              <td>${safe(r.current_market_line)} / ${odds(r.current_market_price)}<div class="gdSubtle">${safe(r.current_market_book || r.current_market_note || 'No match yet')}</div></td>
+              <td class="${clvClass(r.clv_pct_current)}">${pctSigned(r.clv_pct_current)}<div class="gdSubtle">Line ${fmtClv(r.line_clv_current)}</div></td>
+              <td class="${clvClass(r.ev_current_pct)}">${pctSigned(r.ev_current_pct)}<div class="gdSubtle">${money(r.ev_current_dollars)}</div></td>
             </tr>
           `).join('')}
         </tbody>
@@ -12336,11 +12363,50 @@ function renderBetting() {
               <td>${safe(r[labelKey])}</td>
               <td>${safe(r.bets)}</td>
               <td>${safe(r.open)}</td>
-              <td>${money0(r.stake)}</td>
+              <td>${money(r.stake)}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
+    `;
+  }
+  function perfChart(history) {
+    const phases = ['Preseason','Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9','Week 10','Week 11','Week 12','Week 13','Week 14','Week 15','Playoffs'];
+    const latest = {};
+    (history || []).forEach(r => { if (r.season_phase) latest[r.season_phase] = r; });
+    const rows = phases.map(p => latest[p] || {season_phase:p, realized_profit:null, total_ev_current_dollars:null});
+
+    const vals = rows.flatMap(r => [chartPointValue(r.realized_profit), chartPointValue(r.total_ev_current_dollars)]);
+    let min = Math.min(0, ...vals);
+    let max = Math.max(0, ...vals);
+    const pad = Math.max(25, (max - min) * 0.20);
+    min -= pad;
+    max += pad;
+
+    const w = 920, h = 300, left = 74, right = 24, top = 20, bottom = 66;
+    const plotW = w - left - right, plotH = h - top - bottom;
+    const y = v => top + (max - chartPointValue(v)) / (max - min) * plotH;
+    const x = i => left + (i / (rows.length - 1)) * plotW;
+
+    const profitPoints = rows.map((r,i)=>`${x(i)},${y(r.realized_profit)}`).join(' ');
+    const evPoints = rows.map((r,i)=>`${x(i)},${y(r.total_ev_current_dollars)}`).join(' ');
+    const zeroY = y(0);
+    const tickVals = [max, (max + 0) / 2, 0, (min + 0) / 2, min];
+
+    return `
+      <svg class="gdChart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Profit loss and EV over time">
+        ${tickVals.map(v=>`
+          <line x1="${left}" y1="${y(v)}" x2="${w-right}" y2="${y(v)}" class="gdYGrid"></line>
+          <text x="${left-10}" y="${y(v)+4}" text-anchor="end" class="gdYAxis">${money(v)}</text>
+        `).join('')}
+        <line x1="${left}" y1="${zeroY}" x2="${w-right}" y2="${zeroY}" class="gdAxisZero"></line>
+        <polyline points="${evPoints}" class="gdLine gdLineEv"></polyline>
+        <polyline points="${profitPoints}" class="gdLine gdLineProfit"></polyline>
+        ${rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.total_ev_current_dollars)}" r="3" class="gdDotEv"><title>${safe(r.season_phase)} EV ${money(r.total_ev_current_dollars)}</title></circle>`).join('')}
+        ${rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.realized_profit)}" r="3" class="gdDotProfit"><title>${safe(r.season_phase)} P/L ${money(r.realized_profit)}</title></circle>`).join('')}
+        ${rows.map((r,i)=> i%2===0 || r.season_phase==='Preseason' || r.season_phase==='Playoffs' ? `<text x="${x(i)}" y="${h-24}" class="gdXAxis" transform="rotate(-35 ${x(i)} ${h-24})">${safe(r.season_phase)}</text>` : '').join('')}
+      </svg>
+      <div class="gdLegend"><span><b class="profitSwatch"></b> Profit/Loss</span><span><b class="evSwatch"></b> Current-market EV</span></div>
     `;
   }
 
@@ -12372,8 +12438,8 @@ function renderBetting() {
       .gdTop{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}
       .gdTitle{font-size:34px;font-weight:900;letter-spacing:-.03em;color:#102c1d}
       .gdSub{font-size:14px;color:#5f6f65;margin-top:5px;max-width:760px}
-      .gdActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-      .gdBtn{background:#d6ff3f;color:#102c1d;border:1px solid #b9e52e;border-radius:4px;padding:11px 16px;font-weight:900;text-decoration:none}
+      .gdActions{display:flex;gap:10px;flex-wrap:nowrap;justify-content:flex-end;align-items:flex-start}
+      .gdBtn{background:#d6ff3f;color:#102c1d;border:1px solid #b9e52e;border-radius:4px;padding:11px 16px;font-weight:900;text-decoration:none;white-space:nowrap}
       .gdBtn.secondary{background:#fff;border-color:#cfd6d0}
       .gdGrid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:16px}
       .gdPanel{background:#fff;border:1px solid #cfd6d0;min-height:260px;display:grid;grid-template-columns:230px 1fr}
@@ -12384,15 +12450,18 @@ function renderBetting() {
       .gdDarkValue{font-size:19px;color:#fff;margin-top:4px}
       .gdLight{padding:24px}
       .gdTabs{display:flex;gap:28px;border-bottom:1px solid #cad1cb;margin-bottom:22px}
-      .gdTab{font-size:17px;font-weight:900;color:#888;padding:0 0 10px}
-      .gdTab.active{color:#102c1d;border-bottom:3px solid #102c1d}
+      .gdTabBtn{font-size:18px;font-weight:900;color:#888;padding:0 0 10px;background:transparent;border:0;cursor:pointer;text-align:left}
+      .gdTabBtn.active{color:#102c1d;border-bottom:3px solid #102c1d}
+      .gdPendingTabContent{min-height:190px}
+      .gdPendingSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+      .gdPendingMetric{border:1px solid #d7ddd8;background:#fbfcfb;padding:10px;text-align:center}
+      .gdPendingMetric .k{font-size:11px;color:#718077;text-transform:uppercase;font-weight:900;letter-spacing:.04em}
+      .gdPendingMetric .v{font-size:20px;color:#06351e;font-weight:900;margin-top:4px}
+      .gdPendingList{display:grid;gap:8px}
+      .gdPendingBet{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px solid #e3e7e3;padding:7px 0}
+      .gdPendingBet b{color:#102c1d}
+      .gdPendingBetRight{text-align:right;font-weight:900;color:#102c1d}
       .gdEmpty{height:140px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#8a8f8b;font-weight:800;font-size:22px;text-align:center}
-      .gdEmpty small{font-size:15px;font-weight:500;margin-top:12px;max-width:380px}
-      .gdGradedRow{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;border-bottom:1px solid #d7ddd8;padding:13px 0}
-      .gdIcon{background:#f2f2ef;color:#102c1d;height:52px;display:flex;align-items:center;justify-content:center;font-weight:900}
-      .gdRowTitle{font-weight:900;color:#202422}
-      .gdRowSub{font-size:14px;color:#4b554f;margin-top:4px}
-      .gdRowRight{text-align:right;color:#2f3531}
       .gdTiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:28px}
       .gdTile{background:#fff;border:1px solid #cfd6d0;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px}
       .gdTileTitle{font-size:21px;font-weight:900;color:#06351e;margin-bottom:22px}
@@ -12406,12 +12475,29 @@ function renderBetting() {
       .gdTable th,.gdMiniTable th{text-align:left;color:#102c1d;border-bottom:2px solid #cfd6d0;padding:10px 9px;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
       .gdTable td,.gdMiniTable td{border-bottom:1px solid #e3e7e3;padding:10px 9px;color:#18251e;vertical-align:top}
       .gdSubtle{color:#7a857e;font-size:12px;margin-top:3px}
+      .gdPos{color:#047857;font-weight:900}
+      .gdNeg{color:#b91c1c;font-weight:900}
       .gdMiniStack{display:grid;gap:18px}
+      .gdChart{width:100%;height:300px;background:#fff}
+      .gdAxisZero{stroke:#cfd6d0;stroke-width:1}
+      .gdYGrid{stroke:#e1e6e1;stroke-width:1}
+      .gdYAxis{font-size:12px;fill:#65736a;font-weight:800}
+      .gdLine{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+      .gdLineProfit{stroke:#06351e}
+      .gdLineEv{stroke:#b7f52f}
+      .gdDotProfit{fill:#06351e}
+      .gdDotEv{fill:#b7f52f;stroke:#06351e;stroke-width:1}
+      .gdXAxis{font-size:11px;fill:#65736a;font-weight:700}
+      .gdLegend{display:flex;gap:18px;align-items:center;margin-top:8px;color:#415146;font-size:13px;font-weight:800}
+      .gdLegend b{display:inline-block;width:14px;height:4px;margin-right:6px;vertical-align:middle}
+      .profitSwatch{background:#06351e}
+      .evSwatch{background:#b7f52f}
       @media(max-width:1000px){
         .gdGrid2,.gdSplit{grid-template-columns:1fr}
         .gdPanel{grid-template-columns:1fr}
         .gdTiles{grid-template-columns:repeat(2,minmax(0,1fr))}
         .gdTop{flex-direction:column}
+        .gdActions{flex-wrap:wrap;justify-content:flex-start}
       }
       @media(max-width:650px){
         .gdTiles{grid-template-columns:1fr}
@@ -12423,7 +12509,7 @@ function renderBetting() {
       <div class="gdTop">
         <div>
           <div class="gdTitle">Betting Dashboard</div>
-          <div class="gdSub">Portfolio dashboard pulled from your Google Sheet. Built for pending exposure, graded performance, CLV tracking, and current-market comparison.</div>
+          <div class="gdSub">Portfolio dashboard pulled from your Google Sheet. Built for pending exposure, graded performance, CLV tracking, and current-market EV.</div>
         </div>
         <div class="gdActions">
           <button class="gdBtn secondary" onclick="setBettingSeason('2026')">2026</button>
@@ -12447,14 +12533,12 @@ function renderBetting() {
             </div>
             <div class="gdLight">
               <div class="gdTabs">
-                <div class="gdTab active">Today</div>
-                <div class="gdTab">Upcoming</div>
-                <div class="gdTab" style="margin-left:auto">${safe(s.bets)} Total</div>
+                <button class="gdTabBtn active" data-bet-filter="all">All Open</button>
+                <button class="gdTabBtn" data-bet-filter="win-total">Win Totals</button>
+                <button class="gdTabBtn" data-bet-filter="future">Futures</button>
+                <button class="gdTabBtn" data-bet-filter="week1" style="margin-left:auto">Week 1</button>
               </div>
-              <div class="gdEmpty">
-                ${safe(s.open)} Pending Bets
-                <small>All current bets are futures or upcoming games. They stay here until graded in your sheet.</small>
-              </div>
+              <div id="gdPendingTabContent" class="gdPendingTabContent"></div>
             </div>
           </div>
         </div>
@@ -12471,20 +12555,15 @@ function renderBetting() {
               <div class="gdDarkValue">${s.roi == null ? '0.00%' : (Number(s.roi)*100).toFixed(2)+'%'}</div>
             </div>
             <div class="gdLight">
-              <div class="gdGradedRow">
-                <div class="gdIcon">--</div>
-                <div><div class="gdRowTitle">Today</div><div class="gdRowSub">${money(0)}</div></div>
-                <div class="gdRowRight">0-0-0<br><span class="gdSubtle">0.00% ROI</span></div>
+              <div class="gdPendingSummary" style="margin-bottom:18px">
+                <div class="gdPendingMetric"><div class="k">Settled</div><div class="v">${safe(s.settled)}</div></div>
+                <div class="gdPendingMetric"><div class="k">Profit</div><div class="v">${money(s.profit)}</div></div>
+                <div class="gdPendingMetric"><div class="k">ROI</div><div class="v">${s.roi == null ? '—' : pctValue(s.roi)}</div></div>
               </div>
-              <div class="gdGradedRow">
-                <div class="gdIcon">--</div>
-                <div><div class="gdRowTitle">Last 7 Days</div><div class="gdRowSub">${money(0)}</div></div>
-                <div class="gdRowRight">0-0-0<br><span class="gdSubtle">0.00% ROI</span></div>
-              </div>
-              <div class="gdGradedRow">
-                <div class="gdIcon">--</div>
-                <div><div class="gdRowTitle">All Tracked</div><div class="gdRowSub">${money(s.profit)}</div></div>
-                <div class="gdRowRight">${safe(s.wins)}-${safe(s.losses)}-${safe(s.pushes)}<br><span class="gdSubtle">${safe(s.settled)} settled</span></div>
+              <div class="gdPendingList">
+                <div class="gdPendingBet"><div><b>Today</b><div class="gdSubtle">No graded bets yet</div></div><div class="gdPendingBetRight">0-0-0</div></div>
+                <div class="gdPendingBet"><div><b>Last 7 Days</b><div class="gdSubtle">No graded bets yet</div></div><div class="gdPendingBetRight">0-0-0</div></div>
+                <div class="gdPendingBet"><div><b>All Tracked</b><div class="gdSubtle">${safe(s.settled)} settled</div></div><div class="gdPendingBetRight">${safe(s.wins)}-${safe(s.losses)}-${safe(s.pushes)}</div></div>
               </div>
             </div>
           </div>
@@ -12504,20 +12583,26 @@ function renderBetting() {
         </div>
         <div class="gdTile">
           <div class="gdTileTitle">% Bets Beating CLV</div>
-          <div class="gdTileValue">—</div>
-          <div class="gdTileSub">Unlocks after current-market CLV match</div>
+          <div class="gdTileValue">${pctValue(s.pct_bets_beating_current_clv)}</div>
+          <div class="gdTileSub">${safe(s.current_clv_matched || 0)} matched · ${safe(s.current_clv_positive || 0)} positive</div>
         </div>
         <div class="gdTile">
-          <div class="gdTileTitle">Expected Edge / Bet</div>
-          <div class="gdTileValue">—</div>
-          <div class="gdTileSub">Next: connect market edge data</div>
+          <div class="gdTileTitle">Avg EV / Bet</div>
+          <div class="gdTileValue">${pctSigned(s.avg_ev_current_pct)}</div>
+          <div class="gdTileSub">${money(s.avg_ev_current_dollars)} avg · ${money(s.total_ev_current_dollars)} total EV</div>
         </div>
+      </div>
+
+      <div class="gdSection">
+        <div class="gdSectionTitle">Profit/Loss vs Current-Market EV Over Time</div>
+        <div class="gdSectionSub">X-axis moves from Preseason through Week 15 and Playoffs. Profit/Loss updates when bets are graded; EV tracks current-market-implied edge.</div>
+        ${perfChart(dash.performance_history || [])}
       </div>
 
       <div class="gdSplit">
         <div class="gdSection">
-          <div class="gdSectionTitle">Open Bets</div>
-          <div class="gdSectionSub">Pulled from your Google Sheet. Updated ${safe(dash.updated_at)}.</div>
+          <div class="gdSectionTitle">Bet Details</div>
+          <div class="gdSectionSub">Detailed table for the selected category. Pulled from your Google Sheet. Updated ${safe(dash.updated_at)}.</div>
           ${betTable(openRows)}
         </div>
 
@@ -12541,8 +12626,94 @@ function renderBetting() {
 }
 
 function mountBettingFilters() {
-  // Betting dashboard is rendered directly by renderBetting().
+  const buttons = Array.from(document.querySelectorAll('[data-bet-filter]'));
+  const tableRows = Array.from(document.querySelectorAll('[data-bet-filter-row]'));
+  const panel = document.getElementById('gdPendingTabContent');
+  if (!buttons.length || !panel) return;
+
+  function escLocal(v) {
+    return String(v == null || v === '' ? '—' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function moneyLocal(v) {
+    const n = Number(v || 0);
+    return '$' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function pctLocal(v) {
+    if (v == null || v === '' || Number.isNaN(Number(v))) return '—';
+    const n = Number(v) * 100;
+    return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+  }
+  function classifyBet(r) {
+    const desc = String(r['Bet Description'] || '').toLowerCase();
+    if (desc.includes('win total')) return 'win-total';
+    if (desc.includes('conf')) return 'future';
+    if (desc.includes('week 1')) return 'week1';
+    return 'other';
+  }
+  function labelFor(filter) {
+    if (filter === 'win-total') return 'Win Totals';
+    if (filter === 'future') return 'Futures';
+    if (filter === 'week1') return 'Week 1';
+    return 'All Open';
+  }
+  function getDashboardRows() {
+    const el = document.getElementById('betting-dashboard-data');
+    if (!el) return [];
+    try {
+      const d = JSON.parse(el.textContent || '{}').dashboard || {};
+      return d.open_bets || [];
+    } catch(e) {
+      return [];
+    }
+  }
+  function renderPanel(filter) {
+    const all = getDashboardRows();
+    const rows = filter === 'all' ? all : all.filter(r => classifyBet(r) === filter);
+    const exposure = rows.reduce((a,r)=>a + Number(r.stake || 0), 0);
+    const matched = rows.filter(r => String(r.current_market_match).toLowerCase() === 'true').length;
+    const ev = rows.reduce((a,r)=>a + Number(r.ev_current_dollars || 0), 0);
+
+    const preview = rows.slice(0, 5).map(r => `
+      <div class="gdPendingBet">
+        <div>
+          <b>${escLocal(r.Bet)}</b>
+          <div class="gdSubtle">${escLocal(r.Sportsbook)} · ${escLocal(r['Bet Description'])} · CLV ${pctLocal(r.clv_pct_current)}</div>
+        </div>
+        <div class="gdPendingBetRight">
+          ${moneyLocal(r.stake)}
+          <div class="gdSubtle">EV ${moneyLocal(r.ev_current_dollars)}</div>
+        </div>
+      </div>
+    `).join('');
+
+    panel.innerHTML = `
+      <div class="gdPendingSummary">
+        <div class="gdPendingMetric"><div class="k">${escLocal(labelFor(filter))}</div><div class="v">${rows.length}</div></div>
+        <div class="gdPendingMetric"><div class="k">Exposure</div><div class="v">${moneyLocal(exposure)}</div></div>
+        <div class="gdPendingMetric"><div class="k">Current EV</div><div class="v">${moneyLocal(ev)}</div></div>
+      </div>
+      <div class="gdPendingList">
+        ${preview || '<div class="gdEmpty">No bets in this category.</div>'}
+      </div>
+      <div class="gdSubtle" style="margin-top:10px">${matched} of ${rows.length} matched to current-market CLV.</div>
+    `;
+  }
+  function applyFilter(filter) {
+    buttons.forEach(b => b.classList.toggle('active', b.getAttribute('data-bet-filter') === filter));
+    tableRows.forEach(r => {
+      const t = r.getAttribute('data-bet-type');
+      r.style.display = (filter === 'all' || t === filter) ? '' : 'none';
+    });
+    renderPanel(filter);
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.getAttribute('data-bet-filter') || 'all'));
+  });
+
+  applyFilter('all');
 }
+
 
 function dashboardCounts() {
   return (DB.dashboard && DB.dashboard.counts) || {};
@@ -16655,6 +16826,6 @@ function renderMovesPanel(){
 })();
 </script>
 
-<script id="betting-dashboard-data" type="application/json">{"dashboard":{"updated_at":"2026-06-30T11:55:37","summary":{"bets":26,"open":26,"settled":0,"exposure":2028.5,"avg_bet":78.02,"profit":0.0,"roi":null,"wins":0,"losses":0,"pushes":0,"missing_dates":0,"missing_sport":0,"missing_bet_type":4},"by_bet_description":[{"Bet Description":"Win Total","bets":14,"open":14,"stake":1198.5,"profit":0.0,"settled":0},{"Bet Description":"Conf Title","bets":10,"open":10,"stake":610.0,"profit":0.0,"settled":0},{"Bet Description":"Week 1","bets":2,"open":2,"stake":220.0,"profit":0.0,"settled":0}],"by_sportsbook":[{"Sportsbook":"Fan Duel","bets":17,"open":17,"stake":1065.5,"profit":0.0,"settled":0},{"Sportsbook":"Draft Kings","bets":7,"open":7,"stake":758.0,"profit":0.0,"settled":0},{"Sportsbook":"MGM","bets":2,"open":2,"stake":205.0,"profit":0.0,"settled":0}],"by_source":[{"Source":"Powers","bets":17,"open":17,"stake":1428.5,"profit":0.0,"settled":0},{"Source":"Model","bets":9,"open":9,"stake":600.0,"profit":0.0,"settled":0}],"by_sport":[{"Sport":"NCAAF","bets":26,"open":26,"stake":2028.5,"profit":0.0,"settled":0}],"open_bets":[{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":"Total","stake":57.5,"bet_line":5.5,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Auburn under 6.5","Bet Type":"Total","stake":55.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Auburn","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia tech under 6.5","Bet Type":"Total","stake":65.0,"bet_line":6.5,"bet_price":-130.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia Tech","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Colorado under 4.5","Bet Type":"Total","stake":70.0,"bet_line":4.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Colorado","side":"Under"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ohio state over 9.5","Bet Type":"Total","stake":79.0,"bet_line":9.5,"bet_price":-158.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ohio State","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia over 9.5","Bet Type":"Total","stake":69.0,"bet_line":9.5,"bet_price":-138.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Ole miss over 7.5","Bet Type":"Total","stake":70.0,"bet_line":7.5,"bet_price":-140.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Ole Miss","side":"Over"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Oregon win B10","Bet Type":"Total","stake":70.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Oregon","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Georgia win SEC","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":390.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Georgia","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"SMU win ACC","Bet Type":"Total","stake":25.0,"bet_line":0.0,"bet_price":700.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Smu","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Texas tech win big 12","Bet Type":"Total","stake":115.0,"bet_line":0.0,"bet_price":-115.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas Tech","side":"Yes"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Boise win Pac12","Bet Type":"Total","stake":100.0,"bet_line":0.0,"bet_price":160.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Boise","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Miami OH win Mac","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":420.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Unlv win MW","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":240.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"UNLV","side":"Yes"},{"Date":"5/11/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"north dakota state under 9.5","Bet Type":"Total","stake":100.0,"bet_line":9.5,"bet_price":-135.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"North Dakota State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Navy win American","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":490.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Navy","side":"Yes"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"James Madison ","Bet Type":"Total","stake":50.0,"bet_line":0.0,"bet_price":300.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"James Madison","side":""},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Miami oh","Bet Type":"Side","stake":110.0,"bet_line":16.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Miami-OH","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"Western Kentucky ","Bet Type":"Side","stake":50.0,"bet_line":0.0,"bet_price":320.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Western Kentucky","side":""},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"southern miss under 4.5","Bet Type":"Total","stake":90.0,"bet_line":4.5,"bet_price":-180.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Southern Miss","side":"Under"},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Sport":"NCAAF","Bet":"texas state under 6.5","Bet Type":"Total","stake":50.0,"bet_line":6.5,"bet_price":116.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Texas State","side":"Under"},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Model","Sportsbook":"MGM","Sport":"NCAAF","Bet":"Duke ","Bet Type":"Side","stake":110.0,"bet_line":-9.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Duke","side":""},{"Date":"6/25/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":null,"stake":136.0,"bet_line":5.5,"bet_price":-136.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Iowa State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Missouri st under 4.5","Bet Type":null,"stake":152.0,"bet_line":4.5,"bet_price":-152.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Missouri State","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Sport":"NCAAF","Bet":"Cal under 6.5","Bet Type":null,"stake":110.0,"bet_line":6.5,"bet_price":-110.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"California","side":"Under"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"MGM","Sport":"NCAAF","Bet":"UConn under 5.5 ","Bet Type":null,"stake":95.0,"bet_line":5.5,"bet_price":105.0,"closing_line":null,"closing_price":null,"line_clv":null,"price_clv_pp":null,"status":"Open","Notes":null,"team_guess":"Uconn","side":"Under"}]}}</script>
+<script id="betting-dashboard-data" type="application/json">{"dashboard":{"updated_at":"2026-06-30T12:16:45","summary":{"bets":26,"open":26,"settled":0,"exposure":2028.5,"avg_bet":78.02,"profit":0.0,"roi":null,"wins":0,"losses":0,"pushes":0,"missing_dates":0,"missing_sport":0,"missing_bet_type":0,"current_clv_matched":24,"current_clv_positive":14,"pct_bets_beating_current_clv":0.5833,"avg_line_clv_current":0.071,"avg_price_clv_current_pp":1.301,"avg_ev_current_dollars":1.84,"total_ev_current_dollars":44.14,"avg_ev_current_pct":0.0243,"best_current_clv_bet":{"bet":"texas state under 6.5","book":"Fan Duel","team":"Texas State","side":"Under","line_clv_current":0.0,"price_clv_current_pp":15.967854647099927,"current_market_book":"MGM","current_market_price":-165.0,"current_market_line":6.5}},"by_bet_description":[{"Bet Description":"Win Total","bets":14,"open":14,"stake":1198.5,"profit":0.0,"settled":0},{"Bet Description":"Conf Title","bets":10,"open":10,"stake":610.0,"profit":0.0,"settled":0},{"Bet Description":"Week 1","bets":2,"open":2,"stake":220.0,"profit":0.0,"settled":0}],"by_sportsbook":[{"Sportsbook":"Fan Duel","bets":17,"open":17,"stake":1065.5,"profit":0.0,"settled":0},{"Sportsbook":"Draft Kings","bets":7,"open":7,"stake":758.0,"profit":0.0,"settled":0},{"Sportsbook":"MGM","bets":2,"open":2,"stake":205.0,"profit":0.0,"settled":0}],"by_source":[{"Source":"Powers","bets":17,"open":17,"stake":1428.5,"profit":0.0,"settled":0},{"Source":"Model","bets":9,"open":9,"stake":600.0,"profit":0.0,"settled":0}],"by_sport":[{"Sport":"NCAAF","bets":26,"open":26,"stake":2028.5,"profit":0.0,"settled":0}],"open_bets":[{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$57.5","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":"Total","Bet Line":5.5,"Bet Price":-115.0,"Result":null,"Profit":"-$57.5","Running Profit":"-$58","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":57.5,"bet_price":-115.0,"bet_line":5.5,"closing_line":null,"closing_price":null,"profit_num":-57.5,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Iowa State","line_clv":null,"bet_implied_prob":0.5348837209302325,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":4.5,"current_market_price":136.0,"current_market_note":null,"line_clv_current":1.0,"price_clv_current_pp":-11.115490737091049,"clv_pct_current":-0.1111549073709105,"ev_current_dollars":-11.949152542372882,"ev_current_pct":-0.20781134856300665,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$55.0","Sport":"NCAAF","Bet":"Auburn under 6.5","Bet Type":"Total","Bet Line":6.5,"Bet Price":-110.0,"Result":null,"Profit":"-$55.0","Running Profit":"-$113","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":55.0,"bet_price":-110.0,"bet_line":6.5,"closing_line":null,"closing_price":null,"profit_num":-55.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Auburn","line_clv":null,"bet_implied_prob":0.5238095238095238,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":6.5,"current_market_price":-105.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":-1.1614401858304313,"clv_pct_current":-0.011614401858304313,"ev_current_dollars":-1.2195121951219505,"ev_current_pct":-0.022172949002217283,"clv_grade":"Neutral/Negative"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$65.0","Sport":"NCAAF","Bet":"Georgia tech under 6.5","Bet Type":"Total","Bet Line":6.5,"Bet Price":-130.0,"Result":null,"Profit":"-$65.0","Running Profit":"-$178","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":65.0,"bet_price":-130.0,"bet_line":6.5,"closing_line":null,"closing_price":null,"profit_num":-65.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Georgia Tech","line_clv":null,"bet_implied_prob":0.5652173913043478,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":6.5,"current_market_price":-132.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":0.37481259370315545,"clv_pct_current":0.0037481259370315545,"ev_current_dollars":0.4310344827586263,"ev_current_pct":0.006631299734748098,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$70.0","Sport":"NCAAF","Bet":"Colorado under 4.5","Bet Type":"Total","Bet Line":4.5,"Bet Price":-140.0,"Result":null,"Profit":"-$70.0","Running Profit":"-$248","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":70.0,"bet_price":-140.0,"bet_line":4.5,"closing_line":null,"closing_price":null,"profit_num":-70.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Colorado","line_clv":null,"bet_implied_prob":0.5833333333333334,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":4.5,"current_market_price":-168.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":4.35323383084577,"clv_pct_current":0.0435323383084577,"ev_current_dollars":5.223880597014929,"ev_current_pct":0.07462686567164185,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$79.0","Sport":"NCAAF","Bet":"Ohio state over 9.5","Bet Type":"Total","Bet Line":9.5,"Bet Price":-158.0,"Result":null,"Profit":"-$79.0","Running Profit":"-$327","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":79.0,"bet_price":-158.0,"bet_line":9.5,"closing_line":null,"closing_price":null,"profit_num":-79.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Over","team_guess":"Ohio State","line_clv":null,"bet_implied_prob":0.6124031007751938,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":9.5,"current_market_price":-164.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":0.8809020436927439,"clv_pct_current":0.00880902043692744,"ev_current_dollars":1.1363636363636367,"ev_current_pct":0.014384349827387807,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$69.0","Sport":"NCAAF","Bet":"Georgia over 9.5","Bet Type":"Total","Bet Line":9.5,"Bet Price":-138.0,"Result":null,"Profit":"-$69.0","Running Profit":"-$396","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":69.0,"bet_price":-138.0,"bet_line":9.5,"closing_line":null,"closing_price":null,"profit_num":-69.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Over","team_guess":"Georgia","line_clv":null,"bet_implied_prob":0.5798319327731093,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":9.5,"current_market_price":-176.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":5.784922664718051,"clv_pct_current":0.057849226647180514,"ev_current_dollars":6.884057971014485,"ev_current_pct":0.0997689561016592,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$70.0","Sport":"NCAAF","Bet":"Ole miss over 7.5","Bet Type":"Total","Bet Line":7.5,"Bet Price":-140.0,"Result":null,"Profit":"-$70.0","Running Profit":"-$466","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":70.0,"bet_price":-140.0,"bet_line":7.5,"closing_line":null,"closing_price":null,"profit_num":-70.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Over","team_guess":"Ole Miss","line_clv":null,"bet_implied_prob":0.5833333333333334,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"FanDuel","current_market_line":7.5,"current_market_price":-172.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":4.901960784313719,"clv_pct_current":0.049019607843137185,"ev_current_dollars":5.8823529411764675,"ev_current_pct":0.0840336134453781,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$70.0","Sport":"NCAAF","Bet":"Oregon win B10","Bet Type":"Future","Bet Line":0.0,"Bet Price":300.0,"Result":null,"Profit":"-$70.0","Running Profit":"-$536","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":70.0,"bet_price":300.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-70.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Oregon","line_clv":null,"bet_implied_prob":0.25,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":290.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.6410256410256387,"clv_pct_current":0.0064102564102563875,"ev_current_dollars":1.7948717948717885,"ev_current_pct":0.02564102564102555,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"Georgia win SEC","Bet Type":"Future","Bet Line":0.0,"Bet Price":390.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$586","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":390.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Georgia","line_clv":null,"bet_implied_prob":0.2040816326530612,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":370.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.8684324793747283,"clv_pct_current":0.008684324793747283,"ev_current_dollars":2.1276595744680833,"ev_current_pct":0.042553191489361666,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$25.0","Sport":"NCAAF","Bet":"SMU win ACC","Bet Type":"Future","Bet Line":0.0,"Bet Price":700.0,"Result":null,"Profit":"-$25.0","Running Profit":"-$611","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":25.0,"bet_price":700.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-25.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"SMU","line_clv":null,"bet_implied_prob":0.125,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":700.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":0.0,"ev_current_pct":0.0,"clv_grade":"Neutral/Negative"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Powers","Sportsbook":"Fan Duel","Bet Amount":"$115.0","Sport":"NCAAF","Bet":"Texas tech win big 12","Bet Type":"Future","Bet Line":0.0,"Bet Price":-115.0,"Result":null,"Profit":"-$115.0","Running Profit":"-$726","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":115.0,"bet_price":-115.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-115.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Texas Tech","line_clv":null,"bet_implied_prob":0.5348837209302325,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":-120.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":1.0570824524312905,"clv_pct_current":0.010570824524312905,"ev_current_dollars":2.272727272727259,"ev_current_pct":0.019762845849802254,"clv_grade":"Positive"},{"Date":"3/14/2025","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Bet Amount":"$100.0","Sport":"NCAAF","Bet":"Boise win Pac12","Bet Type":"Future","Bet Line":0.0,"Bet Price":160.0,"Result":null,"Profit":"-$100.0","Running Profit":"-$826","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":100.0,"bet_price":160.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-100.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Boise State","line_clv":null,"bet_implied_prob":0.3846153846153846,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"DraftKings","current_market_line":null,"current_market_price":155.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.7541478129713397,"clv_pct_current":0.007541478129713397,"ev_current_dollars":1.9607843137254832,"ev_current_pct":0.019607843137254832,"clv_grade":"Positive"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"Miami OH win Mac","Bet Type":"Future","Bet Line":0.0,"Bet Price":420.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$876","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":420.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Miami-OH","line_clv":null,"bet_implied_prob":0.1923076923076923,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":410.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.37707390648566985,"clv_pct_current":0.0037707390648566985,"ev_current_dollars":0.9803921568627487,"ev_current_pct":0.019607843137254975,"clv_grade":"Positive"},{"Date":"5/11/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Draft Kings","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"Unlv win MW","Bet Type":"Future","Bet Line":0.0,"Bet Price":240.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$926","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":240.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"UNLV","line_clv":null,"bet_implied_prob":0.2941176470588235,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"DraftKings","current_market_line":null,"current_market_price":260.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":-1.633986928104575,"clv_pct_current":-0.01633986928104575,"ev_current_dollars":-2.7777777777777715,"ev_current_pct":-0.05555555555555543,"clv_grade":"Neutral/Negative"},{"Date":"5/11/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Bet Amount":"$100.0","Sport":"NCAAF","Bet":"north dakota state under 9.5","Bet Type":"Total","Bet Line":9.5,"Bet Price":-135.0,"Result":null,"Profit":"-$100.0","Running Profit":"-$1,026","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":100.0,"bet_price":-135.0,"bet_line":9.5,"closing_line":null,"closing_price":null,"profit_num":-100.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"North Dakota State","line_clv":null,"bet_implied_prob":0.574468085106383,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"Caesars","current_market_line":9.5,"current_market_price":-220.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":11.303191489361698,"clv_pct_current":0.11303191489361698,"ev_current_dollars":19.675925925925924,"ev_current_pct":0.19675925925925924,"clv_grade":"Positive"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"Navy win American","Bet Type":"Future","Bet Line":0.0,"Bet Price":490.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$1,076","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":490.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Navy","line_clv":null,"bet_implied_prob":0.1694915254237288,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":490.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":7.105427357601002e-15,"ev_current_pct":1.4210854715202004e-16,"clv_grade":"Neutral/Negative"},{"Date":"6/21/2026","Account":"James","Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"James Madison ","Bet Type":"Future","Bet Line":0.0,"Bet Price":300.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$1,126","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":300.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"James Madison","line_clv":null,"bet_implied_prob":0.25,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":320.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":-1.1904761904761918,"clv_pct_current":-0.011904761904761918,"ev_current_dollars":-2.3809523809523796,"ev_current_pct":-0.04761904761904759,"clv_grade":"Neutral/Negative"},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Powers","Sportsbook":"Draft Kings","Bet Amount":"$110.0","Sport":"NCAAF","Bet":"Miami oh","Bet Type":"Side","Bet Line":16.5,"Bet Price":-110.0,"Result":null,"Profit":"-$110.0","Running Profit":"-$1,236","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":110.0,"bet_price":-110.0,"bet_line":16.5,"closing_line":null,"closing_price":null,"profit_num":-110.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"","team_guess":"Miami-OH","line_clv":null,"bet_implied_prob":0.5238095238095238,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":null,"current_market_source":null,"current_market_book":null,"current_market_line":null,"current_market_price":null,"current_market_note":"Week 1/game-line CLV not wired yet","line_clv_current":null,"price_clv_current_pp":null,"clv_pct_current":null,"ev_current_dollars":null,"ev_current_pct":null,"clv_grade":null},{"Date":"6/21/2026","Account":null,"Bet Description":"Conf Title","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"Western Kentucky ","Bet Type":"Future","Bet Line":0.0,"Bet Price":320.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$1,286","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":320.0,"bet_line":0.0,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Yes","team_guess":"Western Kentucky","line_clv":null,"bet_implied_prob":0.238095238095238,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_conference_futures_import.csv","current_market_book":"FanDuel","current_market_line":null,"current_market_price":320.0,"current_market_note":null,"line_clv_current":null,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":0.0,"ev_current_pct":0.0,"clv_grade":"Neutral/Negative"},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$90.0","Sport":"NCAAF","Bet":"southern miss under 4.5","Bet Type":"Total","Bet Line":4.5,"Bet Price":-180.0,"Result":null,"Profit":"-$90.0","Running Profit":"-$1,376","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":90.0,"bet_price":-180.0,"bet_line":4.5,"closing_line":null,"closing_price":null,"profit_num":-90.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Southern Miss","line_clv":null,"bet_implied_prob":0.6428571428571429,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"MGM","current_market_line":4.5,"current_market_price":-200.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":2.3809523809523725,"clv_pct_current":0.023809523809523725,"ev_current_dollars":3.333333333333325,"ev_current_pct":0.037037037037036945,"clv_grade":"Positive"},{"Date":"6/21/2026","Account":null,"Bet Description":"Win Total","Source":"Model","Sportsbook":"Fan Duel","Bet Amount":"$50.0","Sport":"NCAAF","Bet":"texas state under 6.5","Bet Type":"Total","Bet Line":6.5,"Bet Price":116.0,"Result":null,"Profit":"-$50.0","Running Profit":"-$1,426","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":50.0,"bet_price":116.0,"bet_line":6.5,"closing_line":null,"closing_price":null,"profit_num":-50.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Texas State","line_clv":null,"bet_implied_prob":0.4629629629629629,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"FanDuel","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"MGM","current_market_line":6.5,"current_market_price":-165.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":15.967854647099927,"clv_pct_current":0.15967854647099927,"ev_current_dollars":17.24528301886792,"ev_current_pct":0.34490566037735837,"clv_grade":"Positive"},{"Date":"6/21/2026","Account":"James","Bet Description":"Week 1","Source":"Model","Sportsbook":"MGM","Bet Amount":"$110.0","Sport":"NCAAF","Bet":"Duke ","Bet Type":"Side","Bet Line":-9.5,"Bet Price":-110.0,"Result":null,"Profit":"-$110.0","Running Profit":"-$1,536","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":false,"pulled_at":"2026-06-30T12:16:44","stake":110.0,"bet_price":-110.0,"bet_line":-9.5,"closing_line":null,"closing_price":null,"profit_num":-110.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"","team_guess":"Duke","line_clv":null,"bet_implied_prob":0.5238095238095238,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"MGM","current_market_match":null,"current_market_source":null,"current_market_book":null,"current_market_line":null,"current_market_price":null,"current_market_note":"Week 1/game-line CLV not wired yet","line_clv_current":null,"price_clv_current_pp":null,"clv_pct_current":null,"ev_current_dollars":null,"ev_current_pct":null,"clv_grade":null},{"Date":"6/25/2026","Account":"James","Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Bet Amount":"$136.0","Sport":"NCAAF","Bet":"Iowa state under 5.5","Bet Type":"Total","Bet Line":5.5,"Bet Price":-136.0,"Result":null,"Profit":"-$136.0","Running Profit":"-$1,672","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":true,"pulled_at":"2026-06-30T12:16:44","stake":136.0,"bet_price":-136.0,"bet_line":5.5,"closing_line":null,"closing_price":null,"profit_num":-136.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Iowa State","line_clv":null,"bet_implied_prob":0.576271186440678,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"actionnetwork_win_totals_all_brand_rows.csv","current_market_book":"DraftKings","current_market_line":5.5,"current_market_price":-136.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":7.105427357601002e-15,"ev_current_pct":5.224578939412501e-17,"clv_grade":"Neutral/Negative"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Bet Amount":"$152.0","Sport":"NCAAF","Bet":"Missouri st under 4.5","Bet Type":"Total","Bet Line":4.5,"Bet Price":-152.0,"Result":null,"Profit":"-$152.0","Running Profit":"-$1,824","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":true,"pulled_at":"2026-06-30T12:16:44","stake":152.0,"bet_price":-152.0,"bet_line":4.5,"closing_line":null,"closing_price":null,"profit_num":-152.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"Missouri State","line_clv":null,"bet_implied_prob":0.6031746031746031,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"DraftKings","current_market_line":4.5,"current_market_price":-152.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":-7.105427357601002e-15,"ev_current_pct":-4.674623261579606e-17,"clv_grade":"Neutral/Negative"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"Draft Kings","Bet Amount":"$110.0","Sport":"NCAAF","Bet":"Cal under 6.5","Bet Type":"Total","Bet Line":6.5,"Bet Price":-110.0,"Result":null,"Profit":"-$110.0","Running Profit":"-$1,934","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":true,"pulled_at":"2026-06-30T12:16:44","stake":110.0,"bet_price":-110.0,"bet_line":6.5,"closing_line":null,"closing_price":null,"profit_num":-110.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"California","line_clv":null,"bet_implied_prob":0.5238095238095238,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"DraftKings","current_market_match":true,"current_market_source":"actionnetwork_win_totals_all_brand_rows.csv","current_market_book":"DraftKings","current_market_line":6.5,"current_market_price":-110.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":0.0,"clv_pct_current":0.0,"ev_current_dollars":7.105427357601002e-15,"ev_current_pct":6.45947941600091e-17,"clv_grade":"Neutral/Negative"},{"Date":"6/25/2026","Account":null,"Bet Description":"Win Total","Source":"Powers","Sportsbook":"MGM","Bet Amount":"$95.0","Sport":"NCAAF","Bet":"UConn under 5.5 ","Bet Type":"Total","Bet Line":5.5,"Bet Price":105.0,"Result":null,"Profit":"-$95.0","Running Profit":"-$2,029","Closing Line":null,"Closing Price":null,"CLV":null,"EV":null,"Notes":null,"CLV %":null,"missing_date":false,"missing_sport":false,"missing_bet_type":true,"pulled_at":"2026-06-30T12:16:44","stake":95.0,"bet_price":105.0,"bet_line":5.5,"closing_line":null,"closing_price":null,"profit_num":-95.0,"status":"Open","is_open":true,"realized_profit":0.0,"side":"Under","team_guess":"UConn","line_clv":null,"bet_implied_prob":0.4878048780487805,"closing_implied_prob":null,"price_clv_pp":null,"book_norm":"MGM","current_market_match":true,"current_market_source":"market_win_totals_import.csv","current_market_book":"MGM","current_market_line":5.5,"current_market_price":120.0,"current_market_note":null,"line_clv_current":0.0,"price_clv_current_pp":-3.3259423503325944,"clv_pct_current":-0.03325942350332595,"ev_current_dollars":-6.477272727272727,"ev_current_pct":-0.06818181818181818,"clv_grade":"Neutral/Negative"}],"performance_history":[{"snapshot_at":"2026-06-30T12:16:45","season_phase":"Preseason","bets":26,"open":26,"settled":0,"exposure":2028.5,"realized_profit":0.0,"current_clv_matched":24,"current_clv_positive":14,"pct_bets_beating_current_clv":0.5833,"avg_line_clv_current":0.071,"avg_price_clv_current_pp":1.301,"total_ev_current_dollars":44.14,"avg_ev_current_dollars":1.84,"avg_ev_current_pct":0.0243}]}}</script>
 </body>
 </html>
