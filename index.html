@@ -13587,6 +13587,27 @@ function dashboardFormatSimpleDateV2(v) {
   }).format(d).replace(',', '');
 }
 
+
+function dashboardExpandableListV2(rows, cardFn, initialCount, idBase, label) {
+  rows = rows || [];
+  const total = rows.length;
+  const initial = rows.slice(0, initialCount).map(cardFn).join('');
+  const rest = rows.slice(initialCount).map(cardFn).join('');
+
+  if (total <= initialCount) return initial;
+
+  return `${initial}
+    <div id="${idBase}-extra" style="display:none">${rest}</div>
+    <button class="dashboard-action-btn" style="margin-top:12px" onclick="
+      const el=document.getElementById('${idBase}-extra');
+      const btn=this;
+      if (!el) return;
+      const open = el.style.display !== 'none';
+      el.style.display = open ? 'none' : 'block';
+      btn.textContent = open ? 'Show all ${total} ${label}' : 'Show less';
+    ">Show all ${total} ${label}</button>`;
+}
+
 function dashboardMarketMoveCardCleanV2(r) {
   const title = r.title || `${r.team || ''} Market Move`.trim();
   const reason = dashboardCleanMoveReasonV2(r.reason || r.summary || '');
@@ -13712,7 +13733,7 @@ function renderHome() {
       <div class="card">
         <div class="section-title">Arbs / Middles</div>
         <div class="dashboard-section-sub">Best current market inefficiencies from the arb/middle scan.</div>
-        ${(dash.top_arbs || []).slice(0,6).map(r => dashboardArbCardCleanV2(r)).join('')}
+        ${dashboardExpandableListV2(dash.top_arbs || [], r => dashboardArbCardCleanV2(r), 6, 'dashboard-arbs', 'arbs/middles')}
         <div style="margin-top:12px"><a class="dashboard-card-link" href="#futures">Open Futures Market →</a></div>
       </div>
     </div>
@@ -13721,7 +13742,7 @@ function renderHome() {
       <div class="card">
         <div class="section-title">Win Total / Futures Moves</div>
         <div class="dashboard-section-sub">Recent moves from the daily betting angles report.</div>
-        ${(dash.top_market_moves || []).slice(0,6).map(r => dashboardMarketMoveCardCleanV2(r)).join('')}
+        ${dashboardExpandableListV2(dash.top_market_moves || [], r => dashboardMarketMoveCardCleanV2(r), 6, 'dashboard-market-moves', 'moves')}
       </div>
       <div class="card">
         <div class="section-title">Game Line Moves</div>
