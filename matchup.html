@@ -239,6 +239,7 @@ summary{cursor:pointer;font-weight:950;color:#bfdbfe}
 /* MATCHUP_COACH_FAV_DOG_STYLE_END */
 
 
+
 </style>
 </head>
 <body>
@@ -501,6 +502,7 @@ window.MATCHUP_COACH_FAV_DOG_CONTEXT = [{"game_id":"g1","date":"2026-08-29","tea
 /* MATCHUP_COACH_FAV_DOG_DATA_END */
 
 
+
 /* MATCHUP_COACH_FAV_DOG_HELPERS_START */
 function coachFavDogNorm(x){
   return String(x || '').trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ');
@@ -534,7 +536,7 @@ function coachFavDogDetailRow(g, team){
       <td></td>
       <td colspan="3">
         <div class="coach-favdog-box coach-favdog-muted">
-          <b>Fav/Dog split — 2024–25 HC sample:</b> No 2024–25 HC fav/dog sample
+          <b>Fav/Dog split:</b> No 2024–25 HC fav/dog sample
         </div>
       </td>
     </tr>`;
@@ -570,14 +572,15 @@ function coachFavDogDetailRow(g, team){
     <td></td>
     <td colspan="3">
       <div class="coach-favdog-box">
-        <div class="coach-favdog-title">Fav/Dog split — 2024–25 HC sample</div>
-        <div class="coach-favdog-meta">${meta}</div>
+        <div class="coach-favdog-title">Fav/Dog split</div>
+        <div class="coach-favdog-meta">${meta}</div><div class="coach-favdog-source-note">FG: CFBD full-game sample · 1H/2H: SGO 2024–25 sample</div>
         ${lines}
       </div>
     </td>
   </tr>`;
 }
 /* MATCHUP_COACH_FAV_DOG_HELPERS_END */
+
 
 
 function coachCard(g){function row(team){const c=coachRow(team), h1=coachHalf(team,'1H'), h2=coachHalf(team,'2H'); return `<tr><td><b>${teamLabel(team)}</b><div class="small">${esc(c.head_coach||c.current_coach||'')}</div></td><td>#${esc(c.ats_rank||'—')}<div class="small">${esc(c.ats_record||'')} · ATS ${signed(c.avg_ats_margin,1)}</div></td><td>#${esc(h1.ats_rank||'—')}<div class="small">${esc(h1.ats_w||'—')}-${esc(h1.ats_l||'—')} · ${signed(h1.avg_ats,1)}</div></td><td>#${esc(h2.ats_rank||'—')}<div class="small">${esc(h2.ats_w||'—')}-${esc(h2.ats_l||'—')} · ${signed(h2.avg_ats,1)}</div></td></tr>${coachFavDogDetailRow(g, team)}`;} return `<div class="card"><div class="card-title"><span>Coaching / ATS profile</span><span class="small">Full game · 1H · 2H</span></div><div class="table-wrap"><table><thead><tr><th>Team</th><th>Game ATS</th><th>1H ATS</th><th>2H ATS</th></tr></thead><tbody>${row(g.away_team)}${row(g.home_team)}</tbody></table></div></div>`;}

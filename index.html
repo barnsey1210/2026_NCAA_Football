@@ -5401,6 +5401,7 @@ table thead th:first-child{
 /* COACH_FAV_DOG_CONTEXT_STYLE_END */
 
 
+
 </style>
 
 <style>
@@ -11884,6 +11885,7 @@ window.COACH_FAV_DOG_CONTEXT = [{"game_id":"g1","date":"2026-08-29","team":"East
 /* COACH_FAV_DOG_CONTEXT_DATA_END */
 
 
+
 /* COACH_FAV_DOG_CONTEXT_HELPERS_START */
 function matchupCoachFavDogNorm(x) {
   return String(x || '').trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
@@ -11923,7 +11925,7 @@ function matchupCoachFavDogTableRow(g, team) {
       <td></td>
       <td colspan="5">
         <div class="coach-favdog-box coach-favdog-muted">
-          <b>Fav/Dog split — 2024–25 HC sample:</b> No 2024–25 HC fav/dog sample
+          <b>Fav/Dog split:</b> No 2024–25 HC fav/dog sample
         </div>
       </td>
     </tr>`;
@@ -11959,14 +11961,15 @@ function matchupCoachFavDogTableRow(g, team) {
     <td></td>
     <td colspan="5">
       <div class="coach-favdog-box">
-        <div class="coach-favdog-title">Fav/Dog split — 2024–25 HC sample</div>
-        <div class="coach-favdog-meta">${meta}</div>
+        <div class="coach-favdog-title">Fav/Dog split</div>
+        <div class="coach-favdog-meta">${meta}</div><div class="coach-favdog-source-note">FG: CFBD full-game sample · 1H/2H: SGO 2024–25 sample</div>
         ${lines}
       </div>
     </td>
   </tr>`;
 }
 /* COACH_FAV_DOG_CONTEXT_HELPERS_END */
+
 
 
 /* MATCHUP_COACH_GRADE_CARD_END */
