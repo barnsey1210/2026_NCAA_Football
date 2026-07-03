@@ -1,0 +1,132 @@
+# Daily NCAAF Betting Angles — 2026-07-03
+
+Items are listed in priority order based on arb edge, line movement size, implied-probability movement, and stale-price/middle quality.
+
+## Arbitrage
+
+- **Fresno State Over 7.5 / Under 7.5** — ARB 8.07
+  - DraftKings 190 vs BetMGM -135 on same total 7.5.
+  - Action: Line check now
+- **Oklahoma Over 7.5 / Under 7.5** — ARB 4.84
+  - FanDuel -115 vs Caesars 140 on same total 7.5.
+  - Action: Line check now
+- **Indiana Over 10.5 / Under 10.5** — ARB 4.1
+  - Caesars 125 vs FanDuel -106 on same total 10.5.
+  - Action: Line check now
+- **USC Over 8.5 / Under 8.5** — ARB 3.49
+  - DraftKings 115 vs Caesars 100 on same total 8.5.
+  - Action: Line check now
+- **UNLV Over 7.5 / Under 7.5** — ARB 3.48
+  - DraftKings -130 vs Caesars 150 on same total 7.5.
+  - Action: Line check now
+- **Ole Miss Over 7.5 / Under 7.5** — ARB 3.21
+  - DraftKings -140 vs Caesars 160 on same total 7.5.
+  - Action: Line check now
+- **Missouri Over 6.5 / Under 6.5** — ARB 1.11
+  - FanDuel -110 vs DraftKings 115 on same total 6.5.
+  - Action: Line check now
+
+## Market move
+
+- **San Jose State 3.5 win total moved at DraftKings** — MOVE
+  - line 6.5 → 3.5; Over 3.5: 240.0 → -180.0 (implied probability 29.4% → 64.3% (+34.9%)); Under 3.5: -320.0 → 140.0 (implied probability 76.2% → 41.7% (-34.5%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `San Jose State football 2026 win total 3.5 line move injury roster depth chart news`
+- **Air Force 7.5 win total moved at BetMGM** — MOVE
+  - line 6.5 → 7.5; Over 7.5: -165.0 → 125.0 (implied probability 62.3% → 44.4% (-17.8%)); Under 7.5: 130.0 → -160.0 (implied probability 43.5% → 61.5% (+18.1%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `Air Force football 2026 win total 7.5 line move injury roster depth chart news`
+- **Air Force 7.5 win total moved at DraftKings** — MOVE
+  - line 6.5 → 7.5; Over 7.5: -160.0 → 120.0 (implied probability 61.5% → 45.5% (-16.1%)); Under 7.5: 125.0 → -150.0 (implied probability 44.4% → 60.0% (+15.6%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `Air Force football 2026 win total 7.5 line move injury roster depth chart news`
+- **Kansas Jayhawks 5.5 win total moved at DraftKings** — MOVE
+  - line 6.5 → 5.5; Over 5.5: 130.0 → -156.0 (implied probability 43.5% → 60.9% (+17.5%)); Under 5.5: -156.0 → 128.0 (implied probability 60.9% → 43.9% (-17.1%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Kansas Jayhawks football 2026 win total 5.5 line move injury roster depth chart news`
+- **Louisville Cardinals 8.5 win total moved at DraftKings** — MOVE
+  - line 7.5 → 8.5; Over 8.5: -166.0 → 134.0 (implied probability 62.4% → 42.7% (-19.7%)); Under 8.5: 140.0 → -162.0 (implied probability 41.7% → 61.8% (+20.2%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Louisville Cardinals football 2026 win total 8.5 line move injury roster depth chart news`
+- **Sacramento State Hornets 4.5 win total moved at DraftKings** — MOVE
+  - line 5.5 → 4.5; Over 4.5: 125.0 → -140.0 (implied probability 44.4% → 58.3% (+13.9%)); Under 4.5: -160.0 → 110.0 (implied probability 61.5% → 47.6% (-13.9%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Sacramento State Hornets football 2026 win total 4.5 line move injury roster depth chart news`
+- **San Jose State 4.5 win total moved at BetMGM** — MOVE
+  - line 5.5 → 4.5; Over 4.5: 135.0 → -155.0 (implied probability 42.6% → 60.8% (+18.2%)); Under 4.5: -175.0 → 120.0 (implied probability 63.6% → 45.5% (-18.2%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `San Jose State football 2026 win total 4.5 line move injury roster depth chart news`
+- **Sac State 4.5 win total moved at BetMGM** — MOVE
+  - Over 4.5: -200.0 → -130.0 (implied probability 66.7% → 56.5% (-10.1%)); Under 4.5: 150.0 → 100.0 (implied probability 40.0% → 50.0% (+10.0%)) on 2026-06-30.
+  - Action: Review move / search news
+  - Research: `Sac State football 2026 win total 4.5 line move injury roster depth chart news`
+- **Connecticut 5.5 win total moved at BetMGM** — MOVE
+  - Over 5.5: -155.0 → -118.0 (implied probability 60.8% → 54.1% (-6.7%)); Under 5.5: 120.0 → -110.0 (implied probability 45.5% → 52.4% (+6.9%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Connecticut football 2026 win total 5.5 line move injury roster depth chart news`
+- **California 6.5 win total moved at Caesars** — MOVE
+  - Over 6.5: 110.0 → -115.0 (implied probability 47.6% → 53.5% (+5.9%)); Under 6.5: -140.0 → -115.0 (implied probability 58.3% → 53.5% (-4.8%)) on 2026-06-30.
+  - Action: Review move / search news
+  - Research: `California football 2026 win total 6.5 line move injury roster depth chart news`
+- **New Mexico Title Odds moved** — MOVE
+  - DraftKings Title Odds: price 220.0 → 265.0; implied probability 31.2% → 27.4% (-3.9%) on 2026-06-29.
+  - Action: Review move / search news
+  - Research: `New Mexico football 2026 win total Title Odds line move injury roster depth chart news`
+- **USC 8.5 win total moved at Caesars** — MOVE
+  - Over 8.5: -115.0 → -130.0 (implied probability 53.5% → 56.5% (+3.0%)); Under 8.5: -115.0 → 100.0 (implied probability 53.5% → 50.0% (-3.5%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `USC football 2026 win total 8.5 line move injury roster depth chart news`
+- **Texas State Title Odds moved** — MOVE
+  - BetMGM Title Odds: price 650.0 → 500.0; implied probability 13.3% → 16.7% (+3.3%) on 2026-06-29.
+  - Action: Review move / search news
+  - Research: `Texas State football 2026 win total Title Odds line move injury roster depth chart news`
+- **NC State 7.5 win total moved at Caesars** — MOVE
+  - Over 7.5: 120.0 → 105.0 (implied probability 45.5% → 48.8% (+3.3%)); Under 7.5: -150.0 → -135.0 (implied probability 60.0% → 57.4% (-2.6%)) on 2026-07-03.
+  - Action: Review move / search news
+  - Research: `NC State football 2026 win total 7.5 line move injury roster depth chart news`
+- **Colorado State 3.5 win total moved at BetMGM** — MOVE
+  - Over 3.5: -115.0 → -130.0 (implied probability 53.5% → 56.5% (+3.0%)); Under 3.5: -110.0 → 100.0 (implied probability 52.4% → 50.0% (-2.4%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Colorado State football 2026 win total 3.5 line move injury roster depth chart news`
+- **Navy Title Odds moved** — MOVE
+  - DraftKings Title Odds: price 360.0 → 310.0; implied probability 21.7% → 24.4% (+2.7%) on 2026-06-30.
+  - Action: Review move / search news
+  - Research: `Navy football 2026 win total Title Odds line move injury roster depth chart news`
+- **Tennessee 7.5 win total moved at FanDuel** — MOVE
+  - Over 7.5: -124.0 → -112.0 (implied probability 55.4% → 52.8% (-2.5%)); Under 7.5: 102.0 → -108.0 (implied probability 49.5% → 51.9% (+2.4%)) on 2026-06-27.
+  - Action: Review move / search news
+  - Research: `Tennessee football 2026 win total 7.5 line move injury roster depth chart news`
+- **Maryland 4.5 win total moved at BetMGM** — MOVE
+  - Over 4.5: -185.0 → -200.0 (implied probability 64.9% → 66.7% (+1.8%)); Under 4.5: 140.0 → 155.0 (implied probability 41.7% → 39.2% (-2.5%)) on 2026-06-30.
+  - Action: Review move / search news
+  - Research: `Maryland football 2026 win total 4.5 line move injury roster depth chart news`
+- **Iowa Hawkeyes 7.5 win total moved at DraftKings** — MOVE
+  - Over 7.5: -115.0 → -125.0 (implied probability 53.5% → 55.6% (+2.1%)); Under 7.5: -105.0 → 105.0 (implied probability 51.2% → 48.8% (-2.4%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `Iowa Hawkeyes football 2026 win total 7.5 line move injury roster depth chart news`
+- **California Golden 6.5 win total moved at DraftKings** — MOVE
+  - Over 6.5: -110.0 → 100.0 (implied probability 52.4% → 50.0% (-2.4%)); Under 6.5: -110.0 → -120.0 (implied probability 52.4% → 54.5% (+2.2%)) on 2026-07-01.
+  - Action: Review move / search news
+  - Research: `California Golden football 2026 win total 6.5 line move injury roster depth chart news`
+
+## Research Queue
+
+- `San Jose State football 2026 win total 3.5 line move injury roster depth chart news`
+- `Air Force football 2026 win total 7.5 line move injury roster depth chart news`
+- `Kansas Jayhawks football 2026 win total 5.5 line move injury roster depth chart news`
+- `Louisville Cardinals football 2026 win total 8.5 line move injury roster depth chart news`
+- `Sacramento State Hornets football 2026 win total 4.5 line move injury roster depth chart news`
+- `San Jose State football 2026 win total 4.5 line move injury roster depth chart news`
+- `Sac State football 2026 win total 4.5 line move injury roster depth chart news`
+- `Connecticut football 2026 win total 5.5 line move injury roster depth chart news`
+- `California football 2026 win total 6.5 line move injury roster depth chart news`
+- `New Mexico football 2026 win total Title Odds line move injury roster depth chart news`
+- `USC football 2026 win total 8.5 line move injury roster depth chart news`
+- `Texas State football 2026 win total Title Odds line move injury roster depth chart news`
+- `NC State football 2026 win total 7.5 line move injury roster depth chart news`
+- `Colorado State football 2026 win total 3.5 line move injury roster depth chart news`
+- `Navy football 2026 win total Title Odds line move injury roster depth chart news`
+- `Tennessee football 2026 win total 7.5 line move injury roster depth chart news`
+- `Maryland football 2026 win total 4.5 line move injury roster depth chart news`
+- `Iowa Hawkeyes football 2026 win total 7.5 line move injury roster depth chart news`
+- `California Golden football 2026 win total 6.5 line move injury roster depth chart news`

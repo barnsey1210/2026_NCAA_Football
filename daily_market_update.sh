@@ -105,6 +105,7 @@ run_py "scripts/injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" 
 run_py "scripts/injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || echo "WARNING: CFBDepth injury article pull failed"
 run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || echo "WARNING: injury alert build failed"
 run_py "scripts/agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
+run_py "scripts/agents/postprocess_daily_betting_angles_display.py" "postprocess_daily_betting_angles_display.py" || echo "WARNING: betting angles display postprocess failed"
   run_py "scripts/agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || echo "WARNING: game line email edges append failed"
 
   echo "Checking daily betting angle categories before HTML email build..."
