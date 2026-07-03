@@ -153,6 +153,8 @@ run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py" "parse_sgo_ncaaf_game_odds
 run_py "scripts/site/inject_sgo_game_odds.py" "inject_sgo_game_odds.py" || echo "WARNING: SGO NCAAF game odds injection failed"
 run_py "scripts/site/inject_opening_possession_main_badges.py" "inject_opening_possession_main_badges.py" || echo "WARNING: opening possession main badge injection failed"
 run_py "scripts/site/inject_opening_possession_matchup.py" "inject_opening_possession_matchup.py" || echo "WARNING: opening possession matchup injection failed"
+run_py "scripts/signals/build_travel_1h_signals_2026.py" "build_travel_1h_signals_2026.py" || echo "WARNING: travel 1H signal build failed"
+run_py "scripts/site/inject_travel_1h_badges.py" "inject_travel_1h_badges.py" || echo "WARNING: travel 1H badge injection failed"
 run_py "scripts/site/inject_home_dashboard_data.py" "inject_home_dashboard_data.py"
 run_py "scripts/site/patch_dashboard_all_market_moves.py" "patch_dashboard_all_market_moves.py" || echo "WARNING: all market moves dashboard patch failed"
   run_py "scripts/injuries/build_game_injury_scores.py" "build_game_injury_scores.py" || echo "WARNING: game injury score build failed"
