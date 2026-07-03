@@ -12262,6 +12262,104 @@ function marketLabTeamCellWithRp(g, teamName) {
 }
 // RP_SUPPORT_MARKETLAB_DIRECT_HELPER_END
 
+
+// MARKET_LAB_ACTUAL_MARKET_GUARD_START
+function hasActualMarketSpread(g) {
+  const status = String(g && g.market_price_status || '').toLowerCase();
+  const v = g ? g.market_spread_home : null;
+  return status === 'actual' && v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v));
+}
+
+function hasActualMarketTotal(g) {
+  const status = String(g && (g.market_total_price_status || g.market_price_status) || '').toLowerCase();
+  const v = g ? g.market_total : null;
+  return status === 'actual' && v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v));
+}
+
+function noMarketLabel(note='No current market') {
+  return `<span class="muted" title="${escapeHtml(note)}">No market</span>`;
+}
+
+function guardedMarketSpread(g) {
+  return hasActualMarketSpread(g) ? Number(g.market_spread_home) : null;
+}
+
+function guardedMarketTotal(g) {
+  return hasActualMarketTotal(g) ? Number(g.market_total) : null;
+}
+
+function bestAtsMarket(g) {
+  if (!hasActualMarketSpread(g)) {
+    return {edge:null, side:null, price:null, noMarket:true};
+  }
+
+  const line = Number(g.market_spread_home);
+  const proj = Number(g.projected_margin_home);
+  if (!Number.isFinite(line) || !Number.isFinite(proj)) {
+    return {edge:null, side:null, price:null, noMarket:true};
+  }
+
+  const edge = proj + line;
+  return {
+    edge,
+    side: edge >= 0 ? 'home' : 'away',
+    price: g.market_spread_price,
+    noMarket:false
+  };
+}
+
+function bestTotalMarket(g) {
+  if (!hasActualMarketTotal(g)) {
+    return {edge:null, side:null, price:null, noMarket:true};
+  }
+
+  const line = Number(g.market_total);
+  const proj = Number(g.projected_total);
+  if (!Number.isFinite(line) || !Number.isFinite(proj)) {
+    return {edge:null, side:null, price:null, noMarket:true};
+  }
+
+  const edge = proj - line;
+  return {
+    edge,
+    side: edge >= 0 ? 'Over' : 'Under',
+    total: line,
+    price: edge >= 0 ? g.market_total_over_price : g.market_total_under_price,
+    noMarket:false
+  };
+}
+
+function fmtMarketSpreadCompactCell(g) {
+  if (!hasActualMarketSpread(g)) {
+    const note = g && g.market_line_note ? g.market_line_note : 'No current market spread available';
+    return noMarketLabel(note);
+  }
+
+  const txt = g.market_spread_text || marketSpreadText(g) || 'Market spread';
+  const book = g.market_spread_book ? ` <span class="small">· ${escapeHtml(g.market_spread_book)}</span>` : '';
+  return `<span>${escapeHtml(txt)}</span>${book}`;
+}
+
+function fmtMarketTotalTwoSideCell(g) {
+  if (!hasActualMarketTotal(g)) {
+    const note = g && g.market_line_note ? g.market_line_note : 'No current market total available';
+    return noMarketLabel(note);
+  }
+
+  const total = Number(g.market_total);
+  const book = g.market_total_book ? ` <span class="small">· ${escapeHtml(g.market_total_book)}</span>` : '';
+  return `<span>${Number.isFinite(total) ? total.toFixed(1).replace(/\.0$/, '') : '—'}</span>${book}`;
+}
+
+function marketSpread(g) {
+  return hasActualMarketSpread(g) ? Number(g.market_spread_home) : null;
+}
+
+function marketTotal(g) {
+  return hasActualMarketTotal(g) ? Number(g.market_total) : null;
+}
+// MARKET_LAB_ACTUAL_MARKET_GUARD_END
+
 function scheduleTable(games, mode='simple') {
   const view = mode || scheduleViewMode || 'simple';
   const sortedGames = sortScheduleGames(games);
