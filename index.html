@@ -6881,6 +6881,37 @@ function signedLineText(v) {
 }
 
 
+
+// EARLY_BOOK_LOGO_HELPER_START
+function marketBookLogo(book) {
+  const raw = String(book || '').trim();
+  const b = raw.toLowerCase();
+
+  let src = '';
+  let label = raw || 'Book';
+
+  if (b.includes('fanduel') || b === 'fd' || b === 'fan duel') {
+    src = 'logos/books/fanduel.png';
+    label = 'FanDuel';
+  } else if (b.includes('draftkings') || b === 'dk' || b === 'draft kings') {
+    src = 'logos/books/draftkings.png';
+    label = 'DraftKings';
+  } else if (b.includes('betmgm') || b.includes('mgm')) {
+    src = 'logos/books/betmgm.png';
+    label = 'BetMGM';
+  } else if (b.includes('caesars') || b.includes('caesar') || b === 'cz') {
+    src = 'logos/books/caesars.png';
+    label = 'Caesars';
+  }
+
+  if (!src) return raw ? `<span class="muted">${escapeHtml(raw)}</span>` : '';
+
+  return `<span class="sportsbook-logo-wrap" title="${escapeHtml(label)}">
+    <img class="sportsbook-logo" src="${src}" alt="${escapeHtml(label)}">
+  </span>`;
+}
+// EARLY_BOOK_LOGO_HELPER_END
+
 function marketSpreadHoldBadge(g) {
   const v = Number(g && g.market_spread_hold_pct);
   if (!Number.isFinite(v)) return '';
@@ -6896,7 +6927,7 @@ function fmtMarketSideLine(team, lineForTeam, price, book) {
   const lineTxt = signedLineText(lineForTeam);
   const priceTxt = fmtAmerican(price);
   const teamLogo = teamImageImg(team);
-  const bookBadge = book ? sportsbookLogo(book) : '';
+  const bookBadge = book ? marketBookLogo(book) : '';
   if (!team || !lineTxt) return '';
   return `<div class="market-side-line">${teamLogo}<b>${escapeHtml(String(team))} ${lineTxt}</b>${priceTxt ? ` <span class="muted">${priceTxt}</span>` : ''}${bookBadge}</div>`;
 }
@@ -12335,9 +12366,21 @@ function fmtMarketSpreadCompactCell(g) {
     return noMarketLabel(note);
   }
 
-  const txt = g.market_spread_text || marketSpreadText(g) || 'Market spread';
-  const book = g.market_spread_book ? ` <span class="small">· ${escapeHtml(g.market_spread_book)}</span>` : '';
-  return `<span>${escapeHtml(txt)}</span>${book}`;
+  const homeLine = firstPresent(g.market_best_home_spread_home, g.market_spread_home);
+  const homePrice = firstPresent(g.market_best_home_spread_price, g.market_spread_price);
+  const homeBook = firstPresent(g.market_best_home_spread_book, g.market_spread_book);
+
+  const awayHomePerspective = firstPresent(g.market_best_away_spread_home, g.market_spread_home);
+  const awayLine = awayHomePerspective == null || awayHomePerspective === '' ? null : -Number(awayHomePerspective);
+  const awayPrice = firstPresent(g.market_best_away_spread_price, g.market_spread_price);
+  const awayBook = firstPresent(g.market_best_away_spread_book, g.market_spread_book);
+
+  const homeHtml = fmtMarketSideLine(g.home_team, homeLine, homePrice, homeBook);
+  const awayHtml = fmtMarketSideLine(g.away_team, awayLine, awayPrice, awayBook);
+  const holdHtml = marketSpreadHoldBadge(g);
+
+  if (!homeHtml && !awayHtml) return '—';
+  return `<div class="market-spread-two-side">${homeHtml}${awayHtml}${holdHtml}</div>`;
 }
 
 function fmtMarketTotalTwoSideCell(g) {
