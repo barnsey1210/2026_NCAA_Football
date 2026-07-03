@@ -12422,7 +12422,7 @@ function scheduleTable(games, mode='simple') {
         }
         return `<tr>
           <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${marketLabTeamCellWithRp(g, g.away_team)}</td><td>${marketLabTeamCellWithRp(g, g.home_team)}</td>
-          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${fmtAtsSideWithCoachHalf(g, ats.side)}${rpSupportAtsEdgeLine(g)}</td><td>${ats.ev}</td><td>${ats.score}</td>
+          <td>${fmtMarketSpreadCompactCell(g)}</td><td>${fmtAtsSideWithCoachHalf(g, ats.side)}</td><td>${ats.ev}</td><td>${ats.score}</td>
           <td>${matchupButton(g)}</td>
         </tr>${matchupScheduleDetailRow(g, colSpan)}`;
       }
