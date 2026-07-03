@@ -6582,6 +6582,65 @@ td .spread-setup-compact .team-logo{
 /* OPENING_POSSESSION_MAIN_BADGES_CSS_END */
 </style>
 
+
+
+<style id="moneyline-edge-tight-css">
+.moneyline-edge-tight{
+  display:inline-flex;
+  flex-direction:column;
+  gap:1px;
+  width:92px;
+  max-width:92px;
+  border-radius:8px;
+  padding:4px 5px;
+  border:1px solid rgba(148,163,184,.16);
+  background:rgba(15,23,42,.24);
+  line-height:1.0;
+  overflow:hidden;
+}
+.moneyline-edge-tight.edge-pos{
+  border-color:rgba(34,197,94,.30);
+  background:rgba(34,197,94,.09);
+}
+.moneyline-edge-tight.edge-small{
+  border-color:rgba(250,204,21,.28);
+  background:rgba(250,204,21,.08);
+}
+.ml-edge-tight-main{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:1000;
+}
+.ml-edge-tight-main .team-logo-wrap{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px;
+}
+.ml-edge-tight-main .team-logo{
+  width:16px!important;
+  height:16px!important;
+}
+.ml-edge-tight-sub{
+  font-size:9px;
+  font-weight:800;
+  color:#aab4c6;
+  white-space:nowrap;
+}
+.schedule-marketlab-moneyline th:nth-child(7),
+.schedule-marketlab-moneyline td:nth-child(7){
+  width:104px;
+  max-width:104px;
+}
+.schedule-marketlab-moneyline th:nth-child(8),
+.schedule-marketlab-moneyline td:nth-child(8){
+  width:92px;
+  max-width:92px;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -7586,14 +7645,14 @@ function marketLabTotalMetrics(g) {
 }
 
 function setMarketLabMode(mode) {
-  scheduleMarketLabMode = mode === 'totals' ? 'totals' : 'spreads';
+  scheduleMarketLabMode = mode === 'totals' ? 'totals' : (mode === 'moneyline' ? 'moneyline' : 'spreads');
   localStorage.setItem('ncaaf_2026_marketlab_mode_v1', scheduleMarketLabMode);
 
   const toggle = document.getElementById('marketLabSubToggle');
   if (toggle) {
     toggle.querySelectorAll('button').forEach(btn => {
       const txt = String(btn.textContent || '').trim().toLowerCase();
-      btn.classList.toggle('active', txt === scheduleMarketLabMode || (scheduleMarketLabMode === 'spreads' && txt === 'spreads') || (scheduleMarketLabMode === 'totals' && txt === 'totals'));
+      btn.classList.toggle('active', txt === scheduleMarketLabMode || (scheduleMarketLabMode === 'spreads' && txt === 'spreads') || (scheduleMarketLabMode === 'totals' && txt === 'totals') || (scheduleMarketLabMode === 'moneyline' && txt === 'moneyline'));
     });
   }
 
@@ -9296,6 +9355,11 @@ function scheduleSortValue(g, key) {
   const h1s = market1HSpread(g), h1t = market1HTotal(g);
   const spreadEdge = ms == null || ms === '' ? null : Number(g.projected_margin_home) + Number(ms);
   const totalEdge = mt == null || mt === '' ? null : Number(g.projected_total) - Number(mt);
+  const pHomeMl = typeof projectedHomeWinProbFromGame === 'function' ? projectedHomeWinProbFromGame(g) : null;
+  const pAwayMl = pHomeMl == null ? null : 1 - pHomeMl;
+  const homeMlEv = pHomeMl == null ? null : moneylineEvPct(pHomeMl, g.market_home_moneyline);
+  const awayMlEv = pAwayMl == null ? null : moneylineEvPct(pAwayMl, g.market_away_moneyline);
+  const bestMlEv = [homeMlEv, awayMlEv].filter(v => v != null && Number.isFinite(Number(v))).sort((a,b)=>b-a)[0] ?? null;
   if (key === 'week') return Number(g.week);
   if (key === 'date') return g.date || '';
   if (key === 'away') return (g.away_team || '').toLowerCase();
@@ -9308,6 +9372,14 @@ function scheduleSortValue(g, key) {
   if (key === 'proj_total') return Number(g.projected_total);
   if (key === 'market_total') return mt == null || mt === '' ? null : Number(mt);
   if (key === 'total_edge') return totalEdge;
+  if (key === 'model_moneyline') return pHomeMl == null ? null : Math.abs(Number(g.projected_margin_home) || 0);
+  if (key === 'market_moneyline') {
+    const h = Math.abs(Number(g.market_home_moneyline));
+    const a = Math.abs(Number(g.market_away_moneyline));
+    const vals = [h,a].filter(v => Number.isFinite(v) && v > 0);
+    return vals.length ? Math.min(...vals) : null;
+  }
+  if (key === 'ml_edge') return bestMlEv;
     if (key === 'ats_ev') {
       const m = bestAtsMarket(g), e = m.edge, p = atsModelProb(e);
       return e == null || p == null ? null : evFromProbAndOdds(p, defaultPrice(m.price)) * 100;
@@ -12445,6 +12517,146 @@ function marketTotal(g) {
 }
 // MARKET_LAB_ACTUAL_MARKET_GUARD_END
 
+
+
+// MARKET_LAB_MONEYLINE_HELPERS_START
+function fmtMarketMoneyline(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n === 0) return '—';
+  return n > 0 ? `+${Math.round(n)}` : `${Math.round(n)}`;
+}
+
+function hasActualMoneyline(g) {
+  if (!g) return false;
+  const h = Number(g.market_home_moneyline);
+  const a = Number(g.market_away_moneyline);
+  return (Number.isFinite(h) && h !== 0) || (Number.isFinite(a) && a !== 0);
+}
+
+function americanToImpliedProb(odds) {
+  const o = Number(odds);
+  if (!Number.isFinite(o) || o === 0) return null;
+  return o < 0 ? Math.abs(o) / (Math.abs(o) + 100) : 100 / (o + 100);
+}
+
+function probToAmerican(p) {
+  const x = Number(p);
+  if (!Number.isFinite(x) || x <= 0 || x >= 1) return null;
+  if (x >= 0.5) return -Math.round((x / (1 - x)) * 100);
+  return Math.round(((1 - x) / x) * 100);
+}
+
+function moneylineEvPct(modelProb, marketOdds) {
+  const p = Number(modelProb);
+  const o = Number(marketOdds);
+  if (!Number.isFinite(p) || p <= 0 || p >= 1 || !Number.isFinite(o) || o === 0) return null;
+  const profit = o > 0 ? o / 100 : 100 / Math.abs(o);
+  return (p * profit - (1 - p)) * 100;
+}
+
+function projectedHomeWinProbFromGame(g) {
+  const directKeys = [
+    'projected_home_win_prob',
+    'home_win_prob',
+    'home_win_probability',
+    'projected_win_prob_home',
+    'home_win_pct',
+    'projected_home_win_pct'
+  ];
+
+  for (const k of directKeys) {
+    const v = Number(g[k]);
+    if (Number.isFinite(v)) {
+      if (v > 1.01) return Math.max(0.001, Math.min(0.999, v / 100));
+      return Math.max(0.001, Math.min(0.999, v));
+    }
+  }
+
+  // Fallback from projected margin. Positive means home favored.
+  const margin = Number(g.projected_margin_home);
+  if (!Number.isFinite(margin)) return null;
+
+  // Approximate football spread-to-win conversion. Good enough for a fair-price guide.
+  const pHome = 1 / (1 + Math.exp(-margin / 6.5));
+  return Math.max(0.001, Math.min(0.999, pHome));
+}
+
+function fmtModelMoneylineCell(g) {
+  const pHome = projectedHomeWinProbFromGame(g);
+  if (pHome == null) return '—';
+
+  const pAway = 1 - pHome;
+  const awayFair = probToAmerican(pAway);
+  const homeFair = probToAmerican(pHome);
+
+  const awayHtml = fmtMoneylineTeamCell(g.away_team, awayFair, 'model');
+  const homeHtml = fmtMoneylineTeamCell(g.home_team, homeFair, 'model');
+
+  return `<div class="market-spread-two-side model-moneyline-cell">${awayHtml}${homeHtml}</div>`;
+}
+
+function fmtMoneylineTeamCell(team, ml, book) {
+  const txt = fmtMarketMoneyline(ml);
+  if (txt === '—') return '—';
+
+  const b = String(book || '').trim();
+  let bookTxt = '';
+  if (b && b.toLowerCase() !== 'model') {
+    bookTxt = ` <span class="small">· ${escapeHtml(b)}</span>`;
+  } else if (b.toLowerCase() === 'model') {
+    bookTxt = ` <span class="small">· model</span>`;
+  }
+
+  return `<div class="market-side-line">${teamImageImg(team)}<b>${escapeHtml(String(team))} ${txt}</b>${bookTxt}</div>`;
+}
+
+function fmtMoneylineCell(g) {
+  if (!hasActualMoneyline(g)) {
+    const note = g && g.market_line_note ? g.market_line_note : 'No current moneyline available';
+    return typeof noMarketLabel === 'function' ? noMarketLabel(note) : '—';
+  }
+
+  const awayBook = firstPresent(g.market_away_moneyline_book, g.market_moneyline_book, g.market_spread_book);
+  const homeBook = firstPresent(g.market_home_moneyline_book, g.market_moneyline_book, g.market_spread_book);
+
+  const awayHtml = fmtMoneylineTeamCell(g.away_team, g.market_away_moneyline, awayBook);
+  const homeHtml = fmtMoneylineTeamCell(g.home_team, g.market_home_moneyline, homeBook);
+
+  return `<div class="market-spread-two-side">${awayHtml}${homeHtml}</div>`;
+}
+
+function fmtMoneylineEdgeCell(g) {
+  const pHome = projectedHomeWinProbFromGame(g);
+  if (pHome == null || !hasActualMoneyline(g)) return '—';
+
+  const pAway = 1 - pHome;
+  const awayEv = moneylineEvPct(pAway, g.market_away_moneyline);
+  const homeEv = moneylineEvPct(pHome, g.market_home_moneyline);
+
+  const edges = [];
+  if (awayEv != null) edges.push({team:g.away_team, ev:awayEv, prob:pAway, odds:g.market_away_moneyline});
+  if (homeEv != null) edges.push({team:g.home_team, ev:homeEv, prob:pHome, odds:g.market_home_moneyline});
+
+  if (!edges.length) return '—';
+
+  edges.sort((a,b) => b.ev - a.ev);
+  const best = edges[0];
+
+  const cls = best.ev >= 3 ? 'edge-pos' : best.ev >= 0 ? 'edge-small' : 'muted';
+  const sign = best.ev >= 0 ? '+' : '';
+  const fair = fmtMarketMoneyline(probToAmerican(best.prob));
+  const market = fmtMarketMoneyline(best.odds);
+  const title = `${best.team}: model fair ${fair} vs market ${market}. Estimated EV ${sign}${best.ev.toFixed(1)}%.`;
+
+  return `<div class="moneyline-edge-tight ${cls}" title="${escapeHtml(title)}">
+    <div class="ml-edge-tight-main">${teamImageImg(best.team)}<b>${sign}${best.ev.toFixed(1)}%</b></div>
+    <div class="ml-edge-tight-sub">Fair ${fair} / ${market}</div>
+  </div>`;
+}
+// MARKET_LAB_MONEYLINE_HELPERS_END
+
+
+
 function scheduleTable(games, mode='simple') {
   const view = mode || scheduleViewMode || 'simple';
   const sortedGames = sortScheduleGames(games);
@@ -12456,7 +12668,12 @@ function scheduleTable(games, mode='simple') {
         scheduleTh('one_h_spread','SGO 1H Spread'), scheduleTh('one_h_total','SGO 1H Total'), '<th>Matchup</th>'
       ].join('')
     : view === 'marketlab'
-      ? (scheduleMarketLabMode === 'totals'
+      ? (scheduleMarketLabMode === 'moneyline'
+        ? [
+            scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
+            scheduleTh('model_moneyline','Model ML'), scheduleTh('market_moneyline','Market ML'), scheduleTh('ml_edge','ML Edge'), '<th>Matchup</th>'
+          ].join('')
+        : scheduleMarketLabMode === 'totals'
         ? [
             scheduleTh('week','Week'), scheduleTh('date','Date'), scheduleTh('away','Away'), scheduleTh('home','Home'),
             scheduleTh('proj_total','Proj Total'), scheduleTh('market_total','Market Total'), scheduleTh('total_edge','Total Edge'),
@@ -12478,7 +12695,7 @@ function scheduleTable(games, mode='simple') {
           scheduleTh('conf','Conf'), scheduleTh('neutral','Neutral'), scheduleSpreadTh('proj_spread','Spread'),
           scheduleTh('proj_total','Total'), scheduleTh('home_win','Home Win %'), scheduleTh('status','Status'), '<th>Matchup</th>'
         ].join('');
-  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'totals' ? 10 : 9) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
+  const colSpan = view === 'marketlab' ? (scheduleMarketLabMode === 'moneyline' ? 8 : (scheduleMarketLabMode === 'totals' ? 10 : 9)) : view === 'odds' ? 13 : view === 'results' ? 11 : 11;
   const tableClass = view === 'marketlab' ? `schedule-table schedule-view-marketlab schedule-marketlab-${scheduleMarketLabMode}` : `schedule-table schedule-view-${view}`;
   return `<div class="card schedule-card"><div class="schedule-scroll"><table class="${tableClass}"><thead><tr>${header}</tr></thead><tbody>
   ${sortedGames.map(g => {
@@ -12498,6 +12715,13 @@ function scheduleTable(games, mode='simple') {
       if (view === 'marketlab') {
         const ats = marketLabAtsMetrics(g);
         const tot = marketLabTotalMetrics(g);
+        if (scheduleMarketLabMode === 'moneyline') {
+          return `<tr>
+            <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${marketLabTeamCellWithRp(g, g.away_team)}</td><td>${marketLabTeamCellWithRp(g, g.home_team)}</td>
+            <td>${fmtModelMoneylineCell(g)}</td><td>${fmtMoneylineCell(g)}</td><td>${fmtMoneylineEdgeCell(g)}</td>
+            <td>${matchupButton(g)}</td>
+          </tr>${matchupScheduleDetailRow(g, colSpan)}`;
+        }
         if (scheduleMarketLabMode === 'totals') {
           return `<tr>
             <td>${g.week}</td><td class="marketlab-date-cell">${fmtDate(g.date)}</td><td>${linkTeamWithComboRank(g.away_team)}${rpSupportBadge(g, g.away_team)}</td><td>${linkTeamWithComboRank(g.home_team)}${rpSupportBadge(g, g.home_team)}</td>
@@ -14338,6 +14562,7 @@ function renderSchedule() {
       <div class="view-toggle marketlab-sub-toggle" id="marketLabSubToggle">
         <button onclick="setMarketLabMode('spreads')" class="${scheduleMarketLabMode==='spreads'?'active':''}">Spreads</button>
         <button onclick="setMarketLabMode('totals')" class="${scheduleMarketLabMode==='totals'?'active':''}">Totals</button>
+        <button onclick="setMarketLabMode('moneyline')" class="${scheduleMarketLabMode==='moneyline'?'active':''}">Moneyline</button>
       </div>` : ''}
     <div id="scheduleFilterStrip" class="schedule-filter-strip" style="margin-top:12px">
       <select id="fWeek"><option value="all">All weeks</option>${weeks.map(w=>`<option value="${w}">Week ${w}</option>`).join('')}</select>
