@@ -7244,6 +7244,38 @@ function fmtMarketSpreadCompactCell(g) {
 }
 
 
+
+// MARKET_TOTAL_ML_HOLD_HELPERS_START
+function marketHoldPctFromAmerican(a, b) {
+  const pa = americanToImpliedProb(a);
+  const pb = americanToImpliedProb(b);
+  if (pa == null || pb == null) return null;
+  const hold = (pa + pb - 1) * 100;
+  return Number.isFinite(hold) ? hold : null;
+}
+
+function marketHoldBadgeFromPct(v, labelPrefix='Hold') {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '';
+  const label = `${labelPrefix} ${n >= 0 ? '+' : ''}${n.toFixed(1)}%`;
+  let cls = 'market-hold-neutral';
+  if (n < 0) cls = 'market-hold-arb';
+  else if (n <= 2) cls = 'market-hold-low';
+  else if (n >= 5) cls = 'market-hold-high';
+  return `<div class="market-hold-badge ${cls}" title="Synthetic hold using the two displayed prices. Lower is better for the bettor. Negative hold indicates bettor edge / arbitrage condition.">${label}</div>`;
+}
+
+function marketTotalHoldBadge(g) {
+  const overPrice = firstPresent(g.market_best_over_price, marketOverPrice(g));
+  const underPrice = firstPresent(g.market_best_under_price, marketUnderPrice(g));
+  return marketHoldBadgeFromPct(marketHoldPctFromAmerican(overPrice, underPrice));
+}
+
+function marketMoneylineHoldBadge(g) {
+  return marketHoldBadgeFromPct(marketHoldPctFromAmerican(g.market_away_moneyline, g.market_home_moneyline));
+}
+// MARKET_TOTAL_ML_HOLD_HELPERS_END
+
 function fmtMarketTotalTwoSideCell(g) {
   if (isKnownBadTotalMarket(g)) return '—';
 
@@ -7266,7 +7298,8 @@ function fmtMarketTotalTwoSideCell(g) {
   const underLine = totalLine('Under', underTotal, underPrice, underBook);
 
   const lines = [overLine, underLine].filter(Boolean).join('');
-  return lines ? `<div class="market-spread-two-side market-total-two-side">${lines}</div>` : '—';
+  const holdHtml = marketTotalHoldBadge(g);
+  return lines ? `<div class="market-spread-two-side market-total-two-side">${lines}${holdHtml}</div>` : '—';
 }
 
 function fmtMarketTotalCompactCell(g) {
@@ -12503,9 +12536,29 @@ function fmtMarketTotalTwoSideCell(g) {
     return noMarketLabel(note);
   }
 
-  const total = Number(g.market_total);
-  const book = g.market_total_book ? ` <span class="small">· ${escapeHtml(g.market_total_book)}</span>` : '';
-  return `<span>${Number.isFinite(total) ? total.toFixed(1).replace(/\.0$/, '') : '—'}</span>${book}`;
+  const overTotal = firstPresent(g.market_best_over_total, g.market_total);
+  const overPrice = firstPresent(g.market_best_over_price, marketOverPrice(g));
+  const overBook = firstPresent(g.market_best_over_book, g.market_total_book);
+
+  const underTotal = firstPresent(g.market_best_under_total, g.market_total);
+  const underPrice = firstPresent(g.market_best_under_price, marketUnderPrice(g));
+  const underBook = firstPresent(g.market_best_under_book, g.market_total_book);
+
+  function totalLine(side, total, price, book) {
+    const n = Number(total);
+    if (!Number.isFinite(n)) return '';
+    const totalTxt = n.toFixed(1).replace(/\.0$/, '');
+    const priceTxt = fmtAmerican(price);
+    const bookBadge = book ? sportsbookLogo(book) : '';
+    return `<div class="market-side-line market-total-line"><b>${side} ${totalTxt}</b>${priceTxt ? ` <span class="muted">${priceTxt}</span>` : ''}${bookBadge}</div>`;
+  }
+
+  const overLine = totalLine('Over', overTotal, overPrice, overBook);
+  const underLine = totalLine('Under', underTotal, underPrice, underBook);
+  const holdHtml = marketTotalHoldBadge(g);
+
+  const lines = [overLine, underLine].filter(Boolean).join('');
+  return lines ? `<div class="market-spread-two-side market-total-two-side">${lines}${holdHtml}</div>` : '—';
 }
 
 function marketSpread(g) {
@@ -12621,8 +12674,9 @@ function fmtMoneylineCell(g) {
 
   const awayHtml = fmtMoneylineTeamCell(g.away_team, g.market_away_moneyline, awayBook);
   const homeHtml = fmtMoneylineTeamCell(g.home_team, g.market_home_moneyline, homeBook);
+  const holdHtml = marketMoneylineHoldBadge(g);
 
-  return `<div class="market-spread-two-side">${awayHtml}${homeHtml}</div>`;
+  return `<div class="market-spread-two-side">${awayHtml}${homeHtml}${holdHtml}</div>`;
 }
 
 function fmtMoneylineEdgeCell(g) {
