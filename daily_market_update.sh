@@ -248,3 +248,4 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
 
   echo "Daily market update finished: $(date)"
 } >> "$LOG" 2>&1
+run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
