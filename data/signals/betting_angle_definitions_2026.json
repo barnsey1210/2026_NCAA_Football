@@ -1,0 +1,68 @@
+{
+  "high_variance": {
+    "label": "High model variance",
+    "definition": "At least one team in the game has a 6.0+ point range across active ratings systems: SP+, FPI, and TeamRankings.",
+    "threshold": "max(team rating range) >= 6.0",
+    "meaning": "The active systems disagree strongly on at least one team. This is not automatically a bet, but it flags uncertainty and possible market/model opportunity."
+  },
+  "medium_variance": {
+    "label": "Medium+ model variance",
+    "definition": "At least one team in the game has a 3.0+ point range across SP+, FPI, and TeamRankings.",
+    "threshold": "max(team rating range) >= 3.0",
+    "meaning": "The active systems have meaningful disagreement."
+  },
+  "coin_toss": {
+    "label": "Coin toss / near pick",
+    "definition": "The production projected spread or current market spread is within 3.0 points of pick’em.",
+    "threshold": "abs(projected spread) <= 3.0 OR abs(market spread) <= 3.0",
+    "meaning": "Small changes in assumptions, injuries, or market movement can flip the side."
+  },
+  "coach_1h": {
+    "label": "Coach 1H support",
+    "definition": "A coach/team has a positive first-half ATS support signal from tracked coaching splits.",
+    "threshold": "Uses coach 1H ATS support source once normalized.",
+    "meaning": "Useful for first-half angle review, not standalone without market price."
+  },
+  "coach_ats": {
+    "label": "Coach ATS support",
+    "definition": "A coach/team has a positive full-game ATS support signal from tracked coaching splits.",
+    "threshold": "Uses coach full-game ATS support source once normalized.",
+    "meaning": "Supports side review when aligned with model/market edge."
+  },
+  "rp_support": {
+    "label": "Returning production support",
+    "definition": "A team has a returning-production matchup support signal, especially offense returning production versus opponent defense returning production.",
+    "threshold": "Current target: off-vs-opponent-def RP gap >= 10 points once normalized.",
+    "meaning": "Early-season support signal where continuity may matter before current-year stats stabilize."
+  },
+  "travel_1h": {
+    "label": "Travel / 1H travel angle",
+    "definition": "A tracked travel or road-start first-half angle applies.",
+    "threshold": "Uses travel 1H signal source once normalized.",
+    "meaning": "Flags potential early-game performance angle tied to travel/situation."
+  },
+  "lookahead": {
+    "label": "Schedule spot: lookahead",
+    "definition": "Team may be in a lookahead or sandwich schedule spot.",
+    "threshold": "Schedule spot text/source contains lookahead or sandwich.",
+    "meaning": "Situational caution flag; useful when market/model edge points against the distracted team."
+  },
+  "b2b_road": {
+    "label": "Schedule spot: b2b road",
+    "definition": "Team is playing consecutive road games or a back-to-back road spot.",
+    "threshold": "Schedule spot source contains b2b road, back-to-back road, consecutive road, or second straight road.",
+    "meaning": "Situational fatigue/travel flag."
+  },
+  "injury": {
+    "label": "Injury alert",
+    "definition": "Game has a tracked injury or depth-chart alert.",
+    "threshold": "Injury alert exists or injury score > 0.",
+    "meaning": "Manual review required; impact depends on player/position importance and recency."
+  },
+  "market_move": {
+    "label": "Market move / steam",
+    "definition": "Current or future line-history signal showing meaningful market movement.",
+    "threshold": "To be added after line-history normalization.",
+    "meaning": "Can identify steam, stale numbers, or book disagreement."
+  }
+}
