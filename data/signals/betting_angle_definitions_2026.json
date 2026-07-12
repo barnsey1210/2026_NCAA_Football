@@ -13,32 +13,32 @@
   },
   "coin_toss": {
     "label": "Coin toss / near pick",
-    "definition": "The production projected spread or current market spread is within 3.0 points of pick’em.",
+    "definition": "The production projected spread or current market spread is within 3.0 points of pick\u2019em.",
     "threshold": "abs(projected spread) <= 3.0 OR abs(market spread) <= 3.0",
     "meaning": "Small changes in assumptions, injuries, or market movement can flip the side."
   },
   "coach_1h": {
     "label": "Coach 1H support",
-    "definition": "A coach/team has a positive first-half ATS support signal from tracked coaching splits.",
-    "threshold": "Uses coach 1H ATS support source once normalized.",
+    "definition": "A team/coach has a positive first-half ATS support signal in the projected favorite/underdog role for this game.",
+    "threshold": "period = 1H, is_applicable = true, games >= 7, avg ATS margin >= +2.5",
     "meaning": "Useful for first-half angle review, not standalone without market price."
   },
   "coach_ats": {
     "label": "Coach ATS support",
-    "definition": "A coach/team has a positive full-game ATS support signal from tracked coaching splits.",
-    "threshold": "Uses coach full-game ATS support source once normalized.",
+    "definition": "A team/coach has a positive full-game ATS support signal in the projected favorite/underdog role for this game.",
+    "threshold": "period = Full Game, is_applicable = true, games >= 20, avg ATS margin >= +2.0",
     "meaning": "Supports side review when aligned with model/market edge."
   },
   "rp_support": {
     "label": "Returning production support",
-    "definition": "A team has a returning-production matchup support signal, especially offense returning production versus opponent defense returning production.",
-    "threshold": "Current target: off-vs-opponent-def RP gap >= 10 points once normalized.",
+    "definition": "A returning-production matchup signal applies to the game, including offense returning production versus opponent defense returning production.",
+    "threshold": "RP support badge exists OR early-season returning-production signal exists. Badge source uses offense RP vs opponent defense RP gap.",
     "meaning": "Early-season support signal where continuity may matter before current-year stats stabilize."
   },
   "travel_1h": {
     "label": "Travel / 1H travel angle",
-    "definition": "A tracked travel or road-start first-half angle applies.",
-    "threshold": "Uses travel 1H signal source once normalized.",
+    "definition": "A 3+ timezone travel first-half signal applies, including road favorite start, road dog fade, or related 1H total angle.",
+    "threshold": "Game appears in travel_1h_signals_2026.csv with 3+ timezone travel signal.",
     "meaning": "Flags potential early-game performance angle tied to travel/situation."
   },
   "lookahead": {
@@ -55,8 +55,8 @@
   },
   "injury": {
     "label": "Injury alert",
-    "definition": "Game has a tracked injury or depth-chart alert.",
-    "threshold": "Injury alert exists or injury score > 0.",
+    "definition": "A tracked injury/depth-chart signal exists for the game. Current preseason file has zero active injury alerts.",
+    "threshold": "game_injury_score > 0 from game_injury_alerts.csv",
     "meaning": "Manual review required; impact depends on player/position importance and recency."
   },
   "market_move": {

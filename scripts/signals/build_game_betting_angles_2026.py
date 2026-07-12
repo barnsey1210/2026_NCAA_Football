@@ -2,9 +2,16 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import json
+import re
 
 GAMES = Path("data/projections/game_projection_blend_2026.csv")
+SITE = Path("index.html")
 VAR = Path("data/ratings/ratings_system_variance.csv")
+RP_BADGES = Path("data/site/rp_support_badges.json")
+RP_SIGNALS = Path("data/signals/returning_production_early_season_signals.csv")
+TRAVEL_1H = Path("data/signals/travel_1h_signals_2026.csv")
+COACH_CONTEXT = Path("data/coach/game_coach_fav_dog_context.csv")
+INJURY_GAMES = Path("data/injuries/game_injury_alerts.csv")
 OUT = Path("data/signals/game_betting_angles_2026.csv")
 
 def num(x):
@@ -19,6 +26,20 @@ def clean(x):
     if pd.isna(x):
         return ""
     return str(x)
+
+def norm_team(x):
+    return re.sub(r"[^a-z0-9]+", " ", clean(x).lower()).strip()
+
+def load_games():
+    if SITE.exists():
+        txt = SITE.read_text(errors="ignore")
+        m = re.search(r'<script id="db" type="application/json">(.*?)</script>', txt, flags=re.S)
+        if m:
+            db = json.loads(m.group(1))
+            games = pd.DataFrame(db.get("games", []))
+            if len(games):
+                return games
+    return pd.read_csv(GAMES)
 
 def market_spread_home(row):
     for c in [
@@ -49,17 +70,18 @@ def add_angle(rows, g, angle_key, angle_label, side_team, reason, metric_value=n
         "sort_score": sort_score if np.isfinite(num(sort_score)) else metric_value,
     })
 
-def main():
-    games = pd.read_csv(GAMES)
-    var = pd.read_csv(VAR)
+def make_game_lookup(games):
+    by_id = {}
+    by_match = {}
+    for _, g in games.iterrows():
+        gid = clean(g.get("game_id"))
+        if gid:
+            by_id[gid] = g
+        key = (clean(g.get("date")), norm_team(g.get("away_team")), norm_team(g.get("home_team")))
+        by_match[key] = g
+    return by_id, by_match
 
-    var_by_team = {
-        r["team"]: r.to_dict()
-        for _, r in var.iterrows()
-    }
-
-    rows = []
-
+def add_ratings_variance(rows, games, var_by_team):
     for _, g in games.iterrows():
         away = clean(g.get("away_team"))
         home = clean(g.get("home_team"))
@@ -71,7 +93,6 @@ def main():
         home_range = num(home_v.get("rating_range"))
         max_range = np.nanmax([away_range, home_range]) if any(np.isfinite(x) for x in [away_range, home_range]) else np.nan
 
-        # High / medium model variance.
         if np.isfinite(max_range) and max_range >= 6.0:
             side = away if away_range >= home_range else home
             v = away_v if side == away else home_v
@@ -101,7 +122,8 @@ def main():
                 max_range,
             )
 
-        # Coin toss / near pick.
+def add_coin_toss(rows, games):
+    for _, g in games.iterrows():
         proj = num(g.get("projected_margin_home"))
         mkt = market_spread_home(g)
 
@@ -109,12 +131,12 @@ def main():
         coin_metric = np.nan
 
         if np.isfinite(proj) and abs(proj) <= 3.0:
-            fav = home if proj >= 0 else away
+            fav = clean(g.get("home_team")) if proj >= 0 else clean(g.get("away_team"))
             coin_reasons.append(f"model spread {fav} -{abs(proj):.1f}")
             coin_metric = abs(proj)
 
         if np.isfinite(mkt) and abs(mkt) <= 3.0:
-            fav = home if mkt <= 0 else away
+            fav = clean(g.get("home_team")) if mkt <= 0 else clean(g.get("away_team"))
             coin_reasons.append(f"market spread {fav} -{abs(mkt):.1f}")
             coin_metric = min(coin_metric, abs(mkt)) if np.isfinite(coin_metric) else abs(mkt)
 
@@ -130,34 +152,138 @@ def main():
                 3.0 - coin_metric if np.isfinite(coin_metric) else 0,
             )
 
-        # Schedule spot heuristics from existing columns, if present.
-        all_text = " ".join(f"{c}:{clean(g.get(c))}" for c in games.columns).lower()
+def add_rp_badges(rows, by_match):
+    if RP_BADGES.exists():
+        items = json.loads(RP_BADGES.read_text())
+        for r in items:
+            key = (clean(r.get("date")), norm_team(r.get("away_team")), norm_team(r.get("home_team")))
+            g = by_match.get(key)
+            if g is None:
+                continue
+            gap = num(r.get("off_vs_def_gap"))
+            team = clean(r.get("team"))
+            opp = clean(r.get("opponent"))
+            reason = f"{team} offense RP {num(r.get('team_off_rp')):.0f}% vs {opp} defense RP {num(r.get('opp_def_rp')):.0f}% = +{gap:.0f} gap."
+            add_angle(rows, g, "rp_support", "Returning production support", team, reason, gap, "medium" if gap < 25 else "high", gap)
 
-        if "lookahead" in all_text or "look ahead" in all_text or "sandwich" in all_text:
-            add_angle(rows, g, "lookahead", "Schedule spot: lookahead", "", "Schedule spot text contains lookahead/sandwich.", np.nan, "medium", 5)
+    if RP_SIGNALS.exists():
+        df = pd.read_csv(RP_SIGNALS)
+        by_gid = {}
+        for _, r in df.iterrows():
+            gid = clean(r.get("game_id"))
+            if not gid:
+                continue
+            by_gid.setdefault(gid, []).append(r)
 
-        if "b2b road" in all_text or "back-to-back road" in all_text or "consecutive road" in all_text or "2nd straight road" in all_text:
-            add_angle(rows, g, "b2b_road", "Schedule spot: b2b road", "", "Schedule spot text indicates back-to-back/consecutive road game.", np.nan, "medium", 5)
+        for gid, rs in by_gid.items():
+            # add one best signal per game to avoid clutter
+            r = sorted(rs, key=lambda x: abs(num(x.get("score"))), reverse=True)[0]
+            g = pd.Series({"game_id": gid, "week": r.get("week"), "date": r.get("date"), "away_team": r.get("away_team"), "home_team": r.get("home_team")})
+            score = num(r.get("score"))
+            team = clean(r.get("team"))
+            headline = clean(r.get("headline"))
+            detail = clean(r.get("detail"))
+            reason = headline or detail[:180]
+            if not reason:
+                reason = "Returning production early-season signal."
+            add_angle(rows, g, "rp_support", "Returning production support", team, reason, abs(score), clean(r.get("confidence")).lower() or "medium", abs(score))
 
-        if "injury alert" in all_text or "injuries" in all_text or "injury" in all_text:
-            score_cols = [c for c in games.columns if "injury" in c.lower() and ("score" in c.lower() or "alert" in c.lower())]
-            score_vals = [num(g.get(c)) for c in score_cols]
-            score_vals = [x for x in score_vals if np.isfinite(x)]
-            metric = max(score_vals) if score_vals else np.nan
-            add_angle(rows, g, "injury", "Injury alert", "", "Game has injury-related alert/score fields.", metric, "high" if np.isfinite(metric) and metric > 0 else "medium", metric if np.isfinite(metric) else 1)
+def add_travel(rows, by_id):
+    if not TRAVEL_1H.exists():
+        return
+    df = pd.read_csv(TRAVEL_1H)
+    for _, r in df.iterrows():
+        gid = clean(r.get("game_id"))
+        g = by_id.get(gid)
+        if g is None:
+            g = r
+        side = clean(r.get("spread_side"))
+        badge = clean(r.get("spread_badge"))
+        title = clean(r.get("spread_title"))
+        tz = num(r.get("tz_abs"))
+        reason = f"{badge}: {title}" if title else badge
+        add_angle(rows, g, "travel_1h", "Travel / 1H travel angle", side, reason, tz, "medium", tz)
 
-        # Placeholders that can be upgraded once we normalize coach/RP/travel source files.
-        if "rp support" in all_text or "returning production" in all_text or "off_vs_def" in all_text:
-            add_angle(rows, g, "rp_support", "Returning production support", "", "Returning production support detected in game fields.", np.nan, "medium", 4)
+def add_coach(rows, by_id):
+    if not COACH_CONTEXT.exists():
+        return
+    df = pd.read_csv(COACH_CONTEXT)
+    df = df[df["is_applicable"].astype(str).str.lower().isin(["true", "1", "yes"])].copy()
+    df["avg_ats_margin_num"] = pd.to_numeric(df["avg_ats_margin"], errors="coerce")
+    df["games_num"] = pd.to_numeric(df["games"], errors="coerce")
+    df["ats_win_pct_num"] = pd.to_numeric(df["ats_win_pct"], errors="coerce")
 
-        if "coach" in all_text and "1h" in all_text:
-            add_angle(rows, g, "coach_1h", "Coach 1H support", "", "Coach 1H support detected in game fields.", np.nan, "medium", 4)
+    # 1H support: positive margin, enough games, applicable current role.
+    c1 = df[
+        df["period"].astype(str).eq("1H")
+        & (df["games_num"] >= 7)
+        & (df["avg_ats_margin_num"] >= 2.5)
+    ].copy()
 
-        if "coach" in all_text and "ats" in all_text:
-            add_angle(rows, g, "coach_ats", "Coach ATS support", "", "Coach ATS support detected in game fields.", np.nan, "medium", 4)
+    for _, r in c1.iterrows():
+        g = by_id.get(clean(r.get("game_id")))
+        if g is None:
+            g = r
+        reason = f"{clean(r.get('coach'))} 1H {clean(r.get('fav_dog'))}: {clean(r.get('ats_record'))}, avg ATS margin +{num(r.get('avg_ats_margin')):.1f} over {int(num(r.get('games')))} games."
+        add_angle(rows, g, "coach_1h", "Coach 1H support", clean(r.get("team")), reason, num(r.get("avg_ats_margin")), "medium", num(r.get("avg_ats_margin")))
 
-        if "travel" in all_text and "1h" in all_text:
-            add_angle(rows, g, "travel_1h", "Travel / 1H travel angle", "", "Travel/1H angle detected in game fields.", np.nan, "medium", 4)
+    # Full game ATS support.
+    cf = df[
+        df["period"].astype(str).eq("Full Game")
+        & (df["games_num"] >= 20)
+        & (df["avg_ats_margin_num"] >= 2.0)
+    ].copy()
+
+    for _, r in cf.iterrows():
+        g = by_id.get(clean(r.get("game_id")))
+        if g is None:
+            g = r
+        reason = f"{clean(r.get('coach'))} full-game {clean(r.get('fav_dog'))}: {clean(r.get('ats_record'))}, avg ATS margin +{num(r.get('avg_ats_margin')):.1f} over {int(num(r.get('games')))} games."
+        add_angle(rows, g, "coach_ats", "Coach ATS support", clean(r.get("team")), reason, num(r.get("avg_ats_margin")), "medium", num(r.get("avg_ats_margin")))
+
+def add_injuries(rows, by_id):
+    if not INJURY_GAMES.exists():
+        return
+    df = pd.read_csv(INJURY_GAMES)
+    for _, r in df.iterrows():
+        score = num(r.get("game_injury_score"))
+        summary = clean(r.get("injury_summary"))
+        tier = clean(r.get("game_injury_tier")).lower()
+        if not np.isfinite(score) or score <= 0:
+            continue
+        g = by_id.get(clean(r.get("game_id")))
+        if g is None:
+            g = r
+        reason = summary or f"Game injury score {score:.1f}."
+        add_angle(rows, g, "injury", "Injury alert", "", reason, score, tier or "high", score)
+
+def dedupe(out):
+    if out.empty:
+        return out
+    out["_dedupe_key"] = (
+        out["game_id"].astype(str) + "|" +
+        out["angle_key"].astype(str) + "|" +
+        out["side_team"].astype(str) + "|" +
+        out["reason"].astype(str).str.slice(0, 80)
+    )
+    out = out.sort_values(["angle_key","sort_score","week","date"], ascending=[True,False,True,True])
+    out = out.drop_duplicates("_dedupe_key", keep="first").drop(columns=["_dedupe_key"])
+    return out
+
+def main():
+    games = load_games()
+    by_id, by_match = make_game_lookup(games)
+
+    var = pd.read_csv(VAR)
+    var_by_team = {r["team"]: r.to_dict() for _, r in var.iterrows()}
+
+    rows = []
+    add_ratings_variance(rows, games, var_by_team)
+    add_coin_toss(rows, games)
+    add_rp_badges(rows, by_match)
+    add_travel(rows, by_id)
+    add_coach(rows, by_id)
+    add_injuries(rows, by_id)
 
     out = pd.DataFrame(rows)
     if out.empty:
@@ -166,6 +292,7 @@ def main():
             "side_team","reason","metric_value","tier","sort_score"
         ])
 
+    out = dedupe(out)
     out = out.sort_values(["angle_key","sort_score","week","date"], ascending=[True,False,True,True])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT, index=False)
@@ -177,7 +304,7 @@ def main():
         print(out["angle_key"].value_counts().to_string())
         print()
         print("Sample:")
-        print(out.head(40).to_string(index=False))
+        print(out.head(60).to_string(index=False))
 
 if __name__ == "__main__":
     main()

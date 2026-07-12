@@ -263,6 +263,10 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
 
   echo "Daily market update finished: $(date)"
 } >> "$LOG" 2>&1
+run_py "rerun_conference_sims_2026.py --index index.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index.html" || echo "WARNING: conference sim rerun failed"
+run_py "rerun_conference_sims_2026.py --index index_auto_market.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index_auto_market.html" || echo "WARNING: conference sim rerun auto failed"
+run_py "rerun_conference_sims_2026.py --index index_publish.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index_publish.html" || echo "WARNING: conference sim rerun publish failed"
+run_py "build_conference_rule_tools.py" "build_conference_rule_tools.py" || echo "WARNING: conference rule tools failed"
 run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
 run_py "scripts/site/cleanup_stale_projection_audit_notes.py" "cleanup_stale_projection_audit_notes.py" || echo "WARNING: stale projection audit cleanup failed"
 run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
