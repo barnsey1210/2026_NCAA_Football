@@ -85,7 +85,16 @@ run_py() {
     --conference-futures-csv "market_conference_futures_import.csv" \
     --output-xlsx "market_futures_export.xlsx"
 
-  python3 build_site_from_workbook_safe_with_movement.py \
+  
+# Active 2026 ratings/projection refresh must happen before HTML site build.
+run_py "build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
+run_py "scripts/ratings/build_active_2026_ratings_master.py" "build_active_2026_ratings_master.py" || echo "WARNING: active 2026 ratings master build failed"
+run_py "append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
+run_py "build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
+run_py "build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
+run_py "build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
+
+python3 build_site_from_workbook_safe_with_movement.py \
     --workbook "2026_NCAA _Season.xlsm" \
     --template "index.html" \
     --output "index_auto_market.html" \
@@ -172,7 +181,8 @@ run_py "scripts/site/patch_dashboard_all_market_moves.py" "patch_dashboard_all_m
   run_py "scripts/ratings/build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
   run_py "scripts/audit/audit_ratings_source_freshness.py" "audit_ratings_source_freshness.py" || echo "WARNING: ratings source freshness audit failed"
 
-  python3 scripts/audit/fix_game_projection_spreads_from_current_ratings.py --apply || echo "WARNING: projection spread fix failed"
+  # DISABLED 2026-07-11: can overwrite blended projections back to rating-only lines
+# python3 scripts/audit/fix_game_projection_spreads_from_current_ratings.py --apply || echo "WARNING: projection spread fix failed"
 run_py "scripts/weather/pull_open_meteo_game_weather.py" "pull_open_meteo_game_weather.py" || echo "WARNING: weather pull failed"
 run_py "scripts/history/append_game_line_model_history.py" "append_game_line_model_history.py" || echo "WARNING: game line/model history append failed"
 run_py "scripts/betting/pull_google_sheet_bets.py" "pull_google_sheet_bets.py" || echo "WARNING: betting sheet pull failed"
@@ -192,8 +202,10 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
 
   # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
 
-  run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
-  run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
+  # DISABLED: moved before site build
+# run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
+  # DISABLED: moved before site build
+# run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
 
   # Optional email send. Do not let missing Gmail env vars stop the market/site/rating build.
   if [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
