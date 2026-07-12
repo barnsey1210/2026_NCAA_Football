@@ -89,6 +89,7 @@ run_py() {
 # Active 2026 ratings/projection refresh must happen before HTML site build.
 run_py "build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
 run_py "scripts/ratings/build_active_2026_ratings_master.py" "build_active_2026_ratings_master.py" || echo "WARNING: active 2026 ratings master build failed"
+run_py "scripts/ratings/build_ratings_system_variance.py" "build_ratings_system_variance.py" || echo "WARNING: ratings variance build failed"
 run_py "append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
 run_py "build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
 run_py "build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
@@ -264,3 +265,5 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
 run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
 run_py "scripts/site/cleanup_stale_projection_audit_notes.py" "cleanup_stale_projection_audit_notes.py" || echo "WARNING: stale projection audit cleanup failed"
 run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
+run_py "scripts/site/inject_schedule_model_context.py" "inject_schedule_model_context.py" || echo "WARNING: schedule model context injection failed"
+run_py "scripts/site/inject_schedule_spread_lab_display.py" "inject_schedule_spread_lab_display.py" || echo "WARNING: schedule spread lab display injection failed"

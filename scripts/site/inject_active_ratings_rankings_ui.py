@@ -183,6 +183,18 @@ CSS = r'''
 JS = r'''
 <script id="active-ratings-rankings-ui">
 (function(){
+  // Reset old pre-active-2026 display-lab settings once.
+  // This prevents stale browser localStorage from showing SP+ 100% after production moved to active-three.
+  try {
+    const versionKey = 'ratingLabModelVersion';
+    const currentVersion = 'active-2026-sp-fpi-teamrankings-v2-reset-display-default';
+    if (localStorage.getItem(versionKey) !== currentVersion) {
+      localStorage.removeItem('ratingLabWeights');
+      localStorage.removeItem('ratingLabDraftWeights');
+      localStorage.setItem(versionKey, currentVersion);
+    }
+  } catch(e) {}
+
   function pct(x){ return Math.round(Number(x || 0) * 1000) / 10; }
   function fmtPulled(x){
     if (!x) return 'Pulled: —';

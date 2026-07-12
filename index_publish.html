@@ -18861,6 +18861,43 @@ window.OPENING_POSSESSION_MAIN_BADGES = [{"team":"Bowling Green","head_coach":"E
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <style id="active-ratings-rankings-ui-style">
 .active-ratings-status-grid{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px;margin:12px 0 10px}
 .active-rating-source-card{border:1px solid rgba(148,163,184,.28);border-radius:14px;padding:10px 12px;background:rgba(15,23,42,.035)}
@@ -18881,6 +18918,18 @@ window.OPENING_POSSESSION_MAIN_BADGES = [{"team":"Bowling Green","head_coach":"E
 
 <script id="active-ratings-rankings-ui">
 (function(){
+  // Reset old pre-active-2026 display-lab settings once.
+  // This prevents stale browser localStorage from showing SP+ 100% after production moved to active-three.
+  try {
+    const versionKey = 'ratingLabModelVersion';
+    const currentVersion = 'active-2026-sp-fpi-teamrankings-v2-reset-display-default';
+    if (localStorage.getItem(versionKey) !== currentVersion) {
+      localStorage.removeItem('ratingLabWeights');
+      localStorage.removeItem('ratingLabDraftWeights');
+      localStorage.setItem(versionKey, currentVersion);
+    }
+  } catch(e) {}
+
   function pct(x){ return Math.round(Number(x || 0) * 1000) / 10; }
   function fmtPulled(x){
     if (!x) return 'Pulled: —';
@@ -19033,6 +19082,162 @@ window.OPENING_POSSESSION_MAIN_BADGES = [{"team":"Bowling Green","head_coach":"E
 })();
 </script>
 
+
+
+
+<style id="schedule-model-context-style">
+.model-context-card{border:1px solid rgba(148,163,184,.28);border-radius:16px;padding:12px 14px;margin:12px 0;background:rgba(15,23,42,.22)}
+.model-context-title{font-weight:1000;font-size:14px;margin-bottom:6px}
+.model-context-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px}
+.model-context-pill{border:1px solid rgba(148,163,184,.25);border-radius:12px;padding:8px 10px;background:rgba(15,23,42,.18);font-size:11px;font-weight:850;color:#cbd5e1}
+.model-context-pill b{display:block;color:#f8fafc;font-size:12px}
+.variance-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:1000;border:1px solid rgba(148,163,184,.25);white-space:nowrap}
+.variance-badge.low{background:rgba(22,163,74,.13);color:#86efac;border-color:rgba(34,197,94,.35)}
+.variance-badge.medium{background:rgba(245,158,11,.14);color:#fde68a;border-color:rgba(245,158,11,.38)}
+.variance-badge.high{background:rgba(239,68,68,.14);color:#fecaca;border-color:rgba(239,68,68,.40)}
+.lab-spread-note{display:block;margin-top:3px;font-size:10px;font-weight:900;color:#93c5fd}
+.lab-spread-note strong{color:#dbeafe}
+@media(max-width:900px){.model-context-grid{grid-template-columns:1fr 1fr}}
+</style>
+
+<script id="schedule-model-context-js">
+const RATING_VARIANCE_BY_TEAM = {"Southern Miss":{"rating_range":18.2,"rating_stddev":9.322,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Charlotte":{"rating_range":17.8,"rating_stddev":8.901,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Sacramento State":{"rating_range":12.3,"rating_stddev":6.337,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Massachusetts":{"rating_range":12.1,"rating_stddev":6.407,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Georgia State":{"rating_range":9.9,"rating_stddev":4.969,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Middle Tennessee":{"rating_range":9.9,"rating_stddev":4.951,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Missouri State":{"rating_range":8.6,"rating_stddev":4.908,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"teamrankings"},"Toledo":{"rating_range":8.5,"rating_stddev":4.321,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Sam Houston":{"rating_range":7.9,"rating_stddev":4.077,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Ball State":{"rating_range":7.9,"rating_stddev":4.077,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Tulane":{"rating_range":7.8,"rating_stddev":3.961,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"UCLA":{"rating_range":7.7,"rating_stddev":3.874,"rating_variance_tier":"high","highest_source":"teamrankings","lowest_source":"fpi"},"Miami-OH":{"rating_range":7.7,"rating_stddev":3.853,"rating_variance_tier":"high","highest_source":"spplus","lowest_source":"teamrankings"},"Minnesota":{"rating_range":7.5,"rating_stddev":3.782,"rating_variance_tier":"high","highest_source":"teamrankings","lowest_source":"fpi"},"North Dakota State":{"rating_range":6.9,"rating_stddev":3.647,"rating_variance_tier":"high","highest_source":"spplus","lowest_source":"fpi"},"Wisconsin":{"rating_range":6.6,"rating_stddev":3.305,"rating_variance_tier":"high","highest_source":"teamrankings","lowest_source":"spplus"},"Washington":{"rating_range":6.5,"rating_stddev":3.342,"rating_variance_tier":"high","highest_source":"teamrankings","lowest_source":"fpi"},"Ole Miss":{"rating_range":6.4,"rating_stddev":3.667,"rating_variance_tier":"high","highest_source":"teamrankings","lowest_source":"spplus"},"Delaware":{"rating_range":6.4,"rating_stddev":3.559,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"spplus"},"Nevada":{"rating_range":6.2,"rating_stddev":3.496,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"teamrankings"},"Northern Illinois":{"rating_range":6.1,"rating_stddev":3.073,"rating_variance_tier":"high","highest_source":"fpi","lowest_source":"teamrankings"},"Colorado":{"rating_range":5.9,"rating_stddev":2.974,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Indiana":{"rating_range":5.9,"rating_stddev":3.083,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Buffalo":{"rating_range":5.7,"rating_stddev":3.024,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Ohio":{"rating_range":5.6,"rating_stddev":2.801,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"spplus"},"North Texas":{"rating_range":5.4,"rating_stddev":2.71,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"spplus"},"Kansas State":{"rating_range":5.3,"rating_stddev":3.004,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"Kennesaw State":{"rating_range":5.2,"rating_stddev":2.919,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Kentucky":{"rating_range":5.1,"rating_stddev":2.608,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Air Force":{"rating_range":5.0,"rating_stddev":2.73,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"UL-Monroe":{"rating_range":5.0,"rating_stddev":2.754,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"spplus"},"Oklahoma":{"rating_range":4.8,"rating_stddev":2.615,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Boston College":{"rating_range":4.7,"rating_stddev":2.442,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Texas":{"rating_range":4.7,"rating_stddev":2.401,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Fresno State":{"rating_range":4.5,"rating_stddev":2.542,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Army":{"rating_range":4.4,"rating_stddev":2.212,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Bowling Green":{"rating_range":4.4,"rating_stddev":2.433,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"UTEP":{"rating_range":4.4,"rating_stddev":2.409,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Miami-FL":{"rating_range":4.3,"rating_stddev":2.287,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Utah":{"rating_range":4.3,"rating_stddev":2.268,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Western Michigan":{"rating_range":4.3,"rating_stddev":2.234,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"West Virginia":{"rating_range":4.3,"rating_stddev":2.329,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Kent State":{"rating_range":4.2,"rating_stddev":2.101,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Florida Atlantic":{"rating_range":4.2,"rating_stddev":2.12,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"Cincinnati":{"rating_range":4.2,"rating_stddev":2.397,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Oregon":{"rating_range":4.2,"rating_stddev":2.163,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Louisville":{"rating_range":4.2,"rating_stddev":2.128,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Colorado State":{"rating_range":4.1,"rating_stddev":2.06,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"USC":{"rating_range":4.1,"rating_stddev":2.312,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Michigan":{"rating_range":3.9,"rating_stddev":2.196,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Texas State":{"rating_range":3.9,"rating_stddev":1.96,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Utah State":{"rating_range":3.9,"rating_stddev":2.026,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Hawaii":{"rating_range":3.9,"rating_stddev":1.967,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Arizona State":{"rating_range":3.9,"rating_stddev":1.96,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Texas Tech":{"rating_range":3.8,"rating_stddev":2.022,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Duke":{"rating_range":3.8,"rating_stddev":1.908,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Oklahoma State":{"rating_range":3.8,"rating_stddev":2.088,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"UTSA":{"rating_range":3.8,"rating_stddev":2.194,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"Florida":{"rating_range":3.8,"rating_stddev":1.931,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Wyoming":{"rating_range":3.7,"rating_stddev":2.081,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Oregon State":{"rating_range":3.7,"rating_stddev":1.85,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Washington State":{"rating_range":3.7,"rating_stddev":1.888,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"UNLV":{"rating_range":3.6,"rating_stddev":1.858,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"teamrankings"},"Ohio State":{"rating_range":3.6,"rating_stddev":1.95,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Georgia":{"rating_range":3.6,"rating_stddev":1.909,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"SMU":{"rating_range":3.5,"rating_stddev":1.966,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Houston":{"rating_range":3.5,"rating_stddev":1.79,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Pittsburgh":{"rating_range":3.5,"rating_stddev":1.992,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Western Kentucky":{"rating_range":3.5,"rating_stddev":1.916,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Alabama":{"rating_range":3.4,"rating_stddev":1.704,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Northwestern":{"rating_range":3.4,"rating_stddev":1.908,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Notre Dame":{"rating_range":3.3,"rating_stddev":1.877,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"spplus"},"Iowa":{"rating_range":3.3,"rating_stddev":1.825,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"Missouri":{"rating_range":3.2,"rating_stddev":1.701,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"California":{"rating_range":3.1,"rating_stddev":1.71,"rating_variance_tier":"medium","highest_source":"teamrankings","lowest_source":"fpi"},"East Carolina":{"rating_range":3.1,"rating_stddev":1.552,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Illinois":{"rating_range":3.0,"rating_stddev":1.704,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"New Mexico":{"rating_range":3.0,"rating_stddev":1.501,"rating_variance_tier":"medium","highest_source":"spplus","lowest_source":"fpi"},"Georgia Southern":{"rating_range":3.0,"rating_stddev":1.677,"rating_variance_tier":"medium","highest_source":"fpi","lowest_source":"teamrankings"},"Arizona":{"rating_range":3.0,"rating_stddev":1.5,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Jacksonville State":{"rating_range":3.0,"rating_stddev":1.553,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"South Alabama":{"rating_range":2.8,"rating_stddev":1.537,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"North Carolina":{"rating_range":2.8,"rating_stddev":1.411,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Boise State":{"rating_range":2.8,"rating_stddev":1.589,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Maryland":{"rating_range":2.8,"rating_stddev":1.429,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Tulsa":{"rating_range":2.7,"rating_stddev":1.35,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"San Diego State":{"rating_range":2.7,"rating_stddev":1.48,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Texas A&M":{"rating_range":2.7,"rating_stddev":1.48,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Penn State":{"rating_range":2.7,"rating_stddev":1.401,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"TCU":{"rating_range":2.7,"rating_stddev":1.401,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"New Mexico State":{"rating_range":2.7,"rating_stddev":1.401,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"UAB":{"rating_range":2.7,"rating_stddev":1.531,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Akron":{"rating_range":2.6,"rating_stddev":1.311,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Kansas":{"rating_range":2.6,"rating_stddev":1.32,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Mississippi State":{"rating_range":2.5,"rating_stddev":1.389,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"spplus"},"NC State":{"rating_range":2.5,"rating_stddev":1.25,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Arkansas State":{"rating_range":2.5,"rating_stddev":1.29,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"BYU":{"rating_range":2.4,"rating_stddev":1.212,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Virginia":{"rating_range":2.4,"rating_stddev":1.201,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"spplus"},"Marshall":{"rating_range":2.4,"rating_stddev":1.386,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Florida International":{"rating_range":2.4,"rating_stddev":1.201,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Eastern Michigan":{"rating_range":2.4,"rating_stddev":1.201,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Temple":{"rating_range":2.3,"rating_stddev":1.3,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Appalachian State":{"rating_range":2.3,"rating_stddev":1.15,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Auburn":{"rating_range":2.2,"rating_stddev":1.114,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"spplus"},"LSU":{"rating_range":2.1,"rating_stddev":1.159,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Liberty":{"rating_range":2.1,"rating_stddev":1.06,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"Florida State":{"rating_range":2.0,"rating_stddev":1.041,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Virginia Tech":{"rating_range":2.0,"rating_stddev":1.007,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Baylor":{"rating_range":2.0,"rating_stddev":1.127,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Rutgers":{"rating_range":2.0,"rating_stddev":1.0,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Purdue":{"rating_range":2.0,"rating_stddev":1.007,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Louisiana":{"rating_range":2.0,"rating_stddev":1.007,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Iowa State":{"rating_range":1.9,"rating_stddev":0.95,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"South Florida":{"rating_range":1.9,"rating_stddev":1.002,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Clemson":{"rating_range":1.8,"rating_stddev":0.917,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Navy":{"rating_range":1.8,"rating_stddev":0.987,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Georgia Tech":{"rating_range":1.8,"rating_stddev":0.987,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Rice":{"rating_range":1.8,"rating_stddev":0.929,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"teamrankings"},"Tennessee":{"rating_range":1.7,"rating_stddev":0.85,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Coastal Carolina":{"rating_range":1.7,"rating_stddev":0.981,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Troy":{"rating_range":1.7,"rating_stddev":0.907,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"Stanford":{"rating_range":1.4,"rating_stddev":0.737,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Old Dominion":{"rating_range":1.4,"rating_stddev":0.757,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Louisiana Tech":{"rating_range":1.3,"rating_stddev":0.681,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Wake Forest":{"rating_range":1.2,"rating_stddev":0.643,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"Central Florida":{"rating_range":1.2,"rating_stddev":0.643,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"San Jose State":{"rating_range":1.2,"rating_stddev":0.6,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Nebraska":{"rating_range":1.1,"rating_stddev":0.569,"rating_variance_tier":"low","highest_source":"fpi","lowest_source":"spplus"},"Vanderbilt":{"rating_range":1.0,"rating_stddev":0.529,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Memphis":{"rating_range":0.8,"rating_stddev":0.4,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Michigan State":{"rating_range":0.7,"rating_stddev":0.379,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"teamrankings"},"Syracuse":{"rating_range":0.6,"rating_stddev":0.321,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"James Madison":{"rating_range":0.6,"rating_stddev":0.321,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"spplus"},"Arkansas":{"rating_range":0.6,"rating_stddev":0.3,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"South Carolina":{"rating_range":0.5,"rating_stddev":0.265,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"fpi"},"Central Michigan":{"rating_range":0.4,"rating_stddev":0.2,"rating_variance_tier":"low","highest_source":"spplus","lowest_source":"fpi"},"Connecticut":{"rating_range":0.3,"rating_stddev":0.173,"rating_variance_tier":"low","highest_source":"teamrankings","lowest_source":"spplus"}};
+const GAME_PROJECTION_BLEND_CONFIG = {"spread_weights":{"Site Projection":1.0,"Massey Games":0.0,"Sagarin Predictor Prediction":0.0,"Sagarin Predictor Home/Away Experimental":0.0,"DRatings Predictions":0.0},"total_weights":{"Site Projection":1.0,"Massey Games":0.0,"Sagarin Predictor Prediction":0.0,"Sagarin Predictor Home/Away Experimental":0.0,"DRatings Predictions":0.0}};
+
+(function(){
+  function pct(x){ return `${Math.round(Number(x || 0) * 100)}%`; }
+  function fmtNum(x, d=1){
+    const n = Number(x);
+    return Number.isFinite(n) ? n.toFixed(d) : '—';
+  }
+  function spreadText(homeTeam, awayTeam, margin){
+    const n = Number(margin);
+    if (!Number.isFinite(n)) return '—';
+    const fav = n >= 0 ? homeTeam : awayTeam;
+    return `${fav} -${Math.abs(n).toFixed(1)}`;
+  }
+
+  window.ratingVarianceBadge = function(team){
+    const v = RATING_VARIANCE_BY_TEAM[team];
+    if (!v) return '';
+    const tier = v.rating_variance_tier || 'missing';
+    const label = tier === 'high' ? 'High variance' : tier === 'medium' ? 'Med variance' : 'Low variance';
+    return `<span class="variance-badge ${tier}" title="SP+/FPI/TeamRankings range ${fmtNum(v.rating_range)} pts. High: ${v.highest_source || '—'}, Low: ${v.lowest_source || '—'}">${label} ${fmtNum(v.rating_range)}</span>`;
+  };
+
+  window.gameVarianceBadge = function(g){
+    if (!g) return '';
+    const a = RATING_VARIANCE_BY_TEAM[g.away_team];
+    const h = RATING_VARIANCE_BY_TEAM[g.home_team];
+    const maxRange = Math.max(Number(a?.rating_range || 0), Number(h?.rating_range || 0));
+    const tier = maxRange >= 6 ? 'high' : maxRange >= 3 ? 'medium' : 'low';
+    const label = tier === 'high' ? 'High model variance' : tier === 'medium' ? 'Med model variance' : 'Low model variance';
+    return `<span class="variance-badge ${tier}" title="${g.away_team} range ${fmtNum(a?.rating_range)}; ${g.home_team} range ${fmtNum(h?.rating_range)}">${label} ${fmtNum(maxRange)}</span>`;
+  };
+
+  window.labSpreadForGame = function(g){
+    if (!g || typeof gameHomeMarginLab !== 'function') return null;
+    const lab = gameHomeMarginLab(g);
+    return Number.isFinite(Number(lab)) ? Number(lab) : null;
+  };
+
+  window.labSpreadNoteForGame = function(g){
+    if (!g || typeof ratingLabWeightsAreDefault !== 'function' || ratingLabWeightsAreDefault()) return '';
+    const lab = labSpreadForGame(g);
+    const prod = Number(g.projected_margin_home);
+    if (!Number.isFinite(lab) || !Number.isFinite(prod)) return '';
+    const delta = lab - prod;
+    return `<span class="lab-spread-note">Lab: <strong>${spreadText(g.home_team,g.away_team,lab)}</strong> · Δ ${delta >= 0 ? '+' : ''}${delta.toFixed(1)} vs production</span>`;
+  };
+
+  window.scheduleTotalsModelStatusCard = function(){
+    const tw = GAME_PROJECTION_BLEND_CONFIG.total_weights || {};
+    return `<div class="model-context-card" id="scheduleTotalsModelStatusCard">
+      <div class="model-context-title">Totals projection model</div>
+      <div class="model-context-grid">
+        <div class="model-context-pill"><b>Site Projection / SP+ baseline</b>${pct(tw['Site Projection'])} active</div>
+        <div class="model-context-pill"><b>Massey totals</b>${pct(tw['Massey Games'])} reference only</div>
+        <div class="model-context-pill"><b>DRatings totals</b>${pct(tw['DRatings Predictions'])} unavailable</div>
+        <div class="model-context-pill"><b>Sagarin totals</b>${pct(tw['Sagarin Predictor Prediction'])} unavailable</div>
+      </div>
+    </div>`;
+  };
+
+  window.scheduleSpreadModelStatusCard = function(){
+    return `<div class="model-context-card" id="scheduleSpreadModelStatusCard">
+      <div class="model-context-title">Spread projection model</div>
+      <div class="model-context-grid">
+        <div class="model-context-pill"><b>Production spread</b>Active 2026 blend: SP+ 33.3% · FPI 33.3% · TeamRankings 33.3%</div>
+        <div class="model-context-pill"><b>Display sliders</b>What-if spread impact only. Does not update futures or simulations.</div>
+        <div class="model-context-pill"><b>Model variance</b>Green &lt;3 pts · Yellow 3–6 · Red 6+ across active systems</div>
+        <div class="model-context-pill"><b>Totals</b>Separate model. Currently Site Projection / SP+ baseline 100%.</div>
+      </div>
+    </div>`;
+  };
+})();
+
+</script>
+
+
+
+<script id="schedule-spread-lab-display-js">
+(function(){
+  if (window.__scheduleSpreadLabDisplayPatched) return;
+  window.__scheduleSpreadLabDisplayPatched = true;
+
+  const oldMarketLabAtsMetrics = window.marketLabAtsMetrics || marketLabAtsMetrics;
+  window.marketLabAtsMetrics = function(g){
+    const out = oldMarketLabAtsMetrics(g);
+    if (!out || !g) return out;
+
+    const variance = typeof gameVarianceBadge === 'function' ? gameVarianceBadge(g) : '';
+    const lab = typeof labSpreadNoteForGame === 'function' ? labSpreadNoteForGame(g) : '';
+
+    if (out.side && out.side !== '—') {
+      out.side = `<div class="ats-edge-with-coach"><div>${out.side}</div>${lab}${variance ? `<div style="margin-top:3px">${variance}</div>` : ''}</div>`;
+    }
+    return out;
+  };
+
+  const oldMarketLabTotalMetrics = window.marketLabTotalMetrics || marketLabTotalMetrics;
+  window.marketLabTotalMetrics = function(g){
+    const out = oldMarketLabTotalMetrics(g);
+    if (!out || !g) return out;
+
+    if (out.side && out.side !== '—') {
+      const note = `<span class="lab-spread-note">Totals model: <strong>Site Projection / SP+ baseline 100%</strong></span>`;
+      out.side = `<div class="total-edge-with-coach"><div>${out.side}</div>${note}</div>`;
+    }
+    return out;
+  };
+
+  const oldMarketLabTeamCellWithRp = window.marketLabTeamCellWithRp || marketLabTeamCellWithRp;
+  window.marketLabTeamCellWithRp = function(g, teamName){
+    const base = oldMarketLabTeamCellWithRp(g, teamName);
+    const badge = typeof ratingVarianceBadge === 'function' ? ratingVarianceBadge(teamName) : '';
+    return badge ? `${base}<div style="margin-top:3px">${badge}</div>` : base;
+  };
+
+  const oldRenderSchedule = window.renderSchedule || renderSchedule;
+  window.renderSchedule = function(){
+    let html = oldRenderSchedule();
+
+    const context = (window.scheduleViewMode === 'marketlab')
+      ? (window.scheduleMarketLabMode === 'totals'
+          ? (typeof scheduleTotalsModelStatusCard === 'function' ? scheduleTotalsModelStatusCard() : '')
+          : window.scheduleMarketLabMode === 'spreads'
+            ? (typeof scheduleSpreadModelStatusCard === 'function' ? scheduleSpreadModelStatusCard() : '')
+            : '')
+      : '';
+
+    if (context && html.includes('<div id="scheduleFilterStrip"')) {
+      html = html.replace('<div id="scheduleFilterStrip"', context + '\n<div id="scheduleFilterStrip"');
+    }
+
+    return html;
+  };
+})();
+</script>
 
 </body>
 </html>
