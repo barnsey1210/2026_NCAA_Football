@@ -57,9 +57,8 @@ CONF_ALIASES = {
 }
 
 # Built-in 2026 eligibility rules. CSV can add/override these.
-DEFAULT_TITLE_INELIGIBLE = {
-    ("MW", "North Dakota State"): "First-year Mountain West member; not eligible for 2026 MW title.",
-}
+# North Dakota State is now treated as Mountain West title eligible.
+DEFAULT_TITLE_INELIGIBLE = {}
 
 # Known 2026 game-count exceptions for audit/reporting only.
 ACC_EIGHT_GAME_TEAMS_2026 = {
