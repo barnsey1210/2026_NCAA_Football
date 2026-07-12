@@ -48,7 +48,20 @@ def build_payloads():
     latest = pd.read_csv(LATEST)
     master = pd.read_csv(MASTER)
 
+    # Build source values from the active master first so FPI/SP+/TeamRankings
+    # match the production model exactly, including new 2026 FBS teams.
     source_values = {}
+    for _, r in master.iterrows():
+        team = r.get("team")
+        if not isinstance(team, str) or not team:
+            continue
+        source_values.setdefault(team, {})
+        for key in ["spplus", "fpi", "teamrankings", "kford", "bradpowers"]:
+            if key in r.index:
+                val = r.get(key)
+                source_values[team][key] = None if pd.isna(val) else round(float(val), 4)
+
+    # Fill/refresh any source values available only in ratings_latest.csv.
     for _, r in latest.iterrows():
         key = SOURCE_MAP.get(r.get("source"))
         if not key:
@@ -58,7 +71,8 @@ def build_payloads():
             continue
         source_values.setdefault(team, {})
         val = r.get("rating")
-        source_values[team][key] = None if pd.isna(val) else round(float(val), 4)
+        if key not in source_values[team] or source_values[team][key] is None:
+            source_values[team][key] = None if pd.isna(val) else round(float(val), 4)
 
     status_payload = {}
     if STATUS.exists():
