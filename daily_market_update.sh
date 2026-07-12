@@ -176,7 +176,8 @@ run_py "scripts/site/patch_dashboard_all_market_moves.py" "patch_dashboard_all_m
   run_py "scripts/ratings/parse_rating_source_tables.py" "parse_rating_source_tables.py" || echo "WARNING: ratings source table parse failed"
   run_py "scripts/ratings/parse_kford_text.py" "parse_kford_text.py" || run_py "scripts/ratings/parse_kford_manual.py" "parse_kford_manual.py" || echo "WARNING: KFord parse failed"
   run_py "scripts/ratings/parse_bradpowers_pdf.py" "parse_bradpowers_pdf.py" || echo "WARNING: Brad Powers PDF parse failed"
-  run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
+  # DISABLED: moved before site build / root script is canonical
+# run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
   run_py "scripts/ratings/append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
   run_py "scripts/ratings/build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
   run_py "scripts/audit/audit_ratings_source_freshness.py" "audit_ratings_source_freshness.py" || echo "WARNING: ratings source freshness audit failed"
@@ -261,3 +262,4 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
   echo "Daily market update finished: $(date)"
 } >> "$LOG" 2>&1
 run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
+run_py "scripts/site/cleanup_stale_projection_audit_notes.py" "cleanup_stale_projection_audit_notes.py" || echo "WARNING: stale projection audit cleanup failed"
