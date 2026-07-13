@@ -274,6 +274,7 @@ run_py "scripts/history/append_game_line_model_history.py" "append_game_line_mod
 run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py" || echo "WARNING: matchup line history clean build failed"
 run_py "scripts/site/inject_matchup_line_history.py" "inject_matchup_line_history.py" || echo "WARNING: matchup line history injection failed"
 run_py "scripts/site/inject_standalone_line_history_page.py" "inject_standalone_line_history_page.py" || echo "WARNING: standalone line history page injection failed"
+run_py "scripts/site/hide_redundant_schedule_tabs_light.py" "hide_redundant_schedule_tabs_light.py" || echo "WARNING: light schedule tab cleanup failed"
 run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
 run_py "scripts/site/inject_schedule_model_context.py" "inject_schedule_model_context.py" || echo "WARNING: schedule model context injection failed"
 run_py "scripts/site/inject_schedule_spread_lab_display.py" "inject_schedule_spread_lab_display.py" || echo "WARNING: schedule spread lab display injection failed"
