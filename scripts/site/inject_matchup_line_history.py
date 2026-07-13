@@ -25,6 +25,27 @@ def clean_str(x):
         return None
     return str(x)
 
+def load_site_game_lookup():
+    """Read current index.html DB so history payload always has week/conference."""
+    import json, re
+    idx = {}
+    ip = Path("index.html")
+    if not ip.exists():
+        return idx
+    html = ip.read_text(errors="ignore")
+    m = re.search(r'<script id="db" type="application/json">(.*?)</script>', html, flags=re.S)
+    if not m:
+        return idx
+    try:
+        db = json.loads(m.group(1))
+    except Exception:
+        return idx
+    for g in db.get("games", []):
+        gid = str(g.get("game_id") or "")
+        if gid:
+            idx[gid] = g
+    return idx
+
 def build_payload():
     if not HISTORY.exists():
         return {}
@@ -40,15 +61,20 @@ def build_payload():
 
     sort_cols = [c for c in ["snapshot_date", "snapshot_ts", "snapshot_label"] if c in df.columns]
 
+    site_games = load_site_game_lookup()
+
     out = {}
     for gid, g in df.groupby("game_id"):
+        site_game = site_games.get(str(gid), {})
         rows = []
         for _, r in g.sort_values(sort_cols).iterrows():
             rows.append({
                 "snapshot_date": clean_str(r.get("snapshot_date")),
                 "snapshot_label": clean_str(r.get("snapshot_label")),
                 "game_date": clean_str(r.get("game_date")),
-                "week": clean_num(r.get("game_week")),
+                "week": clean_num(r.get("week") if "week" in r.index else r.get("game_week")),
+                "site_week": clean_num(site_game.get("week")),
+                "conference": clean_str(r.get("conference") if "conference" in r.index else site_game.get("conference") or site_game.get("conf")),
                 "away_team": clean_str(r.get("away_team")),
                 "home_team": clean_str(r.get("home_team")),
                 "market_spread_home": clean_num(r.get("market_spread_home")),
@@ -58,9 +84,13 @@ def build_payload():
                 "market_total": clean_num(r.get("market_total")),
                 "market_total_open": clean_num(r.get("market_total_open")),
                 "projected_total": clean_num(r.get("projected_total")),
+                "market_spread_price": clean_num(r.get("market_spread_price")),
                 "market_spread_book": clean_str(r.get("market_spread_book")),
                 "market_total_book": clean_str(r.get("market_total_book")),
-                "market_line_source": clean_str(r.get("market_line_source")),
+                "market_total_over_price": clean_num(r.get("market_total_over_price")),
+                "market_total_under_price": clean_num(r.get("market_total_under_price")),
+                "market_line_source": clean_str(r.get("market_line_source") or r.get("source")),
+                "source": clean_str(r.get("source") or r.get("market_line_source")),
                 "market_spread_last_update": clean_str(r.get("market_spread_last_update")),
                 "market_total_last_update": clean_str(r.get("market_total_last_update")),
             })

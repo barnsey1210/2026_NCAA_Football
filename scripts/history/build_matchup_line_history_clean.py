@@ -16,8 +16,19 @@ SOURCES = [
     Path("data/odds/season_game_lines_2026.csv"),
 ]
 
+TEAM_ALIASES = {
+    "hawai i": "hawaii",
+    "hawaii rainbow warriors": "hawaii",
+    "stanford cardinal": "stanford",
+    "north dakota state bison": "north dakota state",
+    "jacksonville state gamecocks": "jacksonville state",
+    "sacramento state hornets": "sacramento state",
+    "eastern michigan eagles": "eastern michigan",
+}
+
 def norm_team(x):
-    return re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
+    v = re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
+    return TEAM_ALIASES.get(v, v)
 
 def clean_date(x):
     if x is None or pd.isna(x) or str(x).strip() == "":
@@ -80,8 +91,8 @@ def map_game_id(row, by_pair_date, by_pair):
     if not g:
         g = by_pair.get((norm_team(away), norm_team(home)))
     if not g:
-        return None, d, away, home
-    return str(g.get("game_id")), clean_date(g.get("date")), g.get("away_team"), g.get("home_team")
+        return None, d, away, home, None, None
+    return str(g.get("game_id")), clean_date(g.get("date")), g.get("away_team"), g.get("home_team"), g.get("week"), g.get("conference") or g.get("conf")
 
 def read_source(path, by_pair_date, by_pair):
     if not path.exists():
@@ -95,7 +106,7 @@ def read_source(path, by_pair_date, by_pair):
     source_name = path.name
 
     for _, r in df.iterrows():
-        gid, game_date, away, home = map_game_id(r, by_pair_date, by_pair)
+        gid, game_date, away, home, site_week, site_conf = map_game_id(r, by_pair_date, by_pair)
         if not gid:
             continue
 
@@ -123,7 +134,8 @@ def read_source(path, by_pair_date, by_pair):
             "source": str(r.get("source") or r.get("market_line_source") or source_name),
             "game_id": gid,
             "game_date": game_date,
-            "week": fnum(r.get("week") or r.get("game_week")),
+            "week": fnum(site_week if site_week is not None else (r.get("week") or r.get("game_week"))),
+            "conference": site_conf,
             "away_team": away,
             "home_team": home,
 
@@ -192,7 +204,11 @@ def main():
     ]
     hist = hist.drop_duplicates(subset=dedupe_cols, keep="last").copy()
 
-    # Prefer one row per game/date for the chart: best available row by source priority.
+    # Prefer one row per game/date for the chart:
+    # 1) has spread/total
+    # 2) has real prices
+    # 3) SportsGameOdds / Action before CFBD-only rows
+    # 4) latest timestamp
     source_priority = {
         "SportsGameOdds": 1,
         "sgo_ncaaf_game_odds.csv": 1,
@@ -201,14 +217,33 @@ def main():
         "CFBD Lines": 3,
         "The Odds API": 4,
     }
+
     hist["_priority"] = hist["source"].map(source_priority).fillna(9)
     hist["_has_spread"] = hist["market_spread_home"].notna().astype(int)
     hist["_has_total"] = hist["market_total"].notna().astype(int)
+
+    def has_price(row):
+        vals = [
+            row.get("market_spread_price"),
+            row.get("market_total_over_price"),
+            row.get("market_total_under_price"),
+        ]
+        for v in vals:
+            try:
+                if pd.notna(v) and float(v) != 0:
+                    return 1
+            except Exception:
+                pass
+        return 0
+
+    hist["_has_price"] = hist.apply(has_price, axis=1)
+
     hist = hist.sort_values(
-        ["game_id", "snapshot_date", "_has_spread", "_has_total", "_priority", "_sort_ts"],
-        ascending=[True, True, False, False, True, True]
+        ["game_id", "snapshot_date", "_has_spread", "_has_total", "_has_price", "_priority", "_sort_ts"],
+        ascending=[True, True, False, False, False, True, False]
     )
-    chart = hist.drop_duplicates(subset=["game_id", "snapshot_date"], keep="last").copy()
+
+    chart = hist.drop_duplicates(subset=["game_id", "snapshot_date"], keep="first").copy()
 
     chart = chart.drop(columns=[c for c in ["_sort_ts", "_priority", "_has_spread", "_has_total"] if c in chart.columns])
     chart = chart.sort_values(["game_id", "snapshot_date"])
