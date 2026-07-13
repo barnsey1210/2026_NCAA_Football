@@ -26,6 +26,47 @@ TEAM_ALIASES = {
     "eastern michigan eagles": "eastern michigan",
 }
 
+
+def canonical_team_norm(raw, site_norms):
+    """
+    Resolve raw market team names to site team names.
+    Handles mascot suffixes like:
+    Akron Zips -> Akron
+    Wake Forest Demon Deacons -> Wake Forest
+    Texas Tech Red Raiders -> Texas Tech
+    """
+    v = norm_team(raw)
+    if not v:
+        return v
+
+    # Exact site team match.
+    if v in site_norms:
+        return v
+
+    # Mascot suffix / longer raw display name.
+    candidates = []
+    for site in site_norms:
+        if not site:
+            continue
+        if v.startswith(site + " "):
+            candidates.append(site)
+
+    if candidates:
+        # Prefer longest site name, e.g. "new mexico state" before "new mexico".
+        return sorted(candidates, key=len, reverse=True)[0]
+
+    # Some feeds may reverse the containment pattern.
+    candidates = []
+    for site in site_norms:
+        if site.startswith(v + " "):
+            candidates.append(site)
+
+    if candidates:
+        return sorted(candidates, key=len, reverse=True)[0]
+
+    return v
+
+
 def norm_team(x):
     v = re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
     return TEAM_ALIASES.get(v, v)
