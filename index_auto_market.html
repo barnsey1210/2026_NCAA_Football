@@ -21171,6 +21171,7 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
 
 
 
+
 <!-- safe-simulations-page-start -->
 <script id="safe-simulations-page-js">
 (function(){
@@ -21295,6 +21296,17 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
       const confMarketProb = probNumber(confMarket.implied);
       const confEdge = confTitleProb != null && confMarketProb != null ? confTitleProb - confMarketProb : null;
 
+      // Placeholders until CFP/national-title market feeds are wired.
+      const playoffMarketProb = probNumber(t.playoff_market_implied ?? t.cfp_market_implied);
+      const natTitleMarketProb = probNumber(t.national_title_market_implied ?? t.natty_market_implied);
+      const playoffProb = probNumber(t.playoff_pct ?? t.cfp_pct);
+      const natTitleProb = probNumber(t.national_title_pct ?? t.natty_pct);
+      const playoffEdge = playoffProb != null && playoffMarketProb != null ? playoffProb - playoffMarketProb : null;
+      const natTitleEdge = natTitleProb != null && natTitleMarketProb != null ? natTitleProb - natTitleMarketProb : null;
+
+      const wt = n(winMarket.total);
+      const wtEdge = wt != null && n(t.avg_total_wins) != null ? n(t.avg_total_wins) - wt : null;
+
       return {
         team: t.team,
         conf: t.conference,
@@ -21310,7 +21322,6 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
         conf_title_delta: titleDelta,
         make_title: probNumber(t.make_title_game_pct),
         make_title_delta: makeTitleDelta,
-        bowl: probNumber(t.bowl_eligibility_pct),
         playoff: probNumber(t.playoff_pct ?? t.cfp_pct),
         nat_title: probNumber(t.national_title_pct ?? t.natty_pct),
         win_market: winMarket,
@@ -21334,11 +21345,12 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
     if (key === 'conf_title') return r.conf_title ?? -999;
     if (key === 'conf_title_delta') return r.conf_title_delta.val ?? -999;
     if (key === 'make_title') return r.make_title ?? -999;
-    if (key === 'bowl') return r.bowl ?? -999;
     if (key === 'playoff') return r.playoff ?? -999;
+    if (key === 'playoff_edge') return r.playoff_edge ?? -999;
     if (key === 'nat_title') return r.nat_title ?? -999;
+    if (key === 'nat_title_edge') return r.nat_title_edge ?? -999;
     if (key === 'win_total') return n(r.win_market.total) ?? -999;
-    if (key === 'win_edge') return n(r.win_market.edge) ?? -999;
+    if (key === 'win_edge') return r.win_edge ?? -999;
     if (key === 'conf_market') return probNumber(r.conf_market.implied) ?? -999;
     if (key === 'conf_edge') return r.conf_edge ?? -999;
     return 0;
@@ -21394,13 +21406,14 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
         <td>${pct(r.conf_title)}</td>
         <td class="${r.conf_title_delta.cls}">${r.conf_title_delta.txt}</td>
         <td>${pct(r.make_title)}</td>
-        <td>${pct(r.bowl)}</td>
         <td>${pct(r.playoff)}</td>
         <td>${americanFromProb(r.playoff)}</td>
+        <td class="${r.playoff_edge == null ? '' : r.playoff_edge > 0 ? 'pos' : r.playoff_edge < 0 ? 'neg' : ''}">${r.playoff_edge == null ? '—' : ((r.playoff_edge * 100) >= 0 ? '+' : '') + (r.playoff_edge * 100).toFixed(1).replace(/\.0$/,'') + ' pts'}</td>
         <td>${pct(r.nat_title)}</td>
         <td>${americanFromProb(r.nat_title)}</td>
+        <td class="${r.nat_title_edge == null ? '' : r.nat_title_edge > 0 ? 'pos' : r.nat_title_edge < 0 ? 'neg' : ''}">${r.nat_title_edge == null ? '—' : ((r.nat_title_edge * 100) >= 0 ? '+' : '') + (r.nat_title_edge * 100).toFixed(1).replace(/\.0$/,'') + ' pts'}</td>
         <td>${fmt(r.win_market.total,1)}</td>
-        <td class="${n(r.win_market.edge) > 0 ? 'pos' : n(r.win_market.edge) < 0 ? 'neg' : ''}">${fmt(r.win_market.edge,2)}</td>
+        <td class="${r.win_edge == null ? '' : r.win_edge > 0 ? 'pos' : r.win_edge < 0 ? 'neg' : ''}">${r.win_edge == null ? '—' : (r.win_edge > 0 ? '+' : '') + r.win_edge.toFixed(2).replace(/\.00$/,'').replace(/\.0$/,'')}</td>
         <td>${confMarketTxt}</td>
         <td class="${confEdgeCls}">${confEdgeTxt}</td>
       </tr>`;
@@ -21419,11 +21432,12 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
         ${th('conf_title','Conf Title')}
         ${th('conf_title_delta','Δ Title')}
         ${th('make_title','Make CG')}
-        ${th('bowl','Bowl')}
         ${th('playoff','CFP %')}
         <th>CFP Fair</th>
+        ${th('playoff_edge','CFP Edge')}
         ${th('nat_title','Nat Title')}
         <th>Nat Fair</th>
+        ${th('nat_title_edge','Nat Edge')}
         ${th('win_total','Mkt WT')}
         ${th('win_edge','WT Edge')}
         ${th('conf_market','Mkt Conf')}
@@ -21514,6 +21528,7 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
 .sim-board-table th:nth-child(1){z-index:4}
 </style>
 <!-- safe-simulations-page-end -->
+
 
 
 </body>
