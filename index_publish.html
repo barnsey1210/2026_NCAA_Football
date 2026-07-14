@@ -15988,6 +15988,7 @@ function route() {
   else if (hash==='#line-history') html = renderLineHistoryStandalone();
   else if (hash==='#line-history') html = renderLineHistoryStandalone();
   else if (hash==='#results-center') html = renderResultsCenter();
+  else if (hash==='#openers') html = renderOpenersPage();
   else if (hash==='#rankings') html = renderRankings();
   else if (hash==='#market-edges') html = renderMarketBoard();
   else if (hash==='#simulations') html = renderSimulations();
@@ -16000,6 +16001,7 @@ function route() {
   byId('app').innerHTML = html;
   if (hash==='#schedule') mountScheduleFilters();
   if (hash==='#results-center') mountResultsCenter();
+  if (hash==='#openers') mountOpenersPage();
   if (hash==='#rankings') mountRankSortControls();
   if (hash==='#market-edges') mountMarketBoardControls();
   if (hash==='#coach-betting') mountCoachBettingControls();
@@ -22908,6 +22910,1557 @@ window.GAME_BETTING_ANGLES = GAME_BETTING_ANGLES;
 })();
 </script>
 <!-- fix-home-command-center-toggle-end -->
+
+
+
+
+
+
+<!-- schedule-week-buttons-start -->
+<script id="schedule-week-buttons-js">
+(function(){
+  if (window.__scheduleWeekButtonsInstalledSafe) return;
+  window.__scheduleWeekButtonsInstalledSafe = true;
+
+  function onSchedule(){
+    const title = document.querySelector('.page-title');
+    return location.hash === '#schedule' || String(title ? title.textContent : '').trim() === 'Season Schedule';
+  }
+
+  function weeksFromDB(){
+    try {
+      return [...new Set((DB.games || []).map(g => g.week).filter(w => w !== null && w !== undefined && w !== ''))]
+        .map(w => Number(w))
+        .filter(w => Number.isFinite(w))
+        .sort((a,b)=>a-b);
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function findWeekSelect(){
+    const selects = [...document.querySelectorAll('select')];
+    return selects.find(sel => {
+      const opts = [...sel.options].map(o => String(o.textContent || '').trim().toLowerCase());
+      return opts.includes('all weeks') || opts.some(x => /^week\s*\d+$/.test(x));
+    }) || null;
+  }
+
+  function setWeek(value){
+    localStorage.setItem('ncaaf_schedule_week_button_safe_v1', String(value));
+
+    const sel = findWeekSelect();
+    if (sel) {
+      sel.value = String(value);
+      sel.dispatchEvent(new Event('input', {bubbles:true}));
+      sel.dispatchEvent(new Event('change', {bubbles:true}));
+    }
+
+    document.querySelectorAll('.schedule-week-pill').forEach(btn => {
+      btn.classList.toggle('active', String(btn.dataset.week) === String(value));
+    });
+  }
+
+  function install(){
+    if (!onSchedule()) return;
+
+    const sel = findWeekSelect();
+    if (!sel) return;
+
+    const filters = sel.closest('.filters') || sel.parentElement;
+    if (!filters) return;
+
+    if (!document.getElementById('scheduleWeekButtonBar')) {
+      const weeks = weeksFromDB();
+      if (!weeks.length) return;
+
+      const html = `<div id="scheduleWeekButtonBar" class="schedule-week-button-bar">
+        <button type="button" class="schedule-week-pill" data-week="all">All</button>
+        ${weeks.map(w => `<button type="button" class="schedule-week-pill" data-week="${w}">W${w}</button>`).join('')}
+      </div>`;
+
+      filters.insertAdjacentHTML('beforebegin', html);
+
+      document.querySelectorAll('.schedule-week-pill').forEach(btn => {
+        btn.addEventListener('click', () => setWeek(btn.dataset.week));
+      });
+    }
+
+    sel.classList.add('schedule-week-select-hidden');
+
+    const saved = localStorage.getItem('ncaaf_schedule_week_button_safe_v1') || sel.value || 'all';
+    document.querySelectorAll('.schedule-week-pill').forEach(btn => {
+      btn.classList.toggle('active', String(btn.dataset.week) === String(saved));
+    });
+  }
+
+  function scheduleInstall(){
+    if (!onSchedule()) return;
+    [50, 200, 500, 1000].forEach(ms => setTimeout(install, ms));
+  }
+
+  window.addEventListener('hashchange', scheduleInstall);
+  document.addEventListener('DOMContentLoaded', scheduleInstall);
+
+  // Let the native router render first, then install buttons.
+  document.addEventListener('click', function(e){
+    const txt = String(e.target && e.target.textContent || '').trim();
+    if (txt === 'Season Schedule') {
+      setTimeout(scheduleInstall, 80);
+    }
+  }, true);
+
+  scheduleInstall();
+})();
+</script>
+
+<style id="schedule-week-buttons-css">
+.schedule-week-button-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:14px 0 14px;
+  align-items:center;
+}
+.schedule-week-pill{
+  border:1px solid rgba(96,165,250,.35);
+  background:rgba(15,35,74,.70);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:9px 15px;
+  font-weight:950;
+  cursor:pointer;
+}
+.schedule-week-pill.active{
+  background:#2563eb;
+  color:white;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 2px rgba(96,165,250,.20) inset;
+}
+.schedule-week-select-hidden{
+  display:none!important;
+}
+@media(max-width:800px){
+  .schedule-week-button-bar{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:4px;
+  }
+  .schedule-week-pill{
+    flex:0 0 auto;
+  }
+}
+</style>
+<!-- schedule-week-buttons-end -->
+
+
+
+
+
+
+
+
+
+<!-- openers-page-start -->
+<script id="openers-page-js">
+(function(){
+  if (window.__openersPageInstalledV3) return;
+  window.__openersPageInstalledV3 = true;
+
+  window.__openersSort = window.__openersSort || {key:'week', dir:'asc'};
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function n(v){ const x = Number(v); return Number.isFinite(x) ? x : null; }
+
+  function fmtDate(v){
+    if (!v) return '—';
+    const d = new Date(String(v).slice(0,10) + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return String(v).slice(0,10);
+    return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+  }
+
+  function fmtNum(v, d=1){
+    const x = n(v);
+    if (x == null) return '—';
+    return x.toFixed(d).replace(/\.0$/,'');
+  }
+
+  function projSpread(g){
+    const margin = n(g.projected_margin_home);
+    if (margin == null) return '—';
+    const fav = margin >= 0 ? g.home_team : g.away_team;
+    return `${esc(fav)} -${Math.abs(margin).toFixed(1).replace(/\.0$/,'')}`;
+  }
+
+  function logo(team){
+    try {
+      if (typeof teamImageImg === 'function') return teamImageImg(team);
+      if (typeof advTeamLogo === 'function') return advTeamLogo(team);
+    } catch(e) {}
+    return '';
+  }
+
+  function ratingMoveForTeam(team){
+    const data = window.POSTGAME_RATING_IMPACTS || window.OPENERS_RATING_IMPACTS || {};
+    return data[team] || null;
+  }
+
+  function ratingMoveChip(team){
+    const r = ratingMoveForTeam(team);
+    if (!r) return '';
+
+    const val = Number(r.projected_rating_delta ?? r.rating_delta ?? r.delta);
+    if (!Number.isFinite(val) || Math.abs(val) < 0.05) return '';
+
+    const cls = val > 0 ? 'up' : 'down';
+    const arrow = val > 0 ? '▲' : '▼';
+    return `<span class="openers-rating-chip ${cls}" title="Projected rating movement from postgame box-score impact model">${arrow} ${Math.abs(val).toFixed(1)}</span>`;
+  }
+
+  function boxScoreChip(team){
+    const r = ratingMoveForTeam(team);
+    if (!r) return '';
+    const status = String(r.box_score_status || r.status || '').toLowerCase();
+    if (!status) return '';
+    const good = status.includes('captured') || status.includes('complete') || status.includes('final');
+    return `<span class="openers-box-chip ${good ? 'good' : 'missing'}">${good ? 'Box captured' : 'Box missing'}</span>`;
+  }
+
+  function teamCell(team){
+    return `<span class="openers-team">${logo(team)}<span>${esc(team || '—')}</span>${ratingMoveChip(team)}${boxScoreChip(team)}</span>`;
+  }
+
+  function sortableTh(key, label){
+    const st = window.__openersSort || {key:'week', dir:'asc'};
+    const arrow = st.key === key ? (st.dir === 'asc' ? '▲' : '▼') : '';
+    return `<th class="sortable openers-sort-th" data-openers-sort="${key}">${esc(label)} <span class="sort-arrow">${arrow}</span></th>`;
+  }
+
+  function sortVal(g, key){
+    if (key === 'week') return n(g.week) ?? 999;
+    if (key === 'date') return String(g.date || '');
+    if (key === 'away') return String(g.away_team || '').toLowerCase();
+    if (key === 'home') return String(g.home_team || '').toLowerCase();
+    if (key === 'spread') return Math.abs(n(g.projected_margin_home) ?? 999);
+    if (key === 'total') return n(g.projected_total) ?? -999;
+    return '';
+  }
+
+  function weeks(){
+    return [...new Set((DB.games || []).map(g => g.week).filter(w => w !== null && w !== undefined && w !== ''))]
+      .map(w => Number(w)).filter(w => Number.isFinite(w)).sort((a,b)=>a-b);
+  }
+
+  function filteredGames(){
+    const week = document.getElementById('openersWeek')?.value || 'all';
+    const team = String(document.getElementById('openersTeam')?.value || '').trim().toLowerCase();
+
+    let games = [...(DB.games || [])];
+
+    if (week !== 'all') games = games.filter(g => String(g.week) === String(week));
+    if (team) {
+      games = games.filter(g =>
+        String(g.away_team || '').toLowerCase().includes(team) ||
+        String(g.home_team || '').toLowerCase().includes(team)
+      );
+    }
+
+    const st = window.__openersSort || {key:'week', dir:'asc'};
+    const mult = st.dir === 'asc' ? 1 : -1;
+
+    games.sort((a,b) => {
+      const av = sortVal(a, st.key);
+      const bv = sortVal(b, st.key);
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return (av - bv) * mult || String(a.date || '').localeCompare(String(b.date || ''));
+      }
+      return String(av).localeCompare(String(bv)) * mult || String(a.date || '').localeCompare(String(b.date || ''));
+    });
+
+    return games;
+  }
+
+  function productionModelText(){
+    try {
+      const cfg = window.GAME_PROJECTION_BLEND_CONFIG || {};
+      const w = cfg.spread_weights || {};
+      const active = Object.entries(w)
+        .filter(([k,v]) => Number(v) > 0)
+        .map(([k,v]) => `${k.replace('Site Projection','Site Projection')} ${Math.round(Number(v)*100)}%`);
+      return active.length ? active.join(' · ') : 'Active production projection blend';
+    } catch(e) {
+      return 'Active production projection blend';
+    }
+  }
+
+  function lastRatingsDate(){
+    try {
+      const teams = DB.teams || [];
+      const keys = ['ratings_updated_at','rating_updated_at','snapshot_date','updated_at'];
+      const vals = [];
+      teams.forEach(t => keys.forEach(k => {
+        if (t[k]) vals.push(String(t[k]).slice(0,10));
+      }));
+      return vals.length ? vals.sort().slice(-1)[0] : '';
+    } catch(e) {
+      return '';
+    }
+  }
+
+  function modelStatusCard(){
+    const ratingDate = lastRatingsDate();
+    return `<div class="openers-model-status">
+      <div>
+        <div class="openers-status-title">Production ratings / opener model</div>
+        <div class="openers-status-sub">${esc(productionModelText())}</div>
+      </div>
+      <div class="openers-status-pills">
+        <span>Ratings: SP+ / FPI / TeamRankings active blend</span>
+        <span>Projected spread: current production model</span>
+        <span>${ratingDate ? `Latest rating date: ${esc(ratingDate)}` : 'Latest rating date: see Rankings'}</span>
+        <span>Postgame rating move chips: pending box-score impact model</span>
+      </div>
+    </div>`;
+  }
+
+  function weekButtons(){
+    return `<div class="openers-week-buttons">
+      <button type="button" data-openers-week="all">All</button>
+      ${weeks().map(w => `<button type="button" data-openers-week="${w}">W${w}</button>`).join('')}
+    </div>`;
+  }
+
+  window.renderOpenersPage = function(){
+    return `
+      <div class="hero">
+        <div>
+          <div class="page-title">Openers</div>
+          <div class="page-sub">Streamlined opener-betting board. Projection-only view for quickly comparing upcoming games before market openers settle.</div>
+        </div>
+        <div class="hero-stats">
+          <div class="mini"><div class="label">Games</div><div class="value">${(DB.games || []).length}</div></div>
+          <div class="mini"><div class="label">Weeks</div><div class="value">${weeks().length}</div></div>
+        </div>
+      </div>
+
+      ${modelStatusCard()}
+
+      <div class="card openers-card">
+        <div class="section-title">Projected Openers Board</div>
+        ${weekButtons()}
+        <div class="openers-filters">
+          <select id="openersWeek">
+            <option value="all">All weeks</option>
+            ${weeks().map(w => `<option value="${w}">Week ${w}</option>`).join('')}
+          </select>
+          <input id="openersTeam" placeholder="Filter team">
+        </div>
+        <div id="openersTableWrap"></div>
+      </div>
+    `;
+  };
+
+  window.mountOpenersPage = function(){
+    const weekSelect = document.getElementById('openersWeek');
+    const teamInput = document.getElementById('openersTeam');
+
+    function draw(){
+      const games = filteredGames();
+
+      document.getElementById('openersTableWrap').innerHTML = `<table class="openers-table">
+        <thead><tr>
+          ${sortableTh('week','Week')}
+          ${sortableTh('date','Date')}
+          ${sortableTh('away','Away')}
+          ${sortableTh('home','Home')}
+          ${sortableTh('spread','Proj Spread')}
+          ${sortableTh('total','Proj Total')}
+        </tr></thead>
+        <tbody>
+          ${games.map(g => `<tr>
+            <td>${esc(g.week ?? '—')}</td>
+            <td>${fmtDate(g.date)}</td>
+            <td>${teamCell(g.away_team)}</td>
+            <td>${teamCell(g.home_team)}</td>
+            <td><b>${projSpread(g)}</b></td>
+            <td><b>${fmtNum(g.projected_total, 1)}</b></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+
+      document.querySelectorAll('[data-openers-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.openersSort;
+          const cur = window.__openersSort || {key:'week', dir:'asc'};
+          window.__openersSort = {key, dir: cur.key === key && cur.dir === 'asc' ? 'desc' : 'asc'};
+          draw();
+        });
+      });
+
+      document.querySelectorAll('[data-openers-week]').forEach(btn => {
+        btn.classList.toggle('active', String(btn.dataset.openersWeek) === String(weekSelect.value || 'all'));
+      });
+    }
+
+    weekSelect.addEventListener('input', draw);
+    teamInput.addEventListener('input', draw);
+
+    document.querySelectorAll('[data-openers-week]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        weekSelect.value = btn.dataset.openersWeek;
+        draw();
+      });
+    });
+
+    draw();
+  };
+
+  window.installOpenersNav = function(){
+    const nav = document.querySelector('.nav');
+    if (!nav) return;
+
+    if ([...nav.querySelectorAll('button')].some(b => String(b.textContent || '').trim() === 'Openers')) return;
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Openers';
+    btn.onclick = () => { location.hash = '#openers'; };
+
+    const buttons = [...nav.querySelectorAll('button')];
+    const lineHistory = buttons.find(b => String(b.textContent || '').trim() === 'Line History');
+    const schedule = buttons.find(b => String(b.textContent || '').trim() === 'Season Schedule');
+    const anchor = lineHistory || schedule;
+
+    if (anchor && anchor.nextSibling) nav.insertBefore(btn, anchor.nextSibling);
+    else nav.appendChild(btn);
+  };
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(window.installOpenersNav, 50));
+  window.addEventListener('hashchange', () => setTimeout(window.installOpenersNav, 50));
+  setTimeout(window.installOpenersNav, 100);
+})();
+</script>
+
+<style id="openers-page-css">
+.openers-model-status{
+  margin-top:14px;
+  border:1px solid rgba(96,165,250,.28);
+  background:linear-gradient(180deg,rgba(37,99,235,.16),rgba(15,23,42,.58));
+  border-radius:18px;
+  padding:14px 16px;
+}
+.openers-status-title{
+  font-weight:950;
+  font-size:18px;
+  color:#f8fafc;
+}
+.openers-status-sub{
+  margin-top:3px;
+  color:#aebddd;
+  font-weight:750;
+}
+.openers-status-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.openers-status-pills span{
+  border:1px solid rgba(148,163,184,.22);
+  background:rgba(15,23,42,.55);
+  border-radius:999px;
+  padding:6px 10px;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:850;
+}
+.openers-card{margin-top:16px;}
+.openers-week-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.openers-week-buttons button{
+  border:1px solid rgba(96,165,250,.35);
+  background:rgba(15,35,74,.70);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:8px 13px;
+  font-weight:950;
+  cursor:pointer;
+}
+.openers-week-buttons button.active{background:#2563eb;color:white;border-color:#60a5fa;}
+.openers-filters{display:flex;gap:10px;margin:10px 0 12px;}
+.openers-filters select{display:none;}
+.openers-filters input{
+  max-width:320px;
+  width:100%;
+  padding:9px 11px;
+  border-radius:10px;
+  border:1px solid var(--line);
+}
+.openers-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.openers-table th,.openers-table td{
+  padding:7px 8px!important;
+  font-size:13px!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  vertical-align:middle!important;
+}
+.openers-table th{
+  color:#c7d2fe!important;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  font-size:11px!important;
+}
+.openers-table th:nth-child(1),.openers-table td:nth-child(1){width:58px;}
+.openers-table th:nth-child(2),.openers-table td:nth-child(2){width:82px;}
+.openers-table th:nth-child(5),.openers-table td:nth-child(5){width:150px;}
+.openers-table th:nth-child(6),.openers-table td:nth-child(6){width:105px;}
+.openers-team{display:flex;align-items:center;gap:7px;min-width:0;}
+.openers-team .team-logo-wrap{width:25px!important;height:25px!important;flex:0 0 25px!important;}
+.openers-team .team-logo{width:22px!important;height:22px!important;object-fit:contain!important;}
+.openers-team span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.openers-rating-chip{
+  margin-left:4px;
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:11px;
+  font-weight:950;
+  white-space:nowrap;
+}
+.openers-rating-chip.up{background:rgba(34,197,94,.16);color:#4ade80;border:1px solid rgba(34,197,94,.28);}
+.openers-rating-chip.down{background:rgba(244,63,94,.14);color:#fb7185;border:1px solid rgba(244,63,94,.28);}
+.openers-box-chip{
+  margin-left:3px;
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:10px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.openers-box-chip.good{background:rgba(34,197,94,.12);color:#86efac;}
+.openers-box-chip.missing{background:rgba(245,158,11,.12);color:#fbbf24;}
+.openers-sort-th{cursor:pointer;user-select:none;}
+.openers-sort-th:hover{color:white!important;}
+@media(max-width:900px){
+  .openers-table{min-width:920px;}
+  #openersTableWrap{overflow-x:auto;}
+}
+</style>
+<!-- openers-page-end -->
+
+
+
+
+
+<!-- openers-navigation-guard-start -->
+<script id="openers-navigation-guard-js">
+(function(){
+  if (window.__openersNavigationGuardInstalled) return;
+  window.__openersNavigationGuardInstalled = true;
+
+  function safeRenderOnNav(){
+    // Do not render Openers unless the hash is actually #openers.
+    if (location.hash !== '#openers') return;
+    const app = document.getElementById('app');
+    if (!app || typeof renderOpenersPage !== 'function') return;
+    app.innerHTML = renderOpenersPage();
+    if (typeof mountOpenersPage === 'function') mountOpenersPage();
+  }
+
+  window.addEventListener('hashchange', function(){
+    if (location.hash === '#openers') {
+      setTimeout(safeRenderOnNav, 0);
+    }
+  });
+})();
+</script>
+<!-- openers-navigation-guard-end -->
+
+
+<!-- openers-ratings-context-start -->
+<script id="openers-ratings-context-js">
+(function(){
+  if (window.__openersRatingsContextInstalled) return;
+  window.__openersRatingsContextInstalled = true;
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function fmtPct(v){
+    const n = Number(v);
+    if (!Number.isFinite(n)) return '0%';
+    return `${Math.round(n * 1000) / 10}%`;
+  }
+
+  function sourceRows(){
+    const defaultRows = [
+      {name:'SP+', active:true, weight:.333, teams:138},
+      {name:'FPI', active:true, weight:.333, teams:138},
+      {name:'TeamRankings', active:true, weight:.333, teams:138},
+      {name:'KFord', active:false, weight:0, teams:136},
+      {name:'Brad Powers', active:false, weight:0, teams:136}
+    ];
+
+    try {
+      const rows = DB.ratings_source_summary || DB.rating_sources || DB.ratings_sources || [];
+      if (Array.isArray(rows) && rows.length) {
+        return rows.map(r => {
+          const name = r.source || r.system || r.name || r.rating_system || '';
+          const weight = Number(r.weight ?? r.production_weight ?? r.active_weight ?? 0);
+          const active = weight > 0 || /active/i.test(String(r.status || r.role || ''));
+          return {
+            name,
+            active,
+            weight,
+            pulled: r.pulled_at || r.snapshot_ts || r.updated_at || r.latest_pull || '',
+            sourceUpdated: r.source_updated_at || r.source_updated || r.rating_date || r.snapshot_date || '',
+            teams: r.teams || r.team_count || r.count || ''
+          };
+        }).filter(r => r.name);
+      }
+    } catch(e) {}
+
+    return defaultRows;
+  }
+
+  function productionText(rows){
+    const active = rows.filter(r => r.active && Number(r.weight) > 0);
+    if (!active.length) return 'Active 2026 ratings only — SP+ 33.3% · FPI 33.3% · TeamRankings 33.3%. Reference/stale sources are shown for context but excluded from production projections/sims.';
+    return 'Active 2026 ratings only — ' + active.map(r => `${r.name} ${fmtPct(r.weight)}`).join(' · ') + '. Reference/stale sources are shown for context but excluded from production projections/sims.';
+  }
+
+  function renderOpenersRatingsContext(){
+    const rows = sourceRows();
+
+    return `
+      <div class="openers-ratings-context">
+        <div class="openers-ratings-banner">
+          <b>Production model:</b> ${esc(productionText(rows))}
+        </div>
+        <div class="openers-ratings-grid">
+          ${rows.map(r => `
+            <div class="openers-rating-source-card ${r.active ? 'active' : 'stale'}">
+              <div class="openers-rating-source-name">${esc(r.name)}</div>
+              <div class="openers-rating-source-status">
+                ${r.active ? `Active 2026 · ${fmtPct(r.weight)}` : 'Stale / reference only · 0%'}
+              </div>
+              <div class="openers-rating-source-meta">Pulled: ${esc(r.pulled || '2026-07-13 12:04:19 UTC')}</div>
+              <div class="openers-rating-source-meta">Source updated: ${esc(r.sourceUpdated || 'Not provided by source')}</div>
+              <div class="openers-rating-source-meta">Teams: ${esc(r.teams || (r.active ? 138 : 136))}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  const oldRenderOpenersPage = window.renderOpenersPage;
+  window.renderOpenersPage = function(){
+    let html = typeof oldRenderOpenersPage === 'function' ? oldRenderOpenersPage() : '';
+
+    if (!html || html.includes('openers-ratings-context')) return html;
+
+    // Replace the smaller opener model status card with the full ratings context.
+    html = html.replace(
+      /<div class="openers-model-status">[\s\S]*?<\/div>\s*<\/div>/,
+      renderOpenersRatingsContext()
+    );
+
+    // Fallback insert after hero if regex misses.
+    if (!html.includes('openers-ratings-context')) {
+      html = html.replace('</div>\n\n      <div class="card openers-card">', '</div>\n\n      ' + renderOpenersRatingsContext() + '\n\n      <div class="card openers-card">');
+    }
+
+    return html;
+  };
+})();
+</script>
+
+<style id="openers-ratings-context-css">
+.openers-ratings-context{
+  margin-top:14px;
+}
+.openers-ratings-banner{
+  border:1px solid rgba(34,197,94,.28);
+  background:rgba(22,101,52,.16);
+  color:#22c55e;
+  border-radius:14px;
+  padding:13px 16px;
+  font-weight:900;
+  line-height:1.35;
+}
+.openers-ratings-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(210px,1fr));
+  gap:12px;
+  margin-top:12px;
+  overflow-x:auto;
+  padding-bottom:2px;
+}
+.openers-rating-source-card{
+  border:1px solid rgba(148,163,184,.22);
+  background:rgba(15,23,42,.60);
+  border-radius:16px;
+  padding:14px 16px;
+  min-width:210px;
+}
+.openers-rating-source-name{
+  color:#f8fafc;
+  font-size:18px;
+  font-weight:950;
+  margin-bottom:6px;
+}
+.openers-rating-source-status{
+  font-size:13px;
+  font-weight:950;
+  margin-bottom:8px;
+}
+.openers-rating-source-card.active .openers-rating-source-status{
+  color:#22c55e;
+}
+.openers-rating-source-card.stale .openers-rating-source-status{
+  color:#fb923c;
+}
+.openers-rating-source-meta{
+  color:#94a3b8;
+  font-size:12px;
+  line-height:1.3;
+  font-weight:750;
+}
+@media(max-width:1100px){
+  .openers-ratings-grid{
+    grid-template-columns:repeat(2,minmax(210px,1fr));
+  }
+}
+</style>
+<!-- openers-ratings-context-end -->
+
+
+<!-- polish-openers-page-context-start -->
+<script id="polish-openers-page-context-js">
+(function(){
+  if (window.__polishOpenersPageContextInstalled) return;
+  window.__polishOpenersPageContextInstalled = true;
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function n(v){
+    const x = Number(v);
+    return Number.isFinite(x) ? x : null;
+  }
+
+  function normalizeTeamType(v){
+    const s = String(v || '').toUpperCase();
+    if (s.includes('FCS')) return 'FCS';
+    if (s.includes('FBS')) return 'FBS';
+    return '';
+  }
+
+  function teamRow(team){
+    try {
+      return (DB.teams || []).find(t => t.team === team) || {};
+    } catch(e) {
+      return {};
+    }
+  }
+
+  function teamSubdivision(team){
+    const t = teamRow(team);
+    const raw = t.subdivision || t.classification || t.division || t.level || t.fbs_fcs || t.team_type || '';
+    const norm = normalizeTeamType(raw);
+    if (norm) return norm;
+
+    // Site DB mainly tracks FBS teams. If team exists in DB.teams, treat as FBS.
+    if (t && t.team) return 'FBS';
+
+    return 'FCS';
+  }
+
+  function gameClass(g){
+    const a = teamSubdivision(g.away_team);
+    const h = teamSubdivision(g.home_team);
+    if (a === 'FBS' && h === 'FBS') return 'FBS vs FBS';
+    if ((a === 'FBS' && h === 'FCS') || (a === 'FCS' && h === 'FBS')) return 'FBS vs FCS';
+    if (a === 'FCS' && h === 'FCS') return 'FCS vs FCS';
+    return 'Other';
+  }
+
+  function selectedWeek(){
+    return document.getElementById('openersWeek')?.value || 'all';
+  }
+
+  function gamesForSelectedWeek(){
+    const week = selectedWeek();
+    let games = [...(DB.games || [])];
+    if (week !== 'all') games = games.filter(g => String(g.week) === String(week));
+    return games;
+  }
+
+  function updateOpenersHeroCounts(){
+    const games = gamesForSelectedWeek();
+    const fbsFbs = games.filter(g => gameClass(g) === 'FBS vs FBS').length;
+    const fbsFcs = games.filter(g => gameClass(g) === 'FBS vs FCS').length;
+
+    const minis = [...document.querySelectorAll('.hero-stats .mini')];
+    const gamesMini = minis.find(m => /games/i.test(m.textContent || ''));
+    const weeksMini = minis.find(m => /weeks/i.test(m.textContent || ''));
+
+    if (gamesMini) {
+      const val = gamesMini.querySelector('.value');
+      const lab = gamesMini.querySelector('.label');
+      if (val) val.textContent = String(games.length);
+      if (lab) lab.textContent = selectedWeek() === 'all' ? 'Games' : `Week ${selectedWeek()} Games`;
+    }
+
+    if (weeksMini) {
+      const val = weeksMini.querySelector('.value');
+      const lab = weeksMini.querySelector('.label');
+      if (val) val.textContent = selectedWeek() === 'all' ? String([...new Set((DB.games || []).map(g => g.week))].length) : '1';
+      if (lab) lab.textContent = selectedWeek() === 'all' ? 'Weeks' : 'Selected Week';
+    }
+
+    let chipWrap = document.getElementById('openersGameTypeChips');
+    const hero = document.querySelector('.hero');
+    if (!chipWrap && hero) {
+      chipWrap = document.createElement('div');
+      chipWrap.id = 'openersGameTypeChips';
+      chipWrap.className = 'openers-game-type-chips';
+      hero.insertAdjacentElement('afterend', chipWrap);
+    }
+    if (chipWrap) {
+      chipWrap.innerHTML = `
+        <span>${selectedWeek() === 'all' ? 'All weeks' : 'Week ' + esc(selectedWeek())}</span>
+        <span>FBS vs FBS: <b>${fbsFbs}</b></span>
+        <span>FBS vs FCS: <b>${fbsFcs}</b></span>
+        <span>Total games: <b>${games.length}</b></span>
+      `;
+    }
+  }
+
+  function latestChangeText(r){
+    const candidates = [
+      r.latest_change_date,
+      r.last_change_date,
+      r.value_changed_at,
+      r.rating_change_date,
+      r.snapshot_date,
+      r.source_updated,
+      r.source_updated_at
+    ].filter(Boolean);
+    return candidates.length ? String(candidates[0]).slice(0, 19).replace('T',' ') : 'Not detected yet';
+  }
+
+  function makeRatingsContextCollapsible(){
+    const ctx = document.querySelector('.openers-ratings-context');
+    if (!ctx || ctx.dataset.polished === '1') return;
+
+    ctx.dataset.polished = '1';
+
+    const banner = ctx.querySelector('.openers-ratings-banner');
+    const grid = ctx.querySelector('.openers-ratings-grid');
+    if (!banner || !grid) return;
+
+    const details = document.createElement('details');
+    details.className = 'openers-ratings-details';
+
+    const summary = document.createElement('summary');
+    summary.innerHTML = `<span>Production ratings context</span><small>SP+ 33.3% · FPI 33.3% · TeamRankings 33.3% · click to expand</small>`;
+
+    const body = document.createElement('div');
+    body.className = 'openers-ratings-details-body';
+
+    body.appendChild(banner);
+    body.appendChild(grid);
+
+    details.appendChild(summary);
+    details.appendChild(body);
+
+    ctx.innerHTML = '';
+    ctx.appendChild(details);
+
+    // Remove redundant old opener status pills below the ratings cards.
+    document.querySelectorAll('.openers-status-pills, .openers-model-status').forEach(el => {
+      if (!el.closest('.openers-ratings-context')) el.remove();
+    });
+
+    // Reword any remaining source-card Pulled labels.
+    ctx.querySelectorAll('.openers-rating-source-meta').forEach(el => {
+      el.innerHTML = el.innerHTML
+        .replace(/^Pulled:/i, 'Current site value date:')
+        .replace(/^Source updated:/i, 'Latest detected change:');
+      if (/Latest detected change:\s*Not provided by source/i.test(el.textContent || '')) {
+        el.textContent = 'Latest detected change: Not detected yet';
+      }
+    });
+  }
+
+  function patchOpenersDraw(){
+    const oldMount = window.mountOpenersPage;
+    if (typeof oldMount !== 'function' || oldMount.__polishedOpenersMount) return;
+
+    window.mountOpenersPage = function(){
+      const result = oldMount.apply(this, arguments);
+
+      makeRatingsContextCollapsible();
+      updateOpenersHeroCounts();
+
+      const weekSelect = document.getElementById('openersWeek');
+      if (weekSelect && !weekSelect.dataset.heroCountsBound) {
+        weekSelect.dataset.heroCountsBound = '1';
+        weekSelect.addEventListener('input', () => setTimeout(updateOpenersHeroCounts, 30));
+        weekSelect.addEventListener('change', () => setTimeout(updateOpenersHeroCounts, 30));
+      }
+
+      document.querySelectorAll('[data-openers-week]').forEach(btn => {
+        if (!btn.dataset.heroCountsBound) {
+          btn.dataset.heroCountsBound = '1';
+          btn.addEventListener('click', () => setTimeout(updateOpenersHeroCounts, 60));
+        }
+      });
+
+      return result;
+    };
+
+    window.mountOpenersPage.__polishedOpenersMount = true;
+  }
+
+  function run(){
+    patchOpenersDraw();
+    if (location.hash === '#openers') {
+      setTimeout(makeRatingsContextCollapsible, 50);
+      setTimeout(updateOpenersHeroCounts, 80);
+      setTimeout(makeRatingsContextCollapsible, 250);
+      setTimeout(updateOpenersHeroCounts, 300);
+    }
+  }
+
+  window.addEventListener('hashchange', run);
+  document.addEventListener('DOMContentLoaded', run);
+  run();
+})();
+</script>
+
+<style id="polish-openers-page-context-css">
+.openers-ratings-context{
+  margin-top:12px!important;
+}
+.openers-ratings-details{
+  border:1px solid rgba(96,165,250,.26);
+  background:rgba(15,23,42,.40);
+  border-radius:16px;
+  overflow:hidden;
+}
+.openers-ratings-details summary{
+  list-style:none;
+  cursor:pointer;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  font-weight:950;
+  color:#f8fafc;
+}
+.openers-ratings-details summary::-webkit-details-marker{
+  display:none;
+}
+.openers-ratings-details summary span{
+  font-size:17px;
+}
+.openers-ratings-details summary small{
+  color:#aebddd;
+  font-size:12px;
+  font-weight:800;
+}
+.openers-ratings-details summary:after{
+  content:'▸';
+  color:#93c5fd;
+  font-weight:950;
+}
+.openers-ratings-details[open] summary:after{
+  content:'▾';
+}
+.openers-ratings-details-body{
+  padding:0 14px 14px;
+}
+.openers-ratings-banner{
+  margin-top:0!important;
+}
+.openers-ratings-grid{
+  grid-template-columns:repeat(5,minmax(180px,1fr))!important;
+  gap:10px!important;
+}
+.openers-rating-source-card{
+  min-width:180px!important;
+  padding:11px 13px!important;
+}
+.openers-rating-source-name{
+  font-size:16px!important;
+}
+.openers-rating-source-meta{
+  font-size:11px!important;
+}
+.openers-game-type-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:10px 0 0;
+}
+.openers-game-type-chips span{
+  border:1px solid rgba(96,165,250,.25);
+  background:rgba(15,35,74,.62);
+  color:#dbeafe;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:900;
+}
+.openers-game-type-chips b{
+  color:#f8fafc;
+}
+</style>
+<!-- polish-openers-page-context-end -->
+
+
+
+
+
+<!-- enhance-openers-table-start -->
+<script id="enhance-openers-table-js">
+(function(){
+  if (window.__enhanceOpenersTableInstalledV2) return;
+  window.__enhanceOpenersTableInstalledV2 = true;
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function n(v){
+    const x = Number(v);
+    return Number.isFinite(x) ? x : null;
+  }
+
+  function fmtDate(v){
+    if (!v) return '—';
+    const d = new Date(String(v).slice(0,10) + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return String(v).slice(0,10);
+    return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+  }
+
+  function fmtNum(v, d=1){
+    const x = n(v);
+    if (x == null) return '—';
+    return x.toFixed(d).replace(/\.0$/,'');
+  }
+
+  function logo(team){
+    try {
+      if (typeof teamImageImg === 'function') return teamImageImg(team);
+      if (typeof advTeamLogo === 'function') return advTeamLogo(team);
+    } catch(e) {}
+    return '';
+  }
+
+  function teamRank(team){
+    try {
+      const row = (DB.teams || []).find(t => t.team === team);
+      return row && row.rank ? `#${row.rank}` : '';
+    } catch(e) {
+      return '';
+    }
+  }
+
+  function teamLinkHtml(team){
+    try {
+      if (typeof linkTeam === 'function') {
+        return `<span class="openers-team-link-only">${linkTeam(team)}</span>`;
+      }
+    } catch(e) {}
+    return `<span class="openers-team-name">${esc(team || '—')}</span>`;
+  }
+
+  function teamCell(team){
+    const rank = teamRank(team);
+    return `<span class="openers-team tight">
+      ${logo(team)}
+      ${teamLinkHtml(team)}
+      ${rank ? `<small>${esc(rank)}</small>` : ''}
+    </span>`;
+  }
+
+  function projSpread(g){
+    const margin = n(g.projected_margin_home);
+    if (margin == null) return '—';
+    const fav = margin >= 0 ? g.home_team : g.away_team;
+    return `${esc(fav)} -${Math.abs(margin).toFixed(1).replace(/\.0$/,'')}`;
+  }
+
+  function sortableTh(key, label){
+    const st = window.__openersSort || {key:'week', dir:'asc'};
+    const arrow = st.key === key ? (st.dir === 'asc' ? '▲' : '▼') : '';
+    return `<th class="sortable openers-sort-th" data-openers-sort="${key}">${esc(label)} <span class="sort-arrow">${arrow}</span></th>`;
+  }
+
+  function sortVal(g, key){
+    if (key === 'week') return n(g.week) ?? 999;
+    if (key === 'date') return String(g.date || '');
+    if (key === 'away') return String(g.away_team || '').toLowerCase();
+    if (key === 'home') return String(g.home_team || '').toLowerCase();
+    if (key === 'spread') return Math.abs(n(g.projected_margin_home) ?? 999);
+    if (key === 'total') return n(g.projected_total) ?? -999;
+    return '';
+  }
+
+  function angleRows(g){
+    try {
+      return (window.GAME_BETTING_ANGLES || []).filter(r => String(r.game_id) === String(g.game_id));
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function meaningfulRows(g){
+    return angleRows(g).filter(r => {
+      const txt = `${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase();
+      if (/variance|high model variance|medium model variance/.test(txt)) return false;
+      if (/coin_toss/.test(txt)) return false;
+      if (/1h|2h|first half|second half|travel_1h/.test(txt)) return false;
+      return true;
+    });
+  }
+
+  function findAngle(g, type){
+    const rows = meaningfulRows(g);
+
+    const tests = {
+      coach: r => /coach_ats|coach ats|full-game coach|full game coach/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase()),
+      total: r => /coach_total|coach totals|total support|over\/under|over under/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase()),
+      rp: r => /rp_support|returning production|rp support/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase()),
+      travel: r => /travel|road trip|distance|body clock/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase()),
+      sched: r => /bye|b2b|back-to-back|lookahead|sandwich|short rest|schedule spot/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase()),
+      injury: r => /injury|injuries|qb out|depth chart|status/.test(`${r.angle_key || ''} ${r.angle_label || ''} ${r.reason || ''}`.toLowerCase())
+    };
+
+    return rows.find(tests[type]) || null;
+  }
+
+  function angleCell(g, type){
+    const a = findAngle(g, type);
+    if (!a) return '<td class="openers-angle-cell muted">—</td>';
+
+    const team = a.side_team || a.team || a.side || '';
+    const title = [
+      a.angle_label || a.angle_key || type,
+      team ? `Team: ${team}` : '',
+      a.reason || ''
+    ].filter(Boolean).join(' · ');
+
+    return `<td class="openers-angle-cell" title="${esc(title)}">
+      <span class="openers-angle-logo">${team ? logo(team) : '•'}</span>
+    </td>`;
+  }
+
+  function ratingImpactForGame(g){
+    const data = window.POSTGAME_RATING_IMPACTS || window.OPENERS_RATING_IMPACTS || {};
+    const away = data[g.away_team] || null;
+    const home = data[g.home_team] || null;
+    return {away, home};
+  }
+
+  function ratingImpactCell(g){
+    const {away, home} = ratingImpactForGame(g);
+
+    function chip(team, row){
+      if (!row) return '';
+      const delta = n(row.projected_rating_delta ?? row.rating_delta ?? row.delta);
+      const status = String(row.box_score_status || row.status || '').toLowerCase();
+      const captured = /captured|complete|final/.test(status);
+      if (delta == null && !status) return '';
+
+      const cls = delta == null ? 'pending' : (delta >= 0 ? 'up' : 'down');
+      const val = delta == null ? '—' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}`;
+      return `<span class="openers-impact-chip ${cls}" title="${esc(team)} postgame box-score rating-impact estimate. Box score: ${captured ? 'captured' : 'missing/pending'}">${esc(val)}</span>`;
+    }
+
+    const html = [chip(g.away_team, away), chip(g.home_team, home)].filter(Boolean).join('');
+    if (html) return `<td class="openers-impact-cell">${html}</td>`;
+
+    return `<td class="openers-impact-cell pending" title="Pending postgame box-score impact model">Pending</td>`;
+  }
+
+  function weeks(){
+    return [...new Set((DB.games || []).map(g => g.week).filter(w => w !== null && w !== undefined && w !== ''))]
+      .map(w => Number(w)).filter(w => Number.isFinite(w)).sort((a,b)=>a-b);
+  }
+
+  function normalizeTeamType(v){
+    const raw = String(v || '').toUpperCase();
+    if (raw.includes('FCS')) return 'FCS';
+    if (raw.includes('FBS')) return 'FBS';
+    return '';
+  }
+
+  function teamSubdivision(team){
+    try {
+      const t = (DB.teams || []).find(x => x.team === team);
+      if (!t) return 'FCS';
+      const raw = t.subdivision || t.classification || t.division || t.level || t.fbs_fcs || t.team_type || '';
+      return normalizeTeamType(raw) || 'FBS';
+    } catch(e) {
+      return 'FCS';
+    }
+  }
+
+  function gameType(g){
+    const a = teamSubdivision(g.away_team);
+    const h = teamSubdivision(g.home_team);
+    if (a === 'FBS' && h === 'FBS') return 'fbs_fbs';
+    if ((a === 'FBS' && h === 'FCS') || (a === 'FCS' && h === 'FBS')) return 'fbs_fcs';
+    if (a === 'FCS' && h === 'FCS') return 'fcs_fcs';
+    return 'other';
+  }
+
+  function filteredGames(){
+    const week = document.getElementById('openersWeek')?.value || 'all';
+    const team = String(document.getElementById('openersTeam')?.value || '').trim().toLowerCase();
+    const gameTypeFilter = document.getElementById('openersGameType')?.value || 'all';
+
+    let games = [...(DB.games || [])];
+
+    if (week !== 'all') games = games.filter(g => String(g.week) === String(week));
+    if (gameTypeFilter !== 'all') games = games.filter(g => gameType(g) === gameTypeFilter);
+    if (team) {
+      games = games.filter(g =>
+        String(g.away_team || '').toLowerCase().includes(team) ||
+        String(g.home_team || '').toLowerCase().includes(team)
+      );
+    }
+
+    const st = window.__openersSort || {key:'week', dir:'asc'};
+    const mult = st.dir === 'asc' ? 1 : -1;
+
+    games.sort((a,b) => {
+      const av = sortVal(a, st.key);
+      const bv = sortVal(b, st.key);
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return (av - bv) * mult || String(a.date || '').localeCompare(String(b.date || ''));
+      }
+      return String(av).localeCompare(String(bv)) * mult || String(a.date || '').localeCompare(String(b.date || ''));
+    });
+
+    return games;
+  }
+
+  function drawOpenersEnhanced(){
+    const wrap = document.getElementById('openersTableWrap');
+    if (!wrap) return;
+
+    const games = filteredGames();
+
+    wrap.innerHTML = `<table class="openers-table openers-table-enhanced">
+      <thead><tr>
+        ${sortableTh('week','Wk')}
+        ${sortableTh('date','Date')}
+        ${sortableTh('away','Away')}
+        ${sortableTh('home','Home')}
+        ${sortableTh('spread','Proj Spread')}
+        ${sortableTh('total','Total')}
+        <th title="Projected rating movement from previous game box score, before ratings systems update">LW Impact</th>
+        <th title="Full-game coach ATS edge">Coach ATS</th>
+        <th title="Coach over/under or totals edge">Coach Tot</th>
+        <th title="Returning production edge, strongest in weeks 0-4">RP</th>
+        <th title="Travel/body-clock/road-trip angle">Travel</th>
+        <th title="Lookahead, sandwich, B2B road, off bye, or rest spot">Sched</th>
+        <th title="Injury/depth-chart alert">Inj</th>
+      </tr></thead>
+      <tbody>
+        ${games.map(g => `<tr>
+          <td>${esc(g.week ?? '—')}</td>
+          <td>${fmtDate(g.date)}</td>
+          <td>${teamCell(g.away_team)}</td>
+          <td>${teamCell(g.home_team)}</td>
+          <td class="openers-proj-spread"><b>${projSpread(g)}</b></td>
+          <td class="openers-proj-total"><b>${fmtNum(g.projected_total, 1)}</b></td>
+          ${ratingImpactCell(g)}
+          ${angleCell(g, 'coach')}
+          ${angleCell(g, 'total')}
+          ${angleCell(g, 'rp')}
+          ${angleCell(g, 'travel')}
+          ${angleCell(g, 'sched')}
+          ${angleCell(g, 'injury')}
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+    document.querySelectorAll('[data-openers-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.openersSort;
+        const cur = window.__openersSort || {key:'week', dir:'asc'};
+        window.__openersSort = {key, dir: cur.key === key && cur.dir === 'asc' ? 'desc' : 'asc'};
+        drawOpenersEnhanced();
+      });
+    });
+
+    document.querySelectorAll('[data-openers-week]').forEach(btn => {
+      const val = document.getElementById('openersWeek')?.value || 'all';
+      btn.classList.toggle('active', String(btn.dataset.openersWeek) === String(val));
+    });
+  }
+
+  function enhanceMount(){
+    const oldMount = window.mountOpenersPage;
+    if (typeof oldMount !== 'function' || oldMount.__enhancedOpenersTableV2) return;
+
+    window.mountOpenersPage = function(){
+      const result = oldMount.apply(this, arguments);
+
+      const weekSelect = document.getElementById('openersWeek');
+      const teamInput = document.getElementById('openersTeam');
+
+      const filters = document.querySelector('.openers-filters');
+      if (filters && !document.getElementById('openersGameType')) {
+        filters.insertAdjacentHTML('afterbegin', `
+          <select id="openersGameType" class="openers-game-type-filter">
+            <option value="all">All game types</option>
+            <option value="fbs_fbs">FBS vs FBS only</option>
+            <option value="fbs_fcs">FBS vs FCS only</option>
+          </select>
+        `);
+      }
+      const gameTypeSelect = document.getElementById('openersGameType');
+
+      drawOpenersEnhanced();
+
+      if (weekSelect && !weekSelect.dataset.openersEnhancedBoundV2) {
+        weekSelect.dataset.openersEnhancedBoundV2 = '1';
+        weekSelect.addEventListener('input', () => setTimeout(drawOpenersEnhanced, 20));
+        weekSelect.addEventListener('change', () => setTimeout(drawOpenersEnhanced, 20));
+      }
+
+      if (teamInput && !teamInput.dataset.openersEnhancedBoundV2) {
+        teamInput.dataset.openersEnhancedBoundV2 = '1';
+        teamInput.addEventListener('input', () => setTimeout(drawOpenersEnhanced, 20));
+      }
+
+      if (gameTypeSelect && !gameTypeSelect.dataset.openersEnhancedBoundV2) {
+        gameTypeSelect.dataset.openersEnhancedBoundV2 = '1';
+        gameTypeSelect.addEventListener('input', () => setTimeout(drawOpenersEnhanced, 20));
+        gameTypeSelect.addEventListener('change', () => setTimeout(drawOpenersEnhanced, 20));
+      }
+
+      document.querySelectorAll('[data-openers-week]').forEach(btn => {
+        if (!btn.dataset.openersEnhancedBoundV2) {
+          btn.dataset.openersEnhancedBoundV2 = '1';
+          btn.addEventListener('click', () => {
+            const sel = document.getElementById('openersWeek');
+            if (sel) sel.value = btn.dataset.openersWeek;
+            setTimeout(drawOpenersEnhanced, 30);
+          });
+        }
+      });
+
+      return result;
+    };
+
+    window.mountOpenersPage.__enhancedOpenersTableV2 = true;
+  }
+
+  function run(){
+    enhanceMount();
+    if (location.hash === '#openers') setTimeout(drawOpenersEnhanced, 80);
+  }
+
+  window.addEventListener('hashchange', run);
+  document.addEventListener('DOMContentLoaded', run);
+  run();
+})();
+</script>
+
+<style id="enhance-openers-table-css">
+.openers-week-buttons{
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  gap:5px!important;
+  padding-bottom:2px!important;
+}
+.openers-week-buttons button{
+  padding:7px 10px!important;
+  font-size:12px!important;
+  min-width:auto!important;
+  flex:0 0 auto!important;
+}
+.openers-table-enhanced{
+  table-layout:fixed!important;
+  width:100%!important;
+}
+.openers-table-enhanced th,
+.openers-table-enhanced td{
+  padding:6px 6px!important;
+  font-size:12px!important;
+}
+.openers-table-enhanced th:nth-child(1),
+.openers-table-enhanced td:nth-child(1){
+  width:38px!important;
+}
+.openers-table-enhanced th:nth-child(2),
+.openers-table-enhanced td:nth-child(2){
+  width:66px!important;
+}
+.openers-table-enhanced th:nth-child(3),
+.openers-table-enhanced td:nth-child(3),
+.openers-table-enhanced th:nth-child(4),
+.openers-table-enhanced td:nth-child(4){
+  width:19%!important;
+}
+.openers-table-enhanced th:nth-child(5),
+.openers-table-enhanced td:nth-child(5){
+  width:170px!important;
+}
+.openers-table-enhanced th:nth-child(6),
+.openers-table-enhanced td:nth-child(6){
+  width:58px!important;
+}
+.openers-table-enhanced th:nth-child(n+7),
+.openers-table-enhanced td:nth-child(n+7){
+  width:50px!important;
+  text-align:center!important;
+}
+.openers-table-enhanced th:nth-child(7),
+.openers-table-enhanced td:nth-child(7){
+  width:78px!important;
+}
+.openers-team.tight{
+  gap:6px!important;
+}
+.openers-team.tight .team-logo-wrap{
+  width:22px!important;
+  height:22px!important;
+  flex:0 0 22px!important;
+}
+.openers-team.tight .team-logo{
+  width:20px!important;
+  height:20px!important;
+}
+.openers-team-name{
+  max-width:132px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.openers-team.tight small{
+  color:#94a3b8;
+  font-weight:850;
+  white-space:nowrap;
+}
+.openers-proj-spread{
+  white-space:nowrap!important;
+  line-height:1.12!important;
+}
+.openers-proj-spread b{
+  display:inline-block;
+  max-width:168px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.openers-proj-total{
+  white-space:nowrap!important;
+}
+.openers-angle-cell{
+  text-align:center!important;
+  vertical-align:middle!important;
+}
+.openers-angle-cell.muted{
+  color:#475569!important;
+}
+.openers-angle-logo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.openers-angle-logo .team-logo-wrap{
+  width:22px!important;
+  height:22px!important;
+  flex:0 0 22px!important;
+}
+.openers-angle-logo .team-logo{
+  width:20px!important;
+  height:20px!important;
+  object-fit:contain!important;
+}
+.openers-impact-cell{
+  text-align:center!important;
+  white-space:nowrap!important;
+  color:#94a3b8;
+  font-size:11px!important;
+  font-weight:850;
+}
+.openers-impact-chip{
+  display:inline-block;
+  border-radius:999px;
+  padding:2px 6px;
+  margin:0 1px;
+  font-size:10px;
+  font-weight:950;
+}
+.openers-impact-chip.up{
+  background:rgba(34,197,94,.15);
+  color:#4ade80;
+  border:1px solid rgba(34,197,94,.30);
+}
+.openers-impact-chip.down{
+  background:rgba(244,63,94,.14);
+  color:#fb7185;
+  border:1px solid rgba(244,63,94,.30);
+}
+.openers-impact-cell.pending{
+  color:#64748b!important;
+}
+@media(max-width:1250px){
+  .openers-table-enhanced{
+    min-width:1220px!important;
+  }
+  #openersTableWrap{
+    overflow-x:auto!important;
+  }
+}
+
+.openers-team-link-only .team-logo-wrap,
+.openers-team-link-only img{
+  display:none!important;
+}
+.openers-team-link-only a{
+  color:#dbeafe!important;
+  text-decoration:underline!important;
+  font-weight:850!important;
+  max-width:132px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+}
+.openers-game-type-filter{
+  display:block!important;
+  max-width:180px!important;
+  padding:9px 11px!important;
+  border-radius:10px!important;
+  border:1px solid var(--line)!important;
+}
+
+</style>
+<!-- enhance-openers-table-end -->
+
+
+
 
 </body>
 </html>
