@@ -289,6 +289,7 @@ run_py "scripts/site/fix_home_command_center_logos.py" "fix_home_command_center_
 run_py "scripts/site/rename_home_to_dashboard_and_cleanup.py" "rename_home_to_dashboard_and_cleanup.py" || echo "WARNING: dashboard cleanup failed"
 run_py "scripts/site/polish_home_command_center_tables.py" "polish_home_command_center_tables.py" || echo "WARNING: home command center table polish failed"
 run_py "scripts/site/fix_home_command_center_table_expansion.py" "fix_home_command_center_table_expansion.py" || echo "WARNING: home command center table expansion fix failed"
+run_py "scripts/site/fix_home_command_center_toggle.py" "fix_home_command_center_toggle.py" || echo "WARNING: home command center toggle fix failed"
 run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
 run_py "scripts/site/inject_schedule_model_context.py" "inject_schedule_model_context.py" || echo "WARNING: schedule model context injection failed"
 run_py "scripts/site/inject_schedule_spread_lab_display.py" "inject_schedule_spread_lab_display.py" || echo "WARNING: schedule spread lab display injection failed"
