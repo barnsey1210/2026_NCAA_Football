@@ -1,0 +1,42 @@
+{
+  "schema_version": "postgame-shadow-v1",
+  "built_at": "2026-07-18T00:19:45.042348+00:00",
+  "mode": "shadow_only",
+  "applied_to_ratings": false,
+  "applied_to_projections": false,
+  "results_source": "data/results/game_results_2026.csv",
+  "spread_model": {
+    "status": "ready",
+    "method": "score-only: margin, close, ATS margin, spread magnitude",
+    "holdout_2025": {
+      "n": 1385,
+      "baseline_mae": 7.854020370685854,
+      "model_mae": 7.3555114694666655,
+      "mae_improvement_pct": 6.3471811593436955,
+      "direction_accuracy": 0.6180505415162455,
+      "prediction_target_correlation": 0.35247677631416713
+    },
+    "pbp_excluded_reason": "PBP failed incremental 2025 spread holdout"
+  },
+  "total_model": {
+    "status": "awaiting_current_season_pbp",
+    "method": "score surprises plus garbage-time-filtered PBP from both teams' prior games",
+    "holdout_2025": {
+      "n": 679,
+      "baseline_mae": 4.03654009416929,
+      "model_mae": 3.5336425179225865,
+      "mae_improvement_pct": 12.458629532086892,
+      "direction_accuracy": 0.7069219440353461,
+      "correlation": 0.5078985168388336
+    }
+  },
+  "updates": [],
+  "warnings": [
+    "No live 2026 results artifact exists yet."
+  ],
+  "status": "awaiting_live_results",
+  "summary": {
+    "completed_team_updates": 0,
+    "warnings": 1
+  }
+}

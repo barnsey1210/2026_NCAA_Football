@@ -76,6 +76,8 @@ run_py() {
   run_py "build_season_game_lines_2026.py" || echo "WARNING: season game lines build failed"
     run_py "pull_theodds_ncaaf_lines_2026.py" || echo "WARNING: The Odds API line pull failed"
     run_py "build_theodds_season_lines_2026.py" || echo "WARNING: The Odds API line normalization failed"
+  run_py "scripts/odds/append_game_book_line_history.py" "append_game_book_line_history.py" || echo "WARNING: per-book game line history append failed"
+  run_py "scripts/signals/build_cross_book_opener_signals_2026.py" "build_cross_book_opener_signals_2026.py" || echo "WARNING: cross-book opener signal build failed"
 
 
   echo "Using ~/NCAAF_AUTO/index.html as automation baseline template. No iCloud copy is performed."
@@ -90,6 +92,7 @@ run_py() {
 run_py "build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
 run_py "scripts/ratings/build_active_2026_ratings_master.py" "build_active_2026_ratings_master.py" || echo "WARNING: active 2026 ratings master build failed"
 run_py "scripts/ratings/build_ratings_system_variance.py" "build_ratings_system_variance.py" || echo "WARNING: ratings variance build failed"
+run_py "scripts/signals/build_pbp_line_movement_signals_2026.py" "build_pbp_line_movement_signals_2026.py" || echo "WARNING: PBP line movement signals build failed"
 run_py "scripts/signals/build_game_betting_angles_2026.py" "build_game_betting_angles_2026.py" || echo "WARNING: game betting angles build failed"
 run_py "append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
 run_py "build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
@@ -163,6 +166,8 @@ run_py "scripts/site/inject_coach_fav_dog_trends_page.py" "inject_coach_fav_dog_
 run_py "scripts/site/inject_rp_support_badges.py" "inject_rp_support_badges.py" || echo "WARNING: RP support badge injection failed"
 run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py" "pull_sgo_ncaaf_game_odds.py" || echo "WARNING: SGO NCAAF game odds pull failed"
 run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py" "parse_sgo_ncaaf_game_odds.py" || echo "WARNING: SGO NCAAF game odds parse failed"
+run_py "scripts/odds/append_sgo_game_book_line_history.py" "append_sgo_game_book_line_history.py" || echo "WARNING: granular SGO book history append failed"
+run_py "scripts/signals/build_cross_book_opener_signals_2026.py" "build_cross_book_opener_signals_2026.py" || echo "WARNING: refreshed cross-book opener signal build failed"
 run_py "scripts/site/inject_sgo_game_odds.py" "inject_sgo_game_odds.py" || echo "WARNING: SGO NCAAF game odds injection failed"
 run_py "scripts/site/inject_opening_possession_main_badges.py" "inject_opening_possession_main_badges.py" || echo "WARNING: opening possession main badge injection failed"
 run_py "scripts/site/inject_opening_possession_matchup.py" "inject_opening_possession_matchup.py" || echo "WARNING: opening possession matchup injection failed"
@@ -219,40 +224,6 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
 
 
 
-  # AUTO_GITHUB_PUBLISH_START
-  # Publish the freshly built site to the GitHub Pages repo after sanity checks.
-  PUBLISH_REPO="$HOME/Sites/NCAAF_SITE"
-
-  if [ -d "$PUBLISH_REPO/.git" ]; then
-    echo "Running GitHub publish sanity check..."
-    if python3 scripts/publish/check_index_before_publish.py; then
-      echo "Copying fresh site files to GitHub Pages repo..."
-      cp index.html "$PUBLISH_REPO/index.html"
-      [ -f matchup.html ] && cp matchup.html "$PUBLISH_REPO/matchup.html"
-
-      mkdir -p "$PUBLISH_REPO/data/bets"
-      [ -f data/bets/bets_enriched.csv ] && cp data/bets/bets_enriched.csv "$PUBLISH_REPO/data/bets/bets_enriched.csv"
-      [ -f data/bets/betting_dashboard.json ] && cp data/bets/betting_dashboard.json "$PUBLISH_REPO/data/bets/betting_dashboard.json"
-      [ -f data/bets/market_clv_match_audit.csv ] && cp data/bets/market_clv_match_audit.csv "$PUBLISH_REPO/data/bets/market_clv_match_audit.csv"
-      [ -f data/bets/betting_performance_history.csv ] && cp data/bets/betting_performance_history.csv "$PUBLISH_REPO/data/bets/betting_performance_history.csv"
-      [ -f data/bets/bet_closing_clv.csv ] && cp data/bets/bet_closing_clv.csv "$PUBLISH_REPO/data/bets/bet_closing_clv.csv"
-      [ -f data/bets/bet_closing_clv_audit.csv ] && cp data/bets/bet_closing_clv_audit.csv "$PUBLISH_REPO/data/bets/bet_closing_clv_audit.csv"
-
-      echo "Publishing to GitHub Pages repo..."
-      cd "$PUBLISH_REPO"
-      git status --short
-      git add index.html matchup.html data/bets
-      git commit -m "Daily NCAAF market update $(date +%Y-%m-%d)" || echo "No changes to commit"
-      git push || echo "WARNING: GitHub push failed"
-      cd "$HOME/NCAAF_AUTO"
-    else
-      echo "WARNING: publish sanity check failed; skipping GitHub publish"
-    fi
-  else
-    echo "WARNING: GitHub publish repo not found at $PUBLISH_REPO"
-  fi
-  # AUTO_GITHUB_PUBLISH_END
-
   # cp market_win_totals_history.csv "$ICLOUD/"
   # cp market_conference_futures_history.csv "$ICLOUD/"
   # cp market_win_totals_movement.csv "$ICLOUD/"
@@ -261,14 +232,11 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
   # cp market_futures_export.xlsx "$ICLOUD/"
   # cp index_auto_market.html "$ICLOUD/"
 
-  echo "Daily market update finished: $(date)"
-} >> "$LOG" 2>&1
-run_py "scripts/site/recalculate_game_projections_from_active_combo.py" "recalculate_game_projections_from_active_combo.py" || echo "WARNING: active combo projection recalculation failed"
 run_py "scripts/site/recalculate_game_projections_from_active_combo.py" "recalculate_game_projections_from_active_combo.py" || echo "WARNING: active combo projection recalculation failed"
 run_py "scripts/site/allow_ndsu_mw_title_eligibility.py" "allow_ndsu_mw_title_eligibility.py" || echo "WARNING: NDSU MW eligibility cleanup failed"
-run_py "rerun_conference_sims_2026.py --index index.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index.html" || echo "WARNING: conference sim rerun failed"
-run_py "rerun_conference_sims_2026.py --index index_auto_market.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index_auto_market.html" || echo "WARNING: conference sim rerun auto failed"
-run_py "rerun_conference_sims_2026.py --index index_publish.html --sims 10000 --seed 20260712" "rerun_conference_sims_2026 index_publish.html" || echo "WARNING: conference sim rerun publish failed"
+python3 rerun_conference_sims_2026.py --index index.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun failed"
+python3 rerun_conference_sims_2026.py --index index_auto_market.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun auto failed"
+python3 rerun_conference_sims_2026.py --index index_publish.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun publish failed"
 run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
 run_py "scripts/site/cleanup_stale_projection_audit_notes.py" "cleanup_stale_projection_audit_notes.py" || echo "WARNING: stale projection audit cleanup failed"
 run_py "scripts/history/append_game_line_model_history.py" "append_game_line_model_history.py" || echo "WARNING: game line/model history append failed"
@@ -297,6 +265,7 @@ run_py "scripts/site/polish_openers_page_context.py" "polish_openers_page_contex
 run_py "scripts/site/enhance_openers_table.py" "enhance_openers_table.py" || echo "WARNING: openers table enhancement failed"
 run_py "scripts/site/cleanup_render_wrappers_and_flicker.py" "cleanup_render_wrappers_and_flicker.py" || echo "WARNING: render-wrapper flicker cleanup failed"
 run_py "scripts/site/native_left_nav_cleanup.py" "native_left_nav_cleanup.py" || echo "WARNING: native left nav cleanup failed"
+run_py "scripts/site/native_page_mount_consolidation.py" "native_page_mount_consolidation.py" || echo "WARNING: native page mount consolidation failed"
 run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
 run_py "scripts/site/inject_schedule_model_context.py" "inject_schedule_model_context.py" || echo "WARNING: schedule model context injection failed"
 run_py "scripts/site/inject_schedule_spread_lab_display.py" "inject_schedule_spread_lab_display.py" || echo "WARNING: schedule spread lab display injection failed"
@@ -306,3 +275,23 @@ run_py "scripts/site/inject_schedule_betting_angle_filter.py" "inject_schedule_b
 run_py "scripts/site/inject_schedule_angle_reason_fix.py" "inject_schedule_angle_reason_fix.py" || echo "WARNING: schedule angle reason fix injection failed"
 run_py "scripts/site/inject_betting_angle_definitions.py" "inject_betting_angle_definitions.py" || echo "WARNING: betting angle definitions injection failed"
 run_py "scripts/site/inject_normalized_betting_angle_filter.py" "inject_normalized_betting_angle_filter.py" || echo "WARNING: normalized betting angle filter injection failed"
+run_py "scripts/site/inject_production_model_badge.py" "inject_production_model_badge.py" || echo "WARNING: production model badge injection failed"
+run_py "scripts/betting/build_betting_activity_view.py" "build_betting_activity_view.py" || echo "WARNING: betting activity view build failed"
+run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py" || echo "WARNING: matchups view build failed"
+run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || echo "WARNING: futures view build failed"
+run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py" || echo "WARNING: conference workspace build failed"
+run_py "scripts/site/build_postgame_shadow_updates.py" "build_postgame_shadow_updates.py" || echo "WARNING: postgame shadow build failed"
+run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py" || echo "WARNING: ratings view build failed"
+run_py "scripts/site/build_public_site.py" "build_public_site.py" || echo "WARNING: public multi-page build failed"
+run_py "scripts/publish/check_public_site.py" "check_public_site.py"
+run_py "scripts/publish/check_index_before_publish.py" "check_index_before_publish.py"
+run_py "scripts/audit/audit_page_payload_size.py" "audit_page_payload_size.py"
+
+if [ "${NCAAF_AUTO_PUBLISH:-0}" = "1" ]; then
+  scripts/publish/publish_site.sh --push
+else
+  echo "Build validated. Publishing skipped; set NCAAF_AUTO_PUBLISH=1 or run scripts/publish/publish_site.sh --push explicitly."
+fi
+
+echo "Daily market update finished: $(date)"
+} >> "$LOG" 2>&1

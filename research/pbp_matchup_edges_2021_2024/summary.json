@@ -1,0 +1,17 @@
+{
+  "protocol": "2021-2023 thresholds; 2024 validation; 2025 never read into analysis",
+  "feature_families": 10,
+  "tail_tests": 20,
+  "development_rows": 1565,
+  "validation_rows": 527,
+  "validated_2024": 0,
+  "promising_unconfirmed": 0,
+  "rejected_or_inconclusive": 20,
+  "notes": [
+    "Thresholds are fixed development 20th/80th percentiles.",
+    "ATS high tails bet home and low tails bet away; totals high/low actions are preregistered by football direction.",
+    "Win rates use a 20-decision 50% shrinkage prior.",
+    "Validation q-values use Benjamini-Hochberg correction across all tail tests.",
+    "No favorite/underdog, home/away subdivision, or feature permutations are searched."
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "protocol": {
+    "development": "2021-2023, Week 5+ only",
+    "validation": "2024, Week 5+ only",
+    "locked_test": "2025 not evaluated or reported",
+    "features": [
+      "home_matchup_expected_off_neutral_pass",
+      "home_matchup_expected_off_success",
+      "home_matchup_expected_off_explosiveness",
+      "home_matchup_expected_off_ppa",
+      "home_matchup_expected_off_pace_seconds",
+      "away_matchup_expected_off_neutral_pass",
+      "away_matchup_expected_off_success",
+      "away_matchup_expected_off_explosiveness",
+      "away_matchup_expected_off_ppa",
+      "away_matchup_expected_off_pace_seconds",
+      "home_matchup_expected_def_havoc",
+      "away_matchup_expected_def_havoc"
+    ]
+  },
+  "development_rows": 1565,
+  "validation_rows": 527,
+  "margin": {
+    "football_alpha": 100.0,
+    "residual_alpha": 1000.0,
+    "football_cv_mae_by_alpha": {
+      "0.1": 13.049852330140155,
+      "1.0": 13.049230149548938,
+      "10.0": 13.043657667906528,
+      "100.0": 13.016973432530042,
+      "1000.0": 13.088188029147672
+    },
+    "residual_cv_mae_by_alpha": {
+      "0.1": 12.406788897010628,
+      "1.0": 12.406372021277845,
+      "10.0": 12.402805553264907,
+      "100.0": 12.382069322844918,
+      "1000.0": 12.322577812173632
+    },
+    "validation_market_baseline": {
+      "n": 527,
+      "mae": 12.024667931688805,
+      "rmse": 15.223571057722483,
+      "bias_actual_minus_prediction": 1.1783681214421253
+    },
+    "validation_football_model": {
+      "n": 527,
+      "mae": 12.384751263266114,
+      "rmse": 15.584182031506792,
+      "bias_actual_minus_prediction": 1.2600701729962585
+    },
+    "validation_market_plus_pbp_residual": {
+      "n": 527,
+      "mae": 12.103076340241628,
+      "rmse": 15.327132186833177,
+      "bias_actual_minus_prediction": 1.6519669896995375
+    },
+    "validation_residual_correlation": -0.04567916641158644,
+    "validation_model_edge_mean_abs": 0.7651628224887702
+  },
+  "total": {
+    "football_alpha": 0.1,
+    "residual_alpha": 1000.0,
+    "football_cv_mae_by_alpha": {
+      "0.1": 12.876417818046013,
+      "1.0": 12.876589688353157,
+      "10.0": 12.878129599191317,
+      "100.0": 12.886764042984838,
+      "1000.0": 12.960025783644967
+    },
+    "residual_cv_mae_by_alpha": {
+      "0.1": 12.37852588403643,
+      "1.0": 12.378541595300533,
+      "10.0": 12.378619083596776,
+      "100.0": 12.37723510113507,
+      "1000.0": 12.357886500402252
+    },
+    "validation_market_baseline": {
+      "n": 527,
+      "mae": 13.053130929791271,
+      "rmse": 16.483244324267915,
+      "bias_actual_minus_prediction": 1.730550284629981
+    },
+    "validation_football_model": {
+      "n": 527,
+      "mae": 13.167666268486238,
+      "rmse": 16.504703834318136,
+      "bias_actual_minus_prediction": -0.08898085841739795
+    },
+    "validation_market_plus_pbp_residual": {
+      "n": 527,
+      "mae": 12.966487973408531,
+      "rmse": 16.400441100758865,
+      "bias_actual_minus_prediction": 1.198529514987577
+    },
+    "validation_residual_correlation": 0.07608073217622555,
+    "validation_model_edge_mean_abs": 0.6719259313952821
+  }
+}

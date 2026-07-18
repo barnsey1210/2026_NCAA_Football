@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import re
+import pandas as pd
+
+RAW = Path("data/import/sp_plus/sp_plus_returning_production_2023_2025_raw_paste.txt")
+OUT = Path("data/import/sp_plus/sp_plus_returning_production_2023_2025.csv")
+AUDIT = Path("data/audit/sp_plus_returning_production_2023_2025_audit.csv")
+
+SEASONS = [2023, 2024, 2025]
+
+if not RAW.exists():
+    raise SystemExit(f"Missing {RAW}")
+
+txt = RAW.read_text(errors="ignore")
+lines = [x.strip() for x in txt.splitlines() if x.strip()]
+
+rows = []
+table_idx = -1
+
+# Example:
+# 1. Florida St.    87%    80% (12)    94% (2)
+pat = re.compile(
+    r"^\s*(?P<rank>\d+)\.\s+"
+    r"(?P<team>.+?)\s+"
+    r"(?P<overall>\d+)%\s+"
+    r"(?P<offense>\d+)%\s*\((?P<offense_rank>\d+)\)\s+"
+    r"(?P<defense>\d+)%\s*\((?P<defense_rank>\d+)\)\s*$"
+)
+
+for line in lines:
+    if line.upper().startswith("TEAM"):
+        table_idx += 1
+        continue
+
+    m = pat.match(line)
+    if not m:
+        continue
+
+    if table_idx < 0 or table_idx >= len(SEASONS):
+        raise SystemExit(f"Could not assign season for line: {line}")
+
+    d = m.groupdict()
+    season = SEASONS[table_idx]
+
+    rows.append({
+        "season": season,
+        "team": d["team"].strip(),
+        "overall": int(d["overall"]),
+        "overall_rank": int(d["rank"]),
+        "offense": int(d["offense"]),
+        "offense_rank": int(d["offense_rank"]),
+        "defense": int(d["defense"]),
+        "defense_rank": int(d["defense_rank"]),
+        "source": f"Bill Connelly/SP+ returning production {season}",
+    })
+
+df = pd.DataFrame(rows)
+
+if df.empty:
+    raise SystemExit("No rows parsed. Make sure the three tables are copied to clipboard.")
+
+OUT.parent.mkdir(parents=True, exist_ok=True)
+AUDIT.parent.mkdir(parents=True, exist_ok=True)
+
+df.to_csv(OUT, index=False)
+
+audit = (
+    df.groupby("season")
+    .agg(
+        teams=("team", "count"),
+        overall_min=("overall", "min"),
+        overall_max=("overall", "max"),
+        offense_min=("offense", "min"),
+        offense_max=("offense", "max"),
+        defense_min=("defense", "min"),
+        defense_max=("defense", "max"),
+    )
+    .reset_index()
+)
+
+audit.to_csv(AUDIT, index=False)
+
+print("wrote:", OUT, "rows:", len(df))
+print("wrote:", AUDIT)
+print(audit.to_string(index=False))
+print()
+print(df.head(12).to_string(index=False))

@@ -1,0 +1,229 @@
+{
+  "n": 1564,
+  "path": [],
+  "action": -1,
+  "feature": "total_points_per_drive",
+  "threshold": 4.681631965074823,
+  "left": {
+    "n": 1095,
+    "path": [
+      [
+        "total_points_per_drive",
+        "<=",
+        4.681631965074823
+      ]
+    ],
+    "action": 1,
+    "feature": "abs_spread",
+    "threshold": 7.5,
+    "left": {
+      "n": 568,
+      "path": [
+        [
+          "total_points_per_drive",
+          "<=",
+          4.681631965074823
+        ],
+        [
+          "abs_spread",
+          "<=",
+          7.5
+        ]
+      ],
+      "action": -1,
+      "feature": "total_qb_run_stress",
+      "threshold": 0.16740590687883591,
+      "left": {
+        "n": 341,
+        "path": [
+          [
+            "total_points_per_drive",
+            "<=",
+            4.681631965074823
+          ],
+          [
+            "abs_spread",
+            "<=",
+            7.5
+          ],
+          [
+            "total_qb_run_stress",
+            "<=",
+            0.16740590687883591
+          ]
+        ],
+        "action": -1
+      },
+      "right": {
+        "n": 227,
+        "path": [
+          [
+            "total_points_per_drive",
+            "<=",
+            4.681631965074823
+          ],
+          [
+            "abs_spread",
+            "<=",
+            7.5
+          ],
+          [
+            "total_qb_run_stress",
+            ">",
+            0.16740590687883591
+          ]
+        ],
+        "action": 1
+      }
+    },
+    "right": {
+      "n": 527,
+      "path": [
+        [
+          "total_points_per_drive",
+          "<=",
+          4.681631965074823
+        ],
+        [
+          "abs_spread",
+          ">",
+          7.5
+        ]
+      ],
+      "action": 1,
+      "feature": "total_low_disruption",
+      "threshold": -0.3117366938416777,
+      "left": {
+        "n": 421,
+        "path": [
+          [
+            "total_points_per_drive",
+            "<=",
+            4.681631965074823
+          ],
+          [
+            "abs_spread",
+            ">",
+            7.5
+          ],
+          [
+            "total_low_disruption",
+            "<=",
+            -0.3117366938416777
+          ]
+        ],
+        "action": 1
+      },
+      "right": {
+        "n": 106,
+        "path": [
+          [
+            "total_points_per_drive",
+            "<=",
+            4.681631965074823
+          ],
+          [
+            "abs_spread",
+            ">",
+            7.5
+          ],
+          [
+            "total_low_disruption",
+            ">",
+            -0.3117366938416777
+          ]
+        ],
+        "action": -1
+      }
+    }
+  },
+  "right": {
+    "n": 469,
+    "path": [
+      [
+        "total_points_per_drive",
+        ">",
+        4.681631965074823
+      ]
+    ],
+    "action": -1,
+    "feature": "total_rush_success",
+    "threshold": 0.8680230573872585,
+    "left": {
+      "n": 141,
+      "path": [
+        [
+          "total_points_per_drive",
+          ">",
+          4.681631965074823
+        ],
+        [
+          "total_rush_success",
+          "<=",
+          0.8680230573872585
+        ]
+      ],
+      "action": -1
+    },
+    "right": {
+      "n": 328,
+      "path": [
+        [
+          "total_points_per_drive",
+          ">",
+          4.681631965074823
+        ],
+        [
+          "total_rush_success",
+          ">",
+          0.8680230573872585
+        ]
+      ],
+      "action": -1,
+      "feature": "total_pass_success",
+      "threshold": 0.9397346241220078,
+      "left": {
+        "n": 131,
+        "path": [
+          [
+            "total_points_per_drive",
+            ">",
+            4.681631965074823
+          ],
+          [
+            "total_rush_success",
+            ">",
+            0.8680230573872585
+          ],
+          [
+            "total_pass_success",
+            "<=",
+            0.9397346241220078
+          ]
+        ],
+        "action": 1
+      },
+      "right": {
+        "n": 197,
+        "path": [
+          [
+            "total_points_per_drive",
+            ">",
+            4.681631965074823
+          ],
+          [
+            "total_rush_success",
+            ">",
+            0.8680230573872585
+          ],
+          [
+            "total_pass_success",
+            ">",
+            0.9397346241220078
+          ]
+        ],
+        "action": -1
+      }
+    }
+  }
+}

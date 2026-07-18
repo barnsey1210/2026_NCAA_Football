@@ -1,0 +1,185 @@
+{
+  "n": 1554,
+  "path": [],
+  "prediction": -0.1776061776061776,
+  "feature": "home_overall_success_adv",
+  "threshold": -0.0001814671671235002,
+  "left": {
+    "n": 777,
+    "path": [
+      [
+        "home_overall_success_adv",
+        "<=",
+        -0.0001814671671235002
+      ]
+    ],
+    "prediction": -0.49935649935649934,
+    "feature": "opening_home_spread",
+    "threshold": -3.0,
+    "left": {
+      "n": 190,
+      "path": [
+        [
+          "home_overall_success_adv",
+          "<=",
+          -0.0001814671671235002
+        ],
+        [
+          "opening_home_spread",
+          "<=",
+          -3.0
+        ]
+      ],
+      "prediction": -1.0236842105263158
+    },
+    "right": {
+      "n": 587,
+      "path": [
+        [
+          "home_overall_success_adv",
+          "<=",
+          -0.0001814671671235002
+        ],
+        [
+          "opening_home_spread",
+          ">",
+          -3.0
+        ]
+      ],
+      "prediction": -0.32964224872231684,
+      "feature": "home_opportunity_adv",
+      "threshold": -0.08764995113078433,
+      "left": {
+        "n": 235,
+        "path": [
+          [
+            "home_overall_success_adv",
+            "<=",
+            -0.0001814671671235002
+          ],
+          [
+            "opening_home_spread",
+            ">",
+            -3.0
+          ],
+          [
+            "home_opportunity_adv",
+            "<=",
+            -0.08764995113078433
+          ]
+        ],
+        "prediction": -0.6510638297872341
+      },
+      "right": {
+        "n": 352,
+        "path": [
+          [
+            "home_overall_success_adv",
+            "<=",
+            -0.0001814671671235002
+          ],
+          [
+            "opening_home_spread",
+            ">",
+            -3.0
+          ],
+          [
+            "home_opportunity_adv",
+            ">",
+            -0.08764995113078433
+          ]
+        ],
+        "prediction": -0.11505681818181818
+      }
+    }
+  },
+  "right": {
+    "n": 777,
+    "path": [
+      [
+        "home_overall_success_adv",
+        ">",
+        -0.0001814671671235002
+      ]
+    ],
+    "prediction": 0.14414414414414414,
+    "feature": "opening_home_spread",
+    "threshold": -3.0,
+    "left": {
+      "n": 638,
+      "path": [
+        [
+          "home_overall_success_adv",
+          ">",
+          -0.0001814671671235002
+        ],
+        [
+          "opening_home_spread",
+          "<=",
+          -3.0
+        ]
+      ],
+      "prediction": 0.024294670846394983,
+      "feature": "home_overall_success_adv",
+      "threshold": 0.05912988509605807,
+      "left": {
+        "n": 383,
+        "path": [
+          [
+            "home_overall_success_adv",
+            ">",
+            -0.0001814671671235002
+          ],
+          [
+            "opening_home_spread",
+            "<=",
+            -3.0
+          ],
+          [
+            "home_overall_success_adv",
+            "<=",
+            0.05912988509605807
+          ]
+        ],
+        "prediction": -0.1814621409921671
+      },
+      "right": {
+        "n": 255,
+        "path": [
+          [
+            "home_overall_success_adv",
+            ">",
+            -0.0001814671671235002
+          ],
+          [
+            "opening_home_spread",
+            "<=",
+            -3.0
+          ],
+          [
+            "home_overall_success_adv",
+            ">",
+            0.05912988509605807
+          ]
+        ],
+        "prediction": 0.3333333333333333
+      }
+    },
+    "right": {
+      "n": 139,
+      "path": [
+        [
+          "home_overall_success_adv",
+          ">",
+          -0.0001814671671235002
+        ],
+        [
+          "opening_home_spread",
+          ">",
+          -3.0
+        ]
+      ],
+      "prediction": 0.6942446043165468
+    }
+  }
+}

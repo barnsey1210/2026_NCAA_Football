@@ -1,0 +1,114 @@
+{
+  "high_variance": {
+    "label": "High model variance",
+    "definition": "At least one team in the game has a 6.0+ point range across active ratings systems: SP+, FPI, and TeamRankings.",
+    "threshold": "max(team rating range) >= 6.0",
+    "meaning": "The active systems disagree strongly on at least one team. This is not automatically a bet, but it flags uncertainty and possible market/model opportunity."
+  },
+  "medium_variance": {
+    "label": "Medium+ model variance",
+    "definition": "At least one team in the game has a 3.0+ point range across SP+, FPI, and TeamRankings.",
+    "threshold": "max(team rating range) >= 3.0",
+    "meaning": "The active systems have meaningful disagreement."
+  },
+  "coin_toss": {
+    "label": "Coin toss / near pick",
+    "definition": "The production projected spread or current market spread is within 3.0 points of pick\u2019em.",
+    "threshold": "abs(projected spread) <= 3.0 OR abs(market spread) <= 3.0",
+    "meaning": "Small changes in assumptions, injuries, or market movement can flip the side."
+  },
+  "coach_1h": {
+    "label": "Coach 1H support",
+    "definition": "A team/coach has a positive first-half ATS support signal in the projected favorite/underdog role for this game.",
+    "threshold": "period = 1H, is_applicable = true, games >= 7, avg ATS margin >= +2.5",
+    "meaning": "Useful for first-half angle review, not standalone without market price."
+  },
+  "coach_ats": {
+    "label": "Coach ATS support",
+    "definition": "A team/coach has a positive full-game ATS support signal in the projected favorite/underdog role for this game.",
+    "threshold": "period = Full Game, is_applicable = true, games >= 20, avg ATS margin >= +2.0",
+    "meaning": "Supports side review when aligned with model/market edge."
+  },
+  "rp_support": {
+    "label": "Returning production support",
+    "definition": "A returning-production matchup signal applies to the game, including offense returning production versus opponent defense returning production.",
+    "threshold": "RP support badge exists OR early-season returning-production signal exists. Badge source uses offense RP vs opponent defense RP gap.",
+    "meaning": "Early-season context only; the historical line-movement study did not validate a standalone RP signal.",
+    "evidence_status": "Context only / movement test failed"
+  },
+  "travel_1h": {
+    "label": "Travel / 1H travel angle",
+    "definition": "A 3+ timezone travel first-half signal applies, including road favorite start, road dog fade, or related 1H total angle.",
+    "threshold": "Game appears in travel_1h_signals_2026.csv with 3+ timezone travel signal.",
+    "meaning": "Flags potential early-game performance angle tied to travel/situation. The displayed 2024-25 samples have not passed a multi-season holdout test.",
+    "evidence_status": "Promising small sample / needs holdout"
+  },
+  "lookahead": {
+    "label": "Schedule spot: lookahead",
+    "definition": "Team may be in a lookahead or sandwich schedule spot.",
+    "threshold": "Schedule spot text/source contains lookahead or sandwich.",
+    "meaning": "Situational caution flag only until its ATS and totals performance passes a historical holdout test.",
+    "evidence_status": "Unvalidated flag"
+  },
+  "b2b_road": {
+    "label": "Schedule spot: b2b road",
+    "definition": "Team is playing consecutive road games or a back-to-back road spot.",
+    "threshold": "Schedule spot source contains b2b road, back-to-back road, consecutive road, or second straight road.",
+    "meaning": "Situational fatigue/travel flag only until its ATS and totals performance passes a historical holdout test.",
+    "evidence_status": "Unvalidated flag"
+  },
+  "injury": {
+    "label": "Injury alert",
+    "definition": "A tracked injury/depth-chart signal exists for the game. Current preseason file has zero active injury alerts.",
+    "threshold": "game_injury_score > 0 from game_injury_alerts.csv",
+    "meaning": "Manual review required; impact depends on player/position importance and recency."
+  },
+  "market_move": {
+    "label": "Market move / steam",
+    "definition": "Current or future line-history signal showing meaningful market movement.",
+    "threshold": "To be added after line-history normalization.",
+    "meaning": "Can identify steam, stale numbers, or book disagreement."
+  },
+  "pbp_away_dog_move": {
+    "label": "PBP opener move: away dog",
+    "definition": "A home favorite of at least three points has no positive opponent-adjusted success matchup advantage. Historically the closing spread moved toward the away underdog.",
+    "threshold": "Week 5+; home success matchup advantage <= -0.000181467; opening home spread <= -3",
+    "meaning": "Confirmed opener-to-close line-movement signal. The historical data does not identify a Sunday-to-Tuesday entry window. Review the away underdog at the opener and do not chase after the number has moved. This is not a proven ATS angle.",
+    "evidence_status": "Validated 2024 and untouched 2025 holdout"
+  },
+  "pbp_under_move": {
+    "label": "PBP opener move: under",
+    "definition": "Low combined opponent-adjusted success and slow expected pace meet the frozen historical movement conditions.",
+    "threshold": "Week 5+; combined success <= 0.931088; combined field position > -139.80758; expected pace >= 26.0139 sec/play",
+    "meaning": "Confirmed opener-to-close line-movement signal. The historical data does not identify a Sunday-to-Tuesday entry window. Review the opening under and do not chase after the total falls. This is not a proven game-result angle.",
+    "evidence_status": "Validated 2024 and untouched 2025 holdout"
+  },
+  "cross_book_spread_outlier": {
+    "label": "Stale opener: spread",
+    "definition": "One sportsbook's opening spread is the largest outlier from the cross-book opening median and is at least one point away.",
+    "threshold": "At least 3 books; largest absolute spread deviation >= 1.0",
+    "meaning": "Confirmed opener-to-close convergence signal. Shop the outlier book while its price remains available; the historical test does not yet establish a weekday cutoff. Not a game-outcome prediction.",
+    "evidence_status": "Validated 2024 and untouched 2025 holdout"
+  },
+  "cross_book_total_outlier": {
+    "label": "Stale opener: total",
+    "definition": "One sportsbook's opening total is the largest outlier from the cross-book opening median and is at least 1.5 points away.",
+    "threshold": "At least 3 books; largest absolute total deviation >= 1.5",
+    "meaning": "Confirmed opener-to-close convergence signal. Shop the outlier book while its price remains available; the historical test does not yet establish a weekday cutoff. Not a game-outcome prediction.",
+    "evidence_status": "Validated 2024 and untouched 2025 holdout"
+  },
+  "postgame_spread_repricing": {
+    "label": "Postgame market repricing: spread",
+    "definition": "A completed game's score and prior closing spread imply that the market is likely to upgrade or downgrade the team in its next matchup.",
+    "threshold": "Production threshold pending calibration against the first available 2026 next-game line.",
+    "meaning": "Predicts the direction of the team's next market valuation; it becomes actionable only when the first available next-game line has not already incorporated the expected change.",
+    "evidence_status": "Validated direction in 2024 and untouched 2025 holdout; production pending"
+  },
+  "postgame_total_repricing": {
+    "label": "Postgame market repricing: total",
+    "definition": "Both teams' prior scoring surprises and garbage-time-filtered PBP predict the next game's closing-total innovation relative to rolling market-implied offense and defense ratings.",
+    "threshold": "Production threshold pending calibration against the first available 2026 next-game total.",
+    "meaning": "Designed to identify an early next-game total that has not yet incorporated the expected market repricing. This predicts movement toward the eventual market close, not the game result.",
+    "evidence_status": "Validated 2024 and untouched 2025 holdout"
+  }
+}
