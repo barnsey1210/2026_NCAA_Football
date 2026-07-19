@@ -1,0 +1,8 @@
+const renderBaseFutures=render;
+render=function(){
+  if(mode!=='playoff') return renderBaseFutures();
+  let a=D.rows.filter(x=>(conf.value==='all'||x.conference===conf.value)&&x.team.toLowerCase().includes(search.value.toLowerCase()));
+  a.sort((x,y)=>sort.value==='team'?x.team.localeCompare(y.team):sort.value==='rank'?(x.rank||999)-(y.rank||999):Math.abs(y.national_title_edge??-999)-Math.abs(x.national_title_edge??-999));
+  head.innerHTML='<tr><th>Team</th><th>Make CFP</th><th>Make CFP market</th><th>CFP edge</th><th>Quarterfinal</th><th>Semifinal</th><th>Title game</th><th>Win title</th><th>Title market</th><th>Title edge</th><th>Best title price</th><th>Book</th></tr>';
+  rows.innerHTML=a.map(x=>{const t=`<td><a class="team" href="team.html?team=${e(x.slug)}">${logo(x)}<span>${e(x.team)}<span class="sub">#${x.rank} · ${e(x.conference)}</span></span></a></td>`,edge=x.national_title_edge;return`<tr>${t}<td class="good">${n(x.playoff_model_prob*100,1)}%</td><td>${x.playoff_market_prob==null?'Feed pending':n(x.playoff_market_prob*100,1)+'%'}</td><td>—</td><td>${n(x.quarterfinal_model_prob*100,1)}%</td><td>${n(x.semifinal_model_prob*100,1)}%</td><td>${n(x.national_title_game_model_prob*100,1)}%</td><td class="good">${n(x.national_title_model_prob*100,1)}%</td><td>${x.national_title_market_prob==null?'—':n(x.national_title_market_prob*100,1)+'%'}</td><td class="${edge==null?'':edge>=0?'good':'bad'}">${edge==null?'—':n(edge*100,1)+' pts'}</td><td>${od(x.national_title_price)}</td><td>${e(x.national_title_book||'—')}</td></tr>`}).join('')||'<tr><td class="empty">No matching playoff markets.</td></tr>';
+};
