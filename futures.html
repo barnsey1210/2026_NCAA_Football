@@ -61,7 +61,7 @@ function bindHeaderSort(){
  });
 }
 function edgeFor(x){if(mode==='title')return x.title_edge;if(mode==='playoff')return Math.max(Math.abs(x.playoff_edge??0),Math.abs(x.national_title_edge??0));if(mode==='bets')return Math.max(Math.abs(x.win_edge??0),Math.abs(x.title_edge??0),Math.abs(x.playoff_edge??0),Math.abs(x.national_title_edge??0));return x.win_edge}
-function filtered(){const q=search.value.toLowerCase();return D.rows.filter(x=>(conf.value==='all'||x.conference===conf.value)&&x.team.toLowerCase().includes(q)&&(mode!=='bets'||x.open_wagers.length))}
+function filtered(){const q=search.value.toLowerCase(),g6=new Set(['American','CUSA','MAC','MW','PAC12','Sun Belt']);return D.rows.filter(x=>(conf.value==='all'||(conf.value==='g6'&&g6.has(x.conference))||x.conference===conf.value)&&x.team.toLowerCase().includes(q)&&(mode!=='bets'||x.open_wagers.length))}
 function sortedRows(){
  const a=filtered();
  if(headerSortKey){
@@ -114,7 +114,7 @@ async function init(){
  wagers.textContent=D.summary.open_wagers;
  stamp.textContent=`Simulation + market · ${String(D.built_at).slice(0,10)}`;
  const cs=[...new Set(D.rows.map(x=>x.conference).filter(Boolean))].sort();
- conf.innerHTML='<option value="all">All conferences</option>'+cs.map(x=>`<option>${e(x)}</option>`).join('');
+ conf.innerHTML='<option value="all">All conferences</option><option value="g6">G6</option>'+cs.map(x=>`<option>${e(x)}</option>`).join('');
  renderFreshness();
  render();
 }
