@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const DATA_URL = 'data/site/matchups_view.json';
+  const DATA_URL = 'data/site/matchups_view.json?v=20260723-rpfix2';
   const HISTORY_URL = 'data/site/matchup_line_history.json';
   const DECISION_KEY = 'openers-v2-decisions';
   const BET_KEY = 'ncaaf-game-bets-v1';
