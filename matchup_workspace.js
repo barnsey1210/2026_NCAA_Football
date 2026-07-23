@@ -173,6 +173,34 @@
 
   window.openMatchupWorkspace=open;window.closeMatchupWorkspace=close;window.setMatchupDecision=decision;window.saveMatchupNote=note;window.openMatchupBet=openBet;window.closeMatchupBet=closeBet;window.saveMatchupBet=saveBet;window.removeMatchupBet=removeBet;
   window.__matchupWorkspaceTest={rankClass,contextRows,teamSpots,scheduleRows};
+  function gameIdFromTrigger(target){
+    if(!target)return null;
+    const direct=target.dataset?.matchupId||target.dataset?.gameId||target.dataset?.id;
+    if(direct)return String(direct);
+    const carrier=target.closest?.('[data-matchup-id],[data-game-id],tr.game,tr[data-id],tr[data-game]');
+    const fromData=carrier?.dataset?.matchupId||carrier?.dataset?.gameId||carrier?.dataset?.id||carrier?.dataset?.game;
+    if(fromData)return String(fromData);
+    const attrs=[
+      target.getAttribute?.('onclick')||'',
+      carrier?.getAttribute?.('onclick')||'',
+      target.closest?.('a[href]')?.getAttribute('href')||''
+    ].join(' ');
+    const exact=attrs.match(/(?:openDrawer|openGame|openMatchupWorkspace|showMatchup|openWorkspace)\s*\(\s*['"]([^'"]+)['"]/i);
+    if(exact)return exact[1];
+    const gid=attrs.match(/\b(g\d+)\b/i);
+    return gid?gid[1]:null;
+  }
+  document.addEventListener('click',e=>{
+    const trigger=e.target.closest?.('button.open,.open-matchup,.matchup-open,[data-open-matchup]');
+    if(!trigger)return;
+    const gameId=gameIdFromTrigger(trigger);
+    if(!gameId)return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    open(gameId,trigger.dataset?.matchupSection).catch(error=>console.warn('Unable to open shared matchup workspace:',error.message));
+  },true);
+
   ensureShell();decorateLinks();new MutationObserver(decorateLinks).observe(document.body,{childList:true,subtree:true});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeBet();close()}});
   const linkedGameId = new URLSearchParams(location.search).get('game_id');
   if(linkedGameId) open(linkedGameId).catch(error=>console.warn('Unable to open shared matchup workspace:',error.message));
