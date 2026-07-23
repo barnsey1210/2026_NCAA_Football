@@ -73,6 +73,720 @@
   .mwEmpty{padding:4px 0;color:#7185a4;font-size:10px}
   @media(max-width:1100px){.mwNumbers{grid-template-columns:repeat(3,1fr)}.mwDenseGrid{grid-template-columns:1fr}.mwSpotGrid{grid-template-columns:repeat(2,1fr)}}
 
+
+  /* Incremental visual pass: rank scale + top summary only */
+  .mwRankGood{color:#3ee58f;background:#0b3b2b;border-color:#1f9b68}
+  .mwRankGoodWarn{color:#a8e85f;background:#273a1f;border-color:#6fa543}
+  .mwRankWarn{color:#ffd45c;background:#493b13;border-color:#b78d24}
+  .mwRankWarnBad{color:#ff9d4d;background:#4b2a17;border-color:#b9652e}
+  .mwRankBad{color:#ff6978;background:#491d27;border-color:#b43d50}
+  .mwRankMissing{color:#8da0bc;background:#17243a;border-color:#425675}
+  .mwRank{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:34px;
+    padding:2px 6px;
+    border:1px solid;
+    border-radius:999px;
+    font-size:10px;
+    line-height:1;
+    font-weight:950;
+  }
+  .mwSummaryGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1.2fr 1.45fr;
+    gap:6px;
+  }
+  .mwSummaryCard{
+    min-width:0;
+    padding:9px;
+    border-radius:9px;
+    background:#081932;
+  }
+  .mwSummaryTeam{
+    display:grid;
+    grid-template-columns:38px minmax(0,1fr);
+    gap:8px;
+    align-items:center;
+  }
+  .mwSummaryTeam img{
+    width:36px;
+    height:36px;
+    object-fit:contain;
+  }
+  .mwSummaryTitle{
+    color:#fff;
+    font-size:13px;
+    font-weight:950;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .mwSummaryLabel{
+    color:#dce8fa;
+    font-size:10px;
+    font-weight:950;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .mwSummaryRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:5px;
+    line-height:1.15;
+  }
+  .mwSummaryRow span{
+    color:#91a6c6;
+    font-size:9px;
+    text-transform:uppercase;
+  }
+  .mwSummaryRow b{
+    color:#fff;
+    font-size:13px;
+    white-space:nowrap;
+  }
+  .mwModelCard .mwSummaryRow b{font-size:12px}
+  @media(max-width:1050px){
+    .mwSummaryGrid{grid-template-columns:1fr 1fr}
+  }
+
+
+  /* Source-page link + expansion repair */
+  a[data-matchup-id],
+  a[href*="game_id="]{
+    color:inherit !important;
+    text-decoration:none !important;
+  }
+  a[data-matchup-id]:hover,
+  a[href*="game_id="]:hover{
+    color:#ffffff !important;
+    text-decoration:underline !important;
+  }
+
+
+  .teamLink,
+  a.teamLink,
+  .matchup a{
+    color:inherit !important;
+    text-decoration:none !important;
+  }
+  .teamLink:hover,
+  a.teamLink:hover,
+  .matchup a:hover{
+    color:#ffffff !important;
+    text-decoration:underline !important;
+  }
+
+
+  /* Incremental team-card refinement v3.7 */
+  .mwRankNumber{
+    font-weight:950;
+    font-size:14px;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .mwRankNumber.mwRankGood{color:#3ee58f;background:none;border:0}
+  .mwRankNumber.mwRankGoodWarn{color:#a8e85f;background:none;border:0}
+  .mwRankNumber.mwRankWarn{color:#ffd45c;background:none;border:0}
+  .mwRankNumber.mwRankWarnBad{color:#ff9d4d;background:none;border:0}
+  .mwRankNumber.mwRankBad{color:#ff6978;background:none;border:0}
+  .mwRankNumber.mwRankMissing{color:#8da0bc;background:none;border:0}
+  .mwTeamRankGrid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+  .mwTeamRankItem{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+    background:#081932;
+    border-radius:8px;
+    padding:7px 9px;
+  }
+  .mwTeamRankLabel{
+    color:#91a6c6;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+  .mwTeamRankValue{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    min-width:0;
+  }
+  .mwRatingValue{
+    color:#eef5ff;
+    font-size:13px;
+    font-weight:950;
+    white-space:nowrap;
+  }
+  .mwCoachRecords{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+    margin-top:5px;
+  }
+  .mwCoachRecord{
+    min-width:0;
+    padding:6px 7px;
+    border-radius:7px;
+    background:#0d203b;
+  }
+  .mwCoachRecordLabel{
+    color:#91a6c6;
+    font-size:8px;
+    font-weight:950;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    margin-bottom:3px;
+  }
+  .mwCoachRecordLine{
+    color:#f0f5fc;
+    font-size:10px;
+    font-weight:850;
+    line-height:1.25;
+    white-space:nowrap;
+  }
+  @media(max-width:900px){
+    .mwCoachRecords{grid-template-columns:1fr}
+  }
+
+
+  /* Incremental spacing + coaching refinement v3.8 */
+  .mwTeamHeader h4{
+    font-size:19px;
+    line-height:1.1;
+  }
+  .mwRole{
+    padding:3px 8px;
+    font-size:10px;
+  }
+  .mwChipRow{
+    gap:6px;
+    margin-top:6px;
+  }
+  .mwChip{
+    padding:4px 9px;
+    font-size:11px;
+    line-height:1;
+  }
+  .mwRpLine{
+    grid-template-columns:30px 52px auto;
+    justify-content:start;
+    gap:5px;
+  }
+  .mwRpLine .mwRank{
+    min-width:38px;
+  }
+  .mwSummaryLabel{
+    text-align:center;
+    font-size:11px;
+  }
+  .mwModelCard .mwSummaryRow,
+  .mwMarketCard .mwSummaryRow{
+    display:grid;
+    grid-template-columns:max-content max-content;
+    justify-content:center;
+    column-gap:12px;
+  }
+  .mwModelCard .mwSummaryRow span,
+  .mwMarketCard .mwSummaryRow span{
+    min-width:48px;
+  }
+  .mwApplicableRole{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding:6px 8px;
+    margin:5px 0;
+    border:1px solid #365b85;
+    border-radius:7px;
+    background:#0c203c;
+  }
+  .mwApplicableRoleLabel{
+    color:#91a6c6;
+    font-size:8px;
+    font-weight:950;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+  .mwApplicableRoleValue{
+    color:#f5f8fd;
+    font-size:11px;
+    font-weight:900;
+    text-align:right;
+  }
+
+
+  /* Incremental market, coach-color, and lower-card refinement v4.0 */
+  .mwCoachGood{color:#3ee58f !important}
+  .mwCoachNeutral{color:#ffd45c !important}
+  .mwCoachBad{color:#ff6978 !important}
+  .mwCoachMissing{color:#91a6c6 !important}
+  .mwCoachRecordLine b,
+  .mwApplicableRoleValue b{font-weight:950}
+  .mwBookLogo{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:28px;
+    height:21px;
+    padding:2px;
+    border-radius:5px;
+    background:#f7f9fc;
+    flex:0 0 auto;
+  }
+  .mwBookLogo img{
+    max-width:24px;
+    max-height:17px;
+    object-fit:contain;
+  }
+  .mwMarketValue{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:7px;
+    min-width:0;
+  }
+  .mwSummaryGrid{
+    grid-template-columns:1fr 1fr 1.15fr 1.35fr;
+  }
+  .mwSummaryCard{
+    padding:8px 10px;
+  }
+  .mwSummaryLabel{
+    margin-bottom:3px;
+  }
+  .mwModelCard .mwSummaryRow,
+  .mwMarketCard .mwSummaryRow{
+    grid-template-columns:52px minmax(0,max-content);
+    column-gap:9px;
+  }
+  .mwContextTable th,
+  .mwContextTable td{
+    padding:5px 7px;
+    line-height:1.2;
+  }
+  .mwContextTable .mwPriority{
+    width:24px;
+    height:24px;
+  }
+  .mwFive{
+    padding:7px 9px;
+  }
+  .mwFive h3{
+    margin-bottom:5px;
+  }
+  .mwFive .mwTable th,
+  .mwFive .mwTable td{
+    padding:4px 6px;
+    line-height:1.15;
+  }
+
+
+  /* Lower-half density cleanup v4.1 */
+  .mwBookLogo{
+    width:23px;
+    height:18px;
+    padding:1px;
+    border-radius:4px;
+    background:#eef3f8;
+  }
+  .mwBookLogo img{
+    max-width:21px;
+    max-height:15px;
+  }
+  .mwContextEmpty{
+    padding:8px 10px !important;
+    text-align:left;
+    font-size:11px;
+  }
+  .mwContextEmptySection{
+    padding-bottom:7px;
+  }
+  .mwContextEmptySection .mwTableWrap{
+    overflow:visible;
+  }
+  .mwContextEmptySection .mwTable thead{
+    display:none;
+  }
+  .mwContextEmptySection .mwTable{
+    min-width:0;
+  }
+  .mwFive{
+    padding:6px 8px;
+  }
+  .mwFive h3{
+    margin-bottom:4px;
+  }
+  .mwFive .mwTable th,
+  .mwFive .mwTable td{
+    padding:3px 5px;
+    line-height:1.05;
+    font-size:10px;
+  }
+  .mwFive .mwRank{
+    padding:1px 5px;
+    min-width:31px;
+    font-size:9px;
+  }
+  .mwCoachDetail,
+  .mwHistory{
+    padding:6px 9px;
+  }
+  .mwCompactDetails summary{
+    padding:1px 0;
+    line-height:1.2;
+  }
+  .mwSchedule{
+    padding:7px 8px;
+  }
+  .mwSchedule .mwTable th,
+  .mwSchedule .mwTable td{
+    padding:4px 5px;
+    line-height:1.1;
+    font-size:10px;
+  }
+  .mwSchedule .mwRank{
+    padding:1px 5px;
+    min-width:31px;
+    font-size:9px;
+  }
+
+
+  /* Five Factors readability + global modal font pass v4.2 */
+  .mwShell{
+    font-size:14px;
+    line-height:1.45;
+  }
+  .mwHead h2{
+    font-size:25px;
+  }
+  .mwSection h3{
+    font-size:12px;
+    font-weight:950;
+    letter-spacing:.055em;
+  }
+  .mwFive{
+    padding:8px 10px;
+  }
+  .mwFive h3{
+    margin-bottom:7px;
+    font-size:13px;
+    font-weight:950;
+    color:#d9e6f8;
+  }
+  .mwFive .mwTable{
+    table-layout:fixed;
+  }
+  .mwFive .mwTable th{
+    padding:6px 7px;
+    font-size:10px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  .mwFive .mwTable td{
+    padding:7px 7px;
+    font-size:12px;
+    text-align:center;
+    vertical-align:middle;
+    line-height:1.15;
+  }
+  .mwFive .mwTable tbody tr{
+    height:40px;
+  }
+  .mwFive .mwFactorName{
+    font-size:13px;
+    font-weight:950;
+  }
+  .mwFive .mwColumnTeam{
+    color:#dce8fa;
+    font-size:10px;
+    font-weight:950;
+    line-height:1.15;
+    white-space:normal;
+  }
+  .mwFive .mwEdgeLogo{
+    width:30px;
+    height:30px;
+    object-fit:contain;
+    vertical-align:middle;
+  }
+  .mwFive .mwEdgeDash{
+    color:#91a6c6;
+    font-size:14px;
+    font-weight:900;
+  }
+  .mwFive .mwRank{
+    font-size:10px;
+    min-width:34px;
+    padding:2px 6px;
+  }
+  .mwTable th{
+    font-size:10px;
+  }
+  .mwTable td{
+    font-size:12px;
+  }
+  .mwChip{
+    font-size:12px;
+  }
+  .mwSummaryRow span,
+  .mwTeamRankLabel,
+  .mwMiniTitle,
+  .mwCoachRecordLabel,
+  .mwApplicableRoleLabel{
+    font-size:9px;
+  }
+  .mwSummaryRow b,
+  .mwCoachRecordLine,
+  .mwApplicableRoleValue{
+    font-size:12px;
+  }
+
+
+  .mwSchedule .mwByeRow td{
+    background:#0b1c34;
+    color:#a9bad2;
+    font-style:italic;
+  }
+  .mwSchedule .mwByeRow td:nth-child(2),
+  .mwSchedule .mwByeRow td:nth-child(6){
+    color:#ffd45c;
+    font-style:normal;
+    font-weight:950;
+  }
+
+
+  /* Matchup final structure pass v4.4 */
+  .mwContextEmptySection{
+    border-color:#2c5f4c;
+    padding:7px 10px;
+  }
+  .mwContextEmptySection h3{
+    display:none;
+  }
+  .mwContextEmpty{
+    padding:2px 0 !important;
+    font-size:12px;
+  }
+  .mwMarketEdgeRow{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-top:7px;
+    flex-wrap:wrap;
+  }
+  .mwMarketEdgeChip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 7px;
+    border:1px solid #355a82;
+    border-radius:999px;
+    background:#0b203c;
+    color:#dce8fa;
+    font-size:10px;
+    font-weight:900;
+  }
+  .mwMarketEdgeChip.mwEdgeGood{
+    border-color:#1d9b67;
+    color:#55e7a0;
+  }
+  .mwHistory{
+    padding:9px 10px;
+  }
+  .mwHistory h3{
+    margin-bottom:7px;
+    font-size:14px;
+    color:#dce8fa;
+  }
+  .mwHistorySummary{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-bottom:8px;
+  }
+  .mwHistorySummaryCard{
+    padding:7px 9px;
+    border-radius:7px;
+    background:#0b203c;
+    border:1px solid #31577f;
+    font-size:11px;
+  }
+  .mwHistorySummaryCard b{
+    color:#fff;
+  }
+  .mwHistory .mwTable th,
+  .mwHistory .mwTable td{
+    padding:5px 6px;
+    text-align:center;
+    font-size:11px;
+  }
+  .mwMovementUp{color:#ffb14a;font-weight:950}
+  .mwMovementDown{color:#55e7a0;font-weight:950}
+  .mwMovementFlat{color:#91a6c6;font-weight:900}
+  .mwSpots{
+    width:100%;
+  }
+  .mwSpotTeam{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:950;
+  }
+  .mwSpotTeam img{
+    width:28px;
+    height:28px;
+    object-fit:contain;
+  }
+  .mwSpotGrid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+  .mwSpot{
+    padding:7px 6px;
+    border-radius:7px;
+    background:#0b203c;
+    text-align:center;
+  }
+  .mwSpot b{
+    display:block;
+    font-size:9px;
+    margin-bottom:3px;
+  }
+  .mwSpotValue{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:58px;
+    padding:3px 7px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:950;
+  }
+  .mwSpotYes{background:#113f30;color:#55e7a0;border:1px solid #1d9b67}
+  .mwSpotNo{background:#18304e;color:#b9c7da;border:1px solid #456481}
+  .mwSpotWatch{background:#493b13;color:#ffd45c;border:1px solid #b78d24}
+  .mwScheduleOpponent{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    white-space:nowrap;
+  }
+  .mwScheduleOpponent img{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+  }
+  .mwByeRow td{
+    text-align:center !important;
+    background:#0b1c34 !important;
+  }
+  .mwByeLabel{
+    color:#ffd45c;
+    font-weight:950;
+    letter-spacing:.08em;
+  }
+  .mwEmptyTools{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .mwAddNoteBtn{
+    padding:6px 10px;
+  }
+
+
+  /* Schedule context placement refinement v4.5 */
+  .mwSchedule{
+    padding:7px 9px;
+  }
+  .mwSchedule h3{
+    font-size:12px;
+    margin-bottom:5px;
+  }
+
+
+  /* Final polish pass v4.6 */
+  .mwContextEmptySection{
+    padding:4px 9px;
+    min-height:0;
+  }
+  .mwContextEmptySection .mwContextEmpty{
+    padding:0 !important;
+    line-height:1.2;
+  }
+  .mwSpots{
+    grid-column:1 / -1;
+  }
+  .mwSpots .mwDenseGrid{
+    grid-template-columns:1fr 1fr;
+  }
+  .mwHistoryLegend{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin:-2px 0 6px;
+    color:#91a6c6;
+    font-size:9px;
+    font-weight:850;
+  }
+  .mwHistoryLegend span{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .mwLegendDot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    display:inline-block;
+  }
+  .mwLegendLower{background:#55e7a0}
+  .mwLegendHigher{background:#ffb14a}
+  .mwLegendFlat{background:#91a6c6}
+  .mwMarketEdgeChip{
+    gap:6px;
+    font-size:11px;
+    padding:4px 8px;
+  }
+  .mwMarketEdgeChip img{
+    width:17px;
+    height:17px;
+    object-fit:contain;
+  }
+  .mwMarketEdgeChip.mwEdgeGood{
+    background:#113f30;
+  }
+  .mwMarketEdgeChip.mwEdgeNeutral{
+    color:#c2cfdf;
+    border-color:#456481;
+  }
+  @media(max-width:1100px){
+    .mwSummaryGrid{grid-template-columns:1fr 1fr}
+    .mwGrid2{grid-template-columns:1fr}
+    .mwSpots .mwDenseGrid{grid-template-columns:1fr}
+    .mwHistorySummary{grid-template-columns:1fr}
+  }
+  @media(max-width:700px){
+    .mwSummaryGrid{grid-template-columns:1fr}
+    .mwCoachRecords{grid-template-columns:1fr}
+    .mwSpotGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mwHistoryLegend{justify-content:flex-start;flex-wrap:wrap}
+  }
+
 </style>`);
     document.body.insertAdjacentHTML('beforeend', `<div id="mwBackdrop"><article class="mwShell" role="dialog" aria-modal="true"><div id="mwContent"></div></article></div><div class="mwBetModal" id="mwBetModal"><div class="mwBetCard"><h2>Add bet</h2><div id="mwBetGame" class="mwMuted"></div><label><span>Market</span><select id="mwBetMarket"><option>Spread</option><option>Total</option><option>Moneyline</option></select></label><label><span>Selection</span><input id="mwBetSelection"></label><label><span>Price</span><input id="mwBetPrice"></label><label><span>Book</span><input id="mwBetBook"></label><label><span>Stake</span><input id="mwBetStake"></label><div class="mwActions"><button onclick="closeMatchupBet()">Cancel</button><button class="primary" onclick="saveMatchupBet()">Save bet</button></div></div></div>`);
     document.getElementById('mwBackdrop').addEventListener('click', e=>{if(e.target.id==='mwBackdrop') closeMatchupWorkspace()});
@@ -84,22 +798,148 @@
   function projectedPoints(game){ const total=Number(game.model.total), spread=Number(game.model.home_spread); if(!Number.isFinite(total)||!Number.isFinite(spread))return{away:null,home:null}; return {away:(total+spread)/2,home:(total-spread)/2}; }
   function coachRole(team, game){ const coach=(game.matchup.coaches||[]).find(x=>x.team===team.team), r=role(team,game), split=(coach?.role_splits||[]).find(x=>x.role===r); return {coach,split,r}; }
   function coachPeriod(coach, period){ return (coach?.periods||[]).find(x=>x?.period===period)||{}; }
-  function rankClass(value){ if(!finite(value))return 'mwRankMissing'; const n=Number(value); return n<=40?'mwRankGood':n<=80?'mwRankWarn':'mwRankBad'; }
+  function rankClass(value){ if(!finite(value))return 'mwRankMissing'; const n=Number(value); return n<=28?'mwRankGood':n<=55?'mwRankGoodWarn':n<=83?'mwRankWarn':n<=110?'mwRankWarnBad':'mwRankBad'; }
   function rank(value){ return `<span class="mwRank ${rankClass(value)}">${finite(value)?'#'+Number(value).toFixed(0):'—'}</span>`; }
+  function rankNumber(value){ return `<span class="mwRankNumber ${rankClass(value)}">${finite(value)?'#'+Number(value).toFixed(0):'—'}</span>`; }
+  function parsedAtsPct(record){
+    const m=String(record||'').match(/(\d+)\s*-\s*(\d+)(?:\s*-\s*(\d+))?/);
+    if(!m)return null;
+    const wins=Number(m[1]),losses=Number(m[2]);
+    return wins+losses>0?wins/(wins+losses):null;
+  }
+  function coachAtsPct(row){
+    if(finite(row?.ats_pct))return Number(row.ats_pct)>1?Number(row.ats_pct)/100:Number(row.ats_pct);
+    return parsedAtsPct(row?.ats_record);
+  }
+  function coachAtsClass(value){
+    if(!finite(value))return 'mwCoachMissing';
+    const n=Number(value)>1?Number(value)/100:Number(value);
+    return n>=.55?'mwCoachGood':n<.45?'mwCoachBad':'mwCoachNeutral';
+  }
+  function coachPctText(value){
+    if(!finite(value))return '—';
+    const n=Number(value)>1?Number(value)/100:Number(value);
+    return `${(n*100).toFixed(1)}%`;
+  }
+  function movementText(current, previous){
+    if(!finite(current)||!finite(previous))return '<span class="mwMovementFlat">—</span>';
+    const delta=Number(current)-Number(previous);
+    if(Math.abs(delta)<0.01)return '<span class="mwMovementFlat">0.0</span>';
+    const cls=delta>0?'mwMovementUp':'mwMovementDown';
+    return `<span class="${cls}">${delta>0?'+':''}${delta.toFixed(1)}</span>`;
+  }
+  function edgeTeamLogo(name, game){
+    const team=name===game.game.away_team?game.teams.away:name===game.game.home_team?game.teams.home:null;
+    return team?.logo_slug?`<img src="logos/${esc(team.logo_slug)}.png" alt="" onerror="this.style.display='none'">`:'';
+  }
+  function scheduleOpponentLogo(name, game){
+    const team=name===game.teams.away.team?game.teams.away:name===game.teams.home.team?game.teams.home:null;
+    if(team?.logo_slug)return `<img src="logos/${esc(team.logo_slug)}.png" alt="" onerror="this.style.display='none'">`;
+    const slug=String(name||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    return slug?`<img src="logos/${esc(slug)}.png" alt="" onerror="this.style.display='none'">`:'';
+  }
+  function bookLogo(book){
+    const raw=String(book||'').trim(),b=raw.toLowerCase();
+    let src='',label=raw||'Sportsbook';
+    if(b.includes('fanduel')){src='logos/books/fanduel.png';label='FanDuel'}
+    else if(b.includes('draftkings')){src='logos/books/draftkings.png';label='DraftKings'}
+    else if(b.includes('betmgm')||b==='mgm'){src='logos/books/betmgm.png';label='BetMGM'}
+    else if(b.includes('caesars')){src='logos/books/caesars.png';label='Caesars'}
+    else if(b.includes('bet365')){src='logos/books/bet365.png';label='bet365'}
+    else if(b.includes('betrivers')){src='logos/books/betrivers.png';label='BetRivers'}
+    return src?`<span class="mwBookLogo" title="${esc(label)}"><img src="${src}" alt="${esc(label)}"></span>`:'';
+  }
   function statusClass(value){const s=String(value||'unverified').toLowerCase();return `mwStaffStatus mwStatus${s.charAt(0).toUpperCase()+s.slice(1)}`;}
   function staffLine(label,name,status,extra=''){return `<div class="mwStaffLine"><b>${label}</b><span>${esc(name||'—')}${extra?` <span class="mwMuted">${esc(extra)}</span>`:''}</span><i class="${statusClass(status)}">${esc(status||'unverified')}</i></div>`;}
   function rpLine(label,pctValue,rankValue){return `<div class="mwRpLine"><b>${label}</b><span>${finite(pctValue)?num(pctValue,0)+'%':'—'}</span>${rank(rankValue)}</div>`;}
   function teamCard(team, game){
-    const cr=coachRole(team,game),rec=team.record||{},br=team.betting_record||{},sp=cr.split||{},rp=team.returning_production||{},staff=team.staff_continuity||{};
+    const cr=coachRole(team,game),rec=team.record||{},br=team.betting_record||{},rp=team.returning_production||{},staff=team.staff_continuity||{};
     const hcTenure=finite(staff.head_coach_tenure_year)?`Year ${Number(staff.head_coach_tenure_year).toFixed(0)}`:'';
-    return `<section class="mwSection mwTeamCompact"><div class="mwTeamHeader">${logo(team)}<div><h4>${esc(team.team)} <span class="mwRole">${esc(cr.r)}</span></h4><div class="mwChipRow"><span class="mwChip">${esc(team.conference||'—')}</span><span class="mwChip">Rank ${rank(team.overall_rank)}</span><span class="mwChip">${rec.wins??0}-${rec.losses??0}</span><span class="mwChip">ATS ${esc(br.ats||'—')}</span><span class="mwChip">O/U ${esc(br.ou||'—')}</span></div></div></div><div class="mwMetricGrid"><div class="mwMetric"><span>Power</span><b>${num(team.rating,1)} ${rank(team.overall_rank)}</b></div><div class="mwMetric"><span>Offense</span><b>${rank(team.offense_rank)}</b></div><div class="mwMetric"><span>Defense</span><b>${rank(team.defense_rank)}</b></div></div><div class="mwDual"><div class="mwMiniCard"><div class="mwMiniTitle">Returning production</div>${rpLine('OVR',rp.overall_pct,rp.overall_rank)}${rpLine('OFF',rp.offense_pct,rp.offense_rank)}${rpLine('DEF',rp.defense_pct,rp.defense_rank)}</div><div class="mwMiniCard"><div class="mwMiniTitle">2026 staff continuity</div>${staffLine('HC',staff.head_coach,staff.head_coach_status,hcTenure)}${staffLine('OC',staff.offensive_coordinator,staff.oc_status)}${staffLine('DC',staff.defensive_coordinator,staff.dc_status)}</div></div><div class="mwMiniCard" style="margin-top:6px"><div class="mwMiniTitle">Coach betting — applicable ${esc(cr.r)} role</div><b>${esc(cr.coach?.coach||'Coach unavailable')}</b> · Full game ATS ${esc(sp.ats_record||'—')} (${pct(sp.ats_pct)}) · ${num(sp.ats_margin,1)} ATS +/- · O/U ${esc(sp.ou_record||'—')}</div></section>`;
+    const coach=cr.coach||{};
+    const recordCard=(label,period)=>{
+      const row=coachPeriod(coach,period),atsPct=coachAtsPct(row),atsClass=coachAtsClass(atsPct);
+      return `<div class="mwCoachRecord"><div class="mwCoachRecordLabel">${label}</div><div class="mwCoachRecordLine ${atsClass}">ATS <b>${esc(row.ats_record||'—')}</b> · <b>${coachPctText(atsPct)}</b></div><div class="mwCoachRecordLine">O/U ${esc(row.ou_record||'—')}</div></div>`;
+    };
+    return `<section class="mwSection mwTeamCompact">
+      <div class="mwTeamHeader">${logo(team)}<div><h4>${esc(team.team)} <span class="mwRole">${esc(cr.r)}</span></h4><div class="mwChipRow"><span class="mwChip">${esc(team.conference||'—')}</span><span class="mwChip">${rec.wins??0}-${rec.losses??0}</span><span class="mwChip">ATS ${esc(br.ats||'—')}</span><span class="mwChip">O/U ${esc(br.ou||'—')}</span></div></div></div>
+      <div class="mwTeamRankGrid">
+        <div class="mwTeamRankItem"><span class="mwTeamRankLabel">Overall</span><span class="mwTeamRankValue">${rankNumber(team.overall_rank)} <span class="mwRatingValue">${num(team.rating,1)}</span></span></div>
+        <div class="mwTeamRankItem"><span class="mwTeamRankLabel">Offense</span><span class="mwTeamRankValue">${rankNumber(team.offense_rank)}</span></div>
+        <div class="mwTeamRankItem"><span class="mwTeamRankLabel">Defense</span><span class="mwTeamRankValue">${rankNumber(team.defense_rank)}</span></div>
+      </div>
+      <div class="mwDual"><div class="mwMiniCard"><div class="mwMiniTitle">Returning production</div>${rpLine('OVR',rp.overall_pct,rp.overall_rank)}${rpLine('OFF',rp.offense_pct,rp.offense_rank)}${rpLine('DEF',rp.defense_pct,rp.defense_rank)}</div><div class="mwMiniCard"><div class="mwMiniTitle">2026 staff continuity</div>${staffLine('HC',staff.head_coach,staff.head_coach_status,hcTenure)}${staffLine('OC',staff.offensive_coordinator,staff.oc_status)}${staffLine('DC',staff.defensive_coordinator,staff.dc_status)}</div></div>
+      <div class="mwMiniCard" style="margin-top:6px"><div class="mwMiniTitle">Coach betting records — ${esc(coach.coach||'Coach unavailable')}</div><div class="mwApplicableRole"><span class="mwApplicableRoleLabel">Applicable ${esc(cr.r)} role</span><span class="mwApplicableRoleValue">${cr.split?.ats_record?`<span class="${coachAtsClass(coachAtsPct(cr.split))}">ATS <b>${esc(cr.split.ats_record)}</b> · <b>${coachPctText(coachAtsPct(cr.split))}</b></span> · O/U ${esc(cr.split.ou_record||'—')}`:'No qualifying role sample'}</span></div><div class="mwCoachRecords">${recordCard('Overall','full_game')}${recordCard('1H','first_half')}${recordCard('2H','second_half')}</div></div>
+    </section>`;
   }
 
-  function marketSummary(game){ const s=game.market.spread||{},t=game.market.total||{},pp=projectedPoints(game),awp=finite(game.model.home_win_probability)?1-Number(game.model.home_win_probability):null; return `<div class="mwNumbers"><div class="mwNumber"><span>${esc(game.game.away_team)}</span><b>Projected score ${num(pp.away)}</b><b>Win probability ${pct(awp)}</b></div><div class="mwNumber"><span>${esc(game.game.home_team)}</span><b>Projected score ${num(pp.home)}</b><b>Win probability ${pct(game.model.home_win_probability)}</b></div><div class="mwNumber"><span>Model</span><b>Spread: ${esc(game.game.home_team)} ${line(game.model.home_spread)}</b><b>Total: ${num(game.model.total)}</b></div><div class="mwNumber"><span>Current market</span><b>Spread: ${finite(s.home_line)?`${esc(game.game.home_team)} ${line(s.home_line)} ${price(s.price)} · ${esc(s.book||'')}`:'—'}</b><b>Total: ${finite(t.line)?`${num(t.line)} · O ${price(t.over_price)} / U ${price(t.under_price)} · ${esc(t.book||'')}`:'—'}</b></div></div>`; }
+  function marketSummary(game){
+    const s=game.market.spread||{},t=game.market.total||{},pp=projectedPoints(game);
+    const awayWin=finite(game.model.home_win_probability)?1-Number(game.model.home_win_probability):null;
+    const teamSummary=(team,score,win)=>`<div class="mwSummaryCard"><div class="mwSummaryTeam">${logo(team)}<div><div class="mwSummaryTitle">${esc(team.team)}</div><div class="mwSummaryRow"><span>Projected score</span><b>${num(score)}</b></div><div class="mwSummaryRow"><span>Win probability</span><b>${pct(win)}</b></div></div></div></div>`;
+    const modelSpread=finite(game.model.home_spread)?`${esc(game.game.home_team)} ${line(game.model.home_spread)}`:'—';
+    const marketSpread=finite(s.home_line)?`${esc(game.game.home_team)} ${line(s.home_line)} ${price(s.price)}`:'—';
+    const marketTotal=finite(t.line)?`${num(t.line)} · O ${price(t.over_price)} / U ${price(t.under_price)}`:'—';
+    const spreadEdge=finite(game.model.home_spread)&&finite(s.home_line)?Number(game.model.home_spread)-Number(s.home_line):null;
+    const totalEdge=finite(game.model.total)&&finite(t.line)?Number(game.model.total)-Number(t.line):null;
+    const spreadSide=finite(spreadEdge)?(spreadEdge>0?game.game.away_team:game.game.home_team):'';
+    const totalSide=finite(totalEdge)?(totalEdge>0?'Over':'Under'):'';
+    const edgeChip=(label,value)=>finite(value)?`<span class="mwMarketEdgeChip ${Math.abs(value)>=2?'mwEdgeGood':'mwEdgeNeutral'}">${edgeTeamLogo(label,game)}<span>${esc(label)} ${Math.abs(Number(value)).toFixed(1)}</span></span>`:'';
+    return `<div class="mwSummaryGrid">
+      ${teamSummary(game.teams.away,pp.away,awayWin)}
+      ${teamSummary(game.teams.home,pp.home,game.model.home_win_probability)}
+      <div class="mwSummaryCard mwModelCard"><div class="mwSummaryLabel">Model</div><div class="mwSummaryRow"><span>Spread</span><b>${modelSpread}</b></div><div class="mwSummaryRow"><span>Total</span><b>${num(game.model.total)}</b></div><div class="mwMarketEdgeRow">${edgeChip(spreadSide,spreadEdge)}${edgeChip(totalSide,totalEdge)}</div></div>
+      <div class="mwSummaryCard mwMarketCard"><div class="mwSummaryLabel">Current market</div><div class="mwSummaryRow"><span>Spread</span><span class="mwMarketValue"><b>${marketSpread}</b>${bookLogo(s.book)}</span></div><div class="mwSummaryRow"><span>Total</span><span class="mwMarketValue"><b>${marketTotal}</b>${bookLogo(t.book)}</span></div></div>
+    </div>`;
+  }
   const fiveLabels={success:'Success',explosiveness:'Explosiveness',finishing_drives:'Finishing drives',field_position:'Field position',havoc:'Havoc'};
-  function fiveFactorTable(title, rows){ const by=new Map((rows||[]).map(x=>[x.metric,x])); return `<section class="mwSection mwFive"><h3>${esc(title)}</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Off</th><th>Factor</th><th>Def</th><th>Edge</th></tr></thead><tbody>${Object.entries(fiveLabels).map(([key,label])=>{const x=by.get(key)||{};return `<tr><td>${rank(x.offense_rank)}</td><td><b>${label}</b></td><td>${rank(x.defense_rank)}</td><td><b>${esc(x.edge_team||'—')}</b></td></tr>`}).join('')}</tbody></table></div></section>`; }
-  function scheduleRows(team, game){ const rows=[...(team.recent_form||[]),...(team.upcoming_schedule||[])].filter(x=>String(x.date||'').startsWith('2026')||String(x.season||'')==='2026'); const unique=[...new Map(rows.map(x=>[x.game_id||`${x.date}|${x.opponent}`,x])).values()].sort((a,b)=>String(a.date).localeCompare(String(b.date))); const index=unique.findIndex(x=>String(x.game_id)===String(game.game.game_id)); const selected=index>=0?index:unique.findIndex(x=>x.date===game.game.date); return unique.filter((_,i)=>i>=Math.max(0,selected-3)&&i<=selected+3); }
-  function scheduleCard(team, game){ const rows=scheduleRows(team,game); return `<section class="mwSection mwSchedule"><h3>${esc(team.team)} — 2026 schedule context</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date</th><th>Opponent</th><th>Ovr</th><th>Off</th><th>Def</th><th>Status</th><th>Spread</th><th>Total</th></tr></thead><tbody>${rows.map(x=>{const current=String(x.game_id)===String(game.game.game_id)||x.date===game.game.date;return `<tr class="${current?'mwCurrent':''}"><td>${esc(x.date||'—')}</td><td>${esc(x.opponent||'Selected game')}</td><td>${rank(x.opponent_ranks?.overall)}</td><td>${rank(x.opponent_ranks?.offense)}</td><td>${rank(x.opponent_ranks?.defense)}</td><td>${current?'Selected':esc(x.score||x.status||'Upcoming')}</td><td>${line(x.spread??x.model_spread)}</td><td>${num(x.total_line??x.model_total)}</td></tr>`}).join('')||'<tr><td colspan="8" class="mwMuted">No 2026 schedule context available.</td></tr>'}</tbody></table></div></section>`; }
+  function fiveFactorTable(title, rows, offenseTeam, defenseTeam, game){
+    const by=new Map((rows||[]).map(x=>[x.metric,x]));
+    const edgeLogo=name=>{
+      if(!name)return '<span class="mwEdgeDash">—</span>';
+      const team=name===game.teams.away.team?game.teams.away:name===game.teams.home.team?game.teams.home:null;
+      return team?`<img class="mwEdgeLogo" src="logos/${esc(team.logo_slug)}.png" alt="${esc(name)}" title="${esc(name)}" onerror="this.style.display='none'">`:`<span class="mwEdgeDash" title="${esc(name)}">—</span>`;
+    };
+    return `<section class="mwSection mwFive"><h3>${esc(title)}</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th class="mwColumnTeam">${esc(offenseTeam)}<br>Offense</th><th>Factor</th><th class="mwColumnTeam">${esc(defenseTeam)}<br>Defense</th><th>Edge</th></tr></thead><tbody>${Object.entries(fiveLabels).map(([key,label])=>{const x=by.get(key)||{};return `<tr><td>${rank(x.offense_rank)}</td><td class="mwFactorName">${label}</td><td>${rank(x.defense_rank)}</td><td>${edgeLogo(x.edge_team)}</td></tr>`}).join('')}</tbody></table></div></section>`;
+  }
+  function scheduleRows(team, game){
+    const rows=[...(team.recent_form||[]),...(team.upcoming_schedule||[])]
+      .filter(x=>String(x.date||'').startsWith('2026')||String(x.season||'')==='2026');
+    const unique=[...new Map(rows.map(x=>[x.game_id||`${x.date}|${x.opponent}`,x])).values()]
+      .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+
+    const expanded=[];
+    for(let i=0;i<unique.length;i++){
+      const current=unique[i];
+      expanded.push(current);
+      const next=unique[i+1];
+      if(!next||!current.date||!next.date)continue;
+      const currentDate=new Date(`${current.date}T12:00:00`);
+      const nextDate=new Date(`${next.date}T12:00:00`);
+      const gapDays=Math.round((nextDate-currentDate)/86400000);
+      if(gapDays<12)continue;
+
+      for(let offset=7;offset<=gapDays-7;offset+=7){
+        const byeDate=new Date(currentDate.getTime()+offset*86400000);
+        const iso=byeDate.toISOString().slice(0,10);
+        expanded.push({
+          game_id:`bye-${team.team}-${iso}`,
+          date:iso,
+          opponent:'BYE',
+          status:'Bye week',
+          is_bye:true,
+          opponent_ranks:{overall:null,offense:null,defense:null},
+          spread:null,
+          total_line:null
+        });
+      }
+    }
+
+    expanded.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    const index=expanded.findIndex(x=>String(x.game_id)===String(game.game.game_id));
+    const selected=index>=0?index:expanded.findIndex(x=>x.date===game.game.date&&!x.is_bye);
+    return expanded.filter((_,i)=>i>=Math.max(0,selected-3)&&i<=selected+5);
+  }
+  function scheduleCard(team, game){ const rows=scheduleRows(team,game); return `<section class="mwSection mwSchedule"><h3>${esc(team.team)} — 2026 schedule context</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date</th><th>Opponent</th><th>Ovr</th><th>Off</th><th>Def</th><th>Status</th><th>Spread</th><th>Total</th></tr></thead><tbody>${rows.map(x=>{const current=!x.is_bye&&(String(x.game_id)===String(game.game.game_id)||x.date===game.game.date);if(x.is_bye)return `<tr class="mwByeRow"><td>${esc(x.date)}</td><td colspan="7"><span class="mwByeLabel">BYE WEEK</span></td></tr>`;return `<tr class="${current?'mwCurrent':''}"><td>${esc(x.date||'—')}</td><td><span class="mwScheduleOpponent">${scheduleOpponentLogo(x.opponent,game)}<span>${esc(x.opponent||'Selected game')}</span></span></td><td>${rank(x.opponent_ranks?.overall)}</td><td>${rank(x.opponent_ranks?.offense)}</td><td>${rank(x.opponent_ranks?.defense)}</td><td>${current?'Selected':esc(x.score||x.status||'Upcoming')}</td><td>${line(x.spread??x.model_spread)}</td><td>${num(x.total_line??x.model_total)}</td></tr>`}).join('')||'<tr><td colspan="8" class="mwMuted">No 2026 schedule context available.</td></tr>'}</tbody></table></div></section>`; }
   function opponentTeam(team, game){ return team.team===game.game.away_team?game.teams.home:game.teams.away; }
   function tendencyKind(row){const receive=Number(row?.receive_pct),defer=Number(row?.defer_pct);if(Number(row?.toss_wins)<6)return null;if(receive>=65)return 'receive';if(defer>=65)return 'defer';return null;}
   function continuityScore(staff){if(!staff||Number(staff.unverified_count)>0)return null;return Number(staff.returning_count)+(Number(staff.partial_count)*.5);}
@@ -124,19 +964,56 @@
     return out.sort((x,y)=>y.score-x.score).map((x,i)=>({...x,priority:i+1}));
   }
 
-  function contextTable(game){ const rows=contextRows(game); return `<section class="mwSection" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Team / Side</th><th>Trigger</th><th>Evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted">No context item passes the current explicit rules.</td></tr>'}</tbody></table></div></section>`; }
+  function contextTable(game){ const rows=contextRows(game); const empty=!rows.length; return `<section class="mwSection ${empty?'mwContextEmptySection':''}" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Team / Side</th><th>Trigger</th><th>Evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted mwContextEmpty">No qualifying betting context for this matchup.</td></tr>'}</tbody></table></div></section>`; }
   function splitCell(split){if(!split||split.available===false)return '<span class="mwMuted">No matched sample</span>';return `<b>${esc(split.ats_record||'—')} ATS</b> · ${pct(split.ats_pct)} · ${num(split.ats_margin,1)} +/-<br><span class="mwMuted">O/U ${esc(split.ou_record||'—')} · N=${split.games??'—'}</span>`;}
   function coachingDetail(game){const rows=(game.matchup.coaches||[]);return `<section class="mwSection mwCoachDetail"><details><summary>Complete coaching ATS / totals splits — Full Game, 1H and 2H</summary><div class="mwCoachGrid"><div class="mwCoachCell mwCoachHead">Team / period</div><div class="mwCoachCell mwCoachHead">Favorite</div><div class="mwCoachCell mwCoachHead">Underdog</div>${rows.map(c=>['Full Game','1H','2H'].map((period,i)=>{const fav=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Favorite'),dog=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Underdog');return `<div class="mwCoachCell"><b>${i===0?esc(c.team)+'<br>':''}${esc(period)}</b>${i===0?`<br><span class="mwMuted">${esc(c.coach||'—')}</span>`:''}</div><div class="mwCoachCell">${splitCell(fav)}</div><div class="mwCoachCell">${splitCell(dog)}</div>`}).join('')).join('')}</div></details></section>`;}
   function daysBetween(a,b){const x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)?Math.round((y-x)/86400000):null}
   function spotValue(value,detail=''){return `<b class="${value==='Yes'?'mwWarn':value==='No'?'mwGood':'mwMuted'}">${value}</b>${detail?`<span class="mwMuted"> · ${esc(detail)}</span>`:''}`}
-  function teamSpots(team,game){const rows=scheduleRows(team,game),idx=rows.findIndex(x=>String(x.game_id)===String(game.game.game_id)||x.date===game.game.date),cur=idx>=0?rows[idx]:null,prev=idx>0?rows[idx-1]:null,next=idx>=0&&idx<rows.length-1?rows[idx+1]:null;const road=x=>/away|neutral/i.test(String(x?.site||''));let b2b='Unknown',bye='Unknown',look='Unknown';if(cur&&prev&&cur.site&&prev.site)b2b=road(cur)&&road(prev)?'Yes':'No';const rest=prev&&cur?daysBetween(prev.date,cur.date):null;if(rest!=null)bye=rest>=12?'Yes':'No';if(next){const nr=next.opponent_ranks?.overall;if(finite(nr)&&Number(nr)<=15)look='Yes';else look='Unknown'}return {b2b,bye,look,travel:'Unknown'} }
-  function spotsTable(game){const away=teamSpots(game.teams.away,game),home=teamSpots(game.teams.home,game),rows=[['B2B road','b2b'],['Off bye','bye'],['Lookahead','look'],['Travel 2+ TZ','travel']];const side=(team,spots)=>`<div class="mwMiniCard"><div class="mwMiniTitle">${esc(team)}</div><div class="mwSpotGrid">${rows.map(([label,key])=>`<div class="mwSpot"><b>${label}</b><span>${spotValue(spots[key])}</span></div>`).join('')}</div></div>`;return `<section class="mwSection mwSpots"><h3>Schedule spots</h3><div class="mwDenseGrid">${side(game.game.away_team,away)}${side(game.game.home_team,home)}</div></section>`}
-  function marketCards(game, history){const rows=[...(history[game.game.game_id]||[])].sort((a,b)=>String(a.snapshot_date||a.market_spread_last_update||'').localeCompare(String(b.snapshot_date||b.market_spread_last_update||''))),dedup=[];let prior='';for(const x of rows){const key=[x.market_spread_home,x.market_spread_price,x.market_spread_book,x.market_total,x.market_total_over_price,x.market_total_under_price,x.market_total_book].join('|');if(key!==prior){dedup.push(x);prior=key}}const firstSpread=dedup.find(x=>finite(x.market_spread_home))||{},firstTotal=dedup.find(x=>finite(x.market_total))||{},latest=[...dedup].reverse();const openSpread=finite(firstSpread.market_spread_home)?`${esc(game.game.home_team)} ${line(firstSpread.market_spread_home)} ${price(firstSpread.market_spread_price)} · ${esc(firstSpread.market_spread_book||firstSpread.source||'')}`:'—',openTotal=finite(firstTotal.market_total)?`${num(firstTotal.market_total)} · O ${price(firstTotal.market_total_over_price)} / U ${price(firstTotal.market_total_under_price)} · ${esc(firstTotal.market_total_book||firstTotal.source||'')}`:'—';return `<section class="mwSection mwHistory"><details class="mwCompactDetails"><summary>Line history — changed snapshots</summary><div class="mwHistoryHead"><div></div><div class="mwOpeners"><b>Open spread:</b> ${openSpread}<br><b>Open total:</b> ${openTotal}</div></div><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date / Time</th><th>Book</th><th>Spread</th><th>Price</th><th>Total</th><th>O / U prices</th><th>Source / Status</th></tr></thead><tbody>${latest.map(x=>`<tr><td>${esc(x.snapshot_date||x.market_spread_last_update||'—')}</td><td>${esc(x.market_spread_book||x.market_total_book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${num(x.market_total)}</td><td>${finite(x.market_total_over_price)?`O ${price(x.market_total_over_price)} / U ${price(x.market_total_under_price)}`:'—'}</td><td>${esc(x.snapshot_label||x.source||'Snapshot')}</td></tr>`).join('')||'<tr><td colspan="7" class="mwMuted">No line-history snapshots available.</td></tr>'}</tbody></table></div></details></section>`}
-  function injuries(game){ return `<section class="mwSection"><h3>Injuries</h3><div class="mwDenseGrid">${[game.teams.away,game.teams.home].map(team=>`<div class="mwMiniCard"><div class="mwMiniTitle">${esc(team.team)}</div>${(team.injuries||[]).slice(0,4).map(x=>`<div class="mwTicket"><span>${esc(x.player||x.name||'Player')} · ${esc(x.position||'')}</span><b>${esc(x.status||'Unknown')}</b></div>`).join('')||'<div class="mwEmpty">No matched injury records.</div>'}</div>`).join('')}</div></section>`; }
+  function teamSpots(team,game){
+    const rows=scheduleRows(team,game);
+    const idx=rows.findIndex(x=>String(x.game_id)===String(game.game.game_id)||(!x.is_bye&&x.date===game.game.date));
+    const cur=idx>=0?rows[idx]:null,prev=idx>0?rows[idx-1]:null,next=idx>=0&&idx<rows.length-1?rows[idx+1]:null;
+    const road=x=>/away|neutral/i.test(String(x?.site||''));
+    const rest=prev&&cur?daysBetween(prev.date,cur.date):null;
+    const b2b=cur&&prev&&road(cur)&&road(prev)?'Yes':'No';
+    const bye=prev?.is_bye||rest>=12?'Yes':'No';
+    const nextRank=next?.opponent_ranks?.overall;
+    const look=next&&!next.is_bye&&finite(nextRank)&&Number(nextRank)<=25?'Watch':'No';
+    const travel=road(cur)?'Road':'No';
+    return {b2b,bye,look,travel};
+  }
+  function spotsTable(game){
+    const away=teamSpots(game.teams.away,game),home=teamSpots(game.teams.home,game);
+    const rows=[['B2B road','b2b'],['Off bye','bye'],['Lookahead','look'],['Travel','travel']];
+    const value=v=>`<span class="mwSpotValue ${v==='Yes'?'mwSpotYes':v==='Watch'?'mwSpotWatch':'mwSpotNo'}">${esc(v)}</span>`;
+    const side=(team,spots)=>`<div class="mwMiniCard"><div class="mwSpotTeam">${logo(team)}<span>${esc(team.team)}</span></div><div class="mwSpotGrid">${rows.map(([label,key])=>`<div class="mwSpot"><b>${label}</b>${value(spots[key])}</div>`).join('')}</div></div>`;
+    return `<section class="mwSection mwSpots"><h3>Schedule spots</h3><div class="mwDenseGrid">${side(game.teams.away,away)}${side(game.teams.home,home)}</div></section>`;
+  }
+  function marketCards(game, history){
+    const rows=[...(history[game.game.game_id]||[])].sort((a,b)=>String(a.snapshot_date||a.market_spread_last_update||'').localeCompare(String(b.snapshot_date||b.market_spread_last_update||'')));
+    const dedup=[];let prior='';
+    for(const x of rows){
+      const key=[x.market_spread_home,x.market_spread_price,x.market_spread_book,x.market_total,x.market_total_over_price,x.market_total_under_price,x.market_total_book].join('|');
+      if(key!==prior){dedup.push(x);prior=key}
+    }
+    const firstSpread=dedup.find(x=>finite(x.market_spread_home))||{};
+    const firstTotal=dedup.find(x=>finite(x.market_total))||{};
+    const latest=[...dedup].reverse();
+    const openSpread=finite(firstSpread.market_spread_home)?`${esc(game.game.home_team)} ${line(firstSpread.market_spread_home)} ${price(firstSpread.market_spread_price)}`:'—';
+    const openTotal=finite(firstTotal.market_total)?`${num(firstTotal.market_total)} · O ${price(firstTotal.market_total_over_price)} / U ${price(firstTotal.market_total_under_price)}`:'—';
+    return `<section class="mwSection mwHistory" data-section="line-history"><h3>Line history — ATS spread and O/U total</h3><div class="mwHistoryLegend"><span><i class="mwLegendDot mwLegendLower"></i>Lower</span><span><i class="mwLegendDot mwLegendHigher"></i>Higher</span><span><i class="mwLegendDot mwLegendFlat"></i>Unchanged</span></div><div class="mwHistorySummary"><div class="mwHistorySummaryCard"><b>Opening ATS line:</b> ${openSpread}</div><div class="mwHistorySummaryCard"><b>Opening O/U:</b> ${openTotal}</div></div><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date / Time</th><th>Book</th><th>ATS spread</th><th>Spread price</th><th>Spread move</th><th>O/U total</th><th>Over</th><th>Under</th><th>Total move</th><th>Source</th></tr></thead><tbody>${latest.map((x,i)=>{const older=latest[i+1]||{};return `<tr><td>${esc(x.snapshot_date||x.market_spread_last_update||'—')}</td><td>${bookLogo(x.market_spread_book||x.market_total_book)||esc(x.market_spread_book||x.market_total_book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${movementText(x.market_spread_home,older.market_spread_home)}</td><td>${num(x.market_total)}</td><td>${price(x.market_total_over_price)}</td><td>${price(x.market_total_under_price)}</td><td>${movementText(x.market_total,older.market_total)}</td><td>${esc(x.snapshot_label||x.source||'Snapshot')}</td></tr>`}).join('')||'<tr><td colspan="10" class="mwMuted">No line-history snapshots available.</td></tr>'}</tbody></table></div></section>`;
+  }
+  function injuries(game){ const teams=[game.teams.away,game.teams.home]; if(!teams.some(team=>(team.injuries||[]).length))return ''; return `<section class="mwSection"><h3>Injuries</h3><div class="mwDenseGrid">${teams.map(team=>`<div class="mwMiniCard"><div class="mwMiniTitle">${esc(team.team)}</div>${(team.injuries||[]).slice(0,4).map(x=>`<div class="mwTicket"><span>${esc(x.player||x.name||'Player')} · ${esc(x.position||'')}</span><b>${esc(x.status||'Unknown')}</b></div>`).join('')||'<div class="mwEmpty">No matched injury records.</div>'}</div>`).join('')}</div></section>`; }
   function betsHtml(game){ const all=[...(game.activity?.wagers||[]).map(x=>({...x,sheet:true})),...(localBets[game.game.game_id]||[])];return all.map((x,i)=>`<div class="mwTicket"><div><b>${esc(x.market||'Bet')} · ${esc(x.selection||'—')} ${price(x.price)}</b><div class="mwMuted">${x.sheet?'Google Sheet':esc(x.book||'Local')} · ${finite(x.stake)?'$'+num(x.stake,2):'Stake not set'}</div></div>${x.sheet?'<span class="mwGood">LIVE</span>':`<button onclick="removeMatchupBet(${i-(game.activity?.wagers||[]).length})">Remove</button>`}</div>`).join('')||'<div class="mwMuted">No saved bets on this game.</div>'; }
-  function bottom(game){ return `<div class="mwGrid2"><section class="mwSection"><h3>Saved bets</h3><div id="mwSavedBets">${betsHtml(game)}</div></section><section class="mwSection"><h3>Notes</h3><textarea id="mwNotes" class="mwNotes" placeholder="Add matchup notes…">${esc(notes[game.game.game_id]||'')}</textarea><div class="mwActions"><button onclick="saveMatchupNote()">Save note</button></div></section></div>`; }
+  function bottom(game){
+    const hasBets=(game.activity?.wagers||[]).length+(localBets[game.game.game_id]||[]).length>0;
+    const hasNote=!!notes[game.game.game_id];
+    const bets=hasBets?`<section class="mwSection"><h3>Saved bets</h3><div id="mwSavedBets">${betsHtml(game)}</div></section>`:'';
+    const note=hasNote?`<section class="mwSection"><h3>Notes</h3><textarea id="mwNotes" class="mwNotes" placeholder="Add matchup notes…">${esc(notes[game.game.game_id]||'')}</textarea><div class="mwActions"><button onclick="saveMatchupNote()">Save note</button></div></section>`:`<section class="mwSection"><div class="mwEmptyTools"><button class="mwAddNoteBtn" onclick="this.closest('.mwSection').innerHTML='<h3>Notes</h3><textarea id=&quot;mwNotes&quot; class=&quot;mwNotes&quot; placeholder=&quot;Add matchup notes…&quot;></textarea><div class=&quot;mwActions&quot;><button onclick=&quot;saveMatchupNote()&quot;>Save note</button></div>'">Add note</button></div></section>`;
+    return bets||hasNote?`<div class="mwGrid2">${bets}${note}</div>`:note;
+  }
   function actions(game){const d=decisions[game.game.game_id];return `<div class="mwActions"><button class="primary" onclick="openMatchupBet('${game.game.game_id}','Spread')">Bet Spread</button><button class="primary" onclick="openMatchupBet('${game.game.game_id}','Total')">Bet Total</button><button class="${d==='watch'?'active':''}" onclick="setMatchupDecision('watch')">${d==='watch'?'★ Watched':'☆ Watch'}</button><button class="${d==='pass'?'active':''}" onclick="setMatchupDecision('pass')">${d==='pass'?'Remove Pass':'Pass'}</button>${d?'<button onclick="setMatchupDecision(null)">Clear</button>':''}</div>`;}
-  function render(game, history, section){ document.getElementById('mwContent').innerHTML=`<header class="mwHead"><div><h2>${esc(game.game.away_team)} at ${esc(game.game.home_team)}</h2><div class="mwSub">${esc(game.game.date)} · Week ${game.game.week} · ${esc(game.game.game_id)}</div></div><button class="mwClose" onclick="closeMatchupWorkspace()">×</button></header><div class="mwBody"><section class="mwSection">${marketSummary(game)}${actions(game)}</section><div class="mwGrid2">${teamCard(game.teams.away,game)}${teamCard(game.teams.home,game)}</div>${contextTable(game)}<div class="mwGrid2">${fiveFactorTable(`${game.game.away_team} offense vs ${game.game.home_team} defense`,game.matchup.away_offense_vs_home_defense)}${fiveFactorTable(`${game.game.home_team} offense vs ${game.game.away_team} defense`,game.matchup.home_offense_vs_away_defense)}</div>${coachingDetail(game)}<div class="mwDenseGrid">${spotsTable(game)}${injuries(game)}</div>${marketCards(game,history)}<div class="mwGrid2">${scheduleCard(game.teams.away,game)}${scheduleCard(game.teams.home,game)}</div>${bottom(game)}</div>`; if(section){const el=document.querySelector(`#mwContent [data-section="${CSS.escape(section)}"]`);el?.scrollIntoView()}}
+  function render(game, history, section){ document.getElementById('mwContent').innerHTML=`<header class="mwHead"><div><h2>${esc(game.game.away_team)} at ${esc(game.game.home_team)}</h2><div class="mwSub">${esc(game.game.date)} · Week ${game.game.week} · ${esc(game.game.game_id)}</div></div><button class="mwClose" onclick="closeMatchupWorkspace()">×</button></header><div class="mwBody"><section class="mwSection">${marketSummary(game)}${actions(game)}</section><div class="mwGrid2">${teamCard(game.teams.away,game)}${teamCard(game.teams.home,game)}</div><div class="mwGrid2">${scheduleCard(game.teams.away,game)}${scheduleCard(game.teams.home,game)}</div>${contextTable(game)}<div class="mwGrid2">${fiveFactorTable(`${game.game.away_team} offense vs ${game.game.home_team} defense`,game.matchup.away_offense_vs_home_defense,game.game.away_team,game.game.home_team,game)}${fiveFactorTable(`${game.game.home_team} offense vs ${game.game.away_team} defense`,game.matchup.home_offense_vs_away_defense,game.game.home_team,game.game.away_team,game)}</div>${spotsTable(game)}${injuries(game)}${marketCards(game,history)}${bottom(game)}</div>`; if(section){const el=document.querySelector(`#mwContent [data-section="${CSS.escape(section)}"]`);el?.scrollIntoView()}}
   async function open(gameId, initialSection){ ensureShell(); const [data,history]=await Promise.all([loadData(),loadHistory()]); const game=data.games.find(x=>String(x.game.game_id)===String(gameId)); if(!game)throw Error(`Game not found: ${gameId}`); selectedId=String(gameId);selectedGame=game;render(game,history,initialSection);document.getElementById('mwBackdrop').classList.add('open');document.body.style.overflow='hidden'; }
   function close(){document.getElementById('mwBackdrop')?.classList.remove('open');document.body.style.overflow='';selectedId=null;selectedGame=null;}
   function emit(){decorateLinks();document.dispatchEvent(new CustomEvent('matchup-workspace-statechange',{detail:{gameId:selectedId,decision:decisions[selectedId],notes:!!notes[selectedId],betCount:(localBets[selectedId]||[]).length+(selectedGame?.activity?.wagers||[]).length}}));}
@@ -152,6 +1029,8 @@
       const raw=a.dataset.matchupId||new URL(a.href,location.href).searchParams.get('game_id');
       if(!raw)return;
       if(a.dataset.matchupId!==raw)a.dataset.matchupId=raw;
+      a.style.setProperty('color','inherit','important');
+      a.style.setProperty('text-decoration','none','important');
       a.onclick=e=>{e.preventDefault();e.stopPropagation();open(raw,a.dataset.matchupSection)};
       let badge=a.querySelector('.mwSourceState');
       const bits=[];
@@ -175,30 +1054,95 @@
   window.__matchupWorkspaceTest={rankClass,contextRows,teamSpots,scheduleRows};
   function gameIdFromTrigger(target){
     if(!target)return null;
-    const direct=target.dataset?.matchupId||target.dataset?.gameId||target.dataset?.id;
+    const row=target.closest?.('tr');
+
+    const direct=
+      target.dataset?.matchupId||
+      target.dataset?.gameId||
+      target.dataset?.id||
+      row?.dataset?.matchupId||
+      row?.dataset?.gameId||
+      row?.dataset?.id||
+      row?.dataset?.game;
     if(direct)return String(direct);
-    const carrier=target.closest?.('[data-matchup-id],[data-game-id],tr.game,tr[data-id],tr[data-game]');
-    const fromData=carrier?.dataset?.matchupId||carrier?.dataset?.gameId||carrier?.dataset?.id||carrier?.dataset?.game;
-    if(fromData)return String(fromData);
+
+    const linked=row?.querySelector?.('a[href*="game_id="]');
+    if(linked){
+      try{
+        const linkedId=new URL(linked.getAttribute('href'),location.href).searchParams.get('game_id');
+        if(linkedId)return linkedId;
+      }catch(_){}
+    }
+
     const attrs=[
       target.getAttribute?.('onclick')||'',
-      carrier?.getAttribute?.('onclick')||'',
-      target.closest?.('a[href]')?.getAttribute('href')||''
+      row?.getAttribute?.('onclick')||'',
+      target.closest?.('a[href]')?.getAttribute('href')||'',
+      row?.innerHTML||''
     ].join(' ');
+
     const exact=attrs.match(/(?:openDrawer|openGame|openMatchupWorkspace|showMatchup|openWorkspace)\s*\(\s*['"]([^'"]+)['"]/i);
     if(exact)return exact[1];
+
     const gid=attrs.match(/\b(g\d+)\b/i);
     return gid?gid[1]:null;
   }
-  document.addEventListener('click',e=>{
-    const trigger=e.target.closest?.('button.open,.open-matchup,.matchup-open,[data-open-matchup]');
-    if(!trigger)return;
-    const gameId=gameIdFromTrigger(trigger);
+
+  async function inferGameIdFromRow(row){
+    if(!row)return null;
+    const data=await loadData();
+    const rowText=(row.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+    if(!rowText)return null;
+
+    const matches=data.games.filter(game=>{
+      const away=String(game.game.away_team||'').toLowerCase();
+      const home=String(game.game.home_team||'').toLowerCase();
+      return away&&home&&rowText.includes(away)&&rowText.includes(home);
+    });
+
+    if(matches.length===1)return String(matches[0].game.game_id);
+
+    const weekMatch=rowText.match(/\bw(?:eek)?\s*(\d+)\b/i);
+    if(matches.length>1&&weekMatch){
+      const week=Number(weekMatch[1]);
+      const narrowed=matches.filter(game=>Number(game.game.week)===week);
+      if(narrowed.length===1)return String(narrowed[0].game.game_id);
+    }
+    return null;
+  }
+
+  function isRowOpenClick(target,row){
+    if(!row||row.closest('thead'))return false;
+    if(target.closest('input,select,textarea,label'))return false;
+
+    const button=target.closest('button');
+    if(button){
+      const label=(button.textContent||'').trim();
+      return button.matches('.open,.open-matchup,.matchup-open,[data-open-matchup],[data-matchup-id],[data-game-id]')||
+        label==='›'||label==='>'||label==='→';
+    }
+
+    return !!row.closest('tbody');
+  }
+
+  document.addEventListener('click',async e=>{
+    const row=e.target.closest?.('tr');
+    if(!isRowOpenClick(e.target,row))return;
+
+    const button=e.target.closest?.('button');
+    if(button&&!['›','>','→'].includes((button.textContent||'').trim())&&
+       !button.matches('.open,.open-matchup,.matchup-open,[data-open-matchup],[data-matchup-id],[data-game-id]'))return;
+
+    let gameId=gameIdFromTrigger(e.target);
+    if(!gameId)gameId=await inferGameIdFromRow(row);
     if(!gameId)return;
+
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    open(gameId,trigger.dataset?.matchupSection).catch(error=>console.warn('Unable to open shared matchup workspace:',error.message));
+
+    open(gameId,e.target.dataset?.matchupSection)
+      .catch(error=>console.warn('Unable to open shared matchup workspace:',error.message));
   },true);
 
   ensureShell();decorateLinks();new MutationObserver(decorateLinks).observe(document.body,{childList:true,subtree:true});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeBet();close()}});
