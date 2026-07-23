@@ -73,36 +73,6 @@
   .mwEmpty{padding:4px 0;color:#7185a4;font-size:10px}
   @media(max-width:1100px){.mwNumbers{grid-template-columns:repeat(3,1fr)}.mwDenseGrid{grid-template-columns:1fr}.mwSpotGrid{grid-template-columns:repeat(2,1fr)}}
 
-
-  /* Visual refinement v4.2 */
-  .mwRankGood{color:#3ee58f;background:#0b3b2b;border-color:#1f9b68}
-  .mwRankGoodWarn{color:#9be45f;background:#263a1e;border-color:#6ca43d}
-  .mwRankWarn{color:#ffd055;background:#493b13;border-color:#b68c22}
-  .mwRankWarnBad{color:#ff9d4d;background:#4b2a17;border-color:#b9652e}
-  .mwRankBad{color:#ff6978;background:#491d27;border-color:#b43d50}
-  .mwRankMissing{color:#8da0bc;background:#17243a;border-color:#425675}
-  .mwRank{display:inline-flex;align-items:center;justify-content:center;min-width:34px;
-    padding:2px 6px;border:1px solid;border-radius:999px;font-size:10px;line-height:1;font-weight:950}
-  .mwSummaryGrid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.45fr;gap:6px}
-  .mwSummaryCard{background:#081932;border-radius:9px;padding:9px;min-width:0}
-  .mwSummaryTeam{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center}
-  .mwSummaryTeam img{width:36px;height:36px;object-fit:contain}
-  .mwSummaryLabel{font-size:10px;font-weight:950;color:#dce8fa;text-transform:uppercase;letter-spacing:.04em}
-  .mwSummaryTitle{font-size:13px;font-weight:950;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mwSummaryRow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;font-size:11px;line-height:1.15}
-  .mwSummaryRow span{color:#91a6c6;font-size:9px;text-transform:uppercase}
-  .mwSummaryRow b{font-size:13px;white-space:nowrap}
-  .mwModelCard .mwSummaryRow b{font-size:12px}
-  .mwMarketCard .mwSummaryRow{display:grid;grid-template-columns:48px 1fr auto}
-  .mwBookLogo{display:inline-flex;width:29px;height:22px;align-items:center;justify-content:center;border-radius:6px;background:#f7f9fc;padding:2px}
-  .mwBookLogo img{max-width:25px;max-height:18px;object-fit:contain}
-  .mwTeamCompact{padding:8px}
-  .mwMetricGrid{grid-template-columns:1.1fr 1fr 1fr}
-  .mwMetric{display:flex;align-items:center;justify-content:space-between;gap:6px}
-  .mwMetric b{display:flex;align-items:center;gap:5px;font-size:14px}
-  .mwContextTable td,.mwContextTable th{padding:5px 6px}
-  @media(max-width:1050px){.mwSummaryGrid{grid-template-columns:1fr 1fr}}
-
 </style>`);
     document.body.insertAdjacentHTML('beforeend', `<div id="mwBackdrop"><article class="mwShell" role="dialog" aria-modal="true"><div id="mwContent"></div></article></div><div class="mwBetModal" id="mwBetModal"><div class="mwBetCard"><h2>Add bet</h2><div id="mwBetGame" class="mwMuted"></div><label><span>Market</span><select id="mwBetMarket"><option>Spread</option><option>Total</option><option>Moneyline</option></select></label><label><span>Selection</span><input id="mwBetSelection"></label><label><span>Price</span><input id="mwBetPrice"></label><label><span>Book</span><input id="mwBetBook"></label><label><span>Stake</span><input id="mwBetStake"></label><div class="mwActions"><button onclick="closeMatchupBet()">Cancel</button><button class="primary" onclick="saveMatchupBet()">Save bet</button></div></div></div>`);
     document.getElementById('mwBackdrop').addEventListener('click', e=>{if(e.target.id==='mwBackdrop') closeMatchupWorkspace()});
@@ -114,43 +84,19 @@
   function projectedPoints(game){ const total=Number(game.model.total), spread=Number(game.model.home_spread); if(!Number.isFinite(total)||!Number.isFinite(spread))return{away:null,home:null}; return {away:(total+spread)/2,home:(total-spread)/2}; }
   function coachRole(team, game){ const coach=(game.matchup.coaches||[]).find(x=>x.team===team.team), r=role(team,game), split=(coach?.role_splits||[]).find(x=>x.role===r); return {coach,split,r}; }
   function coachPeriod(coach, period){ return (coach?.periods||[]).find(x=>x?.period===period)||{}; }
-  function bookLogo(book){ const raw=String(book||'').trim(),b=raw.toLowerCase(); let src='',label=raw||'Book'; if(b.includes('fanduel')||b==='fd'||b==='fan duel'){src='logos/books/fanduel.png';label='FanDuel'}else if(b.includes('draftkings')||b==='dk'||b==='draft kings'){src='logos/books/draftkings.png';label='DraftKings'}else if(b.includes('betmgm')||b.includes('mgm')){src='logos/books/betmgm.png';label='BetMGM'}else if(b.includes('caesars')||b.includes('caesar')||b==='cz'){src='logos/books/caesars.png';label='Caesars'} return src?`<span class="mwBookLogo" title="${esc(label)}"><img src="${src}" alt="${esc(label)}"></span>`:(raw?`<span title="${esc(raw)}">•</span>`:''); }
-  function rankClass(value){ if(!finite(value))return 'mwRankMissing'; const n=Number(value); return n<=28?'mwRankGood':n<=55?'mwRankGoodWarn':n<=83?'mwRankWarn':n<=110?'mwRankWarnBad':'mwRankBad'; }
+  function rankClass(value){ if(!finite(value))return 'mwRankMissing'; const n=Number(value); return n<=40?'mwRankGood':n<=80?'mwRankWarn':'mwRankBad'; }
   function rank(value){ return `<span class="mwRank ${rankClass(value)}">${finite(value)?'#'+Number(value).toFixed(0):'—'}</span>`; }
   function statusClass(value){const s=String(value||'unverified').toLowerCase();return `mwStaffStatus mwStatus${s.charAt(0).toUpperCase()+s.slice(1)}`;}
   function staffLine(label,name,status,extra=''){return `<div class="mwStaffLine"><b>${label}</b><span>${esc(name||'—')}${extra?` <span class="mwMuted">${esc(extra)}</span>`:''}</span><i class="${statusClass(status)}">${esc(status||'unverified')}</i></div>`;}
   function rpLine(label,pctValue,rankValue){return `<div class="mwRpLine"><b>${label}</b><span>${finite(pctValue)?num(pctValue,0)+'%':'—'}</span>${rank(rankValue)}</div>`;}
   function teamCard(team, game){
-    const rec=team.record||{},br=team.betting_record||{},rp=team.returning_production||{},staff=team.staff_continuity||{},cr=coachRole(team,game),sp=cr.split||{};
+    const cr=coachRole(team,game),rec=team.record||{},br=team.betting_record||{},sp=cr.split||{},rp=team.returning_production||{},staff=team.staff_continuity||{};
     const hcTenure=finite(staff.head_coach_tenure_year)?`Year ${Number(staff.head_coach_tenure_year).toFixed(0)}`:'';
-    return `<section class="mwSection mwTeamCompact">
-      <div class="mwTeamHeader">${logo(team)}<div><h4>${esc(team.team)} <span class="mwRole">${esc(cr.r)}</span></h4><div class="mwChipRow"><span class="mwChip">${esc(team.conference||'—')}</span><span class="mwChip">Rank ${rank(team.overall_rank)}</span><span class="mwChip">${rec.wins??0}-${rec.losses??0}</span><span class="mwChip">ATS ${esc(br.ats||'—')}</span><span class="mwChip">O/U ${esc(br.ou||'—')}</span></div></div></div>
-      <div class="mwMetricGrid">
-        <div class="mwMetric"><span>Power</span><b>${num(team.rating,1)} ${rank(team.overall_rank)}</b></div>
-        <div class="mwMetric"><span>Offense</span><b>${rank(team.offense_rank)}</b></div>
-        <div class="mwMetric"><span>Defense</span><b>${rank(team.defense_rank)}</b></div>
-      </div>
-      <div class="mwDual">
-        <div class="mwMiniCard"><div class="mwMiniTitle">Returning production</div>${rpLine('OVR',rp.overall_pct,rp.overall_rank)}${rpLine('OFF',rp.offense_pct,rp.offense_rank)}${rpLine('DEF',rp.defense_pct,rp.defense_rank)}</div>
-        <div class="mwMiniCard"><div class="mwMiniTitle">2026 staff continuity</div>${staffLine('HC',staff.head_coach,staff.head_coach_status,hcTenure)}${staffLine('OC',staff.offensive_coordinator,staff.oc_status)}${staffLine('DC',staff.defensive_coordinator,staff.dc_status)}</div>
-      </div>
-      <div class="mwMiniCard" style="margin-top:5px"><div class="mwMiniTitle">Coach betting — applicable ${esc(cr.r)} role</div>${sp.available===false||!sp.ats_record?`<span class="mwMuted">No qualifying current-coach ${esc(cr.r.toLowerCase())} sample.</span>`:`<b>${esc(cr.coach?.coach||'Coach unavailable')}</b> · ${esc(sp.ats_record)} ATS · ${pct(sp.ats_pct)} · ${num(sp.ats_margin,1)} margin · N=${finite(sp.games)?Number(sp.games).toFixed(0):'—'} · O/U ${esc(sp.ou_record||'—')}`}</div>
-    </section>`;
+    return `<section class="mwSection mwTeamCompact"><div class="mwTeamHeader">${logo(team)}<div><h4>${esc(team.team)} <span class="mwRole">${esc(cr.r)}</span></h4><div class="mwChipRow"><span class="mwChip">${esc(team.conference||'—')}</span><span class="mwChip">Rank ${rank(team.overall_rank)}</span><span class="mwChip">${rec.wins??0}-${rec.losses??0}</span><span class="mwChip">ATS ${esc(br.ats||'—')}</span><span class="mwChip">O/U ${esc(br.ou||'—')}</span></div></div></div><div class="mwMetricGrid"><div class="mwMetric"><span>Power</span><b>${num(team.rating,1)} ${rank(team.overall_rank)}</b></div><div class="mwMetric"><span>Offense</span><b>${rank(team.offense_rank)}</b></div><div class="mwMetric"><span>Defense</span><b>${rank(team.defense_rank)}</b></div></div><div class="mwDual"><div class="mwMiniCard"><div class="mwMiniTitle">Returning production</div>${rpLine('OVR',rp.overall_pct,rp.overall_rank)}${rpLine('OFF',rp.offense_pct,rp.offense_rank)}${rpLine('DEF',rp.defense_pct,rp.defense_rank)}</div><div class="mwMiniCard"><div class="mwMiniTitle">2026 staff continuity</div>${staffLine('HC',staff.head_coach,staff.head_coach_status,hcTenure)}${staffLine('OC',staff.offensive_coordinator,staff.oc_status)}${staffLine('DC',staff.defensive_coordinator,staff.dc_status)}</div></div><div class="mwMiniCard" style="margin-top:6px"><div class="mwMiniTitle">Coach betting — applicable ${esc(cr.r)} role</div><b>${esc(cr.coach?.coach||'Coach unavailable')}</b> · Full game ATS ${esc(sp.ats_record||'—')} (${pct(sp.ats_pct)}) · ${num(sp.ats_margin,1)} ATS +/- · O/U ${esc(sp.ou_record||'—')}</div></section>`;
   }
-  function marketSummary(game){
-    const s=game.market.spread||{},t=game.market.total||{},pp=projectedPoints(game);
-    const awp=finite(game.model.home_win_probability)?1-Number(game.model.home_win_probability):null;
-    const teamSummary=(team,score,win)=>`<div class="mwSummaryCard"><div class="mwSummaryTeam">${logo(team)}<div><div class="mwSummaryTitle">${esc(team.team)}</div><div class="mwSummaryRow"><span>Projected score</span><b>${num(score)}</b></div><div class="mwSummaryRow"><span>Win probability</span><b>${pct(win)}</b></div></div></div></div>`;
-    const modelSpread=finite(game.model.home_spread)?`${esc(game.game.home_team)} ${line(game.model.home_spread)}`:'—';
-    const marketSpread=finite(s.home_line)?`${esc(game.game.home_team)} ${line(s.home_line)} ${price(s.price)}`:'—';
-    const marketTotal=finite(t.line)?`${num(t.line)} · O ${price(t.over_price)} / U ${price(t.under_price)}`:'—';
-    return `<div class="mwSummaryGrid">
-      ${teamSummary(game.teams.away,pp.away,awp)}
-      ${teamSummary(game.teams.home,pp.home,game.model.home_win_probability)}
-      <div class="mwSummaryCard mwModelCard"><div class="mwSummaryLabel">Model</div><div class="mwSummaryRow"><span>Spread</span><b>${modelSpread}</b></div><div class="mwSummaryRow"><span>Total</span><b>${num(game.model.total)}</b></div></div>
-      <div class="mwSummaryCard mwMarketCard"><div class="mwSummaryLabel">Current market</div><div class="mwSummaryRow"><span>Spread</span><b>${marketSpread}</b>${bookLogo(s.book)}</div><div class="mwSummaryRow"><span>Total</span><b>${marketTotal}</b>${bookLogo(t.book)}</div></div>
-    </div>`;
-  }
+
+  function marketSummary(game){ const s=game.market.spread||{},t=game.market.total||{},pp=projectedPoints(game),awp=finite(game.model.home_win_probability)?1-Number(game.model.home_win_probability):null; return `<div class="mwNumbers"><div class="mwNumber"><span>${esc(game.game.away_team)}</span><b>Projected score ${num(pp.away)}</b><b>Win probability ${pct(awp)}</b></div><div class="mwNumber"><span>${esc(game.game.home_team)}</span><b>Projected score ${num(pp.home)}</b><b>Win probability ${pct(game.model.home_win_probability)}</b></div><div class="mwNumber"><span>Model</span><b>Spread: ${esc(game.game.home_team)} ${line(game.model.home_spread)}</b><b>Total: ${num(game.model.total)}</b></div><div class="mwNumber"><span>Current market</span><b>Spread: ${finite(s.home_line)?`${esc(game.game.home_team)} ${line(s.home_line)} ${price(s.price)} · ${esc(s.book||'')}`:'—'}</b><b>Total: ${finite(t.line)?`${num(t.line)} · O ${price(t.over_price)} / U ${price(t.under_price)} · ${esc(t.book||'')}`:'—'}</b></div></div>`; }
+  const fiveLabels={success:'Success',explosiveness:'Explosiveness',finishing_drives:'Finishing drives',field_position:'Field position',havoc:'Havoc'};
   function fiveFactorTable(title, rows){ const by=new Map((rows||[]).map(x=>[x.metric,x])); return `<section class="mwSection mwFive"><h3>${esc(title)}</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Off</th><th>Factor</th><th>Def</th><th>Edge</th></tr></thead><tbody>${Object.entries(fiveLabels).map(([key,label])=>{const x=by.get(key)||{};return `<tr><td>${rank(x.offense_rank)}</td><td><b>${label}</b></td><td>${rank(x.defense_rank)}</td><td><b>${esc(x.edge_team||'—')}</b></td></tr>`}).join('')}</tbody></table></div></section>`; }
   function scheduleRows(team, game){ const rows=[...(team.recent_form||[]),...(team.upcoming_schedule||[])].filter(x=>String(x.date||'').startsWith('2026')||String(x.season||'')==='2026'); const unique=[...new Map(rows.map(x=>[x.game_id||`${x.date}|${x.opponent}`,x])).values()].sort((a,b)=>String(a.date).localeCompare(String(b.date))); const index=unique.findIndex(x=>String(x.game_id)===String(game.game.game_id)); const selected=index>=0?index:unique.findIndex(x=>x.date===game.game.date); return unique.filter((_,i)=>i>=Math.max(0,selected-3)&&i<=selected+3); }
   function scheduleCard(team, game){ const rows=scheduleRows(team,game); return `<section class="mwSection mwSchedule"><h3>${esc(team.team)} — 2026 schedule context</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date</th><th>Opponent</th><th>Ovr</th><th>Off</th><th>Def</th><th>Status</th><th>Spread</th><th>Total</th></tr></thead><tbody>${rows.map(x=>{const current=String(x.game_id)===String(game.game.game_id)||x.date===game.game.date;return `<tr class="${current?'mwCurrent':''}"><td>${esc(x.date||'—')}</td><td>${esc(x.opponent||'Selected game')}</td><td>${rank(x.opponent_ranks?.overall)}</td><td>${rank(x.opponent_ranks?.offense)}</td><td>${rank(x.opponent_ranks?.defense)}</td><td>${current?'Selected':esc(x.score||x.status||'Upcoming')}</td><td>${line(x.spread??x.model_spread)}</td><td>${num(x.total_line??x.model_total)}</td></tr>`}).join('')||'<tr><td colspan="8" class="mwMuted">No 2026 schedule context available.</td></tr>'}</tbody></table></div></section>`; }
@@ -178,7 +124,7 @@
     return out.sort((x,y)=>y.score-x.score).map((x,i)=>({...x,priority:i+1}));
   }
 
-  function contextTable(game){ const rows=contextRows(game); return `<section class="mwSection" data-section="betting-context"><h3>Key betting context — qualifying rules only <span class="mwMuted" style="float:right;text-transform:none;letter-spacing:0">Ranks: 1–28 green · 29–55 lime · 56–83 yellow · 84–110 orange · 111–138 red</span></h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Team / Side</th><th>Trigger</th><th>Evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted">No context item passes the current explicit rules.</td></tr>'}</tbody></table></div></section>`; }
+  function contextTable(game){ const rows=contextRows(game); return `<section class="mwSection" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Team / Side</th><th>Trigger</th><th>Evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted">No context item passes the current explicit rules.</td></tr>'}</tbody></table></div></section>`; }
   function splitCell(split){if(!split||split.available===false)return '<span class="mwMuted">No matched sample</span>';return `<b>${esc(split.ats_record||'—')} ATS</b> · ${pct(split.ats_pct)} · ${num(split.ats_margin,1)} +/-<br><span class="mwMuted">O/U ${esc(split.ou_record||'—')} · N=${split.games??'—'}</span>`;}
   function coachingDetail(game){const rows=(game.matchup.coaches||[]);return `<section class="mwSection mwCoachDetail"><details><summary>Complete coaching ATS / totals splits — Full Game, 1H and 2H</summary><div class="mwCoachGrid"><div class="mwCoachCell mwCoachHead">Team / period</div><div class="mwCoachCell mwCoachHead">Favorite</div><div class="mwCoachCell mwCoachHead">Underdog</div>${rows.map(c=>['Full Game','1H','2H'].map((period,i)=>{const fav=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Favorite'),dog=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Underdog');return `<div class="mwCoachCell"><b>${i===0?esc(c.team)+'<br>':''}${esc(period)}</b>${i===0?`<br><span class="mwMuted">${esc(c.coach||'—')}</span>`:''}</div><div class="mwCoachCell">${splitCell(fav)}</div><div class="mwCoachCell">${splitCell(dog)}</div>`}).join('')).join('')}</div></details></section>`;}
   function daysBetween(a,b){const x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)?Math.round((y-x)/86400000):null}
