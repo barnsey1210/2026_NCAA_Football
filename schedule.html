@@ -1,7 +1,195 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Schedule</title><style>
 :root{--bg:#061126;--panel:#0b1b36;--line:#244873;--text:#f5f7ff;--muted:#91a6c6;--green:#43df96;--amber:#ffc45b;--red:#ff7280;--blue:#459cff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.4 Inter,system-ui}.shell{max-width:1900px;margin:auto;padding:16px}.top,.nav,.hero,.weekChips,.summary,.filters,.team{display:flex;align-items:center}.top{gap:16px;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{gap:5px}.nav a{color:var(--muted);padding:8px 11px;text-decoration:none;font-weight:850}.nav .active{background:#173b72;color:white;border-radius:8px}.hero{justify-content:space-between;margin:20px 0 10px}.hero h1{font-size:38px;margin:0}.hero p{color:var(--muted);margin:2px 0}.weekChips{gap:6px;flex-wrap:wrap;margin:10px 0}.weekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:7px 12px;font-weight:900}.weekChips .active{background:#1857a7;color:white}.summary{gap:8px;flex-wrap:wrap}.tile{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 12px;min-width:145px}.tile span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.tile b{font-size:20px}.filters{gap:8px;margin:10px 0}.filters input{width:320px;background:#091a34;border:1px solid var(--line);border-radius:7px;padding:9px;color:white}.card{border:1px solid var(--line);border-radius:12px;overflow:hidden}.wrap{overflow:auto;max-height:calc(100vh - 285px)}table{width:100%;border-collapse:collapse;min-width:1350px}th{position:sticky;top:0;z-index:3;background:#17345f;color:#b5c5df;text-align:left;text-transform:uppercase;font-size:10px;padding:9px}td{padding:8px;border-top:1px solid #17345c;white-space:nowrap}.team{gap:7px;font-weight:900}.team img{width:25px;height:25px;object-fit:contain}.muted{color:var(--muted)}.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 7px;font-size:10px;font-weight:900}.button{color:white;text-decoration:none;border:1px solid #3972aa;border-radius:7px;padding:5px 8px}.empty{text-align:center;color:var(--muted);padding:30px}@media(max-width:900px){.nav{overflow:auto}.summary{display:none}}
-</style><style id="production-nav-css">
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html" class="active">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div></div><section class="hero"><div><h1>Schedule & Results</h1><p>Scores, ATS and total grading, PGWE availability, and CFBD/PBP ingestion status.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters"><input id="search" placeholder="Find a team"></div><div class="card"><div class="wrap"><table><thead><tr><th>Date</th><th>Matchup</th><th>Score</th><th>Spread / ATS</th><th>Total / O-U</th><th>PGWE</th><th>CFBD</th><th>PBP</th><th>Ready</th><th></th></tr></thead><tbody id="rows"><tr><td class="empty">Loading schedule…</td></tr></tbody></table></div></div></main><script>
 let D,GC=new Map,week=0;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',sgn=x=>Number(x)>0?'+':'';function logo(t){return`<img src="logos/${esc(t.logo_slug)}.png" onerror="this.style.display='none'">`}function matchup(r){return`<span class="team">${logo(r.teams.away)}${esc(r.game.away_team)} <span class="muted">at</span> ${logo(r.teams.home)}${esc(r.game.home_team)}</span>`}function grading(r){const a=Number(r.game.away_score),h=Number(r.game.home_score),line=r.market.spread.home_line==null?NaN:Number(r.market.spread.home_line),total=r.market.total.line==null?NaN:Number(r.market.total.line);if(!r.game.completed||!Number.isFinite(a)||!Number.isFinite(h))return{score:'—',ats:'Pending',ou:'Pending'};let ats='No closing line',ou='No closing total';if(Number.isFinite(line)){const m=h-a+line;ats=Math.abs(m)<.001?'Push':`${m>0?r.game.home_team:r.game.away_team} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}if(Number.isFinite(total)){const m=a+h-total;ou=Math.abs(m)<.001?'Push':`${m>0?'Over':'Under'} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}return{score:`${r.game.away_team} ${a}–${h} ${r.game.home_team}`,ats,ou}}function filtered(){return D.games.filter(r=>r.game.week===week&&(`${r.game.away_team} ${r.game.home_team}`).toLowerCase().includes(search.value.toLowerCase()))}function draw(){const all=D.games.filter(r=>r.game.week===week),a=filtered();weeks.querySelectorAll('button').forEach(b=>b.classList.toggle('active',Number(b.dataset.week)===week));const status=r=>{const ids=[`${r.game.game_id}|${r.game.away_team}`,`${r.game.game_id}|${r.game.home_team}`],p=ids.every(x=>GC.has(x)),c=!!r.game.completed;return{p,c,ready:p&&c}};games.textContent=all.length;finals.textContent=all.filter(r=>r.game.completed).length;cfbd.textContent=`${all.filter(r=>r.game.completed).length}/${all.length}`;pbp.textContent=`${all.filter(r=>status(r).p).length}/${all.length}`;ready.textContent=`${all.filter(r=>status(r).ready).length}/${all.length}`;rows.innerHTML=a.map(r=>{const g=grading(r),s=status(r),spread=r.market.spread.home_line,total=r.market.total.line;return`<tr><td>${esc(r.game.date)}<div class="muted">W${r.game.week}</div></td><td>${matchup(r)}</td><td>${esc(g.score)}</td><td>${spread==null?'—':`${esc(r.game.home_team)} ${sgn(spread)}${num(spread)} · `}<span class="${g.ats==='Pending'?'muted':g.ats==='Push'?'warn':'good'}">${esc(g.ats)}</span></td><td>${total==null?'—':`${num(total)} · `}<span class="${g.ou==='Pending'?'muted':g.ou==='Push'?'warn':'good'}">${esc(g.ou)}</span></td><td class="muted">${s.p?'PBP ready; PGWE pending':'Awaiting PBP'}</td><td><span class="pill ${s.c?'good':'muted'}">${s.c?'Complete':esc(r.game.status||'Scheduled')}</span></td><td><span class="pill ${s.p?'good':'muted'}">${s.p?'Processed':'Pending'}</span></td><td><span class="pill ${s.ready?'good':'warn'}">${s.ready?'Ready':'Incomplete'}</span></td><td><a class="button" href="matchups.html?game_id=${esc(r.game.game_id)}">Matchup</a></td></tr>`}).join('')||'<tr><td class="empty" colspan="10">No matching games.</td></tr>'}async function init(){[D,GC]=await Promise.all([fetch('data/site/matchups_view.json').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map)]);const ws=[...new Set(D.games.map(r=>r.game.week))].sort((a,b)=>a-b);week=ws[0]||0;weeks.innerHTML=ws.map(w=>`<button data-week="${w}">Week ${w}</button>`).join('');weeks.querySelectorAll('button').forEach(b=>b.onclick=()=>{week=Number(b.dataset.week);draw()});draw()}search.oninput=draw;init().catch(e=>rows.innerHTML=`<tr><td class="empty">${esc(e.message)}</td></tr>`);
-</script><script src="matchup_workspace.js?v=20260723-staffcachefix1"></script></body></html>
+</script><script src="matchup_workspace.js?v=20260723-contextalign2"></script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+</body></html>

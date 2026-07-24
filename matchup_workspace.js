@@ -946,6 +946,41 @@
   function contextRows(game){
     const out=[], s=game.market.spread||{},t=game.market.total||{};
     const add=x=>{if(x.team&&x.team!=='—'&&x.evidence)out.push(x)};
+    const rpCandidates=(game.angles||[]).filter(x=>{
+      const group=String(x.signal_group||'').toLowerCase();
+      const type=String(x.signal_type||'').toLowerCase();
+      return group==='returning production'||type==='rp_support';
+    });
+    const rpSignal=
+      rpCandidates.find(x=>String(x.signal_group||'').toLowerCase()==='returning production')||
+      rpCandidates[0]||
+      null;
+    const hasHistoricalRpSignal=!!rpSignal;
+    if(rpSignal&&Number(game.game.week)<=4){
+      const rawTeam=rpSignal.team||rpSignal.direction||'';
+      const action=String(rpSignal.strength||'').toLowerCase()==='fade'?'Fade':'Support';
+      const side=rawTeam?`${action} ${rawTeam}`:action;
+      const histGames=Number(rpSignal.historical_games);
+      const histPctRaw=Number(rpSignal.historical_ats_pct);
+      const histPct=Number.isFinite(histPctRaw)?(histPctRaw>1?histPctRaw/100:histPctRaw):null;
+      const histMargin=Number(rpSignal.historical_avg_ats_margin);
+      const evidence=[
+        rpSignal.detail,
+        rpSignal.historical_ats_record?`${rpSignal.historical_ats_record} ATS`:null,
+        histPct!==null?`${(histPct*100).toFixed(1)}% ATS`:null,
+        Number.isFinite(histMargin)?`${histMargin>=0?'+':''}${histMargin.toFixed(2)} average ATS margin`:null,
+        Number.isFinite(histGames)?`${histGames} historical games`:null,
+        rpSignal.source?`Source: ${rpSignal.source}`:null
+      ].filter(Boolean).join(' · ');
+      add({
+        id:'rp_study_signal',
+        score:88,
+        market:rpSignal.market||'Spread',
+        team:side,
+        trigger:rpSignal.headline||rpSignal.signal_type||'Historical early-season returning-production signal',
+        evidence:evidence||'2023–25 early-season returning-production study match.'
+      });
+    }
     if(finite(s.home_line)&&finite(game.model.home_spread)){const edge=Math.abs(Number(s.home_line)-Number(game.model.home_spread));if(edge>=2)add({id:'model_spread_edge',score:100,market:'Spread',team:Number(s.home_line)>Number(game.model.home_spread)?game.game.home_team:game.game.away_team,trigger:`Model spread edge ${num(edge)} pts`,evidence:`Home perspective: model ${line(game.model.home_spread)} vs market ${line(s.home_line)}`})}
     if(finite(t.line)&&finite(game.model.total)){const edge=Math.abs(Number(t.line)-Number(game.model.total));if(edge>=2.5)add({id:'model_total_edge',score:95,market:'Total',team:Number(game.model.total)>Number(t.line)?'Over':'Under',trigger:`Model total edge ${num(edge)} pts`,evidence:`Model ${num(game.model.total)} vs market ${num(t.line)}`})}
     for(const team of [game.teams.away,game.teams.home]){
@@ -959,7 +994,7 @@
     const opening=game.matchup.opening_possession||{},awayKind=tendencyKind(opening.away),homeKind=tendencyKind(opening.home);
     if(awayKind&&homeKind&&awayKind!==homeKind&&opening.projected_opening_receiver){const receiveTeam=awayKind==='receive'?game.teams.away:game.teams.home,deferTeam=awayKind==='defer'?game.teams.away:game.teams.home,prob=receiveTeam.team===game.game.away_team?opening.away_projected_receive_pct:opening.home_projected_receive_pct;if(Number(prob)>=60)add({id:'opening_possession_1h',score:76,market:'1H',team:opening.projected_opening_receiver,trigger:'Opposing receive vs defer toss tendencies',evidence:`${receiveTeam.team} coach receives ${num(receiveTeam.team===game.game.away_team?opening.away.receive_pct:opening.home.receive_pct,0)}% after wins; ${deferTeam.team} coach defers ${num(deferTeam.team===game.game.away_team?opening.away.defer_pct:opening.home.defer_pct,0)}%. Projected first possession: ${opening.projected_opening_receiver} (${num(prob,1)}%).`})}
     if(Number(game.game.week)<=4){const a=game.teams.away,h=game.teams.home,as=continuityScore(a.staff_continuity),hs=continuityScore(h.staff_continuity);if(as!==null&&hs!==null){const gap=Math.abs(as-hs),winner=as>hs?a:hs>as?h:null,loser=winner===a?h:a;if(winner&&((Number(winner.staff_continuity.returning_count)===3&&gap>=1)||(gap>=2)))add({id:'staff_continuity',score:70,market:'Early season',team:winner.team,trigger:'Coaching continuity advantage',evidence:`${winner.team}: ${winner.staff_continuity.returning_count}/3 returning vs ${loser.team}: ${loser.staff_continuity.returning_count}/3 returning (${loser.staff_continuity.new_count} new, ${loser.staff_continuity.partial_count} partial).`})}}
-    const a=game.teams.away,h=game.teams.home,ar=a.returning_production||{},hr=h.returning_production||{},rpRank=Math.abs(Number(ar.overall_rank)-Number(hr.overall_rank)),rpPct=Math.abs(Number(ar.overall_pct)-Number(hr.overall_pct));if(Number(game.game.week)<=4&&((Number.isFinite(rpRank)&&rpRank>=45)||(Number.isFinite(rpPct)&&rpPct>=20))){const team=Number(ar.overall_rank)<Number(hr.overall_rank)?a:h;if(finite(team.returning_production?.overall_rank))add({id:'returning_production_gap',score:60,market:'Spread',team:team.team,trigger:'Returning-production gap',evidence:`Supports ${team.team}: #${ar.overall_rank??'—'} (${ar.overall_pct??'—'}%) vs #${hr.overall_rank??'—'} (${hr.overall_pct??'—'}%)`})}
+    const a=game.teams.away,h=game.teams.home,ar=a.returning_production||{},hr=h.returning_production||{},rpRank=Math.abs(Number(ar.overall_rank)-Number(hr.overall_rank)),rpPct=Math.abs(Number(ar.overall_pct)-Number(hr.overall_pct));if(!hasHistoricalRpSignal&&Number(game.game.week)<=4&&((Number.isFinite(rpRank)&&rpRank>=45)||(Number.isFinite(rpPct)&&rpPct>=20))){const team=Number(ar.overall_rank)<Number(hr.overall_rank)?a:h;if(finite(team.returning_production?.overall_rank))add({id:'returning_production_gap',score:60,market:'Spread',team:team.team,trigger:'Returning-production gap',evidence:`Supports ${team.team}: #${ar.overall_rank??'—'} (${ar.overall_pct??'—'}%) vs #${hr.overall_rank??'—'} (${hr.overall_pct??'—'}%)`})}
     if(Number(game.game.week)>=3){for(const team of [a,h]){const c=team.competition_context||{};if(c.qualifies){const opp=opponentTeam(team,game),supported=c.direction==='step_down'?team:opp;add({id:`competition_${c.direction}_${team.team}`,score:52,market:'Spread',team:supported.team,trigger:c.direction==='step_up'?`${team.team} steps up in competition`:`${team.team} steps down in competition`,evidence:`Current opponent #${c.current_opponent_rank} vs prior-schedule average #${num(c.prior_opponent_average_rank,0)} across ${c.prior_opponents} games (${Math.abs(Number(c.rank_gap)).toFixed(0)} rank spots).`})}}}
     return out.sort((x,y)=>y.score-x.score).map((x,i)=>({...x,priority:i+1}));
   }
@@ -1050,6 +1085,39 @@
     });
   }
 
+  window.NCAAFMatchupContextSummary=async function(gameId){
+    const data=await loadData();
+    const game=data.games.find(x=>String(x.game.game_id)===String(gameId));
+    if(!game)return null;
+    return {
+      game_id:String(gameId),
+      away_team:game.game.away_team,
+      home_team:game.game.home_team,
+      away_logo_slug:game.teams.away.logo_slug,
+      home_logo_slug:game.teams.home.logo_slug,
+      rows:contextRows(game)
+    };
+  };
+
+  window.NCAAFMatchupContextSummaryFromText=async function(rowText){
+    const data=await loadData();
+    const raw=String(rowText||'').toLowerCase();
+    const matches=data.games.filter(x=>{
+      const away=String(x.game.away_team||'').toLowerCase();
+      const home=String(x.game.home_team||'').toLowerCase();
+      return away&&home&&raw.includes(away)&&raw.includes(home);
+    });
+    if(!matches.length)return null;
+    const game=matches[0];
+    return {
+      game_id:String(game.game.game_id),
+      away_team:game.game.away_team,
+      home_team:game.game.home_team,
+      away_logo_slug:game.teams.away.logo_slug,
+      home_logo_slug:game.teams.home.logo_slug,
+      rows:contextRows(game)
+    };
+  };
   window.openMatchupWorkspace=open;window.closeMatchupWorkspace=close;window.setMatchupDecision=decision;window.saveMatchupNote=note;window.openMatchupBet=openBet;window.closeMatchupBet=closeBet;window.saveMatchupBet=saveBet;window.removeMatchupBet=removeBet;
   window.__matchupWorkspaceTest={rankClass,contextRows,teamSpots,scheduleRows};
   function gameIdFromTrigger(target){

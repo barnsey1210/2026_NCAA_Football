@@ -1,6 +1,95 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Team</title><style>
 :root{--bg:#061126;--p:#0b1b36;--p2:#081932;--p3:#10284a;--l:#244873;--t:#f5f7ff;--m:#91a6c6;--g:#43df96;--a:#ffc45b;--r:#ff7280;--b:#55a2ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.4 Inter,system-ui}.shell{max-width:1900px;margin:auto;padding:16px}.top,.nav,.hero,.stats,.filters{display:flex;align-items:center}.top{gap:16px;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{gap:5px;overflow:auto}.nav a{color:var(--m);padding:8px 11px;text-decoration:none;font-weight:850;white-space:nowrap}.hero{gap:18px;margin:18px 0}.hero>img{width:100px;height:100px;object-fit:contain}.hero h1{font-size:40px;margin:0}.hero p,.muted{color:var(--m)}.hero p{margin:3px 0}.stats{gap:7px;flex-wrap:wrap}.stat,.card{border:1px solid var(--l);background:var(--p);border-radius:12px}.stat{padding:8px 11px;min-width:128px}.stat span,.metric span{display:block;color:var(--m);font-size:9px;text-transform:uppercase;font-weight:800}.stat b{font-size:19px}.dashboard{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{padding:14px;margin-bottom:10px;min-width:0}.card h2{margin:0 0 10px;font-size:18px}.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.metric{background:var(--p2);border-radius:8px;padding:9px;min-width:0}.metric b{font-size:16px}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:7px}.comparison .metric{display:grid;grid-template-columns:1fr auto auto;gap:8px}.comparison strong{color:var(--m);font-size:9px;text-transform:uppercase}.bars{display:grid;gap:5px}.bar{display:grid;grid-template-columns:28px 1fr 46px;gap:7px;align-items:center}.track{height:10px;background:#041020;border-radius:999px;overflow:hidden}.fill{height:100%;background:var(--b)}.filters{gap:7px;flex-wrap:wrap;margin-bottom:10px}.filters button{border:1px solid var(--l);background:#091a34;color:var(--m);border-radius:999px;padding:7px 12px;font-weight:900;cursor:pointer}.filters button.active{background:#1857a7;border-color:#55a2ff;color:#fff}.schedule{grid-column:1/-1}.tableWrap{overflow:auto;max-height:650px}table{width:100%;border-collapse:collapse}th{position:sticky;top:0;z-index:2;background:var(--p3);color:var(--m);text-align:left;text-transform:uppercase;font-size:9px;padding:8px;white-space:nowrap}td{padding:8px;border-top:1px solid #17345c;white-space:nowrap}.gameRow{cursor:pointer}.gameRow:hover{background:#0d2445}.gameRow.open{background:#102b51}.opp{display:flex;align-items:center;gap:6px;color:#fff;text-decoration:none;font-weight:850}.opp img,.tinyLogo{width:23px;height:23px;object-fit:contain}.good{color:var(--g)}.mid{color:var(--a)}.bad{color:var(--r)}.detail td{white-space:normal;background:#07172e;padding:12px}.detailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.detailBox{background:var(--p2);border:1px solid #17345c;border-radius:8px;padding:9px}.detailBox h3{margin:0 0 6px;font-size:12px}.detailBox ul{margin:0;padding-left:17px}.empty{padding:30px;color:var(--m)}.marketRows{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.outlook{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.sectionNote{font-size:10px;color:var(--m);margin-top:-6px;margin-bottom:9px}.dash{color:var(--m)}@media(max-width:1100px){.dashboard{grid-template-columns:1fr}.schedule{grid-column:auto}.detailGrid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.hero h1{font-size:30px}.comparison,.marketRows,.outlook,.detailGrid{grid-template-columns:1fr}.nav{overflow:auto}}
-</style><style>.scheduleTop{padding:10px 12px;margin-bottom:10px}.scheduleHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}.scheduleHeader h2{margin:0}.scheduleHeader .filters{margin:0}.scheduleHeader .filters button{padding:4px 9px;font-size:10px}.commandGrid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:9px}.ratingRail{border:1px solid #31567f;background:#08182f;border-radius:9px;padding:9px}.ratingRail h3{font-size:12px;margin:0 0 7px}.railTable th,.railTable td{position:static;padding:5px 4px;font-size:10px}.railTable th{background:transparent}.railMeta{display:grid;gap:5px;margin-top:8px}.railMeta div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #17345c;padding-top:5px}.compactSchedule{max-height:590px}.compactSchedule table{font-size:11px}.compactSchedule th,.compactSchedule td{padding:5px 6px;height:34px}.compactSchedule .opp img{width:17px;height:17px}.rankCell,.probCell,.spreadCell,.resultCell{font-weight:900;text-align:center}.rk1{background:#0b573b;color:#70f0b0}.rk2{background:#174c3c;color:#87e9b7}.rk3{background:#183354;color:#c1d6f4}.rk4{background:#5a4218;color:#ffd176}.rk5{background:#522936;color:#ff9ba6}.rk6{background:#421c2b;color:#ff7887}.rk0{background:#17243a;color:#7589a8}.wp5{background:#0b573b;color:#70f0b0}.wp4{background:#174c3c;color:#87e9b7}.wp3{background:#183354;color:#d5e3f7}.wp2{background:#5a4218;color:#ffd176}.wp1{background:#52212d;color:#ff8997}.sp5{background:#0b573b;color:#70f0b0}.sp4{background:#174c3c;color:#87e9b7}.sp3{background:#183354;color:#d5e3f7}.sp2{background:#5a4218;color:#ffd176}.sp1{background:#52212d;color:#ff8997}.resultWin{background:#0b573b;color:#70f0b0}.resultLoss{background:#52212d;color:#ff8997}.completed td.projection{color:#607594;background:#0a172c}.completed .opp{font-weight:950}.siteCell{width:25px;text-align:center;font-weight:900}.compactSchedule th:nth-child(4),.compactSchedule td:nth-child(4){min-width:140px}@media(max-width:900px){.commandGrid{grid-template-columns:1fr}.ratingRail{width:100%}.railMeta{grid-template-columns:repeat(3,1fr)}.compactSchedule{overflow-x:auto}.compactSchedule table{min-width:820px}}.comparisonTable table{font-size:12px}.comparisonTable th,.comparisonTable td{padding:7px 9px}.comparisonTable td:not(:first-child){text-align:right;font-weight:850}.deltaUp{color:var(--g);background:#0b3c2e}.deltaDown{color:var(--r);background:#3b1d2b}.deltaFlat{color:var(--m);background:#17243a}.coachMount{margin-bottom:10px}.coachMount>.card{margin:0}.byeRow td{background:#13223a;color:var(--a);font-weight:900}.byeRow td:last-child{text-align:center;letter-spacing:.08em}</style><style id="production-nav-css">
+</style><style>.scheduleTop{padding:10px 12px;margin-bottom:10px}.scheduleHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}.scheduleHeader h2{margin:0}.scheduleHeader .filters{margin:0}.scheduleHeader .filters button{padding:4px 9px;font-size:10px}.commandGrid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:9px}.ratingRail{border:1px solid #31567f;background:#08182f;border-radius:9px;padding:9px}.ratingRail h3{font-size:12px;margin:0 0 7px}.railTable th,.railTable td{position:static;padding:5px 4px;font-size:10px}.railTable th{background:transparent}.railMeta{display:grid;gap:5px;margin-top:8px}.railMeta div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #17345c;padding-top:5px}.compactSchedule{max-height:590px}.compactSchedule table{font-size:11px}.compactSchedule th,.compactSchedule td{padding:5px 6px;height:34px}.compactSchedule .opp img{width:17px;height:17px}.rankCell,.probCell,.spreadCell,.resultCell{font-weight:900;text-align:center}.rk1{background:#0b573b;color:#70f0b0}.rk2{background:#174c3c;color:#87e9b7}.rk3{background:#183354;color:#c1d6f4}.rk4{background:#5a4218;color:#ffd176}.rk5{background:#522936;color:#ff9ba6}.rk6{background:#421c2b;color:#ff7887}.rk0{background:#17243a;color:#7589a8}.wp5{background:#0b573b;color:#70f0b0}.wp4{background:#174c3c;color:#87e9b7}.wp3{background:#183354;color:#d5e3f7}.wp2{background:#5a4218;color:#ffd176}.wp1{background:#52212d;color:#ff8997}.sp5{background:#0b573b;color:#70f0b0}.sp4{background:#174c3c;color:#87e9b7}.sp3{background:#183354;color:#d5e3f7}.sp2{background:#5a4218;color:#ffd176}.sp1{background:#52212d;color:#ff8997}.resultWin{background:#0b573b;color:#70f0b0}.resultLoss{background:#52212d;color:#ff8997}.completed td.projection{color:#607594;background:#0a172c}.completed .opp{font-weight:950}.siteCell{width:25px;text-align:center;font-weight:900}.compactSchedule th:nth-child(4),.compactSchedule td:nth-child(4){min-width:140px}@media(max-width:900px){.commandGrid{grid-template-columns:1fr}.ratingRail{width:100%}.railMeta{grid-template-columns:repeat(3,1fr)}.compactSchedule{overflow-x:auto}.compactSchedule table{min-width:820px}}.comparisonTable table{font-size:12px}.comparisonTable th,.comparisonTable td{padding:7px 9px}.comparisonTable td:not(:first-child){text-align:right;font-weight:850}.deltaUp{color:var(--g);background:#0b3c2e}.deltaDown{color:var(--r);background:#3b1d2b}.deltaFlat{color:var(--m);background:#17243a}.coachMount{margin-bottom:10px}.coachMount>.card{margin:0}.byeRow td{background:#13223a;color:var(--a);font-weight:900}.byeRow td:last-child{text-align:center;letter-spacing:.08em}</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style>.v1TeamLink{margin:12px 0}.v1TeamLink a{display:inline-block;border:1px solid var(--l);border-radius:999px;padding:7px 11px;color:#fff;text-decoration:none;font-weight:900}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div></div><div class="v1TeamLink"><a id="v1TeamReport" href="v1.html">Open complete V1 team report</a></div><section id="app"><div class="empty">Loading team workspace…</div></section></main><script>
 let GC=new Map,FILTER='all';const e=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),has=x=>x!==null&&x!==undefined&&x!==''&&Number.isFinite(Number(x)),n=(x,d=1)=>has(x)?Number(x).toFixed(d):'—',pct=x=>has(x)?`${(100*Number(x)).toFixed(1)}%`:'—',ln=x=>has(x)?(Number(x)>0?'+':'')+Number(x).toFixed(1):'—',od=x=>has(x)?(Number(x)>0?'+':'')+Number(x):'—';function tone(r){return r==null?'':r<=35?'good':r<=75?'mid':'bad'}function edgeTone(v){return !Number.isFinite(v)?'':v>=3?'good':v>=1?'mid':v<=-3?'bad':''}function slug(x){return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}function teamLink(t,s){return`<a class="opp" href="team.html?team=${encodeURIComponent(s||slug(t))}"><img src="logos/${e(s||slug(t))}.png" onerror="this.style.display='none'">${e(t)}</a>`}function value(x,suffix=''){return has(x)?`${n(x)}${suffix}`:'<span class="dash">—</span>'}function rankValue(x){return x==null?'<span class="dash">—</span>':`<span class="${tone(x)}">#${x}</span>`}
@@ -19,4 +108,103 @@ function sourceMetric(label,obj){return`<div class="metric"><span>${e(label)}</s
 function winBars(dist){if(!Array.isArray(dist)||!dist.length)return'<div class="muted">Current distribution is not available.</div>';const max=Math.max(...dist.map(x=>Number(x.probability??x.pct??x.value??0)),.01);return`<div class="bars">${dist.map(x=>{const p=Number(x.probability??x.pct??x.value??0),wins=x.wins??x.win_total??x.value_label??'—';return`<div class="bar"><b>${e(wins)}</b><div class="track"><div class="fill" style="width:${Math.max(0,100*p/max)}%"></div></div><span>${(100*p).toFixed(1)}%</span></div>`}).join('')}</div>`}
 async function init(){const [m,f,c,gc,r,pre]=await Promise.all([fetch('data/site/matchups_view.json').then(x=>x.json()),fetch('data/site/futures_view.json').then(x=>x.json()),fetch('data/site/conference_workspace.json').then(x=>x.json()),fetch('data/site/game_control_team_games_2026.json').then(x=>x.json()).catch(()=>({rows:[]})),fetch('data/site/ratings_view.json').then(x=>x.json()),fetch('data/snapshots/preseason/preseason_db.json').then(x=>x.json()).catch(()=>({teams:[]}))]);GC=new Map((gc.rows||[]).map(x=>[x.game_id+'|'+x.team,x]));const q=decodeURIComponent(new URLSearchParams(location.search).get('team')||'ohio-state').toLowerCase(),games=m.games.filter(g=>[g.teams.away,g.teams.home].some(t=>t.team.toLowerCase()===q||t.logo_slug===q||slug(t.team)===q));if(!games.length)throw Error('Team not found');const meta=[games[0].teams.away,games[0].teams.home].find(t=>t.team.toLowerCase()===q||t.logo_slug===q||slug(t.team)===q),team=meta.team,fu=f.rows.find(x=>x.team===team)||{},confObj=c.conferences.find(x=>x.conference===meta.conference)||{},cw=(confObj.teams||[]).find(x=>x.team===team)||{},rt=r.teams.find(x=>x.team===team)||{},pt=(pre.teams||[]).find(x=>x.team===team)||{},rp=meta.returning_production||{},sorted=games.sort((a,b)=>String(a.game.date).localeCompare(String(b.game.date)));document.title=`${team} — NCAAF`;app.innerHTML=`<section class="hero"><img src="logos/${e(meta.logo_slug)}.png"><div><h1>${e(team)}</h1><p>${e(meta.conference||'')} · V2 team command center</p><div class="stats"><div class="stat"><span>Overall rank</span><b class="${rankBand(meta.overall_rank)}">${meta.overall_rank==null?'—':'#'+meta.overall_rank}</b></div><div class="stat"><span>2026 record</span><b>${meta.record?`${meta.record.wins}-${meta.record.losses}`:'0-0'}</b></div><div class="stat"><span>Projected record</span><b>${n(cw.projected_wins)}-${n(cw.projected_losses)}</b></div><div class="stat"><span>Conference finish</span><b>#${cw.projected_finish??'—'}</b></div><div class="stat"><span>Conference title</span><b>${pct(cw.title_pct??fu.title_model_prob)}</b></div></div></div></section><div class="dashboard grid"><div><section class="card"><h2>Preseason vs Current</h2><div class="comparison"><div class="metric"><strong>Metric</strong><strong>Preseason</strong><strong>Current</strong></div><div class="metric"><span>Power rating</span><b>${value(rt.preseason_rating)}</b><b>${value(rt.rating)}</b></div><div class="metric"><span>National rank</span><b>${rt.preseason_rank!=null?'#'+rt.preseason_rank:'—'}</b><b>${meta.overall_rank!=null?'#'+meta.overall_rank:'—'}</b></div><div class="metric"><span>Projected wins</span><b>${value(pt.avg_total_wins??pt.projected_wins)}</b><b>${value(cw.projected_wins??fu.projected_wins)}</b></div><div class="metric"><span>Projected conf wins</span><b>${value(pt.avg_conference_wins)}</b><b>${value(cw.projected_conf_wins)}</b></div><div class="metric"><span>Conference title</span><b>${pt.conference_title_pct!=null?pct(Number(pt.conference_title_pct)>1?Number(pt.conference_title_pct)/100:pt.conference_title_pct):'—'}</b><b>${pct(cw.title_pct??fu.title_model_prob)}</b></div></div></section><section class="card"><h2>Market vs Projection</h2><div class="marketRows"><div class="metric"><span>Win total</span><b>${value(fu.projected_wins)} vs ${value(fu.market_win_total)}</b><small class="${edgeTone(Math.abs(Number(fu.win_edge)))}">${fu.win_edge==null?'—':`${e(fu.win_direction)} ${n(Math.abs(fu.win_edge))} · ${od(fu.win_price)}`}</small></div><div class="metric"><span>Conference title</span><b>${pct(fu.title_model_prob)} vs ${pct(fu.title_market_prob)}</b><small class="${edgeTone(100*Number(fu.title_edge))}">${fu.title_edge==null?'—':`${n(100*fu.title_edge)} pts · ${od(fu.title_price)}`}</small></div><div class="metric"><span>Make playoff</span><b>${pct(fu.playoff_model_prob)} vs ${pct(fu.playoff_market_prob)}</b><small>${fu.playoff_edge==null?'No market':'Edge '+n(100*fu.playoff_edge)+' pts'}</small></div><div class="metric"><span>National title</span><b>${pct(fu.national_title_model_prob)} vs ${pct(fu.national_title_market_prob)}</b><small>${fu.national_title_edge==null?'—':`${n(100*fu.national_title_edge)} pts · ${od(fu.national_title_price)}`}</small></div></div></section></div><div><section class="card"><h2>Ratings</h2><div class="mini"><div class="metric"><span>Composite</span><b>${value(rt.rating)}</b><small class="${rankBand(meta.overall_rank)}">${meta.overall_rank==null?'—':'#'+meta.overall_rank}</small></div>${sourceMetric('SP+',rt.sources?.spplus)}${sourceMetric('FPI',rt.sources?.fpi)}${sourceMetric('TeamRankings',rt.sources?.teamrankings)}${sourceMetric('Brad Powers',rt.sources?.bradpowers)}<div class="metric"><span>Variance</span><b>${value(rt.variance)}</b></div></div></section><section class="card"><h2>Win Distribution</h2><p class="sectionNote">Frozen preseason simulation; current in-season distribution is not exposed by V2 JSON.</p>${winBars(pt.win_distribution)}</section></div><section class="card schedule"><h2>KFord-inspired Schedule Command Center</h2><p class="sectionNote">Offense edge = opponent defense rank minus ${e(team)} offense rank. Defense edge = opponent offense rank minus ${e(team)} defense rank. Positive values favor ${e(team)}.</p><div class="filters" id="filters"><button class="active" data-filter="all">All Games</button><button data-filter="fbs">FBS vs FBS</button><button data-filter="conference">Conference Only</button></div><div class="tableWrap"><table><thead><tr><th>Wk</th><th>Date</th><th>Opponent</th><th>Opp rank</th><th>Off edge</th><th>Def edge</th><th>Win %</th><th>Model spread</th><th>Market spread</th><th>Betting edge</th><th>Proj total</th><th>Market total</th><th>WS</th><th>Result</th></tr></thead><tbody id="scheduleRows"></tbody></table></div></section><section class="card schedule"><h2>Conference Outlook</h2><div class="outlook"><div class="metric"><span>Projected finish</span><b>#${cw.projected_finish??'—'}</b></div><div class="metric"><span>Projected conference record</span><b>${n(cw.projected_conf_wins)}-${n(cw.projected_conf_losses)}</b></div><div class="metric"><span>Make title game</span><b>${pct(cw.make_title_game_pct)}</b></div><div class="metric"><span>Win conference</span><b>${pct(cw.title_pct)}</b></div><div class="metric"><span>Conference SOS</span><b>${value(cw.conf_sos)} · #${cw.conf_sos_rank??'—'}</b></div><div class="metric"><span>Remaining conf SOS</span><b>${value(cw.remaining_sos)} · #${cw.remaining_sos_rank??'—'}</b></div><div class="metric"><span>Conference strength</span><b>${value(confObj.average_team_rating)} · #${confObj.conference_rank??'—'}</b></div><div class="metric"><span>Open wagers</span><b>${(cw.open_wagers||[]).length}</b></div></div></section></div>`;configureSchedule(team,meta,rt,cw,pt,fu);function drawSchedule(){const all=sorted.map(g=>teamGame(g,team)),list=scheduleView(all,FILTER);scheduleRows.innerHTML=list.map(x=>x.bye?byeRow(x.week):row(x,team)).join('')||'<tr><td colspan="11" class="empty">No games match this filter.</td></tr>';scheduleRows.querySelectorAll('.gameRow').forEach(tr=>tr.onclick=ev=>{if(ev.target.closest('a'))return;const d=scheduleRows.querySelector(`[data-detail="${CSS.escape(tr.dataset.game)}"]`);d.hidden=!d.hidden;tr.classList.toggle('open',!d.hidden)})}filters.querySelectorAll('button').forEach(b=>b.onclick=()=>{FILTER=b.dataset.filter;filters.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));drawSchedule()});drawSchedule()}
 init().catch(err=>app.innerHTML=`<div class="empty">Unable to load team: ${e(err.message)}</div>`);
-</script><script src="team_coach_card.js?v=20260719b"></script><script src="matchup_workspace.js?v=20260720f"></script><script>const v1q=new URLSearchParams(location.search).get("team");document.getElementById("v1TeamReport").href="v1.html#team/"+encodeURIComponent(v1q||"")</script></body></html>
+</script><script src="team_coach_card.js?v=20260719b"></script><script src="matchup_workspace.js?v=20260720f"></script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+<script>const v1q=new URLSearchParams(location.search).get("team");document.getElementById("v1TeamReport").href="v1.html#team/"+encodeURIComponent(v1q||"")</script></body></html>

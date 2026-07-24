@@ -1,6 +1,95 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Daily Briefing</title><style>
 :root{--bg:#061126;--panel:#0b1b36;--line:#244873;--text:#f4f7ff;--muted:#91a6c6;--blue:#459cff;--green:#43df96;--amber:#ffc45b;--red:#ff7280;--purple:#b69cff}*{box-sizing:border-box}body{margin:0;background:#061126;color:var(--text);font:13px/1.4 Inter,system-ui,sans-serif}.shell{max-width:1760px;margin:auto;padding:16px}.top{display:flex;align-items:center;gap:16px;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{display:flex;gap:5px}.nav a{color:var(--muted);padding:8px 11px;text-decoration:none;font-weight:850}.nav .active{background:#173b72;color:white;border-radius:8px}.stamp{margin-left:auto;color:#baf8d6;border:1px solid #176747;border-radius:999px;padding:6px 10px;font-size:10px}.hero{display:flex;align-items:end;justify-content:space-between;margin:18px 0 12px}.hero h1{font-size:35px;margin:0}.hero p{color:var(--muted);margin:2px 0}.hero select{background:#091a34;border:1px solid var(--line);color:white;border-radius:7px;padding:7px}.summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px}.tile,.card{border:1px solid var(--line);background:var(--panel);border-radius:11px}.tile{padding:9px 11px}.tile span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.tile b{font-size:20px}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}.stack{display:grid;gap:10px;align-content:start}.head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}.head h2{font-size:14px;margin:0}.head a{color:#9ec9ff;text-decoration:none;font-weight:850;font-size:10px}.item{padding:9px 12px;border-top:1px solid #17345c}.item:first-child{border-top:0}.itemTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.match{display:flex;align-items:center;gap:6px;font-weight:900}.match img{width:23px;height:23px;object-fit:contain}.sub{color:var(--muted);font-size:9px}.edge,.good{color:var(--green);font-weight:950}.bad{color:var(--red);font-weight:950}.warn{color:var(--amber);font-weight:950}.button{border:1px solid #3c70a8;background:#15365f;color:white;border-radius:7px;padding:5px 8px;text-decoration:none;font-weight:850;font-size:10px}.opportunity{display:grid;grid-template-columns:minmax(220px,1.25fr) .75fr .55fr auto;gap:8px;align-items:center}.wager{display:grid;grid-template-columns:1.15fr .85fr .65fr auto;gap:8px;align-items:center}.ticket{background:#07162e;border-radius:7px;padding:6px 8px;margin-top:5px}.change{display:grid;grid-template-columns:1fr auto;gap:7px}.sectionNote{padding:8px 12px;color:var(--muted);font-size:10px;background:#07162e}.empty{padding:24px;text-align:center;color:var(--muted)}@media(max-width:1000px){.summary{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.stamp{display:none}.opportunity,.wager{grid-template-columns:1fr auto}}
-</style><style id="production-nav-css">
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="dashboard-week-css">.hero select{display:none}.dashboardWeekChips{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.dashboardWeekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:6px 10px;font-weight:900}.dashboardWeekChips button.active{background:#1857a7;color:#fff}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html" class="active">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div><div class="stamp" id="stamp">Production model</div></div><section class="hero"><div><h1>Daily Briefing</h1><p>What changed, what requires action, and why it matters today.</p></div><select id="week"></select></section><div class="dashboardWeekChips" id="dashboardWeekChips"></div><section class="summary"><div class="tile"><span>Market games</span><b id="marketGames">—</b></div><div class="tile"><span>Actionable gaps ≥2</span><b id="gapGames">—</b></div><div class="tile"><span>Open wagers</span><b id="openWagers">—</b></div><div class="tile"><span>Exposure</span><b id="exposure">—</b></div><div class="tile"><span>Current EV</span><b id="currentEv">—</b></div><div class="tile"><span>Negative CLV bets</span><b id="negativeClv">—</b></div></section><div class="grid"><div class="stack"><section class="card"><div class="head"><h2>Act — best current game opportunities</h2><a href="openers.html">Open Openers</a></div><div class="sectionNote">Model-to-market differences only. Context edges remain research signals until validated.</div><div id="opportunities"></div></section><section class="card"><div class="head"><h2>Monitor — games with live wagers</h2><a href="betting.html">Open Betting</a></div><div id="live"></div></section></div><div class="stack"><section class="card"><div class="head"><h2>Changed — recent market movement</h2><a href="matchups.html">Open Matchups</a></div><div id="changes"></div></section><section class="card"><div class="head"><h2>Research — futures and win totals</h2><a>Open Futures</a></div><div id="futures"></div></section><section class="card"><div class="head"><h2>Process health</h2><a href="betting.html">Full scorecard</a></div><div id="process"></div></section></div></div></main><script>
 let G,B,H,F;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const n=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',money=x=>Number.isFinite(Number(x))?'$'+Number(x).toFixed(2):'—',pct=x=>Number.isFinite(Number(x))?n(Number(x)*100,1)+'%':'—',line=x=>Number(x)>0?'+'+n(x):n(x);function logo(t){return t?.logo_slug?`<img src="logos/${esc(t.logo_slug)}.png" alt="">`:''}function match(r){return`<span class="match"><a href="team.html?team=${esc(r.teams.away.logo_slug)}">${logo(r.teams.away)}${esc(r.game.away_team)}</a> <span class="sub">at</span> <a href="team.html?team=${esc(r.teams.home.logo_slug)}">${logo(r.teams.home)}${esc(r.game.home_team)}</a></span>`}function games(){return G.games.filter(r=>week.value==='all'||String(r.game.week)===week.value)}
@@ -9,4 +98,103 @@ function movements(){return Object.entries(H).map(([id,a])=>{if(a.length<2)retur
 function moveText(m){const a=[],sp=x=>`${line(x.market_spread_home)} ${x.market_spread_price>0?'+':''}${n(x.market_spread_price,0)} ${esc(x.market_spread_book||'')}`,tot=x=>`${n(x.market_total)} (O ${x.market_total_over_price>0?'+':''}${n(x.market_total_over_price,0)} / U ${x.market_total_under_price>0?'+':''}${n(x.market_total_under_price,0)}) ${esc(x.market_total_book||'')}`;if(m.x.market_spread_home!=null&&m.y.market_spread_home!=null&&(m.sd||m.x.market_spread_price!==m.y.market_spread_price))a.push(`Spread: ${sp(m.x)} → ${sp(m.y)}`);if(m.x.market_total!=null&&m.y.market_total!=null&&(m.td||m.x.market_total_over_price!==m.y.market_total_over_price||m.x.market_total_under_price!==m.y.market_total_under_price))a.push(`Total: ${tot(m.x)} → ${tot(m.y)}`);return a.join('<br>')+`<br>${esc(m.x.snapshot_date)} → ${esc(m.y.snapshot_date)}`}
 function render(){const gs=games(),all=gs.flatMap(r=>offers(r).map(o=>({r,o}))).sort((a,b)=>b.o.edge-a.o.edge),overall=B.strategy_metrics.Overall;marketGames.textContent=gs.filter(r=>offers(r).length).length;gapGames.textContent=new Set(all.filter(x=>x.o.edge>=2).map(x=>x.r.game.game_id)).size;openWagers.textContent=B.summary.owned_open;exposure.textContent=money(B.summary.open_exposure);currentEv.textContent=money(overall.current_ev_dollars);currentEv.className=overall.current_ev_dollars<0?'bad':'good';negativeClv.textContent=B.records.filter(r=>r.is_open&&Number(r.clv_pct_current)<0).length;opportunities.innerHTML=all.slice(0,8).map(({r,o})=>`<div class="item opportunity"><div>${match(r)}<div class="sub">${o.type} · Week ${r.game.week}</div></div><b>${esc(o.pick)} ${line(o.value)}</b><span class="edge">${n(o.edge)} pts</span><a class="button" href="openers.html?game_id=${r.game.game_id}">Review</a></div>`).join('')||'<div class="empty">No market opportunities in this view.</div>';const lg=gs.filter(r=>r.activity.wagers.length);live.innerHTML=lg.map(r=>`<div class="item wager"><div>${match(r)}${r.activity.wagers.map(w=>`<div class="ticket"><b>${esc(w.selection)} ${line(w.line)} ${w.price>0?'+':''}${n(w.price,0)}</b><div class="sub">${money(w.stake)} · current ${w.current_market_line==null?'unavailable':line(w.current_market_line)+' '+n(w.current_market_price,0)} · ${esc(w.current_market_book||'')}</div></div>`).join('')}</div><div>${r.activity.wagers.map(w=>`<div class="${Number(w.clv_pct_current)<0?'bad':'good'}">${pct(w.clv_pct_current)} CLV</div><div class="sub">${pct(w.ev_current_pct)} EV</div>`).join('')}</div><b>${money(r.activity.wagers.reduce((s,w)=>s+(w.stake||0),0))}</b><a class="button" href="matchups.html?game_id=${r.game.game_id}">Game</a></div>`).join('')||'<div class="empty">No linked live wagers for this week.</div>';changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7).map(m=>`<div class="item change"><div><b>${esc(m.y.away_team)} at ${esc(m.y.home_team)}</b><div class="sub">${moveText(m)}</div></div><span class="${m.mag>=2?'bad':'warn'}">${n(m.mag)} pts</span></div>`).join('')||'<div class="empty">No changes in available market snapshots.</div>';futures.innerHTML=(F.items||[]).slice(0,5).map(x=>`<div class="item"><div class="itemTop"><b>${esc(x.label)}</b><span class="edge">${esc(x.edge)}</span></div><div class="sub">${esc(x.summary)} · ${esc(x.action)}</div></div>`).join('');process.innerHTML=['Overall','Powers','Model'].map(k=>{const m=B.strategy_metrics[k];return`<div class="item"><div class="itemTop"><b>${k}</b><span class="${m.avg_clv_pct<0?'bad':'good'}">${n(m.positive_clv_pct*100,0)}% beat market</span></div><div class="sub">Avg CLV ${n(m.avg_clv_pct*100,2)}% · current EV ${money(m.current_ev_dollars)} · ${m.wins}-${m.losses}-${m.pushes}</div></div>`}).join('')}
 async function init(){[G,B,H,F]=await Promise.all([fetch('data/site/matchups_view.json').then(r=>r.json()),fetch('data/site/betting_activity_view.json').then(r=>r.json()),fetch('data/site/matchup_line_history.json').then(r=>r.json()),fetch('data/agents/home_top_bets.json').then(r=>r.json())]);const ws=[...new Set(G.games.map(r=>r.game.week))].sort((a,b)=>a-b);week.innerHTML='<option value="all">All weeks</option>'+ws.map(x=>`<option value="${x}">Week ${x}</option>`).join('');stamp.textContent=G.production_model.sources.map(s=>`${s.short_label} ${s.weight*100}%`).join(' · ')+` · ${G.production_model.updated}`;render()}week.oninput=render;init().catch(e=>document.body.innerHTML+=`<div class="empty">Unable to load dashboard: ${esc(e.message)}</div>`);
-</script><script>document.head.insertAdjacentHTML('beforeend',`<style>.ticket b,.ticket .sub{display:grid;grid-template-columns:120px 1fr;align-items:baseline}.ticket b:before,.ticket .sub:before{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}.ticket b:before{content:'Your bet'}.ticket .sub:before{content:'Stake / current market'}</style>`);</script><script src="dashboard_playoff_edges.js"></script><script src="matchup_workspace.js?v=20260723-staffcachefix1"></script><script id="dashboard-week-js">const dashboardWeek=document.getElementById('week'),dashboardWeekChips=document.getElementById('dashboardWeekChips');function syncDashboardWeeks(){dashboardWeekChips.innerHTML=[...dashboardWeek.options].map(o=>`<button class="${o.value===dashboardWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');dashboardWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{dashboardWeek.value=b.dataset.week;dashboardWeek.dispatchEvent(new Event('input',{bubbles:true}));syncDashboardWeeks()})}new MutationObserver(syncDashboardWeeks).observe(dashboardWeek,{childList:true});dashboardWeek.addEventListener('input',syncDashboardWeeks);</script></body></html>
+</script><script>document.head.insertAdjacentHTML('beforeend',`<style>.ticket b,.ticket .sub{display:grid;grid-template-columns:120px 1fr;align-items:baseline}.ticket b:before,.ticket .sub:before{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}.ticket b:before{content:'Your bet'}.ticket .sub:before{content:'Stake / current market'}</style>`);</script><script src="dashboard_playoff_edges.js"></script><script src="matchup_workspace.js?v=20260723-contextalign2"></script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+<script id="dashboard-week-js">const dashboardWeek=document.getElementById('week'),dashboardWeekChips=document.getElementById('dashboardWeekChips');function syncDashboardWeeks(){dashboardWeekChips.innerHTML=[...dashboardWeek.options].map(o=>`<button class="${o.value===dashboardWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');dashboardWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{dashboardWeek.value=b.dataset.week;dashboardWeek.dispatchEvent(new Event('input',{bubbles:true}));syncDashboardWeeks()})}new MutationObserver(syncDashboardWeeks).observe(dashboardWeek,{childList:true});dashboardWeek.addEventListener('input',syncDashboardWeeks);</script></body></html>
