@@ -89,11 +89,426 @@ img[src$="west-virginia.webp"] {
 </style>
 <!-- V2_DARK_LOGO_BADGES_CSS_END -->
 
-<style id="production-nav-css">
-.top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
-</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html" class="active">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div></div><section class="hero"><div><h1>Schedule & Results</h1><p>Scores, ATS and total grading, PGWE availability, and CFBD/PBP ingestion status.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters"><input id="search" placeholder="Find a team"></div><div class="card"><div class="wrap"><table><thead><tr><th>Date</th><th>Matchup</th><th>Score</th><th>Spread / ATS</th><th>Total / O-U</th><th>PGWE</th><th>CFBD</th><th>PBP</th><th>Ready</th><th></th></tr></thead><tbody id="rows"><tr><td class="empty">Loading schedule…</td></tr></tbody></table></div></div></main><script>
-let D,GC=new Map,week=0;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',sgn=x=>Number(x)>0?'+':'';function logo(t){return`<img src="logos/${esc(t.logo_slug)}.png" onerror="this.style.display='none'">`}function matchup(r){return`<span class="team">${logo(r.teams.away)}${esc(r.game.away_team)} <span class="muted">at</span> ${logo(r.teams.home)}${esc(r.game.home_team)}</span>`}function grading(r){const a=Number(r.game.away_score),h=Number(r.game.home_score),line=r.market.spread.home_line==null?NaN:Number(r.market.spread.home_line),total=r.market.total.line==null?NaN:Number(r.market.total.line);if(!r.game.completed||!Number.isFinite(a)||!Number.isFinite(h))return{score:'—',ats:'Pending',ou:'Pending'};let ats='No closing line',ou='No closing total';if(Number.isFinite(line)){const m=h-a+line;ats=Math.abs(m)<.001?'Push':`${m>0?r.game.home_team:r.game.away_team} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}if(Number.isFinite(total)){const m=a+h-total;ou=Math.abs(m)<.001?'Push':`${m>0?'Over':'Under'} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}return{score:`${r.game.away_team} ${a}–${h} ${r.game.home_team}`,ats,ou}}function filtered(){return D.games.filter(r=>r.game.week===week&&(`${r.game.away_team} ${r.game.home_team}`).toLowerCase().includes(search.value.toLowerCase()))}function draw(){const all=D.games.filter(r=>r.game.week===week),a=filtered();weeks.querySelectorAll('button').forEach(b=>b.classList.toggle('active',Number(b.dataset.week)===week));const status=r=>{const ids=[`${r.game.game_id}|${r.game.away_team}`,`${r.game.game_id}|${r.game.home_team}`],p=ids.every(x=>GC.has(x)),c=!!r.game.completed;return{p,c,ready:p&&c}};games.textContent=all.length;finals.textContent=all.filter(r=>r.game.completed).length;cfbd.textContent=`${all.filter(r=>r.game.completed).length}/${all.length}`;pbp.textContent=`${all.filter(r=>status(r).p).length}/${all.length}`;ready.textContent=`${all.filter(r=>status(r).ready).length}/${all.length}`;rows.innerHTML=a.map(r=>{const g=grading(r),s=status(r),spread=r.market.spread.home_line,total=r.market.total.line;return`<tr><td>${esc(r.game.date)}<div class="muted">W${r.game.week}</div></td><td>${matchup(r)}</td><td>${esc(g.score)}</td><td>${spread==null?'—':`${esc(r.game.home_team)} ${sgn(spread)}${num(spread)} · `}<span class="${g.ats==='Pending'?'muted':g.ats==='Push'?'warn':'good'}">${esc(g.ats)}</span></td><td>${total==null?'—':`${num(total)} · `}<span class="${g.ou==='Pending'?'muted':g.ou==='Push'?'warn':'good'}">${esc(g.ou)}</span></td><td class="muted">${s.p?'PBP ready; PGWE pending':'Awaiting PBP'}</td><td><span class="pill ${s.c?'good':'muted'}">${s.c?'Complete':esc(r.game.status||'Scheduled')}</span></td><td><span class="pill ${s.p?'good':'muted'}">${s.p?'Processed':'Pending'}</span></td><td><span class="pill ${s.ready?'good':'warn'}">${s.ready?'Ready':'Incomplete'}</span></td><td><a class="button" href="matchups.html?game_id=${esc(r.game.game_id)}">Matchup</a></td></tr>`}).join('')||'<tr><td class="empty" colspan="10">No matching games.</td></tr>'}async function init(){[D,GC]=await Promise.all([fetch('data/site/matchups_view.json').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map)]);const ws=[...new Set(D.games.map(r=>r.game.week))].sort((a,b)=>a-b);week=ws[0]||0;weeks.innerHTML=ws.map(w=>`<button data-week="${w}">Week ${w}</button>`).join('');weeks.querySelectorAll('button').forEach(b=>b.onclick=()=>{week=Number(b.dataset.week);draw()});draw()}search.oninput=draw;init().catch(e=>rows.innerHTML=`<tr><td class="empty">${esc(e.message)}</td></tr>`);
-</script><script src="matchup_workspace.js?v=20260723-contextalign2"></script>
+
+<style id="SCHEDULE_NATIVE_HEADER_LAYOUT_V1">
+.scheduleNativeTitleRow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.scheduleNativeTitleRow h1{margin:0}
+.scheduleNativeTitleRow .shadowRulesWrap{margin:0}
+.scheduleNativeTitleRow .shadowRulesPanel{
+  position:absolute;
+  z-index:50;
+  left:20px;
+  right:20px;
+  margin-top:10px
+}
+@media(max-width:800px){
+  .scheduleNativeTitleRow{align-items:flex-start;flex-direction:column}
+  .scheduleNativeTitleRow .shadowRulesPanel{position:static}
+}
+</style>
+
+
+<style id="SCHEDULE_NATIVE_RENDERER_V3_STYLE">
+.scheduleNativeRow{cursor:pointer}
+.scheduleNativeRow:hover{background:rgba(59,130,246,.07)}
+.scheduleNativeDetail td{padding:0!important;background:rgba(8,21,43,.92)}
+.scheduleNativeDetailGrid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px 18px;padding:14px 18px}
+.scheduleNativeDetailGrid span{display:block;color:#91a7c7;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.scheduleNativeDetailGrid b{display:block;margin-top:3px}
+@media(max-width:1050px){.scheduleNativeDetailGrid{grid-template-columns:repeat(2,minmax(150px,1fr))}}
+</style>
+
+
+<style id="SCHEDULE_IMPACTS_NEXTWEEK_V12_STYLE">
+.scheduleTip{cursor:help;border-bottom:1px dotted rgba(255,255,255,.35)}
+.scheduleHeaderTipV12{
+  position:fixed;z-index:9999;display:none;padding:10px 12px;border-radius:9px;
+  background:#071426;border:1px solid #2e6595;color:#eaf3ff;
+  font-size:12px;line-height:1.4;text-transform:none;letter-spacing:0;
+  white-space:normal;box-shadow:0 10px 30px rgba(0,0,0,.4);pointer-events:none
+}
+.scheduleHeaderTipV12.show{display:block}
+.scheduleImpactPairV11,.scheduleNextLinksV11{display:grid;gap:6px;min-width:92px}
+.scheduleImpactPairV11>div,.scheduleNextLinksV11>a{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.scheduleNextLinksV11 a{color:inherit;text-decoration:none;padding:3px 5px;border-radius:7px}
+.scheduleNextLinksV11 a:hover{background:rgba(59,130,246,.12)}
+.scheduleMiniTeamV11{display:inline-flex;align-items:center;width:24px;height:24px}
+.scheduleMiniLogoV12{display:none;width:24px;height:24px;object-fit:contain;flex:0 0 auto}
+.scheduleMiniFallbackV11{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#17345b;font-size:8px;font-weight:900}
+</style>
+
+<style id="schedule-sort-css">.scheduleSortHeader,.scheduleMiniSort{appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:900;cursor:pointer;padding:0}.scheduleSortHeader{text-transform:uppercase;letter-spacing:.04em}.scheduleMiniSort{font-size:9px;color:#b8c8df;margin-left:6px}.scheduleSortHeader:hover,.scheduleMiniSort:hover{color:#fff;text-decoration:underline}.scheduleSortHeader.active,.scheduleMiniSort.active{color:#7fc1ff}</style><style id="schedule-date-time-spacing-v10">.scheduleDateTimeCell{display:flex;align-items:baseline;gap:8px;white-space:nowrap}.scheduleDateTimeCell .sub{display:inline-block;margin:0}</style><style id="schedule-fbs-filter-css-v11">.scheduleScopeToggle{display:flex;gap:8px;margin-top:10px}.scheduleScopeToggle button{border:1px solid #315f91;background:#0d203c;color:#aebfd6;border-radius:999px;padding:7px 13px;font-weight:900;cursor:pointer}.scheduleScopeToggle button.active{background:#1976d2;color:#fff}</style></head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a href="dashboard.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a class="active" href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a></div></div><section class="hero"><div><div class="scheduleNativeTitleRow"><h1>Schedule & Results</h1><!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
+.shadowRulesWrap{margin:12px 0 16px}
+.shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13px;font-weight:900;cursor:pointer}
+.shadowRulesPanel{display:none;margin-top:10px;border:1px solid #2d6c55;background:#08283a;border-radius:12px;padding:14px;color:#eaf3ff}
+.shadowRulesPanel.open{display:block}
+.shadowRulesGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.shadowRuleCard{background:#0b1d38;border:1px solid #244c73;border-radius:10px;padding:12px}
+.shadowRuleCard h3{margin:0 0 8px;font-size:15px}
+.shadowRuleCard p{margin:5px 0;color:#a9bad4;line-height:1.4}
+.shadowRuleCard ul{margin:7px 0 0 18px;padding:0;color:#d7e3f4}
+.shadowMetricGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}
+.shadowMetric{background:#102746;border-radius:8px;padding:8px}
+.shadowMetric span{display:block;color:#8fa5c6;font-size:11px;text-transform:uppercase}
+.shadowMetric b{font-size:15px}
+.shadowFormula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#06182e;border-radius:8px;padding:8px;margin-top:8px;color:#cce8ff}
+.shadowTracking{margin-top:12px;border-top:1px solid #28526f;padding-top:11px}
+.shadowTracking table{width:100%;border-collapse:collapse}
+.shadowTracking th,.shadowTracking td{text-align:left;padding:6px;border-bottom:1px solid #1c3b5b;font-size:12px}
+.shadowTargetNote{margin-top:10px;padding:8px 10px;border-left:3px solid #68c69c;background:#0b2238;color:#dcecff;border-radius:6px}
+.shadowStatusLine{margin-top:10px;color:#8fe0b8;font-weight:800}
+@media(max-width:900px){.shadowRulesGrid{grid-template-columns:1fr}.shadowMetricGrid{grid-template-columns:1fr}}
+</style>
+
+
+
+<div class="shadowRulesWrap">
+  <button id="shadowRulesButton" class="shadowRulesButton" type="button">Saturday Rules & Validation</button>
+  <div id="shadowRulesPanel" class="shadowRulesPanel" aria-live="polite">
+    <div class="shadowRulesGrid">
+      <section class="shadowRuleCard">
+        <h3>Spread rating update</h3>
+        <p>Runs as soon as a game is final and the closing spread is available. It predicts the team-level residual in the next game's closing spread after removing home-field advantage and the market's rolling six-week team ratings.</p>
+        <ul>
+          <li>Final scoring margin</li>
+          <li>Closing spread and ATS margin</li>
+          <li>Closing spread magnitude</li>
+          <li>Close-game indicator</li>
+          <li>Play-by-play excluded after failing the 2025 incremental holdout</li>
+        </ul>
+        <p class="shadowTargetNote"><b>Verified target:</b> next-game closing-spread market innovation after removing 2.5 points of home field and both teams&#39; rolling six-week market ratings.</p>
+        <div class="shadowFormula">Target: next-game closing-spread market innovation, not the completed game's ATS result. Shadow rating Δ remains separate from the official rating.</div>
+        <div id="spreadHoldoutMetrics" class="shadowMetricGrid"></div>
+      </section>
+      <section class="shadowRuleCard">
+        <h3>Total update</h3>
+        <p>Runs after complete PBP is available and garbage-time filtering succeeds. It predicts the next game's closing-total innovation versus the rolling market-implied offense and defense baseline.</p>
+        <ul>
+          <li>Pregame total and final-score surprise</li>
+          <li>Garbage-time-filtered PBP from both teams</li>
+          <li>Offensive and defensive performance signals</li>
+          <li>Reprojects the teams’ next-game total</li>
+        </ul>
+        <p class="shadowTargetNote"><b>Verified target:</b> next-game closing-total innovation versus the rolling market-implied offense/defense baseline.</p>
+        <div class="shadowFormula">Target: next-game closing-total market innovation. Inputs include score surprise plus validated PBP features; official projections remain unchanged.</div>
+        <div id="totalHoldoutMetrics" class="shadowMetricGrid"></div>
+      </section>
+    </div>
+    <section class="shadowTracking">
+      <h3>2026 tracking and recalibration</h3>
+      <p>The Saturday estimate will be stored beside the eventual next-game closing spread/total and Sunday public ratings. We will track MAE, direction accuracy, calibration drift, and whether the feature set should be retrained during 2026.</p>
+      <table>
+        <thead><tr><th>Model</th><th>2025 holdout</th><th>2026 live tracking</th><th>Application</th></tr></thead>
+        <tbody>
+          <tr><td>Spread</td><td id="spreadHoldoutSummary">Loading…</td><td id="spread2026Tracking">No 2026 finals yet</td><td>Shadow only</td></tr>
+          <tr><td>Total</td><td id="totalHoldoutSummary">Loading…</td><td id="total2026Tracking">No 2026 PBP finals yet</td><td>Shadow only</td></tr>
+        </tbody>
+      </table>
+      <div id="shadowRulesStatus" class="shadowStatusLine">Loading current shadow status…</div>
+    </section>
+  </div>
+</div>
+<script id="SATURDAY_SHADOW_RULES_PANEL_SCRIPT">
+(function(){
+  const button=document.getElementById('shadowRulesButton');
+  const panel=document.getElementById('shadowRulesPanel');
+  if(button&&panel)button.addEventListener('click',()=>panel.classList.toggle('open'));
+  const fmt=(x,d=2)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—';
+  const pct=x=>Number.isFinite(Number(x))?`${Number(x).toFixed(1)}%`:'—';
+  function cards(target,items){
+    const el=document.getElementById(target);if(!el)return;
+    el.innerHTML=items.map(([k,v])=>`<div class="shadowMetric"><span>${k}</span><b>${v}</b></div>`).join('');
+  }
+  fetch('data/site/postgame_shadow_updates.json?v=20260724-rules1')
+    .then(r=>r.json())
+    .then(d=>{
+      const s=d.spread_model?.holdout_2025||{};
+      const t=d.total_model?.holdout_2025||{};
+      cards('spreadHoldoutMetrics',[
+        ['Sample',s.n??'—'],['MAE improvement',pct(s.mae_improvement_pct)],['Direction',pct(Number(s.direction_accuracy)*100)]
+      ]);
+      cards('totalHoldoutMetrics',[
+        ['Sample',t.n??'—'],['MAE improvement',pct(t.mae_improvement_pct)],['Direction',pct(Number(t.direction_accuracy)*100)]
+      ]);
+      const ss=document.getElementById('spreadHoldoutSummary');
+      const ts=document.getElementById('totalHoldoutSummary');
+      if(ss)ss.textContent=`${s.n??'—'} games · MAE ${fmt(s.model_mae,3)} · ${pct(s.mae_improvement_pct)} better · ${pct(Number(s.direction_accuracy)*100)} direction`;
+      if(ts)ts.textContent=`${t.n??'—'} games · MAE ${fmt(t.model_mae,3)} · ${pct(t.mae_improvement_pct)} better · ${pct(Number(t.direction_accuracy)*100)} direction`;
+      const status=document.getElementById('shadowRulesStatus');
+      if(status)status.textContent=`Current state: ${d.status||'unknown'} · ${d.summary?.completed_team_updates||0} team updates · ratings applied: ${d.applied_to_ratings===true?'yes':'no'} · projections applied: ${d.applied_to_projections===true?'yes':'no'}`;
+    })
+    .catch(err=>{
+      const status=document.getElementById('shadowRulesStatus');
+      if(status)status.textContent=`Unable to load shadow artifact: ${err.message}`;
+    });
+})();
+</script>
+<!-- SATURDAY_SHADOW_RULES_PANEL_END --></div><p>Live scores, closing-line value, Saturday impacts, and next-game projection readiness.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Data ready</span><b id="ready">—</b></div></section><div class="filters">
+
+
+<input id="search" placeholder="Find a team"><div class="scheduleScopeToggle"><button id="fbsOnly" class="active">FBS vs FBS</button><button id="allGames">All Games</button></div></div><div class="card"><div class="wrap"><table><thead><tr><th><button class="scheduleSortHeader" data-sort="kickoff" title="Sort by kickoff time">Date / Time</button></th><th>Matchup <button class="scheduleMiniSort" data-sort="away" title="Sort by away team">Away</button> <button class="scheduleMiniSort" data-sort="home" title="Sort by home team">Home</button></th><th>Live Score</th><th><span class="scheduleTip" data-tip="Final market spread and ATS result once the game is complete.">Closing Spread / ATS</span></th><th><span class="scheduleTip" data-tip="Final market total and over/under result once the game is complete.">Closing Total / O-U</span></th><th><span class="scheduleTip" data-tip="Applied team-level adjustment from this game for each team’s next closing-spread projection. Uses 0.50× the validated raw spread update.">Spread Impact</span></th><th><span class="scheduleTip" data-tip="Team-level score/PBP adjustment carried into future total projections. Eligible next matchups apply 0.85× the validated total update.">Total Impact</span></th><th><span class="scheduleTip" data-tip="Links each team to the following-week Openers page, where the next market baseline and Saturday Shadow projection are shown.">Next Week</span></th><th><button class="scheduleSortHeader" data-sort="status" title="Sort alphabetically by data status">Data Status</button></th></tr></thead><tbody id="rows"><tr><td class="empty">Loading schedule…</td></tr></tbody></table></div></div></main><script>
+let D,GC=new Map,week=0,sortKey='kickoff',sortDir=1,fbsOnlyMode=true;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',sgn=x=>Number(x)>0?'+':'';function logo(t){return`<img src="logos/${esc(t.logo_slug)}.png" onerror="this.style.display='none'">`}function matchup(r){return`<span class="team">${logo(r.teams.away)}${esc(r.game.away_team)} <span class="muted">at</span> ${logo(r.teams.home)}${esc(r.game.home_team)}</span>`}function grading(r){const a=Number(r.game.away_score),h=Number(r.game.home_score),line=r.market.spread.home_line==null?NaN:Number(r.market.spread.home_line),total=r.market.total.line==null?NaN:Number(r.market.total.line);if(!r.game.completed||!Number.isFinite(a)||!Number.isFinite(h))return{score:'—',ats:'Pending',ou:'Pending'};let ats='No closing line',ou='No closing total';if(Number.isFinite(line)){const m=h-a+line;ats=Math.abs(m)<.001?'Push':`${m>0?r.game.home_team:r.game.away_team} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}if(Number.isFinite(total)){const m=a+h-total;ou=Math.abs(m)<.001?'Push':`${m>0?'Over':'Under'} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}return{score:`${r.game.away_team} ${a}–${h} ${r.game.home_team}`,ats,ou}}function isFbsMatchup(r){const s=shadowFor(r);return s.fbs_matchup!==false&&!s.fcs_excluded}
+function filtered(){return D.games.filter(r=>r.game.week===week&&(!fbsOnlyMode||isFbsMatchup(r))&&(`${r.game.away_team} ${r.game.home_team}`).toLowerCase().includes(search.value.toLowerCase()))}
+let SH=new Map();
+function scheduleLookupKeys(r){
+  const g=r?.game||r||{};
+  const keys=[];
+  if(g.game_id!=null)keys.push(`id:${String(g.game_id)}`);
+  const date=String(g.date||'').slice(0,10);
+  const away=String(g.away_team||'').trim().toLowerCase();
+  const home=String(g.home_team||'').trim().toLowerCase();
+  if(date&&away&&home)keys.push(`match:${date}|${away}|${home}`);
+  return keys
+}
+function shadowFor(r){
+  for(const key of scheduleLookupKeys(r)){
+    const hit=SH.get(key);
+    if(hit)return hit
+  }
+  return {}
+}
+function finiteNum(v){return v!==null&&v!==''&&Number.isFinite(Number(v))}
+function one(v){return finiteNum(v)?Number(v).toFixed(1):'—'}
+function kickoffFor(r){
+  const e=typeof shadowFor==='function'?(shadowFor(r)||{}):{};
+  const g=r?.game||{};
+  const raw=
+    r?.kickoff_utc||
+    r?.kickoff_raw||
+    r?.kickoff_et||
+    e?.kickoff_utc||
+    e?.kickoff_raw||
+    e?.kickoff_et||
+    g?.start_time||
+    g?.startTime||
+    g?.startDate||
+    g?.kickoff_utc||
+    g?.kickoff_raw||
+    null;
+  if(!raw)return null;
+  const d=new Date(raw);
+  return Number.isNaN(d.getTime())?null:d
+}
+function dateTimeCell(r){
+  const d=kickoffFor(r);
+  const rawDate=String(r?.game?.date||r?.date||'').slice(0,10);
+  let dateLabel='TBD';
+  if(rawDate&&/^\d{4}-\d{2}-\d{2}$/.test(rawDate)){
+    const parts=rawDate.split('-').map(Number);
+    dateLabel=`${parts[1]}/${parts[2]}`
+  }
+  if(!d){
+    return `<div class="scheduleDateTimeCell"><b>${esc(dateLabel)}</b><span class="sub">TBD</span></div>`
+  }
+  const timeLabel=new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    hour:'numeric',
+    minute:'2-digit'
+  }).format(d);
+  return `<div class="scheduleDateTimeCell"><b>${esc(dateLabel)}</b><span class="sub">${esc(timeLabel)} ET</span></div>`
+}
+function clvSpread(r,s){
+  const open=Number(s.opening_spread),close=Number(s.closing_spread??r.market.spread.home_line);
+  return Number.isFinite(open)&&Number.isFinite(close)?open-close:null
+}
+function clvTotal(r,s){
+  const open=Number(s.opening_total),close=Number(s.closing_total??r.market.total.line);
+  return Number.isFinite(open)&&Number.isFinite(close)?close-open:null
+}
+function tone(v){return Number(v)>0?'good':Number(v)<0?'bad':'muted'}
+function dataStatus(r,s){
+  if(s.fcs_excluded||s.fbs_matchup===false)return{label:'Excluded',cls:'muted'};
+  const completed=!!r.game.completed;
+  const hasPregame=finiteNum(r.market?.spread?.home_line)||finiteNum(r.market?.total?.line)||finiteNum(s.market_baseline_spread)||finiteNum(s.market_baseline_total);
+  if(!completed)return hasPregame?{label:'Ready',cls:'good'}:{label:'Pending',cls:'muted'};
+  const raw=String(s.data_status||'').toLowerCase();
+  if(raw==='complete')return{label:'Complete',cls:'good'};
+  if(raw==='partial')return{label:'Partial',cls:'warn'};
+  const ids=[`${r.game.game_id}|${r.game.away_team}`,`${r.game.game_id}|${r.game.home_team}`];
+  const pbp=ids.every(x=>GC.has(x));
+  return pbp?{label:'Complete',cls:'good'}:{label:'Partial',cls:'warn'}
+}
+function detailRow(r,s){
+  const items=[
+    ['Opening spread',s.opening_spread],['Closing spread',s.closing_spread??r.market.spread.home_line],
+    ['Opening total',s.opening_total],['Closing total',s.closing_total??r.market.total.line],
+    ['Market baseline spread',s.market_baseline_spread],['Raw spread delta',s.raw_spread_delta],
+    ['Applied spread impact',s.spread_impact],['Next shadow spread',s.next_projection_spread],
+    ['Market baseline total',s.market_baseline_total],['Raw total/PBP delta',s.raw_total_delta],
+    ['Applied total impact',s.total_impact],['Next shadow total',s.next_projection_total],
+    ['CFBD',s.cfbd_status||(r.game.completed?'Complete':'Scheduled')],
+    ['PBP',s.pbp_status||'Pending'],
+    ['Spread status',s.spread_status||'Pending'],['Total status',s.total_status||'Pending']
+  ];
+  return `<tr class="scheduleNativeDetail"><td colspan="9"><div class="scheduleNativeDetailGrid">${items.map(([k,v])=>`<div><span>${esc(k)}</span><b>${v==null?'—':esc(v)}</b></div>`).join('')}</div></td></tr>`
+}
+
+function scheduleLogoV11(r,side){
+  const g=r.game||{};
+  return g[side+'_logo']||g[side+'_logo_url']||g[side+'_team_logo']||''
+}
+function scheduleInitialsV11(team){
+  return String(team||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+}
+function scheduleMiniTeamV11(r,side){
+  const team=r.game[side+'_team'],src=scheduleLogoV11(r,side);
+  return `<span class="scheduleMiniTeamV11" data-team="${esc(team)}" data-side="${side}">
+    <img class="scheduleMiniLogoV12" ${src?`src="${esc(src)}"`:''} alt="">
+    <span class="scheduleMiniFallbackV11">${scheduleInitialsV11(team)}</span>
+  </span>`
+}
+function scheduleImpactPairV11(r,s,type){
+  const away=type==='spread'?s.away_spread_impact:s.away_total_impact;
+  const home=type==='spread'?s.home_spread_impact:s.home_total_impact;
+  return `<div class="scheduleImpactPairV11">
+    <div>${scheduleMiniTeamV11(r,'away')}<b class="${tone(away)}">${one(away)}</b></div>
+    <div>${scheduleMiniTeamV11(r,'home')}<b class="${tone(home)}">${one(home)}</b></div>
+  </div>`
+}
+function scheduleNextWeekV11(r){
+  const nextWeek=Number(r.game.week)+1;
+  const href=team=>`openers.html?week=${nextWeek}&team=${encodeURIComponent(team)}&view=shadow`;
+  return `<div class="scheduleNextLinksV11">
+    <a href="${href(r.game.away_team)}">${scheduleMiniTeamV11(r,'away')}<span>W${nextWeek} →</span></a>
+    <a href="${href(r.game.home_team)}">${scheduleMiniTeamV11(r,'home')}<span>W${nextWeek} →</span></a>
+  </div>`
+}
+function hydrateScheduleImpactLogosV12(){
+  rows.querySelectorAll('.scheduleNativeRow').forEach(row=>{
+    const matchupCell=row.children[1];
+    if(!matchupCell)return;
+    const sourceImgs=[...matchupCell.querySelectorAll('img')].filter(img=>img.src);
+    const slots=[...row.querySelectorAll('.scheduleMiniTeamV11')];
+    slots.forEach((slot,index)=>{
+      const img=slot.querySelector('.scheduleMiniLogoV12');
+      const fallback=slot.querySelector('.scheduleMiniFallbackV11');
+      if(img&&img.getAttribute('src')){
+        img.style.display='block';
+        if(fallback)fallback.style.display='none';
+        return
+      }
+      const side=slot.dataset.side;
+      const source=side==='away'?sourceImgs[0]:sourceImgs[1];
+      if(img&&source&&source.src){
+        img.src=source.src;
+        img.style.display='block';
+        if(fallback)fallback.style.display='none'
+      }else{
+        if(img)img.style.display='none';
+        if(fallback)fallback.style.display='grid'
+      }
+    })
+  })
+}
+function initScheduleHeaderTipsV12(){
+  let tip=document.getElementById('scheduleHeaderTipV12');
+  if(!tip){
+    tip=document.createElement('div');
+    tip.id='scheduleHeaderTipV12';
+    tip.className='scheduleHeaderTipV12';
+    document.body.appendChild(tip)
+  }
+  document.querySelectorAll('.scheduleTip').forEach(header=>{
+    if(header.dataset.tipBound==='1')return;
+    header.dataset.tipBound='1';
+    header.addEventListener('mouseenter',()=>{
+      tip.textContent=header.dataset.tip||'';
+      tip.classList.add('show');
+      const rect=header.getBoundingClientRect();
+      const width=Math.min(320,window.innerWidth-24);
+      tip.style.width=width+'px';
+      const left=Math.max(12,Math.min(window.innerWidth-width-12,rect.left+rect.width/2-width/2));
+      tip.style.left=left+'px';
+      const measured=tip.getBoundingClientRect().height||90;
+      let top=rect.top-measured-10;
+      if(top<10)top=rect.bottom+10;
+      tip.style.top=top+'px'
+    });
+    header.addEventListener('mouseleave',()=>tip.classList.remove('show'))
+  })
+}
+function draw(){
+  const all=D.games.filter(r=>r.game.week===week&&(!fbsOnlyMode||isFbsMatchup(r)));
+  const a=filtered().sort((x,y)=>{
+    let result=0;
+    if(sortKey==='away') result=String(x.game.away_team||'').localeCompare(String(y.game.away_team||''));
+    else if(sortKey==='home') result=String(x.game.home_team||'').localeCompare(String(y.game.home_team||''));
+    else if(sortKey==='status') result=String(dataStatus(x,shadowFor(x)).label||'').localeCompare(String(dataStatus(y,shadowFor(y)).label||''));
+    else{
+      const xd=kickoffFor(x),yd=kickoffFor(y);
+      const xt=xd?xd.getTime():Number.MAX_SAFE_INTEGER;
+      const yt=yd?yd.getTime():Number.MAX_SAFE_INTEGER;
+      result=xt-yt||String(x.game.date).localeCompare(String(y.game.date));
+    }
+    return result*sortDir
+  });
+  weeks.querySelectorAll('button').forEach(b=>b.classList.toggle('active',Number(b.dataset.week)===week));
+  document.querySelectorAll('[data-sort]').forEach(button=>{
+    button.classList.toggle('active',button.dataset.sort===sortKey);
+    button.onclick=event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      const next=button.dataset.sort;
+      sortDir=sortKey===next?-sortDir:1;
+      sortKey=next;
+      draw()
+    }
+  });
+  const oldStatus=r=>{
+    const ids=[`${r.game.game_id}|${r.game.away_team}`,`${r.game.game_id}|${r.game.home_team}`];
+    const p=ids.every(x=>GC.has(x)),c=!!r.game.completed;
+    return{p,c,ready:p&&c}
+  };
+  games.textContent=all.length;
+  finals.textContent=all.filter(r=>r.game.completed).length;
+  cfbd.textContent=`${all.filter(r=>r.game.completed).length}/${all.length}`;
+  pbp.textContent=`${all.filter(r=>oldStatus(r).p).length}/${all.length}`;
+  ready.textContent=`${all.filter(r=>['Ready','Complete'].includes(dataStatus(r,shadowFor(r)).label)).length}/${all.length}`;
+  rows.innerHTML=a.map(r=>{
+    const g=grading(r),s=shadowFor(r),spread=r.market.spread.home_line,total=r.market.total.line;
+    const status=dataStatus(r,s);
+    return `<tr class="scheduleNativeRow" data-game-id="${esc(r.game.game_id)}">
+      <td>${dateTimeCell(r)}</td>
+      <td>${matchup(r)}</td>
+      <td>${esc(g.score)}</td>
+      <td>${spread==null?'—':`${esc(r.game.home_team)} ${sgn(spread)}${num(spread)} · `}<span class="${g.ats==='Pending'?'muted':g.ats==='Push'?'warn':'good'}">${esc(g.ats)}</span></td>
+      <td>${total==null?'—':`${num(total)} · `}<span class="${g.ou==='Pending'?'muted':g.ou==='Push'?'warn':'good'}">${esc(g.ou)}</span></td>
+      <td>${s.fcs_excluded?'<span class="muted">Excluded</span>':scheduleImpactPairV11(r,s,'spread')}</td>
+      <td>${s.fcs_excluded?'<span class="muted">Excluded</span>':scheduleImpactPairV11(r,s,'total')}</td>
+      <td>${scheduleNextWeekV11(r)}</td>
+      <td><span class="pill ${status.cls}">${status.label}</span></td>
+    </tr>${detailRow(r,s)}`
+  }).join('')||'<tr><td class="empty" colspan="9">No matching games.</td></tr>';
+  rows.querySelectorAll('.scheduleNativeDetail').forEach(x=>x.hidden=true);
+  rows.querySelectorAll('.scheduleNativeRow').forEach(row=>{
+    row.addEventListener('click',e=>{
+      if(e.target.closest('a,button,input,select'))return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const detail=row.nextElementSibling;
+      if(detail&&detail.classList.contains('scheduleNativeDetail'))detail.hidden=!detail.hidden
+    },true)
+  });
+  hydrateScheduleImpactLogosV12();
+  initScheduleHeaderTipsV12()
+}
+async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch(`data/site/schedule_live_enrichment.json?v=${Date.now()}`,{cache:'no-store'}).then(r=>r.json()).then(x=>{
+  const m=new Map();
+  for(const y of (x.games||[])){
+    const g=y?.game||y||{};
+    if(g.game_id!=null)m.set(`id:${String(g.game_id)}`,y);
+    const date=String(g.date||'').slice(0,10);
+    const away=String(g.away_team||'').trim().toLowerCase();
+    const home=String(g.home_team||'').trim().toLowerCase();
+    if(date&&away&&home)m.set(`match:${date}|${away}|${home}`,y)
+  }
+  return m
+}).catch(()=>new Map)]);const ws=[...new Set(D.games.map(r=>r.game.week))].sort((a,b)=>a-b);week=ws[0]||0;weeks.innerHTML=ws.map(w=>`<button data-week="${w}">Week ${w}</button>`).join('');weeks.querySelectorAll('button').forEach(b=>b.onclick=()=>{week=Number(b.dataset.week);draw()});draw()}fbsOnly.onclick=()=>{fbsOnlyMode=true;fbsOnly.classList.add('active');allGames.classList.remove('active');draw()};
+allGames.onclick=()=>{fbsOnlyMode=false;allGames.classList.add('active');fbsOnly.classList.remove('active');draw()};
+search.oninput=draw;init().catch(e=>rows.innerHTML=`<tr><td class="empty">${esc(e.message)}</td></tr>`);
+</script>
 <!-- V2_DARK_LOGO_BADGES_START -->
 <style>
 img.v2-dark-logo-badge{
@@ -192,4 +607,6 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 })();
 </script>
 <!-- V2_DARK_LOGO_BADGES_END -->
+
+
 </body></html>

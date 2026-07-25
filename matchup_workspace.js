@@ -1121,7 +1121,9 @@
   window.openMatchupWorkspace=open;window.closeMatchupWorkspace=close;window.setMatchupDecision=decision;window.saveMatchupNote=note;window.openMatchupBet=openBet;window.closeMatchupBet=closeBet;window.saveMatchupBet=saveBet;window.removeMatchupBet=removeBet;
   window.__matchupWorkspaceTest={rankClass,contextRows,teamSpots,scheduleRows};
   function gameIdFromTrigger(target){
+    if(/schedule_v2\.html(?:$|[?#])/i.test(location.pathname+location.search+location.hash))return null;
     if(!target)return null;
+    if(target.closest?.('.scheduleNativeRow'))return null;
     const row=target.closest?.('tr');
 
     const direct=
