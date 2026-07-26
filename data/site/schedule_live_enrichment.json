@@ -1,6 +1,6 @@
 {
   "schema_version": "schedule-live-enrichment-v1",
-  "built_at": "2026-07-25T08:01:51.404509",
+  "built_at": "2026-07-26T09:22:12.709650",
   "source_hits": [
     {
       "source": "data/projections/game_projection_sources_audit_2026.csv",
@@ -19715,7 +19715,7 @@
       "season": 2026,
       "week": 7,
       "date": "2026-10-17",
-      "kickoff_raw": null,
+      "kickoff_raw": "2026-10-17T16:00:00Z",
       "status": "not_in_forecast_window",
       "home_score": null,
       "away_score": null,
@@ -19740,10 +19740,11 @@
       "raw_total_delta": null,
       "market_baseline_spread": 0.3003304443060255,
       "market_baseline_total": 52.8,
-      "kickoff_utc": null,
-      "kickoff_et": null,
-      "kickoff_status": "TBD",
-      "kickoff_source": null,
+      "kickoff_utc": "2026-10-17T16:00:00Z",
+      "kickoff_et": "2026-10-17T12:00:00-04:00",
+      "kickoff_status": "confirmed",
+      "kickoff_source": "Action Network",
+      "start_time": "2026-10-17T16:00:00Z",
       "fbs_matchup": true,
       "fcs_excluded": false
     },
@@ -35787,11 +35788,11 @@
   ],
   "kickoff_enrichment": {
     "games": 902,
-    "games_with_kickoff": 586,
-    "games_tbd": 316,
+    "games_with_kickoff": 587,
+    "games_tbd": 315,
     "sources": {
       "Action": 2,
-      "Action Network": 3,
+      "Action Network": 4,
       "CFBD lines": 581
     },
     "timezone_display": "America/New_York"
