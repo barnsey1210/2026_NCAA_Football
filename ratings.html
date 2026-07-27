@@ -88,20 +88,444 @@ img[src$="west-virginia.webp"] {
 </style>
 <!-- V2_DARK_LOGO_BADGES_CSS_END -->
 
+
+<style id="ratings-market-derived-css">
+.fresh{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+th:nth-child(2),
+td:nth-child(2){
+  width:235px;
+  max-width:235px;
+}
+
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6){
+  width:72px;
+}
+
+.marketCell{
+  font-variant-numeric:tabular-nums;
+  cursor:help;
+}
+
+.marketDelta{
+  font-variant-numeric:tabular-nums;
+  font-weight:900;
+}
+
+.ratingsTipTarget{
+  cursor:help;
+  text-decoration:underline dotted rgba(255,255,255,.35);
+  text-underline-offset:3px;
+}
+
+.ratingsHeaderTip{
+  position:fixed;
+  z-index:9999;
+  display:none;
+  max-width:340px;
+  padding:10px 12px;
+  border:1px solid #315f92;
+  border-radius:9px;
+  background:#0b1d38;
+  color:#eaf3ff;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  font-size:11px;
+  line-height:1.45;
+  pointer-events:none;
+  white-space:normal;
+}
+
+.ratingsHeaderTip.show{
+  display:block;
+}
+
+.marketStatus{
+  margin-top:2px;
+  color:var(--m);
+  font-size:9px;
+}
+
+@media(max-width:1150px){
+  .fresh{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+</style>
+
 <style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
-</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html" class="active">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">BP 25% · SP+ 25% · FPI 25% · TR 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table><thead><tr><th data-k="overall_rank">Rank</th><th data-k="team">Team</th><th data-k="conference">Conf</th><th data-k="rating">Composite</th><th data-k="offense_rank">Off rank</th><th data-k="defense_rank">Def rank</th><th data-k="spplus">SP+</th><th data-k="fpi">FPI</th><th data-k="teamrankings">TR</th><th data-k="bradpowers">Powers</th><th data-k="variance">Variance</th><th data-k="preseason_rating">Preseason</th><th data-k="l2_change">L2 change</th><th data-k="l4_change">L4 change</th></tr></thead><tbody id="rows"></tbody></table></div></div></main><script>
-let teams=[],key='overall_rank',dir=1;const e=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),tone=r=>r<=35?'good':r<=75?'mid':'bad',cell=(x,k)=>{const s=x.sources[k];return s?`<td class="source ${x.high_source===k?'hi':x.low_source===k?'lo':''}"><b>${s.rating.toFixed(1)}</b><span class="sub ${tone(s.rank)}">#${s.rank}</span></td>`:'<td>—</td>'};function val(x,k){return ['spplus','fpi','teamrankings','bradpowers'].includes(k)?x.sources[k]?.rating:x[k]}function render(){const q=search.value.toLowerCase(),a=teams.filter(x=>(conf.value==='all'||x.conference===conf.value)&&x.team.toLowerCase().includes(q)).sort((a,b)=>{const x=val(a,key),y=val(b,key);return(typeof x==='string'?x.localeCompare(y):(Number(x??999)-Number(y??999)))*dir});rows.innerHTML=a.map(x=>`<tr><td class="rank ${tone(x.overall_rank)}">#${x.overall_rank}</td><td><a class="team" href="team.html?team=${e(x.logo_slug)}"><img src="logos/${e(x.logo_slug)}.png">${e(x.team)}</a></td><td>${e(x.conference)}</td><td><b>${x.rating.toFixed(1)}</b><span class="sub ${tone(x.overall_rank)}">#${x.overall_rank}</span></td><td class="${tone(x.offense_rank)}">#${x.offense_rank??'—'}</td><td class="${tone(x.defense_rank)}">#${x.defense_rank??'—'}</td>${cell(x,'spplus')}${cell(x,'fpi')}${cell(x,'teamrankings')}${cell(x,'bradpowers')}<td class="${x.variance>=10?'bad':x.variance>=6?'mid':'good'}"><b>${x.variance.toFixed(1)}</b></td><td>${x.preseason_rating==null?'—':x.preseason_rating.toFixed(1)}</td><td class="${x.l2_change>0?'good':x.l2_change<0?'bad':''}">${x.l2_change==null?'—':(x.l2_change>0?'+':'')+x.l2_change.toFixed(1)}</td><td class="${x.l4_change>0?'good':x.l4_change<0?'bad':''}">${x.l4_change==null?'—':(x.l4_change>0?'+':'')+x.l4_change.toFixed(1)}</td></tr>`).join('')}async function init(){const [m,r]=await Promise.all([fetch('data/site/matchups_view.json').then(x=>x.json()),fetch('data/site/ratings_view.json').then(x=>x.json())]),meta=new Map;m.games.forEach(g=>[g.teams.away,g.teams.home].forEach(t=>{if(t.rating!=null)meta.set(t.team,t)}));teams=r.teams.map(x=>Object.assign(x,meta.get(x.team)||{})).filter(x=>x.rating!=null);conf.innerHTML+=[...new Set(teams.map(x=>x.conference).filter(Boolean))].sort().map(x=>`<option>${e(x)}</option>`).join('');stamp.textContent+=` · Applied ${r.snapshot_date}`;freshness.innerHTML=Object.values(r.source_meta).map(s=>`<div><b>${e(s.label)}</b><span>Last observed value change: ${e(s.last_observed_value_change||'not established')}</span><span>Provider update: ${e(s.provider_updated_at||'not supplied')}</span><span>Latest pull: ${e(s.latest_pull||'not supplied')}</span><span>${s.changed_teams_from_prior} teams changed vs ${e(s.previous_snapshot||'prior')}</span></div>`).join('');render()}document.querySelectorAll('th').forEach(h=>h.onclick=()=>{const k=h.dataset.k;dir=key===k?-dir:1;key=k;render()});[search,conf].forEach(x=>x.oninput=render);init();
-</script><script>
-const ratingsBaseRender=render;
-render=function(){
-  ratingsBaseRender();
+</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body><main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html" class="active">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">BP 25% · SP+ 25% · FPI 25% · TR 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+<thead>
+<tr>
+  <th data-k="overall_rank">Rank</th>
+  <th data-k="team">Team</th>
+  <th data-k="conference">Conf</th>
+  <th data-k="rating">Composite</th>
+  <th data-k="offense_rank">Off rank</th>
+  <th data-k="defense_rank">Def rank</th>
+  <th data-k="spplus">SP+</th>
+  <th data-k="fpi">FPI</th>
+  <th data-k="teamrankings">TR</th>
+  <th data-k="bradpowers">Powers</th>
+  <th class="ratingsTipTarget"
+      data-k="market_rating"
+      data-tip="Team strength inferred from the site’s canonical selected spreads after removing home-field advantage. The raw market ratings are rescaled to the composite distribution for comparison while preserving the original market rank.">Market</th>
+  <th class="ratingsTipTarget"
+      data-k="market_delta"
+      data-tip="Market-derived rating minus the four-source composite. Positive values mean the betting market rates the team higher than SP+, FPI, TeamRankings and Brad Powers collectively.">Market Δ</th>
+  <th data-k="variance">Variance</th>
+  <th data-k="preseason_rating">Preseason</th>
+  <th data-k="preseason_delta">Δ preseason</th>
+  <th data-k="l2_change">L2 change</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table></div></div></main>
+
+<script>
+let teams=[],key='overall_rank',dir=1;
+
+const e=x=>String(x??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+}[c]));
+
+const tone=r=>r<=35?'good':r<=75?'mid':'bad';
+
+const fmt=x=>Number.isFinite(Number(x))
+  ? Number(x).toFixed(1)
+  : '—';
+
+const signed=x=>Number.isFinite(Number(x))
+  ? `${Number(x)>0?'+':''}${Number(x).toFixed(1)}`
+  : '—';
+
+function sourceCell(x,key){
+  const source=x.sources[key];
+
+  if(!source){
+    return '<td>—</td>';
+  }
+
+  return `<td class="source ${x.high_source===key?'hi':x.low_source===key?'lo':''}">
+    <b>${source.rating.toFixed(1)}</b>
+    <span class="sub ${tone(source.rank)}">#${source.rank}</span>
+  </td>`;
+}
+
+function friendlySampleStatus(value){
+  const labels={
+    connected_moderate_sample:'Connected, moderate sample',
+    connected_low_sample:'Connected, low sample',
+    early_limited:'Limited sample',
+    early_one_game:'One-game sample',
+    disconnected_component:'Disconnected matchup group'
+  };
+
+  return labels[value]||String(value||'Unavailable').replaceAll('_',' ');
+}
+
+function marketTip(x){
+  const market=x.market;
+
+  if(!market){
+    return 'No valid market-derived rating is currently available for this team.';
+  }
+
+  const timestamp=market.snapshot_timestamp||market.snapshot_date||'Unavailable';
+
+  return [
+    `Scaled market rating: ${fmt(market.scaled_rating ?? market.rating)}`,
+    `Raw market rating: ${fmt(market.raw_rating)}`,
+    `Market rank: #${market.rank}`,
+    `Market vs composite: ${signed(x.market_delta)}`,
+    `Games informing rating: ${market.games_in_rating ?? market.games_used ?? '—'}`,
+    `Effective game weight: ${fmt(market.effective_games_weight)}`,
+    `Sample: ${friendlySampleStatus(market.sample_status)}`,
+    `Connected component: ${market.component_size || '—'} teams`,
+    `Snapshot: ${timestamp}`
+  ].join(' · ');
+}
+
+function marketCell(x){
+  const market=x.market;
+
+  if(!market){
+    return `<td class="marketCell ratingsTipTarget"
+      data-tip="${e(marketTip(x))}">—</td>`;
+  }
+
+  return `<td class="marketCell ratingsTipTarget"
+    data-tip="${e(marketTip(x))}">
+    <b>${fmt(market.rating)}</b>
+    <span class="sub ${tone(market.rank)}">#${market.rank}</span>
+  </td>`;
+}
+
+function val(x,k){
+  if(['spplus','fpi','teamrankings','bradpowers'].includes(k)){
+    return x.sources[k]?.rating;
+  }
+
+  if(k==='market_rating'){
+    return x.market?.rating;
+  }
+
+  return x[k];
+}
+
+function sortedShown(){
   const q=search.value.toLowerCase();
-  const shown=teams.filter(x=>(conf.value==='all'||x.conference===conf.value)&&x.team.toLowerCase().includes(q)).sort((a,b)=>{const x=val(a,key),y=val(b,key);return(typeof x==='string'?x.localeCompare(y):(Number(x??999)-Number(y??999)))*dir});
-  [...rows.children].forEach((tr,i)=>{const x=shown[i],pre=tr.children[11];if(!x||!pre)return;pre.innerHTML=x.preseason_rating==null?'—':`<b>${x.preseason_rating.toFixed(1)}</b><span class="sub ${tone(x.preseason_rank)}">#${x.preseason_rank}</span>`;const delta=document.createElement('td');delta.className=x.preseason_delta>0?'good':x.preseason_delta<0?'bad':'';delta.textContent=x.preseason_delta==null?'—':`${x.preseason_delta>0?'+':''}${x.preseason_delta.toFixed(1)}`;pre.after(delta)});
-};
-const preseasonHeader=document.querySelector('th[data-k="preseason_rating"]');
-const deltaHeader=document.createElement('th');deltaHeader.dataset.k='preseason_delta';deltaHeader.textContent='Δ preseason';preseasonHeader.after(deltaHeader);deltaHeader.onclick=()=>{dir=key==='preseason_delta'?-dir:1;key='preseason_delta';render()};
+
+  return teams
+    .filter(x=>
+      (conf.value==='all'||x.conference===conf.value)
+      && x.team.toLowerCase().includes(q)
+    )
+    .sort((a,b)=>{
+      const x=val(a,key);
+      const y=val(b,key);
+
+      if(typeof x==='string'){
+        return x.localeCompare(y)*dir;
+      }
+
+      return (Number(x??999)-Number(y??999))*dir;
+    });
+}
+
+function render(){
+  const shown=sortedShown();
+
+  rows.innerHTML=shown.map(x=>{
+    const marketDeltaClass=
+      x.market_delta>0?'good':
+      x.market_delta<0?'bad':'';
+
+    const preseasonDeltaClass=
+      x.preseason_delta>0?'good':
+      x.preseason_delta<0?'bad':'';
+
+    const l2Class=
+      x.l2_change>0?'good':
+      x.l2_change<0?'bad':'';
+
+    return `<tr>
+      <td class="rank ${tone(x.overall_rank)}">#${x.overall_rank}</td>
+
+      <td>
+        <a class="team" href="team.html?team=${e(x.logo_slug)}">
+          <img src="logos/${e(x.logo_slug)}.png">
+          ${e(x.team)}
+        </a>
+      </td>
+
+      <td>${e(x.conference)}</td>
+
+      <td>
+        <b>${x.rating.toFixed(1)}</b>
+        <span class="sub ${tone(x.overall_rank)}">#${x.overall_rank}</span>
+      </td>
+
+      <td class="${tone(x.offense_rank)}">#${x.offense_rank??'—'}</td>
+      <td class="${tone(x.defense_rank)}">#${x.defense_rank??'—'}</td>
+
+      ${sourceCell(x,'spplus')}
+      ${sourceCell(x,'fpi')}
+      ${sourceCell(x,'teamrankings')}
+      ${sourceCell(x,'bradpowers')}
+
+      ${marketCell(x)}
+
+      <td class="marketDelta ${marketDeltaClass}">
+        ${signed(x.market_delta)}
+      </td>
+
+      <td class="${x.variance>=10?'bad':x.variance>=6?'mid':'good'}">
+        <b>${x.variance.toFixed(1)}</b>
+      </td>
+
+      <td>
+        ${x.preseason_rating==null
+          ? '—'
+          : `<b>${x.preseason_rating.toFixed(1)}</b>
+             <span class="sub ${tone(x.preseason_rank)}">#${x.preseason_rank}</span>`
+        }
+      </td>
+
+      <td class="${preseasonDeltaClass}">
+        ${signed(x.preseason_delta)}
+      </td>
+
+      <td class="${l2Class}">
+        ${signed(x.l2_change)}
+      </td>
+    </tr>`;
+  }).join('');
+
+  initRatingsTips();
+}
+
+function formatEastern(value){
+  if(!value){
+    return 'not supplied';
+  }
+
+  const d=new Date(value);
+
+  if(Number.isNaN(d.getTime())){
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    timeZoneName:'short'
+  }).format(d);
+}
+
+function marketFreshnessCard(meta){
+  if(!meta){
+    return '';
+  }
+
+  return `<div>
+    <b>${e(meta.label||'Market-Derived')}</b>
+    <span>Latest snapshot: ${e(formatEastern(meta.snapshot_timestamp||meta.snapshot_date))}</span>
+    <span>Board games: ${e(meta.board_games??'—')}</span>
+    <span>Board teams rated: ${e(meta.board_teams_rated??'—')}</span>
+    <span>Ratings-page matched: ${e(meta.ratings_page_matched??'—')}</span>
+    <span>Ratings-page missing: ${e(meta.ratings_page_missing??'—')}</span>
+    <span>Independent-ready: ${e(meta.independent_ready??'—')} · Context-only: ${e(meta.context_only??'—')}</span>
+  </div>`;
+}
+
+function initRatingsTips(){
+  let tip=document.getElementById('ratingsHeaderTip');
+
+  if(!tip){
+    tip=document.createElement('div');
+    tip.id='ratingsHeaderTip';
+    tip.className='ratingsHeaderTip';
+    document.body.appendChild(tip);
+  }
+
+  document.querySelectorAll('.ratingsTipTarget').forEach(target=>{
+    if(target.dataset.tipBound==='1'){
+      return;
+    }
+
+    target.dataset.tipBound='1';
+
+    const show=()=>{
+      tip.textContent=target.dataset.tip||'';
+      tip.classList.add('show');
+
+      const rect=target.getBoundingClientRect();
+      const width=tip.offsetWidth;
+      const height=tip.offsetHeight;
+
+      let left=rect.left+(rect.width/2)-(width/2);
+      left=Math.max(8,Math.min(left,window.innerWidth-width-8));
+
+      let top=rect.bottom+8;
+
+      if(top+height>window.innerHeight-8){
+        top=rect.top-height-8;
+      }
+
+      tip.style.left=`${left}px`;
+      tip.style.top=`${top}px`;
+    };
+
+    const hide=()=>tip.classList.remove('show');
+
+    target.addEventListener('mouseenter',show);
+    target.addEventListener('mouseleave',hide);
+    target.addEventListener('focusin',show);
+    target.addEventListener('focusout',hide);
+  });
+}
+
+async function init(){
+  const [matchups,ratingView]=await Promise.all([
+    fetch('data/site/matchups_view.json').then(x=>x.json()),
+    fetch('data/site/ratings_view.json').then(x=>x.json())
+  ]);
+
+  const meta=new Map();
+
+  matchups.games.forEach(game=>
+    [game.teams.away,game.teams.home].forEach(team=>{
+      if(team.rating!=null){
+        meta.set(team.team,team);
+      }
+    })
+  );
+
+  teams=ratingView.teams
+    .map(x=>{
+      const matchupMeta=meta.get(x.team)||{};
+
+      // Matchup metadata supplies presentation/context fields, while the
+      // Ratings payload remains authoritative for composite rating and rank.
+      return Object.assign({},matchupMeta,x);
+    })
+    .filter(x=>x.rating!=null);
+
+  conf.innerHTML+=[
+    ...new Set(
+      teams.map(x=>x.conference).filter(Boolean)
+    )
+  ]
+    .sort()
+    .map(x=>`<option>${e(x)}</option>`)
+    .join('');
+
+  stamp.textContent+=` · Applied ${ratingView.snapshot_date}`;
+
+  const providerCards=Object.values(ratingView.source_meta)
+    .map(s=>`<div>
+      <b>${e(s.label)}</b>
+      <span>Last observed value change: ${e(s.last_observed_value_change||'not established')}</span>
+      <span>Provider update: ${e(s.provider_updated_at||'not supplied')}</span>
+      <span>Latest pull: ${e(s.latest_pull||'not supplied')}</span>
+      <span>${s.changed_teams_from_prior} teams changed vs ${e(s.previous_snapshot||'prior')}</span>
+    </div>`)
+    .join('');
+
+  freshness.innerHTML=
+    providerCards+
+    marketFreshnessCard(ratingView.market_meta);
+
+  render();
+}
+
+document.querySelectorAll('th[data-k]').forEach(header=>{
+  header.onclick=()=>{
+    const selected=header.dataset.k;
+    dir=key===selected?-dir:1;
+    key=selected;
+    render();
+  };
+});
+
+[search,conf].forEach(control=>{
+  control.oninput=render;
+});
+
+init();
 </script>
 <!-- V2_DARK_LOGO_BADGES_START -->
 <style>
