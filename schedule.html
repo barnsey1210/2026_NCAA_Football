@@ -112,10 +112,15 @@ img[src$="west-virginia.webp"] {
 .scheduleNativeRow{cursor:pointer}
 .scheduleNativeRow:hover{background:rgba(59,130,246,.07)}
 .scheduleNativeDetail td{padding:0!important;background:rgba(8,21,43,.92)}
-.scheduleNativeDetailGrid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px 18px;padding:14px 18px}
-.scheduleNativeDetailGrid span{display:block;color:#91a7c7;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.scheduleNativeDetailGrid b{display:block;margin-top:3px}
-@media(max-width:1050px){.scheduleNativeDetailGrid{grid-template-columns:repeat(2,minmax(150px,1fr))}}
+.scheduleNativeDetailBody{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;padding:12px}
+.scheduleDetailSection{min-width:0;border:1px solid #234a76;background:#0a1b36;border-radius:10px;padding:10px}
+.scheduleDetailSection h3{margin:0 0 7px;color:#d5e5fb;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.scheduleDetailItems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.scheduleDetailItem{min-width:0;background:#07172e;border-radius:7px;padding:7px}
+.scheduleDetailItem span{display:block;color:#91a7c7;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
+.scheduleDetailItem b{display:block;margin-top:2px;overflow-wrap:anywhere;font-size:12px}
+.scheduleDetailMessage{color:#a9bdd9;line-height:1.45}
+@media(max-width:720px){.scheduleNativeDetailBody{grid-template-columns:1fr;padding:8px}.scheduleDetailItems{grid-template-columns:1fr 1fr}}
 </style>
 
 
@@ -137,7 +142,46 @@ img[src$="west-virginia.webp"] {
 .scheduleMiniFallbackV11{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#17345b;font-size:8px;font-weight:900}
 </style>
 
-<style id="schedule-sort-css">.scheduleSortHeader,.scheduleMiniSort{appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:900;cursor:pointer;padding:0}.scheduleSortHeader{text-transform:uppercase;letter-spacing:.04em}.scheduleMiniSort{font-size:9px;color:#b8c8df;margin-left:6px}.scheduleSortHeader:hover,.scheduleMiniSort:hover{color:#fff;text-decoration:underline}.scheduleSortHeader.active,.scheduleMiniSort.active{color:#7fc1ff}</style><style id="schedule-date-time-spacing-v10">.scheduleDateTimeCell{display:flex;align-items:baseline;gap:8px;white-space:nowrap}.scheduleDateTimeCell .sub{display:inline-block;margin:0}</style><style id="schedule-fbs-filter-css-v11">.scheduleScopeToggle{display:flex;gap:8px;margin-top:10px}.scheduleScopeToggle button{border:1px solid #315f91;background:#0d203c;color:#aebfd6;border-radius:999px;padding:7px 13px;font-weight:900;cursor:pointer}.scheduleScopeToggle button.active{background:#1976d2;color:#fff}</style></head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a href="dashboard.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a class="active" href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a></div></div><section class="hero"><div><div class="scheduleNativeTitleRow"><h1>Schedule & Results</h1><!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="schedule-sort-css">.scheduleSortHeader,.scheduleMiniSort{appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:900;cursor:pointer;padding:0}.scheduleSortHeader{text-transform:uppercase;letter-spacing:.04em}.scheduleMiniSort{font-size:9px;color:#b8c8df;margin-left:6px}.scheduleSortHeader:hover,.scheduleMiniSort:hover{color:#fff;text-decoration:underline}.scheduleSortHeader.active,.scheduleMiniSort.active{color:#7fc1ff}</style><style id="schedule-date-time-spacing-v10">.scheduleDateTimeCell{display:flex;align-items:baseline;gap:8px;white-space:nowrap}.scheduleDateTimeCell .sub{display:inline-block;margin:0}</style><style id="schedule-fbs-filter-css-v11">.scheduleScopeToggle{display:flex;gap:8px;margin-top:10px}.scheduleScopeToggle button{border:1px solid #315f91;background:#0d203c;color:#aebfd6;border-radius:999px;padding:7px 13px;font-weight:900;cursor:pointer}.scheduleScopeToggle button.active{background:#1976d2;color:#fff}</style>
+<style id="schedule-shadow-status-dot-css">
+.scheduleDateTimeCell{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+}
+
+.scheduleShadowDot{
+  display:inline-block;
+  width:9px;
+  height:9px;
+  flex:0 0 9px;
+  border-radius:50%;
+  background:#71829d;
+  box-shadow:0 0 0 2px rgba(113,130,157,.18);
+}
+
+.scheduleShadowDot.ready{
+  background:var(--green);
+  box-shadow:0 0 0 2px rgba(67,223,150,.18);
+}
+
+.scheduleShadowDot.awaiting{
+  background:var(--amber);
+  box-shadow:0 0 0 2px rgba(255,196,91,.18);
+}
+
+.scheduleShadowDot.blocked{
+  background:var(--red);
+  box-shadow:0 0 0 2px rgba(255,114,128,.18);
+}
+
+.scheduleShadowDot.excluded{
+  background:#71829d;
+}
+</style>
+
+</head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a href="dashboard.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a class="active" href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a></div></div><section class="hero"><div><div class="scheduleNativeTitleRow"><h1>Schedule & Results</h1><!-- SATURDAY_SHADOW_RULES_PANEL_START -->
 <style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
 .shadowRulesWrap{margin:12px 0 16px}
 .shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13px;font-weight:900;cursor:pointer}
@@ -178,7 +222,8 @@ img[src$="west-virginia.webp"] {
           <li>Play-by-play excluded after failing the 2025 incremental holdout</li>
         </ul>
         <p class="shadowTargetNote"><b>Verified target:</b> next-game closing-spread market innovation after removing 2.5 points of home field and both teams&#39; rolling six-week market ratings.</p>
-        <div class="shadowFormula">Target: next-game closing-spread market innovation, not the completed game's ATS result. Shadow rating Δ remains separate from the official rating.</div>
+        <div class="shadowFormula">Shadow spread = 50% target-excluded market rating + 50% updated SP+ when independent market support exists; otherwise updated SP+ fallback. Before a team plays, updated SP+ equals its entering SP+ snapshot.</div>
+        <p class="shadowTargetNote"><b>PROJECTED MARKET VALUE:</b> Spreads use a validated two-tier actionable-versus-neutral display. Three colors were not forced because locked 2025 positive-CLV rates were not monotonic.</p>
         <div id="spreadHoldoutMetrics" class="shadowMetricGrid"></div>
       </section>
       <section class="shadowRuleCard">
@@ -191,13 +236,15 @@ img[src$="west-virginia.webp"] {
           <li>Reprojects the teams’ next-game total</li>
         </ul>
         <p class="shadowTargetNote"><b>Verified target:</b> next-game closing-total innovation versus the rolling market-implied offense/defense baseline.</p>
-        <div class="shadowFormula">Target: next-game closing-total market innovation. Inputs include score surprise plus validated PBP features; official projections remain unchanged.</div>
+        <div class="shadowFormula">Shadow total = 60% predicted SP+ component total + 40% existing projected total - 1.1573.</div>
+        <p class="shadowTargetNote"><b>PROJECTED MARKET VALUE:</b> Total green/yellow/red tiers use 2024-selected thresholds and were monotonic on locked 2025 closing-line value.</p>
         <div id="totalHoldoutMetrics" class="shadowMetricGrid"></div>
       </section>
     </div>
     <section class="shadowTracking">
       <h3>2026 tracking and recalibration</h3>
-      <p>The Saturday estimate will be stored beside the eventual next-game closing spread/total and Sunday public ratings. We will track MAE, direction accuracy, calibration drift, and whether the feature set should be retrained during 2026.</p>
+      <p>Tier selection is gated by average CLV, positive-CLV rate, sample stability, and consistency by week and season stage. MAE, median error, Shadow-versus-current probability, ATS results, and ROI remain diagnostics.</p>
+      <p class="shadowTargetNote">Color ranks the Shadow edge by historically observed closing-line value. It does not indicate projection certainty or expected game-result accuracy.</p>
       <table>
         <thead><tr><th>Model</th><th>2025 holdout</th><th>2026 live tracking</th><th>Application</th></tr></thead>
         <tbody>
@@ -220,21 +267,27 @@ img[src$="west-virginia.webp"] {
     const el=document.getElementById(target);if(!el)return;
     el.innerHTML=items.map(([k,v])=>`<div class="shadowMetric"><span>${k}</span><b>${v}</b></div>`).join('');
   }
-  fetch('data/site/postgame_shadow_updates.json?v=20260724-rules1')
-    .then(r=>r.json())
-    .then(d=>{
+  Promise.all([
+    fetch('data/site/postgame_shadow_updates.json?v=20260726-value1').then(r=>r.json()),
+    fetch('data/research/shadow_value_confidence/summary.json?v=20260726-value1').then(r=>r.json())
+  ])
+    .then(([d,value])=>{
       const s=d.spread_model?.holdout_2025||{};
       const t=d.total_model?.holdout_2025||{};
+      const sv=value.spread?.two_tier_locked_2025||[];
+      const tv=value.total?.locked_2025_tiers||[];
+      const actionable=sv.find(x=>x.tier==='actionable')||{};
+      const neutral=sv.find(x=>x.tier==='neutral')||{};
       cards('spreadHoldoutMetrics',[
-        ['Sample',s.n??'—'],['MAE improvement',pct(s.mae_improvement_pct)],['Direction',pct(Number(s.direction_accuracy)*100)]
+        ['Published tier','Neutral only'],['2024 selection','Not CLV-monotonic'],['2025 candidate avg CLV',fmt(actionable.average_clv,2)]
       ]);
       cards('totalHoldoutMetrics',[
-        ['Sample',t.n??'—'],['MAE improvement',pct(t.mae_improvement_pct)],['Direction',pct(Number(t.direction_accuracy)*100)]
+        ['Green N',tv.find(x=>x.tier==='green')?.n??'—'],['Green avg CLV',fmt(tv.find(x=>x.tier==='green')?.average_clv,2)],['Green positive CLV',pct(Number(tv.find(x=>x.tier==='green')?.positive_clv_rate)*100)]
       ]);
       const ss=document.getElementById('spreadHoldoutSummary');
       const ts=document.getElementById('totalHoldoutSummary');
-      if(ss)ss.textContent=`${s.n??'—'} games · MAE ${fmt(s.model_mae,3)} · ${pct(s.mae_improvement_pct)} better · ${pct(Number(s.direction_accuracy)*100)} direction`;
-      if(ts)ts.textContent=`${t.n??'—'} games · MAE ${fmt(t.model_mae,3)} · ${pct(t.mae_improvement_pct)} better · ${pct(Number(t.direction_accuracy)*100)} direction`;
+      if(ss)ss.textContent=`No spread color tier is active: neither tested rule was CLV-monotonic in 2024 selection. The locked 2025 candidate is diagnostic only and was not used to choose a rule.`;
+      if(ts)ts.textContent=tv.map(x=>`${x.tier} N ${x.n}, CLV ${fmt(x.average_clv,2)}, ${pct(Number(x.positive_clv_rate)*100)} positive`).join(' · ');
       const status=document.getElementById('shadowRulesStatus');
       if(status)status.textContent=`Current state: ${d.status||'unknown'} · ${d.summary?.completed_team_updates||0} team updates · ratings applied: ${d.applied_to_ratings===true?'yes':'no'} · projections applied: ${d.applied_to_projections===true?'yes':'no'}`;
     })
@@ -244,10 +297,13 @@ img[src$="west-virginia.webp"] {
     });
 })();
 </script>
-<!-- SATURDAY_SHADOW_RULES_PANEL_END --></div><p>Live scores, closing-line value, Saturday impacts, and next-game projection readiness.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Data ready</span><b id="ready">—</b></div></section><div class="filters">
+<!-- SATURDAY_SHADOW_RULES_PANEL_END --></div><p>Live scores, closing-line value, Saturday impacts, and next-game projection readiness.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Base data ready</span><b id="ready">—</b></div></section><div class="filters">
 
 
-<input id="search" placeholder="Find a team"><div class="scheduleScopeToggle"><button id="fbsOnly" class="active">FBS vs FBS</button><button id="allGames">All Games</button></div></div><div class="card"><div class="wrap"><table><thead><tr><th><button class="scheduleSortHeader" data-sort="kickoff" title="Sort by kickoff time">Date / Time</button></th><th>Matchup <button class="scheduleMiniSort" data-sort="away" title="Sort by away team">Away</button> <button class="scheduleMiniSort" data-sort="home" title="Sort by home team">Home</button></th><th>Live Score</th><th><span class="scheduleTip" data-tip="Final market spread and ATS result once the game is complete.">Closing Spread / ATS</span></th><th><span class="scheduleTip" data-tip="Final market total and over/under result once the game is complete.">Closing Total / O-U</span></th><th><span class="scheduleTip" data-tip="Applied team-level adjustment from this game for each team’s next closing-spread projection. Uses 0.50× the validated raw spread update.">Spread Impact</span></th><th><span class="scheduleTip" data-tip="Team-level score/PBP adjustment carried into future total projections. Eligible next matchups apply 0.85× the validated total update.">Total Impact</span></th><th><span class="scheduleTip" data-tip="Links each team to the following-week Openers page, where the next market baseline and Saturday Shadow projection are shown.">Next Week</span></th><th><button class="scheduleSortHeader" data-sort="status" title="Sort alphabetically by data status">Data Status</button></th></tr></thead><tbody id="rows"><tr><td class="empty">Loading schedule…</td></tr></tbody></table></div></div></main><script>
+<input id="search" placeholder="Find a team"><div class="scheduleScopeToggle"><button id="fbsOnly" class="active">FBS vs FBS</button><button id="allGames">All Games</button></div></div><div class="card"><div class="wrap"><table><thead><tr><th><button class="scheduleSortHeader" data-sort="kickoff" title="Sort by kickoff time">Date / Time</button></th><th>Matchup <button class="scheduleMiniSort" data-sort="away" title="Sort by away team">Away</button> <button class="scheduleMiniSort" data-sort="home" title="Sort by home team">Home</button></th><th>Live Score</th><th><span class="scheduleTip" data-tip="Current spread for pending games; closing spread and ATS result for completed games.">Spread / ATS</span></th><th><span class="scheduleTip" data-tip="Current total for pending games; closing total and over/under result for completed games.">Total / O-U</span></th><th><span class="scheduleTip" data-tip="Shadow spread impact after at least one genuine postgame update. Before activation, no impact is calculated.">Spread Impact</span></th><th><span class="scheduleTip" data-tip="Shadow total impact after at least one genuine postgame update. Projected-market-value color reflects historical CLV, not certainty.">Total Impact</span></th><th><span class="scheduleTip" data-tip="Links each team to the following-week Openers page, where a genuine postgame Shadow projection will appear when ready.">Next Week</span></th><th><button class="scheduleSortHeader scheduleTip"
+  data-sort="status"
+  data-tip="Overall processing state for this game. Awaiting game means the game is not complete. Partial means some required postgame data is missing. Complete means the available result, market close, and required processing steps are ready."
+  title="Sort alphabetically by data status">Data Status</button></th></tr></thead><tbody id="rows"><tr><td class="empty">Loading schedule…</td></tr></tbody></table></div></div></main><script>
 let D,GC=new Map,week=0,sortKey='kickoff',sortDir=1,fbsOnlyMode=true;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',sgn=x=>Number(x)>0?'+':'';function logo(t){return`<img src="logos/${esc(t.logo_slug)}.png" onerror="this.style.display='none'">`}function matchup(r){return`<span class="team">${logo(r.teams.away)}${esc(r.game.away_team)} <span class="muted">at</span> ${logo(r.teams.home)}${esc(r.game.home_team)}</span>`}function grading(r){const a=Number(r.game.away_score),h=Number(r.game.home_score),line=r.market.spread.home_line==null?NaN:Number(r.market.spread.home_line),total=r.market.total.line==null?NaN:Number(r.market.total.line);if(!r.game.completed||!Number.isFinite(a)||!Number.isFinite(h))return{score:'—',ats:'Pending',ou:'Pending'};let ats='No closing line',ou='No closing total';if(Number.isFinite(line)){const m=h-a+line;ats=Math.abs(m)<.001?'Push':`${m>0?r.game.home_team:r.game.away_team} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}if(Number.isFinite(total)){const m=a+h-total;ou=Math.abs(m)<.001?'Push':`${m>0?'Over':'Under'} ${sgn(Math.abs(m))}${num(Math.abs(m))}`;}return{score:`${r.game.away_team} ${a}–${h} ${r.game.home_team}`,ats,ou}}function isFbsMatchup(r){const s=shadowFor(r);return s.fbs_matchup!==false&&!s.fcs_excluded}
 function filtered(){return D.games.filter(r=>r.game.week===week&&(!fbsOnlyMode||isFbsMatchup(r))&&(`${r.game.away_team} ${r.game.home_team}`).toLowerCase().includes(search.value.toLowerCase()))}
 let SH=new Map();
@@ -299,14 +355,26 @@ function dateTimeCell(r){
     dateLabel=`${parts[1]}/${parts[2]}`
   }
   if(!d){
-    return `<div class="scheduleDateTimeCell"><b>${esc(dateLabel)}</b><span class="sub">TBD</span></div>`
+    const status=shadowScheduleTone(r,shadowFor(r));
+    return `<div class="scheduleDateTimeCell">
+      <i class="scheduleShadowDot ${status.tone}"
+         title="${esc(status.label)}"
+         aria-label="${esc(status.label)}"></i>
+      <b>${esc(dateLabel)}</b><span class="sub">TBD</span>
+    </div>`
   }
   const timeLabel=new Intl.DateTimeFormat('en-US',{
     timeZone:'America/New_York',
     hour:'numeric',
     minute:'2-digit'
   }).format(d);
-  return `<div class="scheduleDateTimeCell"><b>${esc(dateLabel)}</b><span class="sub">${esc(timeLabel)} ET</span></div>`
+  const status=shadowScheduleTone(r,shadowFor(r));
+  return `<div class="scheduleDateTimeCell">
+    <i class="scheduleShadowDot ${status.tone}"
+       title="${esc(status.label)}"
+       aria-label="${esc(status.label)}"></i>
+    <b>${esc(dateLabel)}</b><span class="sub">${esc(timeLabel)} ET</span>
+  </div>`
 }
 function clvSpread(r,s){
   const open=Number(s.opening_spread),close=Number(s.closing_spread??r.market.spread.home_line);
@@ -321,7 +389,7 @@ function dataStatus(r,s){
   if(s.fcs_excluded||s.fbs_matchup===false)return{label:'Excluded',cls:'muted'};
   const completed=!!r.game.completed;
   const hasPregame=finiteNum(r.market?.spread?.home_line)||finiteNum(r.market?.total?.line)||finiteNum(s.market_baseline_spread)||finiteNum(s.market_baseline_total);
-  if(!completed)return hasPregame?{label:'Ready',cls:'good'}:{label:'Pending',cls:'muted'};
+  if(!completed)return s.shadow_display_ready===true?{label:'Shadow ready',cls:'good'}:{label:'Awaiting game',cls:'muted'};
   const raw=String(s.data_status||'').toLowerCase();
   if(raw==='complete')return{label:'Complete',cls:'good'};
   if(raw==='partial')return{label:'Partial',cls:'warn'};
@@ -329,19 +397,91 @@ function dataStatus(r,s){
   const pbp=ids.every(x=>GC.has(x));
   return pbp?{label:'Complete',cls:'good'}:{label:'Partial',cls:'warn'}
 }
+function friendlyUpdateState(value){
+  const key=String(value||'baseline_only').toLowerCase();
+  const labels={
+    baseline_only:'Preseason baseline',
+    postgame_updated:'Postgame updated',
+    unavailable:'Unavailable'
+  };
+  return labels[key]||String(value||'Preseason baseline').replaceAll('_',' ');
+}
+
+function shadowScheduleTone(r,s){
+  if(s?.shadow_display_ready===true){
+    return {tone:'ready',label:'Shadow update active'};
+  }
+  if(s?.fcs_excluded||s?.fbs_matchup===false){
+    return {tone:'excluded',label:'Shadow excluded or opponent rating unavailable'};
+  }
+  if(r?.game?.completed){
+    return {tone:'blocked',label:'Completed game awaiting required postgame data'};
+  }
+  return {tone:'awaiting',label:'Awaiting completed game'};
+}
+
 function detailRow(r,s){
-  const items=[
-    ['Opening spread',s.opening_spread],['Closing spread',s.closing_spread??r.market.spread.home_line],
-    ['Opening total',s.opening_total],['Closing total',s.closing_total??r.market.total.line],
-    ['Market baseline spread',s.market_baseline_spread],['Raw spread delta',s.raw_spread_delta],
-    ['Applied spread impact',s.spread_impact],['Next shadow spread',s.next_projection_spread],
-    ['Market baseline total',s.market_baseline_total],['Raw total/PBP delta',s.raw_total_delta],
-    ['Applied total impact',s.total_impact],['Next shadow total',s.next_projection_total],
-    ['CFBD',s.cfbd_status||(r.game.completed?'Complete':'Scheduled')],
-    ['PBP',s.pbp_status||'Pending'],
-    ['Spread status',s.spread_status||'Pending'],['Total status',s.total_status||'Pending']
+  const ready=s.shadow_display_ready===true;
+  const fmt=(v,d=1)=>finiteNum(v)?Number(v).toFixed(d).replace(/^-0\.0+$/,'0.0'):'—';
+  const item=(label,value)=>`<div class="scheduleDetailItem"><span>${esc(label)}</span><b>${value==null?'—':esc(value)}</b></div>`;
+  const section=(title,items,message='')=>`<section class="scheduleDetailSection"><h3>${esc(title)}</h3>${message?`<div class="scheduleDetailMessage">${esc(message)}</div>`:`<div class="scheduleDetailItems">${items.map(x=>item(x[0],x[1])).join('')}</div>`}</section>`;
+  const currentModelSpread=
+    finiteNum(s.current_model_spread)
+      ? s.current_model_spread
+      : r?.model?.home_spread;
+
+  const currentModelTotal=
+    finiteNum(s.current_model_total)
+      ? s.current_model_total
+      : r?.model?.total;
+
+  const current=[
+    ['Current Model Spread',fmt(currentModelSpread)],
+    ['Current Model Total',fmt(currentModelTotal)],
+    ['Current Market Spread',fmt(s.current_market_spread??r.market.spread.home_line)],
+    ['Current Market Total',fmt(s.current_market_total??r.market.total.line)]
   ];
-  return `<tr class="scheduleNativeDetail"><td colspan="9"><div class="scheduleNativeDetailGrid">${items.map(([k,v])=>`<div><span>${esc(k)}</span><b>${v==null?'—':esc(v)}</b></div>`).join('')}</div></td></tr>`
+  const readiness=[
+    ['Market data',s.market_readiness_state||((r.market.spread.home_line!=null||r.market.total.line!=null)?'Current market available':'Market unavailable')],
+    ['Away update',friendlyUpdateState(s.away_update_state)],
+    ['Home update',friendlyUpdateState(s.home_update_state)],
+    ['Completed-team updates',String(Number(s.completed_team_update_count||0))],
+    ['SP+ readiness',s.spread_status||'Awaiting completed game'],['Total readiness',s.total_status||'Awaiting completed game'],
+    ['Source cutoff',s.feature_cutoff||'—'],['Missing reason',(s.shadow_missing_reasons||[]).join('; ')||'—']
+  ];
+  let body=section('Current Projection',current);
+  if(!ready){
+    body+=section('Shadow Status',[],s.shadow_status==='Unavailable'?`Unavailable — ${(s.shadow_missing_reasons||['Postgame data incomplete']).join('; ')}`:'Awaiting completed game · No postgame update is available yet');
+    body+=section('Data Readiness',readiness);
+  }else{
+    body+=section('Spread Projection',[
+      ['Shadow Spread',fmt(s.next_projection_spread)],['Current Model Spread',fmt(currentModelSpread)],
+      ['Spread Impact',fmt(s.spread_impact)],['Current Market Spread',fmt(s.current_market_spread)],
+      ['Shadow Market Edge',finiteNum(s.next_projection_spread)&&finiteNum(s.current_market_spread)?fmt(Number(s.current_market_spread)-Number(s.next_projection_spread)):'—'],
+      ['Formula Used',s.shadow_spread_formula||'—'],['Away Entering SP+',fmt(s.away_sp_plus_entering)],['Home Entering SP+',fmt(s.home_sp_plus_entering)],
+      ['Away Predicted SP+ Change',fmt(s.away_predicted_sp_plus_change,2)],['Home Predicted SP+ Change',fmt(s.home_predicted_sp_plus_change,2)],
+      ['Market Component',fmt(s.predicted_market_rating_spread)]
+    ]);
+    body+=section('Market-Rating Context',[
+      ['Away Rating',fmt(s.away_all_board_market_rating)],['Away Rank',finiteNum(s.away_all_board_market_rank)?String(Math.round(Number(s.away_all_board_market_rank))):'—'],
+      ['Away Games',finiteNum(s.away_market_games_in_rating)?String(Math.round(Number(s.away_market_games_in_rating))):'—'],['Away Sample',s.away_market_sample_status||'—'],
+      ['Home Rating',fmt(s.home_all_board_market_rating)],['Home Rank',finiteNum(s.home_all_board_market_rank)?String(Math.round(Number(s.home_all_board_market_rank))):'—'],
+      ['Home Games',finiteNum(s.home_market_games_in_rating)?String(Math.round(Number(s.home_market_games_in_rating))):'—'],['Home Sample',s.home_market_sample_status||'—'],
+      ['Connected Component',finiteNum(s.leave_one_out_component_size)?String(Math.round(Number(s.leave_one_out_component_size))):'—'],['Readiness',s.market_readiness_state||'—']
+    ]);
+    body+=section('Total Projection',[
+      ['SP+ Component Total',fmt(s.predicted_sp_plus_component_total)],['Existing Projected Total',fmt(s.current_model_total)],
+      ['Raw 60/40 Blend',fmt(s.raw_60_40_total)],['Bias Correction',fmt(s.total_bias_correction,4)],
+      ['Final Shadow Total',fmt(s.next_projection_total)],['Total Impact',fmt(s.total_impact)],['Current Market Total',fmt(s.current_market_total)],
+      ['Shadow Total Edge',finiteNum(s.next_projection_total)&&finiteNum(s.current_market_total)?fmt(Number(s.next_projection_total)-Number(s.current_market_total)):'—']
+    ]);
+    body+=section('Projected Market Value',[
+      ['Spread',s.spread_projected_market_value||'Neutral'],['Total',s.total_projected_market_value||'Unavailable'],
+      ['Meaning','Historical closing-line value; not projection confidence']
+    ]);
+    body+=section('Data Readiness',readiness);
+  }
+  return `<tr class="scheduleNativeDetail"><td colspan="9"><div class="scheduleNativeDetailBody">${body}</div></td></tr>`
 }
 
 function scheduleLogoV11(r,side){
@@ -359,8 +499,14 @@ function scheduleMiniTeamV11(r,side){
   </span>`
 }
 function scheduleImpactPairV11(r,s,type){
-  const away=type==='spread'?s.away_spread_impact:s.away_total_impact;
-  const home=type==='spread'?s.home_spread_impact:s.home_total_impact;
+  const ready=s.shadow_display_ready===true;
+  const away=ready
+    ? (type==='spread'?s.away_spread_impact:s.away_total_impact)
+    : null;
+  const home=ready
+    ? (type==='spread'?s.home_spread_impact:s.home_total_impact)
+    : null;
+
   return `<div class="scheduleImpactPairV11">
     <div>${scheduleMiniTeamV11(r,'away')}<b class="${tone(away)}">${one(away)}</b></div>
     <div>${scheduleMiniTeamV11(r,'home')}<b class="${tone(home)}">${one(home)}</b></div>

@@ -123,6 +123,8 @@ img[src$="west-virginia.webp"] {
 .shadowTag{display:inline-flex;align-items:center;border:1px solid #7652a8;background:#2b1d45;color:#e1ccff;border-radius:999px;padding:2px 6px;font-size:8px;font-weight:950;margin-left:5px}
 </style><style id="openers-shadow-preseason-css-v4">
 .shadowUnavailableNote{color:var(--muted);font-size:10px;font-weight:850;margin-left:4px}
+</style><style id="projected-market-value-css">
+.projection.valueGreen{box-shadow:inset 4px 0 #31d98b}.projection.valueYellow{box-shadow:inset 4px 0 #f2bd4f}.projection.valueRed{box-shadow:inset 4px 0 #f26a75}.projection.valueGray{box-shadow:inset 4px 0 #64748b}.projection.valueNeutral{box-shadow:inset 4px 0 #7790ad}
 </style><style id="openers-shadow-impacts-css-v6">
 .shadowImpactPair{display:grid;grid-template-columns:minmax(80px,1fr) auto;gap:4px 8px;align-items:center;min-width:130px}
 .shadowImpactTeam{display:flex;align-items:center;gap:5px;min-width:0;font-weight:850}
@@ -229,7 +231,112 @@ body:has(#projectionMode button[data-projection-mode="shadow"].active) tbody td:
   width:190px;
   min-width:190px;
 }
-</style></head><body>
+</style>
+<style id="openers-shadow-final-polish-css">
+.openerDateLine{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.shadowReadinessDot{
+  display:inline-block;
+  width:9px;
+  height:9px;
+  flex:0 0 9px;
+  border-radius:50%;
+  background:#71829d;
+  box-shadow:0 0 0 2px rgba(113,130,157,.18);
+}
+
+.shadowReadinessDot.ready{
+  background:var(--green);
+  box-shadow:0 0 0 2px rgba(67,223,150,.18);
+}
+
+.shadowReadinessDot.awaiting{
+  background:var(--amber);
+  box-shadow:0 0 0 2px rgba(255,196,91,.18);
+}
+
+.shadowReadinessDot.blocked{
+  background:var(--red);
+  box-shadow:0 0 0 2px rgba(255,114,128,.18);
+}
+
+.shadowReadinessDot.excluded{
+  background:#71829d;
+}
+
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.columnRow th:nth-child(5),
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+tbody td:nth-child(5),
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.columnRow th:nth-child(9),
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+tbody td:nth-child(9){
+  width:165px;
+  min-width:165px;
+}
+
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.wrap table{
+  min-width:1270px;
+}
+
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.market .book{
+  display:inline-flex;
+  align-items:center;
+  margin-left:3px;
+}
+
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.bestStack>span{
+  gap:2px;
+}
+
+body:has(#projectionMode button[data-projection-mode="shadow"].active)
+.bestStack b{
+  font-size:10px;
+}
+
+#postgameShadow:not([open]) .freshnessBody{
+  display:none;
+}
+</style>
+
+
+<style id="openers-header-tip-css">
+.openersTip{
+  cursor:help;
+  text-decoration:underline dotted rgba(255,255,255,.35);
+  text-underline-offset:3px;
+}
+
+.openersHeaderTip{
+  position:fixed;
+  z-index:9999;
+  display:none;
+  max-width:320px;
+  padding:9px 11px;
+  border:1px solid #315f92;
+  border-radius:9px;
+  background:#0b1d38;
+  color:#eaf3ff;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  font-size:11px;
+  line-height:1.4;
+  pointer-events:none;
+}
+
+.openersHeaderTip.show{
+  display:block;
+}
+</style>
+
+</head><body>
 <main class="shell"><div class="top"><div class="brand"><a href="index.html">NCAAF</a></div><div class="nav"><a href="index.html">Dashboard</a><a href="ratings.html">Ratings</a><a href="openers.html" class="active">Openers</a><a href="matchups.html">Matchups</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="playoff.html">Playoff</a><a href="simulations.html">Simulations</a><a href="betting.html">Betting</a><a href="v1.html">V1 Reference</a></div><div class="model" id="modelStamp">Production ratings</div></div>
 <section class="hero"><div><h1>Openers</h1><p>Fast first-pass decisions before the market settles.</p></div><div class="metrics"><div class="metric"><span>Games shown</span><b id="shown">—</b></div><div class="metric"><span>With market</span><b id="marketCount">—</b></div></div></section>
 <details class="freshness" id="freshness"><summary id="freshnessSummary">Checking whether ratings changed and were applied…</summary><div class="freshnessBody" id="freshnessBody"></div></details>
@@ -245,55 +352,111 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function logo(t){return t?.logo_slug?`<img src="logos/${esc(t.logo_slug)}.png" alt="" loading="lazy" onerror="this.style.display='none'">`:''}function matchup(r){return`<div class="matchup"><a class="team teamLink" href="team.html?team=${encodeURIComponent(r.teams.away.logo_slug||r.game.away_team)}" onclick="event.stopPropagation()"><small class="rank">#${r.teams.away.overall_rank??'—'}</small>${logo(r.teams.away)}${esc(r.game.away_team)}</a><span class="at">at</span><a class="team teamLink" href="team.html?team=${encodeURIComponent(r.teams.home.logo_slug||r.game.home_team)}" onclick="event.stopPropagation()"><small class="rank">#${r.teams.home.overall_rank??'—'}</small>${logo(r.teams.home)}${esc(r.game.home_team)}</a></div>`}
 function shadowRow(r){return SHADOW.get(r.game.game_id)||null}
 function shadowEligible(r){const s=shadowRow(r);return !!s&&!s.fcs_excluded&&s.fbs_matchup!==false}
-function activeHomeSpread(r){if(projectionMode==='shadow'){if(!SHADOW_AVAILABLE)return null;const s=shadowRow(r);return shadowEligible(r)?s.saturday_shadow_spread:null}return r.model.home_spread}
-function activeTotal(r){if(projectionMode==='shadow'){if(!SHADOW_AVAILABLE)return null;const s=shadowRow(r);return shadowEligible(r)?s.saturday_shadow_total:null}return r.model.total}
+function shadowReady(r){return shadowRow(r)?.shadow_display_ready===true}
+function activeHomeSpread(r){if(projectionMode==='shadow'){const s=shadowRow(r);return shadowEligible(r)&&shadowReady(r)?s.saturday_shadow_spread:null}return r.model.home_spread}
+function activeTotal(r){if(projectionMode==='shadow'){const s=shadowRow(r);return shadowEligible(r)&&shadowReady(r)?s.saturday_shadow_total:null}return r.model.total}
 function projectionTag(){return projectionMode==='shadow'?'<span class="shadowTag">Shadow</span>':''}
+const MARKET_VALUE_TOOLTIP='Color ranks the Shadow edge by historically observed closing-line value. It does not indicate projection certainty or expected game-result accuracy.';
+function projectedMarketValue(r,kind){
+  const s=shadowRow(r),score=Number(s?.[`${kind}_projected_market_value_score`]);
+  if(!s?.shadow_display_ready)return{tone:'valueGray',label:'Unavailable'};
+  if(kind==='spread'&&s?.saturday_shadow_spread!=null)return{tone:'valueNeutral',label:'Neutral projected market value'};
+  if(!Number.isFinite(score))return{tone:'valueGray',label:'Unavailable'};
+  if(score>=1.0561331175166497)return{tone:'valueGreen',label:'Strongest projected market value'};
+  if(score>=.37464212056867763)return{tone:'valueYellow',label:'Moderate projected market value'};
+  return{tone:'valueRed',label:'Weak or negative projected market value'};
+}
+function valueCellClass(r,kind){return projectedMarketValue(r,kind).tone}
+function valueCellTitle(r,kind){const v=projectedMarketValue(r,kind);return`PROJECTED MARKET VALUE: ${v.label}. ${MARKET_VALUE_TOOLTIP}`}
 function standardModelSpread(r){const x=r.model.home_spread;if(x==null)return'—';return`${esc(x<0?r.game.home_team:r.game.away_team)} ${line(-Math.abs(x))}`}
 function standardModelTotal(r){return r.model.total==null?'—':num(r.model.total)}
 function scheduleImpactRow(r){return SCHEDULE_ENRICHMENT.get(r.game.game_id)||shadowRow(r)||{}}
 function impactValue(s,side,kind){
   const keys=[`${side}_${kind}_impact`,`${side}_${kind}_delta`,`${side}_raw_postgame_delta`,`${side}_raw_${kind}_delta`];
-  for(const k of keys){const v=Number(s?.[k]);if(Number.isFinite(v))return v}
+  for(const k of keys){const raw=s?.[k];if(raw==null||raw==='')continue;const v=Number(raw);if(Number.isFinite(v))return v}
   return null
 }
 function impactTone(v){return v>0?'good':v<0?'bad':'muted'}
 function impactText(v){return Number.isFinite(v)?`${v>0?'+':''}${Number(v).toFixed(1)}`:'—'}
 function shadowImpactPairHtml(r,kind){
   const s=scheduleImpactRow(r),a=r.game.away_team,h=r.game.home_team;
-  const av=impactValue(s,'away',kind),hv=impactValue(s,'home',kind);
+  const av=shadowReady(r)?impactValue(s,'away',kind):null;
+  const hv=shadowReady(r)?impactValue(s,'home',kind):null;
   return`<div class="shadowImpactPair">
     <div class="shadowImpactTeam" title="${esc(a)}">${logo(TEAM_META[a]||{})}</div><div class="shadowImpactValue ${impactTone(av)}">${impactText(av)}</div>
     <div class="shadowImpactTeam" title="${esc(h)}">${logo(TEAM_META[h]||{})}</div><div class="shadowImpactValue ${impactTone(hv)}">${impactText(hv)}</div>
   </div>`
 }
+function shadowProjectionCell(r,kind){
+  return kind==='spread'
+    ? modelSpread(r)
+    : (activeTotal(r)==null
+        ? shadowMissingLabel(r,'total')
+        : `${num(activeTotal(r))}${projectionTag()}`);
+}
 function shadowStatusHtml(r){
-  if(!SHADOW_AVAILABLE)return'<span class="shadowStatus">Awaiting completed games</span>';
   const s=shadowRow(r);
   if(!s)return'<span class="shadowStatus">Unavailable</span>';
   if(s.fcs_excluded||s.fbs_matchup===false)return'<span class="shadowStatus">Excluded</span>';
-  const spreadReady=Number.isFinite(Number(s.saturday_shadow_spread));
-  const totalReady=Number.isFinite(Number(s.saturday_shadow_total));
-  return`<span class="shadowStatus">${spreadReady||totalReady?'Updated':'Pending'}</span>`
+  return`<span class="shadowStatus">${s.shadow_display_ready?'Active':'Awaiting completed game'}</span>`
 }
 function shadowGapAvailable(){return projectionMode!=='shadow'||SHADOW_AVAILABLE}
 function shadowMissingLabel(r,field){
   const s=shadowRow(r);
   if(projectionMode!=='shadow')return'—';
-  if(!SHADOW_AVAILABLE)return'<span class="shadowExcluded">Pending</span>';
-  if(!s)return'<span class="shadowExcluded">Unavailable</span>';
+  if(!s||s.shadow_activation_reason==='awaiting_completed_game')return'<span class="shadowExcluded">Awaiting game</span>';
   if(s.fcs_excluded||s.fbs_matchup===false)return'<span class="shadowExcluded">Excluded</span>';
   const status=field==='spread'?String(s.spread_status||''):String(s.total_status||'');
-  return`<span class="shadowExcluded" title="${esc(status||'Shadow value not available')}">Pending</span>`
+  return`<span class="shadowExcluded" title="${esc(status||'Shadow value not available')}">Unavailable</span>`
 }
 function modelSpread(r){const x=activeHomeSpread(r);if(x==null)return shadowMissingLabel(r,'spread');return`${esc(x<0?r.game.home_team:r.game.away_team)} ${line(-Math.abs(x))}${projectionTag()}`}function spreadOffer(r){const m=activeHomeSpread(r),g=r.market.spread;if(m==null||g.home_line==null)return null;const home=m<g.home_line,b=home?g.best_home:g.best_away,q=b?.home_line??g.home_line;return{team:home?r.game.home_team:r.game.away_team,line:home?q:-q,edge:Math.abs(m-q),price:b?.price??g.price,book:b?.book??g.book}}function totalOffer(r){const m=activeTotal(r),g=r.market.total;if(m==null||g.line==null)return null;const over=m>g.line,b=over?g.best_over:g.best_under,q=b?.line??g.line;return{team:over?'Over':'Under',line:q,edge:Math.abs(m-q),price:b?.price??(over?g.over_price:g.under_price),book:b?.book??g.book}}function spreadGapHtml(r,s){if(!s)return'—';const meta=TEAM_META[s.team]||{};return`<span class="gapPick" title="${esc(s.team)}">${logo(meta)}<b>${num(s.edge)}</b></span>`}function totalGapHtml(t){if(!t)return'—';return`<span class="gapPick totalPick"><em>${esc(t.team)}</em><b>${num(t.edge)}</b></span>`}
 function spreadMarket(r){const g=r.market.spread;if(g.home_line==null)return'—';const h=g.best_home||g,a=g.best_away||g;return`<span class="bestStack"><span><b>${esc(r.game.home_team)} ${line(h.home_line??g.home_line)} ${price(h.price??g.price)}</b> <span class="book">${esc(h.book??g.book??'')}</span></span><span><b>${esc(r.game.away_team)} ${line(-(a.home_line??g.home_line))} ${price(a.price??g.price)}</b> <span class="book">${esc(a.book??g.book??'')}</span></span></span>`}function totalMarket(r){const g=r.market.total;if(g.line==null)return'—';const o=g.best_over||g,u=g.best_under||g;return`<span class="bestStack"><span><b>Over ${num(o.line??g.line)} ${price(o.price??g.over_price)}</b> <span class="book">${esc(o.book??g.book??'')}</span></span><span><b>Under ${num(u.line??g.line)} ${price(u.price??g.under_price)}</b> <span class="book">${esc(u.book??g.book??'')}</span></span></span>`}
 function independentAngles(r){return(r.angles||[]).filter(a=>/travel|lookahead|sandwich|back.to.back|b2b|short rest|bye|schedule|returning production|coach|injur|weather/i.test(`${a.signal_type||''} ${a.headline||''} ${a.detail||''}`))}
-function gameTypeOf(r){const a=r.teams.away.overall_rank!=null,h=r.teams.home.overall_rank!=null;return a&&h?'fbs_fbs':a||h?'fbs_fcs':'other'}function filtered(){const w=week.value,q=search.value.toLowerCase();return DATA.games.filter(r=>(w==='all'||String(r.game.week)===w)&&(gameType.value==='all'||gameTypeOf(r)===gameType.value)&&(`${r.game.away_team} ${r.game.home_team}`.toLowerCase().includes(q))&&(mode!=='market'||spreadOffer(r)||totalOffer(r))&&(mode!=='watch'||decisions[r.game.game_id]==='watch')&&(mode!=='bet'||(bets[r.game.game_id]||[]).length))}
+function gameTypeOf(r){const a=r.teams.away.overall_rank!=null,h=r.teams.home.overall_rank!=null;return a&&h?'fbs_fbs':a||h?'fbs_fcs':'other'}
+function hasMarket(r){
+  const spread=r?.market?.spread;
+  const total=r?.market?.total;
+  return spread?.home_line!=null||total?.line!=null;
+}
+function filtered(){const w=week.value,q=search.value.toLowerCase();return DATA.games.filter(r=>(w==='all'||String(r.game.week)===w)&&(gameType.value==='all'||gameTypeOf(r)===gameType.value)&&(`${r.game.away_team} ${r.game.home_team}`.toLowerCase().includes(q))&&(mode!=='market'||hasMarket(r))&&(mode!=='watch'||decisions[r.game.game_id]==='watch')&&(mode!=='bet'||(bets[r.game.game_id]||[]).length))}
 function sortVal(r){if(sortKey==='away'||sortKey==='home')return r.game[sortKey+'_team'];if(sortKey==='spread')return Math.abs(activeHomeSpread(r)??-999);if(sortKey==='total')return activeTotal(r)??-999;if(sortKey==='spreadEdge')return spreadOffer(r)?.edge??-1;if(sortKey==='totalEdge')return totalOffer(r)?.edge??-1;return`${r.game.date||''}-${String(r.game.week).padStart(2,'0')}`}function shortDate(v){const s=String(v||'').slice(0,10);return/^\d{4}-\d{2}-\d{2}$/.test(s)?`${Number(s.slice(5,7))}/${Number(s.slice(8,10))}`:s||'TBD'}
+function shadowStatusTone(r){
+  const s=shadowRow(r);
+
+  if(shadowReady(r)){
+    return{
+      tone:'ready',
+      label:'Shadow update active'
+    };
+  }
+
+  if(s?.fcs_excluded||s?.fbs_matchup===false){
+    return{
+      tone:'excluded',
+      label:'Shadow not applicable or opponent rating unavailable'
+    };
+  }
+
+  if(s&&s.shadow_activation_reason&&
+     s.shadow_activation_reason!=='awaiting_completed_game'){
+    return{
+      tone:'blocked',
+      label:s.shadow_status||s.shadow_activation_reason||'Shadow update unavailable'
+    };
+  }
+
+  return{
+    tone:'awaiting',
+    label:'Awaiting completed game'
+  };
+}
+
 function openerDateTime(r){
   const s=scheduleImpactRow(r);
   const raw=s.kickoff_et||s.kickoff_utc||s.kickoff_raw||null;
+  const status=shadowStatusTone(r);
   let timeLabel='TBD';
+
   if(raw){
     const d=new Date(raw);
     if(!Number.isNaN(d.getTime())){
@@ -304,35 +467,52 @@ function openerDateTime(r){
       }).format(d);
     }
   }
-  return`<div class="openerDateTime"><b>${shortDate(r.game.date)}</b><span>${esc(timeLabel)}${timeLabel==='TBD'?'':' ET'}</span></div>`
+
+  return`<div class="openerDateTime">
+    <span class="openerDateLine">
+      <i class="shadowReadinessDot ${status.tone}"
+         title="${esc(status.label)}"
+         aria-label="${esc(status.label)}"></i>
+      <b>${shortDate(r.game.date)}</b>
+    </span>
+    <span>${esc(timeLabel)}${timeLabel==='TBD'?'':' ET'}</span>
+  </div>`
 }
 function render(){
   let list=filtered();
   list.sort((a,b)=>{const x=sortVal(a),y=sortVal(b);return(typeof x==='string'?x.localeCompare(y):x-y)*sortDir});
 
   if(projectionMode==='shadow'){
-    head.innerHTML=`<tr class="groupRow"><th colspan="2"></th><th colspan="4" class="spreadGroup">Spread</th><th colspan="4" class="totalGroup">Total</th></tr><tr class="columnRow"><th data-sort="date">Date</th><th>Matchup <button data-sort="away">Away ↕</button> <button data-sort="home">Home ↕</button></th><th class="spreadGroup" data-sort="spread">Shadow</th><th class="spreadGroup">Current<br>model</th><th class="spreadGroup">Best<br>market</th><th class="spreadGroup">Spread<br>impact</th><th class="totalGroup" data-sort="total">Shadow</th><th class="totalGroup">Current<br>model</th><th class="totalGroup">Best<br>market</th><th class="totalGroup">Total<br>impact</th></tr>`;
-    rows.innerHTML=list.map(r=>`<tr class="game ${selected===r.game.game_id?'selected':''}" onclick="openDrawer('${r.game.game_id}')"><td>${openerDateTime(r)}</td><td>${matchup(r)}</td><td class="projection spreadCol">${modelSpread(r)}</td><td class="projection spreadCol">${standardModelSpread(r)}</td><td class="market spreadCol">${spreadMarket(r)}</td><td class="spreadCol">${shadowImpactPairHtml(r,'spread')}</td><td class="projection totalCol">${activeTotal(r)==null?shadowMissingLabel(r,'total'):`${num(activeTotal(r))}${projectionTag()}`}</td><td class="projection totalCol">${standardModelTotal(r)}</td><td class="market totalCol">${totalMarket(r)}</td><td class="totalCol">${shadowImpactPairHtml(r,'total')}</td></tr>`).join('')||'<tr><td colspan="10" class="empty">No games match these filters.</td></tr>';
+    head.innerHTML=`<tr class="groupRow"><th colspan="2"></th><th colspan="4" class="spreadGroup">Spread</th><th colspan="4" class="totalGroup">Total</th></tr><tr class="columnRow">
+<th class="openersTip" data-sort="date" data-tip="Yellow means awaiting a completed game; green means an active Shadow update; red means required postgame data is missing.">Date</th>
+<th class="openersTip" data-tip="The scheduled matchup. Away and Home buttons sort the visible games.">Matchup <button data-sort="away">Away ↕</button> <button data-sort="home">Home ↕</button></th>
+<th class="spreadGroup openersTip" data-sort="spread" data-tip="Revised spread after at least one team has a valid completed-game update.">Shadow</th>
+<th class="spreadGroup openersTip" data-tip="The existing season-long model projection before a postgame Shadow adjustment.">Current<br>model</th>
+<th class="spreadGroup openersTip" data-tip="Best currently available sportsbook prices for each side.">Best<br>market</th>
+<th class="spreadGroup openersTip" data-tip="Team-level postgame spread changes used in the next matchup. A dash means no update has been calculated.">Spread<br>impact</th>
+<th class="totalGroup openersTip" data-sort="total" data-tip="Revised total after at least one team has a valid completed-game offense or defense update.">Shadow</th>
+<th class="totalGroup openersTip" data-tip="The existing season-long model total before a postgame Shadow adjustment.">Current<br>model</th>
+<th class="totalGroup openersTip" data-tip="Best currently available over and under sportsbook prices.">Best<br>market</th>
+<th class="totalGroup openersTip" data-tip="Team-level postgame total changes used in the next matchup. A dash means no update has been calculated.">Total<br>impact</th>
+</tr>`;
+    rows.innerHTML=list.map(r=>`<tr class="game ${selected===r.game.game_id?'selected':''}" onclick="openDrawer('${r.game.game_id}')"><td>${openerDateTime(r)}</td><td>${matchup(r)}</td><td class="projection spreadCol ${valueCellClass(r,'spread')}" title="${esc(valueCellTitle(r,'spread'))}">${shadowProjectionCell(r,'spread')}</td><td class="projection spreadCol">${standardModelSpread(r)}</td><td class="market spreadCol">${spreadMarket(r)}</td><td class="spreadCol">${shadowImpactPairHtml(r,'spread')}</td><td class="projection totalCol ${valueCellClass(r,'total')}" title="${esc(valueCellTitle(r,'total'))}">${shadowProjectionCell(r,'total')}</td><td class="projection totalCol">${standardModelTotal(r)}</td><td class="market totalCol">${totalMarket(r)}</td><td class="totalCol">${shadowImpactPairHtml(r,'total')}</td></tr>`).join('')||'<tr><td colspan="10" class="empty">No games match these filters.</td></tr>';
   }else{
     head.innerHTML=`<tr class="groupRow"><th colspan="2"></th><th colspan="3" class="spreadGroup">Spread</th><th colspan="3" class="totalGroup">Total</th><th colspan="3"></th></tr><tr class="columnRow"><th data-sort="date">Date</th><th>Matchup <button data-sort="away">Away ↕</button> <button data-sort="home">Home ↕</button></th><th class="spreadGroup" data-sort="spread">Model</th><th class="spreadGroup">Best market</th><th class="spreadGroup" data-sort="spreadEdge">Spread gap</th><th class="totalGroup" data-sort="total">Model</th><th class="totalGroup">Best market</th><th class="totalGroup" data-sort="totalEdge">Total gap</th><th>Context</th><th>Action</th><th></th></tr>`;
     rows.innerHTML=list.map(r=>{const s=spreadOffer(r),t=totalOffer(r),d=decisions[r.game.game_id],b=(bets[r.game.game_id]||[]).length,adv=advantageRows(r).filter(x=>x.team).length;return`<tr class="game ${selected===r.game.game_id?'selected':''}" onclick="openDrawer('${r.game.game_id}')"><td>${openerDateTime(r)}</td><td>${matchup(r)}</td><td class="projection spreadCol">${modelSpread(r)}</td><td class="market spreadCol">${spreadMarket(r)}</td><td class="edge spreadCol ${s?gapTone(s.edge):''}">${spreadGapHtml(r,s)}</td><td class="projection totalCol">${num(r.model.total)}</td><td class="market totalCol">${totalMarket(r)}</td><td class="edge totalCol ${t?gapTone(t.edge):''}">${totalGapHtml(t)}</td><td>${adv?`<span class="contextPill">${adv} edge${adv===1?'':'s'}</span>`:'<span class="muted">—</span>'}</td><td><div class="action"><button class="bet" onclick="event.stopPropagation();openBetFor('${r.game.game_id}','Spread')">Bet</button><button class="watch ${d==='watch'?'active':''}" title="${d==='watch'?'Remove Watch':'Watch'}" onclick="event.stopPropagation();toggleWatch('${r.game.game_id}')">${d==='watch'?'★':'☆'}</button>${d==='pass'?'<span class="pill">Pass</span>':''}${b?`<span class="pill">${b}</span>`:''}</div></td><td><button class="open">›</button></td></tr>`}).join('')||'<tr><td colspan="11" class="empty">No games match these filters.</td></tr>';
   }
 
-  const weekRows=DATA.games.filter(r=>String(r.game.week)===String(week.value)&&(gameType.value==='all'||gameTypeOf(r)===gameType.value));
-  const readyRows=weekRows.filter(r=>{
-    const s=shadowRow(r);
-    if(!SHADOW_AVAILABLE||!s||s.fcs_excluded||s.fbs_matchup===false)return false;
-    const spreadUpdated=Number(s.applied_spread_delta)!==0||Number(s.home_raw_postgame_delta)!==0||Number(s.away_raw_postgame_delta)!==0;
-    const totalUpdated=Number(s.applied_total_delta)!==0||Number(s.raw_total_delta)!==0;
-    return spreadUpdated||totalUpdated;
-  });
+  const readyRows=list.filter(r=>shadowReady(r));
   const coverage=document.getElementById('shadowCoverageStatus');
-  if(coverage)coverage.textContent=`${readyRows.length}/${weekRows.length} games updated`;
+  if(coverage)coverage.textContent=`${readyRows.length} of ${list.length} visible games have Shadow updates`;
   shown.textContent=list.length;
-  marketCount.textContent=list.filter(r=>spreadOffer(r)||totalOffer(r)).length;
+  marketCount.textContent=list.filter(hasMarket).length;
   document.querySelectorAll('[data-sort]').forEach(x=>x.onclick=e=>{e.stopPropagation();const k=x.dataset.sort;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=k.includes('Edge')?-1:1}render()})
 }
-const renderBase=render;render=function(){renderBase();enhanceTableMarks()};
+const renderBase=render;render=function(){
+  renderBase();
+  enhanceTableMarks();
+  initOpenersHeaderTips();
+};
 function current(){return DATA.games.find(r=>r.game.game_id===selected)}function factorLead(r){const count={};for(const side of ['away_offense_vs_home_defense','home_offense_vs_away_defense'])(r.matchup[side]||[]).forEach(x=>{if(x.edge_team)count[x.edge_team]=(count[x.edge_team]||0)+1});return Object.entries(count).sort((a,b)=>b[1]-a[1])[0]}
 function currentScheduleIndex(t,r){const rows=t.upcoming_schedule||[],i=rows.findIndex(x=>x.game_id===r.game.game_id);return i<0?0:i}function competitionInfo(t,r){const rows=t.upcoming_schedule||[],cur=rows[currentScheduleIndex(t,r)],rank=cur?.opponent_ranks?.overall,prev=(t.recent_form||[]).map(g=>g.opponent_ranks?.overall).filter(Number.isFinite);if(!rank||!prev.length)return null;const avg=prev.reduce((a,b)=>a+b,0)/prev.length,gap=avg-rank;if(Math.abs(gap)<10)return null;return{team:t.team,type:gap>0?'step_up':'step_down',rank,avg,gap}}
 function teamLogoName(name){return`<span class="advLogo">${logo(TEAM_META[name]||{})}<span>${esc(name||'—')}</span></span>`}function otherTeam(r,name){return name===r.game.away_team?r.game.home_team:r.game.away_team}
@@ -382,17 +562,122 @@ function coloredRank(label,v){return`<i class="coachValue ${rankTone2(v)}">${lab
 function teamRecord(t){const x=t.record;if(!x)return'2026 —';return`${x.season} ${x.wins}-${x.losses}${x.ties?'-'+x.ties:''}`}function rankTone2(v){return v==null?'':v<=35?'rankGood':v<=75?'rankMid':'rankBad'}function pctTone2(v){return v==null?'rankMid':Number(v)>=.55?'rankGood':Number(v)<=.45?'rankBad':'rankMid'}function marginTone2(v){return v==null?'rankMid':Number(v)>.5?'rankGood':Number(v)<-.5?'rankBad':'rankMid'}function bigLogo(t){return t.logo_slug?`<img class="teamMark" src="logos/${esc(t.logo_slug)}.png" alt="" onerror="this.style.display='none'">`:''}function titleCase(x){return String(x||'—').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}
 function gameRole(t,r){const homeLine=r.market.spread.home_line??r.model.home_spread;if(homeLine==null)return'Pick';const teamLine=t.team===r.game.home_team?homeLine:-homeLine;return teamLine<0?'Favorite':teamLine>0?'Underdog':'Pick'}function coachFor(t,r){return(r.matchup.coaches||[]).find(c=>c.team===t.team)}function teamSummary(t,r){const role=gameRole(t,r),coach=coachFor(t,r),split=coach?.role_splits?.find(x=>x.role===role),style=t.style_profile||{},bet=t.betting_record||{};return`<div class="teamSummary">${bigLogo(t)}<div><h3>${esc(t.team)} · ${esc(role)}</h3><div class="teamStats"><div class="teamStat"><span>Overall record</span><b>${teamRecord(t)}</b></div><div class="teamStat"><span>ATS / O-U</span><b>${esc(bet.ats||'0-0-0')} · ${esc(bet.ou||'0-0-0')}</b></div><div class="teamStat"><span>Conference rank</span><b class="${rankTone2(t.conference_rank)}">#${t.conference_rank??'—'}</b></div><div class="teamStat"><span>Overall / Off / Def</span><b><i class="${rankTone2(t.overall_rank)}">#${t.overall_rank??'—'}</i> · <i class="${rankTone2(t.offense_rank)}">#${t.offense_rank??'—'}</i> · <i class="${rankTone2(t.defense_rank)}">#${t.defense_rank??'—'}</i></b></div><div class="teamStat coachRoleStat"><span>Coach as ${esc(role)}</span><div class="coachLines"><div class="coachLine"><em>Spread</em><b><i class="coachValue ${pctTone2(split?.ats_pct)}">${split?esc(split.ats_record):'—'}</i> · <i class="coachValue ${marginTone2(split?.ats_margin)}">${split?num(split.ats_margin,1):'—'} ATS +/-</i></b></div><div class="coachLine"><em>Total</em><b><i class="coachValue ${pctTone2(split?.over_pct)}">${split?esc(split.ou_record):'—'}</i> · <i class="coachValue ${marginTone2(split?.total_margin)}">${split?num(split.total_margin,1):'—'} Total +/-</i></b></div></div></div><div class="identity">Offense: ${esc(titleCase(style.offense_type))} · Defense: ${esc(style.defense_type||'—')} · Pace: ${esc(style.pace||'—')} ${style.source_season?'('+style.source_season+' baseline)':''}</div></div></div></div>`}
 function scheduleCard(t,r){const s=t.upcoming_schedule||[],i=currentScheduleIndex(t,r),opener=s[i],actualPrevious=s[i-1],actualNext=s[i+1];let previous=actualPrevious||(t.recent_form||[])[0],next=actualNext,previousLabel=actualPrevious?'Previous week':'Previous game';if(actualPrevious&&Number(opener?.week)-Number(actualPrevious.week)>1){previous={bye:true,week:Number(opener.week)-1};previousLabel='Previous week'}if(actualNext&&Number(actualNext.week)-Number(opener?.week)>1)next={bye:true,week:Number(opener.week)+1};return`<div class="detail">${teamSummary(t,r)}<table class="scheduleMini"><thead><tr><th>Spot</th><th>Opponent / ranks</th><th>Score</th><th>Spread / ATS</th><th>Total / O-U</th></tr></thead><tbody>${scheduleRow(previousLabel,previous)}${scheduleRow('Opener target',opener)}${scheduleRow('Next week',next)}</tbody></table></div>`}
-function savedBetsHtml(r){const list=bets[r.game.game_id]||[];return list.length?list.map((b,i)=>`<div class="savedBet"><div><b>${esc(b.market||'Bet')} · ${esc(b.selection||'—')} ${esc(b.price||'')}</b><div class="ranks">${esc(b.book||'Book')} · ${esc(b.stake?b.stake+' units':'Stake not set')}</div></div><button onclick="removeBet(${i})">Remove</button></div>`).join(''):'<p class="muted">No saved bet on this game.</p>'}function drawerMarkup(r){const s=spreadOffer(r),t=totalOffer(r),d=decisions[r.game.game_id];return`<div class="drawerHead"><div><h2>${esc(r.game.away_team)} at ${esc(r.game.home_team)}</h2><p>${esc(r.game.date)} · Week ${r.game.week}</p></div><button class="close" onclick="closeDrawer()">×</button></div><div class="drawerBody"><div class="detail"><h3>Opener numbers</h3><div class="compare"><div><span>${projectionMode==='shadow'?'Shadow spread':'Model spread'}</span><b>${modelSpread(r)}</b></div><div><span>Market spread</span><b>${s?`${esc(s.team)} ${line(s.line)} ${price(s.price)}`:'Not open'}</b></div><div><span>${projectionMode==='shadow'?'Shadow total':'Model total'}</span><b>${activeTotal(r)==null?'—':num(activeTotal(r))}</b></div><div><span>Market total</span><b>${t?`${esc(t.team)} ${num(t.line)} ${price(t.price)}`:'Not open'}</b></div></div><div class="detailActions"><button class="bet" onclick="openBetFor('${r.game.game_id}','Spread')">Bet spread</button><button class="bet" onclick="openBetFor('${r.game.game_id}','Total')">Bet total</button><button onclick="setDecision('watch')">${d==='watch'?'Remove Watch':'Watch'}</button><button onclick="setDecision('pass')">${d==='pass'?'Remove Pass':'Pass'}</button>${d?'<button onclick="setDecision(null)">Clear</button>':''}</div></div><div class="scheduleGrid">${scheduleCard(r.teams.away,r)}${scheduleCard(r.teams.home,r)}</div><div class="lowerGrid"><div class="detail"><h3>Consolidated betting context</h3>${contextHtml(r)}<p class="ranks">Opponent ranks are current production ranks.</p></div><div><div class="detail"><h3>Saved bets</h3>${savedBetsHtml(r)}</div><div class="detail"><h3>Notes</h3><textarea class="notesBox" id="gameNotes" placeholder="Add Saturday-night thoughts, injury information, expert comments, or a number you are waiting for…">${esc(notes[r.game.game_id]||'')}</textarea><div class="noteMeta"><span class="muted">Saved locally for this prototype.</span><button onclick="saveNote()">Save note</button></div></div></div></div></div>`}
+function savedBetsHtml(r){const list=bets[r.game.game_id]||[];return list.length?list.map((b,i)=>`<div class="savedBet"><div><b>${esc(b.market||'Bet')} · ${esc(b.selection||'—')} ${esc(b.price||'')}</b><div class="ranks">${esc(b.book||'Book')} · ${esc(b.stake?b.stake+' units':'Stake not set')}</div></div><button onclick="removeBet(${i})">Remove</button></div>`).join(''):'<p class="muted">No saved bet on this game.</p>'}function drawerMarkup(r){const s=spreadOffer(r),t=totalOffer(r),d=decisions[r.game.game_id],shadowTotal=projectionMode==='shadow'&&activeTotal(r)==null?shadowMissingLabel(r,'total'):(activeTotal(r)==null?'—':num(activeTotal(r)));return`<div class="drawerHead"><div><h2>${esc(r.game.away_team)} at ${esc(r.game.home_team)}</h2><p>${esc(r.game.date)} · Week ${r.game.week}</p></div><button class="close" onclick="closeDrawer()">×</button></div><div class="drawerBody"><div class="detail"><h3>Opener numbers</h3><div class="compare"><div><span>${projectionMode==='shadow'?'Shadow spread':'Model spread'}</span><b>${modelSpread(r)}</b></div><div><span>Market spread</span><b>${s?`${esc(s.team)} ${line(s.line)} ${price(s.price)}`:'Not open'}</b></div><div><span>${projectionMode==='shadow'?'Shadow total':'Model total'}</span><b>${shadowTotal}</b></div><div><span>Market total</span><b>${t?`${esc(t.team)} ${num(t.line)} ${price(t.price)}`:'Not open'}</b></div></div><div class="detailActions"><button class="bet" onclick="openBetFor('${r.game.game_id}','Spread')">Bet spread</button><button class="bet" onclick="openBetFor('${r.game.game_id}','Total')">Bet total</button><button onclick="setDecision('watch')">${d==='watch'?'Remove Watch':'Watch'}</button><button onclick="setDecision('pass')">${d==='pass'?'Remove Pass':'Pass'}</button>${d?'<button onclick="setDecision(null)">Clear</button>':''}</div></div><div class="scheduleGrid">${scheduleCard(r.teams.away,r)}${scheduleCard(r.teams.home,r)}</div><div class="lowerGrid"><div class="detail"><h3>Consolidated betting context</h3>${contextHtml(r)}<p class="ranks">Opponent ranks are current production ranks.</p></div><div><div class="detail"><h3>Saved bets</h3>${savedBetsHtml(r)}</div><div class="detail"><h3>Notes</h3><textarea class="notesBox" id="gameNotes" placeholder="Add Saturday-night thoughts, injury information, expert comments, or a number you are waiting for…">${esc(notes[r.game.game_id]||'')}</textarea><div class="noteMeta"><span class="muted">Saved locally for this prototype.</span><button onclick="saveNote()">Save note</button></div></div></div></div></div>`}
 function savedBetsHtml(r){const local=bets[r.game.game_id]||[],sheet=r.activity?.wagers||[],html=[];sheet.forEach(b=>html.push(`<div class="savedBet"><div><b>${esc(b.market||'Bet')} · ${esc(b.selection||'—')} ${b.price!=null?price(b.price):''}</b><div class="ranks">Google Sheet · ${esc(b.sportsbook||'Book')} · ${b.stake!=null?'$'+num(b.stake,2):'Stake not set'}</div></div><span class="betLive">LIVE</span></div>`));local.forEach((b,i)=>html.push(`<div class="savedBet"><div><b>${esc(b.market||'Bet')} · ${esc(b.selection||'—')} ${esc(b.price||'')}</b><div class="ranks">Local candidate · ${esc(b.book||'Book')} · ${esc(b.stake?b.stake+' units':'Stake not set')}</div></div><button onclick="removeBet(${i})">Remove</button></div>`));return html.join('')||'<p class="muted">No saved bet on this game.</p>'}function openDrawer(id){selected=id;drawerContent.innerHTML=drawerMarkup(current());drawer.classList.add('open');backdrop.classList.add('open');render()}function closeDrawer(){selected=null;drawer.classList.remove('open');backdrop.classList.remove('open');render()}function setDecision(v){if(!v||decisions[selected]===v)delete decisions[selected];else decisions[selected]=v;localStorage.setItem('openers-v2-decisions',JSON.stringify(decisions));drawerContent.innerHTML=drawerMarkup(current());render()}function toggleWatch(id){selected=id;if(decisions[id]==='watch')delete decisions[id];else decisions[id]='watch';localStorage.setItem('openers-v2-decisions',JSON.stringify(decisions));render()}function saveNote(){if(!selected)return;const value=document.getElementById('gameNotes')?.value||'';if(value.trim())notes[selected]=value;else delete notes[selected];localStorage.setItem('openers-v2-notes',JSON.stringify(notes));drawerContent.innerHTML=drawerMarkup(current())}function removeBet(index){if(!selected||!bets[selected])return;bets[selected].splice(index,1);if(!bets[selected].length)delete bets[selected];localStorage.setItem('ncaaf-game-bets-v1',JSON.stringify(bets));drawerContent.innerHTML=drawerMarkup(current());render()}
 function openBetFor(id,kind='Spread'){selected=id;const r=current(),o=kind==='Total'?totalOffer(r):spreadOffer(r);betGame.textContent=`${r.game.away_team} at ${r.game.home_team} · local evaluation only`;betMarket.value=kind;betSelection.value=o?`${o.team} ${kind==='Total'?num(o.line):line(o.line)}`:(kind==='Total'?`Total ${num(activeTotal(r))}`:modelSpread(r));betPrice.value=o?price(o.price):'-110';betBook.value=o?.book||'';betStake.value='';betModal.classList.add('open')}function closeBet(){betModal.classList.remove('open')}function saveBet(){const row={market:betMarket.value,selection:betSelection.value,price:betPrice.value,book:betBook.value,stake:betStake.value,time:new Date().toISOString()};(bets[selected]||(bets[selected]=[])).push(row);localStorage.setItem('ncaaf-game-bets-v1',JSON.stringify(bets));closeBet();if(drawer.classList.contains('open'))drawerContent.innerHTML=drawerMarkup(current());render()}
-function enhanceTableMarks(){if(projectionMode==='shadow')return;document.querySelectorAll('.action .pill').forEach(x=>{if(/^\d+$/.test(x.textContent.trim())){const n=Number(x.textContent.trim());x.className='betLive';x.textContent=`BET${n>1?' '+n:''}`}});document.querySelectorAll('.market .book').forEach(x=>{const raw=x.textContent.trim(),key=raw.toLowerCase().replace(/[^a-z]/g,''),map={fanduel:'fanduel',draftkings:'draftkings',betmgm:'betmgm',caesars:'caesars'},file=map[key];x.innerHTML=file?`<img class="bookLogo" src="logos/books/${file}.png" alt="${esc(raw)}" title="${esc(raw)}">`:`<span class="bookFallback" title="${esc(raw)}">${esc(raw.slice(0,2).toUpperCase())}</span>`});document.querySelectorAll('tr.game').forEach(tr=>{const match=String(tr.getAttribute('onclick')||'').match(/openDrawer\('([^']+)'\)/),id=match&&match[1],r=id&&DATA?.games?.find(g=>g.game.game_id===id);if(!r)return;const edgeCell=tr.children[8];if(edgeCell){edgeCell.innerHTML=edgeIndicator(r);refreshAlignedContext(id,edgeCell);}const action=tr.children[9]?.querySelector('.action'),count=(r.activity?.wagers?.length||0)+(bets[id]?.length||0);if(action&&count){let badge=action.querySelector('.betLive');if(!badge){badge=document.createElement('span');badge.className='betLive';action.appendChild(badge)}badge.textContent=`BET${count>1?' '+count:''}`;badge.title='Open wager linked to this game'}})}
+function enhanceTableMarks(){
+  document.querySelectorAll('.market .book').forEach(x=>{
+    const raw=x.textContent.trim();
+    if(!raw)return;
+
+    const key=raw.toLowerCase().replace(/[^a-z]/g,'');
+    const map={
+      fanduel:'fanduel',
+      draftkings:'draftkings',
+      betmgm:'betmgm',
+      caesars:'caesars'
+    };
+    const file=map[key];
+
+    x.innerHTML=file
+      ? `<img class="bookLogo"
+              src="logos/books/${file}.png"
+              alt="${esc(raw)}"
+              title="${esc(raw)}">`
+      : `<span class="bookFallback"
+               title="${esc(raw)}">${esc(raw.slice(0,2).toUpperCase())}</span>`;
+  });
+
+  if(projectionMode==='shadow')return;
+
+  document.querySelectorAll('.action .pill').forEach(x=>{
+    if(/^\d+$/.test(x.textContent.trim())){
+      const n=Number(x.textContent.trim());
+      x.className='betLive';
+      x.textContent=`BET${n>1?' '+n:''}`;
+    }
+  });
+
+  document.querySelectorAll('tr.game').forEach(tr=>{
+    const match=String(tr.getAttribute('onclick')||'')
+      .match(/openDrawer\('([^']+)'\)/);
+    const id=match&&match[1];
+    const r=id&&DATA?.games?.find(g=>g.game.game_id===id);
+    if(!r)return;
+
+    const edgeCell=tr.children[8];
+    if(edgeCell){
+      edgeCell.innerHTML=edgeIndicator(r);
+      refreshAlignedContext(id,edgeCell);
+    }
+
+    const action=tr.children[9]?.querySelector('.action');
+    const count=(r.activity?.wagers?.length||0)+(bets[id]?.length||0);
+
+    if(action&&count){
+      let badge=action.querySelector('.betLive');
+      if(!badge){
+        badge=document.createElement('span');
+        badge.className='betLive';
+        action.appendChild(badge);
+      }
+      badge.textContent=`BET${count>1?' '+count:''}`;
+      badge.title='Open wager linked to this game';
+    }
+  });
+}
+
+
+function initOpenersHeaderTips(){
+  let tip=document.getElementById('openersHeaderTip');
+
+  if(!tip){
+    tip=document.createElement('div');
+    tip.id='openersHeaderTip';
+    tip.className='openersHeaderTip';
+    document.body.appendChild(tip);
+  }
+
+  document.querySelectorAll('.openersTip').forEach(header=>{
+    if(header.dataset.tipBound==='1')return;
+    header.dataset.tipBound='1';
+
+    const show=()=>{
+      const rect=header.getBoundingClientRect();
+      tip.textContent=header.dataset.tip||'';
+      tip.classList.add('show');
+
+      const width=tip.offsetWidth;
+      const height=tip.offsetHeight;
+
+      let left=rect.left+(rect.width/2)-(width/2);
+      left=Math.max(8,Math.min(left,window.innerWidth-width-8));
+
+      let top=rect.bottom+8;
+      if(top+height>window.innerHeight-8){
+        top=rect.top-height-8;
+      }
+
+      tip.style.left=`${left}px`;
+      tip.style.top=`${top}px`;
+    };
+
+    const hide=()=>tip.classList.remove('show');
+
+    header.addEventListener('mouseenter',show);
+    header.addEventListener('mouseleave',hide);
+    header.addEventListener('focusin',show);
+    header.addEventListener('focusout',hide);
+  });
+}
+
 function renderFreshness(){const f=DATA.rating_freshness||{},sources=f.sources||[],changed=sources.reduce((n,s)=>n+Number(s.changed_teams||0),0),latest=[...new Set(sources.map(s=>s.latest_snapshot).filter(Boolean))].sort().pop()||DATA.production_model.updated,previous=[...new Set(sources.map(s=>s.previous_snapshot).filter(Boolean))].sort().pop()||'prior snapshot',applied=f.applied_to_projection===true;freshnessSummary.textContent=`${applied?'Applied to projections':'Application not verified'} · ${changed?changed+' team-source rating changes':'No rating value changes'} · ${previous} → ${latest}`;freshnessBody.innerHTML=sources.map(s=>`<div class="freshnessSource"><b>${esc(s.source)}</b><br>${s.changed_teams?`${s.changed_teams} teams changed · max ${num(s.largest_absolute_change,2)}`:'Pulled, but no values changed'}<br><span class="muted">Compared ${esc(s.previous_snapshot||'—')} → ${esc(s.latest_snapshot||'—')}</span></div>`).join('')+`<div class="freshnessSource"><b>Projection application</b><br>${applied?'Verified by artifact order':'Not verified'}<br><span class="muted">${esc(f.proof||'No build proof available')}</span></div>`;modelStamp.textContent=`${applied?'Applied':'Unverified'} ${latest} · ${changed?changed+' changes':'no value changes'}`;modelStamp.title=DATA.production_model.sources.map(s=>`${s.label} ${s.weight*100}%`).join(' · ')}
 function gapTone(v){return v>3?"gapGood":v>=1?"gapMid":"gapBad"}document.querySelectorAll("#gameTypeButtons button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gameTypeButtons button").forEach(x=>x.classList.remove("active"));b.classList.add("active");gameType.value=b.dataset.type;render()});async function init(){const [view,shadow,shadowMeta,scheduleEnrichment]=await Promise.all([
 fetch('data/site/matchups_view.json',{cache:'no-store'}).then(r=>r.json()),
 fetch('data/site/saturday_shadow_lines.json',{cache:'no-store'}).then(r=>r.ok?r.json():{games:[]}).catch(()=>({games:[]})),
 fetch('data/site/postgame_shadow_updates.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
 fetch('data/site/schedule_live_enrichment.json',{cache:'no-store'}).then(r=>r.ok?r.json():{games:[]}).catch(()=>({games:[]}))
-]);DATA=view;SHADOW_META=shadowMeta;const shadowRows=Array.isArray(shadow)?shadow:(shadow.games||[]);SHADOW=new Map(shadowRows.map(x=>[x.game_id,x]));const scheduleRows=Array.isArray(scheduleEnrichment)?scheduleEnrichment:(scheduleEnrichment.games||[]);SCHEDULE_ENRICHMENT=new Map(scheduleRows.map(x=>[x.game_id||(x.game||{}).game_id,x]));SHADOW_AVAILABLE=Number(shadowMeta?.summary?.completed_team_updates||0)>0;const shadowButton=document.querySelector('#projectionMode [data-projection-mode="shadow"]');if(shadowButton){shadowButton.disabled=false;shadowButton.title=SHADOW_AVAILABLE?'Show live postgame shadow projections':'Preview shadow status before live postgame updates';const note=document.querySelector('.shadowUnavailableNote');if(note)note.remove()}DATA.games.forEach(r=>{TEAM_META[r.teams.away.team]=r.teams.away;TEAM_META[r.teams.home.team]=r.teams.home});const weeks=[...new Set(DATA.games.map(r=>r.game.week))].sort((a,b)=>a-b);week.innerHTML='<option value="all">All weeks</option>'+weeks.map(x=>`<option value="${x}">Week ${x}</option>`).join('');week.value=String(weeks[0]);renderFreshness();render();const linked=new URLSearchParams(location.search).get('game_id');if(linked&&DATA.games.some(r=>r.game.game_id===linked))openDrawer(linked)}document.querySelectorAll('#projectionMode button').forEach(b=>b.onclick=()=>{
+]);DATA=view;SHADOW_META=shadowMeta;const shadowRows=Array.isArray(shadow)?shadow:(shadow.games||[]);SHADOW=new Map(shadowRows.map(x=>[x.game_id,x]));const scheduleRows=Array.isArray(scheduleEnrichment)?scheduleEnrichment:(scheduleEnrichment.games||[]);SCHEDULE_ENRICHMENT=new Map(scheduleRows.map(x=>[x.game_id||(x.game||{}).game_id,x]));SHADOW_AVAILABLE=shadowRows.some(x=>x.shadow_display_ready===true);const shadowButton=document.querySelector('#projectionMode [data-projection-mode="shadow"]');if(shadowButton){shadowButton.disabled=false;shadowButton.title=SHADOW_AVAILABLE?'Show live postgame Shadow projections':'Show games awaiting completed-game Shadow updates';const note=document.querySelector('.shadowUnavailableNote');if(note)note.remove()}DATA.games.forEach(r=>{TEAM_META[r.teams.away.team]=r.teams.away;TEAM_META[r.teams.home.team]=r.teams.home});const weeks=[...new Set(DATA.games.map(r=>r.game.week))].sort((a,b)=>a-b);week.innerHTML='<option value="all">All weeks</option>'+weeks.map(x=>`<option value="${x}">Week ${x}</option>`).join('');week.value=String(weeks[0]);renderFreshness();render();const linked=new URLSearchParams(location.search).get('game_id');if(linked&&DATA.games.some(r=>r.game.game_id===linked))openDrawer(linked)}document.querySelectorAll('#projectionMode button').forEach(b=>b.onclick=()=>{
 document.querySelectorAll('#projectionMode button').forEach(x=>x.classList.remove('active'));
 b.classList.add('active');
 projectionMode=b.dataset.projectionMode;
@@ -401,7 +686,7 @@ if(drawer.classList.contains('open')&&current())drawerContent.innerHTML=drawerMa
 });
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode;render()});[week,gameType,search].forEach(x=>x.addEventListener('input',render));document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeBet();closeDrawer()}});init().catch(e=>rows.innerHTML=`<tr><td class="empty">Unable to load data: ${esc(e.message)}. Use the local preview URL.</td></tr>`);
 </script><script src="matchup_workspace.js?v=20260723-nativecontext5"></script><script id="postgame-shadow-ui">
-fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const n=d.summary?.completed_team_updates||0;box.querySelector('summary').textContent=`Saturday shadow · ${n} live team updates · ${n?'shadow values available':'awaiting completed games'}`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Spread shadow</b><br>${n?'Live updates available':'Awaiting completed games'}<br><span class="muted">Uses validated score/ATS postgame adjustment</span></div><div class="freshnessSource"><b>Total shadow</b><br>${n?'Live updates available':'Awaiting current-season PBP'}<br><span class="muted">Activates only after eligible completed-game data</span></div><div class="freshnessSource"><b>Safety</b><br>Shadow only<br><span class="muted">Official ratings and projections unchanged</span></div>`}).catch(()=>{});
+fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const values=[...SHADOW.values()],n=values.reduce((a,x)=>a+Number(x.completed_team_update_count||0),0),games=values.filter(x=>x.shadow_display_ready===true).length,independent=values.filter(x=>x.shadow_display_ready===true&&x.market_readiness_state==='independent_market_ready').length,fallback=values.filter(x=>x.shadow_display_ready===true&&x.shadow_spread_formula==='SP+ Fallback').length;box.querySelector('summary').textContent=n?`Saturday Shadow · ${games} active games · ${n} postgame updates`:`Saturday Shadow · Awaiting completed games · 0 postgame updates`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Active games</b><br>${games}<br><span class="muted">At least one genuine postgame update</span></div><div class="freshnessSource"><b>Market + SP+</b><br>${independent}<br><span class="muted">Target-excluded market support</span></div><div class="freshnessSource"><b>SP+ fallback</b><br>${fallback}<br><span class="muted">Active only after a completed game</span></div><div class="freshnessSource"><b>Safety</b><br>Current Model unchanged<br><span class="muted">Preseason baselines stay internal</span></div>`}).catch(()=>{});
 </script><script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script>
 
 
