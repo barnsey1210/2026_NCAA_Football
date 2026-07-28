@@ -26,6 +26,20 @@
   @media(max-width:620px){.mwTeam{grid-template-columns:58px 1fr}.mwTeam>img{width:54px;height:50px}.mwBody{padding:7px}.mwNumbers{grid-template-columns:1fr}.mwHead h2{font-size:18px}.mwSchedule .mwTable,.mwHistory .mwTable{font-size:10px}.mwSchedule th:nth-child(5),.mwSchedule td:nth-child(5),.mwHistory th:nth-child(7),.mwHistory td:nth-child(7){display:none}}
 
   .mwTeamCompact{display:block}.mwTeamHeader{display:grid;grid-template-columns:56px 1fr;gap:9px;align-items:center;margin-bottom:8px}.mwTeamHeader>img{width:54px;height:48px;object-fit:contain}.mwTeamHeader h4{font-size:17px;margin:0}.mwChipRow{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}.mwChip{display:inline-flex;align-items:center;gap:4px;border:1px solid #365b85;background:#102543;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:850}.mwMetricGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.mwMetric{background:#081932;border-radius:8px;padding:7px}.mwMetric span{display:block;color:#91a6c6;font-size:8px;text-transform:uppercase}.mwMetric b{font-size:14px}.mwDual{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.mwMiniCard{background:#081932;border-radius:8px;padding:7px}.mwMiniTitle{color:#91a6c6;font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}.mwRpLine,.mwStaffLine{display:grid;grid-template-columns:26px 1fr auto;gap:6px;align-items:center;padding:3px 0}.mwStaffStatus{border:1px solid #49627e;border-radius:999px;padding:1px 6px;font-size:8px;text-transform:uppercase;font-weight:900}.mwStatusReturning{color:#43df96;border-color:#238d61}.mwStatusNew{color:#ff7280;border-color:#a64b5d}.mwStatusPartial{color:#ffc45b;border-color:#9c7622}.mwStatusUnverified{color:#91a6c6}.mwContextChip{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900;background:#15314f;border:1px solid #38658f}.mwCoachDetail summary{cursor:pointer;color:#cfe0f5;font-weight:900}.mwCoachGrid{display:grid;grid-template-columns:150px repeat(2,minmax(155px,1fr));gap:1px;background:#24405f;margin-top:8px}.mwCoachCell{background:#0b1b36;padding:7px}.mwCoachHead{background:#10284a;color:#afbfda;text-transform:uppercase;font-size:9px;font-weight:900}.mwContextTable td{vertical-align:middle}.mwEvidence{color:#b8c9df}.mwSection[data-section="betting-context"]{border-color:#31745c;box-shadow:inset 0 0 0 1px #123c31}.mwSection[data-section="betting-context"] h3{color:#8af0bb}
+
+/* OPENERS_CONTEXT_PRIORITY_CSS_START */
+.mwContextTable{table-layout:fixed;width:100%}
+.mwContextTable th:nth-child(1),.mwContextTable td:nth-child(1){width:78px}
+.mwContextTable th:nth-child(2),.mwContextTable td:nth-child(2){width:88px}
+.mwContextTable th:nth-child(3),.mwContextTable td:nth-child(3){width:150px}
+.mwContextTable th:nth-child(4),.mwContextTable td:nth-child(4){width:230px}
+.mwContextTable th,.mwContextTable td{white-space:normal;overflow-wrap:anywhere}
+.mwPriority{min-width:44px;text-align:center}
+.mwContextTable tr[data-priority="High"] .mwPriority{background:#16784f;color:#eafff4}
+.mwContextTable tr[data-priority="Medium"] .mwPriority{background:#8a6819;color:#fff5d2}
+.mwContextTable tr[data-priority="Low"] .mwPriority{background:#506176;color:#eef4ff}
+/* OPENERS_CONTEXT_PRIORITY_CSS_END */
+
   `;
 
   function ensureShell(){
@@ -943,7 +957,7 @@
   function opponentTeam(team, game){ return team.team===game.game.away_team?game.teams.home:game.teams.away; }
   function tendencyKind(row){const receive=Number(row?.receive_pct),defer=Number(row?.defer_pct);if(Number(row?.toss_wins)<6)return null;if(receive>=65)return 'receive';if(defer>=65)return 'defer';return null;}
   function continuityScore(staff){if(!staff||Number(staff.unverified_count)>0)return null;return Number(staff.returning_count)+(Number(staff.partial_count)*.5);}
-  function contextRows(game){
+  function legacyContextRows(game){
     const out=[], s=game.market.spread||{},t=game.market.total||{};
     const add=x=>{if(x.team&&x.team!=='—'&&x.evidence)out.push(x)};
     const rpCandidates=(game.angles||[]).filter(x=>{
@@ -999,7 +1013,281 @@
     return out.sort((x,y)=>y.score-x.score).map((x,i)=>({...x,priority:i+1}));
   }
 
-  function contextTable(game){ const rows=contextRows(game); const empty=!rows.length; return `<section class="mwSection ${empty?'mwContextEmptySection':''}" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Team / Side</th><th>Trigger</th><th>Evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted mwContextEmpty">No qualifying betting context for this matchup.</td></tr>'}</tbody></table></div></section>`; }
+/* VALIDATED_RP_MATCHUP_CONTEXT_START */
+const MW_VALIDATED_FULL_GAME_RP_SIGNALS=[{"game_id":"g18","week":1,"date":"2026-09-03","away_team":"Akron","home_team":"Wake Forest","signal_team":"Wake Forest","signal_opponent":"Akron","primary_rule_key":"P4_G6_DEFENSE_15_PLUS","primary_rule_label":"P4 vs G6: defensive RP edge 15+","production_behavior":"context_only","overall_rp_edge":13.0,"offense_vs_defense_edge":8.0,"defense_vs_offense_edge":17.0,"has_defensive_support":true},{"game_id":"g24","week":1,"date":"2026-09-05","away_team":"East Carolina","home_team":"Alabama","signal_team":"Alabama","signal_opponent":"East Carolina","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":6.0,"offense_vs_defense_edge":-15.0,"defense_vs_offense_edge":28.0,"has_defensive_support":true},{"game_id":"g39","week":1,"date":"2026-09-05","away_team":"Florida Atlantic","home_team":"Florida","signal_team":"Florida","signal_opponent":"Florida Atlantic","primary_rule_key":"P4_G6_DEFENSE_15_PLUS","primary_rule_label":"P4 vs G6: defensive RP edge 15+","production_behavior":"context_only","overall_rp_edge":2.0,"offense_vs_defense_edge":-10.0,"defense_vs_offense_edge":15.0,"has_defensive_support":true},{"game_id":"g79","week":1,"date":"2026-09-05","away_team":"Kent State","home_team":"South Carolina","signal_team":"South Carolina","signal_opponent":"Kent State","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":20.0,"offense_vs_defense_edge":37.0,"defense_vs_offense_edge":4.0,"has_defensive_support":false},{"game_id":"g86","week":1,"date":"2026-09-05","away_team":"Missouri State","home_team":"Texas A&M","signal_team":"Texas A&M","signal_opponent":"Missouri State","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":31.0,"offense_vs_defense_edge":23.0,"defense_vs_offense_edge":38.0,"has_defensive_support":true},{"game_id":"g38","week":1,"date":"2026-09-05","away_team":"Tulane","home_team":"Duke","signal_team":"Duke","signal_opponent":"Tulane","primary_rule_key":"P4_G6_DEFENSE_15_PLUS","primary_rule_label":"P4 vs G6: defensive RP edge 15+","production_behavior":"context_only","overall_rp_edge":9.0,"offense_vs_defense_edge":-4.0,"defense_vs_offense_edge":23.0,"has_defensive_support":true},{"game_id":"g156","week":2,"date":"2026-09-12","away_team":"Charlotte","home_team":"Ole Miss","signal_team":"Ole Miss","signal_opponent":"Charlotte","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":18.0,"offense_vs_defense_edge":27.0,"defense_vs_offense_edge":10.0,"has_defensive_support":false},{"game_id":"g115","week":2,"date":"2026-09-12","away_team":"Georgia Southern","home_team":"Clemson","signal_team":"Clemson","signal_opponent":"Georgia Southern","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":10.0,"offense_vs_defense_edge":-16.0,"defense_vs_offense_edge":38.0,"has_defensive_support":true},{"game_id":"g180","week":2,"date":"2026-09-12","away_team":"Old Dominion","home_team":"Virginia Tech","signal_team":"Virginia Tech","signal_opponent":"Old Dominion","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":29.0,"offense_vs_defense_edge":13.0,"defense_vs_offense_edge":44.0,"has_defensive_support":true},{"game_id":"g108","week":2,"date":"2026-09-12","away_team":"Southern Miss","home_team":"Auburn","signal_team":"Auburn","signal_opponent":"Southern Miss","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":35.0,"offense_vs_defense_edge":36.0,"defense_vs_offense_edge":35.0,"has_defensive_support":true},{"game_id":"g125","week":2,"date":"2026-09-12","away_team":"Western Kentucky","home_team":"Georgia","signal_team":"Georgia","signal_opponent":"Western Kentucky","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":36.0,"offense_vs_defense_edge":37.0,"defense_vs_offense_edge":35.0,"has_defensive_support":true},{"game_id":"g247","week":3,"date":"2026-09-19","away_team":"Kennesaw State","home_team":"Tennessee","signal_team":"Tennessee","signal_opponent":"Kennesaw State","primary_rule_key":"P4_G6_DEFENSE_15_PLUS","primary_rule_label":"P4 vs G6: defensive RP edge 15+","production_behavior":"context_only","overall_rp_edge":13.0,"offense_vs_defense_edge":3.0,"defense_vs_offense_edge":23.0,"has_defensive_support":true},{"game_id":"g249","week":3,"date":"2026-09-19","away_team":"Kentucky","home_team":"Texas A&M","signal_team":"Texas A&M","signal_opponent":"Kentucky","primary_rule_key":"P4_P4_OVERALL_15_TO_24_9","primary_rule_label":"P4 vs P4: overall RP edge 15-24.9","production_behavior":"underdog_only","overall_rp_edge":19.0,"offense_vs_defense_edge":15.0,"defense_vs_offense_edge":23.0,"has_defensive_support":false},{"game_id":"g243","week":3,"date":"2026-09-19","away_team":"Mississippi State","home_team":"South Carolina","signal_team":"South Carolina","signal_opponent":"Mississippi State","primary_rule_key":"P4_P4_OVERALL_15_TO_24_9","primary_rule_label":"P4 vs P4: overall RP edge 15-24.9","production_behavior":"underdog_only","overall_rp_edge":20.0,"offense_vs_defense_edge":24.0,"defense_vs_offense_edge":17.0,"has_defensive_support":false},{"game_id":"g223","week":3,"date":"2026-09-19","away_team":"Troy","home_team":"Missouri","signal_team":"Missouri","signal_opponent":"Troy","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":10.0,"offense_vs_defense_edge":27.0,"defense_vs_offense_edge":-7.0,"has_defensive_support":false},{"game_id":"g248","week":3,"date":"2026-09-19","away_team":"UTSA","home_team":"Texas","signal_team":"Texas","signal_opponent":"UTSA","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":14.0,"offense_vs_defense_edge":29.0,"defense_vs_offense_edge":-1.0,"has_defensive_support":false},{"game_id":"g300","week":4,"date":"2026-09-26","away_team":"Appalachian State","home_team":"NC State","signal_team":"NC State","signal_opponent":"Appalachian State","primary_rule_key":"P4_G6_DEFENSE_15_PLUS","primary_rule_label":"P4 vs G6: defensive RP edge 15+","production_behavior":"context_only","overall_rp_edge":20.0,"offense_vs_defense_edge":23.0,"defense_vs_offense_edge":16.0,"has_defensive_support":true},{"game_id":"g311","week":4,"date":"2026-09-26","away_team":"Missouri State","home_team":"SMU","signal_team":"SMU","signal_opponent":"Missouri State","primary_rule_key":"P4_G6_EITHER_COMPONENT_25_PLUS","primary_rule_label":"P4 vs G6: either RP component edge 25+","production_behavior":"directional","overall_rp_edge":28.0,"offense_vs_defense_edge":22.0,"defense_vs_offense_edge":33.0,"has_defensive_support":true},{"game_id":"g265","week":4,"date":"2026-09-26","away_team":"South Carolina","home_team":"Alabama","signal_team":"South Carolina","signal_opponent":"Alabama","primary_rule_key":"P4_P4_OVERALL_15_TO_24_9","primary_rule_label":"P4 vs P4: overall RP edge 15-24.9","production_behavior":"underdog_only","overall_rp_edge":20.0,"offense_vs_defense_edge":15.0,"defense_vs_offense_edge":26.0,"has_defensive_support":false},{"game_id":"g270","week":4,"date":"2026-09-26","away_team":"Virginia Tech","home_team":"Boston College","signal_team":"Virginia Tech","signal_opponent":"Boston College","primary_rule_key":"P4_P4_OVERALL_15_TO_24_9","primary_rule_label":"P4 vs P4: overall RP edge 15-24.9","production_behavior":"underdog_only","overall_rp_edge":19.0,"offense_vs_defense_edge":14.0,"defense_vs_offense_edge":23.0,"has_defensive_support":false}];
+const MW_VALIDATED_FULL_GAME_RP_BY_ID=new Map();
+const MW_VALIDATED_FULL_GAME_RP_BY_MATCHUP=new Map();
+
+function mwValidatedRpNormalizeTeam(value){
+  return String(value??'')
+    .toLowerCase()
+    .replace(/&/g,' and ')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
+
+function mwValidatedRpMatchupKey(away,home){
+  return [
+    mwValidatedRpNormalizeTeam(away),
+    mwValidatedRpNormalizeTeam(home)
+  ].sort().join('||');
+}
+
+for(const row of MW_VALIDATED_FULL_GAME_RP_SIGNALS){
+  const gameId=String(row.game_id||'');
+
+  if(gameId){
+    if(!MW_VALIDATED_FULL_GAME_RP_BY_ID.has(gameId)){
+      MW_VALIDATED_FULL_GAME_RP_BY_ID.set(gameId,[]);
+    }
+    MW_VALIDATED_FULL_GAME_RP_BY_ID.get(gameId).push(row);
+  }
+
+  const key=mwValidatedRpMatchupKey(row.away_team,row.home_team);
+  if(!MW_VALIDATED_FULL_GAME_RP_BY_MATCHUP.has(key)){
+    MW_VALIDATED_FULL_GAME_RP_BY_MATCHUP.set(key,[]);
+  }
+  MW_VALIDATED_FULL_GAME_RP_BY_MATCHUP.get(key).push(row);
+}
+
+function mwValidatedRpSignals(game){
+  const gameId=String(game?.game?.game_id||'');
+  const byId=MW_VALIDATED_FULL_GAME_RP_BY_ID.get(gameId)||[];
+  if(byId.length) return byId;
+
+  const key=mwValidatedRpMatchupKey(
+    game?.game?.away_team,
+    game?.game?.home_team
+  );
+  return MW_VALIDATED_FULL_GAME_RP_BY_MATCHUP.get(key)||[];
+}
+
+function mwValidatedRpNumber(value){
+  const number=Number(value);
+  return Number.isFinite(number)?number:null;
+}
+
+function mwValidatedRpHomeSpread(game){
+  const spread=
+    game?.market?.spread?.home_line ??
+    game?.market?.spread_home ??
+    game?.market_spread_home ??
+    game?.model?.home_spread ??
+    null;
+
+  return mwValidatedRpNumber(spread);
+}
+
+function mwValidatedRpTeamSpread(game,signalTeam){
+  const homeSpread=mwValidatedRpHomeSpread(game);
+  if(homeSpread===null) return null;
+
+  if(signalTeam===game?.game?.home_team) return homeSpread;
+  if(signalTeam===game?.game?.away_team) return -homeSpread;
+  return null;
+}
+
+function mwValidatedRpSigned(value){
+  const number=mwValidatedRpNumber(value);
+  if(number===null) return '—';
+  return `${number>0?'+':''}${number.toFixed(0)}`;
+}
+
+function mwValidatedRpLegacyRow(row){
+  const id=String(row?.id||'').toLowerCase();
+  const group=String(row?.signal_group||'').toLowerCase();
+  const type=String(row?.signal_type||'').toLowerCase();
+  const text=[
+    row?.market,
+    row?.team,
+    row?.trigger,
+    row?.evidence,
+    row?.headline,
+    row?.detail
+  ].join(' ').toLowerCase();
+
+  return (
+    id.includes('returning_production') ||
+    id.startsWith('rp_') ||
+    group==='returning production' ||
+    type==='rp_support' ||
+    text.includes('returning-production') ||
+    text.includes('returning production') ||
+    text.includes('high overall rp') ||
+    text.includes('high defense rp') ||
+    text.includes('low offense rp')
+  );
+}
+
+function mwValidatedRpContextRows(game){
+  const rows=[];
+
+  for(const signal of mwValidatedRpSignals(game)){
+    const overall=mwValidatedRpSigned(signal.overall_rp_edge);
+    const offense=mwValidatedRpSigned(signal.offense_vs_defense_edge);
+    const defense=mwValidatedRpSigned(signal.defense_vs_offense_edge);
+
+    if(signal.primary_rule_key==='P4_G6_EITHER_COMPONENT_25_PLUS'){
+      rows.push({
+        id:'validated_rp_p4_g6_component_25',
+        score:84,
+        priority:'High',
+        market:'Spread',
+        team:signal.signal_team,
+        trigger:'Validated full-game RP mismatch',
+        evidence:
+          `${signal.signal_team} owns the returning-production matchup edge `+
+          `(overall ${overall}, offense vs defense ${offense}, `+
+          `defense vs offense ${defense}). `+
+          `Historical rule: 50-31 ATS (61.7%, n=81), 2021-25 Weeks 1-4.`
+      });
+      continue;
+    }
+
+    if(signal.primary_rule_key==='P4_P4_OVERALL_15_TO_24_9'){
+      const teamSpread=mwValidatedRpTeamSpread(
+        game,
+        signal.signal_team
+      );
+
+      if(teamSpread!==null && teamSpread>0){
+        rows.push({
+          id:'validated_rp_p4_p4_underdog',
+          score:80,
+          priority:'High',
+          market:'Spread',
+          team:signal.signal_team,
+          trigger:'Validated RP-edge underdog',
+          evidence:
+            `${signal.signal_team} owns the returning-production edge `+
+            `(overall ${overall}, offense vs defense ${offense}, `+
+            `defense vs offense ${defense}) and is a ${teamSpread>0?'+':''}${teamSpread.toFixed(1)} underdog. `+
+            `Historical RP-edge underdogs: 12-5 ATS (70.6%, n=17).`
+        });
+      }
+      continue;
+    }
+
+    // P4_G6_DEFENSE_15_PLUS is supporting context only.
+    // It remains visible in the validated RP detail card but is deliberately
+    // excluded from this qualifying-rules-only table.
+  }
+
+  return rows;
+}
+
+function contextRowsBeforePriorityPolicy(game){
+  const legacyRows=legacyContextRows(game);
+  const nonRpRows=legacyRows.filter(
+    row=>!mwValidatedRpLegacyRow(row)
+  );
+  return [
+    ...nonRpRows,
+    ...mwValidatedRpContextRows(game)
+  ].sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0));
+}
+
+/* OPENERS_CONTEXT_PRIORITY_POLICY_START */
+function mwContextRecordStats(row){
+  const text=[row?.trigger,row?.evidence,row?.detail,row?.headline].join(' ');
+  const recordMatch=text.match(/\b(\d+)\s*[-–]\s*(\d+)(?:\s*[-–]\s*(\d+))?\b/);
+  const pctMatch=text.match(/\b(\d{1,3}(?:\.\d+)?)\s*%/);
+  const sampleMatch=text.match(/\bn\s*=\s*(\d+)\b/i)||text.match(/\bover\s+(\d+)\s+games?\b/i)||text.match(/\b(\d+)\s+games?\b/i);
+  let wins=null,losses=null,pushes=0,sample=null,pct=null,record='';
+  if(recordMatch){
+    wins=Number(recordMatch[1]);losses=Number(recordMatch[2]);pushes=Number(recordMatch[3]||0);
+    sample=wins+losses+pushes;
+    record=`${wins}-${losses}${recordMatch[3]!=null?'-'+pushes:''}`;
+  }
+  if(sampleMatch)sample=Number(sampleMatch[1]);
+  if(pctMatch)pct=Number(pctMatch[1]);
+  if(pct==null&&wins!=null&&losses!=null&&wins+losses>0)pct=(wins/(wins+losses))*100;
+  return {record,pct,sample};
+}
+
+function mwContextCategory(row){
+  const id=String(row?.id||'').toLowerCase();
+  const text=[row?.market,row?.trigger,row?.evidence,row?.detail,row?.headline].join(' ').toLowerCase();
+  if(id.includes('validated_rp')||text.includes('validated full-game rp')||text.includes('validated rp-edge'))return 'Validated RP';
+  if(text.includes('coach')||text.includes(' ats ')||text.includes('ats as '))return 'Coach';
+  if(text.includes('injur')||text.includes('qb1')||text.includes('quarterback'))return 'Injury';
+  if(text.includes('travel')||text.includes('lookahead')||text.includes('sandwich')||text.includes('short rest')||text.includes('back-to-back')||text.includes('b2b')||text.includes('bye')||text.includes('step up')||text.includes('step down')||text.includes('competition'))return 'Schedule';
+  if(text.includes('continuity'))return 'Continuity';
+  if(text.includes('stale opener')||text.includes('cross-book')||text.includes('line move'))return 'Market';
+  if(text.includes('weather')||text.includes('wind')||text.includes('rain'))return 'Weather';
+  if(text.includes('model spread')||text.includes('model total'))return 'Model';
+  return 'Other';
+}
+
+function mwContextPriority(row){
+  const category=mwContextCategory(row),id=String(row?.id||'').toLowerCase(),stats=mwContextRecordStats(row);
+  const pct=stats.pct,sample=stats.sample,distance=pct==null?null:Math.abs(pct-50);
+  const isHalf=/\b1h\b|\b2h\b|first half|second half/i.test([row?.market,row?.trigger,row?.evidence].join(' '));
+  if(category==='Model')return {include:false,priority:'Exclude',score:0,category,stats};
+  if(id==='validated_rp_p4_g6_component_25')return {include:true,priority:'High',score:95,category,stats};
+  if(id==='validated_rp_p4_p4_underdog')return {include:true,priority:'Medium',score:82,category,stats};
+  if(category==='Coach'){
+    if(sample==null||pct==null)return {include:false,priority:'Exclude',score:0,category,stats};
+    if(!isHalf&&sample>=40&&distance>=10)return {include:true,priority:'High',score:90,category,stats};
+    if((!isHalf&&sample>=25&&distance>=7.5)||(isHalf&&sample>=25&&distance>=10))return {include:true,priority:'Medium',score:76,category,stats};
+    if(sample>=15&&distance>=5)return {include:true,priority:'Low',score:58,category,stats};
+    return {include:false,priority:'Exclude',score:0,category,stats};
+  }
+  if(category==='Injury')return {include:true,priority:'Medium',score:72,category,stats};
+  if(category==='Market')return {include:true,priority:'Low',score:56,category,stats};
+  if(category==='Schedule'||category==='Continuity'||category==='Weather')return {include:true,priority:'Low',score:50,category,stats};
+  return {include:false,priority:'Exclude',score:0,category,stats};
+}
+
+function mwContextConciseRow(row){
+  const evaluation=mwContextPriority(row),stats=evaluation.stats,category=evaluation.category;
+  let trigger=String(row?.trigger||category),evidence=String(row?.evidence||row?.detail||'');
+  if(category==='Validated RP'){
+    if(String(row?.id||'')==='validated_rp_p4_g6_component_25'){
+      trigger='Validated RP mismatch';
+      const m=evidence.match(/overall\s*([+\-]?\d+).*?offense vs defense\s*([+\-]?\d+).*?defense vs offense\s*([+\-]?\d+)/i);
+      evidence=m?`OVR ${m[1]} · Off/Def ${m[2]} · Def/Off ${m[3]} · 50-31 ATS`:'50-31 ATS · 61.7% · n=81';
+    }else{
+      trigger='Validated RP underdog';
+      evidence='12-5 ATS · 70.6% · n=17';
+    }
+  }else if(category==='Coach'){
+    trigger=trigger.replace(/^Opposing coach poor\s*/i,'Coach fade · ').replace(/^Coach\s*/i,'Coach · ').replace(/\s+as\s+/i,' · ');
+    const pieces=[];
+    if(stats.record)pieces.push(stats.record+' ATS');
+    if(stats.pct!=null)pieces.push(stats.pct.toFixed(1)+'%');
+    if(stats.sample!=null)pieces.push('n='+stats.sample);
+    const margin=evidence.match(/([+\-]?\d+(?:\.\d+)?)\s*ATS\s*\+\/-/i);
+    if(margin)pieces.push(margin[1]+' ATS +/-');
+    evidence=pieces.join(' · ')||evidence;
+  }else{
+    if(category==='Injury')trigger='Injury edge';
+    if(category==='Continuity')trigger='Staff continuity';
+    if(category==='Weather')trigger='Weather';
+    evidence=evidence.slice(0,90);
+  }
+  return {...row,priority:evaluation.priority,priorityScore:evaluation.score,trigger,evidence,contextCategory:category};
+}
+
+function contextRows(game){
+  const baseRows=contextRowsBeforePriorityPolicy(game);
+  const filtered=baseRows.map(mwContextConciseRow).filter(row=>mwContextPriority(row).include);
+  const seen=new Set(),deduped=[];
+  for(const row of filtered){
+    const key=[row.market,row.team,row.trigger,row.evidence].join('|').toLowerCase();
+    if(seen.has(key))continue;
+    seen.add(key);deduped.push(row);
+  }
+  const order={High:3,Medium:2,Low:1};
+  deduped.sort((a,b)=>((order[b.priority]||0)-(order[a.priority]||0))||((Number(b.priorityScore)||0)-(Number(a.priorityScore)||0)));
+  return deduped;
+}
+/* OPENERS_CONTEXT_PRIORITY_POLICY_END */
+
+/* VALIDATED_RP_MATCHUP_CONTEXT_END */
+
+
+  function contextTable(game){ const rows=contextRows(game); const empty=!rows.length; return `<section class="mwSection ${empty?'mwContextEmptySection':''}" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Side</th><th>Angle</th><th>Key evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}" data-priority="${esc(x.priority||'Low')}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted mwContextEmpty">No qualifying betting context for this matchup.</td></tr>'}</tbody></table></div></section>`; }
   function splitCell(split){if(!split||split.available===false)return '<span class="mwMuted">No matched sample</span>';return `<b>${esc(split.ats_record||'—')} ATS</b> · ${pct(split.ats_pct)} · ${num(split.ats_margin,1)} +/-<br><span class="mwMuted">O/U ${esc(split.ou_record||'—')} · N=${split.games??'—'}</span>`;}
   function coachingDetail(game){const rows=(game.matchup.coaches||[]);return `<section class="mwSection mwCoachDetail"><details><summary>Complete coaching ATS / totals splits — Full Game, 1H and 2H</summary><div class="mwCoachGrid"><div class="mwCoachCell mwCoachHead">Team / period</div><div class="mwCoachCell mwCoachHead">Favorite</div><div class="mwCoachCell mwCoachHead">Underdog</div>${rows.map(c=>['Full Game','1H','2H'].map((period,i)=>{const fav=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Favorite'),dog=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Underdog');return `<div class="mwCoachCell"><b>${i===0?esc(c.team)+'<br>':''}${esc(period)}</b>${i===0?`<br><span class="mwMuted">${esc(c.coach||'—')}</span>`:''}</div><div class="mwCoachCell">${splitCell(fav)}</div><div class="mwCoachCell">${splitCell(dog)}</div>`}).join('')).join('')}</div></details></section>`;}
   function daysBetween(a,b){const x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)?Math.round((y-x)/86400000):null}
