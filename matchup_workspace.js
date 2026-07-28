@@ -2,7 +2,10 @@
   'use strict';
 
   const DATA_URL = 'data/site/matchups_view.json?v=20260723-stafffix1';
-  const HISTORY_URL = 'data/site/matchup_line_history.json';
+  const HISTORY_URL = (
+    window.MATCHUP_LINE_HISTORY_URL
+    || `data/site/matchup_line_history.json?v=${Date.now()}`
+  );
   const DECISION_KEY = 'openers-v2-decisions';
   const BET_KEY = 'ncaaf-game-bets-v1';
   const NOTE_KEY = 'openers-v2-notes';
@@ -806,7 +809,7 @@
     document.getElementById('mwBackdrop').addEventListener('click', e=>{if(e.target.id==='mwBackdrop') closeMatchupWorkspace()});
   }
   function loadData(){ return dataPromise ||= fetch(DATA_URL).then(r=>{if(!r.ok)throw Error('Matchup data unavailable');return r.json()}); }
-  function loadHistory(){ return historyPromise ||= fetch(HISTORY_URL).then(r=>r.ok?r.json():{}).catch(()=>({})); }
+  function loadHistory(){ return historyPromise ||= fetch(HISTORY_URL, {cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})); }
   function logo(team){ return `<img src="logos/${esc(team.logo_slug)}.png" alt="" onerror="this.style.display='none'">`; }
   function role(team, game){ const s=Number(game.model.home_spread); if(!Number.isFinite(s)||Math.abs(s)<.05)return "Pick'em"; return team.team===game.game.home_team?(s<0?'Favorite':'Underdog'):(s>0?'Favorite':'Underdog'); }
   function projectedPoints(game){ const total=Number(game.model.total), spread=Number(game.model.home_spread); if(!Number.isFinite(total)||!Number.isFinite(spread))return{away:null,home:null}; return {away:(total+spread)/2,home:(total-spread)/2}; }
