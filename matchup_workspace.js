@@ -1313,18 +1313,80 @@ function contextRows(game){
     return `<section class="mwSection mwSpots"><h3>Schedule spots</h3><div class="mwDenseGrid">${side(game.teams.away,away)}${side(game.teams.home,home)}</div></section>`;
   }
   function marketCards(game, history){
-    const rows=[...(history[game.game.game_id]||[])].sort((a,b)=>String(a.snapshot_date||a.market_spread_last_update||'').localeCompare(String(b.snapshot_date||b.market_spread_last_update||'')));
-    const dedup=[];let prior='';
-    for(const x of rows){
-      const key=[x.market_spread_home,x.market_spread_price,x.market_spread_book,x.market_total,x.market_total_over_price,x.market_total_under_price,x.market_total_book].join('|');
-      if(key!==prior){dedup.push(x);prior=key}
+    const allRows=[...(history[game.game.game_id]||[])].sort((a,b)=>{
+      const ak=String(a.snapshot_ts||a.snapshot_date||a.market_spread_last_update||a.market_total_last_update||'');
+      const bk=String(b.snapshot_ts||b.snapshot_date||b.market_spread_last_update||b.market_total_last_update||'');
+      return ak.localeCompare(bk);
+    });
+
+    const byDate=new Map();
+    for(const row of allRows){
+      const rawDate=String(row.snapshot_date||row.snapshot_ts||row.market_spread_last_update||row.market_total_last_update||'');
+      const dateKey=rawDate.slice(0,10)||rawDate;
+      if(!dateKey)continue;
+      byDate.set(dateKey,row);
     }
-    const firstSpread=dedup.find(x=>finite(x.market_spread_home))||{};
-    const firstTotal=dedup.find(x=>finite(x.market_total))||{};
-    const latest=[...dedup].reverse();
-    const openSpread=finite(firstSpread.market_spread_home)?`${esc(game.game.home_team)} ${line(firstSpread.market_spread_home)} ${price(firstSpread.market_spread_price)}`:'—';
-    const openTotal=finite(firstTotal.market_total)?`${num(firstTotal.market_total)} · O ${price(firstTotal.market_total_over_price)} / U ${price(firstTotal.market_total_under_price)}`:'—';
-    return `<section class="mwSection mwHistory" data-section="line-history"><h3>Line history — ATS spread and O/U total</h3><div class="mwHistoryLegend"><span><i class="mwLegendDot mwLegendLower"></i>Lower</span><span><i class="mwLegendDot mwLegendHigher"></i>Higher</span><span><i class="mwLegendDot mwLegendFlat"></i>Unchanged</span></div><div class="mwHistorySummary"><div class="mwHistorySummaryCard"><b>Opening ATS line:</b> ${openSpread}</div><div class="mwHistorySummaryCard"><b>Opening O/U:</b> ${openTotal}</div></div><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date / Time</th><th>Book</th><th>ATS spread</th><th>Spread price</th><th>Spread move</th><th>O/U total</th><th>Over</th><th>Under</th><th>Total move</th><th>Source</th></tr></thead><tbody>${latest.map((x,i)=>{const older=latest[i+1]||{};return `<tr><td>${esc(x.snapshot_date||x.market_spread_last_update||'—')}</td><td>${bookLogo(x.market_spread_book||x.market_total_book)||esc(x.market_spread_book||x.market_total_book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${movementText(x.market_spread_home,older.market_spread_home)}</td><td>${num(x.market_total)}</td><td>${price(x.market_total_over_price)}</td><td>${price(x.market_total_under_price)}</td><td>${movementText(x.market_total,older.market_total)}</td><td>${esc(x.snapshot_label||x.source||'Snapshot')}</td></tr>`}).join('')||'<tr><td colspan="10" class="mwMuted">No line-history snapshots available.</td></tr>'}</tbody></table></div></section>`;
+
+    const daily=[...byDate.entries()]
+      .sort((a,b)=>String(a[0]).localeCompare(String(b[0])))
+      .map(([,row])=>row);
+
+    const firstSpread=daily.find(x=>finite(x.market_spread_home))||{};
+    const firstTotal=daily.find(x=>finite(x.market_total))||{};
+    const latest=[...daily].reverse().slice(0,7);
+
+    const capturedText=(row,market)=>{
+      const value=market==='spread'
+        ? (row.snapshot_ts||row.market_spread_last_update||row.snapshot_date)
+        : (row.snapshot_ts||row.market_total_last_update||row.snapshot_date);
+      if(!value)return 'Captured: —';
+      const text=String(value);
+      const parsed=new Date(text);
+      if(!Number.isNaN(parsed.getTime())&&text.includes('T')){
+        return `Captured: ${parsed.toLocaleString([],{
+          year:'numeric',month:'2-digit',day:'2-digit',
+          hour:'numeric',minute:'2-digit'
+        })}`;
+      }
+      return `Captured: ${esc(text.slice(0,16).replace('T',' '))}`;
+    };
+
+    const openSpread=finite(firstSpread.market_spread_home)
+      ? `${esc(game.game.home_team)} ${line(firstSpread.market_spread_home)} ${price(firstSpread.market_spread_price)}`
+      : '—';
+
+    const openTotal=finite(firstTotal.market_total)
+      ? `${num(firstTotal.market_total)} · O ${price(firstTotal.market_total_over_price)} / U ${price(firstTotal.market_total_under_price)}`
+      : '—';
+
+    return `<section class="mwSection mwHistory" data-section="line-history">
+      <h3>Line history — ATS spread and O/U total</h3>
+      <div class="mwHistoryLegend">
+        <span><i class="mwLegendDot mwLegendLower"></i>Lower</span>
+        <span><i class="mwLegendDot mwLegendHigher"></i>Higher</span>
+        <span><i class="mwLegendDot mwLegendFlat"></i>Unchanged</span>
+      </div>
+      <div class="mwHistorySummary">
+        <div class="mwHistorySummaryCard">
+          <b>Opening ATS line:</b> ${openSpread}
+          <div class="mwMuted">${capturedText(firstSpread,'spread')}</div>
+        </div>
+        <div class="mwHistorySummaryCard">
+          <b>Opening O/U:</b> ${openTotal}
+          <div class="mwMuted">${capturedText(firstTotal,'total')}</div>
+        </div>
+      </div>
+      <div class="mwTableWrap">
+        <table class="mwTable">
+          <thead><tr><th>Date / Time</th><th>Book</th><th>ATS spread</th><th>Spread price</th><th>Spread move</th><th>O/U total</th><th>Over</th><th>Under</th><th>Total move</th><th>Source</th></tr></thead>
+          <tbody>${latest.map((x,i)=>{
+            const older=latest[i+1]||{};
+            const displayDate=String(x.snapshot_date||x.snapshot_ts||x.market_spread_last_update||x.market_total_last_update||'—').slice(0,10);
+            return `<tr><td>${esc(displayDate)}</td><td>${bookLogo(x.market_spread_book||x.market_total_book)||esc(x.market_spread_book||x.market_total_book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${movementText(x.market_spread_home,older.market_spread_home)}</td><td>${num(x.market_total)}</td><td>${price(x.market_total_over_price)}</td><td>${price(x.market_total_under_price)}</td><td>${movementText(x.market_total,older.market_total)}</td><td>${esc(x.snapshot_label||x.source||'Snapshot')}</td></tr>`;
+          }).join('')||'<tr><td colspan="10" class="mwMuted">No line-history snapshots available.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </section>`;
   }
   function injuries(game){ const teams=[game.teams.away,game.teams.home]; if(!teams.some(team=>(team.injuries||[]).length))return ''; return `<section class="mwSection"><h3>Injuries</h3><div class="mwDenseGrid">${teams.map(team=>`<div class="mwMiniCard"><div class="mwMiniTitle">${esc(team.team)}</div>${(team.injuries||[]).slice(0,4).map(x=>`<div class="mwTicket"><span>${esc(x.player||x.name||'Player')} · ${esc(x.position||'')}</span><b>${esc(x.status||'Unknown')}</b></div>`).join('')||'<div class="mwEmpty">No matched injury records.</div>'}</div>`).join('')}</div></section>`; }
   function betsHtml(game){ const all=[...(game.activity?.wagers||[]).map(x=>({...x,sheet:true})),...(localBets[game.game.game_id]||[])];return all.map((x,i)=>`<div class="mwTicket"><div><b>${esc(x.market||'Bet')} · ${esc(x.selection||'—')} ${price(x.price)}</b><div class="mwMuted">${x.sheet?'Google Sheet':esc(x.book||'Local')} · ${finite(x.stake)?'$'+num(x.stake,2):'Stake not set'}</div></div>${x.sheet?'<span class="mwGood">LIVE</span>':`<button onclick="removeMatchupBet(${i-(game.activity?.wagers||[]).length})">Remove</button>`}</div>`).join('')||'<div class="mwMuted">No saved bets on this game.</div>'; }
