@@ -87,10 +87,18 @@ def main():
     # daily_market_update.sh publishes this root copy when it is present.
     shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
     (OUT/'legacy.html').write_text('<!doctype html><meta charset="utf-8"><title>Moved</title><script>const h=location.hash;location.replace(h.includes("simulations")?"simulations.html":h.includes("team/")?"team.html?team="+h.split("team/")[1]:"ratings.html")</script>')
-    v1=(ROOT/'index.html').read_text(errors='ignore')
+    # The legacy monolith remains available as an explicit reference page, but
+    # it must never be sourced from or promoted over the canonical V2 index.
+    v1_source=ROOT/'v1.html'
+    if not v1_source.exists():
+        raise FileNotFoundError(f'Missing legacy V1 source: {v1_source}')
+    v1=v1_source.read_text(errors='ignore')
     (OUT/'v1.html').write_text('\n'.join(line.rstrip() for line in v1.splitlines())+'\n')
     shutil.copy2(ROOT/'matchup.html',OUT/'matchup.html')
     shutil.copy2(OUT/'index.html',OUT/'dashboard.html')
+    # Keep the root publication shell canonical and V2. Legacy automation may
+    # still build index_auto_market.html, but only this V2 build owns index.html.
+    shutil.copy2(OUT/'index.html',ROOT/'index.html')
     shutil.copy2(ROOT/'playoff_futures_tab.js',OUT/'playoff_futures_tab.js')
     shutil.copy2(ROOT/'dashboard_playoff_edges.js',OUT/'dashboard_playoff_edges.js')
     shutil.copy2(ROOT/'coach_cards.js',OUT/'coach_cards.js')

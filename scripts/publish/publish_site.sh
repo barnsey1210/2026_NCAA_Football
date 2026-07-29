@@ -6,7 +6,9 @@ PUBLISH_REPO="${NCAAF_PUBLISH_REPO:-/Users/jameslindesmith/Sites/NCAAF_SITE}"
 MODE="${1:---check}"
 
 cd "$ROOT"
-python3 scripts/publish/check_index_before_publish.py
+# The canonical publication shell is V2. The former checker validates the
+# embedded database in the legacy monolith and is intentionally not used here.
+python3 scripts/audit/audit_canonical_v2_index.py index.html
 python3 scripts/audit/audit_game_projection_spreads.py
 python3 scripts/audit/audit_page_payload_size.py
 python3 scripts/site/build_postgame_shadow_updates.py
@@ -35,6 +37,7 @@ echo "Matchup pre-publish audits passed."
 # MATCHUP_PREPUBLISH_AUDITS_END
 
 python3 scripts/site/build_public_site.py
+python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
 python3 scripts/publish/check_public_site.py
 
 if [ ! -d "$PUBLISH_REPO/.git" ]; then

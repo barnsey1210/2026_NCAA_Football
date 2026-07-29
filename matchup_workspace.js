@@ -1179,7 +1179,7 @@ function mwValidatedRpContextRows(game){
   return rows;
 }
 
-function contextRowsBeforePriorityPolicy(game){
+function contextRows(game){
   const legacyRows=legacyContextRows(game);
   const nonRpRows=legacyRows.filter(
     row=>!mwValidatedRpLegacyRow(row)
@@ -1189,108 +1189,10 @@ function contextRowsBeforePriorityPolicy(game){
     ...mwValidatedRpContextRows(game)
   ].sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0));
 }
-
-/* OPENERS_CONTEXT_PRIORITY_POLICY_START */
-function mwContextRecordStats(row){
-  const text=[row?.trigger,row?.evidence,row?.detail,row?.headline].join(' ');
-  const recordMatch=text.match(/\b(\d+)\s*[-–]\s*(\d+)(?:\s*[-–]\s*(\d+))?\b/);
-  const pctMatch=text.match(/\b(\d{1,3}(?:\.\d+)?)\s*%/);
-  const sampleMatch=text.match(/\bn\s*=\s*(\d+)\b/i)||text.match(/\bover\s+(\d+)\s+games?\b/i)||text.match(/\b(\d+)\s+games?\b/i);
-  let wins=null,losses=null,pushes=0,sample=null,pct=null,record='';
-  if(recordMatch){
-    wins=Number(recordMatch[1]);losses=Number(recordMatch[2]);pushes=Number(recordMatch[3]||0);
-    sample=wins+losses+pushes;
-    record=`${wins}-${losses}${recordMatch[3]!=null?'-'+pushes:''}`;
-  }
-  if(sampleMatch)sample=Number(sampleMatch[1]);
-  if(pctMatch)pct=Number(pctMatch[1]);
-  if(pct==null&&wins!=null&&losses!=null&&wins+losses>0)pct=(wins/(wins+losses))*100;
-  return {record,pct,sample};
-}
-
-function mwContextCategory(row){
-  const id=String(row?.id||'').toLowerCase();
-  const text=[row?.market,row?.trigger,row?.evidence,row?.detail,row?.headline].join(' ').toLowerCase();
-  if(id.includes('validated_rp')||text.includes('validated full-game rp')||text.includes('validated rp-edge'))return 'Validated RP';
-  if(text.includes('coach')||text.includes(' ats ')||text.includes('ats as '))return 'Coach';
-  if(text.includes('injur')||text.includes('qb1')||text.includes('quarterback'))return 'Injury';
-  if(text.includes('travel')||text.includes('lookahead')||text.includes('sandwich')||text.includes('short rest')||text.includes('back-to-back')||text.includes('b2b')||text.includes('bye')||text.includes('step up')||text.includes('step down')||text.includes('competition'))return 'Schedule';
-  if(text.includes('continuity'))return 'Continuity';
-  if(text.includes('stale opener')||text.includes('cross-book')||text.includes('line move'))return 'Market';
-  if(text.includes('weather')||text.includes('wind')||text.includes('rain'))return 'Weather';
-  if(text.includes('model spread')||text.includes('model total'))return 'Model';
-  return 'Other';
-}
-
-function mwContextPriority(row){
-  const category=mwContextCategory(row),id=String(row?.id||'').toLowerCase(),stats=mwContextRecordStats(row);
-  const pct=stats.pct,sample=stats.sample,distance=pct==null?null:Math.abs(pct-50);
-  const isHalf=/\b1h\b|\b2h\b|first half|second half/i.test([row?.market,row?.trigger,row?.evidence].join(' '));
-  if(category==='Model')return {include:false,priority:'Exclude',score:0,category,stats};
-  if(id==='validated_rp_p4_g6_component_25')return {include:true,priority:'High',score:95,category,stats};
-  if(id==='validated_rp_p4_p4_underdog')return {include:true,priority:'Medium',score:82,category,stats};
-  if(category==='Coach'){
-    if(sample==null||pct==null)return {include:false,priority:'Exclude',score:0,category,stats};
-    if(!isHalf&&sample>=40&&distance>=10)return {include:true,priority:'High',score:90,category,stats};
-    if((!isHalf&&sample>=25&&distance>=7.5)||(isHalf&&sample>=25&&distance>=10))return {include:true,priority:'Medium',score:76,category,stats};
-    if(sample>=15&&distance>=5)return {include:true,priority:'Low',score:58,category,stats};
-    return {include:false,priority:'Exclude',score:0,category,stats};
-  }
-  if(category==='Injury')return {include:true,priority:'Medium',score:72,category,stats};
-  if(category==='Market')return {include:true,priority:'Low',score:56,category,stats};
-  if(category==='Schedule'||category==='Continuity'||category==='Weather')return {include:true,priority:'Low',score:50,category,stats};
-  return {include:false,priority:'Exclude',score:0,category,stats};
-}
-
-function mwContextConciseRow(row){
-  const evaluation=mwContextPriority(row),stats=evaluation.stats,category=evaluation.category;
-  let trigger=String(row?.trigger||category),evidence=String(row?.evidence||row?.detail||'');
-  if(category==='Validated RP'){
-    if(String(row?.id||'')==='validated_rp_p4_g6_component_25'){
-      trigger='Validated RP mismatch';
-      const m=evidence.match(/overall\s*([+\-]?\d+).*?offense vs defense\s*([+\-]?\d+).*?defense vs offense\s*([+\-]?\d+)/i);
-      evidence=m?`OVR ${m[1]} · Off/Def ${m[2]} · Def/Off ${m[3]} · 50-31 ATS`:'50-31 ATS · 61.7% · n=81';
-    }else{
-      trigger='Validated RP underdog';
-      evidence='12-5 ATS · 70.6% · n=17';
-    }
-  }else if(category==='Coach'){
-    trigger=trigger.replace(/^Opposing coach poor\s*/i,'Coach fade · ').replace(/^Coach\s*/i,'Coach · ').replace(/\s+as\s+/i,' · ');
-    const pieces=[];
-    if(stats.record)pieces.push(stats.record+' ATS');
-    if(stats.pct!=null)pieces.push(stats.pct.toFixed(1)+'%');
-    if(stats.sample!=null)pieces.push('n='+stats.sample);
-    const margin=evidence.match(/([+\-]?\d+(?:\.\d+)?)\s*ATS\s*\+\/-/i);
-    if(margin)pieces.push(margin[1]+' ATS +/-');
-    evidence=pieces.join(' · ')||evidence;
-  }else{
-    if(category==='Injury')trigger='Injury edge';
-    if(category==='Continuity')trigger='Staff continuity';
-    if(category==='Weather')trigger='Weather';
-    evidence=evidence.slice(0,90);
-  }
-  return {...row,priority:evaluation.priority,priorityScore:evaluation.score,trigger,evidence,contextCategory:category};
-}
-
-function contextRows(game){
-  const baseRows=contextRowsBeforePriorityPolicy(game);
-  const filtered=baseRows.map(mwContextConciseRow).filter(row=>mwContextPriority(row).include);
-  const seen=new Set(),deduped=[];
-  for(const row of filtered){
-    const key=[row.market,row.team,row.trigger,row.evidence].join('|').toLowerCase();
-    if(seen.has(key))continue;
-    seen.add(key);deduped.push(row);
-  }
-  const order={High:3,Medium:2,Low:1};
-  deduped.sort((a,b)=>((order[b.priority]||0)-(order[a.priority]||0))||((Number(b.priorityScore)||0)-(Number(a.priorityScore)||0)));
-  return deduped;
-}
-/* OPENERS_CONTEXT_PRIORITY_POLICY_END */
-
 /* VALIDATED_RP_MATCHUP_CONTEXT_END */
 
 
-  function contextTable(game){ const rows=contextRows(game); const empty=!rows.length; return `<section class="mwSection ${empty?'mwContextEmptySection':''}" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Side</th><th>Angle</th><th>Key evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}" data-priority="${esc(x.priority||'Low')}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted mwContextEmpty">No qualifying betting context for this matchup.</td></tr>'}</tbody></table></div></section>`; }
+function contextTable(game){ const rows=contextRows(game); const empty=!rows.length; return `<section class="mwSection ${empty?'mwContextEmptySection':''}" data-section="betting-context"><h3>Key betting context — qualifying rules only</h3><div class="mwTableWrap"><table class="mwTable mwContextTable"><thead><tr><th>Priority</th><th>Market</th><th>Side</th><th>Angle</th><th>Key evidence</th></tr></thead><tbody>${rows.map(x=>`<tr data-rule="${esc(x.id)}" data-priority="${esc(x.priority||'Low')}"><td><span class="mwPriority">${x.priority}</span></td><td>${esc(x.market)}</td><td><b>${esc(x.team)}</b></td><td>${esc(x.trigger)}</td><td class="mwEvidence">${esc(x.evidence)}</td></tr>`).join('')||'<tr><td colspan="5" class="mwMuted mwContextEmpty">No qualifying betting context for this matchup.</td></tr>'}</tbody></table></div></section>`; }
   function splitCell(split){if(!split||split.available===false)return '<span class="mwMuted">No matched sample</span>';return `<b>${esc(split.ats_record||'—')} ATS</b> · ${pct(split.ats_pct)} · ${num(split.ats_margin,1)} +/-<br><span class="mwMuted">O/U ${esc(split.ou_record||'—')} · N=${split.games??'—'}</span>`;}
   function coachingDetail(game){const rows=(game.matchup.coaches||[]);return `<section class="mwSection mwCoachDetail"><details><summary>Complete coaching ATS / totals splits — Full Game, 1H and 2H</summary><div class="mwCoachGrid"><div class="mwCoachCell mwCoachHead">Team / period</div><div class="mwCoachCell mwCoachHead">Favorite</div><div class="mwCoachCell mwCoachHead">Underdog</div>${rows.map(c=>['Full Game','1H','2H'].map((period,i)=>{const fav=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Favorite'),dog=(c.role_splits||[]).find(x=>x.period===period&&x.role==='Underdog');return `<div class="mwCoachCell"><b>${i===0?esc(c.team)+'<br>':''}${esc(period)}</b>${i===0?`<br><span class="mwMuted">${esc(c.coach||'—')}</span>`:''}</div><div class="mwCoachCell">${splitCell(fav)}</div><div class="mwCoachCell">${splitCell(dog)}</div>`}).join('')).join('')}</div></details></section>`;}
   function daysBetween(a,b){const x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)?Math.round((y-x)/86400000):null}

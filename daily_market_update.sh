@@ -76,32 +76,22 @@ run_py() {
   run_py "build_season_game_lines_2026.py" || echo "WARNING: season game lines build failed"
     run_py "pull_theodds_ncaaf_lines_2026.py" || echo "WARNING: The Odds API line pull failed"
     run_py "build_theodds_season_lines_2026.py" || echo "WARNING: The Odds API line normalization failed"
-  run_py "scripts/odds/append_game_book_line_history.py" "append_game_book_line_history.py" || echo "WARNING: per-book game line history append failed"
-  run_py "scripts/signals/build_cross_book_opener_signals_2026.py" "build_cross_book_opener_signals_2026.py" || echo "WARNING: cross-book opener signal build failed"
 
 
-  echo "Using ~/NCAAF_AUTO/index.html as automation baseline template. No iCloud copy is performed."
+  # Append today's normalized game lines before site/email rendering.
+  run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || echo "WARNING: game line history append failed"
+  run_py "scripts/odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || echo "WARNING: game line movement report build failed"
+
+  echo "Using ~/NCAAF_AUTO/v1.html as the isolated legacy automation template."
 
   python3 build_market_futures_safe.py \
     --win-totals-csv "market_win_totals_import.csv" \
     --conference-futures-csv "market_conference_futures_import.csv" \
     --output-xlsx "market_futures_export.xlsx"
 
-  
-# Active 2026 ratings/projection refresh must happen before HTML site build.
-run_py "build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
-run_py "scripts/ratings/build_active_2026_ratings_master.py" "build_active_2026_ratings_master.py" || echo "WARNING: active 2026 ratings master build failed"
-run_py "scripts/ratings/build_ratings_system_variance.py" "build_ratings_system_variance.py" || echo "WARNING: ratings variance build failed"
-run_py "scripts/signals/build_pbp_line_movement_signals_2026.py" "build_pbp_line_movement_signals_2026.py" || echo "WARNING: PBP line movement signals build failed"
-run_py "scripts/signals/build_game_betting_angles_2026.py" "build_game_betting_angles_2026.py" || echo "WARNING: game betting angles build failed"
-run_py "append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
-run_py "build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
-run_py "build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
-run_py "build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
-
-python3 build_site_from_workbook_safe_with_movement.py \
+  python3 build_site_from_workbook_safe_with_movement.py \
     --workbook "2026_NCAA _Season.xlsm" \
-    --template "index.html" \
+    --template "v1.html" \
     --output "index_auto_market.html" \
     --cfbd-xlsx "cfbd_2026_export.xlsx" \
     --market-xlsx "market_futures_export.xlsx" \
@@ -110,17 +100,13 @@ python3 build_site_from_workbook_safe_with_movement.py \
       --theodds-lines-csv "data/odds/theodds_season_game_lines_2026.csv" \
       --action-lines-csv "data/odds/actionnetwork_season_game_lines_2026.csv"
 
-  run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || echo "WARNING: game line history append failed"
-  run_py "scripts/odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || echo "WARNING: game line movement report build failed"
 
   run_py "inject_daily_market_moves.py"
   run_py "inject_market_arbs.py"
-run_py "scripts/injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || echo "WARNING: CFBDepth injury pull failed"
-run_py "scripts/injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || echo "WARNING: CFBDepth injury article pull failed"
-run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || echo "WARNING: injury alert build failed"
-run_py "scripts/agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
-run_py "scripts/agents/clean_daily_betting_angle_line_moves.py" "clean_daily_betting_angle_line_moves.py" || echo "WARNING: daily betting angle line move cleanup failed"
-run_py "scripts/agents/postprocess_daily_betting_angles_display.py" "postprocess_daily_betting_angles_display.py" || echo "WARNING: betting angles display postprocess failed"
+  run_py "scripts/injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || echo "WARNING: CFBDepth injury pull failed"
+  run_py "scripts/injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || echo "WARNING: CFBDepth injury article pull failed"
+  run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || echo "WARNING: injury alert build failed"
+  run_py "scripts/agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
   run_py "scripts/agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || echo "WARNING: game line email edges append failed"
 
   echo "Checking daily betting angle categories before HTML email build..."
@@ -141,79 +127,63 @@ else:
             print("WARNING: zero game line edge rows before email HTML build")
 PY2
 
-  run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
+
+  # Add supplemental rows, remove juice-only game moves, then render HTML.
   run_py "scripts/agents/prepend_game_line_moves_to_daily_betting_angles.py" "prepend_game_line_moves_to_daily_betting_angles.py" || echo "WARNING: prepend game line moves to email failed"
-run_py "scripts/agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || echo "WARNING: prepend injury alerts failed"
+  run_py "scripts/agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || echo "WARNING: prepend injury alerts failed"
+  run_py "scripts/agents/clean_daily_game_line_moves.py" "clean_daily_game_line_moves.py" || echo "WARNING: daily game-line move cleaning failed"
+  run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
 
   mkdir -p backups/html
-  cp index.html "backups/html/index_before_daily_promote_$(date +%Y%m%d_%H%M%S).html"
-  cp index_auto_market.html index.html
-  cp index_auto_market.html index_publish.html
-  echo "Promoted fresh build to index.html and index_publish.html"
+  cp v1.html "backups/html/v1_before_daily_refresh_$(date +%Y%m%d_%H%M%S).html"
+  cp index_auto_market.html v1.html
+  echo "Legacy market artifact refreshed at index_auto_market.html and v1.html; canonical V2 index is unchanged."
 
-  run_py "scripts/odds/clear_stale_fallback_game_lines_from_site.py" "clear_stale_fallback_game_lines_from_site.py" || echo "WARNING: stale fallback game-line cleanup failed"
-  run_py "scripts/site/fix_projection_spread_mismatches.py" "fix_projection_spread_mismatches.py" || echo "WARNING: projection spread mismatch fix failed"
-  run_py "scripts/site/fix_projection_rating_mismatches.py" "fix_projection_rating_mismatches.py" || echo "WARNING: projection rating mismatch fix failed"
-  run_py "scripts/odds/restore_action_market_metadata_to_site.py" "restore_action_market_metadata_to_site.py" || echo "WARNING: restore Action market metadata failed"
-  run_py "scripts/market/build_intraday_win_total_moves.py" "build_intraday_win_total_moves.py" || echo "WARNING: intraday win total moves failed"
-run_py "scripts/coach/build_coach_fav_dog_splits_all_periods.py" "build_coach_fav_dog_splits_all_periods.py" || echo "WARNING: coach favorite/dog splits failed"
-run_py "scripts/coach/build_coach_full_game_fav_dog_cfbd.py" "build_coach_full_game_fav_dog_cfbd.py" || echo "WARNING: coach full-game CFBD fav/dog splits failed"
-run_py "scripts/coach/build_coach_fav_dog_splits_hybrid.py" "build_coach_fav_dog_splits_hybrid.py" || echo "WARNING: coach hybrid fav/dog splits failed"
-run_py "scripts/coach/build_game_coach_fav_dog_context.py" "build_game_coach_fav_dog_context.py" || echo "WARNING: game coach favorite/dog context failed"
-run_py "scripts/site/inject_coach_fav_dog_context.py" "inject_coach_fav_dog_context.py" || echo "WARNING: coach favorite/dog context injection failed"
-run_py "scripts/site/inject_matchup_coach_fav_dog_context.py" "inject_matchup_coach_fav_dog_context.py" || echo "WARNING: matchup coach favorite/dog context injection failed"
-run_py "scripts/site/inject_coach_fav_dog_trends_page.py" "inject_coach_fav_dog_trends_page.py" || echo "WARNING: coach fav/dog trends page injection failed"
-run_py "scripts/site/inject_rp_support_badges.py" "inject_rp_support_badges.py" || echo "WARNING: RP support badge injection failed"
-run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py" "pull_sgo_ncaaf_game_odds.py" || echo "WARNING: SGO NCAAF game odds pull failed"
-run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py" "parse_sgo_ncaaf_game_odds.py" || echo "WARNING: SGO NCAAF game odds parse failed"
-run_py "scripts/odds/append_sgo_game_book_line_history.py" "append_sgo_game_book_line_history.py" || echo "WARNING: granular SGO book history append failed"
-run_py "scripts/signals/build_cross_book_opener_signals_2026.py" "build_cross_book_opener_signals_2026.py" || echo "WARNING: refreshed cross-book opener signal build failed"
-run_py "scripts/site/inject_sgo_game_odds.py" "inject_sgo_game_odds.py" || echo "WARNING: SGO NCAAF game odds injection failed"
-run_py "scripts/site/inject_opening_possession_main_badges.py" "inject_opening_possession_main_badges.py" || echo "WARNING: opening possession main badge injection failed"
-run_py "scripts/site/inject_opening_possession_matchup.py" "inject_opening_possession_matchup.py" || echo "WARNING: opening possession matchup injection failed"
-run_py "scripts/signals/build_travel_1h_signals_2026.py" "build_travel_1h_signals_2026.py" || echo "WARNING: travel 1H signal build failed"
-run_py "scripts/site/inject_travel_1h_badges.py" "inject_travel_1h_badges.py" || echo "WARNING: travel 1H badge injection failed"
-run_py "scripts/site/inject_home_dashboard_data.py" "inject_home_dashboard_data.py"
-run_py "scripts/site/patch_dashboard_all_market_moves.py" "patch_dashboard_all_market_moves.py" || echo "WARNING: all market moves dashboard patch failed"
+  # These legacy HTML injectors target index.html directly and therefore must
+  # not run in the V2 daily path. Their production data is supplied by the
+  # canonical V2 JSON/view builders below. The legacy intermediate remains an
+  # optional diagnostic artifact and is never a publication source.
+  echo "Skipping legacy index injectors; V2 builders own the canonical site shell."
   run_py "scripts/injuries/build_game_injury_scores.py" "build_game_injury_scores.py" || echo "WARNING: game injury score build failed"
-  run_py "scripts/site/inject_game_injury_overlay.py" "inject_game_injury_overlay.py" || echo "WARNING: game injury overlay injection failed"
+
+  # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
   run_py "scripts/ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" || echo "WARNING: Sagarin ratings refresh failed"
   run_py "scripts/ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" || echo "WARNING: Massey ratings refresh failed"
   run_py "scripts/ratings/pull_donchess_ratings.py" "pull_donchess_ratings.py" || echo "WARNING: Donchess ratings refresh failed"
-  run_py "scripts/ratings/test_rating_sources.py" "test_rating_sources.py" || echo "WARNING: ratings source pull/test failed"
-  run_py "scripts/ratings/parse_rating_source_tables.py" "parse_rating_source_tables.py" || echo "WARNING: ratings source table parse failed"
-  run_py "scripts/ratings/parse_kford_text.py" "parse_kford_text.py" || run_py "scripts/ratings/parse_kford_manual.py" "parse_kford_manual.py" || echo "WARNING: KFord parse failed"
-  run_py "scripts/ratings/parse_bradpowers_pdf.py" "parse_bradpowers_pdf.py" || echo "WARNING: Brad Powers PDF parse failed"
-  # DISABLED: moved before site build / root script is canonical
-# run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
+
+  run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || echo "WARNING: ratings latest build failed"
   run_py "scripts/ratings/append_ratings_history.py" "append_ratings_history.py" || echo "WARNING: ratings history append failed"
   run_py "scripts/ratings/build_ratings_movement.py" "build_ratings_movement.py" || echo "WARNING: ratings movement build failed"
-  run_py "scripts/audit/audit_ratings_source_freshness.py" "audit_ratings_source_freshness.py" || echo "WARNING: ratings source freshness audit failed"
+  run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
+  run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
 
-  # DISABLED 2026-07-11: can overwrite blended projections back to rating-only lines
-# python3 scripts/audit/fix_game_projection_spreads_from_current_ratings.py --apply || echo "WARNING: projection spread fix failed"
-run_py "scripts/weather/pull_open_meteo_game_weather.py" "pull_open_meteo_game_weather.py" || echo "WARNING: weather pull failed"
-run_py "scripts/betting/pull_google_sheet_bets.py" "pull_google_sheet_bets.py" || echo "WARNING: betting sheet pull failed"
-run_py "scripts/betting/build_betting_dashboard.py" "build_betting_dashboard.py" || echo "WARNING: betting dashboard build failed"
-run_py "scripts/betting/enrich_betting_current_clv.py" "enrich_betting_current_clv.py" || echo "WARNING: betting current CLV enrichment failed"
-run_py "scripts/betting/freeze_betting_closing_clv.py" "freeze_betting_closing_clv.py" || echo "WARNING: betting closing CLV freeze failed"
-# DISABLED temporarily: betting dashboard inject broke site navigation
-run_py "scripts/site/inject_betting_dashboard.py" "inject_betting_dashboard.py" || echo "WARNING: betting dashboard inject failed"
-run_py "scripts/site/build_matchup_page.py" "build_matchup_page.py" || echo "WARNING: matchup page build failed"
-run_py "scripts/site/patch_game_line_move_display_clean.py" "patch_game_line_move_display_clean.py" || echo "WARNING: game line move display patch failed"
-run_py "scripts/site/patch_market_moves_arbs_display_clean.py" "patch_market_moves_arbs_display_clean.py" || echo "WARNING: market moves/arbs display patch failed"
-run_py "scripts/audit/audit_game_projection_spreads.py" "audit_game_projection_spreads.py" || echo "WARNING: projection spread audit failed"
-run_py "scripts/audit/audit_game_projection_totals_v2.py" "audit_game_projection_totals_v2.py" || echo "WARNING: projection total audit failed"
-run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || echo "WARNING: daily run health build failed"
-  run_py "scripts/site/inject_coach_halves_from_csv.py" "inject_coach_halves_from_csv.py" || echo "WARNING: coach halves CSV inject failed"
-  run_py "scripts/site/clean_site_chrome.py" "clean_site_chrome.py" || echo "WARNING: site chrome cleanup failed"
+  # Shadow production bridge. Current selected market lines must already be in
+  # matchups_view; completed-game results/PBP/game-control builders run through
+  # the existing site build and postgame paths. These steps do no acquisition
+  # and never refit the frozen movement models.
+  run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py"
+  run_py "scripts/site/build_odds_screen_v1.py" "build_odds_screen_v1.py" || echo "WARNING: odds screen build failed"
+  python3 scripts/research/build_market_implied_power_ratings.py --production-2026
+  run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"
+  python3 scripts/site/build_shadow_team_game_features.py --mode all
+  python3 scripts/site/build_saturday_shadow_component_predictions.py
+  python3 scripts/site/build_saturday_shadow_lines.py
+  python3 scripts/site/build_schedule_live_enrichment.py
+  python3 scripts/audit/audit_market_shadow_production_layer.py
+  python3 scripts/audit/audit_saturday_shadow_production_integration.py
 
-  # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
+  # Refresh V2 Futures data after the canonical V1 site and projection outputs are final.
+  # A failed or stale playoff-market pull does not block the rest of the site; the
+  # Futures QA banner will surface the issue while cached data remains available.
+  wait_for_network "api.actionnetwork.com"
+  run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || echo "WARNING: Action Network playoff futures pull failed; using cached data where available"
+  run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || echo "WARNING: Futures V2 data build failed"
 
-  # DISABLED: moved before site build
-# run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || echo "WARNING: game projection source build failed"
-  # DISABLED: moved before site build
-# run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || echo "WARNING: game projection blend build failed"
+  # Refresh the production Odds page payloads after the current game and
+  # futures sources are complete. Builders write atomically scoped Odds
+  # artifacts; on failure the previous valid files remain available.
+  run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || echo "WARNING: Odds game payload build failed; retaining last valid artifact"
+  run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || echo "WARNING: Odds futures payload build failed; retaining last valid artifact"
 
   # Optional email send. Do not let missing Gmail env vars stop the market/site/rating build.
   if [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
@@ -222,9 +192,20 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
     echo "WARNING: Skipping email send because NCAAF_GMAIL_USER, NCAAF_GMAIL_APP_PASSWORD, or NCAAF_EMAIL_TO is missing"
   fi
 
+  # Build and validate the canonical V2 public bundle. Publication is delegated
+  # to the normal staged publisher so a legacy artifact can never be copied to
+  # the public repository by this script.
+  python3 scripts/site/build_public_site.py
+  python3 scripts/audit/audit_canonical_v2_index.py index.html
+  python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
+  python3 scripts/publish/check_public_site.py
+  if [ "${NCAAF_AUTO_PUBLISH:-1}" = "0" ]; then
+    echo "NCAAF_AUTO_PUBLISH=0: validated V2 build; publication skipped"
+  else
+    bash scripts/publish/publish_site.sh --push
+  fi
 
-
-  # cp market_win_totals_history.csv "$ICLOUD/"
+# cp market_win_totals_history.csv "$ICLOUD/"
   # cp market_conference_futures_history.csv "$ICLOUD/"
   # cp market_win_totals_movement.csv "$ICLOUD/"
   # cp market_conference_futures_movement.csv "$ICLOUD/"
@@ -232,68 +213,10 @@ run_py "scripts/site/build_daily_run_health.py" "build_daily_run_health.py" || e
   # cp market_futures_export.xlsx "$ICLOUD/"
   # cp index_auto_market.html "$ICLOUD/"
 
-run_py "scripts/site/recalculate_game_projections_from_active_combo.py" "recalculate_game_projections_from_active_combo.py" || echo "WARNING: active combo projection recalculation failed"
-run_py "scripts/site/allow_ndsu_mw_title_eligibility.py" "allow_ndsu_mw_title_eligibility.py" || echo "WARNING: NDSU MW eligibility cleanup failed"
-python3 rerun_conference_sims_2026.py --index index.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun failed"
-python3 rerun_conference_sims_2026.py --index index_auto_market.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun auto failed"
-python3 rerun_conference_sims_2026.py --index index_publish.html --sims 10000 --seed 20260712 || echo "WARNING: conference sim rerun publish failed"
-run_py "scripts/site/cleanup_literal_newline_rows.py" "cleanup_literal_newline_rows.py" || echo "WARNING: literal newline cleanup failed"
-run_py "scripts/site/cleanup_stale_projection_audit_notes.py" "cleanup_stale_projection_audit_notes.py" || echo "WARNING: stale projection audit cleanup failed"
-run_py "scripts/history/append_game_line_model_history.py" "append_game_line_model_history.py" || echo "WARNING: game line/model history append failed"
-run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py" || echo "WARNING: matchup line history clean build failed"
-run_py "scripts/site/inject_matchup_line_history.py" "inject_matchup_line_history.py" || echo "WARNING: matchup line history injection failed"
-run_py "scripts/site/inject_standalone_line_history_page.py" "inject_standalone_line_history_page.py" || echo "WARNING: standalone line history page injection failed"
-run_py "scripts/site/inject_preseason_snapshot.py" "inject_preseason_snapshot.py" || echo "WARNING: preseason snapshot injection failed"
-run_py "scripts/site/inject_team_preseason_current_card.py" "inject_team_preseason_current_card.py" || echo "WARNING: team preseason/current card injection failed"
-run_py "scripts/site/inject_safe_simulations_page.py" "inject_safe_simulations_page.py" || echo "WARNING: safe simulations page injection failed"
-run_py "scripts/agents/build_home_command_center.py" "build_home_command_center.py" || echo "WARNING: home command center build failed"
-run_py "scripts/site/inject_home_command_center.py" "inject_home_command_center.py" || echo "WARNING: home command center injection failed"
-run_py "scripts/site/cleanup_home_after_command_center.py" "cleanup_home_after_command_center.py" || echo "WARNING: home command center cleanup failed"
-run_py "scripts/site/polish_home_command_center_ui.py" "polish_home_command_center_ui.py" || echo "WARNING: home command center polish failed"
-run_py "scripts/site/fix_home_command_center_value_layout.py" "fix_home_command_center_value_layout.py" || echo "WARNING: home command center value layout fix failed"
-run_py "scripts/site/polish_home_command_center_week_tabs.py" "polish_home_command_center_week_tabs.py" || echo "WARNING: home command center week tabs polish failed"
-run_py "scripts/site/fix_home_command_center_logos.py" "fix_home_command_center_logos.py" || echo "WARNING: home command center logos fix failed"
-run_py "scripts/site/rename_home_to_dashboard_and_cleanup.py" "rename_home_to_dashboard_and_cleanup.py" || echo "WARNING: dashboard cleanup failed"
-run_py "scripts/site/polish_home_command_center_tables.py" "polish_home_command_center_tables.py" || echo "WARNING: home command center table polish failed"
-run_py "scripts/site/fix_home_command_center_table_expansion.py" "fix_home_command_center_table_expansion.py" || echo "WARNING: home command center table expansion fix failed"
-run_py "scripts/site/fix_home_command_center_toggle.py" "fix_home_command_center_toggle.py" || echo "WARNING: home command center toggle fix failed"
-run_py "scripts/site/inject_schedule_week_buttons.py" "inject_schedule_week_buttons.py" || echo "WARNING: schedule week buttons failed"
-run_py "scripts/site/native_schedule_tabs_cleanup.py" "native_schedule_tabs_cleanup.py" || echo "WARNING: native schedule tabs cleanup failed"
-run_py "scripts/site/inject_openers_page.py" "inject_openers_page.py" || echo "WARNING: openers page injection failed"
-run_py "scripts/site/inject_openers_ratings_context.py" "inject_openers_ratings_context.py" || echo "WARNING: openers ratings context injection failed"
-run_py "scripts/site/polish_openers_page_context.py" "polish_openers_page_context.py" || echo "WARNING: openers context polish failed"
-run_py "scripts/site/enhance_openers_table.py" "enhance_openers_table.py" || echo "WARNING: openers table enhancement failed"
-run_py "scripts/site/cleanup_render_wrappers_and_flicker.py" "cleanup_render_wrappers_and_flicker.py" || echo "WARNING: render-wrapper flicker cleanup failed"
-run_py "scripts/site/native_left_nav_cleanup.py" "native_left_nav_cleanup.py" || echo "WARNING: native left nav cleanup failed"
-run_py "scripts/site/native_page_mount_consolidation.py" "native_page_mount_consolidation.py" || echo "WARNING: native page mount consolidation failed"
-run_py "scripts/site/inject_active_ratings_rankings_ui.py" "inject_active_ratings_rankings_ui.py" || echo "WARNING: active ratings rankings UI injection failed"
-run_py "scripts/site/inject_schedule_model_context.py" "inject_schedule_model_context.py" || echo "WARNING: schedule model context injection failed"
-run_py "scripts/site/inject_schedule_spread_lab_display.py" "inject_schedule_spread_lab_display.py" || echo "WARNING: schedule spread lab display injection failed"
-run_py "scripts/site/inject_schedule_lab_layout_fix.py" "inject_schedule_lab_layout_fix.py" || echo "WARNING: schedule lab layout fix injection failed"
-run_py "scripts/site/inject_schedule_variance_filter.py" "inject_schedule_variance_filter.py" || echo "WARNING: schedule variance filter injection failed"
-run_py "scripts/site/inject_schedule_betting_angle_filter.py" "inject_schedule_betting_angle_filter.py" || echo "WARNING: schedule betting angle filter injection failed"
-run_py "scripts/site/inject_schedule_angle_reason_fix.py" "inject_schedule_angle_reason_fix.py" || echo "WARNING: schedule angle reason fix injection failed"
-run_py "scripts/site/inject_betting_angle_definitions.py" "inject_betting_angle_definitions.py" || echo "WARNING: betting angle definitions injection failed"
-run_py "scripts/site/inject_normalized_betting_angle_filter.py" "inject_normalized_betting_angle_filter.py" || echo "WARNING: normalized betting angle filter injection failed"
-run_py "scripts/site/inject_production_model_badge.py" "inject_production_model_badge.py" || echo "WARNING: production model badge injection failed"
-run_py "scripts/betting/build_betting_activity_view.py" "build_betting_activity_view.py" || echo "WARNING: betting activity view build failed"
-run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py" || echo "WARNING: matchups view build failed"
-run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || echo "WARNING: futures view build failed"
-run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || echo "WARNING: Odds game payload build failed; retaining last valid artifact"
-run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || echo "WARNING: Odds futures payload build failed; retaining last valid artifact"
-run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py" || echo "WARNING: conference workspace build failed"
-run_py "scripts/site/build_postgame_shadow_updates.py" "build_postgame_shadow_updates.py" || echo "WARNING: postgame shadow build failed"
-run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py" || echo "WARNING: ratings view build failed"
-run_py "scripts/site/build_public_site.py" "build_public_site.py" || echo "WARNING: public multi-page build failed"
-run_py "scripts/publish/check_public_site.py" "check_public_site.py"
-run_py "scripts/publish/check_index_before_publish.py" "check_index_before_publish.py"
-run_py "scripts/audit/audit_page_payload_size.py" "audit_page_payload_size.py"
-
-if [ "${NCAAF_AUTO_PUBLISH:-0}" = "1" ]; then
-  scripts/publish/publish_site.sh --push
-else
-  echo "Build validated. Publishing skipped; set NCAAF_AUTO_PUBLISH=1 or run scripts/publish/publish_site.sh --push explicitly."
-fi
-
-echo "Daily market update finished: $(date)"
+  echo "Daily market update finished: $(date)"
 } >> "$LOG" 2>&1
+
+# The install_* scripts below this point were one-time source migrations. They
+# also write directly into the publication repository, so they are deliberately
+# excluded from recurring automation. Their approved results live in the V2
+# source files and are copied only by the staged publisher above.
