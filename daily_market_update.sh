@@ -162,6 +162,11 @@ PY2
   # the existing site build and postgame paths. These steps do no acquisition
   # and never refit the frozen movement models.
   run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py"
+  # Bridge the newly appended daily market snapshot into the normalized V2
+  # history assets consumed by both Odds and the shared matchup workspace.
+  # Asset-only mode deliberately leaves every canonical V2 HTML file untouched.
+  run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py"
+  python3 scripts/site/inject_matchup_line_history.py --asset-only
   run_py "scripts/site/build_odds_screen_v1.py" "build_odds_screen_v1.py" || echo "WARNING: odds screen build failed"
   python3 scripts/research/build_market_implied_power_ratings.py --production-2026
   run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"

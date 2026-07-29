@@ -1,10 +1,13 @@
 from pathlib import Path
+import argparse
 import re, json
+import hashlib
 import pandas as pd
 import math
 
 TARGETS = [Path("index.html"), Path("index_auto_market.html"), Path("index_publish.html")]
 HISTORY = Path("data/history/matchup_line_history_clean.csv")
+ASSET = Path("data/site/matchup_line_history.json")
 
 START = "<!-- matchup-line-history-start -->"
 END = "<!-- matchup-line-history-end -->"
@@ -26,21 +29,18 @@ def clean_str(x):
     return str(x)
 
 def load_site_game_lookup():
-    """Read current index.html DB so history payload always has week/conference."""
-    import json, re
+    """Read the canonical V2 matchup view for week/conference metadata."""
+    import json
     idx = {}
-    ip = Path("index.html")
+    ip = Path("data/site/matchups_view.json")
     if not ip.exists():
         return idx
-    html = ip.read_text(errors="ignore")
-    m = re.search(r'<script id="db" type="application/json">(.*?)</script>', html, flags=re.S)
-    if not m:
-        return idx
     try:
-        db = json.loads(m.group(1))
+        db = json.loads(ip.read_text())
     except Exception:
         return idx
-    for g in db.get("games", []):
+    for row in db.get("games", []):
+        g = row.get("game") or {}
         gid = str(g.get("game_id") or "")
         if gid:
             idx[gid] = g
@@ -70,6 +70,7 @@ def build_payload():
         for _, r in g.sort_values(sort_cols).iterrows():
             rows.append({
                 "snapshot_date": clean_str(r.get("snapshot_date")),
+                "snapshot_ts": clean_str(r.get("snapshot_ts") or r.get("snapshot_date")),
                 "snapshot_label": clean_str(r.get("snapshot_label")),
                 "game_date": clean_str(r.get("game_date")),
                 "week": clean_num(r.get("week") if "week" in r.index else r.get("game_week")),
@@ -98,7 +99,7 @@ def build_payload():
 
     return out
 
-def inject(path, payload):
+def inject(path, asset_version):
     if not path.exists():
         return
 
@@ -106,8 +107,30 @@ def inject(path, payload):
 
     block = f"""{START}
 <script id="matchup-line-history-js">
-const MATCHUP_LINE_HISTORY = {json.dumps(payload, separators=(",", ":"))};
-window.MATCHUP_LINE_HISTORY = MATCHUP_LINE_HISTORY;
+window.MATCHUP_LINE_HISTORY = window.MATCHUP_LINE_HISTORY || {{}};
+window.MATCHUP_LINE_HISTORY_LOADED = false;
+window.MATCHUP_LINE_HISTORY_URL = "data/site/matchup_line_history.json?v={asset_version}";
+window.loadMatchupLineHistory = window.loadMatchupLineHistory || function() {{
+  if (window.MATCHUP_LINE_HISTORY_READY) return window.MATCHUP_LINE_HISTORY_READY;
+  window.MATCHUP_LINE_HISTORY_READY = fetch(window.MATCHUP_LINE_HISTORY_URL, {{cache:'force-cache'}})
+  .then(response => {{
+    if (!response.ok) throw new Error(`Line history HTTP ${{response.status}}`);
+    return response.json();
+  }})
+  .then(payload => {{
+    window.MATCHUP_LINE_HISTORY = payload || {{}};
+    window.MATCHUP_LINE_HISTORY_LOADED = true;
+    window.dispatchEvent(new CustomEvent('matchup-line-history-ready'));
+    return window.MATCHUP_LINE_HISTORY;
+  }})
+  .catch(error => {{
+    console.error('Line history failed to load', error);
+    window.dispatchEvent(new CustomEvent('matchup-line-history-error', {{detail:String(error)}}));
+    return window.MATCHUP_LINE_HISTORY;
+  }});
+  return window.MATCHUP_LINE_HISTORY_READY;
+}};
+window.loadMatchupLineHistory();
 
 function lineHistoryRowsForGame(g) {{
   if (!g) return [];
@@ -252,9 +275,9 @@ function matchupLineHistoryCard(g) {{
 {END}"""
 
     if START in html and END in html:
-        html = re.sub(re.escape(START) + r".*?" + re.escape(END), block, html, flags=re.S)
+        html = re.sub(re.escape(START) + r".*?" + re.escape(END) + r"\s*", block.strip() + "\n\n", html, flags=re.S)
     else:
-        html = html.replace("</body>", block + "\n</body>")
+        html = html.replace("</body>", block.strip() + "\n\n</body>")
 
     # Insert card into matchup render if obvious anchor exists.
     if "matchupLineHistoryCard(g)" not in html:
@@ -269,14 +292,27 @@ function matchupLineHistoryCard(g) {{
                 break
 
     path.write_text(html, encoding="utf-8")
-    print(path, "injected line history rows", sum(len(v) for v in payload.values()))
+    print(path, "injected external line history loader", asset_version)
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--asset-only",
+        action="store_true",
+        help="refresh only data/site/matchup_line_history.json without changing HTML",
+    )
+    args = parser.parse_args()
     payload = build_payload()
+    serialized = json.dumps(payload, separators=(",", ":"))
+    asset_version = hashlib.sha256(serialized.encode()).hexdigest()[:12]
+    ASSET.parent.mkdir(parents=True, exist_ok=True)
+    ASSET.write_text(serialized + "\n", encoding="utf-8")
     print("games with line history:", len(payload))
     print("history rows:", sum(len(v) for v in payload.values()))
-    for p in TARGETS:
-        inject(p, payload)
+    print("asset:", ASSET, "version:", asset_version, "bytes:", ASSET.stat().st_size)
+    if not args.asset_only:
+        for p in TARGETS:
+            inject(p, asset_version)
 
 if __name__ == "__main__":
     main()

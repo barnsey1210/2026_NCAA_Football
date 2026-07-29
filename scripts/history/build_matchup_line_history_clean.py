@@ -5,7 +5,7 @@ import math
 import pandas as pd
 from datetime import datetime, timezone
 
-INDEX = Path("index.html")
+MATCHUPS_VIEW = Path("data/site/matchups_view.json")
 OUT = Path("data/history/matchup_line_history_clean.csv")
 
 SOURCES = [
@@ -104,12 +104,14 @@ def fnum(x):
         return None
 
 def load_site_db():
-    s = INDEX.read_text(errors="ignore")
-    m = re.search(r'<script id="db" type="application/json">(.*?)</script>', s, flags=re.S)
-    if not m:
-        raise SystemExit("index.html DB not found")
-    db = json.loads(m.group(1))
-    games = db.get("games", [])
+    if not MATCHUPS_VIEW.exists():
+        raise SystemExit(f"canonical matchup view not found: {MATCHUPS_VIEW}")
+    view = json.loads(MATCHUPS_VIEW.read_text())
+    games = []
+    for record in view.get("games", []):
+        game = dict(record.get("game") or {})
+        if game:
+            games.append(game)
     by_pair_date = {}
     by_pair = {}
     for g in games:
@@ -121,7 +123,7 @@ def load_site_db():
         key2 = (norm_team(away), norm_team(home))
         by_pair_date[key] = g
         by_pair.setdefault(key2, g)
-    return db, by_pair_date, by_pair
+    return {"games": games}, by_pair_date, by_pair
 
 def map_game_id(row, by_pair_date, by_pair):
     away = row.get("away_team")

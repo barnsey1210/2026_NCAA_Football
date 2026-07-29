@@ -14,6 +14,8 @@ python3 scripts/audit/audit_page_payload_size.py
 python3 scripts/site/build_postgame_shadow_updates.py
 python3 scripts/betting/build_betting_activity_view.py
 python3 scripts/site/build_matchups_view.py
+python3 scripts/history/build_matchup_line_history_clean.py
+python3 scripts/site/inject_matchup_line_history.py --asset-only
 python3 scripts/research/build_market_implied_power_ratings.py --production-2026
 python3 scripts/site/build_ratings_view.py
 python3 scripts/site/build_shadow_team_game_features.py --mode all
