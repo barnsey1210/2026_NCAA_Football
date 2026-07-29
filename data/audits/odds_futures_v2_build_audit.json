@@ -1,0 +1,171 @@
+{
+  "schema_version": "odds-futures-v2-build-audit-1",
+  "prototype_only": false,
+  "built_at": "2026-07-29T04:15:50.800226+00:00",
+  "output": "data/site/odds_futures_v2.json",
+  "inputs": [
+    {
+      "file": "data/markets/action/action_playoff_futures_2026.json",
+      "fields": [
+        "markets.*.books[].book_id",
+        "markets.*.books[].odds[].team_id",
+        "option_type_id",
+        "money",
+        "pulled_at"
+      ],
+      "use": "current book-specific CFP and national title"
+    },
+    {
+      "file": "data/site/futures_view.json",
+      "fields": [
+        "team",
+        "slug",
+        "conference",
+        "*_model_prob"
+      ],
+      "use": "canonical team identity plus existing model probabilities/edges"
+    },
+    {
+      "file": "market_conference_futures_import.csv",
+      "fields": [
+        "snapshot_date",
+        "team",
+        "conference",
+        "book",
+        "american_odds"
+      ],
+      "use": "current conference title"
+    },
+    {
+      "file": "market_conference_futures_history.csv",
+      "fields": [
+        "snapshot_date",
+        "team",
+        "book",
+        "american_odds"
+      ],
+      "use": "earliest retained conference title snapshot only"
+    },
+    {
+      "file": "market_win_totals_import.csv",
+      "fields": [
+        "snapshot_date",
+        "team",
+        "conference",
+        "book",
+        "win_total",
+        "over_odds",
+        "under_odds"
+      ],
+      "use": "current win totals"
+    },
+    {
+      "file": "market_win_totals_history.csv",
+      "fields": [
+        "snapshot_date",
+        "team",
+        "book",
+        "win_total",
+        "over_odds",
+        "under_odds"
+      ],
+      "use": "earliest retained win total snapshot only"
+    },
+    {
+      "file": "actionnetwork_futures_raw_clean.csv",
+      "fields": [
+        "snapshot_date",
+        "team",
+        "book",
+        "american_odds"
+      ],
+      "use": "earliest retained national-title snapshot"
+    }
+  ],
+  "coverage": {
+    "national_title": {
+      "rows": 136,
+      "books": {
+        "DraftKings": 136,
+        "FanDuel": 136,
+        "BetMGM": 61,
+        "Caesars": 136
+      },
+      "opener_rows": 87,
+      "last_update_rows": 136,
+      "model_rows": 136,
+      "edge_rows": 136
+    },
+    "playoff": {
+      "rows": 136,
+      "books": {
+        "DraftKings": 0,
+        "FanDuel": 136,
+        "BetMGM": 0,
+        "Caesars": 136
+      },
+      "opener_rows": 0,
+      "last_update_rows": 136,
+      "model_rows": 136,
+      "edge_rows": 136
+    },
+    "conference_title": {
+      "rows": 136,
+      "books": {
+        "DraftKings": 136,
+        "FanDuel": 136,
+        "BetMGM": 136,
+        "Caesars": 136
+      },
+      "opener_rows": 136,
+      "last_update_rows": 136,
+      "model_rows": 136,
+      "edge_rows": 136
+    },
+    "win_totals": {
+      "rows": 138,
+      "books": {
+        "DraftKings": 138,
+        "FanDuel": 80,
+        "BetMGM": 138,
+        "Caesars": 131
+      },
+      "opener_rows": 138,
+      "last_update_rows": 138
+    },
+    "heisman": {
+      "available": false,
+      "message": "Heisman odds are not yet available in the current normalized futures pipeline.",
+      "required_pipeline": "Extend the Action Network futures reader from https://api.actionnetwork.com/web/v1/leagues/2/futures/available to ingest market ncaaf_futures_special_fixture_11016_2027_ncaaf_heisman_trophy_winner with player ID/name, team/position, book ID/name, American price, and pull timestamp. Historical audit-page text is not used as current odds."
+    }
+  },
+  "quality": {
+    "national_title": {
+      "duplicate_brand_team_outcomes_collapsed_to_best_price": 10906,
+      "malformed_rows": 0
+    },
+    "playoff": {
+      "duplicate_brand_team_outcomes_collapsed_to_best_price": 2878,
+      "malformed_rows": 26
+    },
+    "conference_title": {
+      "duplicates": 0,
+      "malformed_rows": 0,
+      "unmatched_teams": {}
+    },
+    "win_totals": {
+      "duplicates": 0,
+      "malformed_rows": 0,
+      "unmatched_teams": {}
+    }
+  },
+  "history": {
+    "full_history_built": false,
+    "reason": "Current board plus earliest retained open only; full book-level futures history is not available in normalized sources"
+  },
+  "production_files_unchanged": true,
+  "files_written": [
+    "data/site/odds_futures_v2.json",
+    "data/audits/odds_futures_v2_build_audit.json"
+  ]
+}

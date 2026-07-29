@@ -279,6 +279,8 @@ run_py "scripts/site/inject_production_model_badge.py" "inject_production_model_
 run_py "scripts/betting/build_betting_activity_view.py" "build_betting_activity_view.py" || echo "WARNING: betting activity view build failed"
 run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py" || echo "WARNING: matchups view build failed"
 run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || echo "WARNING: futures view build failed"
+run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || echo "WARNING: Odds game payload build failed; retaining last valid artifact"
+run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || echo "WARNING: Odds futures payload build failed; retaining last valid artifact"
 run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py" || echo "WARNING: conference workspace build failed"
 run_py "scripts/site/build_postgame_shadow_updates.py" "build_postgame_shadow_updates.py" || echo "WARNING: postgame shadow build failed"
 run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py" || echo "WARNING: ratings view build failed"
