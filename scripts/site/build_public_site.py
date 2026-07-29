@@ -59,8 +59,6 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         text=text.replace('teams=[...m.values()];conf.innerHTML', 'teams=[...m.values()].filter(t=>t.rating!=null&&t.overall_rank!=null);conf.innerHTML')
     if target == 'odds.html':
         text=text.replace('<title>Odds Screen — Isolated V2 Prototype</title>', '<title>NCAAF Odds</title>')
-        text=text.replace('<div class="brand">Odds Screen</div><span class="prototype">Isolated prototype</span>', '<div class="brand"><a href="index.html">NCAAF</a> · Odds</div><nav class="production-links"><a href="openers.html">Openers</a><a href="matchups.html">Matchups</a><a class="active" href="odds.html">ODDS</a></nav>')
-        text=text.replace('</head>', '<style id="odds-production-nav-css">.production-links{display:flex;gap:4px}.production-links a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:800;padding:6px 8px;border-radius:8px}.production-links a:hover{color:#fff;background:#30353a}@media(max-width:760px){.production-links{order:4;width:100%}}</style></head>')
     if target == 'team.html':
         text=text.replace('<section id="app">','<div class="v1TeamLink"><a id="v1TeamReport" href="v1.html">Open complete V1 team report</a></div><section id="app">',1)
         text=text.replace('</head>','<style>.v1TeamLink{margin:12px 0}.v1TeamLink a{display:inline-block;border:1px solid var(--l);border-radius:999px;padding:7px 11px;color:#fff;text-decoration:none;font-weight:900}</style></head>')
@@ -85,6 +83,9 @@ def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     for source,target in PAGES.items(): (OUT/target).write_text(transform((ROOT/source).read_text(),target))
+    # Keep the canonical Odds publication artifact aligned with odds_v2.html;
+    # daily_market_update.sh publishes this root copy when it is present.
+    shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
     (OUT/'legacy.html').write_text('<!doctype html><meta charset="utf-8"><title>Moved</title><script>const h=location.hash;location.replace(h.includes("simulations")?"simulations.html":h.includes("team/")?"team.html?team="+h.split("team/")[1]:"ratings.html")</script>')
     v1=(ROOT/'index.html').read_text(errors='ignore')
     (OUT/'v1.html').write_text('\n'.join(line.rstrip() for line in v1.splitlines())+'\n')
