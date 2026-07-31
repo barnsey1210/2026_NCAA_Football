@@ -513,10 +513,12 @@ async function init(){
   const providerCards=Object.values(ratingView.source_meta)
     .map(s=>`<div>
       <b>${e(s.label)}</b>
-      <span>Last observed value change: ${e(formatEasternTimestamp(s.last_observed_value_change,'not established'))}</span>
+      ${s.change_status==='MANUAL_SOURCE'
+        ? `<span>Manual source · Last updated: ${e(formatEasternTimestamp(s.last_observed_value_change||s.latest_pull,'not supplied'))}</span>`
+        : `<span>Last observed value change: ${e(formatEasternTimestamp(s.last_observed_value_change,'not established'))}</span>
       <span>Provider update: ${e(formatEasternTimestamp(s.provider_updated_at,'not supplied'))}</span>
       <span>Latest pull: ${e(formatEasternTimestamp(s.latest_pull,'not supplied'))}</span>
-      <span>${s.changed_teams_from_prior} teams changed vs ${e(s.previous_snapshot||'prior')}</span>
+      <span>${e(s.changed_teams_from_prior??0)} teams changed vs ${e(s.previous_snapshot||'prior')}</span>`}
     </div>`)
     .join('');
 
