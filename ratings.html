@@ -188,6 +188,21 @@ td:nth-child(6){
 </table></div></div></main>
 
 <script>
+
+function formatEasternTimestamp(value, fallback='not supplied'){
+  if(!value) return fallback;
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    timeZoneName:'short'
+  }).format(d);
+}
+
 let teams=[],key='overall_rank',dir=1;
 
 const e=x=>String(x??'').replace(/[&<>"']/g,c=>({
@@ -498,9 +513,9 @@ async function init(){
   const providerCards=Object.values(ratingView.source_meta)
     .map(s=>`<div>
       <b>${e(s.label)}</b>
-      <span>Last observed value change: ${e(s.last_observed_value_change||'not established')}</span>
-      <span>Provider update: ${e(s.provider_updated_at||'not supplied')}</span>
-      <span>Latest pull: ${e(s.latest_pull||'not supplied')}</span>
+      <span>Last observed value change: ${e(formatEasternTimestamp(s.last_observed_value_change,'not established'))}</span>
+      <span>Provider update: ${e(formatEasternTimestamp(s.provider_updated_at,'not supplied'))}</span>
+      <span>Latest pull: ${e(formatEasternTimestamp(s.latest_pull,'not supplied'))}</span>
       <span>${s.changed_teams_from_prior} teams changed vs ${e(s.previous_snapshot||'prior')}</span>
     </div>`)
     .join('');
