@@ -1150,7 +1150,87 @@ function initOpenersHeaderTips(){
   });
 }
 
-function renderFreshness(){const f=DATA.rating_freshness||{},sources=f.sources||[],changed=sources.reduce((n,s)=>n+Number(s.changed_teams||0),0),latest=[...new Set(sources.map(s=>s.latest_snapshot).filter(Boolean))].sort().pop()||DATA.production_model.updated,previous=[...new Set(sources.map(s=>s.previous_snapshot).filter(Boolean))].sort().pop()||'prior snapshot',applied=f.applied_to_projection===true;freshnessSummary.textContent=`${applied?'Applied to projections':'Application not verified'} · ${changed?changed+' team-source rating changes':'No rating value changes'} · ${previous} → ${latest}`;freshnessBody.innerHTML=sources.map(s=>`<div class="freshnessSource"><b>${esc(s.source)}</b><br>${s.changed_teams?`${s.changed_teams} teams changed · max ${num(s.largest_absolute_change,2)}`:'Pulled, but no values changed'}<br><span class="muted">Compared ${esc(s.previous_snapshot||'—')} → ${esc(s.latest_snapshot||'—')}</span></div>`).join('')+`<div class="freshnessSource"><b>Projection application</b><br>${applied?'Verified by artifact order':'Not verified'}<br><span class="muted">${esc(f.proof||'No build proof available')}</span></div>`;modelStamp.textContent=`${applied?'Applied':'Unverified'} ${latest} · ${changed?changed+' changes':'no value changes'}`;modelStamp.title=DATA.production_model.sources.map(s=>`${s.label} ${s.weight*100}%`).join(' · ')}
+function renderFreshness(){
+  const f=DATA.rating_freshness||{};
+  const sources=f.sources||[];
+  const changed=sources.reduce((n,s)=>n+Number(s.changed_teams||0),0);
+  const applied=f.applied_to_projection===true;
+
+  const formatEasternTimestamp=value=>{
+    if(!value)return'not supplied';
+    const parsed=new Date(value);
+    if(Number.isNaN(parsed.getTime()))return String(value);
+
+    return new Intl.DateTimeFormat('en-US',{
+      timeZone:'America/New_York',
+      month:'short',
+      day:'numeric',
+      hour:'numeric',
+      minute:'2-digit',
+      timeZoneName:'short'
+    }).format(parsed);
+  };
+
+  const latestPullValues=sources
+    .map(s=>s.latest_pull_at||s.pulled_at)
+    .filter(Boolean)
+    .map(value=>new Date(value))
+    .filter(value=>!Number.isNaN(value.getTime()));
+
+  const latestPull=latestPullValues.length
+    ? new Date(Math.max(...latestPullValues.map(value=>value.getTime())))
+    : null;
+
+  const appliedDate=latestPull
+    ? new Intl.DateTimeFormat('en-CA',{
+        timeZone:'America/New_York',
+        year:'numeric',
+        month:'2-digit',
+        day:'2-digit'
+      }).format(latestPull)
+    : (DATA.production_model.updated||'unknown');
+
+  freshnessSummary.textContent=
+    `${applied?'Applied to projections':'Application not verified'} · `+
+    `${changed?changed+' team-source rating changes':'No rating value changes'} · `+
+    `Ratings checked ${latestPull?formatEasternTimestamp(latestPull.toISOString()):'not supplied'}`;
+
+  freshnessBody.innerHTML=sources.map(s=>{
+    const manual=s.change_status==='MANUAL_SOURCE';
+
+    if(manual){
+      return `<div class="freshnessSource">
+        <b>${esc(s.source)}</b><br>
+        Manual source<br>
+        <span class="muted">Last updated: ${esc(formatEasternTimestamp(
+          s.last_changed_at||s.latest_pull_at||s.pulled_at
+        ))}</span>
+      </div>`;
+    }
+
+    return `<div class="freshnessSource">
+      <b>${esc(s.source)}</b><br>
+      Last observed value change: ${esc(formatEasternTimestamp(s.last_changed_at))}<br>
+      <span class="muted">Latest pull: ${esc(formatEasternTimestamp(
+        s.latest_pull_at||s.pulled_at
+      ))}</span><br>
+      <span class="muted">${Number(s.changed_teams||0)} teams changed vs prior</span>
+    </div>`;
+  }).join('')+
+  `<div class="freshnessSource">
+    <b>Projection application</b><br>
+    ${applied?'Verified by artifact order':'Not verified'}<br>
+    <span class="muted">${esc(f.proof||'No build proof available')}</span>
+  </div>`;
+
+  modelStamp.textContent=
+    `BP 25% · SP+ 25% · FPI 25% · TR 25% · `+
+    `${applied?'Applied':'Unverified'} ${appliedDate}`;
+
+  modelStamp.title=DATA.production_model.sources
+    .map(s=>`${s.label} ${s.weight*100}%`)
+    .join(' · ');
+}
 function gapTone(v){return v>3?"gapGood":v>=1?"gapMid":"gapBad"}document.querySelectorAll("#gameTypeButtons button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gameTypeButtons button").forEach(x=>x.classList.remove("active"));b.classList.add("active");gameType.value=b.dataset.type;render()});async function init(){const [view,shadow,shadowMeta,scheduleEnrichment]=await Promise.all([
 fetch('data/site/matchups_view.json',{cache:'no-store'}).then(r=>r.json()),
 fetch('data/site/saturday_shadow_lines.json',{cache:'no-store'}).then(r=>r.ok?r.json():{games:[]}).catch(()=>({games:[]})),
