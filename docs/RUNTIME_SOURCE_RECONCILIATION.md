@@ -85,7 +85,11 @@ All 43 paths were classified exactly once. Runtime files were read only and no l
 
 ## Canonical runtime bootstrap
 
-The reviewed bootstrap allowlist contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Each source is byte-identical to its existing runtime equivalent. The bootstrap installs canonical paths without deleting the old compatibility copies.
+The permanent reviewed bootstrap allowlist is the explicit `CANONICAL_RUNTIME_BOOTSTRAP_PATHS` mapping in the reconciliation builder. It contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Membership does not depend on whether a canonical runtime copy has already been installed.
+
+The generated bootstrap artifact reports each path as `PENDING_INSTALL`, `INSTALLED_MATCH`, `INSTALLED_MISMATCH`, or `EQUIVALENT_MISSING`. Installed canonical copies are validated against repository source; pre-install compatibility copies are validated when they provide migration evidence. Old compatibility copies are not deleted.
+
+Current bootstrap status: PENDING_INSTALL=22.
 
 The authoritative bootstrap artifact is `data/audit/canonical_runtime_bootstrap_manifest.csv`.
 

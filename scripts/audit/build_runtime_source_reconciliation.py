@@ -20,6 +20,7 @@ CSV_OUT = ROOT / "data/audit/runtime_source_reconciliation.csv"
 JSON_OUT = ROOT / "data/audit/runtime_source_reconciliation.json"
 BOOTSTRAP_CSV_OUT = ROOT / "data/audit/canonical_runtime_bootstrap_manifest.csv"
 DOC_OUT = ROOT / "docs/RUNTIME_SOURCE_RECONCILIATION.md"
+SOURCE_MANIFEST = ROOT / "deploy/source_manifest.txt"
 
 # Generated reconciliation reports contain the canonical paths being counted.
 # Exclude only this builder's outputs so repeated runs remain idempotent while
@@ -55,6 +56,35 @@ CANONICAL = {
     "scripts/ratings/build_ratings_movement.py": "ratings/build_ratings_movement.py",
     "scripts/email/send_daily_betting_angles_email.py": "email/send_daily_betting_angles_email.py",
 }
+
+# Permanent reviewed migration set. Membership must not depend on whether a
+# canonical runtime file has already been installed. The second value is the
+# compatibility/runtime path that supplied the pre-install byte-identity
+# evidence reviewed in PR #3.
+CANONICAL_RUNTIME_BOOTSTRAP_PATHS = (
+    ("agents/append_daily_game_line_edges.py", "scripts/agents/append_daily_game_line_edges.py"),
+    ("agents/build_daily_betting_angles.py", "scripts/agents/build_daily_betting_angles.py"),
+    ("agents/prepend_game_line_moves_to_daily_betting_angles.py", "scripts/agents/prepend_game_line_moves_to_daily_betting_angles.py"),
+    ("agents/prepend_injury_alerts_to_daily_betting_angles.py", "scripts/agents/prepend_injury_alerts_to_daily_betting_angles.py"),
+    ("email/send_daily_betting_angles_email.py", "scripts/email/send_daily_betting_angles_email.py"),
+    ("injuries/build_game_injury_scores.py", "scripts/injuries/build_game_injury_scores.py"),
+    ("injuries/pull_cfbdepth_article_bodies.py", "scripts/injuries/pull_cfbdepth_article_bodies.py"),
+    ("injuries/pull_cfbdepth_injuries.py", "scripts/injuries/pull_cfbdepth_injuries.py"),
+    ("odds/build_actionnetwork_season_lines_2026.py", "scripts/odds/build_actionnetwork_season_lines_2026.py"),
+    ("odds/build_game_line_movement_report.py", "scripts/odds/build_game_line_movement_report.py"),
+    ("odds/merge_visible_dk_win_totals.py", "scripts/odds/merge_visible_dk_win_totals.py"),
+    ("odds/pull_actionnetwork_ncaaf_game_lines_2026.py", "scripts/odds/pull_actionnetwork_ncaaf_game_lines_2026.py"),
+    ("odds/pull_actionnetwork_visible_dk_win_totals.py", "scripts/odds/pull_actionnetwork_visible_dk_win_totals.py"),
+    ("odds/quarantine_bad_draftkings_win_total_rows.py", "scripts/odds/quarantine_bad_draftkings_win_total_rows.py"),
+    ("pulls/pull_actionnetwork_conference_futures_api.py", "pull_actionnetwork_conference_futures_api.py"),
+    ("ratings/append_ratings_history.py", "scripts/ratings/append_ratings_history.py"),
+    ("ratings/build_ratings_movement.py", "scripts/ratings/build_ratings_movement.py"),
+    ("ratings/parse_massey_visible_ratings.py", "scripts/ratings/parse_massey_visible_ratings.py"),
+    ("ratings/pull_donchess_ratings.py", "scripts/ratings/pull_donchess_ratings.py"),
+    ("ratings/pull_sagarin_ratings.py", "scripts/ratings/pull_sagarin_ratings.py"),
+    ("scripts/projections/build_game_projection_blend_2026.py", "build_game_projection_blend_2026.py"),
+    ("scripts/projections/build_game_projection_sources_2026.py", "build_game_projection_sources_2026.py"),
+)
 
 
 def git_text(path: str) -> str:
@@ -100,6 +130,113 @@ def build_searchable_text(root: Path) -> str:
         and ".git" not in path.parts
         and path.relative_to(root).as_posix() not in REFERENCE_SCAN_EXCLUSIONS
     )
+
+
+def build_bootstrap_rows(stage_by_path: dict[str, dict[str, object]]) -> list[dict[str, object]]:
+    """Validate and describe the permanent reviewed canonical-runtime migration set."""
+    reviewed = list(CANONICAL_RUNTIME_BOOTSTRAP_PATHS)
+    canonical_paths = [canonical for canonical, _ in reviewed]
+    if len(reviewed) != 22:
+        raise RuntimeError(
+            f"reviewed canonical runtime bootstrap must contain exactly 22 paths; found {len(reviewed)}"
+        )
+    if len(set(canonical_paths)) != len(canonical_paths):
+        raise RuntimeError("reviewed canonical runtime bootstrap contains duplicate paths")
+
+    tracked = set(
+        subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True).splitlines()
+    )
+    manifest_paths = {
+        line.strip()
+        for line in SOURCE_MANIFEST.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    errors: list[str] = []
+    bootstrap_rows: list[dict[str, object]] = []
+
+    for canonical_path, equivalent_path in reviewed:
+        source = ROOT / canonical_path
+        canonical_runtime = RUNTIME / canonical_path
+        equivalent_runtime = RUNTIME / equivalent_path
+
+        if canonical_path not in tracked:
+            errors.append(f"bootstrap source is not tracked: {canonical_path}")
+        if not source.is_file() or source.is_symlink():
+            errors.append(f"bootstrap source is not a regular file: {canonical_path}")
+            source_data = b""
+        else:
+            source_data = source.read_bytes()
+        if canonical_path not in stage_by_path:
+            errors.append(f"bootstrap source is not an active registered source: {canonical_path}")
+        if canonical_path not in manifest_paths:
+            errors.append(f"bootstrap source is missing from deploy/source_manifest.txt: {canonical_path}")
+
+        source_sha = digest(source_data) if source_data else ""
+        canonical_exists = canonical_runtime.is_file() and not canonical_runtime.is_symlink()
+        canonical_sha = digest(canonical_runtime.read_bytes()) if canonical_exists else ""
+        equivalent_exists = equivalent_runtime.is_file() and not equivalent_runtime.is_symlink()
+        equivalent_sha = digest(equivalent_runtime.read_bytes()) if equivalent_exists else ""
+        canonical_match = bool(source_sha and canonical_sha == source_sha)
+        equivalent_match = bool(source_sha and equivalent_sha == source_sha)
+
+        if canonical_runtime.exists() and not canonical_exists:
+            status = "INSTALLED_MISMATCH"
+            errors.append(f"installed canonical runtime path is not a regular file: {canonical_path}")
+        elif canonical_exists and canonical_match:
+            status = "INSTALLED_MATCH"
+        elif canonical_exists:
+            status = "INSTALLED_MISMATCH"
+            errors.append(f"installed canonical runtime copy differs from source: {canonical_path}")
+        elif equivalent_exists and equivalent_match:
+            status = "PENDING_INSTALL"
+        elif equivalent_exists:
+            status = "INSTALLED_MISMATCH"
+            errors.append(
+                f"pre-install equivalent runtime copy differs from source: {equivalent_path}"
+            )
+        else:
+            status = "EQUIVALENT_MISSING"
+            errors.append(
+                f"canonical runtime path and pre-install equivalent are both missing: {canonical_path}"
+            )
+
+        is_projection = canonical_path.startswith("scripts/projections/")
+        bootstrap_rows.append(
+            {
+                "canonical_path": canonical_path,
+                "stage_id": stage_by_path.get(canonical_path, {}).get("id", ""),
+                "source_repository_sha256": source_sha,
+                "canonical_runtime_exists": canonical_exists,
+                "canonical_runtime_sha256": canonical_sha,
+                "current_equivalent_runtime_path": equivalent_path,
+                "equivalent_runtime_exists": equivalent_exists,
+                "equivalent_runtime_sha256": equivalent_sha,
+                "byte_identical": equivalent_match,
+                "bootstrap_status": status,
+                "reason_canonical_installation_required": (
+                    "Daily workflow registers this structured canonical path; the reviewed pre-install source was the byte-identical root fallback."
+                    if is_projection
+                    else "Daily workflow now references the tracked canonical path instead of a byte-identical compatibility runtime path."
+                ),
+            }
+        )
+
+    if errors:
+        raise RuntimeError("canonical runtime bootstrap validation failed:\n- " + "\n- ".join(errors))
+    return sorted(bootstrap_rows, key=lambda item: str(item["canonical_path"]))
+
+
+def write_bootstrap_manifest(
+    stage_by_path: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
+    """Write the validated 22-row bootstrap artifact and return its rows."""
+    bootstrap_rows = build_bootstrap_rows(stage_by_path)
+    BOOTSTRAP_CSV_OUT.parent.mkdir(parents=True, exist_ok=True)
+    with BOOTSTRAP_CSV_OUT.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(bootstrap_rows[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(bootstrap_rows)
+    return bootstrap_rows
 
 
 def main() -> int:
@@ -230,36 +367,10 @@ def main() -> int:
         writer.writerows(rows)
     JSON_OUT.write_text(json.dumps({"summary": summary, "rows": rows}, indent=2, sort_keys=True) + "\n")
 
-    bootstrap_rows = []
-    for row in rows:
-        if row["classification"] not in {"DUPLICATE_TRACKED_ELSEWHERE", "ACTIVE_RENAME_OR_MOVE"}:
-            continue
-        canonical_path = str(row["canonical_path_after_reconciliation"])
-        source_data = (ROOT / canonical_path).read_bytes()
-        equivalent_path = str(row["runtime_source_path"])
-        equivalent_data = (RUNTIME / equivalent_path).read_bytes()
-        source_sha = digest(source_data)
-        equivalent_sha = digest(equivalent_data)
-        bootstrap_rows.append({
-            "canonical_path": canonical_path,
-            "stage_id": row["stage_id"],
-            "source_repository_sha256": source_sha,
-            "current_equivalent_runtime_path": equivalent_path,
-            "equivalent_runtime_sha256": equivalent_sha,
-            "byte_identical": source_sha == equivalent_sha,
-            "reason_canonical_installation_required": (
-                "Daily workflow now references the tracked canonical path instead of a byte-identical duplicate runtime path."
-                if row["classification"] == "DUPLICATE_TRACKED_ELSEWHERE"
-                else "Daily workflow registers this structured canonical path; runtime currently has only the byte-identical root fallback."
-            ),
-        })
-    bootstrap_rows.sort(key=lambda item: str(item["canonical_path"]))
-    if len(bootstrap_rows) != 22 or not all(row["byte_identical"] for row in bootstrap_rows):
-        raise RuntimeError("canonical runtime bootstrap must contain exactly 22 byte-identical sources")
-    with BOOTSTRAP_CSV_OUT.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(bootstrap_rows[0]), lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(bootstrap_rows)
+    current_stage_by_path = {
+        path: stage for stage in current["stages"] for path in stage["scripts"]
+    }
+    bootstrap_rows = write_bootstrap_manifest(current_stage_by_path)
 
     duplicate = [row for row in rows if row["classification"] == "DUPLICATE_TRACKED_ELSEWHERE"]
     recovered = [row for row in rows if row["classification"] != "DUPLICATE_TRACKED_ELSEWHERE"]
@@ -296,7 +407,12 @@ def main() -> int:
         "- No raw data, logs, caches, databases, spreadsheets, generated HTML, or provider responses were copied.",
         "- Compatibility fallbacks remain temporarily and are surfaced by the automation audit.", "",
         "## Canonical runtime bootstrap", "",
-        "The reviewed bootstrap allowlist contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Each source is byte-identical to its existing runtime equivalent. The bootstrap installs canonical paths without deleting the old compatibility copies.", "",
+        "The permanent reviewed bootstrap allowlist is the explicit `CANONICAL_RUNTIME_BOOTSTRAP_PATHS` mapping in the reconciliation builder. It contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Membership does not depend on whether a canonical runtime copy has already been installed.", "",
+        "The generated bootstrap artifact reports each path as `PENDING_INSTALL`, `INSTALLED_MATCH`, `INSTALLED_MISMATCH`, or `EQUIVALENT_MISSING`. Installed canonical copies are validated against repository source; pre-install compatibility copies are validated when they provide migration evidence. Old compatibility copies are not deleted.", "",
+        "Current bootstrap status: " + ", ".join(
+            f"{status}={sum(row['bootstrap_status'] == status for row in bootstrap_rows)}"
+            for status in sorted({str(row["bootstrap_status"]) for row in bootstrap_rows})
+        ) + ".", "",
         "The authoritative bootstrap artifact is `data/audit/canonical_runtime_bootstrap_manifest.csv`.", "",
         "## Other recovered source", "",
         "These newly tracked active files already exist at their canonical runtime paths and are not part of the bootstrap manifest expansion:", "",

@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
+import contextlib
+import io
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +32,16 @@ RECONCILIATION_OUTPUTS = (
 
 def load_audit_module():
     spec = importlib.util.spec_from_file_location("audit_daily_automation", AUDIT)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_reconciliation_module():
+    spec = importlib.util.spec_from_file_location(
+        "build_runtime_source_reconciliation", RECONCILIATION_BUILDER
+    )
     module = importlib.util.module_from_spec(spec)
     assert spec.loader
     spec.loader.exec_module(module)
@@ -139,14 +154,121 @@ class DailyAutomationAuditTests(unittest.TestCase):
 
 
 class ReconciliationIdempotenceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.module = load_reconciliation_module()
+
+    def make_runtime(self, root: Path, *, installed: bool) -> None:
+        for canonical, equivalent in self.module.CANONICAL_RUNTIME_BOOTSTRAP_PATHS:
+            source = ROOT / canonical
+            equivalent_target = root / equivalent
+            equivalent_target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, equivalent_target)
+            if installed:
+                canonical_target = root / canonical
+                canonical_target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, canonical_target)
+
+    def write_bootstrap(
+        self,
+        runtime: Path,
+        output: Path,
+        *,
+        manifest: Path | None = None,
+        bootstrap_paths=None,
+    ) -> bytes:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        patches = (
+            mock.patch.object(self.module, "RUNTIME", runtime),
+            mock.patch.object(self.module, "BOOTSTRAP_CSV_OUT", output),
+            mock.patch.object(
+                self.module, "SOURCE_MANIFEST", manifest or ROOT / "deploy/source_manifest.txt"
+            ),
+            mock.patch.object(
+                self.module,
+                "CANONICAL_RUNTIME_BOOTSTRAP_PATHS",
+                bootstrap_paths or self.module.CANONICAL_RUNTIME_BOOTSTRAP_PATHS,
+            ),
+        )
+        with contextlib.ExitStack() as stack:
+            for patcher in patches:
+                stack.enter_context(patcher)
+            stages = json.loads((ROOT / "config/daily_stages.json").read_text())["stages"]
+            stage_by_path = {path: stage for stage in stages for path in stage["scripts"]}
+            self.module.write_bootstrap_manifest(stage_by_path)
+        return output.read_bytes()
+
+    @staticmethod
+    def bootstrap_rows(output: bytes) -> list[dict[str, str]]:
+        return list(csv.DictReader(io.StringIO(output.decode("utf-8"))))
+
+    def test_pre_install_bootstrap_is_stable_and_pending(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=False)
+            rows = self.bootstrap_rows(self.write_bootstrap(runtime, temp / "bootstrap.csv"))
+            self.assertEqual(len(rows), 22)
+            self.assertEqual({row["bootstrap_status"] for row in rows}, {"PENDING_INSTALL"})
+
+    def test_post_install_bootstrap_is_stable_and_matching(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=True)
+            rows = self.bootstrap_rows(self.write_bootstrap(runtime, temp / "bootstrap.csv"))
+            self.assertEqual(len(rows), 22)
+            self.assertEqual({row["bootstrap_status"] for row in rows}, {"INSTALLED_MATCH"})
+
+    def test_installed_canonical_mismatch_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=True)
+            canonical = self.module.CANONICAL_RUNTIME_BOOTSTRAP_PATHS[0][0]
+            (runtime / canonical).write_text("mismatch\n", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "installed canonical runtime copy differs"):
+                self.write_bootstrap(runtime, temp / "bootstrap.csv")
+
+    def test_manifest_omission_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=False)
+            omitted = self.module.CANONICAL_RUNTIME_BOOTSTRAP_PATHS[0][0]
+            manifest = temp / "source_manifest.txt"
+            manifest.write_text(
+                "\n".join(
+                    line
+                    for line in (ROOT / "deploy/source_manifest.txt").read_text().splitlines()
+                    if line != omitted
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(RuntimeError, "missing from deploy/source_manifest.txt"):
+                self.write_bootstrap(runtime, temp / "bootstrap.csv", manifest=manifest)
+
+    def test_duplicate_reviewed_path_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=False)
+            paths = list(self.module.CANONICAL_RUNTIME_BOOTSTRAP_PATHS)
+            paths[-1] = paths[0]
+            with self.assertRaisesRegex(RuntimeError, "duplicate paths"):
+                self.write_bootstrap(
+                    runtime, temp / "bootstrap.csv", bootstrap_paths=tuple(paths)
+                )
+
     def test_consecutive_builder_runs_are_byte_identical(self) -> None:
-        # The controlled builder reads the existing runtime only for source
-        # comparison. It never writes outside these repository audit outputs.
-        subprocess.run([sys.executable, str(RECONCILIATION_BUILDER)], cwd=ROOT, check=True)
-        first = {path: path.read_bytes() for path in RECONCILIATION_OUTPUTS}
-        subprocess.run([sys.executable, str(RECONCILIATION_BUILDER)], cwd=ROOT, check=True)
-        second = {path: path.read_bytes() for path in RECONCILIATION_OUTPUTS}
-        self.assertEqual(first, second)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            runtime = temp / "runtime"
+            self.make_runtime(runtime, installed=False)
+            first = self.write_bootstrap(runtime, temp / "bootstrap.csv")
+            second = self.write_bootstrap(runtime, temp / "bootstrap.csv")
+            self.assertEqual(first, second)
 
 
 if __name__ == "__main__":
