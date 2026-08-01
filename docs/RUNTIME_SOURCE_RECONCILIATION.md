@@ -83,9 +83,15 @@ All 43 paths were classified exactly once. Runtime files were read only and no l
 - No raw data, logs, caches, databases, spreadsheets, generated HTML, or provider responses were copied.
 - Compatibility fallbacks remain temporarily and are surfaced by the automation audit.
 
-## Deployment manifest recommendation
+## Canonical runtime bootstrap
 
-The deployment manifest was intentionally not changed. Separately review these newly tracked active files before any manifest expansion:
+The reviewed bootstrap allowlist contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Each source is byte-identical to its existing runtime equivalent. The bootstrap installs canonical paths without deleting the old compatibility copies.
+
+The authoritative bootstrap artifact is `data/audit/canonical_runtime_bootstrap_manifest.csv`.
+
+## Other recovered source
+
+These newly tracked active files already exist at their canonical runtime paths and are not part of the bootstrap manifest expansion:
 
 - append_market_history.py
 - build_daily_market_movement_report.py
@@ -103,13 +109,11 @@ The deployment manifest was intentionally not changed. Separately review these n
 - scripts/markets/pull_actionnetwork_playoff_futures.py
 - scripts/odds/append_game_line_history.py
 - scripts/odds/append_sgo_game_book_line_history.py
-- scripts/projections/build_game_projection_blend_2026.py
-- scripts/projections/build_game_projection_sources_2026.py
 - scripts/ratings/build_all_ratings_latest.py
 - scripts/research/build_market_implied_power_ratings.py
 - scripts/site/build_ratings_view.py
 - scripts/site/build_saturday_shadow_component_predictions.py
 - scripts/site/build_shadow_team_game_features.py
 
-The 20 canonicalized files need no immediate runtime copy because their tracked bytes already match runtime.
-The first deployment of recovered source remains a separate reviewed operation.
+The canonical bootstrap remains a separate controlled deployment after review and merge.
+Removing obsolete compatibility copies remains out of scope and requires separate review.

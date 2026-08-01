@@ -18,6 +18,7 @@ RUNTIME = Path("/Users/jameslindesmith/NCAAF_AUTO")
 BASELINE = "fb8389890ae02a03fd7834df0037f26c47b64682"
 CSV_OUT = ROOT / "data/audit/runtime_source_reconciliation.csv"
 JSON_OUT = ROOT / "data/audit/runtime_source_reconciliation.json"
+BOOTSTRAP_CSV_OUT = ROOT / "data/audit/canonical_runtime_bootstrap_manifest.csv"
 DOC_OUT = ROOT / "docs/RUNTIME_SOURCE_RECONCILIATION.md"
 
 CANONICAL = {
@@ -210,6 +211,37 @@ def main() -> int:
         writer.writerows(rows)
     JSON_OUT.write_text(json.dumps({"summary": summary, "rows": rows}, indent=2, sort_keys=True) + "\n")
 
+    bootstrap_rows = []
+    for row in rows:
+        if row["classification"] not in {"DUPLICATE_TRACKED_ELSEWHERE", "ACTIVE_RENAME_OR_MOVE"}:
+            continue
+        canonical_path = str(row["canonical_path_after_reconciliation"])
+        source_data = (ROOT / canonical_path).read_bytes()
+        equivalent_path = str(row["runtime_source_path"])
+        equivalent_data = (RUNTIME / equivalent_path).read_bytes()
+        source_sha = digest(source_data)
+        equivalent_sha = digest(equivalent_data)
+        bootstrap_rows.append({
+            "canonical_path": canonical_path,
+            "stage_id": row["stage_id"],
+            "source_repository_sha256": source_sha,
+            "current_equivalent_runtime_path": equivalent_path,
+            "equivalent_runtime_sha256": equivalent_sha,
+            "byte_identical": source_sha == equivalent_sha,
+            "reason_canonical_installation_required": (
+                "Daily workflow now references the tracked canonical path instead of a byte-identical duplicate runtime path."
+                if row["classification"] == "DUPLICATE_TRACKED_ELSEWHERE"
+                else "Daily workflow registers this structured canonical path; runtime currently has only the byte-identical root fallback."
+            ),
+        })
+    bootstrap_rows.sort(key=lambda item: str(item["canonical_path"]))
+    if len(bootstrap_rows) != 22 or not all(row["byte_identical"] for row in bootstrap_rows):
+        raise RuntimeError("canonical runtime bootstrap must contain exactly 22 byte-identical sources")
+    with BOOTSTRAP_CSV_OUT.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(bootstrap_rows[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(bootstrap_rows)
+
     duplicate = [row for row in rows if row["classification"] == "DUPLICATE_TRACKED_ELSEWHERE"]
     recovered = [row for row in rows if row["classification"] != "DUPLICATE_TRACKED_ELSEWHERE"]
     doc = [
@@ -244,14 +276,21 @@ def main() -> int:
         f"- Absolute local-path findings: {summary['absolute_local_path_findings']}.",
         "- No raw data, logs, caches, databases, spreadsheets, generated HTML, or provider responses were copied.",
         "- Compatibility fallbacks remain temporarily and are surfaced by the automation audit.", "",
-        "## Deployment manifest recommendation", "",
-        "The deployment manifest was intentionally not changed. Separately review these newly tracked active files before any manifest expansion:", "",
+        "## Canonical runtime bootstrap", "",
+        "The reviewed bootstrap allowlist contains exactly 22 active registered sources: 20 canonicalized duplicate paths and two structured projection paths. Each source is byte-identical to its existing runtime equivalent. The bootstrap installs canonical paths without deleting the old compatibility copies.", "",
+        "The authoritative bootstrap artifact is `data/audit/canonical_runtime_bootstrap_manifest.csv`.", "",
+        "## Other recovered source", "",
+        "These newly tracked active files already exist at their canonical runtime paths and are not part of the bootstrap manifest expansion:", "",
     ]
-    doc.extend(f"- {path}" for path in summary["proposed_manifest_additions"])
+    bootstrap_paths = {str(row["canonical_path"]) for row in bootstrap_rows}
+    doc.extend(
+        f"- {path}" for path in summary["proposed_manifest_additions"]
+        if path not in bootstrap_paths
+    )
     doc += [
         "",
-        "The 20 canonicalized files need no immediate runtime copy because their tracked bytes already match runtime.",
-        "The first deployment of recovered source remains a separate reviewed operation.",
+        "The canonical bootstrap remains a separate controlled deployment after review and merge.",
+        "Removing obsolete compatibility copies remains out of scope and requires separate review.",
     ]
     DOC_OUT.write_text("\n".join(doc) + "\n")
     print(json.dumps(summary, indent=2, sort_keys=True))
