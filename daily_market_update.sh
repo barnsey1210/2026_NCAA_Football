@@ -63,7 +63,7 @@ run_py() {
   run_py "scripts/odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || echo "WARNING: visible DK win totals pull failed"
   run_py "scripts/odds/merge_visible_dk_win_totals.py" "merge_visible_dk_win_totals.py" || echo "WARNING: visible DK win totals merge failed"
   run_py "pull_fanduel_win_totals.py"
-  run_py "pull_bettingpros_caesars_win_totals.py"
+  run_py "pull_bettingpros_caesars_win_totals.py" || echo "WARNING: Caesars/BettingPros pull failed; preserving cached data"
   run_py "pull_actionnetwork_conference_futures_api.py"
   run_py "scripts/odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || echo "WARNING: bad DraftKings win total quarantine failed"
   run_py "append_market_history.py"
@@ -75,34 +75,28 @@ run_py() {
   run_py "scripts/odds/build_actionnetwork_season_lines_2026.py" "build_actionnetwork_season_lines_2026.py" || echo "WARNING: Action Network season game lines build failed"
   run_py "build_season_game_lines_2026.py" || echo "WARNING: season game lines build failed"
     run_py "pull_theodds_ncaaf_lines_2026.py" || echo "WARNING: The Odds API line pull failed"
-    run_py "build_theodds_season_lines_2026.py" || echo "WARNING: The Odds API line normalization failed"
+  run_py "build_theodds_season_lines_2026.py" || echo "WARNING: The Odds API line normalization failed"
+
+  # SportsGameOdds is the preferred live source for game lines.
+  run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py" \
+    || echo "WARNING: live SGO pull failed; preserving prior SGO and fallback data"
+
+  # If an SGO response is present, normalize it through the same canonical
+  # controller mapping/pairing/coverage path. Partial coverage remains
+  # preview-only and cannot change accepted state or history.
+  if [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
+    run_py "scripts/markets/build_sgo_daily_canonical.py" || echo "WARNING: canonical SGO preview build failed"
+    run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py" || echo "WARNING: SGO coverage blocked accepted compatibility export"
+    run_py "scripts/odds/append_sgo_game_book_line_history.py" || echo "WARNING: SGO coverage blocked canonical history append"
+  fi
 
 
   # Append today's normalized game lines before site/email rendering.
   run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || echo "WARNING: game line history append failed"
   run_py "scripts/odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || echo "WARNING: game line movement report build failed"
 
-  echo "Using ~/NCAAF_AUTO/v1.html as the isolated legacy automation template."
+  echo "Skipping legacy V1 market-site build; canonical V2 owns all public site output."
 
-  python3 build_market_futures_safe.py \
-    --win-totals-csv "market_win_totals_import.csv" \
-    --conference-futures-csv "market_conference_futures_import.csv" \
-    --output-xlsx "market_futures_export.xlsx"
-
-  python3 build_site_from_workbook_safe_with_movement.py \
-    --workbook "2026_NCAA _Season.xlsm" \
-    --template "v1.html" \
-    --output "index_auto_market.html" \
-    --cfbd-xlsx "cfbd_2026_export.xlsx" \
-    --market-xlsx "market_futures_export.xlsx" \
-    --movement-xlsx "market_movement_export.xlsx" \
-      --season-lines-csv "data/odds/season_game_lines_2026.csv" \
-      --theodds-lines-csv "data/odds/theodds_season_game_lines_2026.csv" \
-      --action-lines-csv "data/odds/actionnetwork_season_game_lines_2026.csv"
-
-
-  run_py "inject_daily_market_moves.py"
-  run_py "inject_market_arbs.py"
   run_py "scripts/injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || echo "WARNING: CFBDepth injury pull failed"
   run_py "scripts/injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || echo "WARNING: CFBDepth injury article pull failed"
   run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || echo "WARNING: injury alert build failed"
@@ -133,11 +127,7 @@ PY2
   run_py "scripts/agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || echo "WARNING: prepend injury alerts failed"
   run_py "scripts/agents/clean_daily_game_line_moves.py" "clean_daily_game_line_moves.py" || echo "WARNING: daily game-line move cleaning failed"
   run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
-
-  mkdir -p backups/html
-  cp v1.html "backups/html/v1_before_daily_refresh_$(date +%Y%m%d_%H%M%S).html"
-  cp index_auto_market.html v1.html
-  echo "Legacy market artifact refreshed at index_auto_market.html and v1.html; canonical V2 index is unchanged."
+  python3 scripts/audit/test_daily_betting_email_regression.py
 
   # These legacy HTML injectors target index.html directly and therefore must
   # not run in the V2 daily path. Their production data is supplied by the
@@ -167,7 +157,6 @@ PY2
   # Asset-only mode deliberately leaves every canonical V2 HTML file untouched.
   run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py"
   python3 scripts/site/inject_matchup_line_history.py --asset-only
-  run_py "scripts/site/build_odds_screen_v1.py" "build_odds_screen_v1.py" || echo "WARNING: odds screen build failed"
   python3 scripts/research/build_market_implied_power_ratings.py --production-2026
   run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"
   python3 scripts/site/build_shadow_team_game_features.py --mode all
@@ -191,7 +180,9 @@ PY2
   run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || echo "WARNING: Odds futures payload build failed; retaining last valid artifact"
 
   # Optional email send. Do not let missing Gmail env vars stop the market/site/rating build.
-  if [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
+  if [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
+    echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
+  elif [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
     run_py "scripts/email/send_daily_betting_angles_email.py" "send_daily_betting_angles_email.py" || echo "WARNING: daily betting angles email send failed"
   else
     echo "WARNING: Skipping email send because NCAAF_GMAIL_USER, NCAAF_GMAIL_APP_PASSWORD, or NCAAF_EMAIL_TO is missing"
