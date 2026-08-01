@@ -85,6 +85,9 @@ class DailyAutomationAuditTests(unittest.TestCase):
             )
             result = self.audit_module.audit(ORCHESTRATOR, REGISTRY, launcher)
             self.assertEqual(result["result"], "PASSED")
+            self.assertEqual(result["registered_scripts_runtime_only"], 0)
+            self.assertEqual(result["unresolved_script_count"], 0)
+            self.assertEqual(result["repository_completeness_percent"], 100.0)
 
     def test_launcher_business_logic_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -113,6 +116,19 @@ class DailyAutomationAuditTests(unittest.TestCase):
             broken.write_text(source, encoding="utf-8")
             with self.assertRaises(AssertionError):
                 self.audit_module.audit(broken, REGISTRY, launcher)
+
+    def test_source_coverage_reports_runtime_only_without_failing(self) -> None:
+        stages = [{"scripts": ["tracked.py", "runtime.py", "missing.py"]}]
+        with tempfile.TemporaryDirectory() as repo_dir, tempfile.TemporaryDirectory() as runtime_dir:
+            repo = Path(repo_dir)
+            runtime = Path(runtime_dir)
+            (repo / "tracked.py").write_text("print('tracked')\n", encoding="utf-8")
+            (runtime / "runtime.py").write_text("print('runtime')\n", encoding="utf-8")
+            coverage = self.audit_module.source_coverage(stages, "", repo, runtime)
+            self.assertEqual(coverage["registered_scripts_tracked_in_repo"], 1)
+            self.assertEqual(coverage["registered_scripts_runtime_only"], 1)
+            self.assertEqual(coverage["unresolved_scripts"], ["missing.py"])
+            self.assertEqual(coverage["repository_completeness_percent"], 33.33)
 
 
 if __name__ == "__main__":

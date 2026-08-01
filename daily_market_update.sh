@@ -133,12 +133,12 @@ trap on_exit EXIT
   # STAGE: futures_market_acquisition
   stage_start "futures_market_acquisition"
   run_py "pull_actionnetwork_win_totals_api.py"
-  run_py "scripts/odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || warn "visible DK win totals pull failed"
-  run_py "scripts/odds/merge_visible_dk_win_totals.py" "merge_visible_dk_win_totals.py" || warn "visible DK win totals merge failed"
+  run_py "odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || warn "visible DK win totals pull failed"
+  run_py "odds/merge_visible_dk_win_totals.py" "merge_visible_dk_win_totals.py" || warn "visible DK win totals merge failed"
   run_py "pull_fanduel_win_totals.py"
   run_py "pull_bettingpros_caesars_win_totals.py" || warn "Caesars/BettingPros pull failed; preserving cached data"
-  run_py "pull_actionnetwork_conference_futures_api.py"
-  run_py "scripts/odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || warn "bad DraftKings win total quarantine failed"
+  run_py "pulls/pull_actionnetwork_conference_futures_api.py"
+  run_py "odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || warn "bad DraftKings win total quarantine failed"
   run_py "append_market_history.py"
   run_py "build_daily_market_movement_report.py"
   run_py "build_market_arbitrage_report.py"
@@ -148,8 +148,8 @@ trap on_exit EXIT
   stage_start "game_market_acquisition"
   # Season game lines from CFBD. Used for early spread/total display while SGO is capped.
   run_py "pull_cfbd_lines_2026.py" || warn "CFBD season lines pull failed"
-  run_py "scripts/odds/pull_actionnetwork_ncaaf_game_lines_2026.py" "pull_actionnetwork_ncaaf_game_lines_2026.py" || warn "Action Network game lines pull failed"
-  run_py "scripts/odds/build_actionnetwork_season_lines_2026.py" "build_actionnetwork_season_lines_2026.py" || warn "Action Network season game lines build failed"
+  run_py "odds/pull_actionnetwork_ncaaf_game_lines_2026.py" "pull_actionnetwork_ncaaf_game_lines_2026.py" || warn "Action Network game lines pull failed"
+  run_py "odds/build_actionnetwork_season_lines_2026.py" "build_actionnetwork_season_lines_2026.py" || warn "Action Network season game lines build failed"
   run_py "build_season_game_lines_2026.py" || warn "season game lines build failed"
   run_py "pull_theodds_ncaaf_lines_2026.py" || warn "The Odds API line pull failed"
   run_py "build_theodds_season_lines_2026.py" || warn "The Odds API line normalization failed"
@@ -181,18 +181,18 @@ trap on_exit EXIT
   # STAGE: game_line_history
   stage_start "game_line_history"
   run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || warn "game line history append failed"
-  run_py "scripts/odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || warn "game line movement report build failed"
+  run_py "odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || warn "game line movement report build failed"
   stage_pass "game_line_history"
 
   echo "Skipping legacy V1 market-site build; canonical V2 owns all public site output."
 
   # STAGE: injuries_and_signals
   stage_start "injuries_and_signals"
-  run_py "scripts/injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || warn "CFBDepth injury pull failed"
-  run_py "scripts/injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || warn "CFBDepth injury article pull failed"
+  run_py "injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || warn "CFBDepth injury pull failed"
+  run_py "injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || warn "CFBDepth injury article pull failed"
   run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || warn "injury alert build failed"
-  run_py "scripts/agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
-  run_py "scripts/agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || warn "game line email edges append failed"
+  run_py "agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
+  run_py "agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || warn "game line email edges append failed"
   stage_pass "injuries_and_signals"
 
   echo "Checking daily betting angle categories before HTML email build..."
@@ -217,8 +217,8 @@ PY2
   # Add supplemental rows, remove juice-only game moves, then render HTML.
   # STAGE: email_build
   stage_start "email_build"
-  run_py "scripts/agents/prepend_game_line_moves_to_daily_betting_angles.py" "prepend_game_line_moves_to_daily_betting_angles.py" || warn "prepend game line moves to email failed"
-  run_py "scripts/agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || warn "prepend injury alerts failed"
+  run_py "agents/prepend_game_line_moves_to_daily_betting_angles.py" "prepend_game_line_moves_to_daily_betting_angles.py" || warn "prepend game line moves to email failed"
+  run_py "agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || warn "prepend injury alerts failed"
   run_py "scripts/agents/clean_daily_game_line_moves.py" "clean_daily_game_line_moves.py" || warn "daily game-line move cleaning failed"
   run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
   stage_pass "email_build"
@@ -235,22 +235,22 @@ PY2
   echo "Skipping legacy index injectors; V2 builders own the canonical site shell."
   # STAGE: injury_scores
   stage_start "injury_scores"
-  run_py "scripts/injuries/build_game_injury_scores.py" "build_game_injury_scores.py" || warn "game injury score build failed"
+  run_py "injuries/build_game_injury_scores.py" "build_game_injury_scores.py" || warn "game injury score build failed"
   stage_pass "injury_scores"
 
   # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
   # STAGE: ratings_refresh
   stage_start "ratings_refresh"
-  run_py "scripts/ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" || warn "Sagarin ratings refresh failed"
-  run_py "scripts/ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" || warn "Massey ratings refresh failed"
-  run_py "scripts/ratings/pull_donchess_ratings.py" "pull_donchess_ratings.py" || warn "Donchess ratings refresh failed"
+  run_py "ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" || warn "Sagarin ratings refresh failed"
+  run_py "ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" || warn "Massey ratings refresh failed"
+  run_py "ratings/pull_donchess_ratings.py" "pull_donchess_ratings.py" || warn "Donchess ratings refresh failed"
   stage_pass "ratings_refresh"
 
   # STAGE: ratings_normalization
   stage_start "ratings_normalization"
   run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || warn "ratings latest build failed"
-  run_py "scripts/ratings/append_ratings_history.py" "append_ratings_history.py" || warn "ratings history append failed"
-  run_py "scripts/ratings/build_ratings_movement.py" "build_ratings_movement.py" || warn "ratings movement build failed"
+  run_py "ratings/append_ratings_history.py" "append_ratings_history.py" || warn "ratings history append failed"
+  run_py "ratings/build_ratings_movement.py" "build_ratings_movement.py" || warn "ratings movement build failed"
   stage_pass "ratings_normalization"
 
   # STAGE: projections
@@ -315,7 +315,7 @@ PY2
     echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
     stage_skip "email_send" "disabled by NCAAF_SEND_EMAIL=0"
   elif [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
-    if run_py "scripts/email/send_daily_betting_angles_email.py" "send_daily_betting_angles_email.py"; then
+    if run_py "email/send_daily_betting_angles_email.py" "send_daily_betting_angles_email.py"; then
       stage_pass "email_send"
     else
       warn "daily betting angles email send failed"

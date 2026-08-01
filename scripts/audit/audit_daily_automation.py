@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -31,7 +32,82 @@ def active_shell_lines(text: str) -> list[str]:
     return [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#")]
 
 
-def audit(orchestrator: Path, registry_path: Path, launcher: Path) -> dict[str, object]:
+def source_coverage(
+    stages: list[dict[str, object]],
+    source: str,
+    repo_root: Path,
+    runtime_root: Path,
+) -> dict[str, object]:
+    registered = [str(script) for stage in stages for script in stage["scripts"]]
+    tracked = [script for script in registered if (repo_root / script).is_file()]
+    runtime_only = [
+        script
+        for script in registered
+        if not (repo_root / script).is_file() and (runtime_root / script).is_file()
+    ]
+
+    fallback_pairs = re.findall(
+        r'run_py\s+"([^"]+)"(?:\s+"([^"]+)")?',
+        source,
+    )
+    fallback_by_primary = {primary: fallback for primary, fallback in fallback_pairs if fallback}
+    unresolved = []
+    for script in registered:
+        if (repo_root / script).is_file() or (runtime_root / script).is_file():
+            continue
+        fallback = fallback_by_primary.get(script)
+        if fallback and (runtime_root / fallback).is_file():
+            continue
+        unresolved.append(script)
+
+    source_hashes: dict[str, list[str]] = {}
+    for path in repo_root.rglob("*"):
+        if (
+            path.is_file()
+            and path.suffix in {".py", ".sh"}
+            and ".git" not in path.parts
+        ):
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            source_hashes.setdefault(digest, []).append(path.relative_to(repo_root).as_posix())
+    duplicate_mappings = []
+    for script in tracked:
+        digest = hashlib.sha256((repo_root / script).read_bytes()).hexdigest()
+        equivalents = sorted(path for path in source_hashes[digest] if path != script)
+        if equivalents:
+            duplicate_mappings.append({"registered": script, "equivalent_paths": equivalents})
+
+    active_fallbacks = [
+        {
+            "primary": primary,
+            "fallback": fallback,
+            "fallback_exists_in_runtime": (runtime_root / fallback).is_file(),
+        }
+        for primary, fallback in fallback_pairs
+        if fallback
+    ]
+    total = len(registered)
+    return {
+        "registered_scripts": total,
+        "registered_scripts_tracked_in_repo": len(tracked),
+        "registered_scripts_runtime_only": len(runtime_only),
+        "registered_runtime_only_paths": sorted(runtime_only),
+        "duplicate_path_mapping_count": len(duplicate_mappings),
+        "duplicate_path_mappings": duplicate_mappings,
+        "unresolved_script_count": len(unresolved),
+        "unresolved_scripts": sorted(unresolved),
+        "active_legacy_fallback_count": len(active_fallbacks),
+        "active_legacy_fallbacks": active_fallbacks,
+        "repository_completeness_percent": round((len(tracked) / total * 100.0) if total else 100.0, 2),
+    }
+
+
+def audit(
+    orchestrator: Path,
+    registry_path: Path,
+    launcher: Path,
+    repo_root: Path | None = None,
+    runtime_root: Path = Path("/Users/jameslindesmith/NCAAF_AUTO"),
+) -> dict[str, object]:
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
     stages = registry.get("stages", [])
     require(isinstance(stages, list) and stages, "registry has no stages")
@@ -107,7 +183,9 @@ def audit(orchestrator: Path, registry_path: Path, launcher: Path) -> dict[str, 
     require("daily_run_status.py" in source, "structured run-status writer is not integrated")
     require("data/control/daily_run_status.json" in source, "canonical run-status output is missing")
 
-    return {
+    if repo_root is None:
+        repo_root = registry_path.resolve().parents[1]
+    result = {
         "result": "PASSED",
         "stages_checked": len(stages),
         "stage_order_rules_checked": len(ordering_rules),
@@ -117,6 +195,8 @@ def audit(orchestrator: Path, registry_path: Path, launcher: Path) -> dict[str, 
         "email_disable_preserves_build": True,
         "publication_disable_preserves_build_and_validation": True,
     }
+    result.update(source_coverage(stages, source, repo_root.resolve(), runtime_root.resolve()))
+    return result
 
 
 def main() -> int:
@@ -128,8 +208,16 @@ def main() -> int:
         type=Path,
         default=Path.home() / "Scripts/NCAAF/daily_market_update.sh",
     )
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--runtime-root", type=Path, default=Path("/Users/jameslindesmith/NCAAF_AUTO"))
     args = parser.parse_args()
-    result = audit(args.orchestrator, args.registry, args.launcher)
+    result = audit(
+        args.orchestrator,
+        args.registry,
+        args.launcher,
+        repo_root=args.repo_root,
+        runtime_root=args.runtime_root,
+    )
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 
