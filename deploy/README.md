@@ -34,7 +34,7 @@ Deployment is deliberately not part of `daily_market_update.sh`, the LaunchAgent
 
 `deploy/source_manifest.txt` is the authoritative deployment allowlist. The deployer rejects empty, absolute, parent-traversal, duplicate, missing, directory, symlink, and repository-escaping entries. It never broadly synchronizes `scripts/`, invokes `rsync`, or deletes target files.
 
-The initial manifest remains restricted to the eight source files approved by stabilization commit `9318203`.
+The stabilization manifest began with the eight source files approved by commit `9318203`. Daily automation consolidation adds only the reviewed registry and run-status writer required by the changed orchestration. The manifest file itself remains the complete authority; directories are never implicitly included.
 
 ## Test targets and exceptional dirty-tree use
 

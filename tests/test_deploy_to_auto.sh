@@ -28,10 +28,12 @@ scripts/markets/build_sgo_daily_canonical.py
 scripts/control/sgo_preview_adapter.py
 scripts/audit/test_daily_betting_email_regression.py
 scripts/injuries/build_injury_alerts.py
+config/daily_stages.json
+scripts/control/daily_run_status.py
 EOF
 cmp -s "$TMP/expected-manifest.txt" "$ROOT/deploy/source_manifest.txt" \
-  || fail "source manifest differs from the eight approved stabilization files"
-printf 'PASS: manifest is exactly the eight approved stabilization files\n'
+  || fail "source manifest differs from the approved runtime files"
+printf 'PASS: manifest is exactly the approved runtime files\n'
 make_recorded_runtime() {
   local target="$1" commit="$2"
   mkdir -p "$target/data/control"
@@ -139,10 +141,47 @@ grep -q 'Rollback: copy files from' "$TMP/post-copy-validation.out" || fail "pos
   || fail "failed validation replaced the prior deployment record"
 printf 'PASS: post-copy validation failure reports rollback instructions\n'
 
+behind_source="$TMP/behind-source"
 behind_runtime="$TMP/behind-runtime"
-behind_commit="9318203"
-make_recorded_runtime "$behind_runtime" "$behind_commit"
-python3 "$STATUS" --target "$behind_runtime" >"$TMP/behind-status.out"
+mkdir -p "$behind_source/deploy" "$behind_runtime/data/control"
+cp "$STATUS" "$behind_source/deploy/deploy_status.py"
+printf 'app.py\n' > "$behind_source/deploy/source_manifest.txt"
+printf 'print("stable")\n' > "$behind_source/app.py"
+git -C "$behind_source" init -q
+git -C "$behind_source" config user.name "Deployment Test"
+git -C "$behind_source" config user.email "deployment-test@example.invalid"
+git -C "$behind_source" remote add origin https://github.com/barnsey1210/2026_NCAA_Football.git
+git -C "$behind_source" add .
+git -C "$behind_source" commit -qm "runtime version"
+behind_commit="$(git -C "$behind_source" rev-parse HEAD)"
+mkdir -p "$behind_runtime"
+cp "$behind_source/app.py" "$behind_runtime/app.py"
+python3 - "$behind_runtime" "$behind_source" "$behind_commit" <<'PY'
+import json
+import pathlib
+import sys
+
+target, source, commit = sys.argv[1:]
+record = {
+    "source_repository": source,
+    "source_commit": commit,
+    "source_branch": "main",
+    "deployed_at_utc": "2026-08-01T00:00:00Z",
+    "target_runtime": target,
+    "deployed_files": ["app.py"],
+    "backup_location": f"{target}/.deploy_rollback/test",
+    "shell_validation_status": "PASSED",
+    "python_validation_status": "PASSED",
+    "email_regression_status": "SKIPPED (test fixture)",
+    "overall_status": "PASSED",
+}
+path = pathlib.Path(target) / "data/control/deployed_source_version.json"
+path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+printf 'newer docs\n' > "$behind_source/README.md"
+git -C "$behind_source" add README.md
+git -C "$behind_source" commit -qm "newer source commit"
+python3 "$behind_source/deploy/deploy_status.py" --target "$behind_runtime" >"$TMP/behind-status.out"
 grep -q '^Deployment state: BEHIND$' "$TMP/behind-status.out" || fail "older recorded deployment did not report BEHIND"
 grep -q '^Main repository has newer commits: YES$' "$TMP/behind-status.out" || fail "BEHIND status did not report newer commits"
 printf 'PASS: status reports BEHIND for an older intact deployed commit\n'

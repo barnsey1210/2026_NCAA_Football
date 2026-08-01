@@ -43,6 +43,8 @@ NCAAF_MAIN_REPO
 
 The daily entry point is `daily_market_update.sh`. Legacy V1 generation and direct legacy page promotion are excluded from that workflow.
 
+Daily orchestration stages are declared in `config/daily_stages.json`; the registry records ordering, criticality, network use, and email/publication dependencies without duplicating pipeline commands. Runtime runs write `data/control/daily_run_status.json` through the source-owned status writer. The machine-local launcher remains environment loading plus one `exec` into the deployed canonical entry point.
+
 ## Deployment architecture
 
 The deployment boundary is file-manifest based:
