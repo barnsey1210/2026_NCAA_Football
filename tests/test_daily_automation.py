@@ -16,6 +16,13 @@ STATUS_WRITER = ROOT / "scripts/control/daily_run_status.py"
 AUDIT = ROOT / "scripts/audit/audit_daily_automation.py"
 REGISTRY = ROOT / "config/daily_stages.json"
 ORCHESTRATOR = ROOT / "daily_market_update.sh"
+RECONCILIATION_BUILDER = ROOT / "scripts/audit/build_runtime_source_reconciliation.py"
+RECONCILIATION_OUTPUTS = (
+    ROOT / "data/audit/runtime_source_reconciliation.csv",
+    ROOT / "data/audit/runtime_source_reconciliation.json",
+    ROOT / "data/audit/canonical_runtime_bootstrap_manifest.csv",
+    ROOT / "docs/RUNTIME_SOURCE_RECONCILIATION.md",
+)
 
 
 def load_audit_module():
@@ -85,6 +92,9 @@ class DailyAutomationAuditTests(unittest.TestCase):
             )
             result = self.audit_module.audit(ORCHESTRATOR, REGISTRY, launcher)
             self.assertEqual(result["result"], "PASSED")
+            self.assertEqual(result["registered_scripts_runtime_only"], 0)
+            self.assertEqual(result["unresolved_script_count"], 0)
+            self.assertEqual(result["repository_completeness_percent"], 100.0)
 
     def test_launcher_business_logic_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -113,6 +123,30 @@ class DailyAutomationAuditTests(unittest.TestCase):
             broken.write_text(source, encoding="utf-8")
             with self.assertRaises(AssertionError):
                 self.audit_module.audit(broken, REGISTRY, launcher)
+
+    def test_source_coverage_reports_runtime_only_without_failing(self) -> None:
+        stages = [{"scripts": ["tracked.py", "runtime.py", "missing.py"]}]
+        with tempfile.TemporaryDirectory() as repo_dir, tempfile.TemporaryDirectory() as runtime_dir:
+            repo = Path(repo_dir)
+            runtime = Path(runtime_dir)
+            (repo / "tracked.py").write_text("print('tracked')\n", encoding="utf-8")
+            (runtime / "runtime.py").write_text("print('runtime')\n", encoding="utf-8")
+            coverage = self.audit_module.source_coverage(stages, "", repo, runtime)
+            self.assertEqual(coverage["registered_scripts_tracked_in_repo"], 1)
+            self.assertEqual(coverage["registered_scripts_runtime_only"], 1)
+            self.assertEqual(coverage["unresolved_scripts"], ["missing.py"])
+            self.assertEqual(coverage["repository_completeness_percent"], 33.33)
+
+
+class ReconciliationIdempotenceTests(unittest.TestCase):
+    def test_consecutive_builder_runs_are_byte_identical(self) -> None:
+        # The controlled builder reads the existing runtime only for source
+        # comparison. It never writes outside these repository audit outputs.
+        subprocess.run([sys.executable, str(RECONCILIATION_BUILDER)], cwd=ROOT, check=True)
+        first = {path: path.read_bytes() for path in RECONCILIATION_OUTPUTS}
+        subprocess.run([sys.executable, str(RECONCILIATION_BUILDER)], cwd=ROOT, check=True)
+        second = {path: path.read_bytes() for path in RECONCILIATION_OUTPUTS}
+        self.assertEqual(first, second)
 
 
 if __name__ == "__main__":

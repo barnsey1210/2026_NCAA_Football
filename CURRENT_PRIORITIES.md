@@ -40,7 +40,7 @@ Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAg
 
 ## Immediate next priorities
 
-1. Review and merge the daily automation consolidation PR, then deploy its manifest-approved runtime files through the standard manual deployer.
+1. Review and merge runtime-source reconciliation PR #3, then use the standard manual deployer for its exact 22-file canonical-path bootstrap.
 2. Continue provider-coverage and freshness QA without changing the locked odds-source policy.
 3. Consolidate root-level fallback copies only through separate provenance review; do not remove production fallback behavior casually.
 4. Keep ratings acquisition activation gated until SP+, FPI, and TeamRankings provenance is documented.

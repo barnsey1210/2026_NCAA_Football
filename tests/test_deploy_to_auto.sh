@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 DEPLOY="$ROOT/deploy/deploy_to_auto.sh"
 STATUS="$ROOT/deploy/deploy_status.py"
+BOOTSTRAP="$ROOT/data/audit/canonical_runtime_bootstrap_manifest.csv"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/ncaaf-deploy-test.XXXXXX")"
 DIRTY_MARKER="$ROOT/.deploy_test_dirty_marker"
 BAD_SHELL="$ROOT/tests/.deploy_bad_syntax.sh"
@@ -30,10 +31,63 @@ scripts/audit/test_daily_betting_email_regression.py
 scripts/injuries/build_injury_alerts.py
 config/daily_stages.json
 scripts/control/daily_run_status.py
+agents/append_daily_game_line_edges.py
+agents/build_daily_betting_angles.py
+agents/prepend_game_line_moves_to_daily_betting_angles.py
+agents/prepend_injury_alerts_to_daily_betting_angles.py
+email/send_daily_betting_angles_email.py
+injuries/build_game_injury_scores.py
+injuries/pull_cfbdepth_article_bodies.py
+injuries/pull_cfbdepth_injuries.py
+odds/build_actionnetwork_season_lines_2026.py
+odds/build_game_line_movement_report.py
+odds/merge_visible_dk_win_totals.py
+odds/pull_actionnetwork_ncaaf_game_lines_2026.py
+odds/pull_actionnetwork_visible_dk_win_totals.py
+odds/quarantine_bad_draftkings_win_total_rows.py
+pulls/pull_actionnetwork_conference_futures_api.py
+ratings/append_ratings_history.py
+ratings/build_ratings_movement.py
+ratings/parse_massey_visible_ratings.py
+ratings/pull_donchess_ratings.py
+ratings/pull_sagarin_ratings.py
+scripts/projections/build_game_projection_blend_2026.py
+scripts/projections/build_game_projection_sources_2026.py
 EOF
 cmp -s "$TMP/expected-manifest.txt" "$ROOT/deploy/source_manifest.txt" \
   || fail "source manifest differs from the approved runtime files"
 printf 'PASS: manifest is exactly the approved runtime files\n'
+python3 - "$ROOT" "$BOOTSTRAP" "$ROOT/deploy/source_manifest.txt" "$ROOT/config/daily_stages.json" <<'PY'
+import csv
+import json
+import pathlib
+import subprocess
+import sys
+
+root, bootstrap_path, manifest_path, registry_path = map(pathlib.Path, sys.argv[1:])
+rows = list(csv.DictReader(bootstrap_path.open(encoding="utf-8")))
+assert len(rows) == 22
+bootstrap = [row["canonical_path"] for row in rows]
+assert len(set(bootstrap)) == 22
+manifest = manifest_path.read_text(encoding="utf-8").splitlines()
+assert set(bootstrap).issubset(manifest)
+registry = json.loads(registry_path.read_text(encoding="utf-8"))
+registered = {path for stage in registry["stages"] for path in stage["scripts"]}
+assert set(bootstrap).issubset(registered)
+for row in rows:
+    path = row["canonical_path"]
+    source = root / path
+    assert source.is_file() and not source.is_symlink()
+    assert row["byte_identical"] == "True"
+    assert row["source_repository_sha256"] == row["equivalent_runtime_sha256"]
+    assert not any(char in path for char in "*?[]")
+    assert not path.endswith("/")
+    assert source.suffix in {".py", ".sh"}
+    subprocess.run(["git", "-C", str(root), "ls-files", "--error-unmatch", path], check=True, capture_output=True)
+for path in manifest:
+    assert path and not any(char in path for char in "*?[]") and not path.endswith("/")
+print("PASS: exact 22-file canonical bootstrap is registered, tracked, regular, and manifest-approved")
+PY
 make_recorded_runtime() {
   local target="$1" commit="$2"
   mkdir -p "$target/data/control"
