@@ -21,6 +21,18 @@ JSON_OUT = ROOT / "data/audit/runtime_source_reconciliation.json"
 BOOTSTRAP_CSV_OUT = ROOT / "data/audit/canonical_runtime_bootstrap_manifest.csv"
 DOC_OUT = ROOT / "docs/RUNTIME_SOURCE_RECONCILIATION.md"
 
+# Generated reconciliation reports contain the canonical paths being counted.
+# Exclude only this builder's outputs so repeated runs remain idempotent while
+# source code, documentation, configuration, and tests stay searchable.
+REFERENCE_SCAN_EXCLUSIONS = frozenset(
+    {
+        CSV_OUT.relative_to(ROOT).as_posix(),
+        JSON_OUT.relative_to(ROOT).as_posix(),
+        BOOTSTRAP_CSV_OUT.relative_to(ROOT).as_posix(),
+        DOC_OUT.relative_to(ROOT).as_posix(),
+    }
+)
+
 CANONICAL = {
     "scripts/odds/pull_actionnetwork_visible_dk_win_totals.py": "odds/pull_actionnetwork_visible_dk_win_totals.py",
     "scripts/odds/merge_visible_dk_win_totals.py": "odds/merge_visible_dk_win_totals.py",
@@ -79,6 +91,17 @@ def scan_source(text: str) -> tuple[list[str], list[str]]:
     return sorted(set(embedded)), sorted(set(absolute))
 
 
+def build_searchable_text(root: Path) -> str:
+    """Build reference-count input without this builder's generated outputs."""
+    return "\n".join(
+        path.read_text(encoding="utf-8", errors="ignore")
+        for path in root.rglob("*")
+        if path.is_file()
+        and ".git" not in path.parts
+        and path.relative_to(root).as_posix() not in REFERENCE_SCAN_EXCLUSIONS
+    )
+
+
 def main() -> int:
     registry = json.loads(git_text("config/daily_stages.json"))
     old_shell = git_text("daily_market_update.sh")
@@ -100,11 +123,7 @@ def main() -> int:
             hash_paths.setdefault(digest(git_bytes(path)), []).append(path)
 
     missing = [path for path in stage_by_path if path not in baseline_set]
-    searchable = "\n".join(
-        path.read_text(encoding="utf-8", errors="ignore")
-        for path in ROOT.rglob("*")
-        if path.is_file() and ".git" not in path.parts
-    )
+    searchable = build_searchable_text(ROOT)
     rows: list[dict[str, object]] = []
     for primary in missing:
         stage = stage_by_path[primary]
