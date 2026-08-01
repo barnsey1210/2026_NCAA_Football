@@ -53,8 +53,12 @@ The deployment boundary is file-manifest based:
 - Files are installed atomically where practical.
 - Deployed `.sh` and `.py` files are syntax checked.
 - The email regression runs from the runtime when its required artifacts exist; isolated targets report an explicit skip.
+- A successful deployment writes `data/control/deployed_source_version.json` only after validation.
+- `deploy/deploy_status.py` verifies the recorded commit and manifest files without changing the runtime.
 
 The deployer does not run the daily pipeline, call providers, send email, or publish.
+
+Deployment remains a manual release boundary. It is not embedded in `daily_market_update.sh`, the LaunchAgent, the 8 AM schedule, or Git-driven self-update behavior. Runtime-affecting work is complete only after review, merge, deployment, and a `CURRENT` status check; documentation-only work normally remains source-only.
 
 ## Data ownership and secrets
 

@@ -21,6 +21,7 @@ _Updated 2026-08-01_
 | `scripts/history/`, `scripts/snapshots/` | Historical and snapshot transforms |
 | `deploy/source_manifest.txt` | Explicit runtime-deployment allowlist |
 | `deploy/deploy_to_auto.sh` | Safe deployment command |
+| `deploy/deploy_status.py` | Read-only CURRENT / BEHIND / UNKNOWN runtime audit |
 | `deploy/README.md` | Deployment and rollback runbook |
 | `tests/test_deploy_to_auto.sh` | Isolated deployment behavior tests |
 
@@ -72,6 +73,7 @@ Adding a file requires an explicit source-ownership review, manifest edit, isola
 
 - **Daily orchestration:** `daily_market_update.sh`
 - **Deployment:** `deploy/deploy_to_auto.sh`
+- **Deployment status:** `deploy/deploy_status.py`
 - **Deployment allowlist:** `deploy/source_manifest.txt`
 - **Public-site checks:** existing audit and publish check commands invoked by the runtime publisher
 - **Publication:** existing runtime publication scripts; never performed by the deployer

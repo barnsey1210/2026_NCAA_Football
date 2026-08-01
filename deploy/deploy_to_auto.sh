@@ -48,6 +48,7 @@ case "$origin" in
 esac
 
 SOURCE_COMMIT="$(git -C "$SOURCE_ROOT" rev-parse HEAD)"
+SOURCE_BRANCH="$(git -C "$SOURCE_ROOT" symbolic-ref --quiet --short HEAD 2>/dev/null || printf 'DETACHED')"
 if (( ! ALLOW_DIRTY )) && [[ -n "$(git -C "$SOURCE_ROOT" status --porcelain --untracked-files=normal)" ]]; then
   die "source working tree is not clean; commit/review changes first or use --allow-dirty explicitly"
 fi
@@ -85,10 +86,13 @@ done < "$MANIFEST"
 
 printf 'Source repository: %s\n' "$SOURCE_ROOT"
 printf 'Source commit: %s\n' "$SOURCE_COMMIT"
+printf 'Source branch: %s\n' "$SOURCE_BRANCH"
 printf 'Target runtime: %s\n' "$TARGET"
 printf 'Manifest: %s (%d files)\n' "$MANIFEST" "${#PATHS[@]}"
 
 # Validate source syntax before changing any runtime file.
+SHELL_RESULT="PASSED"
+PYTHON_RESULT="PASSED"
 for path in "${PATHS[@]}"; do
   case "$path" in
     *.sh) bash -n "$SOURCE_ROOT/$path" ;;
@@ -96,9 +100,31 @@ for path in "${PATHS[@]}"; do
   esac
 done
 
+ensure_target_dir() {
+  local dir="$1" relative current component
+  [[ "$dir" == "$TARGET" || "$dir" == "$TARGET"/* ]] || die "target directory is outside runtime: $dir"
+  relative="${dir#"$TARGET"}"
+  relative="${relative#/}"
+  current="$TARGET"
+  [[ -n "$relative" ]] || return 0
+  local IFS='/'
+  read -r -a components <<< "$relative"
+  for component in "${components[@]}"; do
+    [[ -n "$component" && "$component" != "." && "$component" != ".." ]] \
+      || die "unsafe runtime directory component: $dir"
+    current="$current/$component"
+    if [[ -e "$current" || -L "$current" ]]; then
+      [[ -d "$current" && ! -L "$current" ]] \
+        || die "runtime destination directory is not a real directory: $current"
+    else
+      mkdir -- "$current"
+    fi
+  done
+}
+
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_ROOT="$TARGET/.deploy_rollback/${timestamp}-${SOURCE_COMMIT:0:12}"
-mkdir -p -- "$BACKUP_ROOT"
+ensure_target_dir "$BACKUP_ROOT"
 declare -a COPIED=()
 declare -a BACKED_UP=()
 
@@ -116,7 +142,7 @@ for path in "${PATHS[@]}"; do
   src="$SOURCE_ROOT/$path"
   dest="$TARGET/$path"
   dest_dir="$(dirname -- "$dest")"
-  mkdir -p -- "$dest_dir"
+  ensure_target_dir "$dest_dir"
   resolved_dest_dir="$(cd -- "$dest_dir" && pwd -P)"
   [[ "$resolved_dest_dir" == "$TARGET" || "$resolved_dest_dir" == "$TARGET"/* ]] \
     || die "runtime destination parent escapes target through a symlink: $path"
@@ -124,7 +150,7 @@ for path in "${PATHS[@]}"; do
   if [[ -e "$dest" || -L "$dest" ]]; then
     [[ -f "$dest" && ! -L "$dest" ]] || die "runtime destination is not a regular non-symlink file: $dest"
     backup="$BACKUP_ROOT/$path"
-    mkdir -p -- "$(dirname -- "$backup")"
+    ensure_target_dir "$(dirname -- "$backup")"
     cp -p -- "$dest" "$backup"
     BACKED_UP+=("$path")
   fi
@@ -156,6 +182,60 @@ else
   printf 'SKIP: daily betting email regression; required artifacts absent in target\n'
 fi
 
+RECORD_REL="data/control/deployed_source_version.json"
+RECORD="$TARGET/$RECORD_REL"
+ensure_target_dir "$(dirname -- "$RECORD")"
+if [[ -e "$RECORD" || -L "$RECORD" ]]; then
+  [[ -f "$RECORD" && ! -L "$RECORD" ]] || die "deployment record is not a regular non-symlink file: $RECORD"
+  record_backup="$BACKUP_ROOT/$RECORD_REL"
+  ensure_target_dir "$(dirname -- "$record_backup")"
+  cp -p -- "$RECORD" "$record_backup"
+  BACKED_UP+=("$RECORD_REL")
+fi
+
+DEPLOYED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+record_tmp="$(mktemp "$(dirname -- "$RECORD")/.deployed_source_version.XXXXXX")"
+trap 'rm -f -- "${record_tmp:-}"' EXIT
+python3 - "$record_tmp" "$SOURCE_ROOT" "$SOURCE_COMMIT" "$SOURCE_BRANCH" "$DEPLOYED_AT_UTC" \
+  "$TARGET" "$BACKUP_ROOT" "$SHELL_RESULT" "$PYTHON_RESULT" "$EMAIL_RESULT" "${PATHS[@]}" <<'PY'
+import json
+import sys
+
+(
+    output,
+    source_repository,
+    source_commit,
+    source_branch,
+    deployed_at_utc,
+    target_runtime,
+    backup_location,
+    shell_status,
+    python_status,
+    email_status,
+    *deployed_files,
+) = sys.argv[1:]
+
+record = {
+    "source_repository": source_repository,
+    "source_commit": source_commit,
+    "source_branch": source_branch,
+    "deployed_at_utc": deployed_at_utc,
+    "target_runtime": target_runtime,
+    "deployed_files": deployed_files,
+    "backup_location": backup_location,
+    "shell_validation_status": shell_status,
+    "python_validation_status": python_status,
+    "email_regression_status": email_status,
+    "overall_status": "PASSED",
+}
+with open(output, "w", encoding="utf-8") as handle:
+    json.dump(record, handle, indent=2)
+    handle.write("\n")
+PY
+mv -f -- "$record_tmp" "$RECORD"
+record_tmp=""
+trap - EXIT
+
 printf '\nDEPLOYMENT PASSED\n'
 printf 'Source commit: %s\n' "$SOURCE_COMMIT"
 printf 'Copied files (%d):\n' "${#COPIED[@]}"
@@ -164,5 +244,6 @@ printf 'Backup location: %s\n' "$BACKUP_ROOT"
 printf 'Backed-up files: %d\n' "${#BACKED_UP[@]}"
 printf 'Shell/Python syntax validation: PASSED\n'
 printf 'Email regression: %s\n' "$EMAIL_RESULT"
+printf 'Deployment record: %s\n' "$RECORD"
 printf 'Rollback: copy files from %s back to %s preserving relative paths.\n' "$BACKUP_ROOT" "$TARGET"
 trap - ERR

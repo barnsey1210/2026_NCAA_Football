@@ -34,6 +34,9 @@ Required operating rules:
 4. Validate deployed shell and Python source and run the runtime email regression when its fixtures exist.
 5. Never broadly synchronize `scripts/`, never use deletion synchronization, and never overwrite runtime data or generated outputs implicitly.
 6. Review the deployment summary before running any live daily workflow.
+7. Confirm `python3 deploy/deploy_status.py` reports `CURRENT` after deployment.
+
+Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAgent, the 8 AM job, and publication. Successful runtime deployments record their exact source commit in `data/control/deployed_source_version.json`.
 
 ## Priorities after deployment review
 

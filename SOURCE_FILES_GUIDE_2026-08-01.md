@@ -38,8 +38,10 @@ To add a deployable source file:
 4. Run `bash tests/test_deploy_to_auto.sh`.
 5. Review the target path, backup behavior, and syntax validation.
 6. Commit the source and manifest change together.
+7. After review and merge, deploy once with `bash deploy/deploy_to_auto.sh` and confirm `python3 deploy/deploy_status.py` reports `CURRENT`.
 
 Do not solve deployment by syncing an entire directory.
+Documentation-only source changes normally do not require runtime deployment. Runtime-affecting work is not operationally complete until the reviewed commit has been deployed.
 
 ## Initial approved manifest
 

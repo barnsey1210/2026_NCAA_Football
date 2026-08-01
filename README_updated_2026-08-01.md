@@ -22,6 +22,7 @@ See [PROJECT_ARCHITECTURE_2026-08-01.md](PROJECT_ARCHITECTURE_2026-08-01.md) for
 7. Run operational workflows and publication separately.
 
 Do not edit a runtime copy and treat it as authoritative source.
+For runtime-affecting features, merge plus successful source tests are not the final operational step: run the single deployment command and verify deployment status. Documentation-only changes generally do not require deployment.
 
 ## Manifest deployment
 
@@ -49,7 +50,13 @@ Test against an isolated runtime:
 bash deploy/deploy_to_auto.sh --target /absolute/path/to/test-runtime
 ```
 
-The deployer creates a timestamped rollback backup and prints exact restore instructions. A dirty source tree is rejected by default; the exceptional override is documented in `deploy/README.md` and should not be used for routine releases.
+Audit the default runtime without changing it:
+
+```bash
+python3 deploy/deploy_status.py
+```
+
+The deployer creates a timestamped rollback backup, prints exact restore instructions, and writes `data/control/deployed_source_version.json` only after successful validation. A dirty source tree is rejected by default; the exceptional override is documented in `deploy/README.md` and should not be used for routine releases.
 
 The deployer never broadly syncs `scripts/`, never uses deletion synchronization, and never runs providers, email, the daily pipeline, or publication.
 
