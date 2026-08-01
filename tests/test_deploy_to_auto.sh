@@ -162,6 +162,8 @@ import pathlib
 import sys
 
 target, source, commit = sys.argv[1:]
+target = str(pathlib.Path(target).resolve())
+source = str(pathlib.Path(source).resolve())
 record = {
     "source_repository": source,
     "source_commit": commit,
