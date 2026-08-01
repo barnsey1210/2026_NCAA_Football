@@ -43,9 +43,9 @@ To add a deployable source file:
 Do not solve deployment by syncing an entire directory.
 Documentation-only source changes normally do not require runtime deployment. Runtime-affecting work is not operationally complete until the reviewed commit has been deployed.
 
-## Initial approved manifest
+## Approved manifest evolution
 
-The initial list is intentionally limited to the eight files from stabilization commit `9318203`; see `PROJECT_MAP_updated_2026-08-01.md` for the exact paths.
+The initial list was limited to the eight files from stabilization commit `9318203`. Daily automation consolidation adds only the stage registry and run-status writer required by the changed orchestration. `deploy/source_manifest.txt` is always the exact current allowlist; no directory is implicitly deployable.
 
 ## Review checklist
 

@@ -22,9 +22,9 @@ The stabilization checkpoint at commit `9318203` completed:
 
 These are closed stabilization items. Regressions should be fixed without restoring legacy paths or duplicating the canonical implementations.
 
-## Immediate next priority — manifest-based runtime deployment
+## Completed — manifest deployment and daily automation consolidation
 
-Review and merge the manifest deployment change, then use it to deploy only approved source files from `NCAAF_MAIN_REPO` to `NCAAF_AUTO`.
+The first controlled manifest deployment completed successfully. Daily automation consolidation now preserves the single production workflow while adding an ordered stage registry, structured runtime status, explicit email/publication gating, and static/isolated regression coverage. Deployment remains manual and separate from daily execution.
 
 Required operating rules:
 
@@ -38,11 +38,11 @@ Required operating rules:
 
 Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAgent, the 8 AM job, and publication. Successful runtime deployments record their exact source commit in `data/control/deployed_source_version.json`.
 
-## Priorities after deployment review
+## Immediate next priorities
 
-1. Perform the first controlled deployment to `NCAAF_AUTO` and verify rollback instructions and runtime parity.
+1. Review and merge the daily automation consolidation PR, then deploy its manifest-approved runtime files through the standard manual deployer.
 2. Continue provider-coverage and freshness QA without changing the locked odds-source policy.
-3. Consolidate duplicated source copies only through reviewed manifest changes.
+3. Consolidate root-level fallback copies only through separate provenance review; do not remove production fallback behavior casually.
 4. Keep ratings acquisition activation gated until SP+, FPI, and TeamRankings provenance is documented.
 5. Preserve preview-first activation, explicit acceptance, and separately gated publication.
 

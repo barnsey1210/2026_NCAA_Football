@@ -9,6 +9,10 @@ _Updated 2026-08-01_
 | Path | Purpose |
 |---|---|
 | `daily_market_update.sh` | Canonical daily runtime orchestration |
+| `config/daily_stages.json` | Ordered daily-stage metadata and safety policy |
+| `scripts/control/daily_run_status.py` | Atomic runtime-only daily run status writer |
+| `scripts/audit/audit_daily_automation.py` | Static orchestration, ordering, gating, launcher, and V1 audit |
+| `docs/DAILY_AUTOMATION.md` | Daily stage inventory and operating runbook |
 | `scripts/markets/` | Provider acquisition and canonical market builders |
 | `scripts/ratings/` | Ratings acquisition, normalization, and history builders |
 | `scripts/results/` | Scores, results, and postgame inputs |
@@ -52,9 +56,9 @@ Private, repository-scoped manual/control tooling only. It may contain safe GitH
 
 Public static publication repository. It is updated only by the normal validated publication process from accepted runtime outputs.
 
-## Stabilization deployment manifest
+## Runtime deployment manifest
 
-The initial manifest is deliberately limited to:
+The initial stabilization manifest was deliberately limited to eight paths. Daily automation consolidation adds only its two new runtime dependencies: `config/daily_stages.json` and `scripts/control/daily_run_status.py`. The complete current manifest remains explicit in `deploy/source_manifest.txt`.
 
 ```text
 daily_market_update.sh
