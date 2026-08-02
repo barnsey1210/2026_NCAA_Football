@@ -13,6 +13,8 @@ _Authoritative as of 2026-08-01_
 
 `NCAAF_MAIN_REPO` is the single source of truth for versioned application source. `NCAAF_AUTO` is intentionally mutable and receives reviewed files through an allowlisted deployment.
 
+Repository implementation and release tasks follow [`docs/CODEX_TASK_TEMPLATE.md`](docs/CODEX_TASK_TEMPLATE.md). If that standard workflow conflicts with a task-specific prompt, work stops for clarification rather than crossing an architectural boundary by assumption.
+
 ## Controlled flow
 
 ```text

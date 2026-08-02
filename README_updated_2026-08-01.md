@@ -11,6 +11,8 @@ This repository is the authoritative source repository for the 2026 NCAAF applic
 
 See [PROJECT_ARCHITECTURE_2026-08-01.md](PROJECT_ARCHITECTURE_2026-08-01.md) for boundaries and [PROJECT_MAP_updated_2026-08-01.md](PROJECT_MAP_updated_2026-08-01.md) for the directory map.
 
+Future repository tasks should follow the reusable [Codex task workflow](docs/CODEX_TASK_TEMPLATE.md), including its conflict rule, review boundary, and runtime completion criteria.
+
 The daily production path and its stage/failure inventory are documented in [docs/DAILY_AUTOMATION.md](docs/DAILY_AUTOMATION.md). The machine launcher remains thin; all business logic stays in the one deployed `daily_market_update.sh` entry point.
 
 ## Safe source workflow

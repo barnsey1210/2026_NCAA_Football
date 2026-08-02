@@ -19,8 +19,7 @@ All 43 paths were classified exactly once. Runtime files were read only and no l
 
 | Classification | Count |
 |---|---:|
-| ACTIVE_ADD_TO_REPO | 21 |
-| ACTIVE_RENAME_OR_MOVE | 2 |
+| ACTIVE_ADD_TO_REPO | 23 |
 | DUPLICATE_TRACKED_ELSEWHERE | 20 |
 
 ## Recovered active source
@@ -41,8 +40,8 @@ All 43 paths were classified exactly once. Runtime files were read only and no l
 | scripts/odds/append_game_line_history.py | ACTIVE_ADD_TO_REPO | HIGH |
 | scripts/agents/clean_daily_game_line_moves.py | ACTIVE_ADD_TO_REPO | HIGH |
 | scripts/ratings/build_all_ratings_latest.py | ACTIVE_ADD_TO_REPO | HIGH |
-| scripts/projections/build_game_projection_sources_2026.py | ACTIVE_RENAME_OR_MOVE | HIGH |
-| scripts/projections/build_game_projection_blend_2026.py | ACTIVE_RENAME_OR_MOVE | HIGH |
+| scripts/projections/build_game_projection_sources_2026.py | ACTIVE_ADD_TO_REPO | HIGH |
+| scripts/projections/build_game_projection_blend_2026.py | ACTIVE_ADD_TO_REPO | HIGH |
 | scripts/research/build_market_implied_power_ratings.py | ACTIVE_ADD_TO_REPO | HIGH |
 | scripts/site/build_ratings_view.py | ACTIVE_ADD_TO_REPO | HIGH |
 | scripts/site/build_shadow_team_game_features.py | ACTIVE_ADD_TO_REPO | HIGH |
@@ -89,7 +88,7 @@ The permanent reviewed bootstrap allowlist is the explicit `CANONICAL_RUNTIME_BO
 
 The generated bootstrap artifact reports each path as `PENDING_INSTALL`, `INSTALLED_MATCH`, `INSTALLED_MISMATCH`, or `EQUIVALENT_MISSING`. Installed canonical copies are validated against repository source; pre-install compatibility copies are validated when they provide migration evidence. Old compatibility copies are not deleted.
 
-Current bootstrap status: PENDING_INSTALL=22.
+Current bootstrap status: INSTALLED_MATCH=22.
 
 The authoritative bootstrap artifact is `data/audit/canonical_runtime_bootstrap_manifest.csv`.
 
