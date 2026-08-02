@@ -45,6 +45,8 @@ To add a deployable source file:
 Do not solve deployment by syncing an entire directory.
 Documentation-only source changes normally do not require runtime deployment. Runtime-affecting work is not operationally complete until the reviewed commit has been deployed.
 
+Shared V2 page-health source consists of `config/page_health_registry.json`, `scripts/site/build_page_health_status.py`, `page_health.js`, and `page_health.css`, with public assembly and validation owned by the existing site/publish scripts. Generated page-health JSON and CSV remain runtime/build artifacts and are not deployment-manifest source.
+
 ## Approved manifest evolution
 
 The initial list was limited to the eight files from stabilization commit `9318203`. Daily automation consolidation adds only the stage registry and run-status writer required by the changed orchestration. `deploy/source_manifest.txt` is always the exact current allowlist; no directory is implicitly deployable.

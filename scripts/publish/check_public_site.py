@@ -12,10 +12,18 @@ for name in required:
   s=p.read_text(errors='ignore')
   if 'class="top"' not in s or 'href="openers.html"' not in s or 'href="matchups.html"' not in s: errors.append(f'top navigation missing: {name}')
   if '_v2.html' in s: errors.append(f'prototype link leaked: {name}')
+  if 'page_health.css' not in s or 'page_health.js' not in s: errors.append(f'page health assets missing: {name}')
   if name in ('index.html','dashboard.html'):
    if '<title>NCAAF Daily Briefing</title>' not in s or 'Daily Briefing' not in s: errors.append(f'canonical V2 dashboard markers missing: {name}')
    if '<script id="db" type="application/json">' in s or '<title>2026 NCAA Football</title>' in s: errors.append(f'legacy V1 shell detected: {name}')
 shadow=ROOT/'data/site/postgame_shadow_updates.json'
+health=ROOT/'data/site/page_health_status.json'
+if not health.exists(): errors.append('page health artifact missing')
+else:
+ d=json.loads(health.read_text())
+ expected={'dashboard','ratings','openers','matchups','odds','schedule','futures','conferences','playoff','simulations','betting'}
+ found={p.get('page_id') for p in d.get('pages',[])}
+ if found!=expected: errors.append(f'page health IDs mismatch: {sorted(found)}')
 if not shadow.exists(): errors.append('postgame shadow artifact missing')
 else:
  d=json.loads(shadow.read_text())

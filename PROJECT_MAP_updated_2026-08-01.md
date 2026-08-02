@@ -28,6 +28,10 @@ _Updated 2026-08-01_
 | `deploy/deploy_status.py` | Read-only CURRENT / BEHIND / UNKNOWN runtime audit |
 | `deploy/README.md` | Deployment and rollback runbook |
 | `tests/test_deploy_to_auto.sh` | Isolated deployment behavior tests |
+| `config/page_health_registry.json` | Central page-health checks and freshness thresholds |
+| `scripts/site/build_page_health_status.py` | Builds page-level QA and browser status artifacts |
+| `page_health.js`, `page_health.css` | Shared accessible page-health renderer |
+| `docs/PAGE_HEALTH_SUMMARIES.md` | Page inventory, provenance, metrics, and status semantics |
 
 ## Operational runtime
 
@@ -58,7 +62,7 @@ Public static publication repository. It is updated only by the normal validated
 
 ## Runtime deployment manifest
 
-The initial stabilization manifest was deliberately limited to eight paths. Daily automation consolidation adds only its two new runtime dependencies: `config/daily_stages.json` and `scripts/control/daily_run_status.py`. The complete current manifest remains explicit in `deploy/source_manifest.txt`.
+The initial stabilization manifest was deliberately limited to eight paths. Daily automation consolidation added two dependencies, runtime reconciliation added 22 canonical source paths, and page health adds seven explicit source/configuration assets. The complete current manifest remains explicit in `deploy/source_manifest.txt`; the abbreviated baseline below is historical context, not the full current allowlist.
 
 ```text
 daily_market_update.sh

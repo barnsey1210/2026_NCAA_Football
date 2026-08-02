@@ -34,7 +34,7 @@ Deployment is deliberately not part of `daily_market_update.sh`, the LaunchAgent
 
 `deploy/source_manifest.txt` is the authoritative deployment allowlist. The deployer rejects empty, absolute, parent-traversal, duplicate, missing, directory, symlink, and repository-escaping entries. It never broadly synchronizes `scripts/`, invokes `rsync`, or deletes target files.
 
-The stabilization manifest began with the eight source files approved by commit `9318203`. Daily automation consolidation added the reviewed registry and run-status writer. Runtime-source reconciliation adds exactly 22 active registered canonical paths documented in `data/audit/canonical_runtime_bootstrap_manifest.csv`. These remain permanent manifest entries for future controlled releases.
+The stabilization manifest began with the eight source files approved by commit `9318203`. Daily automation consolidation added the reviewed registry and run-status writer. Runtime-source reconciliation added exactly 22 active registered canonical paths documented in `data/audit/canonical_runtime_bootstrap_manifest.csv`. Page-health summaries add seven explicit registry, builder, validator, renderer, and stylesheet source files. These remain permanent manifest entries for future controlled releases.
 
 The first deployment after reconciliation is a one-time canonical-path bootstrap. It installs 20 byte-identical canonical replacements for alternate runtime paths and two structured projection paths that previously existed only as root fallbacks. It does not delete the old equivalent files. Removing compatibility copies requires a separate reviewed cleanup.
 

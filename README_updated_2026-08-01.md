@@ -28,6 +28,8 @@ The daily production path and its stage/failure inventory are documented in [doc
 Do not edit a runtime copy and treat it as authoritative source.
 For runtime-affecting features, merge plus successful source tests are not the final operational step: run the single deployment command and verify deployment status. Documentation-only changes generally do not require deployment.
 
+V2 page health is standardized through the central registry and shared renderer described in [docs/PAGE_HEALTH_SUMMARIES.md](docs/PAGE_HEALTH_SUMMARIES.md). Page URLs and page-specific data remain unchanged; the shared strip summarizes existing artifacts and provenance.
+
 ## Manifest deployment
 
 Preview the allowlist:

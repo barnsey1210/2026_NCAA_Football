@@ -40,7 +40,7 @@ Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAg
 
 ## Immediate next priorities
 
-1. Use the standard workflow in `docs/CODEX_TASK_TEMPLATE.md` for the next approved feature; runtime-affecting work must finish with controlled deployment and a `CURRENT` status check.
+1. Complete review of the standardized V2 page-health summaries documented in `docs/PAGE_HEALTH_SUMMARIES.md`; runtime-affecting work must finish with controlled deployment and a `CURRENT` status check.
 2. Continue provider-coverage and freshness QA without changing the locked odds-source policy.
 3. Consolidate root-level fallback copies only through separate provenance review; do not remove production fallback behavior casually.
 4. Keep ratings acquisition activation gated until SP+, FPI, and TeamRankings provenance is documented.

@@ -67,11 +67,12 @@ stage_dir="$(mktemp -d "$PUBLISH_REPO/.site-stage.XXXXXX")"
 trap 'rm -rf "$stage_dir"' EXIT
 cp build/public_site/*.html "$stage_dir/"
 cp build/public_site/*.js "$stage_dir/"
+cp build/public_site/*.css "$stage_dir/"
 mkdir -p "$stage_dir/data/bets" "$stage_dir/data/site" "$stage_dir/data/agents" "$PUBLISH_REPO/data/bets" "$PUBLISH_REPO/data/site" "$PUBLISH_REPO/data/agents"
 for file in bets_enriched.csv betting_dashboard.json market_clv_match_audit.csv betting_performance_history.csv bet_closing_clv.csv bet_closing_clv_audit.csv; do
   [ -f "data/bets/$file" ] && cp "data/bets/$file" "$stage_dir/data/bets/$file"
 done
-for file in matchup_line_history.json matchups_view.json betting_activity_view.json futures_view.json conference_workspace.json postgame_shadow_updates.json ratings_view.json game_control_team_games_2026.json playoff_model_2026.json schedule_live_enrichment.json odds_screen_v2.json odds_futures_v2.json; do
+for file in matchup_line_history.json matchups_view.json betting_activity_view.json futures_view.json conference_workspace.json postgame_shadow_updates.json ratings_view.json game_control_team_games_2026.json playoff_model_2026.json schedule_live_enrichment.json odds_screen_v2.json odds_futures_v2.json page_health_status.json; do
   [ -f "data/site/$file" ] && cp "data/site/$file" "$stage_dir/data/site/$file"
 done
 [ -f data/agents/home_top_bets.json ] && cp data/agents/home_top_bets.json "$stage_dir/data/agents/home_top_bets.json"
@@ -109,6 +110,7 @@ print(
 PYVALIDATE
 for staged in "$stage_dir"/*.html; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
 for staged in "$stage_dir"/*.js; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
+for staged in "$stage_dir"/*.css; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
 for staged in "$stage_dir"/data/bets/*; do
   [ -f "$staged" ] && mv "$staged" "$PUBLISH_REPO/data/bets/$(basename "$staged")"
 done
@@ -119,7 +121,7 @@ for staged in "$stage_dir"/data/agents/*; do
   [ -f "$staged" ] && mv "$staged" "$PUBLISH_REPO/data/agents/$(basename "$staged")"
 done
 
-git -C "$PUBLISH_REPO" add index.html dashboard.html openers.html matchups.html odds.html schedule.html futures.html conferences.html playoff.html betting.html team.html ratings.html simulations.html legacy.html v1.html matchup.html playoff_futures_tab.js dashboard_playoff_edges.js coach_cards.js team_coach_card.js matchup_workspace.js data/bets data/site data/agents
+git -C "$PUBLISH_REPO" add index.html dashboard.html openers.html matchups.html odds.html schedule.html futures.html conferences.html playoff.html betting.html team.html ratings.html simulations.html legacy.html v1.html matchup.html playoff_futures_tab.js dashboard_playoff_edges.js coach_cards.js team_coach_card.js matchup_workspace.js page_health.js page_health.css data/bets data/site data/agents
 if git -C "$PUBLISH_REPO" diff --cached --quiet; then
   echo "No website changes to publish"
   exit 0

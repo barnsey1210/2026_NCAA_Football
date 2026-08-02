@@ -29,6 +29,13 @@ scripts/markets/build_sgo_daily_canonical.py
 scripts/control/sgo_preview_adapter.py
 scripts/audit/test_daily_betting_email_regression.py
 scripts/injuries/build_injury_alerts.py
+config/page_health_registry.json
+scripts/site/build_page_health_status.py
+scripts/site/build_public_site.py
+scripts/publish/publish_site.sh
+scripts/publish/check_public_site.py
+page_health.js
+page_health.css
 config/daily_stages.json
 scripts/control/daily_run_status.py
 agents/append_daily_game_line_edges.py

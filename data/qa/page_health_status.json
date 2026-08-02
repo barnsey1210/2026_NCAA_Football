@@ -1,0 +1,576 @@
+{
+  "schema_version": "page-health-status-v1",
+  "built_at": "2026-08-02T01:19:52.331672+00:00",
+  "pages": [
+    {
+      "page_id": "dashboard",
+      "display_name": "Dashboard",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Daily-run status is unavailable; page data remains independently usable.",
+      "last_success_at": "2026-08-01T12:02:03.408419+00:00",
+      "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
+      "age_minutes": 797.8,
+      "age_hours": 13.3,
+      "metrics": [
+        {
+          "label": "Slate games",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Betting signals",
+          "value": 43,
+          "detail": ""
+        },
+        {
+          "label": "Market history",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Injury alerts",
+          "value": 0,
+          "detail": ""
+        },
+        {
+          "label": "Open wagers",
+          "value": 35,
+          "detail": ""
+        }
+      ],
+      "warnings": [
+        "Daily-run status is unavailable; page data remains independently usable."
+      ],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "index.html",
+      "source_artifacts": [
+        "data/site/matchups_view.json",
+        "data/site/betting_activity_view.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "ratings",
+      "display_name": "Ratings",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-01T00:00:00+00:00",
+      "artifact_built_at": "2026-08-01T00:00:00+00:00",
+      "age_minutes": 1519.9,
+      "age_hours": 25.33,
+      "metrics": [
+        {
+          "label": "Composite",
+          "value": "138/138",
+          "detail": ""
+        },
+        {
+          "label": "SP+",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "FPI",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "TeamRankings",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Brad Powers",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Movement rows",
+          "value": 1096,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "ratings.html",
+      "source_artifacts": [
+        "data/site/ratings_view.json"
+      ],
+      "legacy_status_selectors": [
+        "#freshness"
+      ]
+    },
+    {
+      "page_id": "openers",
+      "display_name": "Openers",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Retained opener history is partial for market-covered games.",
+      "last_success_at": "2026-08-01T12:02:15.942431+00:00",
+      "artifact_built_at": "2026-08-01T12:02:15.942431+00:00",
+      "age_minutes": 797.6,
+      "age_hours": 13.29,
+      "metrics": [
+        {
+          "label": "Games",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Spread openers",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "Total openers",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "History",
+          "value": 94,
+          "detail": ""
+        },
+        {
+          "label": "Unmatched",
+          "value": 12,
+          "detail": ""
+        }
+      ],
+      "warnings": [
+        "Retained opener history is partial for market-covered games."
+      ],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "openers.html",
+      "source_artifacts": [
+        "data/site/matchups_view.json",
+        "data/site/odds_screen_v2.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "matchups",
+      "display_name": "Matchups",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Advanced matchup coverage is partial for the current inventory.",
+      "last_success_at": "2026-08-01T12:02:03.408419+00:00",
+      "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
+      "age_minutes": 797.8,
+      "age_hours": 13.3,
+      "metrics": [
+        {
+          "label": "Matchups",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Model spreads",
+          "value": 765,
+          "detail": ""
+        },
+        {
+          "label": "Model totals",
+          "value": 765,
+          "detail": ""
+        },
+        {
+          "label": "Five Factors",
+          "value": 841,
+          "detail": ""
+        },
+        {
+          "label": "Coaching",
+          "value": 765,
+          "detail": ""
+        },
+        {
+          "label": "Odds",
+          "value": 130,
+          "detail": ""
+        }
+      ],
+      "warnings": [
+        "Advanced matchup coverage is partial for the current inventory."
+      ],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "matchups.html",
+      "source_artifacts": [
+        "data/site/matchups_view.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "odds",
+      "display_name": "Odds",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Critical page data is aging (13.3 hours old).",
+      "last_success_at": "2026-08-01T12:00:42.054042+00:00",
+      "artifact_built_at": "2026-08-01T12:03:03.368000+00:00",
+      "age_minutes": 799.2,
+      "age_hours": 13.32,
+      "metrics": [
+        {
+          "label": "Games",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "Spreads",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "Totals",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "Moneylines",
+          "value": 89,
+          "detail": ""
+        },
+        {
+          "label": "Books",
+          "value": 4,
+          "detail": ""
+        },
+        {
+          "label": "Unavailable",
+          "value": 0,
+          "detail": ""
+        }
+      ],
+      "warnings": [
+        "Critical page data is aging (13.3 hours old)."
+      ],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "odds.html",
+      "source_artifacts": [
+        "data/site/odds_screen_v2.json",
+        "data/site/odds_futures_v2.json"
+      ],
+      "legacy_status_selectors": [
+        "#oddsStatus"
+      ]
+    },
+    {
+      "page_id": "schedule",
+      "display_name": "Schedule",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-01T12:02:03.408419+00:00",
+      "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
+      "age_minutes": 797.8,
+      "age_hours": 13.3,
+      "metrics": [
+        {
+          "label": "Games",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Kickoffs",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Projections",
+          "value": 765,
+          "detail": ""
+        },
+        {
+          "label": "Odds",
+          "value": 130,
+          "detail": ""
+        },
+        {
+          "label": "Results",
+          "value": 16,
+          "detail": ""
+        },
+        {
+          "label": "Duplicates",
+          "value": 0,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "schedule.html",
+      "source_artifacts": [
+        "data/site/schedule_live_enrichment.json",
+        "data/site/matchups_view.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "futures",
+      "display_name": "Futures",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Action Network playoff futures pull is stale or unavailable.",
+      "last_success_at": "2026-08-01T12:03:03.366054+00:00",
+      "artifact_built_at": "2026-08-01T12:03:03.366054+00:00",
+      "age_minutes": 796.8,
+      "age_hours": 13.28,
+      "metrics": [
+        {
+          "label": "Teams",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Win totals",
+          "value": 106,
+          "detail": ""
+        },
+        {
+          "label": "Conference title",
+          "value": 108,
+          "detail": ""
+        },
+        {
+          "label": "Playoff",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "National title",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Books",
+          "value": 9,
+          "detail": ""
+        }
+      ],
+      "warnings": [
+        "Action Network playoff futures pull is stale or unavailable."
+      ],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "futures.html",
+      "source_artifacts": [
+        "data/site/futures_view.json"
+      ],
+      "legacy_status_selectors": [
+        "#marketStatus"
+      ]
+    },
+    {
+      "page_id": "conferences",
+      "display_name": "Conferences",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-01T12:03:10.265374+00:00",
+      "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
+      "age_minutes": 796.7,
+      "age_hours": 13.28,
+      "metrics": [
+        {
+          "label": "Conferences",
+          "value": 10,
+          "detail": ""
+        },
+        {
+          "label": "Teams assigned",
+          "value": 136,
+          "detail": ""
+        },
+        {
+          "label": "Missing",
+          "value": 0,
+          "detail": ""
+        },
+        {
+          "label": "Duplicates",
+          "value": 0,
+          "detail": ""
+        },
+        {
+          "label": "Title sims",
+          "value": 136,
+          "detail": ""
+        },
+        {
+          "label": "Title markets",
+          "value": 108,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "conferences.html",
+      "source_artifacts": [
+        "data/site/conference_workspace.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "playoff",
+      "display_name": "Playoff",
+      "status": "gray",
+      "status_label": "Inactive / unavailable",
+      "summary": "Legitimately inactive before 2026-08-15.",
+      "last_success_at": "2026-07-22T03:36:38.451051+00:00",
+      "artifact_built_at": "2026-07-22T03:36:38.451051+00:00",
+      "age_minutes": 15703.2,
+      "age_hours": 261.72,
+      "metrics": [
+        {
+          "label": "Simulations",
+          "value": 5000,
+          "detail": ""
+        },
+        {
+          "label": "Teams",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Playoff coverage",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Title coverage",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Excluded",
+          "value": 0,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [
+        "Legitimately inactive before 2026-08-15."
+      ],
+      "page_url": "playoff.html",
+      "source_artifacts": [
+        "data/site/playoff_model_2026.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "simulations",
+      "display_name": "Simulations",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-01T12:03:10.265374+00:00",
+      "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
+      "age_minutes": 796.7,
+      "age_hours": 13.28,
+      "metrics": [
+        {
+          "label": "Simulations",
+          "value": 5000,
+          "detail": ""
+        },
+        {
+          "label": "Teams",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Playoff coverage",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Title coverage",
+          "value": 138,
+          "detail": ""
+        },
+        {
+          "label": "Excluded",
+          "value": 0,
+          "detail": ""
+        },
+        {
+          "label": "Conferences",
+          "value": 10,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "simulations.html",
+      "source_artifacts": [
+        "data/site/playoff_model_2026.json",
+        "data/site/conference_workspace.json"
+      ],
+      "legacy_status_selectors": []
+    },
+    {
+      "page_id": "betting",
+      "display_name": "Betting",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-01T12:02:03.408419+00:00",
+      "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
+      "age_minutes": 797.8,
+      "age_hours": 13.3,
+      "metrics": [
+        {
+          "label": "Games evaluated",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Active signals",
+          "value": 43,
+          "detail": ""
+        },
+        {
+          "label": "Line moves",
+          "value": 902,
+          "detail": ""
+        },
+        {
+          "label": "Open wagers",
+          "value": 35,
+          "detail": ""
+        },
+        {
+          "label": "Duplicates",
+          "value": 0,
+          "detail": ""
+        },
+        {
+          "label": "Malformed",
+          "value": 0,
+          "detail": ""
+        }
+      ],
+      "warnings": [],
+      "critical_failures": [],
+      "unavailable_reasons": [],
+      "page_url": "betting.html",
+      "source_artifacts": [
+        "data/site/betting_activity_view.json",
+        "data/site/matchups_view.json"
+      ],
+      "legacy_status_selectors": []
+    }
+  ]
+}
