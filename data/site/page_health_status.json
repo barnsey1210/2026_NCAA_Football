@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-08-02T01:47:00+00:00",
+  "built_at": "2026-08-02T03:16:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -10,8 +10,8 @@
       "summary": "Last completed daily-run status is unavailable; page data remains independently usable.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 824.9,
-      "age_hours": 13.75,
+      "age_minutes": 913.9,
+      "age_hours": 15.23,
       "metrics": [
         {
           "label": "Slate games",
@@ -61,13 +61,13 @@
     {
       "page_id": "ratings",
       "display_name": "Ratings",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Market-Derived Ratings have partial team coverage; they remain separate from the composite.",
       "last_success_at": "2026-08-01T00:00:00+00:00",
-      "artifact_built_at": "2026-08-01T00:00:00+00:00",
-      "age_minutes": 1547.0,
-      "age_hours": 25.78,
+      "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
+      "age_minutes": 1636.0,
+      "age_hours": 27.27,
       "metrics": [
         {
           "label": "Composite",
@@ -75,37 +75,40 @@
           "detail": ""
         },
         {
-          "label": "SP+",
-          "value": 138,
+          "label": "Rating sources",
+          "value": "SP+ 138 \u00b7 FPI 138 \u00b7 TR 138 \u00b7 BP 138",
           "detail": ""
         },
         {
-          "label": "FPI",
-          "value": 138,
+          "label": "Market-derived",
+          "value": "120/138",
+          "detail": "Separate from composite"
+        },
+        {
+          "label": "Off / Def",
+          "value": "138/138 \u00b7 138/138",
           "detail": ""
         },
         {
-          "label": "TeamRankings",
-          "value": 138,
-          "detail": ""
-        },
-        {
-          "label": "Brad Powers",
-          "value": 138,
-          "detail": ""
-        },
-        {
-          "label": "Movement rows",
+          "label": "Movement",
           "value": 1096,
+          "detail": ""
+        },
+        {
+          "label": "Variance",
+          "value": "138/138",
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "Market-Derived Ratings have partial team coverage; they remain separate from the composite."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "ratings.html",
       "source_artifacts": [
-        "data/site/ratings_view.json"
+        "data/site/ratings_view.json",
+        "data/site/matchups_view.json"
       ],
       "legacy_status_selectors": [
         "#freshness"
@@ -117,14 +120,14 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Retained opener history is partial for market-covered games.",
-      "last_success_at": "2026-08-01T12:02:15.942431+00:00",
+      "last_success_at": "2026-08-01T12:00:42.054042+00:00",
       "artifact_built_at": "2026-08-01T12:02:15.942431+00:00",
-      "age_minutes": 824.7,
-      "age_hours": 13.75,
+      "age_minutes": 915.3,
+      "age_hours": 15.25,
       "metrics": [
         {
           "label": "Games",
-          "value": 902,
+          "value": 106,
           "detail": ""
         },
         {
@@ -144,12 +147,18 @@
         },
         {
           "label": "Unmatched",
-          "value": 12,
+          "value": 10,
+          "detail": ""
+        },
+        {
+          "label": "Market updated",
+          "value": "2026-08-01T12:00:42.054042+00:00",
           "detail": ""
         }
       ],
       "warnings": [
-        "Retained opener history is partial for market-covered games."
+        "Retained opener history is partial for market-covered games.",
+        "10 opener games lack an exact canonical mapping."
       ],
       "critical_failures": [],
       "unavailable_reasons": [],
@@ -168,8 +177,8 @@
       "summary": "Advanced matchup coverage is partial for the current inventory.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 824.9,
-      "age_hours": 13.75,
+      "age_minutes": 913.9,
+      "age_hours": 15.23,
       "metrics": [
         {
           "label": "Matchups",
@@ -220,11 +229,11 @@
       "display_name": "Odds",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Critical page data is aging (13.8 hours old).",
+      "summary": "10 provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games.",
       "last_success_at": "2026-08-01T12:00:42.054042+00:00",
       "artifact_built_at": "2026-08-01T12:03:03.368000+00:00",
-      "age_minutes": 826.3,
-      "age_hours": 13.77,
+      "age_minutes": 915.3,
+      "age_hours": 15.25,
       "metrics": [
         {
           "label": "Games",
@@ -258,7 +267,8 @@
         }
       ],
       "warnings": [
-        "Critical page data is aging (13.8 hours old)."
+        "10 provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games.",
+        "1 game contains malformed provider input that was excluded; valid alternative current quotes remain available."
       ],
       "critical_failures": [],
       "unavailable_reasons": [],
@@ -279,8 +289,8 @@
       "summary": "No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 824.9,
-      "age_hours": 13.75,
+      "age_minutes": 913.9,
+      "age_hours": 15.23,
       "metrics": [
         {
           "label": "Games",
@@ -330,11 +340,11 @@
       "display_name": "Futures",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Action Network playoff futures pull is stale or unavailable.",
-      "last_success_at": "2026-08-01T12:03:03.366054+00:00",
+      "summary": "Futures team-market coverage is partial or has missing teams.",
+      "last_success_at": "2026-07-29T12:37:29.746590+00:00",
       "artifact_built_at": "2026-08-01T12:03:03.366054+00:00",
-      "age_minutes": 823.9,
-      "age_hours": 13.73,
+      "age_minutes": 5198.5,
+      "age_hours": 86.64,
       "metrics": [
         {
           "label": "Teams",
@@ -368,6 +378,7 @@
         }
       ],
       "warnings": [
+        "Futures team-market coverage is partial or has missing teams.",
         "Action Network playoff futures pull is stale or unavailable."
       ],
       "critical_failures": [],
@@ -383,13 +394,13 @@
     {
       "page_id": "conferences",
       "display_name": "Conferences",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Conference title market data is stale.",
       "last_success_at": "2026-08-01T12:03:10.265374+00:00",
       "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
-      "age_minutes": 823.8,
-      "age_hours": 13.73,
+      "age_minutes": 912.8,
+      "age_hours": 15.21,
       "metrics": [
         {
           "label": "Conferences",
@@ -397,23 +408,23 @@
           "detail": ""
         },
         {
-          "label": "Teams assigned",
+          "label": "Teams / integrity",
+          "value": "136 \u00b7 0 missing \u00b7 0 dupes",
+          "detail": ""
+        },
+        {
+          "label": "Current records",
           "value": 136,
           "detail": ""
         },
         {
-          "label": "Missing",
-          "value": 0,
-          "detail": ""
-        },
-        {
-          "label": "Duplicates",
-          "value": 0,
-          "detail": ""
-        },
-        {
-          "label": "Title sims",
+          "label": "Conf records",
           "value": 136,
+          "detail": ""
+        },
+        {
+          "label": "Eligibility / sims",
+          "value": "136/136",
           "detail": ""
         },
         {
@@ -422,25 +433,28 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "Conference title market data is stale."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "conferences.html",
       "source_artifacts": [
-        "data/site/conference_workspace.json"
+        "data/site/conference_workspace.json",
+        "data/site/futures_view.json"
       ],
       "legacy_status_selectors": []
     },
     {
       "page_id": "playoff",
       "display_name": "Playoff",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "Critical page data is stale beyond the maximum threshold.",
-      "last_success_at": "2026-07-22T03:36:38.451051+00:00",
-      "artifact_built_at": "2026-07-22T03:36:38.451051+00:00",
-      "age_minutes": 15730.4,
-      "age_hours": 262.17,
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Playoff prices were not updated within 24 hours.",
+      "last_success_at": "2026-08-01T12:03:03.366054+00:00",
+      "artifact_built_at": "2026-08-01T12:03:03.366054+00:00",
+      "age_minutes": 912.9,
+      "age_hours": 15.22,
       "metrics": [
         {
           "label": "Simulations",
@@ -463,32 +477,35 @@
           "detail": ""
         },
         {
-          "label": "Excluded",
-          "value": 0,
+          "label": "Playoff markets",
+          "value": "138/138",
           "detail": ""
         }
       ],
-      "warnings": [],
-      "critical_failures": [
-        "Critical page data is stale beyond the maximum threshold."
+      "warnings": [
+        "Playoff prices were not updated within 24 hours.",
+        "Newer ratings inputs exist than the playoff simulation output."
       ],
+      "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "playoff.html",
       "source_artifacts": [
-        "data/site/playoff_model_2026.json"
+        "data/site/playoff_model_2026.json",
+        "data/site/ratings_view.json",
+        "data/site/futures_view.json"
       ],
       "legacy_status_selectors": []
     },
     {
       "page_id": "simulations",
       "display_name": "Simulations",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "No latest successful daily-run record is available to verify simulation completion.",
       "last_success_at": "2026-08-01T12:03:10.265374+00:00",
       "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
-      "age_minutes": 823.8,
-      "age_hours": 13.73,
+      "age_minutes": 912.8,
+      "age_hours": 15.21,
       "metrics": [
         {
           "label": "Simulations",
@@ -521,7 +538,9 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "No latest successful daily-run record is available to verify simulation completion."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "simulations.html",
@@ -539,8 +558,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 824.9,
-      "age_hours": 13.75,
+      "age_minutes": 913.9,
+      "age_hours": 15.23,
       "metrics": [
         {
           "label": "Games evaluated",
