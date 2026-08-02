@@ -38,8 +38,8 @@ def atomic_write(path: Path, text: str) -> None:
 
 
 class Context:
-    def __init__(self, root: Path, now: datetime):
-        self.root, self.now, self.cache = root, now, {}
+    def __init__(self, root: Path, now: datetime, shared: dict[str, Any] | None = None):
+        self.root, self.now, self.cache, self.shared = root, now, {}, shared or {}
 
     def load(self, rel: str) -> Any:
         if rel not in self.cache:
@@ -83,6 +83,44 @@ def matchup_data(c: Context) -> tuple[dict[str, Any], list[dict[str, Any]], dict
     return (data, data.get("games", []), data.get("audit_summary", {})) if isinstance(data, dict) else ({}, [], {})
 
 
+def injury_health(c: Context) -> dict[str, Any]:
+    """Classify source availability without treating unreleased reports as failure."""
+    cfg = c.shared.get("injuries", {})
+    raw_paths = [c.root / rel for rel in cfg.get("raw_artifacts", [])]
+    normalized_path = c.root / cfg.get("normalized_artifact", "data/injuries/injury_events_normalized.csv")
+    alerts_path = c.root / cfg.get("alerts_artifact", "data/injuries/injury_alerts.csv")
+    raw_rows = [row for path in raw_paths for row in csv_rows(path)]
+    normalized = csv_rows(normalized_path)
+    alerts = csv_rows(alerts_path)
+    error_tokens = ("error", "failed", "fetch_error")
+    source_failed = any(any(token in str(value).lower() for token in error_tokens) for row in raw_rows for value in row.values())
+    existing = [path for path in [*raw_paths, normalized_path, alerts_path] if path.is_file()]
+    latest = max((datetime.fromtimestamp(path.stat().st_mtime, timezone.utc) for path in existing), default=None)
+    age = (c.now - latest).total_seconds() / 3600 if latest else None
+    if source_failed or (raw_rows and not normalized_path.is_file()):
+        state, label = "source_failed", "RED · Source failed"
+    elif not raw_rows and not normalized and not alerts:
+        state, label = "not_released", "GRAY · No reports released"
+    elif alerts and age is not None and age > cfg.get("stale_hours", 96):
+        state, label = "active_stale", "RED · Active reports stale"
+    elif latest and age is not None and age > cfg.get("fresh_hours", 36):
+        state, label = "active_aging", "YELLOW · Reports aging"
+    elif alerts:
+        state, label = "active", f"{len(alerts)} active alerts"
+    else:
+        state, label = "no_injuries", "No injuries found"
+    return {"state": state, "label": label, "alerts": len(alerts), "age_hours": age}
+
+
+def explicitly_inactive(data: Any) -> bool:
+    """Only explicit source/domain state may make an otherwise valid page GRAY."""
+    if not isinstance(data, dict):
+        return False
+    state = str(data.get("status") or data.get("state") or data.get("availability") or "").lower().replace(" ", "_")
+    has_data = bool(data.get("teams") or data.get("games") or data.get("trials"))
+    return not has_data and state in {"inactive", "not_released", "not_open", "unavailable"}
+
+
 def odds_counts(data: dict[str, Any]) -> dict[str, int]:
     out = {"spread": 0, "total": 0, "moneyline": 0, "fallback": 0, "unavailable": 0, "stale": 0}
     for game in data.get("games", []):
@@ -119,15 +157,21 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
     matchups, games, audit = matchup_data(c)
     latest_success = max(timestamps) if timestamps else None
     artifact_built = latest_success
+    injuries = injury_health(c) if page_id in {"dashboard", "matchups", "schedule"} else None
 
     if page_id == "dashboard":
         bets = c.load("data/site/betting_activity_view.json") or {}
         moves = csv_rows(c.root / "data/history/game_line_model_history.csv")
         signals = csv_rows(c.root / "data/agents/daily_betting_angles.csv")
-        injuries = csv_rows(c.root / "data/injuries/injury_alerts.csv")
         run = c.load("data/control/daily_run_status.json")
-        metrics = [metric("Slate games", len(games)), metric("Betting signals", len(signals)), metric("Market history", len(moves)), metric("Injury alerts", len(injuries)), metric("Open wagers", bets.get("summary", {}).get("owned_open", 0))]
-        if not isinstance(run, dict): warnings.append("Daily-run status is unavailable; page data remains independently usable.")
+        run_label, run_value = "Last completed run", "Unavailable"
+        if isinstance(run, dict) and run.get("overall_result") == "RUNNING":
+            run_label = "Current run at build"
+            run_value = f"RUNNING · {run.get('started_at_utc') or 'start unavailable'}"
+        elif isinstance(run, dict) and run.get("finished_at_utc"):
+            run_value = f"{run.get('overall_result', 'COMPLETED')} · {run['finished_at_utc']}"
+        metrics = [metric("Slate games", len(games)), metric("Betting signals", len(signals)), metric("Market history", len(moves)), metric("Injuries", injuries["label"]), metric("Open wagers", bets.get("summary", {}).get("owned_open", 0)), metric(run_label, run_value)]
+        if not isinstance(run, dict): warnings.append("Last completed daily-run status is unavailable; page data remains independently usable.")
     elif page_id == "ratings":
         data = c.load("data/site/ratings_view.json") or {}
         teams = data.get("teams", [])
@@ -145,7 +189,7 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if og and (spread < len(og) or total < len(og)): warnings.append("Some games do not yet have both retained spread and total openers.")
         if og and history < len(og): warnings.append("Retained opener history is partial for market-covered games.")
     elif page_id == "matchups":
-        metrics = [metric("Matchups", audit.get("games", len(games))), metric("Model spreads", audit.get("model_spread")), metric("Model totals", audit.get("model_total")), metric("Five Factors", audit.get("five_factors_complete")), metric("Coaching", audit.get("coach_full_both_teams")), metric("Odds", audit.get("market_spread"))]
+        metrics = [metric("Matchups", audit.get("games", len(games))), metric("Model coverage", f"{audit.get('model_spread', 0)} S · {audit.get('model_total', 0)} T"), metric("Five Factors", audit.get("five_factors_complete")), metric("Coaching", audit.get("coach_full_both_teams")), metric("Odds", audit.get("market_spread")), metric("Injuries", injuries["label"])]
         if audit.get("games", len(games)) and not audit.get("model_spread"): failures.append("Model spread coverage is missing.")
         if audit.get("five_factors_complete", 0) < len(games): warnings.append("Advanced matchup coverage is partial for the current inventory.")
     elif page_id == "odds":
@@ -160,7 +204,7 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         data = c.load("data/site/schedule_live_enrichment.json") or {}; rows = data.get("games", [])
         kickoff = sum(bool(r.get("kickoff_utc") or r.get("date")) for r in rows); projections = audit.get("model_spread", 0); odds = audit.get("market_spread", 0); results = sum(bool(r.get("home_score") is not None and r.get("away_score") is not None) for r in rows)
         ids = [r.get("game_id") for r in rows if r.get("game_id")]; duplicates = len(ids)-len(set(ids))
-        metrics = [metric("Games", len(rows)), metric("Kickoffs", kickoff), metric("Projections", projections), metric("Odds", odds), metric("Results", results), metric("Duplicates", duplicates)]
+        metrics = [metric("Games", len(rows)), metric("Kickoffs", kickoff), metric("Projections", projections), metric("Odds", odds), metric("Results / integrity", f"{results} results · {duplicates} dupes"), metric("Injuries", injuries["label"])]
         if duplicates: failures.append(f"Schedule contains {duplicates} duplicate game IDs.")
         if rows and projections == 0: failures.append("Schedule projection coverage is missing.")
         elif rows and odds == 0: warnings.append("No current market odds are available for the schedule inventory.")
@@ -190,14 +234,22 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if malformed or visible_nan: failures.append("Betting output contains malformed prices or visible nan values.")
         if duplicates: failures.append("Betting output contains duplicate bet IDs.")
 
+    if injuries:
+        if injuries["state"] in {"source_failed", "active_stale"}:
+            failures.append(f"Injury status: {injuries['label']}.")
+        elif injuries["state"] == "active_aging":
+            warnings.append(f"Injury status: {injuries['label']}.")
+        elif injuries["state"] == "not_released":
+            unavailable.append("No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health.")
+
     age_hours = (c.now-latest_success).total_seconds()/3600 if latest_success else None
-    inactive = parse_time(cfg.get("inactive_before"))
+    domain_inactive = page_id == "playoff" and explicitly_inactive(c.load("data/site/playoff_model_2026.json"))
     if age_hours is not None and age_hours > cfg["fresh_hours"] and age_hours <= cfg["stale_hours"]:
         warnings.append(f"Critical page data is aging ({age_hours:.1f} hours old).")
     if failures:
         status = "red"
-    elif inactive and c.now < inactive:
-        status = "gray"; unavailable.append(f"Legitimately inactive before {inactive.date().isoformat()}.")
+    elif domain_inactive:
+        status = "gray"; unavailable.append("The playoff source explicitly reports that the domain is not released or active.")
     elif age_hours is None:
         status = "red"; failures.append("No parseable critical artifact timestamp is available.")
     elif age_hours > cfg["stale_hours"]:
@@ -213,7 +265,7 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
 
 def build(root: Path, registry_path: Path, now: datetime) -> dict[str, Any]:
     registry = json.loads(registry_path.read_text())
-    context = Context(root, now)
+    context = Context(root, now, registry.get("shared_checks"))
     pages = [evaluate(page_id, cfg, context) for page_id, cfg in registry["pages"].items()]
     if {p["status"] for p in pages} - VALID:
         raise ValueError("Invalid status generated")
@@ -226,7 +278,7 @@ def main() -> None:
     ap.add_argument("--registry", type=Path, default=REGISTRY)
     ap.add_argument("--now")
     args = ap.parse_args()
-    now = parse_time(args.now) if args.now else datetime.now(timezone.utc)
+    now = parse_time(args.now) if args.now else datetime.now(timezone.utc).replace(second=0, microsecond=0)
     if now is None:
         raise SystemExit("Invalid --now timestamp")
     payload = build(args.root.resolve(), args.registry.resolve(), now)

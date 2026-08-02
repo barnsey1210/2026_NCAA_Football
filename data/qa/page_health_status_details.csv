@@ -2,8 +2,9 @@ page_id,status,metric,value,detail,last_success_at,source_artifacts
 dashboard,yellow,Slate games,902,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
 dashboard,yellow,Betting signals,43,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
 dashboard,yellow,Market history,902,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
-dashboard,yellow,Injury alerts,0,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
+dashboard,yellow,Injuries,GRAY · No reports released,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
 dashboard,yellow,Open wagers,35,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
+dashboard,yellow,Last completed run,Unavailable,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json|data/site/betting_activity_view.json
 ratings,green,Composite,138/138,,2026-08-01T00:00:00+00:00,data/site/ratings_view.json
 ratings,green,SP+,138,,2026-08-01T00:00:00+00:00,data/site/ratings_view.json
 ratings,green,FPI,138,,2026-08-01T00:00:00+00:00,data/site/ratings_view.json
@@ -16,11 +17,11 @@ openers,yellow,Total openers,106,,2026-08-01T12:02:15.942431+00:00,data/site/mat
 openers,yellow,History,94,,2026-08-01T12:02:15.942431+00:00,data/site/matchups_view.json|data/site/odds_screen_v2.json
 openers,yellow,Unmatched,12,,2026-08-01T12:02:15.942431+00:00,data/site/matchups_view.json|data/site/odds_screen_v2.json
 matchups,yellow,Matchups,902,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
-matchups,yellow,Model spreads,765,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
-matchups,yellow,Model totals,765,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
+matchups,yellow,Model coverage,765 S · 765 T,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
 matchups,yellow,Five Factors,841,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
 matchups,yellow,Coaching,765,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
 matchups,yellow,Odds,130,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
+matchups,yellow,Injuries,GRAY · No reports released,,2026-08-01T12:02:03.408419+00:00,data/site/matchups_view.json
 odds,yellow,Games,106,,2026-08-01T12:00:42.054042+00:00,data/site/odds_screen_v2.json|data/site/odds_futures_v2.json
 odds,yellow,Spreads,106,,2026-08-01T12:00:42.054042+00:00,data/site/odds_screen_v2.json|data/site/odds_futures_v2.json
 odds,yellow,Totals,106,,2026-08-01T12:00:42.054042+00:00,data/site/odds_screen_v2.json|data/site/odds_futures_v2.json
@@ -31,8 +32,8 @@ schedule,green,Games,902,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_li
 schedule,green,Kickoffs,902,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
 schedule,green,Projections,765,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
 schedule,green,Odds,130,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
-schedule,green,Results,16,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
-schedule,green,Duplicates,0,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
+schedule,green,Results / integrity,16 results · 0 dupes,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
+schedule,green,Injuries,GRAY · No reports released,,2026-08-01T12:02:03.408419+00:00,data/site/schedule_live_enrichment.json|data/site/matchups_view.json
 futures,yellow,Teams,138,,2026-08-01T12:03:03.366054+00:00,data/site/futures_view.json
 futures,yellow,Win totals,106,,2026-08-01T12:03:03.366054+00:00,data/site/futures_view.json
 futures,yellow,Conference title,108,,2026-08-01T12:03:03.366054+00:00,data/site/futures_view.json
@@ -45,11 +46,11 @@ conferences,green,Missing,0,,2026-08-01T12:03:10.265374+00:00,data/site/conferen
 conferences,green,Duplicates,0,,2026-08-01T12:03:10.265374+00:00,data/site/conference_workspace.json
 conferences,green,Title sims,136,,2026-08-01T12:03:10.265374+00:00,data/site/conference_workspace.json
 conferences,green,Title markets,108,,2026-08-01T12:03:10.265374+00:00,data/site/conference_workspace.json
-playoff,gray,Simulations,5000,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
-playoff,gray,Teams,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
-playoff,gray,Playoff coverage,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
-playoff,gray,Title coverage,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
-playoff,gray,Excluded,0,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
+playoff,red,Simulations,5000,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
+playoff,red,Teams,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
+playoff,red,Playoff coverage,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
+playoff,red,Title coverage,138,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
+playoff,red,Excluded,0,,2026-07-22T03:36:38.451051+00:00,data/site/playoff_model_2026.json
 simulations,green,Simulations,5000,,2026-08-01T12:03:10.265374+00:00,data/site/playoff_model_2026.json|data/site/conference_workspace.json
 simulations,green,Teams,138,,2026-08-01T12:03:10.265374+00:00,data/site/playoff_model_2026.json|data/site/conference_workspace.json
 simulations,green,Playoff coverage,138,,2026-08-01T12:03:10.265374+00:00,data/site/playoff_model_2026.json|data/site/conference_workspace.json

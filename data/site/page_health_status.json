@@ -1,17 +1,17 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-08-02T01:19:52.331672+00:00",
+  "built_at": "2026-08-02T01:47:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
       "display_name": "Dashboard",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Daily-run status is unavailable; page data remains independently usable.",
+      "summary": "Last completed daily-run status is unavailable; page data remains independently usable.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 797.8,
-      "age_hours": 13.3,
+      "age_minutes": 824.9,
+      "age_hours": 13.75,
       "metrics": [
         {
           "label": "Slate games",
@@ -29,21 +29,28 @@
           "detail": ""
         },
         {
-          "label": "Injury alerts",
-          "value": 0,
+          "label": "Injuries",
+          "value": "GRAY \u00b7 No reports released",
           "detail": ""
         },
         {
           "label": "Open wagers",
           "value": 35,
           "detail": ""
+        },
+        {
+          "label": "Last completed run",
+          "value": "Unavailable",
+          "detail": ""
         }
       ],
       "warnings": [
-        "Daily-run status is unavailable; page data remains independently usable."
+        "Last completed daily-run status is unavailable; page data remains independently usable."
       ],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health."
+      ],
       "page_url": "index.html",
       "source_artifacts": [
         "data/site/matchups_view.json",
@@ -59,8 +66,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-01T00:00:00+00:00",
       "artifact_built_at": "2026-08-01T00:00:00+00:00",
-      "age_minutes": 1519.9,
-      "age_hours": 25.33,
+      "age_minutes": 1547.0,
+      "age_hours": 25.78,
       "metrics": [
         {
           "label": "Composite",
@@ -112,8 +119,8 @@
       "summary": "Retained opener history is partial for market-covered games.",
       "last_success_at": "2026-08-01T12:02:15.942431+00:00",
       "artifact_built_at": "2026-08-01T12:02:15.942431+00:00",
-      "age_minutes": 797.6,
-      "age_hours": 13.29,
+      "age_minutes": 824.7,
+      "age_hours": 13.75,
       "metrics": [
         {
           "label": "Games",
@@ -161,8 +168,8 @@
       "summary": "Advanced matchup coverage is partial for the current inventory.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 797.8,
-      "age_hours": 13.3,
+      "age_minutes": 824.9,
+      "age_hours": 13.75,
       "metrics": [
         {
           "label": "Matchups",
@@ -170,13 +177,8 @@
           "detail": ""
         },
         {
-          "label": "Model spreads",
-          "value": 765,
-          "detail": ""
-        },
-        {
-          "label": "Model totals",
-          "value": 765,
+          "label": "Model coverage",
+          "value": "765 S \u00b7 765 T",
           "detail": ""
         },
         {
@@ -193,13 +195,20 @@
           "label": "Odds",
           "value": 130,
           "detail": ""
+        },
+        {
+          "label": "Injuries",
+          "value": "GRAY \u00b7 No reports released",
+          "detail": ""
         }
       ],
       "warnings": [
         "Advanced matchup coverage is partial for the current inventory."
       ],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health."
+      ],
       "page_url": "matchups.html",
       "source_artifacts": [
         "data/site/matchups_view.json"
@@ -211,11 +220,11 @@
       "display_name": "Odds",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Critical page data is aging (13.3 hours old).",
+      "summary": "Critical page data is aging (13.8 hours old).",
       "last_success_at": "2026-08-01T12:00:42.054042+00:00",
       "artifact_built_at": "2026-08-01T12:03:03.368000+00:00",
-      "age_minutes": 799.2,
-      "age_hours": 13.32,
+      "age_minutes": 826.3,
+      "age_hours": 13.77,
       "metrics": [
         {
           "label": "Games",
@@ -249,7 +258,7 @@
         }
       ],
       "warnings": [
-        "Critical page data is aging (13.3 hours old)."
+        "Critical page data is aging (13.8 hours old)."
       ],
       "critical_failures": [],
       "unavailable_reasons": [],
@@ -267,11 +276,11 @@
       "display_name": "Schedule",
       "status": "green",
       "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "summary": "No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 797.8,
-      "age_hours": 13.3,
+      "age_minutes": 824.9,
+      "age_hours": 13.75,
       "metrics": [
         {
           "label": "Games",
@@ -294,19 +303,21 @@
           "detail": ""
         },
         {
-          "label": "Results",
-          "value": 16,
+          "label": "Results / integrity",
+          "value": "16 results \u00b7 0 dupes",
           "detail": ""
         },
         {
-          "label": "Duplicates",
-          "value": 0,
+          "label": "Injuries",
+          "value": "GRAY \u00b7 No reports released",
           "detail": ""
         }
       ],
       "warnings": [],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "No actionable CFBDepth injury reports have been released; injury context is inactive and does not reduce page health."
+      ],
       "page_url": "schedule.html",
       "source_artifacts": [
         "data/site/schedule_live_enrichment.json",
@@ -322,8 +333,8 @@
       "summary": "Action Network playoff futures pull is stale or unavailable.",
       "last_success_at": "2026-08-01T12:03:03.366054+00:00",
       "artifact_built_at": "2026-08-01T12:03:03.366054+00:00",
-      "age_minutes": 796.8,
-      "age_hours": 13.28,
+      "age_minutes": 823.9,
+      "age_hours": 13.73,
       "metrics": [
         {
           "label": "Teams",
@@ -377,8 +388,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-01T12:03:10.265374+00:00",
       "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
-      "age_minutes": 796.7,
-      "age_hours": 13.28,
+      "age_minutes": 823.8,
+      "age_hours": 13.73,
       "metrics": [
         {
           "label": "Conferences",
@@ -423,13 +434,13 @@
     {
       "page_id": "playoff",
       "display_name": "Playoff",
-      "status": "gray",
-      "status_label": "Inactive / unavailable",
-      "summary": "Legitimately inactive before 2026-08-15.",
+      "status": "red",
+      "status_label": "Action required",
+      "summary": "Critical page data is stale beyond the maximum threshold.",
       "last_success_at": "2026-07-22T03:36:38.451051+00:00",
       "artifact_built_at": "2026-07-22T03:36:38.451051+00:00",
-      "age_minutes": 15703.2,
-      "age_hours": 261.72,
+      "age_minutes": 15730.4,
+      "age_hours": 262.17,
       "metrics": [
         {
           "label": "Simulations",
@@ -458,10 +469,10 @@
         }
       ],
       "warnings": [],
-      "critical_failures": [],
-      "unavailable_reasons": [
-        "Legitimately inactive before 2026-08-15."
+      "critical_failures": [
+        "Critical page data is stale beyond the maximum threshold."
       ],
+      "unavailable_reasons": [],
       "page_url": "playoff.html",
       "source_artifacts": [
         "data/site/playoff_model_2026.json"
@@ -476,8 +487,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-01T12:03:10.265374+00:00",
       "artifact_built_at": "2026-08-01T12:03:10.265374+00:00",
-      "age_minutes": 796.7,
-      "age_hours": 13.28,
+      "age_minutes": 823.8,
+      "age_hours": 13.73,
       "metrics": [
         {
           "label": "Simulations",
@@ -528,8 +539,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-01T12:02:03.408419+00:00",
       "artifact_built_at": "2026-08-01T12:02:03.408419+00:00",
-      "age_minutes": 797.8,
-      "age_hours": 13.3,
+      "age_minutes": 824.9,
+      "age_hours": 13.75,
       "metrics": [
         {
           "label": "Games evaluated",
