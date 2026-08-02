@@ -29,12 +29,30 @@ class PageHealthTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(value))
 
+    def write_csv(self, rel, text):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+
+    def healthy_ratings(self):
+        teams = [{"team": f"T{i}", "rating": 1, "variance": 0, "market": {"rating": 1}, "sources": {s: {"rating": 1} for s in ("spplus", "fpi", "teamrankings", "bradpowers")}} for i in range(138)]
+        games = [{"teams": {"away": {"team": f"T{i}", "offense_rank": i+1, "defense_rank": i+1}, "home": {"team": f"T{i+1}", "offense_rank": i+2, "defense_rank": i+2}}} for i in range(0, 138, 2)]
+        self.write("data/site/ratings_view.json", {"snapshot_date": "2026-08-01", "teams": teams})
+        self.write("data/site/matchups_view.json", {"built_at": NOW.isoformat(), "games": games, "audit_summary": {}})
+        self.write_csv("data/ratings/ratings_movement.csv", "team,change\nT0,0\n")
+        return teams
+
     def evaluate(self, page):
         return MOD.evaluate(page, self.registry["pages"][page], MOD.Context(self.root, NOW, self.registry.get("shared_checks")))
 
     def test_registry_covers_every_major_page(self):
         self.assertEqual(set(self.registry["pages"]), {"dashboard", "ratings", "openers", "matchups", "odds", "schedule", "futures", "conferences", "playoff", "simulations", "betting"})
         self.assertEqual({v["page_url"] for v in self.registry["pages"].values()}, {"index.html", "ratings.html", "openers.html", "matchups.html", "odds.html", "schedule.html", "futures.html", "conferences.html", "playoff.html", "simulations.html", "betting.html"})
+        for page in self.registry["pages"].values():
+            self.assertIsInstance(page.get("core_metrics"), list)
+            self.assertTrue(page["core_metrics"])
+            self.assertIsInstance(page.get("optional_metrics"), list)
+            self.assertIsInstance(page.get("future_metrics"), list)
 
     def test_missing_critical_artifact_is_red(self):
         result = self.evaluate("matchups")
@@ -46,18 +64,31 @@ class PageHealthTests(unittest.TestCase):
         self.assertEqual(self.evaluate("matchups")["status"], "green")
 
     def test_partial_ratings_is_yellow(self):
-        teams = [{"rating": 1, "sources": {s: {"rating": 1} for s in ("spplus", "fpi", "teamrankings", "bradpowers")}} for _ in range(138)]
+        teams = self.healthy_ratings()
         teams[-1]["sources"]["fpi"]["rating"] = None
         self.write("data/site/ratings_view.json", {"snapshot_date": "2026-08-01", "teams": teams})
         self.assertEqual(self.evaluate("ratings")["status"], "yellow")
 
+    def test_market_derived_ratings_are_required_but_separate(self):
+        teams = self.healthy_ratings()
+        for team in teams:
+            team["market"] = None
+        self.write("data/site/ratings_view.json", {"snapshot_date": "2026-08-01", "teams": teams})
+        result = self.evaluate("ratings")
+        self.assertEqual(result["status"], "red")
+        self.assertTrue(any("separate from the composite" in item for item in result["critical_failures"]))
+
     def test_legitimate_inactive_playoff_is_gray(self):
         self.write("data/site/playoff_model_2026.json", {"built_at": NOW.isoformat(), "status": "not_released", "trials": 0, "teams": []})
+        self.write("data/site/ratings_view.json", {"built_at": NOW.isoformat(), "teams": []})
+        self.write("data/site/futures_view.json", {"built_at": NOW.isoformat(), "summary": {}, "market_qa": {"last_successful_pull": NOW.isoformat(), "status": "current"}})
         self.assertEqual(self.evaluate("playoff")["status"], "gray")
 
     def test_available_playoff_data_is_evaluated_before_calendar_fallback(self):
         teams = [{"playoff_pct": .1, "national_title_pct": .01} for _ in range(138)]
         self.write("data/site/playoff_model_2026.json", {"built_at": NOW.isoformat(), "trials": 5000, "teams": teams})
+        self.write("data/site/ratings_view.json", {"built_at": NOW.isoformat(), "teams": []})
+        self.write("data/site/futures_view.json", {"built_at": NOW.isoformat(), "summary": {"playoff_markets": 138}, "market_qa": {"last_successful_pull": NOW.isoformat(), "status": "current"}})
         self.assertEqual(self.evaluate("playoff")["status"], "green")
 
     def test_unreleased_injuries_do_not_yellow_matchups(self):
@@ -87,11 +118,24 @@ class PageHealthTests(unittest.TestCase):
         self.assertIn("2026-08-01T13:00:00Z", running["metrics"][-1]["value"])
 
     def test_stale_current_odds_never_green(self):
-        stale = (NOW - timedelta(hours=30)).isoformat()
+        stale = (NOW - timedelta(hours=49)).isoformat()
         game = {"source_updated_at": stale, "quotes": {"DraftKings": {"spread": {"away": {}}, "total": {"over": {}}, "moneyline": {"away": {}}}}, "data_quality_notes": []}
         self.write("data/site/odds_screen_v2.json", {"built_at": stale, "books": ["DraftKings"], "games": [game]})
         self.write("data/site/odds_futures_v2.json", {"built_at": stale, "categories": {}})
         self.assertEqual(self.evaluate("odds")["status"], "red")
+
+    def test_odds_24_to_48_hours_is_yellow(self):
+        aging = (NOW - timedelta(hours=30)).isoformat()
+        game = {"game_id": "g1", "source_updated_at": aging, "quotes": {"DraftKings": {"spread": {"away": {}}, "total": {"over": {}}, "moneyline": {"away": {}}}}, "data_quality_notes": []}
+        self.write("data/site/odds_screen_v2.json", {"built_at": aging, "books": ["DraftKings"], "games": [game]})
+        self.write("data/site/odds_futures_v2.json", {"built_at": aging, "categories": {}})
+        self.assertEqual(self.evaluate("odds")["status"], "yellow")
+
+    def test_simulation_without_latest_completed_run_is_yellow(self):
+        teams = [{"playoff_pct": .1, "national_title_pct": .01} for _ in range(138)]
+        self.write("data/site/playoff_model_2026.json", {"built_at": NOW.isoformat(), "trials": 5000, "teams": teams})
+        self.write("data/site/conference_workspace.json", {"built_at": NOW.isoformat(), "conferences": [{} for _ in range(10)]})
+        self.assertEqual(self.evaluate("simulations")["status"], "yellow")
 
     def test_missing_conference_membership_never_green(self):
         self.write("data/site/conference_workspace.json", {"built_at": NOW.isoformat(), "conferences": [{"teams": [{"team": "A", "title_pct": .2}]} for _ in range(10)]})

@@ -136,11 +136,24 @@ def odds_counts(data: dict[str, Any]) -> dict[str, int]:
     return out
 
 
+def latest_market_time(data: dict[str, Any]) -> datetime | None:
+    qa = data.get("market_qa", {}) if isinstance(data, dict) else {}
+    return parse_time(qa.get("last_successful_pull")) or parse_time(data.get("market_freshness"))
+
+
+def latest_completed_run(c: Context) -> dict[str, Any] | None:
+    run = c.load("data/control/daily_run_status.json")
+    if isinstance(run, dict) and run.get("overall_result") in {"PASSED", "PASSED_WITH_WARNINGS"} and run.get("finished_at_utc"):
+        return run
+    return None
+
+
 def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
     metrics: list[dict[str, Any]] = []
     warnings: list[str] = []
     failures: list[str] = []
     unavailable: list[str] = []
+    page_specific_freshness = False
     timestamps: list[datetime] = []
     sources = list(cfg.get("critical_artifacts", []))
     for rel in sources:
@@ -174,20 +187,45 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if not isinstance(run, dict): warnings.append("Last completed daily-run status is unavailable; page data remains independently usable.")
     elif page_id == "ratings":
         data = c.load("data/site/ratings_view.json") or {}
+        ratings_time = c.timestamp("data/site/ratings_view.json", data)
+        if ratings_time: latest_success = ratings_time
         teams = data.get("teams", [])
         rated = sum(t.get("rating") is not None for t in teams)
         source_counts = {s: sum((t.get("sources", {}).get(s) or {}).get("rating") is not None for t in teams) for s in ("spplus", "fpi", "teamrankings", "bradpowers")}
-        metrics = [metric("Composite", f"{rated}/{cfg.get('expected_teams', 138)}"), metric("SP+", source_counts["spplus"]), metric("FPI", source_counts["fpi"]), metric("TeamRankings", source_counts["teamrankings"]), metric("Brad Powers", source_counts["bradpowers"]), metric("Movement rows", len(csv_rows(c.root / "data/ratings/ratings_movement.csv")))]
+        expected = cfg.get("expected_teams", 138)
+        market = sum((t.get("market") or {}).get("rating") is not None for t in teams)
+        matchup_teams = {}
+        for game in games:
+            for side in ("away", "home"):
+                team = game.get("teams", {}).get(side, {})
+                if team.get("team"):
+                    matchup_teams[team["team"]] = team
+        offense = sum(t.get("offense_rank") is not None for t in matchup_teams.values())
+        defense = sum(t.get("defense_rank") is not None for t in matchup_teams.values())
+        movement = len(csv_rows(c.root / "data/ratings/ratings_movement.csv"))
+        variance = sum(t.get("variance") is not None for t in teams)
+        metrics = [metric("Composite", f"{rated}/{expected}"), metric("Rating sources", f"SP+ {source_counts['spplus']} · FPI {source_counts['fpi']} · TR {source_counts['teamrankings']} · BP {source_counts['bradpowers']}"), metric("Market-derived", f"{market}/{expected}", "Separate from composite"), metric("Off / Def", f"{offense}/{expected} · {defense}/{expected}"), metric("Movement", movement), metric("Variance", f"{variance}/{expected}")]
         if rated < cfg.get("expected_teams", 138): failures.append("Composite ratings coverage is below the expected FBS inventory.")
         if min(source_counts.values(), default=0) < cfg.get("expected_teams", 138): warnings.append("At least one ratings source has partial team coverage.")
+        if market == 0: failures.append("Market-Derived Ratings are missing; they remain separate from the composite.")
+        elif market < expected: warnings.append("Market-Derived Ratings have partial team coverage; they remain separate from the composite.")
+        if offense == 0 or defense == 0: failures.append("Offensive or Defensive Ratings are missing.")
+        elif offense < expected or defense < expected: warnings.append("Offensive or Defensive Ratings have partial team coverage.")
+        if movement == 0: failures.append("Ratings Movement is missing.")
+        if variance == 0: failures.append("Ratings Variance is missing.")
+        elif variance < expected: warnings.append("Ratings Variance has partial team coverage.")
     elif page_id == "openers":
         odds = c.load("data/site/odds_screen_v2.json") or {}; og = odds.get("games", [])
         spread = sum(bool(g.get("opener", {}).get("spread", {}).get("away")) for g in og)
         total = sum(bool(g.get("opener", {}).get("total", {}).get("over")) for g in og)
         history = sum(bool(g.get("history", {}).get("spread") or g.get("history", {}).get("total")) for g in og)
-        metrics = [metric("Games", len(games)), metric("Spread openers", spread), metric("Total openers", total), metric("History", history), metric("Unmatched", max(0, len(og)-history))]
+        unmatched = sum(not g.get("game_id") or any("no exact" in str(n).lower() for n in g.get("data_quality_notes", [])) for g in og)
+        quote_times = [parse_time(g.get("source_updated_at")) for g in og]; quote_times = [x for x in quote_times if x]
+        if quote_times: latest_success = max(quote_times)
+        metrics = [metric("Games", len(og)), metric("Spread openers", spread), metric("Total openers", total), metric("History", history), metric("Unmatched", unmatched), metric("Market updated", latest_success.isoformat() if latest_success else None)]
         if og and (spread < len(og) or total < len(og)): warnings.append("Some games do not yet have both retained spread and total openers.")
         if og and history < len(og): warnings.append("Retained opener history is partial for market-covered games.")
+        if unmatched: warnings.append(f"{unmatched} opener games lack an exact canonical mapping.")
     elif page_id == "matchups":
         metrics = [metric("Matchups", audit.get("games", len(games))), metric("Model coverage", f"{audit.get('model_spread', 0)} S · {audit.get('model_total', 0)} T"), metric("Five Factors", audit.get("five_factors_complete")), metric("Coaching", audit.get("coach_full_both_teams")), metric("Odds", audit.get("market_spread")), metric("Injuries", injuries["label"])]
         if audit.get("games", len(games)) and not audit.get("model_spread"): failures.append("Model spread coverage is missing.")
@@ -199,6 +237,10 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if quote_latest: latest_success = quote_latest
         metrics = [metric("Games", total_games), metric("Spreads", counts["spread"]), metric("Totals", counts["total"]), metric("Moneylines", counts["moneyline"]), metric("Books", len(data.get("books", []))), metric("Unavailable", counts["unavailable"])]
         if total_games and counts["spread"] < total_games: warnings.append("Spread coverage is partial.")
+        mapping_failures = sum(any("no exact" in str(note).lower() for note in game.get("data_quality_notes", [])) for game in data.get("games", []))
+        malformed = sum(any("malformed" in str(note).lower() for note in game.get("data_quality_notes", [])) for game in data.get("games", []))
+        if mapping_failures: failures.append(f"{mapping_failures} current odds games failed exact canonical mapping.")
+        if malformed: failures.append(f"{malformed} current odds games contain malformed market pairs.")
         if quote_latest and (c.now-quote_latest).total_seconds()/3600 > cfg["stale_hours"]: failures.append("Current odds quotes are stale beyond the maximum threshold.")
     elif page_id == "schedule":
         data = c.load("data/site/schedule_live_enrichment.json") or {}; rows = data.get("games", [])
@@ -209,20 +251,59 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if rows and projections == 0: failures.append("Schedule projection coverage is missing.")
         elif rows and odds == 0: warnings.append("No current market odds are available for the schedule inventory.")
     elif page_id == "futures":
+        page_specific_freshness = True
         data = c.load("data/site/futures_view.json") or {}; summary = data.get("summary", {}); qa = data.get("market_qa", {})
         books = qa.get("books", []); metrics = [metric("Teams", summary.get("teams")), metric("Win totals", summary.get("win_markets")), metric("Conference title", summary.get("title_markets")), metric("Playoff", summary.get("playoff_markets")), metric("National title", summary.get("national_title_markets")), metric("Books", len(books))]
-        if str(qa.get("status", "")).lower() not in ("pass", "current", "ok"): warnings.extend(qa.get("warnings", []) or ["Futures market QA is not fully current."])
+        market_time = latest_market_time(data)
+        market_age = (c.now-market_time).total_seconds()/3600 if market_time else None
+        if market_time: latest_success = market_time
+        expected = cfg.get("expected_teams", 138)
+        coverages = [summary.get(k, 0) or 0 for k in ("win_markets", "title_markets", "playoff_markets", "national_title_markets")]
+        if not any(coverages): failures.append("All critical futures market categories are missing.")
+        elif min(coverages) < expected: warnings.append("Futures team-market coverage is partial or has missing teams.")
+        if qa.get("invalid_prices") or qa.get("invalid_implied_probabilities"): failures.append("Futures output contains malformed current prices.")
+        if qa.get("stale_prices_displayed_as_current"): failures.append("Stale futures prices are displayed as current.")
+        elif market_age is None or market_age >= cfg["fresh_hours"] or str(qa.get("status", "")).lower() not in ("pass", "current", "ok"):
+            warnings.extend(qa.get("warnings", []) or ["Sportsbook futures are stale or have partial provider coverage."])
     elif page_id == "conferences":
         data = c.load("data/site/conference_workspace.json") or {}; confs = data.get("conferences", []); teams = [t for conf in confs for t in conf.get("teams", [])]; names = [t.get("team") for t in teams if t.get("team")]
+        conference_time = c.timestamp("data/site/conference_workspace.json", data)
+        if conference_time: latest_success = conference_time
         duplicates = len(names)-len(set(names)); missing = max(0, cfg.get("expected_teams", 138)-len(set(names)))
-        title_cov = sum(t.get("title_pct") is not None for t in teams); market_cov = sum(t.get("title_market_prob") is not None for t in teams)
-        metrics = [metric("Conferences", len(confs)), metric("Teams assigned", len(set(names))), metric("Missing", missing), metric("Duplicates", duplicates), metric("Title sims", title_cov), metric("Title markets", market_cov)]
+        title_cov = sum(t.get("title_pct") is not None for t in teams); eligibility_cov = sum(t.get("make_title_game_pct") is not None and t.get("title_pct") is not None for t in teams); market_cov = sum(t.get("title_market_prob") is not None for t in teams)
+        records = sum(all(t.get(k) is not None for k in ("current_wins", "current_losses")) for t in teams)
+        conf_records = sum(all(t.get(k) is not None for k in ("current_conf_wins", "current_conf_losses")) for t in teams)
+        metrics = [metric("Conferences", len(confs)), metric("Teams / integrity", f"{len(set(names))} · {missing} missing · {duplicates} dupes"), metric("Current records", records), metric("Conf records", conf_records), metric("Eligibility / sims", f"{eligibility_cov}/{len(teams)}"), metric("Title markets", market_cov)]
         if len(confs) < cfg.get("expected_conferences", 10) or missing or duplicates: failures.append("Conference membership coverage is incomplete or duplicated.")
+        if records < len(teams) or conf_records < len(teams): failures.append("Current overall or conference records are incomplete.")
+        if title_cov < len(teams) or eligibility_cov < len(teams): warnings.append("Conference simulation or eligibility coverage is partial.")
+        if conference_time and (c.now-conference_time).total_seconds()/3600 > cfg["fresh_hours"]: warnings.append("Conference simulations or records are aging.")
+        futures = c.load("data/site/futures_view.json") or {}; market_time = latest_market_time(futures)
+        if market_cov == 0: warnings.append("Conference title market data is unavailable.")
+        elif not market_time or (c.now-market_time).total_seconds()/3600 >= 24: warnings.append("Conference title market data is stale.")
     elif page_id in ("playoff", "simulations"):
+        page_specific_freshness = True
         data = c.load("data/site/playoff_model_2026.json") or {}; teams = data.get("teams", []); complete = sum(t.get("playoff_pct") is not None for t in teams); title = sum(t.get("national_title_pct") is not None for t in teams)
         metrics = [metric("Simulations", data.get("trials")), metric("Teams", len(teams)), metric("Playoff coverage", complete), metric("Title coverage", title), metric("Excluded", max(0, cfg.get("expected_teams", 138)-len(teams)))]
         if page_id == "simulations":
             confs = c.load("data/site/conference_workspace.json") or {}; metrics.append(metric("Conferences", len(confs.get("conferences", []))))
+            run = latest_completed_run(c)
+            if not run:
+                warnings.append("No latest successful daily-run record is available to verify simulation completion.")
+            else:
+                run_start = parse_time(run.get("started_at_utc")); sim_time = c.timestamp("data/site/playoff_model_2026.json", data)
+                stage = next((s for s in run.get("stages", []) if s.get("id") in {"simulations", "simulation", "conference_simulations"}), None)
+                if stage and stage.get("status") == "FAILED": failures.append("Simulation stage failed during the latest completed daily run.")
+                elif not sim_time or (run_start and sim_time < run_start): warnings.append("Simulation did not complete during the latest successful daily run.")
+        else:
+            ratings = c.load("data/site/ratings_view.json") or {}; futures = c.load("data/site/futures_view.json") or {}
+            sim_time = c.timestamp("data/site/playoff_model_2026.json", data); ratings_time = c.timestamp("data/site/ratings_view.json", ratings); market_time = latest_market_time(futures)
+            market_cov = (futures.get("summary", {}).get("playoff_markets", 0) or 0)
+            metrics[-1] = metric("Playoff markets", f"{market_cov}/{cfg.get('expected_teams', 138)}")
+            if market_cov < cfg.get("expected_teams", 138): warnings.append("Eligible-team playoff market coverage is partial.")
+            if not market_time or (c.now-market_time).total_seconds()/3600 >= 24: warnings.append("Playoff prices were not updated within 24 hours.")
+            if sim_time and ratings_time and ratings_time > sim_time: warnings.append("Newer ratings inputs exist than the playoff simulation output.")
+            elif sim_time and (c.now-sim_time).total_seconds()/3600 >= cfg["fresh_hours"]: warnings.append("Playoff simulation is older than the current readiness threshold.")
         if teams and complete < len(teams): warnings.append("Some teams lack playoff probability output.")
     elif page_id == "betting":
         data = c.load("data/site/betting_activity_view.json") or {}; records = data.get("records", []); signals = csv_rows(c.root / "data/agents/daily_betting_angles.csv")
@@ -244,7 +325,7 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
 
     age_hours = (c.now-latest_success).total_seconds()/3600 if latest_success else None
     domain_inactive = page_id == "playoff" and explicitly_inactive(c.load("data/site/playoff_model_2026.json"))
-    if age_hours is not None and age_hours > cfg["fresh_hours"] and age_hours <= cfg["stale_hours"]:
+    if not page_specific_freshness and age_hours is not None and age_hours > cfg["fresh_hours"] and age_hours <= cfg["stale_hours"]:
         warnings.append(f"Critical page data is aging ({age_hours:.1f} hours old).")
     if failures:
         status = "red"
@@ -252,7 +333,7 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         status = "gray"; unavailable.append("The playoff source explicitly reports that the domain is not released or active.")
     elif age_hours is None:
         status = "red"; failures.append("No parseable critical artifact timestamp is available.")
-    elif age_hours > cfg["stale_hours"]:
+    elif not page_specific_freshness and age_hours > cfg["stale_hours"]:
         status = "red"; failures.append("Critical page data is stale beyond the maximum threshold.")
     elif age_hours > cfg["fresh_hours"] or warnings:
         status = "yellow"
