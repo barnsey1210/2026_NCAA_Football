@@ -64,6 +64,8 @@ The deployer does not run the daily pipeline, call providers, send email, or pub
 
 Deployment remains a manual release boundary. It is not embedded in `daily_market_update.sh`, the LaunchAgent, the 8 AM schedule, or Git-driven self-update behavior. Runtime-affecting work is complete only after review, merge, deployment, and a `CURRENT` status check; documentation-only work normally remains source-only.
 
+Page-level operational health is computed from existing canonical artifacts. `config/page_health_registry.json` owns thresholds, `scripts/site/build_page_health_status.py` emits QA and browser payloads, and shared `page_health.js`/`page_health.css` assets render page-specific summaries without changing page URLs or navigation. See `docs/PAGE_HEALTH_SUMMARIES.md`.
+
 ## Data ownership and secrets
 
 Runtime-only material includes API environment files, raw provider responses, databases, logs, caches, current-run ledgers, generated HTML, and publication staging. These remain outside the source manifest unless a specific reviewed decision explicitly changes ownership.

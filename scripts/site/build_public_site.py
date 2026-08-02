@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble approved pages while retaining the monolith for team detail routes."""
 from pathlib import Path
-import re, shutil
+import re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
@@ -17,6 +17,7 @@ LINKS = [('Dashboard','index.html'), ('Ratings','ratings.html'), ('Openers','ope
 CSS = """<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style>"""
+PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
 
 def nav(target):
     links=''.join(f'<a href="{href}"'+(' class="active"' if href==target else '')+f'>{label}</a>' for label,href in LINKS)
@@ -31,6 +32,7 @@ def transform(text,target):
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     text=text.replace('</head>',CSS+'</head>')
+    text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
     text=text.replace('</head>','<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head>')
     if target == 'index.html':
         text=text.replace('changes.innerHTML=movements().slice(0,7)', "changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7)")
@@ -82,7 +84,16 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
 def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
-    for source,target in PAGES.items(): (OUT/target).write_text(transform((ROOT/source).read_text(),target))
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)
+    for source,target in PAGES.items():
+        source_path=ROOT/source
+        if not source_path.exists():
+            # The authoritative repository tracks the canonical public names;
+            # the runtime retains *_v2 source names for compatibility.
+            source_path=ROOT/('dashboard.html' if target=='index.html' else target)
+        (OUT/target).write_text(transform(source_path.read_text(),target))
+    for asset in PAGE_HEALTH_ASSETS:
+        shutil.copy2(ROOT/asset, OUT/asset)
     # Keep the canonical Odds publication artifact aligned with odds_v2.html;
     # daily_market_update.sh publishes this root copy when it is present.
     shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
@@ -120,17 +131,20 @@ import shutil as _openers_sync_shutil
 from pathlib import Path as _OpenersSyncPath
 
 def _sync_openers_v2_public_artifacts():
-    _project_root = _OpenersSyncPath.home() / "NCAAF_AUTO"
+    _project_root = ROOT
     _public_root = _project_root / "build" / "public_site"
     _pairs = (
-        (_project_root / "openers_v2.html", _public_root / "openers.html"),
+        ((_project_root / "openers_v2.html") if (_project_root / "openers_v2.html").exists() else (_project_root / "openers.html"), _public_root / "openers.html"),
         (_project_root / "matchup_workspace.js", _public_root / "matchup_workspace.js"),
     )
     _public_root.mkdir(parents=True, exist_ok=True)
     for _source, _target in _pairs:
         if not _source.exists():
             raise RuntimeError(f"Required public artifact source is missing: {_source}")
-        _openers_sync_shutil.copy2(_source, _target)
+        if _target.name == "openers.html":
+            _target.write_text(transform(_source.read_text(), "openers.html"))
+        else:
+            _openers_sync_shutil.copy2(_source, _target)
         print(f"synced public artifact: {_source.name} -> {_target}")
     # The canonical Openers and Schedule builders run after the shared page
     # transform. Reapply only the production ODDS nav item they would otherwise
@@ -152,6 +166,13 @@ def _sync_openers_v2_public_artifacts():
                 '<a href="odds.html">ODDS</a><a href="futures.html">Futures</a>',
                 1,
             )
+        if 'href="page_health.css"' not in _text:
+            _text = _text.replace(
+                '</head>',
+                '<link rel="stylesheet" href="page_health.css">'
+                '<script defer src="page_health.js"></script></head>',
+                1,
+            )
         _page.write_text(_text)
 
 _openers_sync_atexit.register(_sync_openers_v2_public_artifacts)
@@ -164,10 +185,11 @@ import sys as _schedule_persist_sys
 from pathlib import Path as _SchedulePersistPath
 
 def _sync_schedule_persistent_public_artifacts():
-    _root = _SchedulePersistPath.home() / "NCAAF_AUTO"
+    _root = ROOT
     _script = _root / "scripts/site/build_schedule_persistent.py"
     if not _script.exists():
-        raise RuntimeError(f"Missing persistent Schedule builder: {_script}")
+        print(f"schedule persistent builder unavailable; retaining assembled page: {_script}")
+        return
     _schedule_persist_subprocess.run(
         [_schedule_persist_sys.executable, str(_script)],
         check=True,

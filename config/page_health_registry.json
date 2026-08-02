@@ -1,0 +1,26 @@
+{
+  "schema_version": "page-health-registry-v1",
+  "valid_statuses": ["green", "yellow", "red", "gray"],
+  "shared_checks": {
+    "injuries": {
+      "fresh_hours": 36,
+      "stale_hours": 96,
+      "raw_artifacts": ["data/injuries/cfbdepth_latest_injury_status_raw.csv", "data/injuries/cfbdepth_injury_articles_raw.csv"],
+      "normalized_artifact": "data/injuries/injury_events_normalized.csv",
+      "alerts_artifact": "data/injuries/injury_alerts.csv"
+    }
+  },
+  "pages": {
+    "dashboard": {"display_name": "Dashboard", "page_url": "index.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json", "data/site/betting_activity_view.json"], "legacy_status_selectors": []},
+    "ratings": {"display_name": "Ratings", "page_url": "ratings.html", "fresh_hours": 48, "stale_hours": 120, "expected_teams": 138, "critical_artifacts": ["data/site/ratings_view.json"], "legacy_status_selectors": ["#freshness"]},
+    "openers": {"display_name": "Openers", "page_url": "openers.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json", "data/site/odds_screen_v2.json"], "legacy_status_selectors": []},
+    "matchups": {"display_name": "Matchups", "page_url": "matchups.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json"], "legacy_status_selectors": []},
+    "odds": {"display_name": "Odds", "page_url": "odds.html", "fresh_hours": 8, "stale_hours": 24, "critical_artifacts": ["data/site/odds_screen_v2.json", "data/site/odds_futures_v2.json"], "legacy_status_selectors": ["#oddsStatus"]},
+    "schedule": {"display_name": "Schedule", "page_url": "schedule.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/schedule_live_enrichment.json", "data/site/matchups_view.json"], "legacy_status_selectors": []},
+    "futures": {"display_name": "Futures", "page_url": "futures.html", "fresh_hours": 24, "stale_hours": 72, "critical_artifacts": ["data/site/futures_view.json"], "legacy_status_selectors": ["#marketStatus"]},
+    "conferences": {"display_name": "Conferences", "page_url": "conferences.html", "fresh_hours": 48, "stale_hours": 120, "expected_conferences": 10, "expected_teams": 136, "critical_artifacts": ["data/site/conference_workspace.json"], "legacy_status_selectors": []},
+    "playoff": {"display_name": "Playoff", "page_url": "playoff.html", "fresh_hours": 72, "stale_hours": 168, "expected_teams": 138, "critical_artifacts": ["data/site/playoff_model_2026.json"], "legacy_status_selectors": []},
+    "simulations": {"display_name": "Simulations", "page_url": "simulations.html", "fresh_hours": 72, "stale_hours": 168, "expected_teams": 138, "critical_artifacts": ["data/site/playoff_model_2026.json", "data/site/conference_workspace.json"], "legacy_status_selectors": []},
+    "betting": {"display_name": "Betting", "page_url": "betting.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/betting_activity_view.json", "data/site/matchups_view.json"], "legacy_status_selectors": []}
+  }
+}

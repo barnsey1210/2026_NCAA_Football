@@ -1,25 +1,117 @@
 #!/usr/bin/env python3
+"""Validate the canonical public V2 bundle, including page-health integration."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
 from pathlib import Path
-import json, sys
-ROOT=Path(__file__).resolve().parents[2]; OUT=ROOT/'build/public_site'
-modern=['index.html','dashboard.html','openers.html','matchups.html','odds.html','schedule.html','futures.html','conferences.html','betting.html','team.html','ratings.html','simulations.html','playoff.html']
-required=modern+['legacy.html','matchup.html','v1.html']; errors=[]
-for name in required:
- p=OUT/name
- minimum=100 if name=='legacy.html' else 1000
- if not p.exists() or p.stat().st_size<minimum: errors.append(f'missing or too small: {name}'); continue
- if name in modern:
-  s=p.read_text(errors='ignore')
-  if 'class="top"' not in s or 'href="openers.html"' not in s or 'href="matchups.html"' not in s: errors.append(f'top navigation missing: {name}')
-  if '_v2.html' in s: errors.append(f'prototype link leaked: {name}')
-  if name in ('index.html','dashboard.html'):
-   if '<title>NCAAF Daily Briefing</title>' not in s or 'Daily Briefing' not in s: errors.append(f'canonical V2 dashboard markers missing: {name}')
-   if '<script id="db" type="application/json">' in s or '<title>2026 NCAA Football</title>' in s: errors.append(f'legacy V1 shell detected: {name}')
-shadow=ROOT/'data/site/postgame_shadow_updates.json'
-if not shadow.exists(): errors.append('postgame shadow artifact missing')
-else:
- d=json.loads(shadow.read_text())
- if d.get('applied_to_ratings') or d.get('applied_to_projections'): errors.append('shadow artifact marked as applied')
-if errors:
- print('PUBLIC SITE VALIDATION FAILED'); print('\n'.join('- '+x for x in errors)); sys.exit(1)
-print(f'PUBLIC SITE VALIDATION PASSED: {len(required)} pages; shadow artifact isolated')
+
+EXPECTED_HEALTH = {
+    "dashboard": "index.html", "ratings": "ratings.html", "openers": "openers.html",
+    "matchups": "matchups.html", "odds": "odds.html", "schedule": "schedule.html",
+    "futures": "futures.html", "conferences": "conferences.html", "playoff": "playoff.html",
+    "simulations": "simulations.html", "betting": "betting.html",
+}
+VALID_STATUS = {"green", "yellow", "red", "gray"}
+MODERN = list(EXPECTED_HEALTH.values()) + ["dashboard.html", "team.html"]
+REQUIRED = MODERN + ["legacy.html", "matchup.html", "v1.html"]
+HEALTH_FIELDS = {
+    "page_id", "display_name", "status", "status_label", "summary", "last_success_at",
+    "artifact_built_at", "metrics", "warnings", "critical_failures", "unavailable_reasons",
+    "page_url", "source_artifacts",
+}
+
+
+def validate(root: Path, out: Path) -> list[str]:
+    errors: list[str] = []
+    for name in REQUIRED:
+        path = out / name
+        minimum = 100 if name == "legacy.html" else 1000
+        if not path.exists() or path.stat().st_size < minimum:
+            errors.append(f"missing or too small: {name}")
+            continue
+        if name in MODERN:
+            text = path.read_text(errors="ignore")
+            if 'class="top"' not in text or 'href="openers.html"' not in text or 'href="matchups.html"' not in text:
+                errors.append(f"top navigation missing: {name}")
+            if "_v2.html" in text:
+                errors.append(f"prototype link leaked: {name}")
+            if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
+                errors.append(f"page health loader missing: {name}")
+            if name in ("index.html", "dashboard.html"):
+                if "<title>NCAAF Daily Briefing</title>" not in text or "Daily Briefing" not in text:
+                    errors.append(f"canonical V2 dashboard markers missing: {name}")
+                if '<script id="db" type="application/json">' in text or "<title>2026 NCAA Football</title>" in text:
+                    errors.append(f"legacy V1 shell detected: {name}")
+
+    for asset in ("page_health.js", "page_health.css"):
+        path = out / asset
+        if not path.is_file() or path.stat().st_size < 100:
+            errors.append(f"required page health asset missing or too small: {asset}")
+    js = out / "page_health.js"
+    if js.is_file():
+        text = js.read_text(errors="ignore")
+        if "data/site/page_health_status.json" not in text or "page-health-summary" not in text:
+            errors.append("page health JavaScript lacks the canonical payload loader or container marker")
+
+    health = root / "data/site/page_health_status.json"
+    if not health.exists():
+        errors.append("page health artifact missing")
+    else:
+        try:
+            data = json.loads(health.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"page health artifact malformed: {exc}")
+        else:
+            pages = data.get("pages")
+            if not isinstance(pages, list):
+                errors.append("page health pages must be a list")
+                pages = []
+            ids = [page.get("page_id") for page in pages if isinstance(page, dict)]
+            if set(ids) != set(EXPECTED_HEALTH) or len(ids) != len(EXPECTED_HEALTH):
+                errors.append(f"page health IDs mismatch: {sorted(str(x) for x in ids)}")
+            for page in pages:
+                if not isinstance(page, dict):
+                    errors.append("page health record is not an object")
+                    continue
+                page_id = page.get("page_id")
+                missing = HEALTH_FIELDS - set(page)
+                if missing:
+                    errors.append(f"page health record {page_id!r} missing fields: {sorted(missing)}")
+                if page.get("status") not in VALID_STATUS:
+                    errors.append(f"page health record {page_id!r} has invalid status: {page.get('status')!r}")
+                if page_id in EXPECTED_HEALTH and page.get("page_url") != EXPECTED_HEALTH[page_id]:
+                    errors.append(f"page health URL mismatch for {page_id}: {page.get('page_url')!r}")
+
+    shadow = root / "data/site/postgame_shadow_updates.json"
+    if not shadow.exists():
+        errors.append("postgame shadow artifact missing")
+    else:
+        try:
+            data = json.loads(shadow.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"postgame shadow artifact malformed: {exc}")
+        else:
+            if data.get("applied_to_ratings") or data.get("applied_to_projections"):
+                errors.append("shadow artifact marked as applied")
+    return errors
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--out", type=Path)
+    args = parser.parse_args()
+    root = args.root.resolve()
+    out = args.out.resolve() if args.out else root / "build/public_site"
+    errors = validate(root, out)
+    if errors:
+        print("PUBLIC SITE VALIDATION FAILED")
+        print("\n".join("- " + error for error in errors))
+        raise SystemExit(1)
+    print(f"PUBLIC SITE VALIDATION PASSED: {len(REQUIRED)} pages; shadow artifact isolated; page health complete")
+
+
+if __name__ == "__main__":
+    main()
