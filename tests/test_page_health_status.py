@@ -131,6 +131,50 @@ class PageHealthTests(unittest.TestCase):
         self.write("data/site/odds_futures_v2.json", {"built_at": aging, "categories": {}})
         self.assertEqual(self.evaluate("odds")["status"], "yellow")
 
+    def test_provider_identity_mapping_and_excluded_malformed_are_warnings(self):
+        fresh = NOW.isoformat()
+        unmapped = {
+            "game_id": "action-1", "away_team": "FCS", "home_team": "FBS", "source_updated_at": fresh,
+            "quotes": {"FanDuel": {"spread": {"away": {"point": 20}, "home": {"point": -20}}, "total": {"over": {"point": 50}, "under": {"point": 50}}, "moneyline": {}}},
+            "data_quality_notes": ["No exact V2 game match; board uses Action Network identity"],
+        }
+        excluded = {
+            "game_id": "g2", "away_team": "A", "home_team": "B", "source_updated_at": fresh,
+            "quotes": {
+                "Caesars": {"spread": {"away": {"point": 7, "valid": False}, "home": {"point": 7, "valid": False}}},
+                "DraftKings": {"spread": {"away": {"point": 7}, "home": {"point": -7}}, "total": {"over": {"point": 48}, "under": {"point": 48}}},
+            },
+            "data_quality_notes": ["One or more malformed current spread pairs were excluded"],
+        }
+        self.write("data/site/odds_screen_v2.json", {"built_at": fresh, "books": ["FanDuel", "Caesars", "DraftKings"], "games": [unmapped, excluded]})
+        self.write("data/site/odds_futures_v2.json", {"built_at": fresh, "categories": {}})
+        result = self.evaluate("odds")
+        self.assertEqual(result["status"], "yellow")
+        self.assertFalse(result["critical_failures"])
+        self.assertEqual(len(result["warnings"]), 2)
+
+    def test_malformed_without_valid_fallback_is_red(self):
+        fresh = NOW.isoformat()
+        game = {
+            "game_id": "g1", "away_team": "A", "home_team": "B", "source_updated_at": fresh,
+            "quotes": {"Caesars": {"spread": {"away": {"point": 7, "valid": False}, "home": {"point": 7, "valid": False}}, "total": {"over": {"point": 48}, "under": {"point": 48}}}},
+            "data_quality_notes": ["One or more malformed current spread pairs were excluded"],
+        }
+        self.write("data/site/odds_screen_v2.json", {"built_at": fresh, "books": ["Caesars"], "games": [game]})
+        self.write("data/site/odds_futures_v2.json", {"built_at": fresh, "categories": {}})
+        self.assertEqual(self.evaluate("odds")["status"], "red")
+
+    def test_wrong_canonical_attachment_risk_is_red(self):
+        fresh = NOW.isoformat()
+        game = {
+            "game_id": "g1", "away_team": "A", "home_team": "B", "source_updated_at": fresh,
+            "quotes": {"DraftKings": {"spread": {"away": {"point": 7}, "home": {"point": -7}}, "total": {"over": {"point": 48}, "under": {"point": 48}}}},
+            "data_quality_notes": ["Wrong canonical game attachment detected"],
+        }
+        self.write("data/site/odds_screen_v2.json", {"built_at": fresh, "books": ["DraftKings"], "games": [game]})
+        self.write("data/site/odds_futures_v2.json", {"built_at": fresh, "categories": {}})
+        self.assertEqual(self.evaluate("odds")["status"], "red")
+
     def test_simulation_without_latest_completed_run_is_yellow(self):
         teams = [{"playoff_pct": .1, "national_title_pct": .01} for _ in range(138)]
         self.write("data/site/playoff_model_2026.json", {"built_at": NOW.isoformat(), "trials": 5000, "teams": teams})

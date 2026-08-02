@@ -227,9 +227,9 @@
     {
       "page_id": "odds",
       "display_name": "Odds",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "10 current odds games failed exact canonical mapping.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "10 provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games.",
       "last_success_at": "2026-08-01T12:00:42.054042+00:00",
       "artifact_built_at": "2026-08-01T12:03:03.368000+00:00",
       "age_minutes": 915.3,
@@ -266,11 +266,11 @@
           "detail": ""
         }
       ],
-      "warnings": [],
-      "critical_failures": [
-        "10 current odds games failed exact canonical mapping.",
-        "1 current odds games contain malformed market pairs."
+      "warnings": [
+        "10 provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games.",
+        "1 game contains malformed provider input that was excluded; valid alternative current quotes remain available."
       ],
+      "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "odds.html",
       "source_artifacts": [

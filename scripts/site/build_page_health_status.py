@@ -141,6 +141,54 @@ def latest_market_time(data: dict[str, Any]) -> datetime | None:
     return parse_time(qa.get("last_successful_pull")) or parse_time(data.get("market_freshness"))
 
 
+def odds_quality_health(data: dict[str, Any]) -> tuple[list[str], list[str]]:
+    """Separate excluded/provider-only input warnings from display-critical failures."""
+    warnings: list[str] = []
+    failures: list[str] = []
+    unmapped = 0
+    excluded_malformed = 0
+    for game in data.get("games", []):
+        notes = " | ".join(str(note) for note in game.get("data_quality_notes", [])).lower()
+        if "no exact v2 game match" in notes:
+            unmapped += 1
+        if "wrong canonical" in notes or "incorrect canonical" in notes:
+            failures.append(f"Odds for {game.get('away_team')} at {game.get('home_team')} risk attachment to the wrong canonical game.")
+
+        invalid_markets: set[str] = set()
+        valid_markets: set[str] = set()
+        required_sides = {"spread": {"away", "home"}, "total": {"over", "under"}, "moneyline": {"away", "home"}}
+        for quote in game.get("quotes", {}).values():
+            for market in required_sides:
+                market_quote = quote.get(market) or {}
+                if not market_quote:
+                    continue
+                if any(side.get("valid") is False for side in market_quote.values() if isinstance(side, dict)):
+                    invalid_markets.add(market)
+                elif required_sides[market].issubset(market_quote):
+                    valid_markets.add(market)
+        if invalid_markets:
+            uncovered = invalid_markets - valid_markets
+            if uncovered:
+                failures.append(
+                    f"Malformed current {', '.join(sorted(uncovered))} input leaves critical coverage unavailable for "
+                    f"{game.get('away_team')} at {game.get('home_team')}."
+                )
+            else:
+                excluded_malformed += 1
+        elif "malformed" in notes and "excluded" not in notes:
+            failures.append(f"Malformed current odds may be displayed for {game.get('away_team')} at {game.get('home_team')}.")
+
+    if unmapped:
+        warnings.append(
+            f"{unmapped} provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games."
+        )
+    if excluded_malformed:
+        warnings.append(
+            f"{excluded_malformed} game contains malformed provider input that was excluded; valid alternative current quotes remain available."
+        )
+    return warnings, failures
+
+
 def latest_completed_run(c: Context) -> dict[str, Any] | None:
     run = c.load("data/control/daily_run_status.json")
     if isinstance(run, dict) and run.get("overall_result") in {"PASSED", "PASSED_WITH_WARNINGS"} and run.get("finished_at_utc"):
@@ -237,10 +285,9 @@ def evaluate(page_id: str, cfg: dict[str, Any], c: Context) -> dict[str, Any]:
         if quote_latest: latest_success = quote_latest
         metrics = [metric("Games", total_games), metric("Spreads", counts["spread"]), metric("Totals", counts["total"]), metric("Moneylines", counts["moneyline"]), metric("Books", len(data.get("books", []))), metric("Unavailable", counts["unavailable"])]
         if total_games and counts["spread"] < total_games: warnings.append("Spread coverage is partial.")
-        mapping_failures = sum(any("no exact" in str(note).lower() for note in game.get("data_quality_notes", [])) for game in data.get("games", []))
-        malformed = sum(any("malformed" in str(note).lower() for note in game.get("data_quality_notes", [])) for game in data.get("games", []))
-        if mapping_failures: failures.append(f"{mapping_failures} current odds games failed exact canonical mapping.")
-        if malformed: failures.append(f"{malformed} current odds games contain malformed market pairs.")
+        quality_warnings, quality_failures = odds_quality_health(data)
+        warnings.extend(quality_warnings)
+        failures.extend(quality_failures)
         if quote_latest and (c.now-quote_latest).total_seconds()/3600 > cfg["stale_hours"]: failures.append("Current odds quotes are stale beyond the maximum threshold.")
     elif page_id == "schedule":
         data = c.load("data/site/schedule_live_enrichment.json") or {}; rows = data.get("games", [])
