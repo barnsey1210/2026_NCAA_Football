@@ -6,6 +6,8 @@ _Authoritative as of 2026-08-01_
 
 Reviewed code, configuration, tests, and documentation are authored in `/Users/jameslindesmith/NCAAF_MAIN_REPO`. A similarly named file in `/Users/jameslindesmith/NCAAF_AUTO` is an operational copy, not an independent source of truth.
 
+Use [`docs/CODEX_TASK_TEMPLATE.md`](docs/CODEX_TASK_TEMPLATE.md) as the standard branch, test, review, deployment, and reporting checklist for future source work.
+
 ## What belongs in the main repository
 
 - Pipeline and builder source under `scripts/`.
