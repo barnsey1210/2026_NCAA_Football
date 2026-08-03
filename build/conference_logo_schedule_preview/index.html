@@ -1,0 +1,3027 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACC Logo Schedule Preview</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #07101d;
+  --panel: #0d1726;
+  --panel-2: #111e30;
+  --line: #243247;
+  --text: #edf4ff;
+  --muted: #8fa0b7;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+               "Segoe UI", sans-serif;
+}
+.page {
+  padding: 18px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+h1 {
+  margin: 0;
+  font-size: 25px;
+}
+.subtitle {
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 13px;
+}
+.legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--muted);
+}
+.legend span {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+.table-shell {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1780px;
+  width: 100%;
+}
+th, td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 4px;
+  vertical-align: middle;
+  text-align: center;
+}
+th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #101c2c;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+tbody tr:hover td {
+  background-color: rgba(255,255,255,.025);
+}
+.sticky-left {
+  position: sticky;
+  z-index: 4;
+  background: var(--panel);
+}
+.team-column {
+  left: 0;
+  width: 180px;
+  min-width: 180px;
+  text-align: left;
+}
+.rating-column {
+  left: 180px;
+  width: 68px;
+  min-width: 68px;
+}
+.rating-column span,
+.team-name span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+.team-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.team-name img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.week-header {
+  width: 83px;
+  min-width: 83px;
+}
+.schedule-cell {
+  width: 75px;
+  min-height: 88px;
+  border-radius: 7px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 14px;
+}
+.location {
+  font-weight: 800;
+  font-size: 10px;
+}
+.rank-badge {
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 5px;
+  background: #e6bd50;
+  color: #111;
+  font-weight: 800;
+}
+.logo-wrap {
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+.logo-wrap img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.opponent-name {
+  font-size: 8px;
+  line-height: 1.05;
+  color: rgba(255,255,255,.86);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.projection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.margin {
+  font-size: 12px;
+  font-weight: 800;
+}
+.probability {
+  font-size: 10px;
+  font-weight: 700;
+}
+.strong-win { background: #0b5f3d; }
+.lean-win { background: #1c5742; }
+.coin-flip { background: #394557; }
+.lean-loss { background: #714a27; }
+.strong-loss { background: #702d32; }
+.unknown { background: #293342; }
+.bye,
+.nonconf {
+  justify-content: center;
+  align-items: center;
+  color: #718197;
+  background: #151f2d;
+  font-size: 10px;
+  font-weight: 800;
+}
+.nonconf {
+  color: #455368;
+}
+.outcome {
+  width: 92px;
+  min-width: 92px;
+  font-weight: 800;
+  background: var(--panel-2);
+}
+.projected-record {
+  width: 108px;
+  min-width: 108px;
+}
+.finish {
+  width: 78px;
+  min-width: 78px;
+  font-size: 16px;
+}
+.title-prob {
+  color: #79e9b4;
+}
+.note {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 10px;
+}
+@media (max-width: 700px) {
+  .page { padding: 10px; }
+  .header { display: block; }
+  .legend { margin-top: 10px; }
+  .team-column {
+    width: 145px;
+    min-width: 145px;
+  }
+  .rating-column {
+    left: 145px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <h1>ACC Logo Schedule</h1>
+      <div class="subtitle">
+        Conference games only · BYE weeks shown · model margin and win probability
+      </div>
+    </div>
+    <div class="legend" aria-label="Win probability legend">
+      <span>Dark green ≥80%</span>
+      <span>Green 62–79%</span>
+      <span>Slate 45–61%</span>
+      <span>Amber 25–44%</span>
+      <span>Red &lt;25%</span>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-left team-column">Team</th>
+          <th class="sticky-left rating-column">Rating</th>
+          <th class='week-header'>W0</th><th class='week-header'>W1</th><th class='week-header'>W2</th><th class='week-header'>W3</th><th class='week-header'>W4</th><th class='week-header'>W5</th><th class='week-header'>W6</th><th class='week-header'>W7</th><th class='week-header'>W8</th><th class='week-header'>W9</th><th class='week-header'>W10</th><th class='week-header'>W11</th><th class='week-header'>W12</th><th class='week-header'>W13</th><th class='week-header'>W14</th>
+          <th>Proj Conf</th>
+          <th>Finish</th>
+          <th>Make Title</th>
+          <th>Win Title</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/miami-fl.png"
+               alt="Miami-FL logo">
+          <div>
+            <strong>Miami-FL</strong>
+            <span>#7 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>23.2</strong>
+        <span>#7</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g22"
+       title="Miami-FL vs Stanford&#10;Date: 2026-09-04&#10;Location: @&#10;Model margin: +24.8&#10;Win probability: 98%&#10;Market line: -22.5&#10;Spread edge: +2.3&#10;Model total: 47.4&#10;Market total: 49.5&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL @
+                   Stanford;
+                   model margin +24.8;
+                   win probability 98%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+24.8</span><span class="probability">98%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g188"
+       title="Miami-FL vs Wake Forest&#10;Date: 2026-09-18&#10;Location: @&#10;Model margin: +16.3&#10;Win probability: 92%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.5&#10;Market total: —&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL @
+                   Wake Forest;
+                   model margin +16.3;
+                   win probability 92%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+16.3</span><span class="probability">92%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g345"
+       title="Miami-FL vs Clemson&#10;Date: 2026-10-03&#10;Location: @&#10;Model margin: +8.6&#10;Win probability: 79%&#10;Market line: -7.0&#10;Spread edge: +1.6&#10;Model total: 47.3&#10;Market total: 55.5&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL @
+                   Clemson;
+                   model margin +8.6;
+                   win probability 79%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">+8.6</span><span class="probability">79%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g479"
+       title="Miami-FL vs Florida State&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: +16.2&#10;Win probability: 92%&#10;Market line: -16.5&#10;Spread edge: -0.3&#10;Model total: 49.2&#10;Market total: 53.5&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL H
+                   Florida State;
+                   model margin +16.2;
+                   win probability 92%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">+16.2</span><span class="probability">92%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g539"
+       title="Miami-FL vs Pittsburgh&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +17.0&#10;Win probability: 93%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.0&#10;Market total: —&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL H
+                   Pittsburgh;
+                   model margin +17.0;
+                   win probability 93%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">+17.0</span><span class="probability">93%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g599"
+       title="Miami-FL vs North Carolina&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: +18.8&#10;Win probability: 95%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.9&#10;Market total: —&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL @
+                   North Carolina;
+                   model margin +18.8;
+                   win probability 95%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+18.8</span><span class="probability">95%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g719"
+       title="Miami-FL vs Duke&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +20.5&#10;Win probability: 96%&#10;Market line: -21.0&#10;Spread edge: -0.5&#10;Model total: 54.2&#10;Market total: 55.5&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL H
+                   Duke;
+                   model margin +20.5;
+                   win probability 96%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+20.5</span><span class="probability">96%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g762"
+       title="Miami-FL vs Virginia Tech&#10;Date: 2026-11-20&#10;Location: H&#10;Model margin: +18.9&#10;Win probability: 95%&#10;Market line: -16.5&#10;Spread edge: +2.4&#10;Model total: 50.4&#10;Market total: 56.5&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL H
+                   Virginia Tech;
+                   model margin +18.9;
+                   win probability 95%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">+18.9</span><span class="probability">95%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g861"
+       title="Miami-FL vs Boston College&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: +28.4&#10;Win probability: 99%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Mario Cristobal: 80-94-2 ATS, avg margin -0.6"
+       aria-label="Miami-FL H
+                   Boston College;
+                   model margin +28.4;
+                   win probability 99%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+28.4</span><span class="probability">99%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">8.4–0.6</td>
+      <td class="outcome finish">#1</td>
+      <td class="outcome">94%</td>
+      <td class="outcome title-prob">76%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/smu.png"
+               alt="SMU logo">
+          <div>
+            <strong>SMU</strong>
+            <span>#26 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>12.0</strong>
+        <span>#26</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g99"
+       title="SMU vs Florida State&#10;Date: 2026-09-07&#10;Location: @&#10;Model margin: +1.4&#10;Win probability: 56%&#10;Market line: -1.5&#10;Spread edge: -0.1&#10;Model total: 51.5&#10;Market total: 53.5&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU @
+                   Florida State;
+                   model margin +1.4;
+                   win probability 56%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">+1.4</span><span class="probability">56%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g216"
+       title="SMU vs Louisville&#10;Date: 2026-09-19&#10;Location: @&#10;Model margin: -1.8&#10;Win probability: 43%&#10;Market line: +1.5&#10;Spread edge: -0.3&#10;Model total: 51.5&#10;Market total: 56.5&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU @
+                   Louisville;
+                   model margin -1.8;
+                   win probability 43%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-1.8</span><span class="probability">43%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g377"
+       title="SMU vs Boston College&#10;Date: 2026-10-03&#10;Location: H&#10;Model margin: +18.9&#10;Win probability: 95%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.7&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU H
+                   Boston College;
+                   model margin +18.9;
+                   win probability 95%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+18.9</span><span class="probability">95%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g490"
+       title="SMU vs Virginia&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: +7.1&#10;Win probability: 75%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.4&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU H
+                   Virginia;
+                   model margin +7.1;
+                   win probability 75%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">+7.1</span><span class="probability">75%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g551"
+       title="SMU vs California&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +13.5&#10;Win probability: 89%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU H
+                   California;
+                   model margin +13.5;
+                   win probability 89%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+13.5</span><span class="probability">89%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g612"
+       title="SMU vs Syracuse&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: +12.2&#10;Win probability: 87%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.8&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU @
+                   Syracuse;
+                   model margin +12.2;
+                   win probability 87%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+12.2</span><span class="probability">87%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g670"
+       title="SMU vs Virginia Tech&#10;Date: 2026-11-07&#10;Location: H&#10;Model margin: +9.4&#10;Win probability: 81%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.6&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU H
+                   Virginia Tech;
+                   model margin +9.4;
+                   win probability 81%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">+9.4</span><span class="probability">81%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g735"
+       title="SMU vs Wake Forest&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +11.5&#10;Win probability: 85%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.8&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU H
+                   Wake Forest;
+                   model margin +11.5;
+                   win probability 85%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+11.5</span><span class="probability">85%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g878"
+       title="SMU vs Stanford&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: +13.6&#10;Win probability: 89%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Rhett Lashlee: 27-27-0 ATS, avg margin 2.1"
+       aria-label="SMU @
+                   Stanford;
+                   model margin +13.6;
+                   win probability 89%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+13.6</span><span class="probability">89%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">7.0–2.0</td>
+      <td class="outcome finish">#2</td>
+      <td class="outcome">45%</td>
+      <td class="outcome title-prob">11%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/louisville.png"
+               alt="Louisville logo">
+          <div>
+            <strong>Louisville</strong>
+            <span>#29 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>10.9</strong>
+        <span>#29</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g216"
+       title="Louisville vs SMU&#10;Date: 2026-09-19&#10;Location: H&#10;Model margin: +1.8&#10;Win probability: 57%&#10;Market line: -1.5&#10;Spread edge: +0.3&#10;Model total: 51.5&#10;Market total: 56.5&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville H
+                   SMU;
+                   model margin +1.8;
+                   win probability 57%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">+1.8</span><span class="probability">57%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g292"
+       title="Louisville vs Wake Forest&#10;Date: 2026-09-26&#10;Location: H&#10;Model margin: +9.9&#10;Win probability: 82%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.6&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville H
+                   Wake Forest;
+                   model margin +9.9;
+                   win probability 82%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+9.9</span><span class="probability">82%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g370"
+       title="Louisville vs NC State&#10;Date: 2026-10-03&#10;Location: @&#10;Model margin: +3.2&#10;Win probability: 62%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville @
+                   NC State;
+                   model margin +3.2;
+                   win probability 62%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">+3.2</span><span class="probability">62%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g399"
+       title="Louisville vs Florida State&#10;Date: 2026-10-09&#10;Location: H&#10;Model margin: +5.2&#10;Win probability: 69%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.3&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville H
+                   Florida State;
+                   model margin +5.2;
+                   win probability 69%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">+5.2</span><span class="probability">69%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g496"
+       title="Louisville vs Syracuse&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: +11.1&#10;Win probability: 85%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville @
+                   Syracuse;
+                   model margin +11.1;
+                   win probability 85%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+11.1</span><span class="probability">85%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g593"
+       title="Louisville vs Stanford&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: +16.8&#10;Win probability: 93%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.5&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville H
+                   Stanford;
+                   model margin +16.8;
+                   win probability 93%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+16.8</span><span class="probability">93%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g645"
+       title="Louisville vs Georgia Tech&#10;Date: 2026-11-07&#10;Location: @&#10;Model margin: +3.4&#10;Win probability: 63%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.2&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville @
+                   Georgia Tech;
+                   model margin +3.4;
+                   win probability 63%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">+3.4</span><span class="probability">63%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g725"
+       title="Louisville vs North Carolina&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: +6.5&#10;Win probability: 73%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.0&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville @
+                   North Carolina;
+                   model margin +6.5;
+                   win probability 73%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+6.5</span><span class="probability">73%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g788"
+       title="Louisville vs Pittsburgh&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +6.0&#10;Win probability: 71%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.1&#10;Market total: —&#10;Jeff Brohm: 77-73-2 ATS, avg margin 2.2"
+       aria-label="Louisville H
+                   Pittsburgh;
+                   model margin +6.0;
+                   win probability 71%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">+6.0</span><span class="probability">71%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">6.6–2.4</td>
+      <td class="outcome finish">#3</td>
+      <td class="outcome">32%</td>
+      <td class="outcome title-prob">7%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/virginia.png"
+               alt="Virginia logo">
+          <div>
+            <strong>Virginia</strong>
+            <span>#36 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>8.3</strong>
+        <span>#36</span>
+      </td>
+      <td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g8"
+       title="Virginia vs NC State&#10;Date: 2026-08-29&#10;Location: N&#10;Model margin: +3.6&#10;Win probability: 64%&#10;Market line: -5.5&#10;Spread edge: -1.9&#10;Model total: 51.1&#10;Market total: 54.5&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia N
+                   NC State;
+                   model margin +3.6;
+                   win probability 64%">
+      <div class="cell-top">
+        <span class="location">N</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">+3.6</span><span class="probability">64%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g351"
+       title="Virginia vs Florida State&#10;Date: 2026-10-03&#10;Location: @&#10;Model margin: -2.3&#10;Win probability: 41%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.2&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia @
+                   Florida State;
+                   model margin -2.3;
+                   win probability 41%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">-2.3</span><span class="probability">41%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g445"
+       title="Virginia vs Syracuse&#10;Date: 2026-10-10&#10;Location: H&#10;Model margin: +14.7&#10;Win probability: 91%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.5&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia H
+                   Syracuse;
+                   model margin +14.7;
+                   win probability 91%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+14.7</span><span class="probability">91%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g490"
+       title="Virginia vs SMU&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: -7.1&#10;Win probability: 25%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.4&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia @
+                   SMU;
+                   model margin -7.1;
+                   win probability 25%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-7.1</span><span class="probability">25%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g563"
+       title="Virginia vs Duke&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +7.1&#10;Win probability: 75%&#10;Market line: -6.5&#10;Spread edge: +0.6&#10;Model total: 53.2&#10;Market total: 53.5&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia H
+                   Duke;
+                   model margin +7.1;
+                   win probability 75%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+7.1</span><span class="probability">75%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g621"
+       title="Virginia vs Wake Forest&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: +1.4&#10;Win probability: 55%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.5&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia @
+                   Wake Forest;
+                   model margin +1.4;
+                   win probability 55%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+1.4</span><span class="probability">55%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g748"
+       title="Virginia vs California&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +9.7&#10;Win probability: 82%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.3&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia H
+                   California;
+                   model margin +9.7;
+                   win probability 82%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+9.7</span><span class="probability">82%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g819"
+       title="Virginia vs North Carolina&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +9.6&#10;Win probability: 81%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.9&#10;Market total: —&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia H
+                   North Carolina;
+                   model margin +9.6;
+                   win probability 81%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+9.6</span><span class="probability">81%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g886"
+       title="Virginia vs Virginia Tech&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: 0.0&#10;Win probability: 50%&#10;Market line: +1.5&#10;Spread edge: +1.5&#10;Model total: 49.4&#10;Market total: 53.5&#10;Tony Elliott: 27-20-1 ATS, avg margin -0.8"
+       aria-label="Virginia @
+                   Virginia Tech;
+                   model margin 0.0;
+                   win probability 50%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">0.0</span><span class="probability">50%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">5.6–3.4</td>
+      <td class="outcome finish">#4</td>
+      <td class="outcome">8%</td>
+      <td class="outcome title-prob">2%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/clemson.png"
+               alt="Clemson logo">
+          <div>
+            <strong>Clemson</strong>
+            <span>#25 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>12.1</strong>
+        <span>#25</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g201"
+       title="Clemson vs North Carolina&#10;Date: 2026-09-19&#10;Location: H&#10;Model margin: +12.7&#10;Win probability: 88%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.0&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson H
+                   North Carolina;
+                   model margin +12.7;
+                   win probability 88%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+12.7</span><span class="probability">88%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g262"
+       title="Clemson vs California&#10;Date: 2026-09-25&#10;Location: @&#10;Model margin: +7.4&#10;Win probability: 76%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson @
+                   California;
+                   model margin +7.4;
+                   win probability 76%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+7.4</span><span class="probability">76%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g345"
+       title="Clemson vs Miami-FL&#10;Date: 2026-10-03&#10;Location: H&#10;Model margin: -8.6&#10;Win probability: 21%&#10;Market line: +7.0&#10;Spread edge: -1.6&#10;Model total: 47.3&#10;Market total: 55.5&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson H
+                   Miami-FL;
+                   model margin -8.6;
+                   win probability 21%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-8.6</span><span class="probability">21%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g529"
+       title="Clemson vs Virginia Tech&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +8.6&#10;Win probability: 79%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.5&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson H
+                   Virginia Tech;
+                   model margin +8.6;
+                   win probability 79%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">+8.6</span><span class="probability">79%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g584"
+       title="Clemson vs Florida State&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: +1.6&#10;Win probability: 56%&#10;Market line: -1.5&#10;Spread edge: +0.1&#10;Model total: 48.4&#10;Market total: 51.5&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson @
+                   Florida State;
+                   model margin +1.6;
+                   win probability 56%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">+1.6</span><span class="probability">56%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g673"
+       title="Clemson vs Syracuse&#10;Date: 2026-11-07&#10;Location: @&#10;Model margin: +12.3&#10;Win probability: 87%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.7&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson @
+                   Syracuse;
+                   model margin +12.3;
+                   win probability 87%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+12.3</span><span class="probability">87%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g703"
+       title="Clemson vs Georgia Tech&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +8.5&#10;Win probability: 79%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.4&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson H
+                   Georgia Tech;
+                   model margin +8.5;
+                   win probability 79%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">+8.5</span><span class="probability">79%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g775"
+       title="Clemson vs Duke&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: +4.5&#10;Win probability: 67%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.4&#10;Market total: —&#10;Dabo Swinney: 126-116-1 ATS, avg margin 1.1"
+       aria-label="Clemson @
+                   Duke;
+                   model margin +4.5;
+                   win probability 67%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+4.5</span><span class="probability">67%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">5.5–2.5</td>
+      <td class="outcome finish">#5</td>
+      <td class="outcome">9%</td>
+      <td class="outcome title-prob">3%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/nc-state.png"
+               alt="NC State logo">
+          <div>
+            <strong>NC State</strong>
+            <span>#47 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>4.7</strong>
+        <span>#47</span>
+      </td>
+      <td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g8"
+       title="NC State vs Virginia&#10;Date: 2026-08-29&#10;Location: N&#10;Model margin: -3.6&#10;Win probability: 36%&#10;Market line: +5.5&#10;Spread edge: +1.9&#10;Model total: 51.1&#10;Market total: 54.5&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State N
+                   Virginia;
+                   model margin -3.6;
+                   win probability 36%">
+      <div class="cell-top">
+        <span class="location">N</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-3.6</span><span class="probability">36%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g370"
+       title="NC State vs Louisville&#10;Date: 2026-10-03&#10;Location: H&#10;Model margin: -3.2&#10;Win probability: 38%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State H
+                   Louisville;
+                   model margin -3.2;
+                   win probability 38%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-3.2</span><span class="probability">38%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g421"
+       title="NC State vs Wake Forest&#10;Date: 2026-10-10&#10;Location: H&#10;Model margin: +3.9&#10;Win probability: 64%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State H
+                   Wake Forest;
+                   model margin +3.9;
+                   win probability 64%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+3.9</span><span class="probability">64%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g554"
+       title="NC State vs Stanford&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: +6.3&#10;Win probability: 72%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.4&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State @
+                   Stanford;
+                   model margin +6.3;
+                   win probability 72%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+6.3</span><span class="probability">72%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g596"
+       title="NC State vs California&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: +5.9&#10;Win probability: 71%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 55.2&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State H
+                   California;
+                   model margin +5.9;
+                   win probability 71%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+5.9</span><span class="probability">71%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g659"
+       title="NC State vs Duke&#10;Date: 2026-11-07&#10;Location: H&#10;Model margin: +3.3&#10;Win probability: 63%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 58.1&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State H
+                   Duke;
+                   model margin +3.3;
+                   win probability 63%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+3.3</span><span class="probability">63%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g723"
+       title="NC State vs Syracuse&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +10.9&#10;Win probability: 84%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.5&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State H
+                   Syracuse;
+                   model margin +10.9;
+                   win probability 84%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+10.9</span><span class="probability">84%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g778"
+       title="NC State vs Florida State&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -5.9&#10;Win probability: 29%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State @
+                   Florida State;
+                   model margin -5.9;
+                   win probability 29%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">-5.9</span><span class="probability">29%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g866"
+       title="NC State vs North Carolina&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: +0.2&#10;Win probability: 51%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.8&#10;Market total: 55.5&#10;Dave Doeren: 92-96-5 ATS, avg margin 0.0"
+       aria-label="NC State @
+                   North Carolina;
+                   model margin +0.2;
+                   win probability 51%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+0.2</span><span class="probability">51%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">5.1–3.9</td>
+      <td class="outcome finish">#6</td>
+      <td class="outcome">4%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/pittsburgh.png"
+               alt="Pittsburgh logo">
+          <div>
+            <strong>Pittsburgh</strong>
+            <span>#37 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>7.9</strong>
+        <span>#37</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g186"
+       title="Pittsburgh vs Syracuse&#10;Date: 2026-09-17&#10;Location: H&#10;Model margin: +12.9&#10;Win probability: 88%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.5&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh H
+                   Syracuse;
+                   model margin +12.9;
+                   win probability 88%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+12.9</span><span class="probability">88%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g336"
+       title="Pittsburgh vs Virginia Tech&#10;Date: 2026-10-02&#10;Location: @&#10;Model margin: -0.4&#10;Win probability: 48%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.3&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh @
+                   Virginia Tech;
+                   model margin -0.4;
+                   win probability 48%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">-0.4</span><span class="probability">48%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g435"
+       title="Pittsburgh vs North Carolina&#10;Date: 2026-10-10&#10;Location: H&#10;Model margin: +7.8&#10;Win probability: 77%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.8&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh H
+                   North Carolina;
+                   model margin +7.8;
+                   win probability 77%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+7.8</span><span class="probability">77%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g461"
+       title="Pittsburgh vs Boston College&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: +9.4&#10;Win probability: 81%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.4&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh @
+                   Boston College;
+                   model margin +9.4;
+                   win probability 81%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+9.4</span><span class="probability">81%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g539"
+       title="Pittsburgh vs Miami-FL&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -17.0&#10;Win probability: 7%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.0&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh @
+                   Miami-FL;
+                   model margin -17.0;
+                   win probability 7%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-17.0</span><span class="probability">7%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g606"
+       title="Pittsburgh vs Georgia Tech&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: +3.6&#10;Win probability: 64%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh H
+                   Georgia Tech;
+                   model margin +3.6;
+                   win probability 64%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">+3.6</span><span class="probability">64%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g695"
+       title="Pittsburgh vs Florida State&#10;Date: 2026-11-13&#10;Location: H&#10;Model margin: +1.1&#10;Win probability: 54%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.1&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh H
+                   Florida State;
+                   model margin +1.1;
+                   win probability 54%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">+1.1</span><span class="probability">54%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g788"
+       title="Pittsburgh vs Louisville&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -6.0&#10;Win probability: 29%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.1&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh @
+                   Louisville;
+                   model margin -6.0;
+                   win probability 29%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-6.0</span><span class="probability">29%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g841"
+       title="Pittsburgh vs California&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: +3.2&#10;Win probability: 62%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 54.2&#10;Market total: —&#10;Pat Narduzzi: 72-67-2 ATS, avg margin 0.6"
+       aria-label="Pittsburgh @
+                   California;
+                   model margin +3.2;
+                   win probability 62%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+3.2</span><span class="probability">62%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">5.1–3.9</td>
+      <td class="outcome finish">#7</td>
+      <td class="outcome">3%</td>
+      <td class="outcome title-prob">1%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/georgia-tech.png"
+               alt="Georgia Tech logo">
+          <div>
+            <strong>Georgia Tech</strong>
+            <span>#40 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>6.1</strong>
+        <span>#40</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g313"
+       title="Georgia Tech vs Stanford&#10;Date: 2026-09-26&#10;Location: @&#10;Model margin: +7.7&#10;Win probability: 77%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.5&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech @
+                   Stanford;
+                   model margin +7.7;
+                   win probability 77%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+7.7</span><span class="probability">77%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g412"
+       title="Georgia Tech vs Duke&#10;Date: 2026-10-10&#10;Location: H&#10;Model margin: +3.1&#10;Win probability: 62%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 56.2&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech H
+                   Duke;
+                   model margin +3.1;
+                   win probability 62%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+3.1</span><span class="probability">62%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g508"
+       title="Georgia Tech vs Virginia Tech&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: -2.2&#10;Win probability: 42%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.4&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech @
+                   Virginia Tech;
+                   model margin -2.2;
+                   win probability 42%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">-2.2</span><span class="probability">42%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g533"
+       title="Georgia Tech vs Boston College&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +11.0&#10;Win probability: 84%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.5&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech H
+                   Boston College;
+                   model margin +11.0;
+                   win probability 84%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+11.0</span><span class="probability">84%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g606"
+       title="Georgia Tech vs Pittsburgh&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: -3.6&#10;Win probability: 36%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech @
+                   Pittsburgh;
+                   model margin -3.6;
+                   win probability 36%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-3.6</span><span class="probability">36%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g645"
+       title="Georgia Tech vs Louisville&#10;Date: 2026-11-07&#10;Location: H&#10;Model margin: -3.4&#10;Win probability: 37%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.2&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech H
+                   Louisville;
+                   model margin -3.4;
+                   win probability 37%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-3.4</span><span class="probability">37%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g703"
+       title="Georgia Tech vs Clemson&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -8.5&#10;Win probability: 21%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.4&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech @
+                   Clemson;
+                   model margin -8.5;
+                   win probability 21%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-8.5</span><span class="probability">21%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g780"
+       title="Georgia Tech vs Wake Forest&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +3.6&#10;Win probability: 64%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.5&#10;Market total: —&#10;Brent Key: 27-23-1 ATS, avg margin 1.3"
+       aria-label="Georgia Tech H
+                   Wake Forest;
+                   model margin +3.6;
+                   win probability 64%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+3.6</span><span class="probability">64%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">4.2–3.8</td>
+      <td class="outcome finish">#8</td>
+      <td class="outcome">1%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/virginia-tech.png"
+               alt="Virginia Tech logo">
+          <div>
+            <strong>Virginia Tech</strong>
+            <span>#41 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>6.0</strong>
+        <span>#41</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g270"
+       title="Virginia Tech vs Boston College&#10;Date: 2026-09-26&#10;Location: @&#10;Model margin: +7.6&#10;Win probability: 76%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.7&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech @
+                   Boston College;
+                   model margin +7.6;
+                   win probability 76%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+7.6</span><span class="probability">76%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g336"
+       title="Virginia Tech vs Pittsburgh&#10;Date: 2026-10-02&#10;Location: H&#10;Model margin: +0.4&#10;Win probability: 52%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.3&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech H
+                   Pittsburgh;
+                   model margin +0.4;
+                   win probability 52%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">+0.4</span><span class="probability">52%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g407"
+       title="Virginia Tech vs California&#10;Date: 2026-10-10&#10;Location: @&#10;Model margin: +1.3&#10;Win probability: 55%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech @
+                   California;
+                   model margin +1.3;
+                   win probability 55%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">+1.3</span><span class="probability">55%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g508"
+       title="Virginia Tech vs Georgia Tech&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: +2.2&#10;Win probability: 58%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.4&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech H
+                   Georgia Tech;
+                   model margin +2.2;
+                   win probability 58%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">+2.2</span><span class="probability">58%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g529"
+       title="Virginia Tech vs Clemson&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -8.6&#10;Win probability: 21%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.5&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech @
+                   Clemson;
+                   model margin -8.6;
+                   win probability 21%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-8.6</span><span class="probability">21%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g670"
+       title="Virginia Tech vs SMU&#10;Date: 2026-11-07&#10;Location: @&#10;Model margin: -9.4&#10;Win probability: 19%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.6&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech @
+                   SMU;
+                   model margin -9.4;
+                   win probability 19%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-9.4</span><span class="probability">19%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g749"
+       title="Virginia Tech vs Stanford&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: +11.3&#10;Win probability: 85%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech H
+                   Stanford;
+                   model margin +11.3;
+                   win probability 85%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+11.3</span><span class="probability">85%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g762"
+       title="Virginia Tech vs Miami-FL&#10;Date: 2026-11-20&#10;Location: @&#10;Model margin: -18.9&#10;Win probability: 5%&#10;Market line: +16.5&#10;Spread edge: -2.4&#10;Model total: 50.4&#10;Market total: 56.5&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech @
+                   Miami-FL;
+                   model margin -18.9;
+                   win probability 5%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-18.9</span><span class="probability">5%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g886"
+       title="Virginia Tech vs Virginia&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: 0.0&#10;Win probability: 50%&#10;Market line: -1.5&#10;Spread edge: -1.5&#10;Model total: 49.4&#10;Market total: 53.5&#10;James Franklin: 109-83-3 ATS, avg margin 2.6"
+       aria-label="Virginia Tech H
+                   Virginia;
+                   model margin 0.0;
+                   win probability 50%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">0.0</span><span class="probability">50%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">4.2–4.8</td>
+      <td class="outcome finish">#9</td>
+      <td class="outcome">1%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/duke.png"
+               alt="Duke logo">
+          <div>
+            <strong>Duke</strong>
+            <span>#48 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>4.4</strong>
+        <span>#48</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g204"
+       title="Duke vs Stanford&#10;Date: 2026-09-19&#10;Location: H&#10;Model margin: +10.6&#10;Win probability: 84%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke H
+                   Stanford;
+                   model margin +10.6;
+                   win probability 84%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+10.6</span><span class="probability">84%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g412"
+       title="Duke vs Georgia Tech&#10;Date: 2026-10-10&#10;Location: @&#10;Model margin: -3.1&#10;Win probability: 38%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 56.2&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke @
+                   Georgia Tech;
+                   model margin -3.1;
+                   win probability 38%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">-3.1</span><span class="probability">38%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g468"
+       title="Duke vs North Carolina&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: +5.7&#10;Win probability: 71%&#10;Market line: -4.5&#10;Spread edge: +1.2&#10;Model total: 53.0&#10;Market total: 54.5&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke H
+                   North Carolina;
+                   model margin +5.7;
+                   win probability 71%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">+5.7</span><span class="probability">71%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g563"
+       title="Duke vs Virginia&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -7.1&#10;Win probability: 25%&#10;Market line: +6.5&#10;Spread edge: -0.6&#10;Model total: 53.2&#10;Market total: 53.5&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke @
+                   Virginia;
+                   model margin -7.1;
+                   win probability 25%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-7.1</span><span class="probability">25%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g582"
+       title="Duke vs Boston College&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: +11.1&#10;Win probability: 85%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 56.5&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke H
+                   Boston College;
+                   model margin +11.1;
+                   win probability 85%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+11.1</span><span class="probability">85%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g659"
+       title="Duke vs NC State&#10;Date: 2026-11-07&#10;Location: @&#10;Model margin: -3.3&#10;Win probability: 37%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 58.1&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke @
+                   NC State;
+                   model margin -3.3;
+                   win probability 37%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-3.3</span><span class="probability">37%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g719"
+       title="Duke vs Miami-FL&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -20.5&#10;Win probability: 4%&#10;Market line: +21.0&#10;Spread edge: +0.5&#10;Model total: 54.2&#10;Market total: 55.5&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke @
+                   Miami-FL;
+                   model margin -20.5;
+                   win probability 4%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-20.5</span><span class="probability">4%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g775"
+       title="Duke vs Clemson&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: -4.5&#10;Win probability: 33%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.4&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke H
+                   Clemson;
+                   model margin -4.5;
+                   win probability 33%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-4.5</span><span class="probability">33%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g887"
+       title="Duke vs Wake Forest&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: -2.5&#10;Win probability: 41%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.6&#10;Market total: —&#10;Manny Diaz: 31-30-2 ATS, avg margin -0.3"
+       aria-label="Duke @
+                   Wake Forest;
+                   model margin -2.5;
+                   win probability 41%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">-2.5</span><span class="probability">41%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">4.2–4.8</td>
+      <td class="outcome finish">#10</td>
+      <td class="outcome">1%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/florida-state.png"
+               alt="Florida State logo">
+          <div>
+            <strong>Florida State</strong>
+            <span>#33 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>8.7</strong>
+        <span>#33</span>
+      </td>
+      <td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g99"
+       title="Florida State vs SMU&#10;Date: 2026-09-07&#10;Location: H&#10;Model margin: -1.4&#10;Win probability: 44%&#10;Market line: +1.5&#10;Spread edge: +0.1&#10;Model total: 51.5&#10;Market total: 53.5&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State H
+                   SMU;
+                   model margin -1.4;
+                   win probability 44%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-1.4</span><span class="probability">44%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g351"
+       title="Florida State vs Virginia&#10;Date: 2026-10-03&#10;Location: H&#10;Model margin: +2.3&#10;Win probability: 59%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.2&#10;Market total: —&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State H
+                   Virginia;
+                   model margin +2.3;
+                   win probability 59%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">+2.3</span><span class="probability">59%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g399"
+       title="Florida State vs Louisville&#10;Date: 2026-10-09&#10;Location: @&#10;Model margin: -5.2&#10;Win probability: 31%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.3&#10;Market total: —&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State @
+                   Louisville;
+                   model margin -5.2;
+                   win probability 31%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-5.2</span><span class="probability">31%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g479"
+       title="Florida State vs Miami-FL&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: -16.2&#10;Win probability: 8%&#10;Market line: +16.5&#10;Spread edge: +0.3&#10;Model total: 49.2&#10;Market total: 53.5&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State @
+                   Miami-FL;
+                   model margin -16.2;
+                   win probability 8%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-16.2</span><span class="probability">8%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g584"
+       title="Florida State vs Clemson&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: -1.6&#10;Win probability: 44%&#10;Market line: +1.5&#10;Spread edge: -0.1&#10;Model total: 48.4&#10;Market total: 51.5&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State H
+                   Clemson;
+                   model margin -1.6;
+                   win probability 44%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-1.6</span><span class="probability">44%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g638"
+       title="Florida State vs Boston College&#10;Date: 2026-11-07&#10;Location: @&#10;Model margin: +10.2&#10;Win probability: 83%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.5&#10;Market total: —&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State @
+                   Boston College;
+                   model margin +10.2;
+                   win probability 83%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">+10.2</span><span class="probability">83%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g695"
+       title="Florida State vs Pittsburgh&#10;Date: 2026-11-13&#10;Location: @&#10;Model margin: -1.1&#10;Win probability: 46%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.1&#10;Market total: —&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State @
+                   Pittsburgh;
+                   model margin -1.1;
+                   win probability 46%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-1.1</span><span class="probability">46%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g778"
+       title="Florida State vs NC State&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +5.9&#10;Win probability: 71%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.1&#10;Market total: —&#10;Mike Norvell: 59-65-2 ATS, avg margin -0.2"
+       aria-label="Florida State H
+                   NC State;
+                   model margin +5.9;
+                   win probability 71%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">+5.9</span><span class="probability">71%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">3.8–4.2</td>
+      <td class="outcome finish">#11</td>
+      <td class="outcome">1%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/california.png"
+               alt="California logo">
+          <div>
+            <strong>California</strong>
+            <span>#58 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>1.9</strong>
+        <span>#58</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g164"
+       title="California vs Syracuse&#10;Date: 2026-09-12&#10;Location: @&#10;Model margin: +2.1&#10;Win probability: 58%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.6&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California @
+                   Syracuse;
+                   model margin +2.1;
+                   win probability 58%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+2.1</span><span class="probability">58%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g262"
+       title="California vs Clemson&#10;Date: 2026-09-25&#10;Location: H&#10;Model margin: -7.4&#10;Win probability: 24%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California H
+                   Clemson;
+                   model margin -7.4;
+                   win probability 24%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-7.4</span><span class="probability">24%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g407"
+       title="California vs Virginia Tech&#10;Date: 2026-10-10&#10;Location: H&#10;Model margin: -1.3&#10;Win probability: 45%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California H
+                   Virginia Tech;
+                   model margin -1.3;
+                   win probability 45%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">-1.3</span><span class="probability">45%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g464"
+       title="California vs Wake Forest&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: +0.8&#10;Win probability: 53%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California H
+                   Wake Forest;
+                   model margin +0.8;
+                   win probability 53%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">+0.8</span><span class="probability">53%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g551"
+       title="California vs SMU&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -13.5&#10;Win probability: 11%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California @
+                   SMU;
+                   model margin -13.5;
+                   win probability 11%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-13.5</span><span class="probability">11%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g596"
+       title="California vs NC State&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: -5.9&#10;Win probability: 29%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 55.2&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California @
+                   NC State;
+                   model margin -5.9;
+                   win probability 29%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-5.9</span><span class="probability">29%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g748"
+       title="California vs Virginia&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -9.7&#10;Win probability: 18%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.3&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California @
+                   Virginia;
+                   model margin -9.7;
+                   win probability 18%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-9.7</span><span class="probability">18%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g772"
+       title="California vs Stanford&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +7.7&#10;Win probability: 77%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California H
+                   Stanford;
+                   model margin +7.7;
+                   win probability 77%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+7.7</span><span class="probability">77%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g841"
+       title="California vs Pittsburgh&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: -3.2&#10;Win probability: 38%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 54.2&#10;Market total: —&#10;Tosh Lupoi: no matched full-game ATS sample"
+       aria-label="California H
+                   Pittsburgh;
+                   model margin -3.2;
+                   win probability 38%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-3.2</span><span class="probability">38%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">3.5–5.5</td>
+      <td class="outcome finish">#12</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/wake-forest.png"
+               alt="Wake Forest logo">
+          <div>
+            <strong>Wake Forest</strong>
+            <span>#52 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>3.9</strong>
+        <span>#52</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g188"
+       title="Wake Forest vs Miami-FL&#10;Date: 2026-09-18&#10;Location: H&#10;Model margin: -16.3&#10;Win probability: 8%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.5&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest H
+                   Miami-FL;
+                   model margin -16.3;
+                   win probability 8%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-16.3</span><span class="probability">8%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g292"
+       title="Wake Forest vs Louisville&#10;Date: 2026-09-26&#10;Location: @&#10;Model margin: -9.9&#10;Win probability: 18%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.6&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest @
+                   Louisville;
+                   model margin -9.9;
+                   win probability 18%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-9.9</span><span class="probability">18%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-win"
+       href="../matchup.html?game=g388"
+       title="Wake Forest vs Stanford&#10;Date: 2026-10-03&#10;Location: H&#10;Model margin: +9.9&#10;Win probability: 82%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.8&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest H
+                   Stanford;
+                   model margin +9.9;
+                   win probability 82%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/stanford.png" alt="Stanford logo"></div>
+      <div class="opponent-name">Stanford</div>
+      <div class="projection"><span class="margin">+9.9</span><span class="probability">82%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g421"
+       title="Wake Forest vs NC State&#10;Date: 2026-10-10&#10;Location: @&#10;Model margin: -3.9&#10;Win probability: 36%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest @
+                   NC State;
+                   model margin -3.9;
+                   win probability 36%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-3.9</span><span class="probability">36%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g464"
+       title="Wake Forest vs California&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: -0.8&#10;Win probability: 47%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest @
+                   California;
+                   model margin -0.8;
+                   win probability 47%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">-0.8</span><span class="probability">47%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g621"
+       title="Wake Forest vs Virginia&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: -1.4&#10;Win probability: 45%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.5&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest H
+                   Virginia;
+                   model margin -1.4;
+                   win probability 45%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-1.4</span><span class="probability">45%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g735"
+       title="Wake Forest vs SMU&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -11.5&#10;Win probability: 15%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.8&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest @
+                   SMU;
+                   model margin -11.5;
+                   win probability 15%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-11.5</span><span class="probability">15%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g780"
+       title="Wake Forest vs Georgia Tech&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -3.6&#10;Win probability: 36%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.5&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest @
+                   Georgia Tech;
+                   model margin -3.6;
+                   win probability 36%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">-3.6</span><span class="probability">36%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g887"
+       title="Wake Forest vs Duke&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: +2.5&#10;Win probability: 59%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.6&#10;Market total: —&#10;Jake Dickert: 38-26-0 ATS, avg margin 2.1"
+       aria-label="Wake Forest H
+                   Duke;
+                   model margin +2.5;
+                   win probability 59%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">+2.5</span><span class="probability">59%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">3.4–5.6</td>
+      <td class="outcome finish">#13</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/north-carolina.png"
+               alt="North Carolina logo">
+          <div>
+            <strong>North Carolina</strong>
+            <span>#57 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>1.9</strong>
+        <span>#57</span>
+      </td>
+      <td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g201"
+       title="North Carolina vs Clemson&#10;Date: 2026-09-19&#10;Location: @&#10;Model margin: -12.7&#10;Win probability: 12%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.0&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina @
+                   Clemson;
+                   model margin -12.7;
+                   win probability 12%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-12.7</span><span class="probability">12%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g435"
+       title="North Carolina vs Pittsburgh&#10;Date: 2026-10-10&#10;Location: @&#10;Model margin: -7.8&#10;Win probability: 23%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.8&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina @
+                   Pittsburgh;
+                   model margin -7.8;
+                   win probability 23%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-7.8</span><span class="probability">23%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g468"
+       title="North Carolina vs Duke&#10;Date: 2026-10-17&#10;Location: @&#10;Model margin: -5.7&#10;Win probability: 29%&#10;Market line: +4.5&#10;Spread edge: -1.2&#10;Model total: 53.0&#10;Market total: 54.5&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina @
+                   Duke;
+                   model margin -5.7;
+                   win probability 29%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">-5.7</span><span class="probability">29%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-win"
+       href="../matchup.html?game=g546"
+       title="North Carolina vs Syracuse&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: +7.5&#10;Win probability: 76%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.2&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina H
+                   Syracuse;
+                   model margin +7.5;
+                   win probability 76%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+7.5</span><span class="probability">76%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g599"
+       title="North Carolina vs Miami-FL&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: -18.8&#10;Win probability: 5%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 46.9&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina H
+                   Miami-FL;
+                   model margin -18.8;
+                   win probability 5%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-18.8</span><span class="probability">5%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g725"
+       title="North Carolina vs Louisville&#10;Date: 2026-11-14&#10;Location: H&#10;Model margin: -6.5&#10;Win probability: 27%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.0&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina H
+                   Louisville;
+                   model margin -6.5;
+                   win probability 27%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-6.5</span><span class="probability">27%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g819"
+       title="North Carolina vs Virginia&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -9.6&#10;Win probability: 19%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.9&#10;Market total: —&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina @
+                   Virginia;
+                   model margin -9.6;
+                   win probability 19%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-9.6</span><span class="probability">19%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g866"
+       title="North Carolina vs NC State&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: -0.2&#10;Win probability: 49%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.8&#10;Market total: 55.5&#10;Bill Belichick: 5-6-1 ATS, avg margin -3.9"
+       aria-label="North Carolina H
+                   NC State;
+                   model margin -0.2;
+                   win probability 49%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-0.2</span><span class="probability">49%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">2.4–5.6</td>
+      <td class="outcome finish">#14</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/syracuse.png"
+               alt="Syracuse logo">
+          <div>
+            <strong>Syracuse</strong>
+            <span>#81 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>-3.1</strong>
+        <span>#81</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g164"
+       title="Syracuse vs California&#10;Date: 2026-09-12&#10;Location: H&#10;Model margin: -2.1&#10;Win probability: 42%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.6&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse H
+                   California;
+                   model margin -2.1;
+                   win probability 42%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">-2.1</span><span class="probability">42%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g186"
+       title="Syracuse vs Pittsburgh&#10;Date: 2026-09-17&#10;Location: @&#10;Model margin: -12.9&#10;Win probability: 12%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.5&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse @
+                   Pittsburgh;
+                   model margin -12.9;
+                   win probability 12%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-12.9</span><span class="probability">12%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g445"
+       title="Syracuse vs Virginia&#10;Date: 2026-10-10&#10;Location: @&#10;Model margin: -14.7&#10;Win probability: 9%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.5&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse @
+                   Virginia;
+                   model margin -14.7;
+                   win probability 9%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia.png" alt="Virginia logo"></div>
+      <div class="opponent-name">Virginia</div>
+      <div class="projection"><span class="margin">-14.7</span><span class="probability">9%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g496"
+       title="Syracuse vs Louisville&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: -11.1&#10;Win probability: 15%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse H
+                   Louisville;
+                   model margin -11.1;
+                   win probability 15%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-11.1</span><span class="probability">15%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g546"
+       title="Syracuse vs North Carolina&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -7.5&#10;Win probability: 24%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.2&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse @
+                   North Carolina;
+                   model margin -7.5;
+                   win probability 24%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/north-carolina.png" alt="North Carolina logo"></div>
+      <div class="opponent-name">North Carolina</div>
+      <div class="projection"><span class="margin">-7.5</span><span class="probability">24%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g612"
+       title="Syracuse vs SMU&#10;Date: 2026-10-31&#10;Location: H&#10;Model margin: -12.2&#10;Win probability: 13%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.8&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse H
+                   SMU;
+                   model margin -12.2;
+                   win probability 13%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-12.2</span><span class="probability">13%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g673"
+       title="Syracuse vs Clemson&#10;Date: 2026-11-07&#10;Location: H&#10;Model margin: -12.3&#10;Win probability: 13%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 47.7&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse H
+                   Clemson;
+                   model margin -12.3;
+                   win probability 13%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#25</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/clemson.png" alt="Clemson logo"></div>
+      <div class="opponent-name">Clemson</div>
+      <div class="projection"><span class="margin">-12.3</span><span class="probability">13%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g723"
+       title="Syracuse vs NC State&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -10.9&#10;Win probability: 16%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.5&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse @
+                   NC State;
+                   model margin -10.9;
+                   win probability 16%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-10.9</span><span class="probability">16%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g771"
+       title="Syracuse vs Boston College&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -1.5&#10;Win probability: 44%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.9&#10;Market total: —&#10;Fran Brown: 10-14-1 ATS, avg margin -2.2"
+       aria-label="Syracuse @
+                   Boston College;
+                   model margin -1.5;
+                   win probability 44%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/boston-college.png" alt="Boston College logo"></div>
+      <div class="opponent-name">Boston College</div>
+      <div class="projection"><span class="margin">-1.5</span><span class="probability">44%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">1.9–7.1</td>
+      <td class="outcome finish">#15</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/boston-college.png"
+               alt="Boston College logo">
+          <div>
+            <strong>Boston College</strong>
+            <span>#84 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>-3.5</strong>
+        <span>#84</span>
+      </td>
+      <td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g270"
+       title="Boston College vs Virginia Tech&#10;Date: 2026-09-26&#10;Location: H&#10;Model margin: -7.6&#10;Win probability: 24%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.7&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College H
+                   Virginia Tech;
+                   model margin -7.6;
+                   win probability 24%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">-7.6</span><span class="probability">24%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g377"
+       title="Boston College vs SMU&#10;Date: 2026-10-03&#10;Location: @&#10;Model margin: -18.9&#10;Win probability: 5%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.7&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College @
+                   SMU;
+                   model margin -18.9;
+                   win probability 5%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-18.9</span><span class="probability">5%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g461"
+       title="Boston College vs Pittsburgh&#10;Date: 2026-10-17&#10;Location: H&#10;Model margin: -9.4&#10;Win probability: 19%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.4&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College H
+                   Pittsburgh;
+                   model margin -9.4;
+                   win probability 19%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/pittsburgh.png" alt="Pittsburgh logo"></div>
+      <div class="opponent-name">Pittsburgh</div>
+      <div class="projection"><span class="margin">-9.4</span><span class="probability">19%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g533"
+       title="Boston College vs Georgia Tech&#10;Date: 2026-10-24&#10;Location: @&#10;Model margin: -11.0&#10;Win probability: 16%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 52.5&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College @
+                   Georgia Tech;
+                   model margin -11.0;
+                   win probability 16%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">-11.0</span><span class="probability">16%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g582"
+       title="Boston College vs Duke&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: -11.1&#10;Win probability: 15%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 56.5&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College @
+                   Duke;
+                   model margin -11.1;
+                   win probability 15%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">-11.1</span><span class="probability">15%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g638"
+       title="Boston College vs Florida State&#10;Date: 2026-11-07&#10;Location: H&#10;Model margin: -10.2&#10;Win probability: 17%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.5&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College H
+                   Florida State;
+                   model margin -10.2;
+                   win probability 17%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/florida-state.png" alt="Florida State logo"></div>
+      <div class="opponent-name">Florida State</div>
+      <div class="projection"><span class="margin">-10.2</span><span class="probability">17%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell coin-flip"
+       href="../matchup.html?game=g771"
+       title="Boston College vs Syracuse&#10;Date: 2026-11-21&#10;Location: H&#10;Model margin: +1.5&#10;Win probability: 56%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.9&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College H
+                   Syracuse;
+                   model margin +1.5;
+                   win probability 56%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/syracuse.png" alt="Syracuse logo"></div>
+      <div class="opponent-name">Syracuse</div>
+      <div class="projection"><span class="margin">+1.5</span><span class="probability">56%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g861"
+       title="Boston College vs Miami-FL&#10;Date: 2026-11-28&#10;Location: @&#10;Model margin: -28.4&#10;Win probability: 1%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Bill O&#x27;Brien: 28-19-2 ATS, avg margin 2.4"
+       aria-label="Boston College @
+                   Miami-FL;
+                   model margin -28.4;
+                   win probability 1%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-28.4</span><span class="probability">1%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">1.5–6.5</td>
+      <td class="outcome finish">#16</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+    <tr>
+      <td class="sticky-left team-column">
+        <div class="team-name">
+          <img src="../../logos/stanford.png"
+               alt="Stanford logo">
+          <div>
+            <strong>Stanford</strong>
+            <span>#80 overall</span>
+          </div>
+        </div>
+      </td>
+      <td class="sticky-left rating-column">
+        <strong>-3.0</strong>
+        <span>#80</span>
+      </td>
+      <td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g22"
+       title="Stanford vs Miami-FL&#10;Date: 2026-09-04&#10;Location: H&#10;Model margin: -24.8&#10;Win probability: 2%&#10;Market line: +22.5&#10;Spread edge: -2.3&#10;Model total: 47.4&#10;Market total: 49.5&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford H
+                   Miami-FL;
+                   model margin -24.8;
+                   win probability 2%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        <span class="rank-badge">#7</span>
+      </div>
+      <div class="logo-wrap"><img src="../../logos/miami-fl.png" alt="Miami-FL logo"></div>
+      <div class="opponent-name">Miami-FL</div>
+      <div class="projection"><span class="margin">-24.8</span><span class="probability">2%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g204"
+       title="Stanford vs Duke&#10;Date: 2026-09-19&#10;Location: @&#10;Model margin: -10.6&#10;Win probability: 16%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 53.5&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford @
+                   Duke;
+                   model margin -10.6;
+                   win probability 16%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/duke.png" alt="Duke logo"></div>
+      <div class="opponent-name">Duke</div>
+      <div class="projection"><span class="margin">-10.6</span><span class="probability">16%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g313"
+       title="Stanford vs Georgia Tech&#10;Date: 2026-09-26&#10;Location: H&#10;Model margin: -7.7&#10;Win probability: 23%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.5&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford H
+                   Georgia Tech;
+                   model margin -7.7;
+                   win probability 23%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/georgia-tech.png" alt="Georgia Tech logo"></div>
+      <div class="opponent-name">Georgia Tech</div>
+      <div class="projection"><span class="margin">-7.7</span><span class="probability">23%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g388"
+       title="Stanford vs Wake Forest&#10;Date: 2026-10-03&#10;Location: @&#10;Model margin: -9.9&#10;Win probability: 18%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 45.8&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford @
+                   Wake Forest;
+                   model margin -9.9;
+                   win probability 18%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/wake-forest.png" alt="Wake Forest logo"></div>
+      <div class="opponent-name">Wake Forest</div>
+      <div class="projection"><span class="margin">-9.9</span><span class="probability">18%</span></div>
+    </a>
+    </td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td><div class="schedule-cell nonconf" aria-label="Nonconference game omitted">—</div></td><td>
+    <a class="schedule-cell lean-loss"
+       href="../matchup.html?game=g554"
+       title="Stanford vs NC State&#10;Date: 2026-10-24&#10;Location: H&#10;Model margin: -6.3&#10;Win probability: 28%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 51.4&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford H
+                   NC State;
+                   model margin -6.3;
+                   win probability 28%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/nc-state.png" alt="NC State logo"></div>
+      <div class="opponent-name">NC State</div>
+      <div class="projection"><span class="margin">-6.3</span><span class="probability">28%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g593"
+       title="Stanford vs Louisville&#10;Date: 2026-10-31&#10;Location: @&#10;Model margin: -16.8&#10;Win probability: 7%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 48.5&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford @
+                   Louisville;
+                   model margin -16.8;
+                   win probability 7%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/louisville.png" alt="Louisville logo"></div>
+      <div class="opponent-name">Louisville</div>
+      <div class="projection"><span class="margin">-16.8</span><span class="probability">7%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g749"
+       title="Stanford vs Virginia Tech&#10;Date: 2026-11-14&#10;Location: @&#10;Model margin: -11.3&#10;Win probability: 15%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford @
+                   Virginia Tech;
+                   model margin -11.3;
+                   win probability 15%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/virginia-tech.png" alt="Virginia Tech logo"></div>
+      <div class="opponent-name">Virginia Tech</div>
+      <div class="projection"><span class="margin">-11.3</span><span class="probability">15%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g772"
+       title="Stanford vs California&#10;Date: 2026-11-21&#10;Location: @&#10;Model margin: -7.7&#10;Win probability: 23%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 50.5&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford @
+                   California;
+                   model margin -7.7;
+                   win probability 23%">
+      <div class="cell-top">
+        <span class="location">@</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/california.png" alt="California logo"></div>
+      <div class="opponent-name">California</div>
+      <div class="projection"><span class="margin">-7.7</span><span class="probability">23%</span></div>
+    </a>
+    </td><td>
+    <a class="schedule-cell strong-loss"
+       href="../matchup.html?game=g878"
+       title="Stanford vs SMU&#10;Date: 2026-11-28&#10;Location: H&#10;Model margin: -13.6&#10;Win probability: 11%&#10;Market line: —&#10;Spread edge: —&#10;Model total: 49.6&#10;Market total: —&#10;Tavita Pritchard: no matched full-game ATS sample"
+       aria-label="Stanford H
+                   SMU;
+                   model margin -13.6;
+                   win probability 11%">
+      <div class="cell-top">
+        <span class="location">H</span>
+        
+      </div>
+      <div class="logo-wrap"><img src="../../logos/smu.png" alt="SMU logo"></div>
+      <div class="opponent-name">SMU</div>
+      <div class="projection"><span class="margin">-13.6</span><span class="probability">11%</span></div>
+    </a>
+    </td><td><div class="schedule-cell bye" aria-label="Bye week">BYE</div></td>
+      <td class="outcome projected-record">1.4–7.6</td>
+      <td class="outcome finish">#17</td>
+      <td class="outcome">0%</td>
+      <td class="outcome title-prob">0%</td>
+    </tr>
+    
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    Muted dashes represent omitted nonconference games. BYE means the team has
+    no scheduled game that week. Hover a conference game for model, market, and
+    coaching context.
+  </div>
+</div>
+</body>
+</html>

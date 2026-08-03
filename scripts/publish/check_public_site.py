@@ -55,6 +55,28 @@ def validate(root: Path, out: Path) -> list[str]:
         if "data/site/page_health_status.json" not in text or "page-health-summary" not in text:
             errors.append("page health JavaScript lacks the canonical payload loader or container marker")
 
+
+    conferences = out / "conferences.html"
+    if conferences.is_file():
+        conference_text = conferences.read_text(errors="ignore")
+        for marker in (
+            'id="conferenceSelect"',
+            'id="scheduleLayout"',
+            'id="scheduleScroll"',
+            'id="pageNote"',
+            'class="range-key"',
+            'Conf SOS:',
+            'Rem SOS:',
+            'id="healthToggle"',
+            'matchup.html?game_id=',
+        ):
+            if marker not in conference_text:
+                errors.append(f"Conference Logo Schedule marker missing: {marker}")
+        if "Conference Workspace" in conference_text:
+            errors.append("legacy Conference Workspace shell detected")
+        if "matchup.html?game=" in conference_text:
+            errors.append("legacy Conference matchup query parameter detected")
+
     betting = out / "betting.html"
     if betting.is_file():
         betting_text = betting.read_text(errors="ignore")

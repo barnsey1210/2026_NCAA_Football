@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
 PAGES = {"dashboard_v2.html":"index.html", "openers_v2.html":"openers.html",
          "matchups_v2.html":"matchups.html", "futures_v2.html":"futures.html",
-         "conferences_v2.html":"conferences.html", "betting_v2.html":"betting.html",
+         "betting_v2.html":"betting.html",
          "team_v2.html":"team.html", "ratings_v2.html":"ratings.html",
          "simulations_v2.html":"simulations.html", "playoff_v2.html":"playoff.html",
          "schedule_v2.html":"schedule.html", "odds_v2.html":"odds.html"}
@@ -95,6 +95,9 @@ def main():
         (OUT/target).write_text(transform(source_path.read_text(),target))
     for asset in PAGE_HEALTH_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
+    # The approved Conference Logo Schedule is generated from current conference
+    # workspace and matchup artifacts after shared page-health assets exist.
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_conference_logo_schedule.py')], check=True)
     # Keep the canonical Odds publication artifact aligned with odds_v2.html;
     # daily_market_update.sh publishes this root copy when it is present.
     shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
