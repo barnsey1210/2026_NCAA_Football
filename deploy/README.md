@@ -40,6 +40,8 @@ The first deployment after reconciliation is a one-time canonical-path bootstrap
 
 Other recovered sources that already exist at their exact canonical runtime paths are deliberately excluded from this bootstrap expansion. The manifest file remains the complete authority; directories, globs, generated data, logs, caches, databases, HTML, and raw provider responses are never implicitly included.
 
+Betting Model Performance reconciliation adds only its canonical V2 page, model-tracking calculation/capture/settlement/view sources, active controller source, safe config/schema, and focused regression tests. Mutable JSONL ledgers, generated view JSON, previews, and backups remain runtime-only and are never deployed from Git.
+
 ## Test targets and exceptional dirty-tree use
 
 For an isolated test target:
