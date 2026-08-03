@@ -84,6 +84,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
 def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/model_tracking/build_model_performance_view.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)
     for source,target in PAGES.items():
         source_path=ROOT/source

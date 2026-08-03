@@ -60,6 +60,17 @@ ratings/pull_donchess_ratings.py
 ratings/pull_sagarin_ratings.py
 scripts/projections/build_game_projection_blend_2026.py
 scripts/projections/build_game_projection_sources_2026.py
+betting_v2.html
+scripts/model_tracking/__init__.py
+scripts/model_tracking/model_tracking.py
+scripts/model_tracking/capture_model_tracking.py
+scripts/model_tracking/settle_model_tracking.py
+scripts/model_tracking/build_model_performance_view.py
+scripts/control/run_data_refresh.py
+data/model_tracking/config.json
+data/model_tracking/schema.json
+tests/test_model_tracking_phase1.py
+tests/test_betting_model_performance_integration.py
 EOF
 cmp -s "$TMP/expected-manifest.txt" "$ROOT/deploy/source_manifest.txt" \
   || fail "source manifest differs from the approved runtime files"

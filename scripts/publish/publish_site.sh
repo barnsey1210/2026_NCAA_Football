@@ -30,6 +30,7 @@ python3 scripts/site/build_conference_workspace.py
 echo "Building production Odds payloads..."
 python3 scripts/site/build_odds_screen_v2.py
 python3 scripts/site/build_odds_futures_v2.py
+python3 scripts/model_tracking/build_model_performance_view.py
 # MATCHUP_PREPUBLISH_AUDITS_START
 echo "Running matchup pre-publish audits..."
 python3 scripts/audit/audit_matchup_workspace.py
@@ -72,7 +73,7 @@ mkdir -p "$stage_dir/data/bets" "$stage_dir/data/site" "$stage_dir/data/agents" 
 for file in bets_enriched.csv betting_dashboard.json market_clv_match_audit.csv betting_performance_history.csv bet_closing_clv.csv bet_closing_clv_audit.csv; do
   [ -f "data/bets/$file" ] && cp "data/bets/$file" "$stage_dir/data/bets/$file"
 done
-for file in matchup_line_history.json matchups_view.json betting_activity_view.json futures_view.json conference_workspace.json postgame_shadow_updates.json ratings_view.json game_control_team_games_2026.json playoff_model_2026.json schedule_live_enrichment.json odds_screen_v2.json odds_futures_v2.json page_health_status.json; do
+for file in matchup_line_history.json matchups_view.json betting_activity_view.json futures_view.json conference_workspace.json postgame_shadow_updates.json ratings_view.json game_control_team_games_2026.json playoff_model_2026.json schedule_live_enrichment.json odds_screen_v2.json odds_futures_v2.json page_health_status.json model_performance_view.json; do
   [ -f "data/site/$file" ] && cp "data/site/$file" "$stage_dir/data/site/$file"
 done
 [ -f data/agents/home_top_bets.json ] && cp data/agents/home_top_bets.json "$stage_dir/data/agents/home_top_bets.json"

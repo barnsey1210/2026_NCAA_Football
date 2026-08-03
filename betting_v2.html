@@ -1,0 +1,252 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Betting — Production Candidate</title><style>
+:root{--bg:#061126;--panel:#0b1b36;--panel2:#102545;--line:#244873;--text:#f4f7ff;--muted:#91a6c6;--blue:#459cff;--green:#43df96;--amber:#ffc45b;--red:#ff7280;--purple:#b69cff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#061126,#081936 70%,#07142b);color:var(--text);font:13px/1.4 Inter,system-ui,sans-serif;min-height:100vh}button,input,select{font:inherit}.shell{max-width:1760px;margin:auto;padding:16px 18px 45px}.top{display:flex;align-items:center;gap:18px;padding-bottom:12px;border-bottom:1px solid #19375f}.brand{font-size:20px;font-weight:950}.nav{display:flex;gap:5px;overflow:auto}.nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;text-decoration:none}.nav .active{background:#173b72;color:white;border-radius:9px}.sync{margin-left:auto;border:1px solid #2b7f5e;color:#baf8d6;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:850}.hero{display:flex;justify-content:space-between;align-items:end;margin:20px 0 13px}.hero h1{font-size:35px;margin:0}.hero p{color:var(--muted);margin:3px 0}.metrics{display:flex;gap:7px}.metric,.score{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px}.metric{min-width:100px}.metric span,.score span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.metric b{font-size:19px}.performance{display:grid;grid-template-columns:1.05fr 1.4fr;gap:10px;margin-bottom:12px}.card{border:1px solid var(--line);background:#081731;border-radius:13px;overflow:hidden}.cardHead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.cardHead h2{font-size:14px;margin:0}.cardHead small{color:var(--muted)}.chart{padding:10px;height:230px}.chart svg{width:100%;height:100%;overflow:visible}.axis{stroke:#355578;stroke-width:1}.profit{stroke:var(--green);fill:none;stroke-width:3}.ev{stroke:var(--blue);fill:none;stroke-width:3;stroke-dasharray:6 4}.chartText{fill:var(--muted);font-size:10px}.legend{display:flex;gap:14px;color:var(--muted);font-size:10px;padding:0 12px 10px}.legend i{display:inline-block;width:13px;height:3px;margin-right:5px;vertical-align:middle}.scoreGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}.score h3{margin:0 0 7px;font-size:14px}.score strong{font-size:18px}.score dl{display:grid;grid-template-columns:1fr auto;gap:4px;margin:7px 0 0}.score dt{color:var(--muted)}.score dd{margin:0;font-weight:850}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.breakdowns{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 10px 10px}.mini{width:100%;border-collapse:collapse}.mini th,.mini td{padding:5px 7px;border-top:1px solid #17345c;text-align:left;font-size:10px}.mini th{color:var(--muted);text-transform:uppercase}.tabs,.filters{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:10px 0}.tabs button{border:1px solid var(--line);background:#0a1a35;color:#a8bad7;border-radius:999px;padding:8px 14px;font-weight:850}.tabs .active{background:#1857a7;color:white}.filters select,.filters input{background:#091a34;border:1px solid var(--line);color:white;border-radius:8px;padding:8px}.filters input{min-width:220px}.wrap{overflow:auto;max-height:560px}.ledger{width:100%;min-width:1250px;border-collapse:collapse}.ledger th{position:sticky;top:0;z-index:2;background:#132a50;color:#afbfda;text-align:left;text-transform:uppercase;letter-spacing:.06em;font-size:9px;padding:8px;white-space:nowrap}.ledger td{padding:8px;border-top:1px solid #17345c;white-space:nowrap}.tag{display:inline-flex;border:1px solid #33745b;border-radius:999px;padding:3px 7px;color:#b8efd3;font-size:9px;font-weight:900;margin-right:3px}.tag.powers{border-color:#8b6cbc;color:#dbc9ff}.tag.opener{border-color:#2f77b5;color:#b9ddff}.sub{color:var(--muted);font-size:9px}.book{width:26px;height:20px;object-fit:contain;background:white;border-radius:4px;padding:2px;vertical-align:middle}.gameLink{border:1px solid #3c70a8;background:#15365f;color:white;border-radius:7px;padding:5px 7px;text-decoration:none;font-weight:850}.empty{text-align:center;color:var(--muted);padding:36px}.foot{color:var(--muted);font-size:10px;margin-top:9px}@media(max-width:1050px){.metrics{display:none}.sync{display:none}.performance{grid-template-columns:1fr}.scoreGrid{grid-template-columns:1fr}.breakdowns{grid-template-columns:1fr}}
+.periodBar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin-bottom:4px;scrollbar-width:thin}.periodBar button{flex:0 0 auto;border:1px solid var(--line);background:#0a1a35;color:#a8bad7;border-radius:999px;padding:7px 12px;font-weight:850;cursor:pointer}.periodBar button.active{background:#1857a7;border-color:#55a2ff;color:white}.resultsCard{margin:12px 0}.resultsWrap{overflow:auto}.resultsTable{width:100%;min-width:1120px;border-collapse:collapse}.resultsTable th,.resultsTable td{padding:7px 8px;border-top:1px solid #17345c;text-align:right;white-space:nowrap}.resultsTable th{color:var(--muted);font-size:9px;text-transform:uppercase}.resultsTable th:first-child,.resultsTable td:first-child{text-align:left}.resultsTable tbody tr{cursor:pointer}.resultsTable tbody tr:hover,.resultsTable tbody tr.active{background:#123665}.resultsTable tbody tr.total{font-weight:900;border-top:2px solid #3c6596}.ledgerHeading{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.ledgerHeading h2{font-size:14px;margin:0}.ledgerHeading small{color:var(--muted)}(max-width:700px){.periodBar{margin-right:-18px}.resultsTable{font-size:11px}}</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+<style id="model-performance-preview-css">
+.viewSwitch,.modelTabs,.modelFilters{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.viewSwitch button,.modelTabs button,.modelFilters button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:8px 13px;font-weight:900;cursor:pointer}.viewSwitch button.active,.modelTabs button.active,.modelFilters button.active{background:#1857a7;color:#fff;border-color:#55a2ff}.modelView[hidden]{display:none}.modelNotice{border:1px solid #28558c;background:#0b2444;border-radius:12px;padding:12px;margin:10px 0;color:#bcd0ec}.modelNotice strong{color:#fff}.modelMethod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.modelMethod div{border:1px solid var(--line);background:#081731;border-radius:10px;padding:10px}.modelMethod b{display:block;margin-bottom:3px}.modelMethod span{color:var(--muted);font-size:10px}.modelCards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.modelCard{background:#0a1a35;border:1px solid var(--line);border-radius:12px;padding:12px}.modelCard span{color:var(--muted);font-size:10px;text-transform:uppercase}.modelCard b{display:block;font-size:22px;margin-top:4px}.modelMatrixWrap{overflow:auto}.modelMatrix{width:100%;min-width:1050px;border-collapse:collapse}.modelMatrix th,.modelMatrix td{border-top:1px solid var(--line);padding:8px;text-align:right;white-space:nowrap}.modelMatrix th:first-child,.modelMatrix td:first-child{text-align:left;position:sticky;left:0;background:#0a1a35}.modelMatrix th[data-sort]{cursor:pointer}.modelMatrix th[data-sort]:hover{color:#fff}.statusPill{display:inline-flex;font-size:9px;border:1px solid #37618f;border-radius:999px;padding:3px 6px;color:#bdd5f2}.statusPill.active{border-color:#2b7f5e;color:#baf8d6}.statusPill.warn{border-color:#8a6a2d;color:#ffe0a1}.statusPill.muted{border-color:#42536f;color:#a7b5cc}.modelNameSub{color:var(--muted);font-size:9px;margin-top:3px}.modelEmpty{text-align:center!important;padding:28px!important;color:var(--muted)}.modelSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.modelSummaryBlock{border:1px solid var(--line);background:#081731;border-radius:12px;padding:12px}.modelSummaryBlock h3{margin:0 0 8px;font-size:13px}.modelSummaryBlock p{margin:5px 0;color:var(--muted);font-size:11px}.modelSummaryBlock b{color:#fff}.modelFilterLabel{align-self:center;color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:900;margin-right:2px}@media(max-width:900px){.modelMethod,.modelSummaryGrid{grid-template-columns:1fr}.modelCards{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.modelMatrix{min-width:760px}.modelAdvanced{display:none}}
+</style></head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a>Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a>Futures</a><a>Simulations</a><a class="active">Betting</a></div><div class="sync" id="sync">Sheet snapshot</div></div><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">Model Performance</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open wagers</span><b id="ownedCount">—</b></div><div class="metric"><span>Open exposure</span><b id="exposure">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div></div></section><section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Process scorecard</h2><small>Overall, Powers, and Opener bets</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section><div class="tabs" id="tabs"><button class="active" data-tab="open">All open wagers</button><button data-tab="powers">Powers bets</button><button data-tab="opener">Opener bets</button><button data-tab="drafts">Site-entered drafts</button><button data-tab="all">All records</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger"><thead><tr><th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Current market</th><th>Current CLV / EV</th><th>Status</th><th>Game</th></tr></thead><tbody id="rows"><tr><td colspan="10" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Google Sheet rows are treated as James’s wagers regardless of Account. “Site-entered drafts” are bets entered through this site that have not yet been added to the Google Sheet; they remain device-local and are not part of official performance.</p></div><section id="modelPerformanceView" class="modelView" hidden>
+<div class="modelNotice" id="modelTrackerNotice"><strong>Prospective tracking has not started.</strong> Official records begin with the first accepted market capture. Preview and dry-run predictions are excluded.</div>
+<div class="modelMethod"><div><b>Spread formula</b><span>Home rating − away rating + HFA</span></div><div><b>Home-field advantage</b><span>2.6 points for non-neutral games; 0.0 at neutral sites</span></div><div><b>Core Spread Consensus</b><span>SP+, FPI, TeamRankings, and Brad Powers at 25% each; all four required</span></div></div>
+<div class="modelTabs"><button class="active" data-model-tab="spread">Spread</button><button data-model-tab="totals">Totals</button><button data-model-tab="summary">Summary</button></div>
+<div class="modelFilters" id="modelPeriods"></div>
+<div class="modelFilters" id="modelTypeFilters"><span class="modelFilterLabel">Models</span><button class="active" data-model-filter="core">Core models</button><button data-model-filter="all">All models</button><button data-model-filter="individual">Individual</button><button data-model-filter="consensus">Consensus</button></div>
+<div class="modelFilters" id="opportunityFilters"><span class="modelFilterLabel">Ledger</span><button class="active" data-opportunity-filter="all">All opportunities</button><button data-opportunity-filter="qualified">Qualified only</button></div>
+<div class="modelCards" id="modelCards"></div>
+<section id="modelMatrixSection" class="card"><div class="cardHead"><h2 id="modelMatrixTitle">Spread model matrix</h2><small id="modelMatrixNote">Rankings begin after 30 settled selections</small></div><div class="modelMatrixWrap"><table class="modelMatrix"><thead><tr><th data-sort="display_name">Model</th><th data-sort="rank">Rank</th><th data-sort="games">Games</th><th data-sort="availability_pct">Availability</th><th>Record</th><th data-sort="win_pct">Win %</th><th data-sort="roi">ROI</th><th data-sort="average_point_clv">Avg point CLV</th><th data-sort="positive_clv_pct">Positive CLV</th><th data-sort="mae">MAE</th><th data-sort="bias">Bias</th><th data-sort="rmse">RMSE</th></tr></thead><tbody id="modelMatrixRows"></tbody></table></div></section>
+<section id="modelSummarySection" class="modelSummaryGrid" hidden></section>
+<section class="card resultsCard"><div class="cardHead"><h2>Model opportunity ledger</h2><small>Read-only; never creates a personal wager</small></div><div class="modelMatrixWrap"><table class="modelMatrix"><thead><tr><th>Week / Game</th><th>Market</th><th>Model</th><th>Prediction</th><th>Opener</th><th>Edge</th><th>Side</th><th>Qualification</th><th>Provenance</th><th>Close</th><th>Point CLV</th><th>Result</th></tr></thead><tbody id="modelLedgerRows"><tr><td colspan="12" class="modelEmpty">No accepted prospective opportunities yet.</td></tr></tbody></table></div></section>
+</section></main><script>
+let DATA=null,GAMES=null,tab='open';const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—';const money=x=>Number.isFinite(Number(x))?'$'+Number(x).toFixed(2):'—';const odds=x=>Number.isFinite(Number(x))?(Number(x)>0?'+':'')+Number(x):'—';const tone=v=>Number(v)>0?'positive':Number(v)<0?'negative':'';
+function tags(r){const t=r.strategy_tags||[];return(t.length?t:['Other']).map(x=>`<span class="tag ${String(x).toLowerCase()}">${esc(x)}</span>`).join('')+`<div class="sub">${esc(r.actor?.source||r.source||'Google Sheet')}</div>`}function bookLogo(name){const k=String(name||'').toLowerCase().replace(/[^a-z]/g,''),map={fanduel:'fanduel',draftkings:'draftkings',mgm:'betmgm',betmgm:'betmgm',caesars:'caesars',caesers:'caesars'},f=map[k];return f?`<img class="book" src="logos/books/${f}.png" alt="${esc(name)}" title="${esc(name)}">`:`<span class="sub">${esc(name||'—')}</span>`}
+function localRecords(){const raw=JSON.parse(localStorage.getItem('ncaaf-game-bets-v1')||'{}'),out=[];Object.entries(raw).forEach(([gameId,list])=>{const game=GAMES.games.find(x=>x.game.game_id===gameId);(list||[]).forEach((b,i)=>out.push({bet_id:`local-${gameId}-${i}`,game_id:gameId,game_date:game?.game.date,away_team:game?.game.away_team,home_team:game?.game.home_team,actor:{type:'site_draft',source:'Openers'},strategy_tags:['Model'],placed_at:b.time,status:'Draft',is_open:true,market:b.market,selection:b.selection,sportsbook:b.book,stake:Number(b.stake)||null,line:Number(b.line)||null,price:Number(String(b.price).replace('+',''))||null,game_link_status:'local_game_id'}))});return out}function allRecords(){return[...(DATA.records||[]),...localRecords()]}
+function visible(r){if(tab==='open'&&!(r.is_open&&r.actor.type!=='site_draft'))return false;if(tab==='powers'&&!(r.strategy_tags||[]).includes('Powers'))return false;if(tab==='opener'&&!(r.strategy_tags||[]).includes('Model'))return false;if(tab==='drafts'&&r.actor.type!=='site_draft')return false;const q=search.value.toLowerCase();if(q&&!`${r.selection} ${r.team} ${r.actor.source} ${r.away_team} ${r.home_team} ${r.sportsbook}`.toLowerCase().includes(q))return false;if(market.value!=='all'&&r.market!==market.value)return false;if(link.value==='linked'&&!r.game_id)return false;if(link.value==='team'&&r.game_id)return false;if(link.value==='unlinked'&&(r.game_id||r.game_link_status==='not_game_market'))return false;return true}
+function renderRows(){const list=allRecords().filter(visible);rows.innerHTML=list.map(r=>`<tr><td>${tags(r)}</td><td>${esc(r.placed_at||'—')}</td><td>${esc(r.market||'—')}</td><td><b>${esc(r.selection||'—')}</b><div class="sub">${r.game_id?`${esc(r.away_team)} at ${esc(r.home_team)}`:esc(r.team||'Team/future')}</div></td><td>${bookLogo(r.sportsbook)}</td><td>${money(r.stake)}</td><td><b>${r.line!=null?num(r.line):'—'} ${r.price!=null?odds(r.price):''}</b></td><td>${r.current_market_line!=null?`${num(r.current_market_line)} ${odds(r.current_market_price)}`:'—'}<div class="sub">${esc(r.current_market_book||'')}</div></td><td class="${tone(r.clv_pct_current)}">${r.clv_pct_current!=null?num(Number(r.clv_pct_current)*100,1)+'% CLV':'—'}<div class="sub ${tone(r.ev_current_pct)}">${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'% EV':''}</div></td><td><b>${esc(r.status||'—')}</b><div class="sub ${tone(r.realized_profit)}">${r.is_open?'Pending':money(r.realized_profit)}</div></td><td>${r.game_id?`<a class="gameLink" href="matchups_v2.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`:`<span class="sub">${esc(r.game_link_status||'Team market')}</span>`}</td></tr>`).join('')||'<tr><td colspan="11" class="empty">No records in this view.</td></tr>'}
+function score(m){return`<div class="score"><h3>${esc(m.label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${num(m.positive_clv_pct*100,1)}%</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd></dl></div>`}function mini(title,list){return`<table class="mini"><thead><tr><th>${title}</th><th>Record</th><th>CLV hit</th><th>Avg CLV</th></tr></thead><tbody>${list.map(m=>`<tr><td>${esc(m.label)}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${num(m.positive_clv_pct*100,0)}%</td><td class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</td></tr>`).join('')||'<tr><td colspan="4">No graded bets yet</td></tr>'}</tbody></table>`}
+function drawChart(){const p=DATA.performance_history||[],vals=p.flatMap(x=>[Number(x.realized_profit)||0,Number(x.total_ev_current_dollars)||0]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?0:i/(p.length-1))*(W-L-R),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(Number(d[k])||0)}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
+async function init(){[DATA,GAMES]=await Promise.all([fetch('data/site/betting_activity_view.json').then(r=>r.json()),fetch('data/site/matchups_view.json').then(r=>r.json())]);const s=DATA.summary,sm=Object.entries(DATA.strategy_metrics).map(([label,m])=>({label,...m})),wm=Object.entries(DATA.week_metrics).map(([label,m])=>({label,...m})),mm=Object.entries(DATA.market_metrics).map(([label,m])=>({label,...m})),overall=DATA.strategy_metrics.Overall;ownedCount.textContent=s.owned_open;exposure.textContent=money(s.open_exposure);totalEv.textContent=money(overall?.current_ev_dollars);totalEv.className=tone(overall?.current_ev_dollars);sync.textContent=`Sheet snapshot · ${String(DATA.built_at).slice(0,16).replace('T',' ')}`;scores.innerHTML=sm.map(score).join('');weeks.innerHTML=mini('Week',wm);markets.innerHTML=mini('Market',mm);drawChart();const ms=[...new Set(DATA.records.map(r=>r.market).filter(Boolean))].sort();market.innerHTML='<option value="all">All markets</option>'+ms.map(x=>`<option>${esc(x)}</option>`).join('');renderRows()}document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;renderRows()});[market,link,search].forEach(x=>x.addEventListener('input',renderRows));init().catch(e=>rows.innerHTML=`<tr><td colspan="10" class="empty">Unable to load betting data: ${esc(e.message)}</td></tr>`);
+</script><script>document.querySelector('[data-tab="opener"]').textContent='Model bets';document.querySelector('.performance .card:nth-child(2) .cardHead small').textContent='Overall, Powers, and Model bets';document.querySelector('.ledger thead tr').innerHTML='<th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Active bet</th><th>Current market</th><th>Current CLV / EV</th><th>Result / P&amp;L</th><th>Game</th>';</script>
+<script>
+let ACTIVE_PERIOD='Futures',PERIODS=[];
+const pPct=(v,d=1)=>v==null?'—':num(Number(v)*100,d)+'%';
+function pPeriodForWeek(week){return Number(week)===14?'Conference Championships':`Week ${week}`}
+function pNormalize(r){if(r.bet_period)return r;const game=r.game_id?GAMES.games.find(x=>x.game.game_id===r.game_id):null,week=game?.game.week;return{...r,game_week:week,bet_period:game?pPeriodForWeek(week):'Unassigned',market_group:r.market||'Other',is_future:false,is_graded:['Won','Lost','Push'].includes(r.status),settled_risk:['Won','Lost','Push'].includes(r.status)?Number(r.stake)||0:0,realized_pl:Number(r.realized_profit)||0,current_ev:r.is_open?(Number(r.stake)||0)*(Number(r.ev_current_pct)||0):0,clv_value:r.clv_pct_current,has_valid_closing_line:r.clv_pct_current!=null}}
+function pRecords(){return allRecords().map(pNormalize)}
+function pSelected(records=pRecords(),period=ACTIVE_PERIOD){return period==='All Bets'?records:records.filter(r=>r.bet_period===period)}
+function pMetrics(list){const open=list.filter(r=>r.is_open),graded=list.filter(r=>r.is_graded),risk=graded.reduce((s,r)=>s+(Number(r.settled_risk)||0),0),pl=graded.reduce((s,r)=>s+(Number(r.realized_pl)||0),0),clv=list.filter(r=>r.has_valid_closing_line&&Number.isFinite(Number(r.clv_value))),positive=clv.filter(r=>Number(r.clv_value)>0).length;return{bets:list.length,open:open.length,settled:graded.length,open_exposure:open.reduce((s,r)=>s+(Number(r.stake)||0),0),wins:graded.filter(r=>r.status==='Won').length,losses:graded.filter(r=>r.status==='Lost').length,pushes:graded.filter(r=>r.status==='Push').length,settled_risk:risk,profit:pl,realized_pl:pl,roi:risk?pl/risk:null,clv_matched:clv.length,positive_clv:positive,positive_clv_pct:clv.length?positive/clv.length:null,avg_clv_pct:clv.length?clv.reduce((s,r)=>s+Number(r.clv_value),0)/clv.length:null,current_ev_dollars:open.reduce((s,r)=>s+(Number(r.current_ev)||0),0)}}
+function pScore(label,list){return score({label,...pMetrics(list)})}
+function pMini(title,groups){return mini(title,groups.map(([label,list])=>({label,...pMetrics(list)})))}
+function pGroup(list,key){const map=new Map;list.forEach(r=>{const name=r[key]||'Other';if(!map.has(name))map.set(name,[]);map.get(name).push(r)});return[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]))}
+function pChart(list){const by=new Map;list.forEach(r=>{const key=ACTIVE_PERIOD==='Futures'?(r.placed_at||r.source_pulled_at):(r.game_date||r.placed_at)||'Unknown';if(!by.has(key))by.set(key,[]);by.get(key).push(r)});let realized=0,ev=0;const p=[...by.entries()].sort((a,b)=>new Date(a[0])-new Date(b[0])).map(([date,rows])=>{realized+=rows.reduce((s,r)=>s+(r.is_graded?Number(r.realized_pl)||0:0),0);ev+=rows.reduce((s,r)=>s+(r.is_open?Number(r.current_ev)||0:0),0);return{snapshot_at:date,realized_profit:realized,total_ev_current_dollars:ev}}),vals=p.flatMap(x=>[x.realized_profit,x.total_ev_current_dollars]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?(W-L-R)/2:i/(p.length-1)*(W-L-R)),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(d[k])}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
+function pPeriodMetrics(period){return pMetrics(pSelected(pRecords().filter(r=>r.actor?.type!=='site_draft'),period))}
+function pResults(){const activity=new Set((DATA.records||[]).map(r=>r.bet_period)),shown=['Futures',...PERIODS.filter(p=>p.startsWith('Week ')&&activity.has(p)),'Conference Championships','Bowl / Playoff',...(activity.has('Unassigned')?['Unassigned']:[])],rowsData=shown.map(p=>[p,pPeriodMetrics(p)]),total=pPeriodMetrics('All Bets');periodResultsBody.innerHTML=rowsData.map(([p,m])=>pResultRow(p,m)).join('')+pResultRow('All Bets',total,true);periodResultsBody.querySelectorAll('tr[data-period]').forEach(r=>r.onclick=()=>pSetPeriod(r.dataset.period))}
+function pResultRow(period,m,total=false){return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_pct)}">${pPct(m.avg_clv_pct,2)}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
+function pVisible(r){if(ACTIVE_PERIOD!=='All Bets'&&r.bet_period!==ACTIVE_PERIOD)return false;if(tab==='open'&&!(r.is_open&&r.actor.type!=='site_draft'))return false;if(tab==='powers'&&!(r.strategy_tags||[]).includes('Powers'))return false;if(tab==='opener'&&!(r.strategy_tags||[]).includes('Model'))return false;if(tab==='drafts'&&r.actor.type!=='site_draft')return false;const q=search.value.toLowerCase();if(q&&!`${r.selection} ${r.team} ${r.actor?.source} ${r.away_team} ${r.home_team} ${r.sportsbook}`.toLowerCase().includes(q))return false;if(market.value!=='all'&&r.market!==market.value)return false;if(link.value==='linked'&&!r.game_id)return false;if(link.value==='team'&&r.game_id)return false;if(link.value==='unlinked'&&(r.game_id||r.game_link_status==='not_game_market'))return false;return true}
+function pRows(){const list=pRecords().filter(pVisible);ledgerTitle.textContent=`${ACTIVE_PERIOD} wager ledger`;ledgerSubtitle.textContent=`${list.length} records in current filters`;rows.innerHTML=list.map(r=>`<tr><td>${tags(r)}</td><td>${esc(r.placed_at||'—')}</td><td>${esc(r.market||'—')}</td><td><b>${esc(r.selection||'—')}</b><div class="sub">${r.game_id?`${esc(r.away_team)} at ${esc(r.home_team)}`:esc(r.team||'Team/future')}</div></td><td>${bookLogo(r.sportsbook)}</td><td>${money(r.stake)}</td><td><b>${r.line!=null?num(r.line):'—'} ${r.price!=null?odds(r.price):''}</b></td><td>${r.current_market_line!=null?`${num(r.current_market_line)} ${odds(r.current_market_price)}`:'—'}<div class="sub">${esc(r.current_market_book||'')}</div></td><td class="${tone(r.clv_value)}">${r.clv_value!=null?num(Number(r.clv_value)*100,1)+'% CLV':'—'}<div class="sub ${tone(r.ev_current_pct)}">${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'% EV':''}</div></td><td><b>${esc(r.status||'—')}</b><div class="sub ${tone(r.realized_pl)}">${r.is_open?'Pending':money(r.realized_pl)}</div></td><td>${r.game_id?`<a class="gameLink" href="matchups_v2.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`:`<span class="sub">${esc(r.game_link_status||'Team market')}</span>`}</td></tr>`).join('')||'<tr><td colspan="11" class="empty">No records in this period and filter combination.</td></tr>'}
+function pDashboard(){const list=pSelected(),overall=pMetrics(list),powers=list.filter(r=>(r.strategy_tags||[]).includes('Powers')),model=list.filter(r=>(r.strategy_tags||[]).includes('Model'));ownedCount.textContent=overall.open;exposure.textContent=money(overall.open_exposure);totalEv.textContent=money(overall.current_ev_dollars);totalEv.className=tone(overall.current_ev_dollars);scores.innerHTML=pScore('Overall',list)+pScore('Powers',powers)+pScore('Model',model);const categories=pGroup(list,'market_group');if(ACTIVE_PERIOD==='All Bets')weeks.innerHTML=pMini('Period',PERIODS.filter(p=>p!=='All Bets').map(p=>[p,pSelected(pRecords(),p)]).filter(x=>x[1].length));else weeks.innerHTML=pMini('Strategy',[['Powers',powers],['Model',model]]);markets.innerHTML=pMini('Category',categories);pChart(list);pRows();pResults()}
+function pSetPeriod(period){ACTIVE_PERIOD=period;sessionStorage.setItem('ncaaf-betting-period',period);document.querySelectorAll('#periodBar button').forEach(b=>b.classList.toggle('active',b.dataset.period===period));pDashboard()}
+function pInit(){const regular=[...new Set(GAMES.games.map(x=>Number(x.game.week)).filter(x=>Number.isFinite(x)&&x!==14))].sort((a,b)=>a-b).map(x=>`Week ${x}`);PERIODS=['Futures',...regular,'Conference Championships','Bowl / Playoff','All Bets'];const stored=sessionStorage.getItem('ncaaf-betting-period'),gamePeriods=(DATA.records||[]).filter(r=>r.bet_period?.startsWith('Week ')).sort((a,b)=>(a.period_sort||0)-(b.period_sort||0));ACTIVE_PERIOD=stored&&PERIODS.includes(stored)?stored:(gamePeriods.at(-1)?.bet_period||'Futures');const bar=document.createElement('div');bar.id='periodBar';bar.className='periodBar';bar.innerHTML=PERIODS.map(p=>`<button data-period="${esc(p)}">${esc(p.replace('Week ','W'))}</button>`).join('');document.querySelector('.hero').after(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>pSetPeriod(b.dataset.period));const results=document.createElement('section');results.className='card resultsCard';results.innerHTML='<div class="cardHead"><h2>Season Betting Results by Week</h2><small>Graded performance, CLV, current EV, and exposure</small></div><div class="resultsWrap"><table class="resultsTable"><thead><tr><th>Period</th><th>Bets</th><th>Record</th><th>Risked</th><th>Profit/Loss</th><th>ROI</th><th>CLV Hit</th><th>Avg CLV</th><th>CLV Sample</th><th>Current EV</th><th>Open Exposure</th></tr></thead><tbody id="periodResultsBody"></tbody></table></div>';document.querySelector('.performance').after(results);const ledger=document.querySelector('.card:has(.ledger)'),heading=document.createElement('div');heading.className='ledgerHeading';heading.innerHTML='<h2 id="ledgerTitle">Wager ledger</h2><small id="ledgerSubtitle"></small>';ledger.prepend(heading);document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;pRows()});[market,link,search].forEach(x=>x.addEventListener('input',pRows));pSetPeriod(ACTIVE_PERIOD)}
+(function waitForBettingData(){if(DATA&&GAMES)return pInit();setTimeout(waitForBettingData,25)})();
+</script><script src="matchup_workspace.js?v=20260720f"></script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+<script id="model-performance-preview-js">
+(function(){
+let MP=null,mode='spread',period='All',modelFilter='core',opportunityFilter='all',sortKey='display_name',sortDir=1;
+const val=(v,s='—')=>v==null?s:v,pct=v=>v==null?'—':(Number(v)*100).toFixed(1)+'%',num1=v=>v==null?'—':Number(v).toFixed(1);
+function switchView(name){const mine=name==='bets';document.getElementById('myBetsView').hidden=!mine;document.getElementById('modelPerformanceView').hidden=mine;document.querySelectorAll('.viewSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.view===name))}
+function statusLabel(r){const map={NO_SETTLED_PREDICTIONS:'NO SETTLED PREDICTIONS','UNRANKED — SMALL SAMPLE':'UNRANKED — SMALL SAMPLE',AVAILABLE:'AVAILABLE',STALE:'STALE',NOT_YET_RELEASED:'NOT YET RELEASED',NOT_ENOUGH_APPROVED_SOURCES:'WAITING FOR 3 SOURCES',COMPARISON_ONLY:'COMPARISON ONLY',BENCHMARK:'BENCHMARK'};return map[r.ranking_status]||map[r.status]||String(r.ranking_status||r.status||'').replaceAll('_',' ')}
+function statusClass(r){if(String(r.tracking_status||'').startsWith('ACTIVE'))return'active';if(['STALE','NOT_YET_RELEASED','NOT_ENOUGH_APPROVED_SOURCES'].includes(r.status))return'warn';return'muted'}
+function currentRows(){if(!MP)return[];let rows=mode==='totals'?MP.total_matrix:MP.spread_matrix;if(modelFilter==='core')rows=rows.filter(r=>r.default_visible);else if(modelFilter==='individual')rows=rows.filter(r=>r.model_type==='individual');else if(modelFilter==='consensus')rows=rows.filter(r=>r.model_type==='consensus');return [...rows].sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return-1;if(typeof av==='string')return av.localeCompare(bv)*sortDir;return(Number(av)-Number(bv))*sortDir})}
+function renderMatrix(){const rows=currentRows();modelMatrixRows.innerHTML=rows.map(r=>`<tr><td><b>${r.display_name||r.model}</b><div class="modelNameSub">${r.model!==r.display_name?r.model:''}</div><div><span class="statusPill ${statusClass(r)}">${statusLabel(r)}</span></div></td><td>${val(r.rank)}</td><td>${r.games}</td><td>${pct(r.availability_pct)}</td><td>${r.record}</td><td>${pct(r.win_pct)}</td><td>${pct(r.roi)}</td><td>${num1(r.average_point_clv)}</td><td>${pct(r.positive_clv_pct)}</td><td>${num1(r.mae)}</td><td>${num1(r.bias)}</td><td>${num1(r.rmse)}</td></tr>`).join('')||'<tr><td colspan="12" class="modelEmpty">No models match the current filter.</td></tr>'}
+function opportunityPeriod(o){const w=o.site_week;return w==null?'All':`W${w}`}
+function renderLedger(){let rows=(MP.opportunities||[]).filter(o=>mode==='totals'?o.market_type==='total':o.market_type==='spread');if(period!=='All')rows=rows.filter(o=>opportunityPeriod(o)===period);if(opportunityFilter==='qualified')rows=rows.filter(o=>o.qualification_status==='QUALIFIED');modelLedgerRows.innerHTML=rows.map(o=>`<tr><td><b>${o.site_week!=null?'W'+o.site_week:'—'}</b><div class="modelNameSub">${o.away_team} at ${o.home_team}</div></td><td>${o.market_type}</td><td>${(o.consensus_versions||[]).join(', ')||'Individual models'}</td><td>—</td><td>${o.opener_market_observation_id?'Captured':'—'}</td><td>${val(o.estimated_ev_pct)}</td><td>—</td><td>${o.qualification_status||'—'}</td><td>${o.opener_provenance_grade||'—'}</td><td>—</td><td>—</td><td>Open</td></tr>`).join('')||'<tr><td colspan="12" class="modelEmpty">No accepted prospective opportunities in this view.</td></tr>'}
+function renderCards(){const s=MP.summary[mode==='totals'?'totals':'spread'];modelCards.innerHTML=[['Opportunities',s.opportunities],['Settled selections',s.settled_selections],['Average point CLV','—'],[mode==='totals'?'O/U ROI':'ATS ROI','—']].map(x=>`<div class="modelCard"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}
+function renderSummary(){const h=MP.methodology.hfa,core=MP.methodology.spread_core_v1,total=MP.methodology.total;modelSummarySection.innerHTML=`<div class="modelSummaryBlock"><h3>Spread tracking</h3><p><b>Formula:</b> ${MP.methodology.spread_projection_formula}</p><p><b>HFA:</b> ${h.non_neutral} non-neutral; ${h.neutral} neutral</p><p><b>Core consensus:</b> ${core.models.join(', ')}</p></div><div class="modelSummaryBlock"><h3>Total tracking</h3><p><b>Current state:</b> Site Total Projection is tracked individually.</p><p><b>Consensus rule:</b> ${total.minimum_independent_sources} approved independent sources required.</p><p><b>Shadow Total:</b> excluded from consensus.</p></div><div class="modelSummaryBlock"><h3>Ranking policy</h3><p><b>Minimum sample:</b> ${MP.ranking_minimum} settled selections.</p><p>Models below the threshold remain unranked.</p><p>Dry-run and preview captures never enter official records.</p></div>`}
+function render(){if(!MP)return;const summary=mode==='summary';modelMatrixSection.hidden=summary;modelSummarySection.hidden=!summary;opportunityFilters.hidden=summary;modelTypeFilters.hidden=summary;modelMatrixTitle.textContent=mode==='totals'?'Total model matrix':'Spread model matrix';renderCards();if(summary)renderSummary();else renderMatrix();renderLedger()}
+function bindButtons(){document.querySelectorAll('.viewSwitch button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-model-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.modelTab;render()});document.querySelectorAll('[data-model-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');modelFilter=b.dataset.modelFilter;render()});document.querySelectorAll('[data-opportunity-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-opportunity-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');opportunityFilter=b.dataset.opportunityFilter;render()});document.querySelectorAll('#modelMatrixSection th[data-sort]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.sort)sortDir*=-1;else{sortKey=th.dataset.sort;sortDir=1}renderMatrix()})}
+fetch('data/site/model_performance_view.json').then(r=>r.json()).then(d=>{MP=d;modelPeriods.innerHTML=d.periods.map(p=>`<button class="${p==='All'?'active':''}" data-period="${p}">${p}</button>`).join('');modelPeriods.querySelectorAll('button').forEach(b=>b.onclick=()=>{modelPeriods.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');period=b.dataset.period;renderLedger()});if(d.tracking_started)modelTrackerNotice.innerHTML='<strong>Official prospective tracking is active.</strong> Results include accepted captures only; personal wagers remain separate.';bindButtons();render()}).catch(e=>modelMatrixRows.innerHTML=`<tr><td colspan="12" class="modelEmpty">Unable to load preview data: ${e.message}</td></tr>`);switchView('bets')
+})();
+</script></body></html>

@@ -1,0 +1,17 @@
+{
+  "schema_version": "model-tracking-config-v1",
+  "season": 2026,
+  "spread_core_v1": {
+    "models": ["SP+", "FPI", "TeamRankings", "Brad Powers"],
+    "weights": {"SP+": 0.25, "FPI": 0.25, "TeamRankings": 0.25, "Brad Powers": 0.25},
+    "require_all": true
+  },
+  "approved_spread_models": ["SP+", "FPI", "TeamRankings", "Brad Powers", "Sagarin", "Donchess", "Massey", "KFord", "DRatings"],
+  "approved_total_models": ["Production Total", "TeamRankings", "Sagarin", "Donchess", "Massey", "DRatings"],
+  "total_consensus_minimum": 3,
+  "ranking_minimum_settled": 30,
+  "qualification": {"version": "estimated_ev_v1", "minimum_ev_pct": 1.0, "dispersion_modifier": false},
+  "opener_provenance": ["TRUE_EXECUTABLE_OPENER", "EARLIEST_CAPTURED", "LATE_FIRST_CAPTURE", "UNKNOWN"],
+  "close_provenance": ["TRUE_CLOSE", "LAST_CAPTURED", "EARLY_LAST_CAPTURE", "UNKNOWN"]
+}
+

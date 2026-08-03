@@ -55,6 +55,25 @@ def validate(root: Path, out: Path) -> list[str]:
         if "data/site/page_health_status.json" not in text or "page-health-summary" not in text:
             errors.append("page health JavaScript lacks the canonical payload loader or container marker")
 
+    betting = out / "betting.html"
+    if betting.is_file():
+        betting_text = betting.read_text(errors="ignore")
+        for marker in ('data-view="bets">My Bets', 'data-view="model">Model Performance',
+                       'id="modelPerformanceView"'):
+            if marker not in betting_text:
+                errors.append(f"Betting Model Performance marker missing: {marker}")
+    model_performance = out / "data/site/model_performance_view.json"
+    if not model_performance.is_file():
+        errors.append("Model Performance public artifact missing")
+    else:
+        try:
+            model_data = json.loads(model_performance.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"Model Performance public artifact malformed: {exc}")
+        else:
+            if model_data.get("schema_version") != "model-performance-view-v2":
+                errors.append("Model Performance public artifact schema mismatch")
+
     health = root / "data/site/page_health_status.json"
     if not health.exists():
         errors.append("page health artifact missing")

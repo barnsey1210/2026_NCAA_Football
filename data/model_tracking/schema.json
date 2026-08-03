@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NCAAF prospective model tracking v1",
+  "description": "Separate from the personal wager ledger. JSONL files are append-only.",
+  "datasets": {
+    "model_opportunities.jsonl": ["opportunity_id", "canonical_game_id", "season", "site_week", "kickoff_utc", "away_team", "home_team", "neutral_site", "fcs_opponent_flag", "market_type", "opener_market_observation_id", "opener_provenance_grade", "models_expected", "models_available", "models_missing", "model_count", "model_source_timestamps", "consensus_versions", "qualification_status", "estimated_ev_pct", "qualification_rule_version", "created_at", "revision", "supersedes_id", "correction_reason"],
+    "model_predictions.jsonl": ["prediction_id", "opportunity_id", "canonical_game_id", "model_id", "model_type", "model_set_version", "snapshot_at", "source_updated_at", "available_at_opener", "predicted_home_margin", "predicted_total", "models_included", "revision"],
+    "market_observations.jsonl": ["market_observation_id", "canonical_game_id", "market_type", "sportsbook", "source", "observed_at", "line", "side_prices", "available", "suspended", "is_executable", "provenance_grade", "revision"],
+    "game_results.jsonl": ["result_id", "canonical_game_id", "final_away_score", "final_home_score", "final_home_margin", "final_total", "status", "completed_at", "source", "revision"],
+    "model_prediction_scores.jsonl": ["score_id", "prediction_id", "opportunity_id", "benchmark_type", "result", "point_clv", "absolute_error", "signed_error", "squared_error", "hypothetical_profit", "settlement_version", "revision"],
+    "corrections.jsonl": ["correction_id", "dataset", "superseded_id", "replacement_id", "reason", "created_at"]
+  }
+}
+
