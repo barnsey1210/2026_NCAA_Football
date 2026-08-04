@@ -827,7 +827,7 @@ section{margin-top:8px}
 </style>
 
 </head>
-<body data-war-room-home-release="locked-v1-links-fixed">
+<body data-war-room-home-release="locked-v2-navigation-fixed-r2">
 <div class="page">
 <header>
   <div class="brand"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></div>
@@ -908,7 +908,51 @@ const signed=(x,d=1)=>N(x)==null?'—':(N(x)>0?'+':'')+N(x).toFixed(d);
 const money=x=>N(x)==null?'—':'$'+N(x).toLocaleString(undefined,{maximumFractionDigits:0});
 function slug(t){return t?.logo_slug||t?.slug||String(t?.team||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function logo(t,cls='logo'){const s=slug(t);return `<span class="${cls}">${s?`<img src="${BASE}logos/${esc(s)}.png" alt="">`:''}</span>`}
-function href(r){return `${BASE}matchup.html?game_id=${encodeURIComponent(r?.game?.game_id||'')}`}
+
+function syncCanonicalNavigation(tools){
+  const byTool=Object.fromEntries(tools.map(x=>[x[2],`${BASE}${x[5]}`]));
+  const routes={
+    Home:`${BASE}index.html`,
+    Ratings:byTool['Team Ratings'],
+    Matchups:byTool['Game Matchups'],
+    Openers:byTool['Openers'],
+    Odds:byTool['Sportsbook Odds'],
+    Schedule:byTool['Schedule'],
+    Futures:byTool['Futures Market'],
+    Conferences:byTool['Conferences'],
+    Coaches:byTool['Coaches'],
+    Playoff:byTool['Playoff'],
+    'Sim Lab':byTool['Sim Lab'],
+    Betting:byTool['Betting Dashboard'],
+    Injuries:byTool['Injury Center']
+  };
+
+  document.querySelectorAll('header nav a').forEach(a=>{
+    const label=a.textContent.trim();
+    if(routes[label])a.href=routes[label];
+  });
+
+  const panelRouteMap={
+    'View all matchups →':routes.Matchups,
+    'View My Bets →':routes.Betting,
+    'View Injuries →':routes.Injuries,
+    'View Coaches →':routes.Coaches,
+    'View Betting →':routes.Betting,
+    'View Markets →':routes.Odds,
+    'View Ratings →':routes.Ratings,
+    'Dashboard →':routes.Betting,
+    'View Playoff →':routes.Playoff,
+    'View all tools →':routes.Home
+  };
+  document.querySelectorAll('.panel-head a').forEach(a=>{
+    const label=a.textContent.trim();
+    if(panelRouteMap[label])a.href=panelRouteMap[label];
+  });
+
+  document.documentElement.dataset.canonicalNavigation='synced';
+}
+
+function href(r){return `${BASE}matchups.html?game_id=${encodeURIComponent(r?.game?.game_id||'')}`}
 function marketSpread(r){return N(r?.market?.spread?.home_line)}
 function modelSpread(r){return N(r?.model?.home_spread)}
 function spreadEdge(r){const a=modelSpread(r),b=marketSpread(r);return a==null||b==null?null:b-a}
@@ -1206,6 +1250,7 @@ async function init(){
     <strong>${x[4]} →</strong>
     <em>Open ${x[2]} →</em>
   </a>`).join('');
+  syncCanonicalNavigation(tools);
 
   games.innerHTML=sorted.slice(0,5).map(gameRow).join('')||'<div class="empty"><strong>No current-week games</strong></div>';
 
