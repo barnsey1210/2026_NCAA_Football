@@ -100,20 +100,38 @@ def digest(path: Path) -> str:
             h.update(block)
     return h.hexdigest()
 
-for src in sorted(source.rglob("*")):
-    if not src.is_file():
-        continue
-    rel = src.relative_to(source)
-    if rel in excluded:
-        continue
-    dst = target / rel
-    if dst.exists() and digest(src) == digest(dst):
-        continue
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-    changed.append(rel.as_posix())
+import os
+
+for dirpath, dirnames, filenames in os.walk(source, followlinks=True):
+    base = Path(dirpath)
+    for name in sorted(filenames):
+        src = base / name
+        if not src.is_file():
+            continue
+        rel = src.relative_to(source)
+        if rel in excluded:
+            continue
+        dst = target / rel
+        if dst.exists() and digest(src) == digest(dst):
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        changed.append(rel.as_posix())
 
 manifest.write_text("\n".join(changed) + ("\n" if changed else ""), encoding="utf-8")
+
+required = [
+    Path("data/site/odds_screen_v2.json"),
+    Path("data/site/matchups_view.json"),
+]
+for rel in required:
+    src = source / rel
+    dst = target / rel
+    if not src.exists() or not dst.exists():
+        raise SystemExit(f"required published file missing: {rel}")
+    if digest(src) != digest(dst):
+        raise SystemExit(f"required published file did not synchronize: {rel}")
+
 print(f"[canonical-publish] synchronized {len(changed)} changed public files")
 for rel in changed[:30]:
     print(f"[canonical-publish]   {rel}")
