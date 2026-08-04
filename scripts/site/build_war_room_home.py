@@ -1,4 +1,26 @@
-<!doctype html>
+#!/usr/bin/env python3
+'''Build the production War Room homepage.
+
+This is the locked homepage release derived from the approved V15 preview.
+
+Output:
+    index.html
+
+The builder writes atomically and saves the previous homepage under:
+    build/war_room_home_release_backups/
+'''
+
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT
+HTML = ROOT / "index.html"
+BACKUP_DIR = ROOT / "build" / "war_room_home_release_backups"
+
+PAGE = r'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1371,4 +1393,52 @@ init().catch(e=>{
 });
 </script>
 </body>
-</html>
+</html>'''
+
+def main() -> None:
+    import os
+    import tempfile
+    from datetime import datetime, timezone
+
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+    if HTML.exists():
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        backup = BACKUP_DIR / f"index_before_war_room_{stamp}.html"
+        shutil.copy2(HTML, backup)
+        print(f"Backed up: {backup}")
+
+    fd, temporary = tempfile.mkstemp(prefix=".index.", suffix=".html", dir=ROOT)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(PAGE)
+        os.replace(temporary, HTML)
+    except Exception:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
+    required = [
+        'data-war-room-home-release="locked-v1"',
+        "This Week’s Top Games",
+        "Viewer’s Guide",
+        "Actionable Board",
+        "Explore Every Tool",
+        "data/site/matchups_view.json",
+        "data/site/matchup_line_history.json",
+    ]
+    rendered = HTML.read_text(encoding="utf-8")
+    missing = [item for item in required if item not in rendered]
+    if missing:
+        raise SystemExit(f"Homepage validation failed; missing markers: {missing}")
+    if "production unchanged" in rendered.lower() or "preview v" in rendered.lower():
+        raise SystemExit("Homepage validation failed; preview language remains.")
+
+    print(f"Wrote production homepage: {HTML}")
+    print("Release marker: locked-v1")
+
+
+if __name__ == "__main__":
+    main()
