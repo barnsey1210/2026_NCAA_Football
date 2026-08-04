@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "component": "market",
+      "n": 1385,
+      "max_abs_difference": 4.884981308350689e-14,
+      "passed": true
+    },
+    {
+      "component": "sp_plus",
+      "n": 1127,
+      "max_abs_difference": 3.708144902248023e-14,
+      "passed": true
+    },
+    {
+      "component": "sp_offense",
+      "n": 1127,
+      "max_abs_difference": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "component": "sp_defense_improvement",
+      "n": 1127,
+      "max_abs_difference": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "component": "final_spread_50_50_market_sp_plus",
+      "n": 218,
+      "max_abs_difference": 0.0,
+      "passed": true
+    },
+    {
+      "component": "sp_plus_component_total",
+      "n": 411,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true
+    },
+    {
+      "component": "final_corrected_total",
+      "n": 411,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true,
+      "legacy_unrounded_correction_max_difference": 4.452945168509359e-05,
+      "detail": "approved -1.1573 reference; legacy candidate used -1.1572554705483324"
+    }
+  ],
+  "production_models": [
+    "market_rating_movement",
+    "sp_plus_overall_movement",
+    "sp_plus_offense_movement",
+    "sp_plus_defense_improvement"
+  ],
+  "excluded_models": [
+    "fpi_next_game_spread",
+    "teamrankings_next_game_spread"
+  ],
+  "source_coverage_not_used": true,
+  "production_files_modified": false
+}

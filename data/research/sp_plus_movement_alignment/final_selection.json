@@ -1,0 +1,51 @@
+{
+  "status": "COMPLETE_RESEARCH_ONLY",
+  "selection": {
+    "threshold": 1.0,
+    "direction_model": "ordinal_ridge_proxy",
+    "magnitude_model": "huber",
+    "features": [
+      "ats_margin",
+      "total_residual",
+      "final_margin",
+      "closing_spread",
+      "raw_pbp_performance",
+      "rules_repeatable_spread",
+      "regularized_repeatable_spread",
+      "residualized_repeatable_spread",
+      "repeatable_offense_performance",
+      "repeatable_defense_performance",
+      "off_ppa",
+      "off_success_rate",
+      "off_explosiveness",
+      "def_ppa_allowed",
+      "def_success_allowed",
+      "def_explosiveness_allowed",
+      "def_havoc_rate",
+      "off_plays",
+      "drive_off_points_per_opportunity",
+      "drive_def_points_per_opportunity_allowed",
+      "gc_game_control_index",
+      "trailing_2_game_ats",
+      "trailing_3_game_ats",
+      "trailing_2_game_ppa",
+      "trailing_3_game_ppa",
+      "recent_form_vs_season",
+      "opponent_adjusted_recent_form",
+      "current_sp_plus_overall",
+      "opponent_sp_plus_rating",
+      "games_played",
+      "completed_week"
+    ],
+    "blend": "simple_average",
+    "blend_2024_scores": {
+      "simple_average": 3.2019509752788218,
+      "market_when_conflict": 4.245672293754799,
+      "sp_plus_when_conflict": 3.653031355766649,
+      "suppress_conflict": 4.575043712502849
+    },
+    "selected_without_2025": true
+  },
+  "holdout_opened_after_selection": true,
+  "production_change_justified": false
+}

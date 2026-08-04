@@ -1,0 +1,176 @@
+PAGE: /Users/jameslindesmith/NCAAF_AUTO/schedule_v2.html
+SIZE: 667122
+LIVE BLOCK START COUNT: 1
+LIVE BLOCK END COUNT: 1
+INLINE DATA COUNT: 2
+
+SCRIPT SOURCES:
+  matchup_workspace.js?v=20260723-contextalign2
+
+MATCHES:
+
+FILE: /Users/jameslindesmith/NCAAF_AUTO/matchup_workspace.js
+
+--- MATCH: scheduleRows ---
+defenseTeam)}<br>Defense</th><th>Edge</th></tr></thead><tbody>${Object.entries(fiveLabels).map(([key,label])=>{const x=by.get(key)||{};return `<tr><td>${rank(x.offense_rank)}</td><td class="mwFactorName">${label}</td><td>${rank(x.defense_rank)}</td><td>${edgeLogo(x.edge_team)}</td></tr>`}).join('')}</tbody></table></div></section>`;
+  }
+  function scheduleRows(team, game){
+    const rows=[...(team.recent_form||[]),...(team.upcoming_schedule||[])]
+      .filter(x=>String(x.date||'').startsWith('2026')||String(x.season||'')==='2026');
+    const unique=[...new Map(rows.map(x=>[x.game_id||`${x.date}|${x.opponent}`,x])).values()]
+      .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+
+    const expanded=[];
+    for(let i=0;i<unique.length;i++){
+      const current=unique[i];
+      expanded.push(current);
+      const next=unique[i+1];
+      if(!next||!current.date||!next.date)continue;
+      const currentDate=new Date(`${current.date}T12:00:00`);
+      const nextDate=new Date(`${next.date}T12:00:00`);
+      const gapDays=Math.round((nextDate
+
+--- MATCH: scheduleRows ---
+g(a.date).localeCompare(String(b.date)));
+    const index=expanded.findIndex(x=>String(x.game_id)===String(game.game.game_id));
+    const selected=index>=0?index:expanded.findIndex(x=>x.date===game.game.date&&!x.is_bye);
+    return expanded.filter((_,i)=>i>=Math.max(0,selected-3)&&i<=selected+5);
+  }
+  function scheduleCard(team, game){ const rows=scheduleRows(team,game); return `<section class="mwSection mwSchedule"><h3>${esc(team.team)} — 2026 schedule context</h3><div class="mwTableWrap"><table class="mwTable"><thead><tr><th>Date</th><th>Opponent</th><th>Ovr</th><th>Off</th><th>Def</th><th>Status</th><th>Spread</th><th>Total</th></tr></thead><tbody>${rows.map(x=>{const current=!x.is_bye&&(String(x.game_id)===String(game.game.game_id)||x.date===game.game.date);if(x.is_bye)return `<tr class="mwByeRow"><td>${esc(x.date)}</td><td colspan="7"><span class="mwByeLabel">BYE WEEK</span></td></tr>`;return `<tr class="${current?'mwCurrent':''}"><td>${esc(x.date||'—')}</td><td><span class="mwScheduleOpponent">${scheduleOpponentLogo(x.opponent,game)}<span>
+
+--- MATCH: scheduleRows ---
+x=Date.parse(a),y=Date.parse(b);return Number.isFinite(x)&&Number.isFinite(y)?Math.round((y-x)/86400000):null}
+  function spotValue(value,detail=''){return `<b class="${value==='Yes'?'mwWarn':value==='No'?'mwGood':'mwMuted'}">${value}</b>${detail?`<span class="mwMuted"> · ${esc(detail)}</span>`:''}`}
+  function teamSpots(team,game){
+    const rows=scheduleRows(team,game);
+    const idx=rows.findIndex(x=>String(x.game_id)===String(game.game.game_id)||(!x.is_bye&&x.date===game.game.date));
+    const cur=idx>=0?rows[idx]:null,prev=idx>0?rows[idx-1]:null,next=idx>=0&&idx<rows.length-1?rows[idx+1]:null;
+    const road=x=>/away|neutral/i.test(String(x?.site||''));
+    const rest=prev&&cur?daysBetween(prev.date,cur.date):null;
+    const b2b=cur&&prev&&road(cur)&&road(prev)?'Yes':'No';
+    const bye=prev?.is_bye||rest>=12?'Yes':'No';
+    const nextRank=next?.opponent_ranks?.overall;
+    const look=next&&!next.is_bye&&finite(nextRank)&&Number(nextRank)<=25?'Watch':'No';
+    const travel=road(cur)?'Road':'No';
+    return {b2b,bye,look,travel};
+  }
+  functi
+
+--- MATCH: scheduleRows ---
+xtRows(game)
+    };
+  };
+  window.openMatchupWorkspace=open;window.closeMatchupWorkspace=close;window.setMatchupDecision=decision;window.saveMatchupNote=note;window.openMatchupBet=openBet;window.closeMatchupBet=closeBet;window.saveMatchupBet=saveBet;window.removeMatchupBet=removeBet;
+  window.__matchupWorkspaceTest={rankClass,contextRows,teamSpots,scheduleRows};
+  function gameIdFromTrigger(target){
+    if(!target)return null;
+    const row=target.closest?.('tr');
+
+    const direct=
+      target.dataset?.matchupId||
+      target.dataset?.gameId||
+      target.dataset?.id||
+      row?.dataset?.matchupId||
+      row?.dataset?.gameId||
+      row?.dataset?.id||
+      row?.dataset?.game;
+    if(direct)return String(direct);
+
+    const linked=row?.querySelector?.('a[href*="game_id="]');
+    if(linked){
+      try{
+        const linkedId=new URL(linked.getAttribute('href'),location.href).searchParams.get('game_id');
+        if(linkedId)return linkedId;
+      }catch(_){}
+    }
+
+    const attrs=[
+      target.getAttribute?.('onclick')||'',
+      row?.getAt
+
+FILE: /Users/jameslindesmith/NCAAF_AUTO/coach_cards.js
+
+--- MATCH: CFBD ---
+}</td><td>${esc(p.ats_record)}</td><td>${num(Number(p.ats_pct)*100,1)}%</td><td class="${valueTone(p.ats_margin)}">${num(p.ats_margin,2)}</td><td>${esc(p.ou_record)}</td><td class="${valueTone(p.total_margin)}">${num(p.total_margin,2)}</td><td>${p.games??'—'}</td></tr>`).join('')}</tbody></table><p class="muted">Full-game roles prefer long-history CFBD results; 1H/2H roles use the available 2024–25 sample.</p></div>`};
+
+
+HTML MATCH: Historical Saturday Shadow Replay
+px}
+.shadowReplayRow:last-child{border-bottom:0}
+.shadowReplayMuted{color:#9eb0ca}
+.shadowReplayWarn{margin-top:8px;color:#ffd589;font-size:12px}
+@media(max-width:900px){.shadowReplayGrid{grid-template-columns:1fr}}
+</style>
+<section id="shadowReplayCard" class="shadowReplayCard">
+  <div class="shadowReplayHead">
+    <div class="shadowReplayTitle">Historical Saturday Shadow Replay</div>
+    <div id="shadowReplayBadge" class="shadowReplayBadge">Loading…</div>
+  </div>
+  <div id="shadowReplayBody" class="shadowReplayMuted">Run the historical replay to populate this validation card.</div>
+</section>
+<script id="SATURDAY_SHADOW_REPLAY_CARD_SCRIPT">
+(function(){
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const n=(v,d=2)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'—';
+ fetch('data/site/postgame_shadow_replay.json?v=20260724-replay1')
+  .then(r=>{if(!r.ok)throw new Error('Replay artifact not built');return r.json()})
+  .then(d=>{
+   const g=d.game||{},s=d.spread_updates||[],t=d.total_update||{
+
+HTML MATCH: Saturday Rules & Validation
+· ')}</div>`:''}`;
+  })
+  .catch(err=>{
+   document.getElementById('shadowReplayBadge').textContent='NOT RUN';
+   document.getElementById('shadowReplayBody').textContent=err.message;
+  });
+})();
+</script>
+<!-- SATURDAY_SHADOW_REPLAY_CARD_END -->
+
+<div class="shadowRulesWrap">
+  <button id="shadowRulesButton" class="shadowRulesButton" type="button">Saturday Rules & Validation</button>
+  <div id="shadowRulesPanel" class="shadowRulesPanel" aria-live="polite">
+    <div class="shadowRulesGrid">
+      <section class="shadowRuleCard">
+        <h3>Spread rating update</h3>
+        <p>Runs as soon as a game is final and the closing spread is available. It predicts the team-level residual in the next game's closing spread after removing home-field advantage and the market's rolling six-week team ratings.</p>
+        <ul>
+          <li>Final scoring margin</li>
+          <li>Closing spread and ATS margin</li>
+          <li>Closing spread magnitude</li>
+          <li>Close-game indicator</li>
+          <li>Play-by-play excluded after failing the 2025 incremental holdout</l
+
+HTML MATCH: CFBD
+f="matchups_v2.html">Matchups</a><a class="active">Schedule</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></div></div><section class="hero"><div><h1>Schedule & Results</h1><p>Scores, ATS and total grading, PGWE availability, and CFBD/PBP ingestion status.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters">
+<!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
+.shadowRulesWrap{margin:12px 0 16px}
+.shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13
+
+HTML MATCH: PBP
+tchups_v2.html">Matchups</a><a class="active">Schedule</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></div></div><section class="hero"><div><h1>Schedule & Results</h1><p>Scores, ATS and total grading, PGWE availability, and CFBD/PBP ingestion status.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters">
+<!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
+.shadowRulesWrap{margin:12px 0 16px}
+.shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13px;f
+
+HTML MATCH: FULLY READY
+on><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters">
+<!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
+.shadowRulesWrap{margin:12px 0 16px}
+.shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13px;font-weight:900;cursor:pointer}
+.shadowRulesPanel{display:none;margin-top:10px;border:1px solid #2d6c55;background:#08283a;border-radius:12px;padding:14px;color:#eaf3ff}
+.shadowRulesPanel.open{display:block}
+.shadowRulesGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.shadowRuleCard{background:#0b1d38;border:1px solid #244c73;border-radius:10px;padding:12px}
+.shadowRul
+
+HTML MATCH: Schedule & Results
+<a href="ratings_v2.html">Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a class="active">Schedule</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></div></div><section class="hero"><div><h1>Schedule & Results</h1><p>Scores, ATS and total grading, PGWE availability, and CFBD/PBP ingestion status.</p></div></section><div class="weekChips" id="weeks"></div><section class="summary"><div class="tile"><span>Games</span><b id="games">—</b></div><div class="tile"><span>Final</span><b id="finals">—</b></div><div class="tile"><span>CFBD complete</span><b id="cfbd">—</b></div><div class="tile"><span>PBP processed</span><b id="pbp">—</b></div><div class="tile"><span>Fully ready</span><b id="ready">—</b></div></section><div class="filters">
+<!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+<style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
+.shadowRulesWrap{margin:12px 0 16px}
+.shadowRulesButton{border:1px solid #2e6595

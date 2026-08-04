@@ -1,0 +1,74 @@
+{
+  "seasons": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "coverage": {
+    "2021": {
+      "fbs_teams": 130,
+      "advanced_team_games": 1581,
+      "output_team_games": 1581,
+      "team_games_missing_offense_or_defense_pbp": 0,
+      "havoc_team_games": 1581,
+      "drive_pace_team_games": 1581
+    },
+    "2022": {
+      "fbs_teams": 131,
+      "advanced_team_games": 1588,
+      "output_team_games": 1588,
+      "team_games_missing_offense_or_defense_pbp": 0,
+      "havoc_team_games": 1588,
+      "drive_pace_team_games": 1588
+    },
+    "2023": {
+      "fbs_teams": 133,
+      "advanced_team_games": 1618,
+      "output_team_games": 1618,
+      "team_games_missing_offense_or_defense_pbp": 0,
+      "havoc_team_games": 1601,
+      "drive_pace_team_games": 1618
+    },
+    "2024": {
+      "fbs_teams": 134,
+      "advanced_team_games": 1619,
+      "output_team_games": 1619,
+      "team_games_missing_offense_or_defense_pbp": 0,
+      "havoc_team_games": 1610,
+      "drive_pace_team_games": 1625
+    },
+    "2025": {
+      "fbs_teams": 136,
+      "advanced_team_games": 1650,
+      "output_team_games": 1650,
+      "team_games_missing_offense_or_defense_pbp": 0,
+      "havoc_team_games": 1650,
+      "drive_pace_team_games": 1650
+    }
+  },
+  "team_game_rows": 8056,
+  "rolling_rows": 8056,
+  "adjusted_rows": 8056,
+  "unique_games": 4329,
+  "unique_teams": 136,
+  "off_play_exact_match_rate": 0.7591857000993049,
+  "def_play_exact_match_rate": 0.7540963257199603,
+  "off_play_within_2_rate": 0.9468718967229395,
+  "def_play_within_2_rate": 0.9471201588877854,
+  "valid_drive_pace_rows": 7796,
+  "invalid_drive_pace_rows": 260,
+  "off_competitive_scrimmage_plays": 488028,
+  "off_excluded_garbage_or_ot_plays": 49873,
+  "off_excluded_garbage_or_ot_rate": 0.09271780494923787,
+  "notes": [
+    "No betting results or markets were loaded.",
+    "Every rolling and opponent-adjusted row uses games from earlier weeks only.",
+    "Opponent adjustment is an iterative regularized two-way actor/context model with a 3-game prior weight.",
+    "Positive defensive pass-tendency effect means opponents pass more than expected (pass-funnel direction).",
+    "Positive defensive success/PPA/explosiveness allowed effects are worse; positive defensive havoc effect is better.",
+    "Drive pace retains a raw audit field; values outside 12-45 seconds/play are excluded as corrupted clocks.",
+    "Garbage time is excluded when the pre-play margin exceeds 38 in Q2, 28 in Q3, or 22 in Q4; overtime is excluded."
+  ]
+}

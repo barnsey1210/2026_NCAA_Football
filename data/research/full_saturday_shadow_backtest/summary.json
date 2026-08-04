@@ -1,0 +1,114 @@
+{
+  "schema_version": "full-saturday-shadow-backtest-v1",
+  "primary_goal": "predict next closing spread and total",
+  "spread": {
+    "baseline": {
+      "n": 679,
+      "mae": 5.2823282626422685,
+      "rmse": 7.1909790660235835,
+      "direction_accuracy": 0.8365243004418262,
+      "correlation": 0.8611625394695387,
+      "mean_error": 0.6849707353766471
+    },
+    "best_lambda": 0.5,
+    "best_shadow": {
+      "n": 679,
+      "mae": 4.706689858509621,
+      "rmse": 6.668937854569886,
+      "direction_accuracy": 0.8468335787923417,
+      "correlation": 0.8652973624112131,
+      "mean_error": 1.025599345736025
+    },
+    "games_improved_pct": 0.5905743740795287,
+    "rows_with_home_delta": 679,
+    "rows_with_away_delta": 679,
+    "rows": 679
+  },
+  "total": {
+    "baseline": {
+      "n": 762,
+      "mae": 7.320298261618029,
+      "rmse": 14.790991889613894,
+      "direction_accuracy": 1.0,
+      "correlation": 0.10539756320169287,
+      "mean_error": 3.5890199591382452
+    },
+    "best_lambda": 0.8,
+    "best_shadow": {
+      "n": 762,
+      "mae": 6.835989413187369,
+      "rmse": 14.627774204996213,
+      "direction_accuracy": 1.0,
+      "correlation": 0.18275777749497124,
+      "mean_error": 3.113569592079702
+    },
+    "games_improved_pct": 0.5236220472440944,
+    "segments": {
+      "both_prior": {
+        "baseline": {
+          "n": 679,
+          "mae": 4.03654009416929,
+          "rmse": 5.028430631551757,
+          "direction_accuracy": 1.0,
+          "correlation": 0.7900061785642715,
+          "mean_error": 0.061248077964457595
+        },
+        "shadow": {
+          "n": 679,
+          "mae": 3.493030016843573,
+          "rmse": 4.460549657569175,
+          "direction_accuracy": 1.0,
+          "correlation": 0.7194594264339198,
+          "mean_error": -0.47232066975072673
+        },
+        "n": 679
+      },
+      "neither_prior": {
+        "baseline": {
+          "n": 56,
+          "mae": 48.133957466481725,
+          "rmse": 51.495126534761056,
+          "direction_accuracy": 1.0,
+          "correlation": -0.1726444485367573,
+          "mean_error": 47.0892279241794
+        },
+        "shadow": {
+          "n": 56,
+          "mae": 48.133957466481725,
+          "rmse": 51.495126534761056,
+          "direction_accuracy": 1.0,
+          "correlation": -0.1726444485367573,
+          "mean_error": 47.0892279241794
+        },
+        "n": 56
+      },
+      "one_prior": {
+        "baseline": {
+          "n": 27,
+          "mae": 5.250182714407867,
+          "rmse": 6.202980451142315,
+          "direction_accuracy": 1.0,
+          "correlation": 0.5032677030384659,
+          "mean_error": 2.0832963026455675
+        },
+        "shadow": {
+          "n": 27,
+          "mae": 5.250182714407867,
+          "rmse": 6.202980451142315,
+          "direction_accuracy": 1.0,
+          "correlation": 0.5032677030384659,
+          "mean_error": 2.0832963026455675
+        },
+        "n": 27
+      }
+    },
+    "rows": 762
+  },
+  "interpretation": {
+    "spread_formula": "market baseline home spread + lambda * (-home team delta + away team delta)",
+    "total_formula": "market baseline total + lambda * validated both-prior score-plus-PBP total delta",
+    "one_prior_total_policy": "baseline retained",
+    "neither_prior_total_policy": "baseline retained"
+  },
+  "adoption_rule": "Adopt only when shadow MAE is lower than baseline MAE on the locked 2025 holdout."
+}

@@ -1,0 +1,442 @@
+{
+  "api": {
+    "calls_consumed": 0,
+    "estimated_cost": 0,
+    "remaining": {}
+  },
+  "completion_timestamp": "2026-07-31T14:11:10.117151+00:00",
+  "deployed_commit_after": "8b2d4cc8185f3f6a74a6f68f002de013327f4971",
+  "deployed_commit_before": "dccc04be6f1a706a726a6a848e52611d4a97f919",
+  "errors": [],
+  "execution_environment": "darwin",
+  "files_changed": [
+    "data/site/matchup_line_history.json",
+    "data/site/matchups_view.json",
+    "data/site/odds_screen_v2.json",
+    "data/site/odds_futures_v2.json",
+    "data/ratings/ratings_latest.csv"
+  ],
+  "host": "Mac.attlocal.net",
+  "mode_plan": {
+    "description": "Live pregame refresh of SP+, FPI, and TeamRankings. Validates and promotes all three sources, rebuilds the active ratings composite, projections, and V2 site assets, then publishes once.",
+    "stages": [
+      "live_rating_acquisition",
+      "rating_candidate_parse",
+      "rating_candidate_acceptance",
+      "canonical_ratings_rebuild",
+      "projections",
+      "game_views",
+      "shadow_components",
+      "saturday_shadow_lines",
+      "schedule_enrichment",
+      "publication_gate"
+    ]
+  },
+  "providers_called": [],
+  "publication": {
+    "command": [
+      "bash",
+      "scripts/publish/publish_site.sh",
+      "--push"
+    ],
+    "duration_seconds": 121.015,
+    "output_tail": "atus_distribution\": {\n    \"disconnected_component\": 58,\n    \"early_one_game\": 38,\n    \"connected_low_sample\": 18,\n    \"early_limited\": 15,\n    \"connected_moderate_sample\": 13\n  },\n  \"component_size_distribution\": {\n    \"2\": 58,\n    \"3\": 6,\n    \"4\": 4,\n    \"74\": 74\n  },\n  \"readiness_distribution\": {\n    \"market_context_only\": 78,\n    \"independent_market_ready\": 52\n  },\n  \"historical_rows_preserved\": 10022\n}\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_latest.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_history.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_target_excluded_2026.json\nwrote: <PROJECT_ROOT>/data/research/market_implied_ratings/production_2026_audit.json\nWrote data/ratings/ratings_source_status.csv\n      source change_status       latest_pull_at      last_changed_at  teams_changed\n Brad Powers MANUAL_SOURCE 2026-07-31T01:46:59Z 2026-07-31T01:46:59Z            NaN\n         FPI     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\n         SP+     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\nTeamRankings     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\npreseason baseline refreshed: <PROJECT_ROOT>/data/ratings/ratings_preseason_2026.csv snapshot: 2026-07-31\n<PROJECT_ROOT>/data/site/ratings_view.json 138\nmarket ratings matched: 120\nmarket ratings missing: 18\n{\n  \"parity\": {\n    \"status\": \"PASS\",\n    \"features_checked\": 48,\n    \"max_abs_difference\": 3.552713678800501e-15,\n    \"identical_feature_order\": true,\n    \"historical_transforms_reused_directly\": true\n  },\n  \"current_2026_rows\": 0,\n  \"output\": \"<PROJECT_ROOT>/data/research/shadow_live_feature_constructor\"\n}\n{\n  \"games\": 130,\n  \"internal_baseline_rows\": 108,\n  \"displayed_shadow_rows\": 0,\n  \"postgame_updated_teams\": 0,\n  \"independent_market_ready\": 52,\n  \"market_context_only\": 78,\n  \"market_unavailable\": 0,\n  \"sp_plus_unavailable\": 22\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_component_predictions.json\n{\n  \"games\": 902,\n  \"spread_complete\": 0,\n  \"total_complete\": 0,\n  \"current_market_total_baselines\": 140,\n  \"official_total_fallbacks\": 646,\n  \"missing_total_baselines\": 116,\n  \"output\": \"data/site/saturday_shadow_lines.json\"\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.json\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.csv\nwrote: <PROJECT_ROOT>/data/history/saturday_shadow_line_snapshots.csv\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\nPASS: market shadow production layer\nratings rows: 146\nshadow games: 902\nspread weights: {'predicted_market_rating_spread': 0.5, 'predicted_updated_sp_plus_spread': 0.5}\ntotal weights: {'predicted_sp_plus_component_total': 0.6, 'existing_projected_total': 0.4} bias -1.1573\n{\n  \"status\": \"PASS\",\n  \"games\": 130,\n  \"internal_baseline_games\": 108,\n  \"displayed_shadow_games\": 0,\n  \"postgame_updated_games\": 0,\n  \"independent_50_50_games\": 52,\n  \"unavailable_games\": 130,\n  \"populated_totals\": 0,\n  \"line_rows\": 902,\n  \"baseline_team_sides\": 238,\n  \"postgame_team_sides\": 0,\n  \"failed_checks\": []\n}\nCOACH BETTING CONSISTENCY AUDIT (REPORT ONLY)\nCanonical source: V1 embedded coach arrays; full-game role splits from coach_fav_dog_splits_hybrid.csv\nV2 consumer: Team: team_coach_card.js -> data/site/matchups_view.json\nV2 consumer: Matchup: matchups_v2.html -> data/site/matchups_view.json\nV2 consumer: Coach Trends: v1.html coach-betting route -> embedded canonical arrays and COACH_FAV_DOG_TRENDS_PAGE_ROWS\nCoaches checked: 138\nMismatch comparisons by page: Team=0, Matchup=0, Coach Trends=0\nLargest sample-size losses:\nLane Kiffin:\n  full_game_ats: canonical=95W-83L-4P (N=182); Team=95W-83L-4P (N=182); Matchup=95W-83L-4P (N=182); Coach Trends=95W-83L-4P (N=182)\n  full_game_totals: canonical=82O-100U-0P (N=182); Team=82O-100U-0P (N=182); Matchup=82O-100U-0P (N=182); Coach Trends=82O-100U-0P (N=182)\n  favorite_ats: canonical=48W-39L-3P (N=90); Team=48W-39L-3P (N=90); Matchup=48W-39L-3P (N=90); Coach Trends=48W-39L-3P (N=90)\n  favorite_totals: canonical=31O-48U-0P (N=79); Team=31O-48U-0P (N=79); Matchup=31O-48U-0P (N=79); Coach Trends=31O-48U-0P (N=79)\n  underdog_ats: canonical=14W-14L-0P (N=28); Team=14W-14L-0P (N=28); Matchup=14W-14L-0P (N=28); Coach Trends=14W-14L-0P (N=28)\n  underdog_totals: canonical=11O-11U-1P (N=23); Team=11O-11U-1P (N=23); Matchup=11O-11U-1P (N=23); Coach Trends=11O-11U-1P (N=23)\n  first_half_ats: canonical=8W-8L-0P (N=16); Team=8W-8L-0P (N=16); Matchup=8W-8L-0P (N=16); Coach Trends=8W-8L-0P (N=16)\n  first_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\n  second_half_ats: canonical=5W-11L-0P (N=16); Team=5W-11L-0P (N=16); Matchup=5W-11L-0P (N=16); Coach Trends=5W-11L-0P (N=16)\n  second_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\nWrote: data/qa/coach_betting_consistency.json\nWrote: data/qa/coach_betting_consistency.csv\nPASS: all audited coach-betting records are consistent\nWrote <PROJECT_ROOT>/data/site/model_performance_view.json (0 opportunities, 0 settled)\n{\n  \"teams\": 138,\n  \"win_markets\": 106,\n  \"title_markets\": 108,\n  \"playoff_markets\": 138,\n  \"national_title_markets\": 138,\n  \"open_wagers\": 29\n}\n{\n  \"market_qa\": \"warn\",\n  \"source\": \"Action Network\",\n  \"last_successful_pull\": \"2026-07-29T12:37:29.746590+00:00\",\n  \"books\": [\n    \"BetMGM\",\n    \"BetRivers\",\n    \"Caesars\",\n    \"Casumo ES\",\n    \"DraftKings\",\n    \"FanDuel\",\n    \"Sports Interaction\",\n    \"TheScore ON\",\n    \"bet365\"\n  ],\n  \"warnings\": [\n    \"Action Network playoff futures pull is stale or unavailable.\"\n  ]\n}\n<PROJECT_ROOT>/data/site/futures_view.json\n<PROJECT_ROOT>/data/qa/futures_market_qa.json\n10 136\nBuilding production Odds payloads...\nODDS SCREEN V2 BUILD\ngames: 108\nspread_coverage: 108\ntotal_coverage: 106\nmoneyline_coverage: 89\nspread_opener_coverage: 60\ntotal_opener_coverage: 59\nspread_history_coverage: 96\ntotal_history_coverage: 96\nper_book_game_coverage: {'DraftKings': {'spread': 53, 'total': 58, 'moneyline': 49}, 'FanDuel': {'spread': 105, 'total': 105, 'moneyline': 88}, 'BetMGM': {'spread': 57, 'total': 53}, 'Caesars': {'spread': 53, 'total': 53, 'moneyline': 46}}\nmoneyline_history_available: false\npayload: data/site/odds_screen_v2.json\naudit: data/audits/odds_screen_v2_build_audit.json\nBuilt data/site/odds_futures_v2.json: national=136, playoff=136, conference=136, wins=138\nRunning matchup pre-publish audits...\nPASS: shared matchup workspace regression audit\ngames checked: 902\nnegative coach fixtures: 88; example=('g1', 'Eastern Michigan', 'Sacramento State', '21-27-0', 'Favorite')\nmarket fixture: g1\nincomplete-market fixture: g9\nMATCHUP CARD DATA AUDIT\n{\n  \"teams_in_view\": 138,\n  \"games\": 902,\n  \"teams_with_complete_required_fields\": 138,\n  \"teams_with_required_errors\": 0,\n  \"teams_with_warnings\": 32,\n  \"source_rp_teams\": 138,\n  \"source_rp_missing_from_view_team_set\": 0,\n  \"inconsistent_team_snapshots\": 0,\n  \"games_with_market_spread\": 130,\n  \"games_with_market_total\": 140,\n  \"games_with_injuries\": 0,\n  \"games_with_weather\": 902\n}\nseverity: {'WARN': 57}\nSam Houston source key: Sam Houston State\nSam Houston source RP: {'rank': 80, 'overall': 49, 'off': 52, 'offRank': 71, 'def': 46, 'defRank': 87}\nSam Houston view RP: {'overall_rank': 80, 'overall_pct': 49.0, 'offense_rank': 71, 'offense_pct': 52.0, 'defense_rank': 87, 'defense_pct': 46.0}\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_gaps.csv\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_audit.json\nPASS: all universally required matchup-card fields are complete and consistent\nPASS: CSS dark-logo treatment present on 13 V2 pages\nMatchup pre-publish audits passed.\nBuilt 15 pages in <PROJECT_ROOT>/build/public_site\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 587,\n  \"games_tbd\": 315,\n  \"sources\": {\n    \"Action\": 2,\n    \"Action Network\": 4,\n    \"CFBD lines\": 581\n  },\n  \"timezone_display\": \"America/New_York\"\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{'fbs_teams': 138, 'rows': {'data/site/schedule_live_enrichment.json': 902, 'data/site/saturday_shadow_lines.json': 902}}\nalready shared/synced: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json == <PROJECT_ROOT>/build/public_site/data/site/schedule_live_enrichment.json\nsynced/publicized artifact: schedule_v2.html -> <PROJECT_ROOT>/build/public_site/schedule.html\nPASS: persistent Schedule build\nsynced public artifact: openers_v2.html -> <PROJECT_ROOT>/build/public_site/openers.html\nsynced public artifact: matchup_workspace.js -> <PROJECT_ROOT>/build/public_site/matchup_workspace.js\nCANONICAL V2 INDEX AUDIT PASSED: <PROJECT_ROOT>/build/public_site/index.html\nPUBLIC SITE VALIDATION PASSED: 16 pages; shadow artifact isolated\nvalidated staged artifact: data/site/schedule_live_enrichment.json (games=902, confirmed_kickoffs=587, fbs_tagged=902)\n[main 8b2d4cc] Daily NCAAF site update 2026-07-31\n 11 files changed, 6664 insertions(+), 6001 deletions(-)\n create mode 100644 data/site/model_performance_view.json\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n<PROJECT_ROOT>/scripts/research/build_market_implied_power_ratings.py:538: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  combined = pd.concat([history, latest[history.columns]], ignore_index=True)\n<PROJECT_ROOT>/scripts/site/build_saturday_shadow_lines.py:340: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  snap = pd.concat([old, snap], ignore_index=True)\nTo github-ncaaf-site:barnsey1210/2026_NCAA_Football.git\n   dccc04b..8b2d4cc  main -> main\n",
+    "returncode": 0,
+    "status": "COMPLETED"
+  },
+  "requested_mode": "pregame",
+  "requested_scope": {
+    "markets": [
+      "spread",
+      "total",
+      "moneyline"
+    ],
+    "providers": [],
+    "scope": "both",
+    "week": "current"
+  },
+  "requester_identity": "daily-market-update",
+  "run_id": "20260731T140806Z-a0ac4d75",
+  "schema_version": 1,
+  "stage": "complete",
+  "stages": [
+    {
+      "name": "exclusive_lock",
+      "status": "PASSED",
+      "timestamp": "2026-07-31T14:08:07.011734+00:00"
+    },
+    {
+      "name": "ratings_validation",
+      "status": "PASSED",
+      "timestamp": "2026-07-31T14:08:07.020715+00:00"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/test_rating_sources.py",
+        "--sources",
+        "spplus,fpi,teamrankings"
+      ],
+      "duration_seconds": 1.09,
+      "name": "test_rating_sources.py",
+      "output_tail": "\nSPPLUS\nstatus: 200\ncontent-type: text/html;charset=UTF-8\nlength: 161248\nfinal url: https://www.espn.com/college-football/story/_/id/48306284/2026-college-football-sp+-rankings-138-fbs-teams\nsaved html: data/ratings/raw/spplus/spplus_20260731_100807.html\ntables found: 2\n\nTable 0: rows=138 cols=5\ncolumns: ['team', 'sp', 'off_sp', 'def_sp', 'st_sp']\n         team   sp    off_sp    def_sp    st_sp\n1. Ohio State 31.8  40.6 (2)   8.8 (1) 0.1 (67)\n    2. Oregon 28.3  40.7 (1)  12.6 (3) 0.3 (50)\n3. Notre Dame 25.8  40.2 (3)  14.6 (9) 0.3 (47)\n   4. Georgia 25.5  38.2 (5)  13.3 (5)  0.6 (3)\n   5. Indiana 24.5  37.4 (9)  13.5 (6) 0.5 (22)\n     6. Texas 23.7  37.6 (7)  14.3 (8) 0.4 (31)\n7. Texas Tech 23.1  37.6 (8) 14.7 (11) 0.2 (54)\n     8. Miami 21.0 34.4 (12)  13.7 (7) 0.3 (42)\n\nTable 1: rows=10 cols=4\ncolumns: ['conference', 'avg_rating', 'off_rank', 'def_rank']\n      conference  avg_rating off_rank def_rank\n          1. SEC        14.5 32.8 (1) 18.6 (1)\n      2. Big Ten        11.0 30.7 (2) 19.8 (2)\n       3. Big 12         7.4 30.0 (3) 22.6 (4)\n          4. ACC         6.4 28.5 (4) 22.2 (3)\n       5. Pac-12        -3.7 23.6 (6) 27.2 (5)\n6. Mountain West        -8.2 21.2 (8) 29.3 (6)\n     7. American        -8.2 23.7 (5) 32.0 (8)\n     8. Sun Belt       -12.2 21.7 (7) 33.6 (9)\n\nFPI\nstatus: 200\ncontent-type: text/html; charset=utf-8\nlength: 725186\nfinal url: https://www.espn.com/college-football/fpi\nsaved html: data/ratings/raw/fpi/fpi_20260731_100807.html\ntables found: 2\n\nTable 0: rows=138 cols=2\ncolumns: ['team', 'conf']\n                     team       conf\n      Ohio State Buckeyes    Big Ten\n          Texas Longhorns        SEC\nNotre Dame Fighting Irish FBS Indep.\n             Oregon Ducks    Big Ten\n         Georgia Bulldogs        SEC\n         Indiana Hoosiers    Big Ten\n         Miami Hurricanes        ACC\n     Alabama Crimson Tide        SEC\n\nTable 1: rows=138 cols=12\ncolumns: ['unnamed_0_level_0_w_l', 'power_index_fpi', 'power_index_rk', 'power_index_trend', 'projections_proj_w_l', 'projections_win_out', 'projections_6wins', 'projections_win_div', 'projections_win_conf', 'projections_playoff', 'projections_make_nc', 'projections_win_nc']\nunnamed_0_level_0_w_l  power_index_fpi  power_index_rk power_index_trend projections_proj_w_l  projections_win_out  projections_6wins  projections_win_div  projections_win_conf  projections_playoff  projections_make_nc  projections_win_nc\n                  0-0             28.7               1                --             10.2-2.4                  9.2               99.4                  0.0                  38.8                 75.7                 28.0                17.0\n                  0-0             26.9               2                --              9.8-2.7                  6.8               98.0                  0.0                  29.7                 70.2                 22.5                12.8\n                  0-0             25.9               3                --             10.7-1.3                 32.7              100.0                  0.0                   0.0                 74.1                 19.6                10.6\n                  0-0             25.3               4                --             10.2-2.3                  8.5               99.4                  0.0                  24.2                 64.7                 17.7                 9.2\n                  0-0             24.8               5                --              9.9-2.5                 10.9               98.5                  0.0                  23.3                 63.9                 17.1                 9.6\n                  0-0             23.1               6                --             10.1-2.3                  9.5               99.4                  0.0                  18.7                 57.1                 13.1                 6.4\n                  0-0             21.8               7                --             10.4-2.3                  8.8               99.4                  0.0                  50.3                 63.3                 11.2                 5.3\n                  0-0             20.1               8                --              8.6-3.6                  1.6               93.1                  0.0                  10.3                 41.4                  8.1                 3.8\n\nTEAMRANKINGS\nstatus: 200\ncontent-type: text/html; charset=UTF-8\nlength: 408706\nfinal url: https://www.teamrankings.com/college-football/ranking/predictive-by-other\nsaved html: data/ratings/raw/teamrankings/teamrankings_20260731_100808.html\ntables found: 3\n\nTable 0: rows=138 cols=9\ncolumns: ['rank', 'team', 'rating', 'v_1_10', 'v_11_25', 'v_26_40', 'hi', 'lo', 'last']\n rank             team  rating v_1_10 v_11_25 v_26_40  hi  lo  last\n    1    Ohio St (0-0)    32.3    0-0     0-0     0-0   1   1     1\n    2     Oregon (0-0)    29.5    0-0     0-0     0-0   2   2     2\n    3 Notre Dame (0-0)    29.1    0-0     0-0     0-0   3   3     3\n    4    Indiana (0-0)    29.0    0-0     0-0     0-0   4   4     4\n    5    Georgia (0-0)    28.4    0-0     0-0     0-0   5   5     5\n    6      Texas (0-0)    28.4    0-0     0-0     0-0   6   6     6\n    7      Miami (0-0)    25.3    0-0     0-0     0-0   7   7     7\n    8 Texas Tech (0-0)    23.8    0-0     0-0     0-0   8   8     8\n\nTable 1: rows=5 cols=4\ncolumns: ['team', 'rank', 'chg', 'value']\n      team  rank chg value\n   Ohio St     1  --    --\n    Oregon     2  --    --\nNotre Dame     3  --    --\n   Indiana     4  --    --\n   Georgia     5  --    --\n\nTable 2: rows=5 cols=4\ncolumns: ['team', 'rank', 'chg', 'value']\n       team  rank chg value\n      UMass   138  --    --\nSam Houston   137  --    --\n  Charlotte   136  --    --\n    Ball St   135  --    --\n    Kent St   134  --    --\n\nWrote data/ratings/ratings_source_test_summary.json\n<HOME>/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\n<PROJECT_ROOT>/scripts/ratings/test_rating_sources.py:80: FutureWarning: Passing literal html to 'read_html' is deprecated and will be removed in a future version. To read from a literal string, wrap it in a 'StringIO' object.\n  tables = pd.read_html(html)\n<PROJECT_ROOT>/scripts/ratings/test_rating_sources.py:80: FutureWarning: Passing literal html to 'read_html' is deprecated and will be removed in a future version. To read from a literal string, wrap it in a 'StringIO' object.\n  tables = pd.read_html(html)\n<PROJECT_ROOT>/scripts/ratings/test_rating_sources.py:80: FutureWarning: Passing literal html to 'read_html' is deprecated and will be removed in a future version. To read from a literal string, wrap it in a 'StringIO' object.\n  tables = pd.read_html(html)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/parse_rating_source_tables.py"
+      ],
+      "duration_seconds": 0.254,
+      "name": "parse_rating_source_tables.py",
+      "output_tail": "\nTeamRankings parsed\nrows: 138\nunique teams: 138\nduplicates: []\nmissing teamrankings: 0\n             team  teamrankings             team_raw\n        Air Force          -7.4      Air Force (0-0)\n            Akron         -17.9          Akron (0-0)\n          Alabama          21.6        Alabama (0-0)\nAppalachian State         -10.9      App State (0-0)\n          Arizona           8.7        Arizona (0-0)\n    Arizona State           8.7     Arizona St (0-0)\n         Arkansas           4.7       Arkansas (0-0)\n   Arkansas State         -11.0    Arkansas St (0-0)\n             Army          -1.2           Army (0-0)\n           Auburn          13.4         Auburn (0-0)\n              BYU          14.6            BYU (0-0)\n       Ball State         -23.0        Ball St (0-0)\n           Baylor           4.6         Baylor (0-0)\n      Boise State           6.7       Boise St (0-0)\n   Boston College          -6.2 Boston College (0-0)\n\nFPI parsed\nrows: 138\nunique teams: 138\nduplicates: []\nmissing fpi: 0\n             team   fpi                  team_raw\n        Air Force  -6.8         Air Force Falcons\n            Akron -16.9                Akron Zips\n          Alabama  20.1      Alabama Crimson Tide\nAppalachian State  -9.8    App State Mountaineers\n          Arizona   7.2          Arizona Wildcats\n    Arizona State   4.8  Arizona State Sun Devils\n         Arkansas   4.4       Arkansas Razorbacks\n   Arkansas State  -9.2 Arkansas State Red Wolves\n             Army  -5.6        Army Black Knights\n           Auburn  12.0             Auburn Tigers\n              BYU  13.1               BYU Cougars\n       Ball State -17.3      Ball State Cardinals\n           Baylor   6.5              Baylor Bears\n      Boise State   4.0       Boise State Broncos\n   Boston College  -2.7     Boston College Eagles\n\nSP+ parsed\nrows: 138\nunique teams: 138\nduplicates: []\nmissing spplus: 0\nmissing spplus_off: 0\nmissing spplus_def: 0\n             team  spplus  spplus_off  spplus_def          team_raw\n        Air Force    -2.4        25.3        27.7     79. Air Force\n            Akron   -19.5        13.0        31.9        127. Akron\n          Alabama    18.2        31.3        12.6       11. Alabama\nAppalachian State   -12.1        21.2        33.6     111. App. St.\n          Arizona    10.2        31.5        20.8       30. Arizona\n    Arizona State     6.4        28.2        21.2   42. Arizona St.\n         Arkansas     5.0        34.1        29.3      47. Arkansas\n   Arkansas State    -8.5        23.7        32.3 101. Arkansas St.\n             Army    -3.0        24.5        27.6          83. Army\n           Auburn    11.2        28.4        17.5        26. Auburn\n              BYU    15.5        33.3        18.1           18. BYU\n       Ball State   -25.2        12.2        36.7   134. Ball State\n           Baylor     4.5        32.2        28.3        51. Baylor\n      Boise State     6.8        29.9        22.8   39. Boise State\n   Boston College    -1.5        25.4        27.4  74. Boston Coll.\n\nCoverage vs 2026 site universe \u2014 teamrankings\nmissing from source: 0 []\nextra in source: 0 []\n\nCoverage vs 2026 site universe \u2014 fpi\nmissing from source: 0 []\nextra in source: 0 []\n\nCoverage vs 2026 site universe \u2014 spplus_espn\nmissing from source: 0 []\nextra in source: 0 []\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/accept_live_rating_candidates_with_status.py"
+      ],
+      "duration_seconds": 0.494,
+      "name": "accept_live_rating_candidates_with_status.py",
+      "output_tail": "SP+: candidate passed validation\nFPI: candidate passed validation\nTeamRankings: candidate passed validation\nSP+: backed up accepted file to data/ratings/accepted_backups/spplus_2026_from_espn_latest_20260731T140808Z.csv\nSP+: promoted spplus_2026_candidate.csv -> spplus_2026_from_espn_latest.csv\nFPI: backed up accepted file to data/ratings/accepted_backups/fpi_2026_latest_20260731T140808Z.csv\nFPI: promoted fpi_2026_candidate.csv -> fpi_2026_latest.csv\nTeamRankings: backed up accepted file to data/ratings/accepted_backups/teamrankings_2026_latest_20260731T140808Z.csv\nTeamRankings: promoted teamrankings_2026_candidate.csv -> teamrankings_2026_latest.csv\nAll three live rating candidates accepted.\n\nLive ratings change summary:\nSP+: NO_CHANGE | teams_changed=0 | last_changed_at=2026-07-31T01:46:59Z\nFPI: NO_CHANGE | teams_changed=0 | last_changed_at=2026-07-31T01:46:59Z\nTeamRankings: NO_CHANGE | teams_changed=0 | last_changed_at=2026-07-31T01:46:59Z\nWrote data/ratings/live_rating_change_status.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/build_all_ratings_latest.py"
+      ],
+      "duration_seconds": 0.301,
+      "name": "build_all_ratings_latest.py",
+      "output_tail": "Wrote data/ratings/ratings_latest.csv: 1100 rows\nWrote data/ratings/ratings_audit.csv\n\nRows by source:\nsource\nBrad Powers          138\nDonchess Overall     136\nFPI                  138\nKFord                136\nMassey Power         138\nSP+                  138\nSagarin Predictor    138\nTeamRankings         138\n\nCoverage:\nBrad Powers 138 site teams\nDonchess Overall 136 site teams\nFPI 138 site teams\nKFord 136 site teams\nMassey Power 138 site teams\nSP+ 138 site teams\nSagarin Predictor 138 site teams\nTeamRankings 138 site teams\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/build_active_2026_ratings_master.py"
+      ],
+      "duration_seconds": 0.256,
+      "name": "build_active_2026_ratings_master.py",
+      "output_tail": "wrote data/ratings/ratings_master_latest.csv: 138 rows\n power_rank       team  power_rating  spplus  fpi  teamrankings  source_count\n          1 Ohio State     30.496685    31.8 28.7          32.3             4\n          2     Oregon     27.491685    28.3 25.3          29.5             4\n          3 Notre Dame     27.304185    25.8 25.9          29.1             4\n          4    Georgia     26.196685    25.5 24.8          28.4             4\n          5      Texas     26.081685    23.7 26.9          28.4             4\n          6    Indiana     25.559185    24.5 23.1          29.0             4\n          7   Miami-FL     22.834185    21.0 21.8          25.3             4\n          8 Texas Tech     21.814185    23.1 20.0          23.8             4\n          9  Texas A&M     20.716685    20.3 20.0          22.7             4\n         10    Alabama     19.916685    18.2 20.1          21.6             4\n         11        LSU     19.904185    20.2 20.0          22.1             4\n         12   Oklahoma     19.381685    17.2 17.8          22.0             4\n         13        USC     18.636685    16.8 17.0          20.9             4\n         14   Ole Miss     18.556685    15.9 16.0          22.3             4\n         15   Michigan     17.504185    16.1 15.9          19.8             4\n         16  Tennessee     15.986685    16.0 15.1          16.8             4\n         17 Penn State     15.419185    15.7 13.7          16.4             4\n         18    Florida     14.941685    14.9 13.6          17.4             4\n         19        BYU     14.511685    15.5 13.1          14.6             4\n         20 Washington     13.781685    14.5  9.9          16.4             4\n\nsource count coverage:\nsource_count\n4    138\n\nwrote data/ratings/ratings_source_status.csv\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/ratings/merge_live_rating_change_status.py"
+      ],
+      "duration_seconds": 0.239,
+      "name": "merge_live_rating_change_status.py",
+      "output_tail": "Wrote data/ratings/ratings_source_status.csv\n      source change_status       latest_pull_at      last_changed_at teams_changed\n Brad Powers MANUAL_SOURCE 2026-07-31T01:46:59Z 2026-07-31T01:46:59Z          None\n         FPI     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z             0\n         SP+     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z             0\nTeamRankings     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z             0\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/recalculate_game_projections_from_active_combo.py"
+      ],
+      "duration_seconds": 1.024,
+      "name": "recalculate_game_projections_from_active_combo.py",
+      "output_tail": "ratings source: <PROJECT_ROOT>/data/ratings/ratings_master_latest.csv\ncanonical DB: <PROJECT_ROOT>/data/snapshots/preseason/preseason_db.json\nactive ratings: 138\nteam ratings updated: 138\ngames recalculated: 0\ngames unchanged: 765\ngames skipped: 137\nneutral recalculated: 13\nnon-neutral recalculated: 752\nHFA: neutral=0.0, non-neutral=2.6\naudit: <PROJECT_ROOT>/data/audits/recalculate_game_projections_active_combo.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "build_game_projection_sources_2026.py"
+      ],
+      "duration_seconds": 0.261,
+      "name": "build_game_projection_sources_2026.py",
+      "output_tail": "Wrote data/projections/game_projection_sources_2026.csv: 16 rows\nWrote data/projections/game_projection_sources_audit_2026.csv: 19 rows\nsnapshot_date  season       source game_id  week       date          away_team          home_team  spread_home  total  away_score  home_score  home_win_prob                             source_url            pulled_at                                                                     notes\n   2026-07-31    2026 Massey Games      g4     0 2026-08-29             Hawaii           Stanford          7.0   52.5        21.0        28.0           0.68 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g3     0 2026-08-29 Jacksonville State North Dakota State         14.0   55.5        21.0        35.0           0.82 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g6     0 2026-08-29            Memphis               UNLV         -1.0   59.5        29.0        28.0           0.49 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g8     0 2026-08-29           NC State           Virginia          1.0   53.5        27.0        28.0           0.51 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g2     0 2026-08-29   New Mexico State      Florida State         31.0   51.5         7.0        38.0           0.97 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g5     0 2026-08-29     North Carolina                TCU         11.0   52.5        20.0        31.0           0.77 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g1     0 2026-08-29   Sacramento State   Eastern Michigan          3.0   56.5        26.0        29.0           0.58 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g7     0 2026-08-29     San Jose State                USC         31.0   55.5        10.0        41.0           0.97 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g18     1 2026-09-03              Akron        Wake Forest         27.0   50.5        10.0        37.0           0.95 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g10     1 2026-09-03    Bethune-Cookman    Central Florida         45.0   53.5         3.0        48.0           1.00 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g12     1 2026-09-03           Colorado       Georgia Tech          7.0   55.5        21.0        28.0           0.70 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g14     1 2026-09-03   Eastern Illinois          Minnesota         42.0   48.5         3.0        45.0           1.00 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g17     1 2026-09-03              Idaho               Utah         38.0   53.5         7.0        45.0           0.99 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g16     1 2026-09-03      Massachusetts            Rutgers         35.0   54.5         7.0        42.0           0.98 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games      g9     1 2026-09-03            UAlbany            Buffalo         25.0   50.5        13.0        38.0           0.94 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n   2026-07-31    2026 Massey Games     g13     1 2026-09-03       West Georgia     Kennesaw State         14.0   52.5        17.0        31.0           0.81 https://masseyratings.com/cf/fbs/games 2026-05-13T02:03:10Z Massey rendered games page projection; spread_home from projected points.\n\nAudit status:\nsource\nDRatings Predictions     0\nMassey Games            16\nSagarin Predictions      0\nName: matched, dtype: object\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "build_game_projection_blend_2026.py"
+      ],
+      "duration_seconds": 0.454,
+      "name": "build_game_projection_blend_2026.py",
+      "output_tail": "Wrote data/projections/game_projection_blend_2026.csv: 902 rows\nWrote data/projections/game_projection_blend_audit_2026.csv: 902 rows\nBlend config: data/projections/game_projection_blend_config.json\n\nCoverage:\nhas_site_spread                 765\nhas_site_total                  765\nhas_dratings_spread               0\nhas_dratings_total                0\nhas_massey_spread                16\nhas_massey_total                 16\nhas_sagarin_homeaway_spread       0\nhas_sagarin_homeaway_total        0\nhas_sagarin_predictor_spread      0\nhas_sagarin_predictor_total       0\n\nLargest spread disagreements:\n week       date          away_team          home_team        site_spread_text       blend_spread_text  site_total blend_total  spread_disagreement_massey\n    0 2026-08-29            Memphis               UNLV               UNLV -5.4               UNLV -5.4       58.95       58.95                       6.418\n    0 2026-08-29 Jacksonville State North Dakota State North Dakota State -7.6 North Dakota State -7.6       53.50        53.5                       6.370\n    0 2026-08-29     North Carolina                TCU                TCU -5.6                TCU -5.6       49.40        49.4                       5.407\n    0 2026-08-29     San Jose State                USC               USC -36.4               USC -36.4       55.20        55.2                       5.358\n    1 2026-09-03      Massachusetts            Rutgers           Rutgers -29.9           Rutgers -29.9       54.40        54.4                       5.137\n    1 2026-09-03              Akron        Wake Forest       Wake Forest -23.5       Wake Forest -23.5       44.90        44.9                       3.495\n    0 2026-08-29   Sacramento State   Eastern Michigan   Eastern Michigan -6.3   Eastern Michigan -6.3       51.80        51.8                       3.265\n    0 2026-08-29   New Mexico State      Florida State     Florida State -28.2     Florida State -28.2       50.35       50.35                       2.767\n    0 2026-08-29             Hawaii           Stanford           Stanford -4.8           Stanford -4.8       50.90        50.9                       2.240\n    0 2026-08-29           NC State           Virginia           Virginia -2.7           Virginia -2.7       51.10        51.1                       1.728\n    1 2026-09-03           Colorado       Georgia Tech       Georgia Tech -6.6       Georgia Tech -6.6       51.70        51.7                       0.383\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_matchups_view.py"
+      ],
+      "duration_seconds": 2.868,
+      "name": "build_matchups_view.py",
+      "output_tail": "games: 902\nview: <PROJECT_ROOT>/data/site/matchups_view.json 14550890 bytes\naudit: <PROJECT_ROOT>/data/audits/matchups_view_audit.json\n{\n  \"games\": 902,\n  \"model_spread\": 765,\n  \"model_total\": 765,\n  \"market_spread\": 130,\n  \"market_total\": 140,\n  \"line_history\": 902,\n  \"five_factors_complete\": 841,\n  \"returning_production_both_teams\": 765,\n  \"staff_continuity_both_teams\": 754,\n  \"opening_possession_pairs\": 765,\n  \"competition_context_eligible\": 687,\n  \"coach_full_both_teams\": 765,\n  \"coach_halves_both_teams\": 549,\n  \"injury_players\": 0,\n  \"weather_rows\": 902,\n  \"angles\": 829,\n  \"recent_form\": 522,\n  \"quarterback_depth_both_teams\": 641,\n  \"canonical_wager_game_links\": 3,\n  \"expert_picks\": 0,\n  \"notes\": 0,\n  \"watch_pass\": 0\n}\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/history/build_matchup_line_history_clean.py"
+      ],
+      "duration_seconds": 11.619,
+      "name": "build_matchup_line_history_clean.py",
+      "output_tail": "data/odds/game_line_history.csv rows: 12222 games: 157\ndata/history/game_line_model_history.csv rows: 902 games: 902\ndata/odds/actionnetwork_season_game_lines_2026.csv rows: 95 games: 95\ndata/markets/sgo/sgo_ncaaf_game_odds.csv rows: 71 games: 71\ndata/odds/season_game_lines_2026.csv rows: 50 games: 50\n\nwrote: data/history/matchup_line_history_clean.csv\nrows: 4749\ngames: 902\nsnapshot dates: 2026-05-24 to 2026-07-31\nsnapshots per game:\n1     745\n2       2\n4      33\n5      39\n6       1\n7       1\n8      10\n9       1\n11      9\n54      1\n55      2\n56      5\n57     46\n58      7\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/inject_matchup_line_history.py",
+        "--asset-only"
+      ],
+      "duration_seconds": 0.964,
+      "name": "inject_matchup_line_history.py",
+      "output_tail": "games with line history: 902\nhistory rows: 4749\nasset: data/site/matchup_line_history.json version: 81f216dc53c2 bytes: 3449055\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_saturday_shadow_component_predictions.py"
+      ],
+      "duration_seconds": 0.387,
+      "name": "build_saturday_shadow_component_predictions.py",
+      "output_tail": "{\n  \"games\": 130,\n  \"internal_baseline_rows\": 108,\n  \"displayed_shadow_rows\": 0,\n  \"postgame_updated_teams\": 0,\n  \"independent_market_ready\": 52,\n  \"market_context_only\": 78,\n  \"market_unavailable\": 0,\n  \"sp_plus_unavailable\": 22\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_component_predictions.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_saturday_shadow_lines.py"
+      ],
+      "duration_seconds": 1.83,
+      "name": "build_saturday_shadow_lines.py",
+      "output_tail": "{\n  \"games\": 902,\n  \"spread_complete\": 0,\n  \"total_complete\": 0,\n  \"current_market_total_baselines\": 140,\n  \"official_total_fallbacks\": 646,\n  \"missing_total_baselines\": 116,\n  \"output\": \"data/site/saturday_shadow_lines.json\"\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.json\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.csv\nwrote: <PROJECT_ROOT>/data/history/saturday_shadow_line_snapshots.csv\n<PROJECT_ROOT>/scripts/site/build_saturday_shadow_lines.py:340: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  snap = pd.concat([old, snap], ignore_index=True)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_schedule_live_enrichment.py"
+      ],
+      "duration_seconds": 39.162,
+      "name": "build_schedule_live_enrichment.py",
+      "output_tail": "{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/model_tracking/capture_model_tracking.py",
+        "--accept"
+      ],
+      "duration_seconds": 0.456,
+      "name": "capture_model_tracking.py",
+      "output_tail": "Accepted 0 opportunities, 0 predictions -> <PROJECT_ROOT>/data/model_tracking/last_capture_preview.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/model_tracking/settle_model_tracking.py",
+        "--accept"
+      ],
+      "duration_seconds": 0.148,
+      "name": "settle_model_tracking.py",
+      "output_tail": "Accepted 0 result records and 0 scores\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/model_tracking/build_model_performance_view.py"
+      ],
+      "duration_seconds": 0.241,
+      "name": "build_model_performance_view.py",
+      "output_tail": "Wrote <PROJECT_ROOT>/data/site/model_performance_view.json (0 opportunities, 0 settled)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/publish/publish_site.sh",
+        "--push"
+      ],
+      "duration_seconds": 121.015,
+      "name": "canonical_publish",
+      "output_tail": "atus_distribution\": {\n    \"disconnected_component\": 58,\n    \"early_one_game\": 38,\n    \"connected_low_sample\": 18,\n    \"early_limited\": 15,\n    \"connected_moderate_sample\": 13\n  },\n  \"component_size_distribution\": {\n    \"2\": 58,\n    \"3\": 6,\n    \"4\": 4,\n    \"74\": 74\n  },\n  \"readiness_distribution\": {\n    \"market_context_only\": 78,\n    \"independent_market_ready\": 52\n  },\n  \"historical_rows_preserved\": 10022\n}\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_latest.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_history.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_target_excluded_2026.json\nwrote: <PROJECT_ROOT>/data/research/market_implied_ratings/production_2026_audit.json\nWrote data/ratings/ratings_source_status.csv\n      source change_status       latest_pull_at      last_changed_at  teams_changed\n Brad Powers MANUAL_SOURCE 2026-07-31T01:46:59Z 2026-07-31T01:46:59Z            NaN\n         FPI     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\n         SP+     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\nTeamRankings     NO_CHANGE 2026-07-31T14:08:08Z 2026-07-31T01:46:59Z            0.0\npreseason baseline refreshed: <PROJECT_ROOT>/data/ratings/ratings_preseason_2026.csv snapshot: 2026-07-31\n<PROJECT_ROOT>/data/site/ratings_view.json 138\nmarket ratings matched: 120\nmarket ratings missing: 18\n{\n  \"parity\": {\n    \"status\": \"PASS\",\n    \"features_checked\": 48,\n    \"max_abs_difference\": 3.552713678800501e-15,\n    \"identical_feature_order\": true,\n    \"historical_transforms_reused_directly\": true\n  },\n  \"current_2026_rows\": 0,\n  \"output\": \"<PROJECT_ROOT>/data/research/shadow_live_feature_constructor\"\n}\n{\n  \"games\": 130,\n  \"internal_baseline_rows\": 108,\n  \"displayed_shadow_rows\": 0,\n  \"postgame_updated_teams\": 0,\n  \"independent_market_ready\": 52,\n  \"market_context_only\": 78,\n  \"market_unavailable\": 0,\n  \"sp_plus_unavailable\": 22\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_component_predictions.json\n{\n  \"games\": 902,\n  \"spread_complete\": 0,\n  \"total_complete\": 0,\n  \"current_market_total_baselines\": 140,\n  \"official_total_fallbacks\": 646,\n  \"missing_total_baselines\": 116,\n  \"output\": \"data/site/saturday_shadow_lines.json\"\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.json\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.csv\nwrote: <PROJECT_ROOT>/data/history/saturday_shadow_line_snapshots.csv\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\nPASS: market shadow production layer\nratings rows: 146\nshadow games: 902\nspread weights: {'predicted_market_rating_spread': 0.5, 'predicted_updated_sp_plus_spread': 0.5}\ntotal weights: {'predicted_sp_plus_component_total': 0.6, 'existing_projected_total': 0.4} bias -1.1573\n{\n  \"status\": \"PASS\",\n  \"games\": 130,\n  \"internal_baseline_games\": 108,\n  \"displayed_shadow_games\": 0,\n  \"postgame_updated_games\": 0,\n  \"independent_50_50_games\": 52,\n  \"unavailable_games\": 130,\n  \"populated_totals\": 0,\n  \"line_rows\": 902,\n  \"baseline_team_sides\": 238,\n  \"postgame_team_sides\": 0,\n  \"failed_checks\": []\n}\nCOACH BETTING CONSISTENCY AUDIT (REPORT ONLY)\nCanonical source: V1 embedded coach arrays; full-game role splits from coach_fav_dog_splits_hybrid.csv\nV2 consumer: Team: team_coach_card.js -> data/site/matchups_view.json\nV2 consumer: Matchup: matchups_v2.html -> data/site/matchups_view.json\nV2 consumer: Coach Trends: v1.html coach-betting route -> embedded canonical arrays and COACH_FAV_DOG_TRENDS_PAGE_ROWS\nCoaches checked: 138\nMismatch comparisons by page: Team=0, Matchup=0, Coach Trends=0\nLargest sample-size losses:\nLane Kiffin:\n  full_game_ats: canonical=95W-83L-4P (N=182); Team=95W-83L-4P (N=182); Matchup=95W-83L-4P (N=182); Coach Trends=95W-83L-4P (N=182)\n  full_game_totals: canonical=82O-100U-0P (N=182); Team=82O-100U-0P (N=182); Matchup=82O-100U-0P (N=182); Coach Trends=82O-100U-0P (N=182)\n  favorite_ats: canonical=48W-39L-3P (N=90); Team=48W-39L-3P (N=90); Matchup=48W-39L-3P (N=90); Coach Trends=48W-39L-3P (N=90)\n  favorite_totals: canonical=31O-48U-0P (N=79); Team=31O-48U-0P (N=79); Matchup=31O-48U-0P (N=79); Coach Trends=31O-48U-0P (N=79)\n  underdog_ats: canonical=14W-14L-0P (N=28); Team=14W-14L-0P (N=28); Matchup=14W-14L-0P (N=28); Coach Trends=14W-14L-0P (N=28)\n  underdog_totals: canonical=11O-11U-1P (N=23); Team=11O-11U-1P (N=23); Matchup=11O-11U-1P (N=23); Coach Trends=11O-11U-1P (N=23)\n  first_half_ats: canonical=8W-8L-0P (N=16); Team=8W-8L-0P (N=16); Matchup=8W-8L-0P (N=16); Coach Trends=8W-8L-0P (N=16)\n  first_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\n  second_half_ats: canonical=5W-11L-0P (N=16); Team=5W-11L-0P (N=16); Matchup=5W-11L-0P (N=16); Coach Trends=5W-11L-0P (N=16)\n  second_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\nWrote: data/qa/coach_betting_consistency.json\nWrote: data/qa/coach_betting_consistency.csv\nPASS: all audited coach-betting records are consistent\nWrote <PROJECT_ROOT>/data/site/model_performance_view.json (0 opportunities, 0 settled)\n{\n  \"teams\": 138,\n  \"win_markets\": 106,\n  \"title_markets\": 108,\n  \"playoff_markets\": 138,\n  \"national_title_markets\": 138,\n  \"open_wagers\": 29\n}\n{\n  \"market_qa\": \"warn\",\n  \"source\": \"Action Network\",\n  \"last_successful_pull\": \"2026-07-29T12:37:29.746590+00:00\",\n  \"books\": [\n    \"BetMGM\",\n    \"BetRivers\",\n    \"Caesars\",\n    \"Casumo ES\",\n    \"DraftKings\",\n    \"FanDuel\",\n    \"Sports Interaction\",\n    \"TheScore ON\",\n    \"bet365\"\n  ],\n  \"warnings\": [\n    \"Action Network playoff futures pull is stale or unavailable.\"\n  ]\n}\n<PROJECT_ROOT>/data/site/futures_view.json\n<PROJECT_ROOT>/data/qa/futures_market_qa.json\n10 136\nBuilding production Odds payloads...\nODDS SCREEN V2 BUILD\ngames: 108\nspread_coverage: 108\ntotal_coverage: 106\nmoneyline_coverage: 89\nspread_opener_coverage: 60\ntotal_opener_coverage: 59\nspread_history_coverage: 96\ntotal_history_coverage: 96\nper_book_game_coverage: {'DraftKings': {'spread': 53, 'total': 58, 'moneyline': 49}, 'FanDuel': {'spread': 105, 'total': 105, 'moneyline': 88}, 'BetMGM': {'spread': 57, 'total': 53}, 'Caesars': {'spread': 53, 'total': 53, 'moneyline': 46}}\nmoneyline_history_available: false\npayload: data/site/odds_screen_v2.json\naudit: data/audits/odds_screen_v2_build_audit.json\nBuilt data/site/odds_futures_v2.json: national=136, playoff=136, conference=136, wins=138\nRunning matchup pre-publish audits...\nPASS: shared matchup workspace regression audit\ngames checked: 902\nnegative coach fixtures: 88; example=('g1', 'Eastern Michigan', 'Sacramento State', '21-27-0', 'Favorite')\nmarket fixture: g1\nincomplete-market fixture: g9\nMATCHUP CARD DATA AUDIT\n{\n  \"teams_in_view\": 138,\n  \"games\": 902,\n  \"teams_with_complete_required_fields\": 138,\n  \"teams_with_required_errors\": 0,\n  \"teams_with_warnings\": 32,\n  \"source_rp_teams\": 138,\n  \"source_rp_missing_from_view_team_set\": 0,\n  \"inconsistent_team_snapshots\": 0,\n  \"games_with_market_spread\": 130,\n  \"games_with_market_total\": 140,\n  \"games_with_injuries\": 0,\n  \"games_with_weather\": 902\n}\nseverity: {'WARN': 57}\nSam Houston source key: Sam Houston State\nSam Houston source RP: {'rank': 80, 'overall': 49, 'off': 52, 'offRank': 71, 'def': 46, 'defRank': 87}\nSam Houston view RP: {'overall_rank': 80, 'overall_pct': 49.0, 'offense_rank': 71, 'offense_pct': 52.0, 'defense_rank': 87, 'defense_pct': 46.0}\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_gaps.csv\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_audit.json\nPASS: all universally required matchup-card fields are complete and consistent\nPASS: CSS dark-logo treatment present on 13 V2 pages\nMatchup pre-publish audits passed.\nBuilt 15 pages in <PROJECT_ROOT>/build/public_site\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 587,\n  \"games_tbd\": 315,\n  \"sources\": {\n    \"Action\": 2,\n    \"Action Network\": 4,\n    \"CFBD lines\": 581\n  },\n  \"timezone_display\": \"America/New_York\"\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{'fbs_teams': 138, 'rows': {'data/site/schedule_live_enrichment.json': 902, 'data/site/saturday_shadow_lines.json': 902}}\nalready shared/synced: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json == <PROJECT_ROOT>/build/public_site/data/site/schedule_live_enrichment.json\nsynced/publicized artifact: schedule_v2.html -> <PROJECT_ROOT>/build/public_site/schedule.html\nPASS: persistent Schedule build\nsynced public artifact: openers_v2.html -> <PROJECT_ROOT>/build/public_site/openers.html\nsynced public artifact: matchup_workspace.js -> <PROJECT_ROOT>/build/public_site/matchup_workspace.js\nCANONICAL V2 INDEX AUDIT PASSED: <PROJECT_ROOT>/build/public_site/index.html\nPUBLIC SITE VALIDATION PASSED: 16 pages; shadow artifact isolated\nvalidated staged artifact: data/site/schedule_live_enrichment.json (games=902, confirmed_kickoffs=587, fbs_tagged=902)\n[main 8b2d4cc] Daily NCAAF site update 2026-07-31\n 11 files changed, 6664 insertions(+), 6001 deletions(-)\n create mode 100644 data/site/model_performance_view.json\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n<PROJECT_ROOT>/scripts/research/build_market_implied_power_ratings.py:538: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  combined = pd.concat([history, latest[history.columns]], ignore_index=True)\n<PROJECT_ROOT>/scripts/site/build_saturday_shadow_lines.py:340: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  snap = pd.concat([old, snap], ignore_index=True)\nTo github-ncaaf-site:barnsey1210/2026_NCAA_Football.git\n   dccc04b..8b2d4cc  main -> main\n",
+      "returncode": 0,
+      "status": "PASSED"
+    }
+  ],
+  "start_timestamp": "2026-07-31T14:08:06.962460+00:00",
+  "status": "COMPLETED",
+  "trigger_source": "launchd",
+  "validation_results": {
+    "ratings": [
+      {
+        "accepted_snapshot_date": "2026-07-31",
+        "check_timestamp": "2026-07-31T14:08:07.016025+00:00",
+        "content_changed": false,
+        "content_hash": "dae137020e18cfde5970e8a18e0b1d422efacd734d4e9cf73113ef133e3e70a5",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "spplus",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "SP+",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-31",
+        "check_timestamp": "2026-07-31T14:08:07.016719+00:00",
+        "content_changed": false,
+        "content_hash": "7207490e7b367dd8ad47c0d4e82aa84bd79ddf954feaee3c36909ddc1550a94b",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "fpi",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "FPI",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-31",
+        "check_timestamp": "2026-07-31T14:08:07.017291+00:00",
+        "content_changed": false,
+        "content_hash": "2ea94de71ce9043273246fd6c7104e614e7bd85c424bf9a0414ee8cba50402ef",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "teamrankings",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "TeamRankings",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-31",
+        "check_timestamp": "2026-07-31T14:08:07.017879+00:00",
+        "content_changed": false,
+        "content_hash": "40d975b3877cc69ad1a2baf154409b63d05f3820b9fb9b577154356c6dfa4c8b",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "brad_powers",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Brad Powers",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T14:08:07.018457+00:00",
+        "content_changed": false,
+        "content_hash": "3f88a05ebce7f734d7b6f8fd8ef31c8605d73d4332baee1ae0b9fa8a4cfa0246",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "sagarin",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Sagarin Predictor",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T14:08:07.019045+00:00",
+        "content_changed": false,
+        "content_hash": "c745b699f2967f8bd6cd2a91422694b1a577d845d41a8fc29b102aa54b2e91b2",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "massey",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Massey Power",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T14:08:07.019636+00:00",
+        "content_changed": false,
+        "content_hash": "ee4d5ea5c0ba3e18ebbe5efc98a867d0249f72527d67a7ae7cd61929995d8fe9",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 2,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "donchess",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Donchess Overall",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 136
+      },
+      {
+        "accepted_snapshot_date": "2026-07-31",
+        "check_timestamp": "2026-07-31T14:08:07.020249+00:00",
+        "content_changed": false,
+        "content_hash": "5cbbefaa8673b62f9659d149ec196acb7a83176ceaf5a400e60594cd75084b56",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 2,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "kford",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "KFord",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 136
+      }
+    ],
+    "v2_shell_hashes_unchanged": true
+  },
+  "warnings": []
+}

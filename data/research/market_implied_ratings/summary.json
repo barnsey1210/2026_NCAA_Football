@@ -1,0 +1,44 @@
+{
+  "schema_version": "market-implied-power-rating-backtest-v1",
+  "rating_definition": "Team strength inferred from closing spreads. Positive is stronger. Home closing margin is modeled as home rating minus away rating plus 2.5 HFA.",
+  "leakage_policy": "Each game prediction uses closing lines from earlier weeks only. Weekly rating snapshots include games through that completed week.",
+  "parameter_selection": {
+    "development": "2021-2023 available for future walk-forward expansion",
+    "validation": 2024,
+    "locked_holdout": 2025,
+    "selected": {
+      "lookback_weeks": 99,
+      "half_life_weeks": 8.0,
+      "ridge_alpha": 1.0
+    }
+  },
+  "validation_2024": {
+    "n": 667,
+    "mae": 4.90595241589055,
+    "rmse": 6.5485252504497895,
+    "direction_accuracy": 0.848575712143928,
+    "correlation": 0.8708445412241115
+  },
+  "holdout_2025": {
+    "n": 679,
+    "mae": 5.2823282626422685,
+    "rmse": 7.190979066023584,
+    "direction_accuracy": 0.8365243004418262,
+    "correlation": 0.8611625394695387
+  },
+  "latest_snapshot": {
+    "season": 2025,
+    "through_week": 16,
+    "teams": 136
+  },
+  "production_policy": {
+    "blend_into_fundamental_rating": false,
+    "display_separately": true,
+    "primary_uses": [
+      "market baseline for Saturday Shadow Line",
+      "fundamental-versus-market disagreement",
+      "market rating movement over time",
+      "next-closing-line prediction"
+    ]
+  }
+}

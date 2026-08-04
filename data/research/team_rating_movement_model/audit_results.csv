@@ -1,0 +1,25 @@
+check,status,details
+all required outputs parse,PASS,missing=[]
+selection lock reproducible,PASS,final_selection equals pre-holdout lock
+strict splits respected,PASS,"{'train_seasons': [2021, 2022, 2023], 'selection_season': 2024, 'holdout_season': 2025, 'no_move_threshold': 0.75, 'direction_model': 'ordinal_ridge_proxy', 'magnitude_model': 'huber', 'features': ['ats_margin', 'total_residual', 'final_margin', 'closing_spread', 'raw_pbp_performance', 'rules_repeatable_spread', 'regularized_repeatable_spread', 'residualized_repeatable_spread', 'repeatable_offense_performance', 'repeatable_defense_performance', 'off_ppa', 'off_success_rate', 'off_explosiveness', 'def_ppa_allowed', 'def_success_allowed', 'def_explosiveness_allowed', 'def_havoc_rate', 'off_plays', 'drive_off_points_per_opportunity', 'drive_def_points_per_opportunity_allowed', 'gc_game_control_index', 'trailing_2_game_ats', 'trailing_3_game_ats', 'trailing_2_game_ppa', 'trailing_3_game_ppa', 'recent_form_vs_season', 'opponent_adjusted_recent_form'], 'confidence_cutoffs': {'high_probability': 0.65, 'high_magnitude': 0.5, 'medium_probability': 0.52, 'minimum_feature_coverage': 0.75}, 'selected_without_holdout': True}"
+Week N+1 opener evaluation-only,PASS,all rows flagged
+Week N+1 close evaluation-only,PASS,all rows flagged
+Week N+1 result evaluation-only,PASS,all rows flagged
+rating target formula correct,PASS,max_error=1.7763568394002505e-15
+next-rating targets separated from features,PASS,next game never precedes current
+no future PBP,PASS,completed game only
+no future injury/roster,PASS,no such features used
+total projection uses prior games only,PASS,both prior weeks precede target
+SP+ snapshot legitimacy explicit,PASS,withheld
+FPI snapshot legitimacy explicit,PASS,withheld
+TeamRankings snapshot legitimacy explicit,PASS,withheld
+spread sign convention correct,PASS,away - home - HFA
+HFA treatment correct,PASS,2.5 on all rows
+neutral-site uncertainty explicit,PASS,no neutral flag available
+CLV calculations correct,PASS,n=1556
+ATS results valid,PASS,W/L/P only
+total results valid,PASS,W/L/P only
+confidence tiers reproducible,PASS,"['High', 'Low', 'Medium', 'No actionable signal']"
+model rankings reproducible,PASS,unique market/model labels
+protected production files unchanged,PASS,changed=[]
+publication repository clean,PASS,clean

@@ -1,0 +1,222 @@
+{
+  "terminology": "PROJECTED MARKET VALUE",
+  "split": {
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection": 2024,
+    "locked_holdout": 2025
+  },
+  "opening_timing": "unknown; not verified Saturday DK/FD",
+  "spread": {
+    "selected_mode": "neutral_only",
+    "selection_decision_uses_2025": false,
+    "caution": "MAE is diagnostic only; no spread value tier is published unless 2024 selection is CLV-monotonic.",
+    "three_tier_selection": {
+      "expected_error_model": "linear",
+      "score": "score_expected_error_adjusted",
+      "red_yellow_threshold": 0.5206587894872456,
+      "yellow_green_threshold": 1.0632261872677926,
+      "selection_quantiles": [
+        0.33,
+        0.8
+      ],
+      "selection_clv_monotonic": false,
+      "selection_minimum_sample_ok": true,
+      "selection_stage_stability": 0.5,
+      "locked_2025_clv_monotonic": true,
+      "features": [
+        "edge",
+        "dispersion",
+        "component_range",
+        "weighted_std",
+        "side_agreement",
+        "impact",
+        "week",
+        "stage",
+        "feature_coverage",
+        "home_games_played",
+        "away_games_played",
+        "home_predicted_sp_plus_change",
+        "away_predicted_sp_plus_change"
+      ],
+      "locked_2025_sample": 218
+    },
+    "three_tier_locked_2025": [
+      {
+        "market": "spread",
+        "tier": "green",
+        "sample_size": 55,
+        "average_projected_edge": 5.8801407634482805,
+        "n": 55,
+        "mae": 4.9837790048345525,
+        "median_absolute_error": 4.467540567949717,
+        "rmse": 5.962903341019045,
+        "bias": 0.6257335086412326,
+        "probability_shadow_beats_current": 0.03636363636363636,
+        "positive_clv_rate": 0.509090909090909,
+        "average_clv": 1.2363636363636363,
+        "ats_win_rate": 0.49056603773584906,
+        "ats_record": "26-27-2",
+        "roi_at_minus_110": -0.06115702479338842
+      },
+      {
+        "market": "spread",
+        "tier": "yellow",
+        "sample_size": 78,
+        "average_projected_edge": 2.7922127508152053,
+        "n": 78,
+        "mae": 2.779347181247525,
+        "median_absolute_error": 2.4850805909673603,
+        "rmse": 3.3062873576080993,
+        "bias": 0.32622274243503047,
+        "probability_shadow_beats_current": 0.08974358974358974,
+        "positive_clv_rate": 0.5,
+        "average_clv": 0.32051282051282054,
+        "ats_win_rate": 0.5526315789473685,
+        "ats_record": "42-34-2",
+        "roi_at_minus_110": 0.05361305361305359
+      },
+      {
+        "market": "spread",
+        "tier": "red",
+        "sample_size": 85,
+        "average_projected_edge": 0.8967037656994834,
+        "n": 85,
+        "mae": 1.8020733338472286,
+        "median_absolute_error": 1.5670967933445787,
+        "rmse": 2.2383472612163344,
+        "bias": -0.11203775444249867,
+        "probability_shadow_beats_current": 0.08235294117647059,
+        "positive_clv_rate": 0.3411764705882353,
+        "average_clv": -0.38823529411764707,
+        "ats_win_rate": 0.4588235294117647,
+        "ats_record": "39-46-0",
+        "roi_at_minus_110": -0.12406417112299467
+      }
+    ],
+    "two_tier_selection": {
+      "score": "score_expected_error_adjusted",
+      "actionable_threshold": 0.7087089613658397,
+      "selection_quantile": 0.5,
+      "selection_clv_monotonic": false,
+      "selection_minimum_sample_ok": true,
+      "locked_2025_clv_monotonic": true,
+      "locked_2025_sample": 218
+    },
+    "two_tier_locked_2025": [
+      {
+        "market": "spread",
+        "tier": "actionable",
+        "sample_size": 106,
+        "average_projected_edge": 4.597697937560449,
+        "average_clv": 0.7877358490566038,
+        "positive_clv_rate": 0.5188679245283019,
+        "n": 106,
+        "mae": 4.062508301728971,
+        "median_absolute_error": 3.225615048290601,
+        "rmse": 4.989975887148303,
+        "bias": 0.7357346866314722
+      },
+      {
+        "market": "spread",
+        "tier": "neutral",
+        "sample_size": 112,
+        "average_projected_edge": 1.1612872790740172,
+        "average_clv": -0.20982142857142858,
+        "positive_clv_rate": 0.36607142857142855,
+        "n": 112,
+        "mae": 1.9057792749727749,
+        "median_absolute_error": 1.6507217373012204,
+        "rmse": 2.304369852636986,
+        "bias": -0.24687829486918117
+      }
+    ]
+  },
+  "total": {
+    "selected_mode": "three_tier",
+    "selection": {
+      "expected_error_model": "boost",
+      "red_yellow_threshold": 0.37464212056867763,
+      "yellow_green_threshold": 1.0561331175166497,
+      "selection_quantiles": [
+        0.25,
+        0.75
+      ],
+      "selection_monotonic": false,
+      "selection_min_tier_n": 70,
+      "locked_2025_clv_monotonic": true,
+      "features": [
+        "edge",
+        "component_difference",
+        "raw_adjustment",
+        "week",
+        "stage",
+        "existing_total_projection",
+        "coverage",
+        "pace_available",
+        "home_feature_coverage",
+        "away_feature_coverage"
+      ],
+      "locked_2025_sample": 392
+    },
+    "locked_2025_tiers": [
+      {
+        "market": "total",
+        "tier": "green",
+        "sample_size": 122,
+        "average_projected_edge": 5.278361270668187,
+        "n": 122,
+        "mae": 3.4125084381254274,
+        "median_absolute_error": 3.115089155150727,
+        "rmse": 4.299902319187102,
+        "bias": -0.9580923274069766,
+        "probability_shadow_beats_current": 0.6311475409836066,
+        "positive_clv_rate": 0.6639344262295082,
+        "average_clv": 2.1557377049180326,
+        "ats_win_rate": 0.5327868852459017,
+        "ats_record": "65-57-0",
+        "roi_at_minus_110": 0.017138599105812242
+      },
+      {
+        "market": "total",
+        "tier": "yellow",
+        "sample_size": 174,
+        "average_projected_edge": 2.0357563502348333,
+        "n": 174,
+        "mae": 2.0106378633149125,
+        "median_absolute_error": 1.7335493400526687,
+        "rmse": 2.5363784354156333,
+        "bias": 0.24051073413805454,
+        "probability_shadow_beats_current": 0.6839080459770115,
+        "positive_clv_rate": 0.5804597701149425,
+        "average_clv": 0.7126436781609196,
+        "ats_win_rate": 0.5114942528735632,
+        "ats_record": "89-85-0",
+        "roi_at_minus_110": -0.02351097178683387
+      },
+      {
+        "market": "total",
+        "tier": "red",
+        "sample_size": 96,
+        "average_projected_edge": 0.4641498769651557,
+        "n": 96,
+        "mae": 1.7394636714118867,
+        "median_absolute_error": 1.3795334877732301,
+        "rmse": 2.2475360157950237,
+        "bias": 0.5053369160602084,
+        "probability_shadow_beats_current": 0.6875,
+        "positive_clv_rate": 0.34375,
+        "average_clv": -0.21875,
+        "ats_win_rate": 0.4479166666666667,
+        "ats_record": "43-53-0",
+        "roi_at_minus_110": -0.14488636363636362
+      }
+    ]
+  },
+  "market_value_tiers_validated": true,
+  "spread_market_value_tiers_validated": false,
+  "total_market_value_tiers_validated": true
+}

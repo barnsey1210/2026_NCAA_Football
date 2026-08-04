@@ -1,0 +1,273 @@
+{
+  "n": 1544,
+  "path": [],
+  "prediction": -0.34520725388601037,
+  "feature": "opening_total",
+  "threshold": 56.0,
+  "left": {
+    "n": 936,
+    "path": [
+      [
+        "opening_total",
+        "<=",
+        56.0
+      ]
+    ],
+    "prediction": -0.531517094017094,
+    "feature": "opening_total",
+    "threshold": 47.0,
+    "left": {
+      "n": 311,
+      "path": [
+        [
+          "opening_total",
+          "<=",
+          56.0
+        ],
+        [
+          "opening_total",
+          "<=",
+          47.0
+        ]
+      ],
+      "prediction": -0.2540192926045016,
+      "feature": "combined_change_xrush",
+      "threshold": -0.03300221048015163,
+      "left": {
+        "n": 125,
+        "path": [
+          [
+            "opening_total",
+            "<=",
+            56.0
+          ],
+          [
+            "opening_total",
+            "<=",
+            47.0
+          ],
+          [
+            "combined_change_xrush",
+            "<=",
+            -0.03300221048015163
+          ]
+        ],
+        "prediction": 0.092
+      },
+      "right": {
+        "n": 186,
+        "path": [
+          [
+            "opening_total",
+            "<=",
+            56.0
+          ],
+          [
+            "opening_total",
+            "<=",
+            47.0
+          ],
+          [
+            "combined_change_xrush",
+            ">",
+            -0.03300221048015163
+          ]
+        ],
+        "prediction": -0.48655913978494625
+      }
+    },
+    "right": {
+      "n": 625,
+      "path": [
+        [
+          "opening_total",
+          "<=",
+          56.0
+        ],
+        [
+          "opening_total",
+          ">",
+          47.0
+        ]
+      ],
+      "prediction": -0.6696,
+      "feature": "combined_change_havoc",
+      "threshold": -0.06957651354520879,
+      "left": {
+        "n": 125,
+        "path": [
+          [
+            "opening_total",
+            "<=",
+            56.0
+          ],
+          [
+            "opening_total",
+            ">",
+            47.0
+          ],
+          [
+            "combined_change_havoc",
+            "<=",
+            -0.06957651354520879
+          ]
+        ],
+        "prediction": -0.128
+      },
+      "right": {
+        "n": 500,
+        "path": [
+          [
+            "opening_total",
+            "<=",
+            56.0
+          ],
+          [
+            "opening_total",
+            ">",
+            47.0
+          ],
+          [
+            "combined_change_havoc",
+            ">",
+            -0.06957651354520879
+          ]
+        ],
+        "prediction": -0.805
+      }
+    }
+  },
+  "right": {
+    "n": 608,
+    "path": [
+      [
+        "opening_total",
+        ">",
+        56.0
+      ]
+    ],
+    "prediction": -0.05838815789473684,
+    "feature": "opening_total",
+    "threshold": 62.5,
+    "left": {
+      "n": 389,
+      "path": [
+        [
+          "opening_total",
+          ">",
+          56.0
+        ],
+        [
+          "opening_total",
+          "<=",
+          62.5
+        ]
+      ],
+      "prediction": -0.2120822622107969,
+      "feature": "combined_pace_acceleration",
+      "threshold": 1.5173571099305514,
+      "left": {
+        "n": 272,
+        "path": [
+          [
+            "opening_total",
+            ">",
+            56.0
+          ],
+          [
+            "opening_total",
+            "<=",
+            62.5
+          ],
+          [
+            "combined_pace_acceleration",
+            "<=",
+            1.5173571099305514
+          ]
+        ],
+        "prediction": -0.4117647058823529
+      },
+      "right": {
+        "n": 117,
+        "path": [
+          [
+            "opening_total",
+            ">",
+            56.0
+          ],
+          [
+            "opening_total",
+            "<=",
+            62.5
+          ],
+          [
+            "combined_pace_acceleration",
+            ">",
+            1.5173571099305514
+          ]
+        ],
+        "prediction": 0.25213675213675213
+      }
+    },
+    "right": {
+      "n": 219,
+      "path": [
+        [
+          "opening_total",
+          ">",
+          56.0
+        ],
+        [
+          "opening_total",
+          ">",
+          62.5
+        ]
+      ],
+      "prediction": 0.2146118721461187,
+      "feature": "combined_change_xrush",
+      "threshold": 0.005213807121946079,
+      "left": {
+        "n": 110,
+        "path": [
+          [
+            "opening_total",
+            ">",
+            56.0
+          ],
+          [
+            "opening_total",
+            ">",
+            62.5
+          ],
+          [
+            "combined_change_xrush",
+            "<=",
+            0.005213807121946079
+          ]
+        ],
+        "prediction": 0.37272727272727274
+      },
+      "right": {
+        "n": 109,
+        "path": [
+          [
+            "opening_total",
+            ">",
+            56.0
+          ],
+          [
+            "opening_total",
+            ">",
+            62.5
+          ],
+          [
+            "combined_change_xrush",
+            ">",
+            0.005213807121946079
+          ]
+        ],
+        "prediction": 0.05504587155963303
+      }
+    }
+  }
+}

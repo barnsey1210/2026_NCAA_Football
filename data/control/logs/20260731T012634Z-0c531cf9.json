@@ -1,0 +1,311 @@
+{
+  "api": {
+    "calls_consumed": 0,
+    "estimated_cost": 0,
+    "remaining": {}
+  },
+  "completion_timestamp": "2026-07-31T01:26:34.499687+00:00",
+  "deployed_commit_after": "c6b159d639a45f0bd6622cfdbbb3300a76622692",
+  "deployed_commit_before": "c6b159d639a45f0bd6622cfdbbb3300a76622692",
+  "errors": [],
+  "execution_environment": "darwin",
+  "files_changed": [],
+  "host": "Mac.attlocal.net",
+  "mode_plan": {
+    "description": "Live pregame refresh of SP+, FPI, and TeamRankings. Validates and promotes all three sources, rebuilds the active ratings composite, projections, and V2 site assets, then publishes once.",
+    "stages": [
+      "live_rating_acquisition",
+      "rating_candidate_parse",
+      "rating_candidate_acceptance",
+      "canonical_ratings_rebuild",
+      "projections",
+      "game_views",
+      "shadow_components",
+      "saturday_shadow_lines",
+      "schedule_enrichment",
+      "publication_gate"
+    ]
+  },
+  "providers_called": [],
+  "publication": {
+    "status": "SKIPPED"
+  },
+  "requested_mode": "pregame",
+  "requested_scope": {
+    "markets": [
+      "spread",
+      "total",
+      "moneyline"
+    ],
+    "providers": [],
+    "scope": "both",
+    "week": "current"
+  },
+  "requester_identity": "james",
+  "run_id": "20260731T012634Z-0c531cf9",
+  "schema_version": 1,
+  "stage": "complete",
+  "stages": [
+    {
+      "name": "exclusive_lock",
+      "status": "PASSED",
+      "timestamp": "2026-07-31T01:26:34.465170+00:00"
+    },
+    {
+      "name": "ratings_validation",
+      "status": "PASSED",
+      "timestamp": "2026-07-31T01:26:34.481395+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/ratings/test_rating_sources.py --sources spplus,fpi,teamrankings"
+      ],
+      "name": "live_rating_acquisition",
+      "providers": [
+        "spplus",
+        "fpi",
+        "teamrankings"
+      ],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481403+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/ratings/parse_rating_source_tables.py"
+      ],
+      "name": "rating_candidate_parse",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481405+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/ratings/accept_live_rating_candidates.py"
+      ],
+      "name": "rating_candidate_acceptance",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481407+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/ratings/build_all_ratings_latest.py",
+        "python3 scripts/ratings/build_active_2026_ratings_master.py"
+      ],
+      "name": "canonical_ratings_rebuild",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481408+00:00"
+    },
+    {
+      "commands": [
+        "python3 build_game_projection_sources_2026.py",
+        "python3 build_game_projection_blend_2026.py"
+      ],
+      "name": "projections",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481410+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/site/build_matchups_view.py",
+        "python3 scripts/history/build_matchup_line_history_clean.py",
+        "python3 scripts/site/inject_matchup_line_history.py --asset-only"
+      ],
+      "name": "game_views",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481411+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/site/build_saturday_shadow_component_predictions.py"
+      ],
+      "name": "shadow_components",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481413+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/site/build_saturday_shadow_lines.py"
+      ],
+      "name": "saturday_shadow_lines",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481415+00:00"
+    },
+    {
+      "commands": [
+        "python3 scripts/site/build_schedule_live_enrichment.py"
+      ],
+      "name": "schedule_enrichment",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481416+00:00"
+    },
+    {
+      "commands": [
+        "bash scripts/publish/publish_site.sh --push"
+      ],
+      "name": "publication_gate",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-31T01:26:34.481417+00:00"
+    }
+  ],
+  "start_timestamp": "2026-07-31T01:26:34.400350+00:00",
+  "status": "COMPLETED",
+  "trigger_source": "local",
+  "validation_results": {
+    "ratings": [
+      {
+        "accepted_snapshot_date": "2026-07-30",
+        "check_timestamp": "2026-07-31T01:26:34.475071+00:00",
+        "content_changed": false,
+        "content_hash": "7a0a0946260ac871fd13d6c81aa2833547937ad41b8aabd21cc0eeb240de2bbb",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "spplus",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "SP+",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-30",
+        "check_timestamp": "2026-07-31T01:26:34.476733+00:00",
+        "content_changed": false,
+        "content_hash": "f7b94d562621e5a9301688fff9b6d89fadae925965424f24740ba7b709d4f19d",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "fpi",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "FPI",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-30",
+        "check_timestamp": "2026-07-31T01:26:34.478067+00:00",
+        "content_changed": false,
+        "content_hash": "94fcc5e25b2934378eea9c54161de5d322bdd0c2e4bef8bf5d7ef2762cdae024",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "teamrankings",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "TeamRankings",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-30",
+        "check_timestamp": "2026-07-31T01:26:34.478687+00:00",
+        "content_changed": false,
+        "content_hash": "fd0542ef5ea797166ce9437165a52e5915cea5b43f51ea467e9d8afa7aec644c",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "brad_powers",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Brad Powers",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T01:26:34.479243+00:00",
+        "content_changed": false,
+        "content_hash": "3f88a05ebce7f734d7b6f8fd8ef31c8605d73d4332baee1ae0b9fa8a4cfa0246",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "sagarin",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Sagarin Predictor",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T01:26:34.479799+00:00",
+        "content_changed": false,
+        "content_hash": "c745b699f2967f8bd6cd2a91422694b1a577d845d41a8fc29b102aa54b2e91b2",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 0,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "massey",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Massey Power",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 138
+      },
+      {
+        "accepted_snapshot_date": "2026-07-29",
+        "check_timestamp": "2026-07-31T01:26:34.480357+00:00",
+        "content_changed": false,
+        "content_hash": "ee4d5ea5c0ba3e18ebbe5efc98a867d0249f72527d67a7ae7cd61929995d8fe9",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 2,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "donchess",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "Donchess Overall",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 136
+      },
+      {
+        "accepted_snapshot_date": "2026-07-30",
+        "check_timestamp": "2026-07-31T01:26:34.480922+00:00",
+        "content_changed": false,
+        "content_hash": "cf873af0d3744d0de57f612d27477beebb94331bd02751ef3cb348d732650628",
+        "downstream_rebuilt": false,
+        "duplicate_teams": 0,
+        "missing_teams": 2,
+        "parsing_warnings": [],
+        "passed_validation": true,
+        "provider_key": "kford",
+        "rejection_reason": null,
+        "replaced_accepted_snapshot": false,
+        "source": "KFord",
+        "source_reported_update_date": null,
+        "status": "CHECKED_NO_CHANGE",
+        "teams": 136
+      }
+    ],
+    "v2_shell_hashes_unchanged": true
+  },
+  "warnings": []
+}

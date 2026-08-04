@@ -1,0 +1,83 @@
+{
+  "schema_version": "shadow-opener-incorporation-selection-v1",
+  "train_seasons": [
+    2021,
+    2022,
+    2023
+  ],
+  "selection_season": 2024,
+  "holdout_season": 2025,
+  "choices_locked_before_holdout": true,
+  "category_thresholds": {
+    "spread": {
+      "near_zero": 0.2,
+      "partial_upper": 0.55,
+      "mostly_upper": 0.85,
+      "full_upper": 1.15
+    },
+    "total": {
+      "near_zero": 0.25,
+      "partial_upper": 0.6,
+      "mostly_upper": 0.9,
+      "full_upper": 1.1
+    }
+  },
+  "residual_models": {
+    "spread": {
+      "direction_threshold": 0.25,
+      "family": "elastic",
+      "edge_threshold": 1.0,
+      "probability_threshold": 0.525,
+      "features": [
+        "week",
+        "home_games_played_after",
+        "away_games_played_after",
+        "home_predicted_movement",
+        "away_predicted_movement",
+        "predicted_game_adjustment",
+        "home_prob_down",
+        "home_prob_no_change",
+        "home_prob_up",
+        "away_prob_down",
+        "away_prob_no_change",
+        "away_prob_up",
+        "home_feature_coverage",
+        "away_feature_coverage",
+        "home_raw_ats_performance",
+        "away_raw_ats_performance",
+        "home_raw_pbp_performance",
+        "away_raw_pbp_performance",
+        "home_repeatable_spread_performance",
+        "away_repeatable_spread_performance",
+        "home_trailing_2_game_ats",
+        "away_trailing_2_game_ats",
+        "home_recent_form_vs_season",
+        "away_recent_form_vs_season",
+        "home_opponent_adjusted_recent_form",
+        "away_opponent_adjusted_recent_form",
+        "spread_opener",
+        "spread_pricing_gap",
+        "spread_incorporation_ratio",
+        "no_movement_projection",
+        "preopener_projected_close"
+      ]
+    },
+    "total": {
+      "direction_threshold": 0.75,
+      "family": "boost",
+      "edge_threshold": 0.75,
+      "probability_threshold": 0.525,
+      "features": [
+        "week",
+        "home_games_played_after",
+        "away_games_played_after",
+        "predicted_combined_total_adjustment",
+        "frozen_combined_total_baseline",
+        "preopener_projected_total",
+        "total_opener",
+        "total_pricing_gap",
+        "total_incorporation_ratio"
+      ]
+    }
+  }
+}

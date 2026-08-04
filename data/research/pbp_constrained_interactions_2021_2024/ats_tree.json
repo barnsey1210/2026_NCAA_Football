@@ -1,0 +1,229 @@
+{
+  "n": 1564,
+  "path": [],
+  "action": 1,
+  "feature": "dog_pass_success",
+  "threshold": -0.016664752379848446,
+  "left": {
+    "n": 938,
+    "path": [
+      [
+        "dog_pass_success",
+        "<=",
+        -0.016664752379848446
+      ]
+    ],
+    "action": 1,
+    "feature": "dog_explosive_rush",
+    "threshold": 0.011315135194059411,
+    "left": {
+      "n": 750,
+      "path": [
+        [
+          "dog_pass_success",
+          "<=",
+          -0.016664752379848446
+        ],
+        [
+          "dog_explosive_rush",
+          "<=",
+          0.011315135194059411
+        ]
+      ],
+      "action": 1,
+      "feature": "dog_explosive_pass",
+      "threshold": -0.03326908549314031,
+      "left": {
+        "n": 225,
+        "path": [
+          [
+            "dog_pass_success",
+            "<=",
+            -0.016664752379848446
+          ],
+          [
+            "dog_explosive_rush",
+            "<=",
+            0.011315135194059411
+          ],
+          [
+            "dog_explosive_pass",
+            "<=",
+            -0.03326908549314031
+          ]
+        ],
+        "action": -1
+      },
+      "right": {
+        "n": 525,
+        "path": [
+          [
+            "dog_pass_success",
+            "<=",
+            -0.016664752379848446
+          ],
+          [
+            "dog_explosive_rush",
+            "<=",
+            0.011315135194059411
+          ],
+          [
+            "dog_explosive_pass",
+            ">",
+            -0.03326908549314031
+          ]
+        ],
+        "action": 1
+      }
+    },
+    "right": {
+      "n": 188,
+      "path": [
+        [
+          "dog_pass_success",
+          "<=",
+          -0.016664752379848446
+        ],
+        [
+          "dog_explosive_rush",
+          ">",
+          0.011315135194059411
+        ]
+      ],
+      "action": 1
+    }
+  },
+  "right": {
+    "n": 626,
+    "path": [
+      [
+        "dog_pass_success",
+        ">",
+        -0.016664752379848446
+      ]
+    ],
+    "action": -1,
+    "feature": "abs_spread",
+    "threshold": 4.5,
+    "left": {
+      "n": 315,
+      "path": [
+        [
+          "dog_pass_success",
+          ">",
+          -0.016664752379848446
+        ],
+        [
+          "abs_spread",
+          "<=",
+          4.5
+        ]
+      ],
+      "action": 1,
+      "feature": "dog_points_per_drive",
+      "threshold": 0.04844490354357804,
+      "left": {
+        "n": 189,
+        "path": [
+          [
+            "dog_pass_success",
+            ">",
+            -0.016664752379848446
+          ],
+          [
+            "abs_spread",
+            "<=",
+            4.5
+          ],
+          [
+            "dog_points_per_drive",
+            "<=",
+            0.04844490354357804
+          ]
+        ],
+        "action": 1
+      },
+      "right": {
+        "n": 126,
+        "path": [
+          [
+            "dog_pass_success",
+            ">",
+            -0.016664752379848446
+          ],
+          [
+            "abs_spread",
+            "<=",
+            4.5
+          ],
+          [
+            "dog_points_per_drive",
+            ">",
+            0.04844490354357804
+          ]
+        ],
+        "action": -1
+      }
+    },
+    "right": {
+      "n": 311,
+      "path": [
+        [
+          "dog_pass_success",
+          ">",
+          -0.016664752379848446
+        ],
+        [
+          "abs_spread",
+          ">",
+          4.5
+        ]
+      ],
+      "action": -1,
+      "feature": "dog_pass_success",
+      "threshold": 0.01620248994322704,
+      "left": {
+        "n": 187,
+        "path": [
+          [
+            "dog_pass_success",
+            ">",
+            -0.016664752379848446
+          ],
+          [
+            "abs_spread",
+            ">",
+            4.5
+          ],
+          [
+            "dog_pass_success",
+            "<=",
+            0.01620248994322704
+          ]
+        ],
+        "action": -1
+      },
+      "right": {
+        "n": 124,
+        "path": [
+          [
+            "dog_pass_success",
+            ">",
+            -0.016664752379848446
+          ],
+          [
+            "abs_spread",
+            ">",
+            4.5
+          ],
+          [
+            "dog_pass_success",
+            ">",
+            0.01620248994322704
+          ]
+        ],
+        "action": -1
+      }
+    }
+  }
+}

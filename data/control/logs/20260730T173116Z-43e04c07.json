@@ -1,0 +1,446 @@
+{
+  "api": {
+    "actual_cost": null,
+    "calls_consumed": 2,
+    "estimated_cost": 2,
+    "remaining": {}
+  },
+  "completion_timestamp": "2026-07-30T17:35:53.502770+00:00",
+  "deployed_commit_after": "c33fdf3017e2c6ea5462d5bc2b377a4c8eeeeb84",
+  "deployed_commit_before": "83a14098a70271b4798e6cc243332c86baaf1c27",
+  "errors": [
+    "website publication failed"
+  ],
+  "execution_environment": "darwin",
+  "files_changed": [
+    "data/odds/season_game_lines_2026.csv",
+    "data/odds/game_line_history.csv",
+    "data/site/matchup_line_history.json",
+    "data/site/matchups_view.json",
+    "data/site/odds_screen_v2.json",
+    "data/site/odds_futures_v2.json"
+  ],
+  "host": "Mac.attlocal.net",
+  "mode_plan": {
+    "default_scope": "games",
+    "description": "Capture, validate, accept, rebuild, and optionally publish current-week SportsGameOdds game odds. Futures remain outside this production controller path.",
+    "scopes": {
+      "both": [
+        "game_odds_pull",
+        "futures_pull",
+        "game_history_append",
+        "futures_history_append",
+        "game_views",
+        "futures_views",
+        "validation",
+        "publication_gate"
+      ],
+      "futures": [
+        "futures_pull",
+        "futures_history_append",
+        "futures_views",
+        "validation",
+        "publication_gate"
+      ],
+      "games": [
+        "game_odds_pull",
+        "game_history_append",
+        "game_views",
+        "validation",
+        "publication_gate"
+      ]
+    }
+  },
+  "preview": {
+    "acceptance_block_reason": "preview-only; acceptance disabled",
+    "acceptance_dry_run_design": "A future provider-free command may copy same-book comparable staged values into a temporary accepted-data clone, run canonical builders/audits, diff outputs, and stop before promotion/publication.",
+    "acceptance_eligibility": false,
+    "accepted_display_book_priority": "DraftKings then Bovada (build_season_game_lines_2026.py); replay does not redefine it",
+    "accepted_state_modified": false,
+    "actual_api_cost": null,
+    "archive_page_coverage": "complete_bounded_fetch",
+    "books_returned": [
+      "betmgm",
+      "bovada",
+      "caesars",
+      "draftkings",
+      "fanduel"
+    ],
+    "canonical_week_counts_mapped": {
+      "0": 8,
+      "1": 82,
+      "10": 1,
+      "12": 1,
+      "13": 3,
+      "2": 8,
+      "3": 7
+    },
+    "comparison_method": "same accepted display sportsbook, paired sides, current-to-current only",
+    "comparison_status_counts": {
+      "moneyline:accepted_value_missing": 6,
+      "moneyline:comparable": 2,
+      "spread:comparable": 8,
+      "total:comparable": 8
+    },
+    "composite_games_staged": 8,
+    "consensus_and_best_price_behavior": "separate quote-level observations; not used for canonical movement",
+    "coverage_status": "COMPLETE",
+    "estimated_api_cost": 2,
+    "events_ambiguous": 0,
+    "events_excluded": 0,
+    "events_in_archived_page": 111,
+    "events_mapped": 110,
+    "events_staged_for_canonical_week": 8,
+    "events_unmatched": 1,
+    "events_unmatched_or_excluded": 1,
+    "excluded_events": [
+      {
+        "away_team": "UAB",
+        "candidate_count": 1,
+        "event_id": "HTi8ZufisDnaYtVhvz6J",
+        "home_team": "Illinois",
+        "reason": "unmatched",
+        "start_time_utc": "2026-09-04T01:00:00+00:00"
+      }
+    ],
+    "expected_canonical_game_ids": [
+      "g1",
+      "g2",
+      "g3",
+      "g4",
+      "g5",
+      "g6",
+      "g7",
+      "g8"
+    ],
+    "expected_canonical_games": 8,
+    "external_calls": 2,
+    "fbs_vs_fbs_staged": 8,
+    "fbs_vs_fcs_staged": 0,
+    "fcs_vs_fcs_staged": 0,
+    "files_that_would_change_in_acceptance": [
+      "data/odds/season_game_lines_2026.csv",
+      "canonical per-book market history",
+      "derived V2 market JSON after validation"
+    ],
+    "games_changed": 5,
+    "games_returned": 111,
+    "largest_valid_same_book_spread_changes": [
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g8",
+        "change": -2.5,
+        "game": "NC State at Virginia"
+      },
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g3",
+        "change": 2.5,
+        "game": "Jacksonville State at North Dakota State"
+      },
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g6",
+        "change": -2.5,
+        "game": "Memphis at UNLV"
+      },
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g2",
+        "change": -1.0,
+        "game": "New Mexico State at Florida State"
+      },
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g4",
+        "change": -1.0,
+        "game": "Hawaii at Stanford"
+      }
+    ],
+    "largest_valid_same_book_total_changes": [
+      {
+        "book": "draftkings",
+        "canonical_game_id": "g8",
+        "change": 1.0,
+        "game": "NC State at Virginia"
+      }
+    ],
+    "mapped_canonical_game_ids": [
+      "g1",
+      "g2",
+      "g3",
+      "g4",
+      "g5",
+      "g6",
+      "g7",
+      "g8"
+    ],
+    "mapped_canonical_games": 8,
+    "missing_book_behavior": "comparison unavailable; no newer-book substitution",
+    "missing_canonical_game_ids": [],
+    "missing_canonical_games": 0,
+    "mode": "live_preview",
+    "moneylines_changed": 1,
+    "neutral_site_games_staged": 2,
+    "new_observations": 206,
+    "next_cursor_present": false,
+    "observation_ledger": "data/control/observations/sports_game_odds/20260730T173116Z-43e04c07.jsonl",
+    "original_preview_counts": {
+      "games_changed": 39,
+      "moneylines_changed": 7,
+      "spreads_changed": 29,
+      "totals_changed": 14
+    },
+    "page_count": 2,
+    "pagination_design": "Live preview follows nextCursor up to an explicit maximum page/request budget and blocks acceptance if a cursor remains.",
+    "populated_market_components": {
+      "moneyline": 60,
+      "spread": 80,
+      "total": 80
+    },
+    "provider": "sports_game_odds",
+    "provider_week_counts": {
+      "1": 91,
+      "10": 1,
+      "12": 1,
+      "13": 3,
+      "2": 8,
+      "3": 7
+    },
+    "provider_week_is_authoritative": false,
+    "publication": "SKIPPED",
+    "pulled_at": "2026-07-30T17:31:16.539326+00:00",
+    "quote_audit_ledger_total": 638,
+    "quote_observations_added_to_audit_ledger": 206,
+    "quote_observations_retained": 220,
+    "quote_rows_by_sportsbook": {
+      "betmgm": 32,
+      "bovada": 46,
+      "caesars": 46,
+      "draftkings": 48,
+      "fanduel": 48
+    },
+    "raw_retention": "archived response replayed; quote observations remain audit-only",
+    "replay_source_run_id": null,
+    "request_success": true,
+    "requested_week": "current",
+    "resolved_canonical_week": 0,
+    "run_id": "20260730T173116Z-43e04c07",
+    "selected_week_date_range": [
+      "2026-08-29",
+      "2026-08-29"
+    ],
+    "shared_deduplicated_ledger": "data/control/observations/sports_game_odds/quote_observations.jsonl",
+    "spreads_changed": 5,
+    "stale_quote_rows": 6,
+    "stale_threshold_hours": 24.0,
+    "stale_threshold_rationale": "24 hours is a proposed conservative preview threshold; it is explicit/configurable and is not an acceptance policy.",
+    "supported_books": [
+      "betmgm",
+      "bovada",
+      "caesars",
+      "draftkings",
+      "fanduel"
+    ],
+    "suspended_quote_rows": 0,
+    "totals_changed": 1,
+    "unavailable_quote_rows": 19,
+    "v2_structural_hashes": "unchanged"
+  },
+  "providers_called": [
+    "sports_game_odds"
+  ],
+  "publication": {
+    "command": [
+      "bash",
+      "scripts/publish/publish_site.sh",
+      "--push"
+    ],
+    "duration_seconds": 112.03,
+    "output_tail": " odds builders and scripts/site/build_matchups_view.py; exactly one selected home-perspective spread per canonical game_id\",\n  \"completed_close_policy\": \"only an explicit canonical closing_home_spread/closing_spread_home is eligible; current state is never relabeled as close\",\n  \"rejected_completed_games_without_explicit_close\": [],\n  \"solver\": \"existing weighted ridge least squares, sum-to-zero constraint, HFA 2.5; neutral HFA 0 in target fair spread\",\n  \"selected_parameters\": {\n    \"lookback_weeks\": 99,\n    \"half_life_weeks\": 8.0,\n    \"ridge_alpha\": 1.0\n  },\n  \"board_games\": 130,\n  \"teams\": 142,\n  \"sample_status_distribution\": {\n    \"disconnected_component\": 58,\n    \"early_one_game\": 38,\n    \"connected_low_sample\": 18,\n    \"early_limited\": 15,\n    \"connected_moderate_sample\": 13\n  },\n  \"component_size_distribution\": {\n    \"2\": 58,\n    \"3\": 6,\n    \"4\": 4,\n    \"74\": 74\n  },\n  \"readiness_distribution\": {\n    \"market_context_only\": 78,\n    \"independent_market_ready\": 52\n  },\n  \"historical_rows_preserved\": 10022\n}\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_latest.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_history.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_target_excluded_2026.json\nwrote: <PROJECT_ROOT>/data/research/market_implied_ratings/production_2026_audit.json\npreseason baseline refreshed: <PROJECT_ROOT>/data/ratings/ratings_preseason_2026.csv snapshot: 2026-07-29\n<PROJECT_ROOT>/data/site/ratings_view.json 138\nmarket ratings matched: 120\nmarket ratings missing: 18\n{\n  \"parity\": {\n    \"status\": \"PASS\",\n    \"features_checked\": 48,\n    \"max_abs_difference\": 3.552713678800501e-15,\n    \"identical_feature_order\": true,\n    \"historical_transforms_reused_directly\": true\n  },\n  \"current_2026_rows\": 0,\n  \"output\": \"<PROJECT_ROOT>/data/research/shadow_live_feature_constructor\"\n}\n{\n  \"games\": 130,\n  \"internal_baseline_rows\": 108,\n  \"displayed_shadow_rows\": 0,\n  \"postgame_updated_teams\": 0,\n  \"independent_market_ready\": 52,\n  \"market_context_only\": 78,\n  \"market_unavailable\": 0,\n  \"sp_plus_unavailable\": 22\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_component_predictions.json\n{\n  \"games\": 902,\n  \"spread_complete\": 0,\n  \"total_complete\": 0,\n  \"current_market_total_baselines\": 140,\n  \"official_total_fallbacks\": 646,\n  \"missing_total_baselines\": 116,\n  \"output\": \"data/site/saturday_shadow_lines.json\"\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.json\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.csv\nwrote: <PROJECT_ROOT>/data/history/saturday_shadow_line_snapshots.csv\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\nPASS: market shadow production layer\nratings rows: 146\nshadow games: 902\nspread weights: {'predicted_market_rating_spread': 0.5, 'predicted_updated_sp_plus_spread': 0.5}\ntotal weights: {'predicted_sp_plus_component_total': 0.6, 'existing_projected_total': 0.4} bias -1.1573\n{\n  \"status\": \"PASS\",\n  \"games\": 130,\n  \"internal_baseline_games\": 108,\n  \"displayed_shadow_games\": 0,\n  \"postgame_updated_games\": 0,\n  \"independent_50_50_games\": 52,\n  \"unavailable_games\": 130,\n  \"populated_totals\": 0,\n  \"line_rows\": 902,\n  \"baseline_team_sides\": 238,\n  \"postgame_team_sides\": 0,\n  \"failed_checks\": []\n}\nCOACH BETTING CONSISTENCY AUDIT (REPORT ONLY)\nCanonical source: V1 embedded coach arrays; full-game role splits from coach_fav_dog_splits_hybrid.csv\nV2 consumer: Team: team_coach_card.js -> data/site/matchups_view.json\nV2 consumer: Matchup: matchups_v2.html -> data/site/matchups_view.json\nV2 consumer: Coach Trends: v1.html coach-betting route -> embedded canonical arrays and COACH_FAV_DOG_TRENDS_PAGE_ROWS\nCoaches checked: 138\nMismatch comparisons by page: Team=0, Matchup=0, Coach Trends=0\nLargest sample-size losses:\nLane Kiffin:\n  full_game_ats: canonical=95W-83L-4P (N=182); Team=95W-83L-4P (N=182); Matchup=95W-83L-4P (N=182); Coach Trends=95W-83L-4P (N=182)\n  full_game_totals: canonical=82O-100U-0P (N=182); Team=82O-100U-0P (N=182); Matchup=82O-100U-0P (N=182); Coach Trends=82O-100U-0P (N=182)\n  favorite_ats: canonical=48W-39L-3P (N=90); Team=48W-39L-3P (N=90); Matchup=48W-39L-3P (N=90); Coach Trends=48W-39L-3P (N=90)\n  favorite_totals: canonical=31O-48U-0P (N=79); Team=31O-48U-0P (N=79); Matchup=31O-48U-0P (N=79); Coach Trends=31O-48U-0P (N=79)\n  underdog_ats: canonical=14W-14L-0P (N=28); Team=14W-14L-0P (N=28); Matchup=14W-14L-0P (N=28); Coach Trends=14W-14L-0P (N=28)\n  underdog_totals: canonical=11O-11U-1P (N=23); Team=11O-11U-1P (N=23); Matchup=11O-11U-1P (N=23); Coach Trends=11O-11U-1P (N=23)\n  first_half_ats: canonical=8W-8L-0P (N=16); Team=8W-8L-0P (N=16); Matchup=8W-8L-0P (N=16); Coach Trends=8W-8L-0P (N=16)\n  first_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\n  second_half_ats: canonical=5W-11L-0P (N=16); Team=5W-11L-0P (N=16); Matchup=5W-11L-0P (N=16); Coach Trends=5W-11L-0P (N=16)\n  second_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\nWrote: data/qa/coach_betting_consistency.json\nWrote: data/qa/coach_betting_consistency.csv\nPASS: all audited coach-betting records are consistent\n{\n  \"teams\": 138,\n  \"win_markets\": 106,\n  \"title_markets\": 108,\n  \"playoff_markets\": 138,\n  \"national_title_markets\": 138,\n  \"open_wagers\": 29\n}\n{\n  \"market_qa\": \"warn\",\n  \"source\": \"Action Network\",\n  \"last_successful_pull\": \"2026-07-29T12:37:29.746590+00:00\",\n  \"books\": [\n    \"BetMGM\",\n    \"BetRivers\",\n    \"Caesars\",\n    \"Casumo ES\",\n    \"DraftKings\",\n    \"FanDuel\",\n    \"Sports Interaction\",\n    \"TheScore ON\",\n    \"bet365\"\n  ],\n  \"warnings\": [\n    \"Action Network playoff futures pull is stale or unavailable.\"\n  ]\n}\n<PROJECT_ROOT>/data/site/futures_view.json\n<PROJECT_ROOT>/data/qa/futures_market_qa.json\n10 136\nBuilding production Odds payloads...\nODDS SCREEN V2 BUILD\ngames: 111\nspread_coverage: 111\ntotal_coverage: 109\nmoneyline_coverage: 93\nspread_opener_coverage: 60\ntotal_opener_coverage: 59\nspread_history_coverage: 99\ntotal_history_coverage: 99\nper_book_game_coverage: {'DraftKings': {'spread': 57, 'total': 61, 'moneyline': 53}, 'FanDuel': {'spread': 105, 'total': 105, 'moneyline': 88}, 'BetMGM': {'spread': 56, 'total': 53}, 'Caesars': {'spread': 53, 'total': 53, 'moneyline': 47}}\nmoneyline_history_available: false\npayload: data/site/odds_screen_v2.json\naudit: data/audits/odds_screen_v2_build_audit.json\nBuilt data/site/odds_futures_v2.json: national=136, playoff=136, conference=136, wins=138\nRunning matchup pre-publish audits...\nPASS: shared matchup workspace regression audit\ngames checked: 902\nnegative coach fixtures: 88; example=('g1', 'Eastern Michigan', 'Sacramento State', '21-27-0', 'Favorite')\nmarket fixture: g1\nincomplete-market fixture: g9\nMATCHUP CARD DATA AUDIT\n{\n  \"teams_in_view\": 138,\n  \"games\": 902,\n  \"teams_with_complete_required_fields\": 138,\n  \"teams_with_required_errors\": 0,\n  \"teams_with_warnings\": 32,\n  \"source_rp_teams\": 138,\n  \"source_rp_missing_from_view_team_set\": 0,\n  \"inconsistent_team_snapshots\": 0,\n  \"games_with_market_spread\": 130,\n  \"games_with_market_total\": 140,\n  \"games_with_injuries\": 0,\n  \"games_with_weather\": 902\n}\nseverity: {'WARN': 57}\nSam Houston source key: Sam Houston State\nSam Houston source RP: {'rank': 80, 'overall': 49, 'off': 52, 'offRank': 71, 'def': 46, 'defRank': 87}\nSam Houston view RP: {'overall_rank': 80, 'overall_pct': 49.0, 'offense_rank': 71, 'offense_pct': 52.0, 'defense_rank': 87, 'defense_pct': 46.0}\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_gaps.csv\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_audit.json\nPASS: all universally required matchup-card fields are complete and consistent\nPASS: CSS dark-logo treatment present on 13 V2 pages\nMatchup pre-publish audits passed.\nBuilt 15 pages in <PROJECT_ROOT>/build/public_site\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 588,\n  \"games_tbd\": 314,\n  \"sources\": {\n    \"Action\": 2,\n    \"Action Network\": 5,\n    \"CFBD lines\": 581\n  },\n  \"timezone_display\": \"America/New_York\"\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{'fbs_teams': 138, 'rows': {'data/site/schedule_live_enrichment.json': 902, 'data/site/saturday_shadow_lines.json': 902}}\nalready shared/synced: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json == <PROJECT_ROOT>/build/public_site/data/site/schedule_live_enrichment.json\nsynced/publicized artifact: schedule_v2.html -> <PROJECT_ROOT>/build/public_site/schedule.html\nPASS: persistent Schedule build\nsynced public artifact: openers_v2.html -> <PROJECT_ROOT>/build/public_site/openers.html\nsynced public artifact: matchup_workspace.js -> <PROJECT_ROOT>/build/public_site/matchup_workspace.js\nCANONICAL V2 INDEX AUDIT PASSED: <PROJECT_ROOT>/build/public_site/index.html\nPUBLIC SITE VALIDATION PASSED: 16 pages; shadow artifact isolated\nvalidated staged artifact: data/site/schedule_live_enrichment.json (games=902, confirmed_kickoffs=588, fbs_tagged=902)\n[main c33fdf3] Daily NCAAF site update 2026-07-30\n 15 files changed, 19481 insertions(+), 40072 deletions(-)\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n<PROJECT_ROOT>/scripts/research/build_market_implied_power_ratings.py:538: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  combined = pd.concat([history, latest[history.columns]], ignore_index=True)\n<PROJECT_ROOT>/scripts/site/build_saturday_shadow_lines.py:340: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  snap = pd.concat([old, snap], ignore_index=True)\nfailed to get: -25308\nfatal: could not read Username for 'https://github.com': Device not configured\n",
+    "returncode": 128,
+    "status": "FAILED"
+  },
+  "requested_mode": "odds",
+  "requested_scope": {
+    "markets": [
+      "spread",
+      "total",
+      "moneyline"
+    ],
+    "providers": [
+      "sports_game_odds"
+    ],
+    "scope": "games",
+    "week": "current"
+  },
+  "requester_identity": "barnsey1210",
+  "run_id": "20260730T173116Z-43e04c07",
+  "schema_version": 1,
+  "stage": "complete",
+  "stages": [
+    {
+      "name": "exclusive_lock",
+      "status": "PASSED",
+      "timestamp": "2026-07-30T17:31:16.515064+00:00"
+    },
+    {
+      "name": "sports_game_odds_capture",
+      "staging_manifest": "data/control/staging/20260730T173116Z-43e04c07/manifest.json",
+      "status": "PASSED",
+      "timestamp": "2026-07-30T17:31:17.329169+00:00"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/markets/build_sgo_canonical_artifacts.py",
+        "--observations",
+        "data/control/staging/20260730T173116Z-43e04c07/quote_observations.csv",
+        "--manifest",
+        "data/control/staging/20260730T173116Z-43e04c07/manifest.json",
+        "--raw",
+        "data/control/raw/sports_game_odds/20260730T173116Z-43e04c07/response.json",
+        "--quotes-out",
+        "data/markets/sgo/sgo_accepted_quotes.csv",
+        "--display-out",
+        "data/markets/sgo/sgo_canonical_display_lines.csv",
+        "--coverage-out",
+        "data/markets/sgo/sgo_canonical_coverage.json",
+        "--exclusions-out",
+        "data/markets/sgo/sgo_canonical_exclusions.csv"
+      ],
+      "duration_seconds": 0.149,
+      "name": "build_sgo_canonical_artifacts.py",
+      "output_tail": "{\n  \"schema_version\": \"canonical-market-coverage-v1\",\n  \"provider\": \"sports_game_odds\",\n  \"scope\": \"FBS-vs-FBS canonical site week\",\n  \"selected_week\": 0,\n  \"expected_canonical_games\": 8,\n  \"expected_canonical_game_ids\": [\n    \"g1\",\n    \"g2\",\n    \"g3\",\n    \"g4\",\n    \"g5\",\n    \"g6\",\n    \"g7\",\n    \"g8\"\n  ],\n  \"mapped_canonical_games\": 8,\n  \"mapped_canonical_game_ids\": [\n    \"g1\",\n    \"g2\",\n    \"g3\",\n    \"g4\",\n    \"g5\",\n    \"g6\",\n    \"g7\",\n    \"g8\"\n  ],\n  \"missing_canonical_games\": 0,\n  \"missing_canonical_game_ids\": [],\n  \"raw_pages_fetched\": 2,\n  \"next_cursor_remaining\": false,\n  \"coverage_status\": \"COMPLETE\",\n  \"request_unit_estimate\": 0,\n  \"request_unit_actual\": 0,\n  \"acceptance_eligibility\": true,\n  \"acceptance_block_reason\": \"\",\n  \"unmatched_events\": 1,\n  \"ambiguous_events\": 0,\n  \"accepted_quote_rows\": 198,\n  \"display_rows\": 24,\n  \"payload_hash\": \"59afa0055466cf03dc5ec4f3534abbfab2adb3574180807d933218ea9870d901\"\n}\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/control/accept_sgo_staged.py",
+        "--stage-dir",
+        "data/control/staging/20260730T173116Z-43e04c07",
+        "--display",
+        "data/markets/sgo/sgo_canonical_display_lines.csv",
+        "--coverage",
+        "data/markets/sgo/sgo_canonical_coverage.json"
+      ],
+      "duration_seconds": 0.034,
+      "name": "accept_sgo_staged.py",
+      "output_tail": "{\n  \"accepted\": true,\n  \"changed_market_rows\": 24,\n  \"changes\": [\n    {\n      \"canonical_game_id\": \"g1\",\n      \"target_game_id\": \"401866408\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g1\",\n      \"target_game_id\": \"401866408\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g1\",\n      \"target_game_id\": \"401866408\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g2\",\n      \"target_game_id\": \"401864570\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g2\",\n      \"target_game_id\": \"401864570\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g2\",\n      \"target_game_id\": \"401864570\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g3\",\n      \"target_game_id\": \"401864577\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g3\",\n      \"target_game_id\": \"401864577\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g3\",\n      \"target_game_id\": \"401864577\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g4\",\n      \"target_game_id\": \"401858201\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g4\",\n      \"target_game_id\": \"401858201\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g4\",\n      \"target_game_id\": \"401858201\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g5\",\n      \"target_game_id\": \"401856766\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g5\",\n      \"target_game_id\": \"401856766\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g5\",\n      \"target_game_id\": \"401856766\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g6\",\n      \"target_game_id\": \"401862693\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g6\",\n      \"target_game_id\": \"401862693\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g6\",\n      \"target_game_id\": \"401862693\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g7\",\n      \"target_game_id\": \"401864494\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g7\",\n      \"target_game_id\": \"401864494\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g7\",\n      \"target_game_id\": \"401864494\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g8\",\n      \"target_game_id\": \"401858202\",\n      \"market\": \"moneyline\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g8\",\n      \"target_game_id\": \"401858202\",\n      \"market\": \"spread\",\n      \"book\": \"draftkings\"\n    },\n    {\n      \"canonical_game_id\": \"g8\",\n      \"target_game_id\": \"401858202\",\n      \"market\": \"total\",\n      \"book\": \"draftkings\"\n    }\n  ]\n}\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/odds/append_game_line_history.py"
+      ],
+      "duration_seconds": 1.436,
+      "name": "append_game_line_history.py",
+      "output_tail": "Appended 8 changed game/source rows to data/odds/game_line_history.csv; total rows now 16804\nsnapshot_ts=2026-07-30T17:31:17+00:00\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/odds/append_sgo_game_book_line_history.py",
+        "--accepted-quotes",
+        "data/markets/sgo/sgo_accepted_quotes.csv"
+      ],
+      "duration_seconds": 0.312,
+      "name": "append_sgo_game_book_line_history.py",
+      "output_tail": "Canonical SGO quote rows appended: 198; total history rows: 10293\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/odds/build_game_line_movement_report.py"
+      ],
+      "duration_seconds": 0.288,
+      "name": "build_game_line_movement_report.py",
+      "output_tail": "Wrote data/odds/game_line_movement_report.csv: 6 rows\nmarket\nSpread    5\nTotal     1\n         away_team          home_team market       book  previous  latest  change                                                                  summary\n          NC State           Virginia Spread draftkings      -3.0    -5.5    -2.5                       NC State at Virgini spread -3 \u2192 -5.5 at draftkings\n           Memphis               UNLV Spread draftkings      -3.0    -5.5    -2.5                           Memphis at UNLV spread -3 \u2192 -5.5 at draftkings\nJacksonville State North Dakota State Spread draftkings     -10.0    -7.5     2.5 Jacksonville State at North Dakota State spread -10 \u2192 -7.5 at draftkings\n           Hawai'i           Stanford Spread draftkings      -3.0    -4.0    -1.0                         Hawai'i at Stanford spread -3 \u2192 -4 at draftkings\n  New Mexico State      Florida State Spread draftkings     -29.5   -30.5    -1.0     New Mexico State at Florida State spread -29.5 \u2192 -30.5 at draftkings\n          NC State           Virginia  Total draftkings      53.5    54.5     1.0                      NC State at Virgini total 53.5 \u2192 54.5 at draftkings\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_matchups_view.py"
+      ],
+      "duration_seconds": 2.345,
+      "name": "build_matchups_view.py",
+      "output_tail": "games: 902\nview: <PROJECT_ROOT>/data/site/matchups_view.json 14550914 bytes\naudit: <PROJECT_ROOT>/data/audits/matchups_view_audit.json\n{\n  \"games\": 902,\n  \"model_spread\": 765,\n  \"model_total\": 765,\n  \"market_spread\": 130,\n  \"market_total\": 140,\n  \"line_history\": 902,\n  \"five_factors_complete\": 841,\n  \"returning_production_both_teams\": 765,\n  \"staff_continuity_both_teams\": 754,\n  \"opening_possession_pairs\": 765,\n  \"competition_context_eligible\": 687,\n  \"coach_full_both_teams\": 765,\n  \"coach_halves_both_teams\": 549,\n  \"injury_players\": 0,\n  \"weather_rows\": 902,\n  \"angles\": 829,\n  \"recent_form\": 522,\n  \"quarterback_depth_both_teams\": 641,\n  \"canonical_wager_game_links\": 3,\n  \"expert_picks\": 0,\n  \"notes\": 0,\n  \"watch_pass\": 0\n}\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/history/build_matchup_line_history_clean.py"
+      ],
+      "duration_seconds": 11.193,
+      "name": "build_matchup_line_history_clean.py",
+      "output_tail": "data/odds/game_line_history.csv rows: 12018 games: 157\ndata/history/game_line_model_history.csv rows: 902 games: 902\ndata/odds/actionnetwork_season_game_lines_2026.csv rows: 98 games: 98\ndata/markets/sgo/sgo_ncaaf_game_odds.csv rows: 71 games: 71\ndata/odds/season_game_lines_2026.csv rows: 50 games: 50\n\nwrote: data/history/matchup_line_history_clean.csv\nrows: 4654\ngames: 902\nsnapshot dates: 2026-05-24 to 2026-07-30\nsnapshots per game:\n1     745\n2       2\n4      58\n5      14\n6       1\n7      10\n8       2\n10      3\n11      6\n53      1\n55      5\n56     48\n57      7\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/inject_matchup_line_history.py",
+        "--asset-only"
+      ],
+      "duration_seconds": 0.948,
+      "name": "inject_matchup_line_history.py",
+      "output_tail": "games with line history: 902\nhistory rows: 4654\nasset: data/site/matchup_line_history.json version: 88d3c70db2c7 bytes: 3377627\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_odds_screen_v2.py"
+      ],
+      "duration_seconds": 0.219,
+      "name": "build_odds_screen_v2.py",
+      "output_tail": "ODDS SCREEN V2 BUILD\ngames: 111\nspread_coverage: 111\ntotal_coverage: 109\nmoneyline_coverage: 93\nspread_opener_coverage: 60\ntotal_opener_coverage: 59\nspread_history_coverage: 99\ntotal_history_coverage: 99\nper_book_game_coverage: {'DraftKings': {'spread': 57, 'total': 61, 'moneyline': 53}, 'FanDuel': {'spread': 105, 'total': 105, 'moneyline': 88}, 'BetMGM': {'spread': 56, 'total': 53}, 'Caesars': {'spread': 53, 'total': 53, 'moneyline': 47}}\nmoneyline_history_available: false\npayload: data/site/odds_screen_v2.json\naudit: data/audits/odds_screen_v2_build_audit.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "/Library/Developer/CommandLineTools/usr/bin/python3",
+        "scripts/site/build_schedule_live_enrichment.py"
+      ],
+      "duration_seconds": 38.193,
+      "name": "build_schedule_live_enrichment.py",
+      "output_tail": "{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n",
+      "returncode": 0,
+      "status": "PASSED"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/publish/publish_site.sh",
+        "--check"
+      ],
+      "duration_seconds": 108.977,
+      "name": "canonical_publish_check",
+      "output_tail": "c70db2c7 bytes: 3377627\n{\n  \"schema_version\": \"market-implied-production-2026-audit-v1\",\n  \"generated_at\": \"2026-07-30T17:32:28.282160+00:00\",\n  \"canonical_current_line_source\": \"data/site/matchups_view.json market.spread.home_line\",\n  \"line_selection_owner\": \"existing odds builders and scripts/site/build_matchups_view.py; exactly one selected home-perspective spread per canonical game_id\",\n  \"completed_close_policy\": \"only an explicit canonical closing_home_spread/closing_spread_home is eligible; current state is never relabeled as close\",\n  \"rejected_completed_games_without_explicit_close\": [],\n  \"solver\": \"existing weighted ridge least squares, sum-to-zero constraint, HFA 2.5; neutral HFA 0 in target fair spread\",\n  \"selected_parameters\": {\n    \"lookback_weeks\": 99,\n    \"half_life_weeks\": 8.0,\n    \"ridge_alpha\": 1.0\n  },\n  \"board_games\": 130,\n  \"teams\": 142,\n  \"sample_status_distribution\": {\n    \"disconnected_component\": 58,\n    \"early_one_game\": 38,\n    \"connected_low_sample\": 18,\n    \"early_limited\": 15,\n    \"connected_moderate_sample\": 13\n  },\n  \"component_size_distribution\": {\n    \"2\": 58,\n    \"3\": 6,\n    \"4\": 4,\n    \"74\": 74\n  },\n  \"readiness_distribution\": {\n    \"market_context_only\": 78,\n    \"independent_market_ready\": 52\n  },\n  \"historical_rows_preserved\": 10022\n}\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_latest.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_ratings_history.csv\nwrote: <PROJECT_ROOT>/data/ratings/market_implied_target_excluded_2026.json\nwrote: <PROJECT_ROOT>/data/research/market_implied_ratings/production_2026_audit.json\npreseason baseline refreshed: <PROJECT_ROOT>/data/ratings/ratings_preseason_2026.csv snapshot: 2026-07-29\n<PROJECT_ROOT>/data/site/ratings_view.json 138\nmarket ratings matched: 120\nmarket ratings missing: 18\n{\n  \"parity\": {\n    \"status\": \"PASS\",\n    \"features_checked\": 48,\n    \"max_abs_difference\": 3.552713678800501e-15,\n    \"identical_feature_order\": true,\n    \"historical_transforms_reused_directly\": true\n  },\n  \"current_2026_rows\": 0,\n  \"output\": \"<PROJECT_ROOT>/data/research/shadow_live_feature_constructor\"\n}\n{\n  \"games\": 130,\n  \"internal_baseline_rows\": 108,\n  \"displayed_shadow_rows\": 0,\n  \"postgame_updated_teams\": 0,\n  \"independent_market_ready\": 52,\n  \"market_context_only\": 78,\n  \"market_unavailable\": 0,\n  \"sp_plus_unavailable\": 22\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_component_predictions.json\n{\n  \"games\": 902,\n  \"spread_complete\": 0,\n  \"total_complete\": 0,\n  \"current_market_total_baselines\": 140,\n  \"official_total_fallbacks\": 646,\n  \"missing_total_baselines\": 116,\n  \"output\": \"data/site/saturday_shadow_lines.json\"\n}\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.json\nwrote: <PROJECT_ROOT>/data/site/saturday_shadow_lines.csv\nwrote: <PROJECT_ROOT>/data/history/saturday_shadow_line_snapshots.csv\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\nPASS: market shadow production layer\nratings rows: 146\nshadow games: 902\nspread weights: {'predicted_market_rating_spread': 0.5, 'predicted_updated_sp_plus_spread': 0.5}\ntotal weights: {'predicted_sp_plus_component_total': 0.6, 'existing_projected_total': 0.4} bias -1.1573\n{\n  \"status\": \"PASS\",\n  \"games\": 130,\n  \"internal_baseline_games\": 108,\n  \"displayed_shadow_games\": 0,\n  \"postgame_updated_games\": 0,\n  \"independent_50_50_games\": 52,\n  \"unavailable_games\": 130,\n  \"populated_totals\": 0,\n  \"line_rows\": 902,\n  \"baseline_team_sides\": 238,\n  \"postgame_team_sides\": 0,\n  \"failed_checks\": []\n}\nCOACH BETTING CONSISTENCY AUDIT (REPORT ONLY)\nCanonical source: V1 embedded coach arrays; full-game role splits from coach_fav_dog_splits_hybrid.csv\nV2 consumer: Team: team_coach_card.js -> data/site/matchups_view.json\nV2 consumer: Matchup: matchups_v2.html -> data/site/matchups_view.json\nV2 consumer: Coach Trends: v1.html coach-betting route -> embedded canonical arrays and COACH_FAV_DOG_TRENDS_PAGE_ROWS\nCoaches checked: 138\nMismatch comparisons by page: Team=0, Matchup=0, Coach Trends=0\nLargest sample-size losses:\nLane Kiffin:\n  full_game_ats: canonical=95W-83L-4P (N=182); Team=95W-83L-4P (N=182); Matchup=95W-83L-4P (N=182); Coach Trends=95W-83L-4P (N=182)\n  full_game_totals: canonical=82O-100U-0P (N=182); Team=82O-100U-0P (N=182); Matchup=82O-100U-0P (N=182); Coach Trends=82O-100U-0P (N=182)\n  favorite_ats: canonical=48W-39L-3P (N=90); Team=48W-39L-3P (N=90); Matchup=48W-39L-3P (N=90); Coach Trends=48W-39L-3P (N=90)\n  favorite_totals: canonical=31O-48U-0P (N=79); Team=31O-48U-0P (N=79); Matchup=31O-48U-0P (N=79); Coach Trends=31O-48U-0P (N=79)\n  underdog_ats: canonical=14W-14L-0P (N=28); Team=14W-14L-0P (N=28); Matchup=14W-14L-0P (N=28); Coach Trends=14W-14L-0P (N=28)\n  underdog_totals: canonical=11O-11U-1P (N=23); Team=11O-11U-1P (N=23); Matchup=11O-11U-1P (N=23); Coach Trends=11O-11U-1P (N=23)\n  first_half_ats: canonical=8W-8L-0P (N=16); Team=8W-8L-0P (N=16); Matchup=8W-8L-0P (N=16); Coach Trends=8W-8L-0P (N=16)\n  first_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\n  second_half_ats: canonical=5W-11L-0P (N=16); Team=5W-11L-0P (N=16); Matchup=5W-11L-0P (N=16); Coach Trends=5W-11L-0P (N=16)\n  second_half_totals: canonical=6O-10U-0P (N=16); Team=6O-10U-0P (N=16); Matchup=6O-10U-0P (N=16); Coach Trends=6O-10U-0P (N=16)\nWrote: data/qa/coach_betting_consistency.json\nWrote: data/qa/coach_betting_consistency.csv\nPASS: all audited coach-betting records are consistent\n{\n  \"teams\": 138,\n  \"win_markets\": 106,\n  \"title_markets\": 108,\n  \"playoff_markets\": 138,\n  \"national_title_markets\": 138,\n  \"open_wagers\": 29\n}\n{\n  \"market_qa\": \"warn\",\n  \"source\": \"Action Network\",\n  \"last_successful_pull\": \"2026-07-29T12:37:29.746590+00:00\",\n  \"books\": [\n    \"BetMGM\",\n    \"BetRivers\",\n    \"Caesars\",\n    \"Casumo ES\",\n    \"DraftKings\",\n    \"FanDuel\",\n    \"Sports Interaction\",\n    \"TheScore ON\",\n    \"bet365\"\n  ],\n  \"warnings\": [\n    \"Action Network playoff futures pull is stale or unavailable.\"\n  ]\n}\n<PROJECT_ROOT>/data/site/futures_view.json\n<PROJECT_ROOT>/data/qa/futures_market_qa.json\n10 136\nBuilding production Odds payloads...\nODDS SCREEN V2 BUILD\ngames: 111\nspread_coverage: 111\ntotal_coverage: 109\nmoneyline_coverage: 93\nspread_opener_coverage: 60\ntotal_opener_coverage: 59\nspread_history_coverage: 99\ntotal_history_coverage: 99\nper_book_game_coverage: {'DraftKings': {'spread': 57, 'total': 61, 'moneyline': 53}, 'FanDuel': {'spread': 105, 'total': 105, 'moneyline': 88}, 'BetMGM': {'spread': 56, 'total': 53}, 'Caesars': {'spread': 53, 'total': 53, 'moneyline': 47}}\nmoneyline_history_available: false\npayload: data/site/odds_screen_v2.json\naudit: data/audits/odds_screen_v2_build_audit.json\nBuilt data/site/odds_futures_v2.json: national=136, playoff=136, conference=136, wins=138\nRunning matchup pre-publish audits...\nPASS: shared matchup workspace regression audit\ngames checked: 902\nnegative coach fixtures: 88; example=('g1', 'Eastern Michigan', 'Sacramento State', '21-27-0', 'Favorite')\nmarket fixture: g1\nincomplete-market fixture: g9\nMATCHUP CARD DATA AUDIT\n{\n  \"teams_in_view\": 138,\n  \"games\": 902,\n  \"teams_with_complete_required_fields\": 138,\n  \"teams_with_required_errors\": 0,\n  \"teams_with_warnings\": 32,\n  \"source_rp_teams\": 138,\n  \"source_rp_missing_from_view_team_set\": 0,\n  \"inconsistent_team_snapshots\": 0,\n  \"games_with_market_spread\": 130,\n  \"games_with_market_total\": 140,\n  \"games_with_injuries\": 0,\n  \"games_with_weather\": 902\n}\nseverity: {'WARN': 57}\nSam Houston source key: Sam Houston State\nSam Houston source RP: {'rank': 80, 'overall': 49, 'off': 52, 'offRank': 71, 'def': 46, 'defRank': 87}\nSam Houston view RP: {'overall_rank': 80, 'overall_pct': 49.0, 'offense_rank': 71, 'offense_pct': 52.0, 'defense_rank': 87, 'defense_pct': 46.0}\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_gaps.csv\nwrote: <PROJECT_ROOT>/data/audits/matchup_card_data_audit.json\nPASS: all universally required matchup-card fields are complete and consistent\nPASS: CSS dark-logo treatment present on 13 V2 pages\nMatchup pre-publish audits passed.\nBuilt 15 pages in <PROJECT_ROOT>/build/public_site\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 0,\n  \"source_hits\": [\n    {\n      \"source\": \"data/projections/game_projection_sources_audit_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/projections/game_projection_sources_2026.csv\",\n      \"matched_rows\": 16\n    },\n    {\n      \"source\": \"data/history/saturday_shadow_line_snapshots.csv\",\n      \"matched_rows\": 902\n    },\n    {\n      \"source\": \"data/weather/game_weather_latest.csv\",\n      \"matched_rows\": 886\n    }\n  ]\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{\n  \"games\": 902,\n  \"games_with_kickoff\": 588,\n  \"games_tbd\": 314,\n  \"sources\": {\n    \"Action\": 2,\n    \"Action Network\": 5,\n    \"CFBD lines\": 581\n  },\n  \"timezone_display\": \"America/New_York\"\n}\nwrote: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json\n{'fbs_teams': 138, 'rows': {'data/site/schedule_live_enrichment.json': 902, 'data/site/saturday_shadow_lines.json': 902}}\nalready shared/synced: <PROJECT_ROOT>/data/site/schedule_live_enrichment.json == <PROJECT_ROOT>/build/public_site/data/site/schedule_live_enrichment.json\nsynced/publicized artifact: schedule_v2.html -> <PROJECT_ROOT>/build/public_site/schedule.html\nPASS: persistent Schedule build\nsynced public artifact: openers_v2.html -> <PROJECT_ROOT>/build/public_site/openers.html\nsynced public artifact: matchup_workspace.js -> <PROJECT_ROOT>/build/public_site/matchup_workspace.js\nCANONICAL V2 INDEX AUDIT PASSED: <PROJECT_ROOT>/build/public_site/index.html\nPUBLIC SITE VALIDATION PASSED: 16 pages; shadow artifact isolated\nPASS: local site validated; publication repository is clean\n<PROJECT_ROOT>/scripts/history/build_matchup_line_history_clean.py:221: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  hist = pd.concat(parts, ignore_index=True)\n<PROJECT_ROOT>/scripts/research/build_market_implied_power_ratings.py:538: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  combined = pd.concat([history, latest[history.columns]], ignore_index=True)\n<PROJECT_ROOT>/scripts/site/build_saturday_shadow_lines.py:340: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.\n  snap = pd.concat([old, snap], ignore_index=True)\n",
+      "returncode": 0,
+      "status": "PASSED"
+    }
+  ],
+  "start_timestamp": "2026-07-30T17:31:16.473463+00:00",
+  "status": "FAILED",
+  "trigger_source": "github-actions",
+  "validation_results": {
+    "v2_shell_hashes_unchanged": true
+  },
+  "warnings": []
+}

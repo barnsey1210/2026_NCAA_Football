@@ -1,0 +1,27 @@
+{
+  "research_only": true,
+  "production_files_changed": false,
+  "sample_by_season": {
+    "2021": 452,
+    "2022": 447,
+    "2023": 441,
+    "2024": 436,
+    "2025": 428
+  },
+  "temporal_holdouts": [
+    2023,
+    2024,
+    2025
+  ],
+  "full_sample": {
+    "games": 2204,
+    "mae_grid_optimum": 2.7,
+    "rmse_grid_optimum": 2.54,
+    "median_residual_exact_mae_optimum": 2.6999999999999993,
+    "mean_residual_exact_rmse_optimum": 2.5376588021778583,
+    "practical_mae_tolerance": 0.001,
+    "practically_equivalent_low": 2.55,
+    "practically_equivalent_high": 2.75
+  },
+  "decision_rule": "Prefer temporal out-of-sample MAE. If several constants are practically indistinguishable, choose a rounded value inside the stable range rather than false precision."
+}

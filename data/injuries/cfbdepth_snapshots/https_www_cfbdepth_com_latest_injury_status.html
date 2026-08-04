@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- Google Analytics 4 — G-LLS5MVDCXN -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LLS5MVDCXN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-LLS5MVDCXN', { send_page_view: true });
+    </script>
+
+    <!-- Google AdSense — auto ads suppressed for paid subscribers -->
+    <script>
+      (function() {
+        // Paid plan UIDs — Depth+ and All-Access
+        var PAID_UIDS = ['y9qKANmA', 'dQGgyeQ4'];
+        var PAID_NAMES = ['depth+', 'all-access', 'allaccess'];
+
+        function isPaidUser() {
+          try {
+            var outseta = window.Outseta;
+            if (!outseta) return false;
+            var token = outseta.getAccessToken && outseta.getAccessToken();
+            if (!token) return false;
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            var planUid  = payload['outseta:planUid']  || payload['planUid']  || '';
+            var planName = (payload['outseta:planName'] || payload['planName'] || payload['plan'] || '').toLowerCase();
+            if (PAID_UIDS.indexOf(planUid) > -1) return true;
+            return PAID_NAMES.some(function(n) { return planName.indexOf(n) > -1; });
+          } catch(e) { return false; }
+        }
+
+        // If paid user, block AdSense auto ads by overriding adsbygoogle push
+        // and removing any injected ad iframes
+        function suppressAdsForPaidUsers() {
+          if (!isPaidUser()) return;
+
+          // Override adsbygoogle to silently drop all push() calls
+          window.adsbygoogle = { push: function() {}, loaded: true };
+
+          // Remove any auto-injected AdSense iframes/ins elements
+          var removeAds = function() {
+            var ads = document.querySelectorAll('ins.adsbygoogle, iframe[src*="googlesyndication"], .adsbygoogle');
+            ads.forEach(function(el) {
+              var parent = el.closest('[data-google-query-id], .google-auto-placed, ins');
+              if (parent) { parent.style.display = 'none'; }
+              else { el.style.display = 'none'; }
+            });
+          };
+
+          // Run immediately and observe DOM for late-injected ads
+          removeAds();
+          var observer = new MutationObserver(removeAds);
+          document.addEventListener('DOMContentLoaded', function() {
+            observer.observe(document.body, { childList: true, subtree: true });
+            removeAds();
+          });
+
+          // Re-run after short delays for late-loading ads
+          setTimeout(removeAds, 500);
+          setTimeout(removeAds, 2000);
+        }
+
+        // Run on load and re-run when Outseta auth state changes
+        window.addEventListener('load', suppressAdsForPaidUsers);
+        window.addEventListener('o.auth.success', suppressAdsForPaidUsers);
+        window.addEventListener('o.auth.login',   suppressAdsForPaidUsers);
+      })();
+    </script>
+
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CFBDepth — Everything College Football</title>
+
+    <!-- Primary SEO Meta -->
+    <meta name="description" content="CFBDepth provides real-time college football depth charts, player ratings, injury reports, roster breakdowns, and AI-powered analytics for all 138 FBS teams. Free depth chart data for SEC, Big Ten, Big 12, ACC, and more." />
+    <meta name="keywords" content="college football depth charts, CFB depth charts, college football analytics, FBS depth charts, college football player ratings, CFB injury report, college football roster, Alabama depth chart, Georgia depth chart, Ohio State depth chart, college football AI" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="CFBDepth" />
+    <link rel="canonical" href="https://cfbdepth.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cfbdepth.com/" />
+    <meta property="og:title" content="CFBDepth — Everything College Football" />
+    <meta property="og:description" content="Real-time depth charts, player ratings, injury reports, and AI insights for all 138 FBS college football teams. Free data for every SEC, Big Ten, Big 12, and ACC team." />
+    <meta property="og:image" content="https://cfbdepth.com/wordmark.png" />
+    <meta property="og:site_name" content="CFBDepth" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://cfbdepth.com/" />
+    <meta name="twitter:title" content="CFBDepth — Everything College Football" />
+    <meta name="twitter:description" content="Real-time depth charts, player ratings, injury reports, and AI insights for all 138 FBS college football teams." />
+    <meta name="twitter:image" content="https://cfbdepth.com/wordmark.png" />
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#0057FF" />
+    <link rel="apple-touch-icon" href="./logo.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CFBDepth" />
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "CFBDepth.ai",
+      "url": "https://cfbdepth.com",
+      "description": "Real-time college football depth charts, player ratings, injury reports, and AI analytics for all 138 FBS teams.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://cfbdepth.com/teams?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsOrganization",
+      "name": "CFBDepth.ai",
+      "url": "https://cfbdepth.com",
+      "sport": "American Football",
+      "description": "College football analytics platform providing depth charts, player ratings, and AI-powered insights for all 138 FBS teams."
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" />
+    </noscript>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6927089829879865" crossorigin="anonymous"></script>
+
+    <!-- CFBAI Widget — floating bubble on all pages; inline mounts override on / and /ai -->
+    <script src="https://depth-ai-widget.vercel.app/widget.js" defer></script>
+    <script>
+      (function() {
+        var _bubbleInited = false;
+        var BACKEND_URL = 'https://cfbdepth-backend-production.up.railway.app';
+        var AI_API_KEY  = '97b4e7d0cff3cb238b3290ee3f96d3d2e86fb03bc783dfce3f699340390b2058';
+        var GUEST_CREDIT_LIMIT = 5;
+        var GUEST_KEY = 'cfbdepth_guest';
+
+        // ── Generate fingerprint IMMEDIATELY and cache in a global var ─────────
+        // Both the bubble init below and the React /ai page component read
+        // window._cfbFP so they always use the exact same value.
+        window._cfbFP = (function() {
+          try {
+            var stored = localStorage.getItem('cfbdepth_fp');
+            if (stored) return stored;
+            var parts = [
+              navigator.language || '',
+              screen.width + 'x' + screen.height,
+              screen.colorDepth || '',
+              new Date().getTimezoneOffset(),
+              navigator.hardwareConcurrency || '',
+              navigator.platform || ''
+            ];
+            try {
+              var c = document.createElement('canvas');
+              var ctx = c.getContext('2d');
+              if (ctx) { ctx.fillText('CFB🏈', 2, 2); parts.push(c.toDataURL().length); }
+            } catch(e) {}
+            var str = parts.join('|');
+            var h = 0;
+            for (var i = 0; i < str.length; i++) {
+              h = ((h << 5) - h) + str.charCodeAt(i);
+              h |= 0;
+            }
+            var fp = 'fp_' + Math.abs(h).toString(36);
+            localStorage.setItem('cfbdepth_fp', fp);
+            return fp;
+          } catch(e) { return 'fp_default'; }
+        })();
+        console.log('[CFBAI] Fingerprint ready:', window._cfbFP);
+
+        // Plan UID → credits mapping
+        var PLAN_CREDITS = {
+          '4968GAmX': 5,   // Walk-On free
+          'y9qKANmA': 50,  // Depth+
+          'dQGgyeQ4': 250  // All-Access
+        };
+
+        // Add-on UID → credits mapping
+        var ADDON_CREDITS = {
+          'NmdKxxW0': 20,  // Walk-On Pack $5
+          'rmkIraQg': 60,  // Starter Pack $10
+          'vWyPDV9b': 150, // All-American Pack $25
+          'MQvEJxmY': 325  // Heisman Pack $50
+        };
+
+        // ── Browser fingerprint (survives localStorage clear) ──────────────
+        function getBrowserFingerprint() {
+          try {
+            var components = [
+              navigator.language || '',
+              navigator.languages ? navigator.languages.join(',') : '',
+              screen.width + 'x' + screen.height,
+              screen.colorDepth || '',
+              new Date().getTimezoneOffset(),
+              navigator.hardwareConcurrency || '',
+              navigator.platform || '',
+              navigator.userAgent.length,
+              !!window.sessionStorage,
+              !!window.indexedDB,
+            ];
+            // Canvas fingerprint
+            try {
+              var c = document.createElement('canvas');
+              var ctx = c.getContext('2d');
+              ctx.textBaseline = 'top';
+              ctx.font = '14px Arial';
+              ctx.fillText('CFBDepth🏈', 2, 2);
+              components.push(c.toDataURL().length);
+            } catch(e) {}
+            // Simple hash
+            var str = components.join('|');
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+              hash = ((hash << 5) - hash) + str.charCodeAt(i);
+              hash |= 0;
+            }
+            return 'fp_' + Math.abs(hash).toString(36);
+          } catch(e) {
+            return 'fp_default';
+          }
+        }
+
+        // ── Multi-layer guest state storage ───────────────────────────────
+        // Stores guest used-credits in localStorage, sessionStorage, cookie,
+        // and IndexedDB keyed by fingerprint — so clearing one doesn't reset.
+
+        function getCookieVal(name) {
+          var m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
+          return m ? decodeURIComponent(m[1]) : null;
+        }
+
+        function setCookieVal(name, val, days) {
+          var exp = new Date(Date.now() + days * 864e5).toUTCString();
+          document.cookie = name + '=' + encodeURIComponent(val) +
+            '; expires=' + exp + '; path=/; SameSite=Lax';
+        }
+
+        function getGuestUsed(fp) {
+          // Try to read used credits from any available storage layer
+          var key = GUEST_KEY + '_' + fp;
+          try { var v = localStorage.getItem(key); if (v !== null) return parseInt(v, 10); } catch(e) {}
+          try { var v = sessionStorage.getItem(key); if (v !== null) return parseInt(v, 10); } catch(e) {}
+          var cv = getCookieVal(key);
+          if (cv !== null) return parseInt(cv, 10);
+          return null; // First visit
+        }
+
+        function setGuestUsed(fp, used) {
+          var key = GUEST_KEY + '_' + fp;
+          // Write to ALL storage layers simultaneously
+          try { localStorage.setItem(key, used); } catch(e) {}
+          try { sessionStorage.setItem(key, used); } catch(e) {}
+          setCookieVal(key, used, 365); // 1 year cookie
+          // IndexedDB as extra layer
+          try {
+            var req = indexedDB.open('cfbdepth_guest_db', 1);
+            req.onupgradeneeded = function(e) {
+              e.target.result.createObjectStore('guest', { keyPath: 'id' });
+            };
+            req.onsuccess = function(e) {
+              var db = e.target.result;
+              var tx = db.transaction('guest', 'readwrite');
+              tx.objectStore('guest').put({ id: key, used: used });
+            };
+          } catch(e) {}
+        }
+
+        function readIndexedDB(fp, callback) {
+          var key = GUEST_KEY + '_' + fp;
+          try {
+            var req = indexedDB.open('cfbdepth_guest_db', 1);
+            req.onupgradeneeded = function(e) {
+              e.target.result.createObjectStore('guest', { keyPath: 'id' });
+            };
+            req.onsuccess = function(e) {
+              var db = e.target.result;
+              var tx = db.transaction('guest', 'readonly');
+              var get = tx.objectStore('guest').get(key);
+              get.onsuccess = function() {
+                callback(get.result ? get.result.used : null);
+              };
+              get.onerror = function() { callback(null); };
+            };
+            req.onerror = function() { callback(null); };
+          } catch(e) { callback(null); }
+        }
+
+        function getOutsetaToken() {
+          try { return (window.Outseta && Outseta.getAccessToken()) || null; } catch(e) { return null; }
+        }
+
+        function getOutsetaUid() {
+          try {
+            var token = getOutsetaToken();
+            if (!token) return null;
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.sub || payload.uid || null;
+          } catch(e) { return null; }
+        }
+
+        // ── Guest credit enforcement ───────────────────────────────────────
+        // Runs before widget init. Checks all storage layers + fingerprint.
+        // If guest has used all credits, sets freeCredits to 0.
+        var _guestFreeCredits = GUEST_CREDIT_LIMIT;
+        var _fp = getBrowserFingerprint();
+
+        function enforceGuestCredits(callback) {
+          // Logged-in users skip guest tracking entirely
+          if (getOutsetaToken()) {
+            callback(GUEST_CREDIT_LIMIT);
+            return;
+          }
+
+          // Check fast storage layers first
+          var used = getGuestUsed(_fp);
+          if (used !== null) {
+            var remaining = Math.max(0, GUEST_CREDIT_LIMIT - used);
+            callback(remaining);
+            return;
+          }
+
+          // Check IndexedDB as last resort (async)
+          readIndexedDB(_fp, function(dbUsed) {
+            if (dbUsed !== null) {
+              // Found in IndexedDB — sync back to other layers
+              setGuestUsed(_fp, dbUsed);
+              var remaining = Math.max(0, GUEST_CREDIT_LIMIT - dbUsed);
+              callback(remaining);
+            } else {
+              // Truly first visit — initialize with 0 used
+              setGuestUsed(_fp, 0);
+              callback(GUEST_CREDIT_LIMIT);
+            }
+          });
+        }
+
+        // Listen for AI usage events to track guest credit consumption
+        window.addEventListener('o.ai.query', function() {
+          if (getOutsetaToken()) return; // Skip for logged-in users
+          var used = getGuestUsed(_fp) || 0;
+          setGuestUsed(_fp, used + 1);
+        });
+
+        // Also listen for DepthAI credit deduction events
+        window.addEventListener('depthai.credit.used', function() {
+          if (getOutsetaToken()) return;
+          var used = getGuestUsed(_fp) || 0;
+          setGuestUsed(_fp, used + 1);
+        });
+
+        // Listen for Outseta billing success → call backend to grant DepthAI credits
+        window.addEventListener('o.billing.success', function(e) {
+          var token = getOutsetaToken();
+          if (!token) return; // not logged in, nothing to grant
+
+          var detail   = (e && e.detail) || {};
+          var planUid  = detail.planUid  || detail.PlanUid  || null;
+          var addonUid = detail.addonUid || detail.AddOnUid || null;
+          var invoiceId = detail.invoiceId || detail.InvoiceUid || null;
+
+          fetch('https://cfbdepth-backend-production.up.railway.app/api/ai/billing-success', {
+            method:  'POST',
+            headers: {
+              'Content-Type':  'application/json',
+              'Authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({
+              planUid:        planUid,
+              addonUid:       addonUid,
+              idempotencyKey: invoiceId || (planUid || addonUid || 'unknown') + '-' + Date.now(),
+            }),
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            console.log('[Credits] Granted after billing:', d);
+            // Refresh DepthAI widget credit balance so nav updates immediately
+            if (window.DepthAI && typeof window.DepthAI.refreshCredits === 'function') {
+              window.DepthAI.refreshCredits();
+            }
+          })
+          .catch(function(e) { console.error('[Credits] Grant failed:', e); });
+        });
+
+        // Also listen for subscription change
+        window.addEventListener('o.subscriptionChange.success', function(e) {
+          var token = getOutsetaToken();
+          if (!token) return;
+          var planUid = ((e && e.detail) || {}).planUid || null;
+          fetch('https://cfbdepth-backend-production.up.railway.app/api/ai/billing-success', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ planUid: planUid }),
+          }).catch(function() {});
+        });
+
+        function initBubble() {
+          if (_bubbleInited) return;
+          if (!window.DepthAI) return;
+          // On the /ai page the React component owns the widget — never init the bubble there
+          if (window.location.pathname === '/ai' || window.location.pathname.startsWith('/ai')) return;
+
+          var token = getOutsetaToken();
+          var fp    = window._cfbFP || getBrowserFingerprint();
+          var opts  = {
+            apiUrl:      'https://depthai-production.up.railway.app',
+            freeCredits: 5,
+            onCredits:   function(b) {
+              // Option A callback — fires on init and after every chat turn
+              var total = (b && typeof b.totalLeft === 'number') ? Math.max(0, b.totalLeft) : null;
+              if (total === null) return;
+              window.dispatchEvent(new CustomEvent('depthai:credits', { detail: b }));
+              console.log('[Credits] onCredits callback:', total);
+            }
+          };
+
+          if (token) {
+            // Logged-in user — pass their token so the widget authenticates them
+            opts.getToken = getOutsetaToken;
+          } else {
+            // Guest — pass fingerprint for free credit tracking
+            opts.guestFingerprint = fp;
+          }
+
+          console.log('[CFBAI] Initialising bubble — logged in:', !!token, 'fp:', fp);
+          _bubbleInited = true;
+          DepthAI.init(opts);
+        }
+
+        function reinitBubble() {
+          if (window.DepthAI && typeof DepthAI.destroy === 'function') {
+            try { DepthAI.destroy(); } catch(e) {}
+          }
+          _bubbleInited = false;
+          // On /ai the inline React component handles the widget — skip bubble
+          // but still reset _bubbleInited so bubble works when navigating away
+          if (window.location.pathname === '/ai' || window.location.pathname.startsWith('/ai')) return;
+          initBubble();
+        }
+
+        window.addEventListener('load', function() { initBubble(); });
+        var poll = setInterval(function() {
+          initBubble();
+          if (_bubbleInited) clearInterval(poll);
+        }, 200);
+        setTimeout(function() { clearInterval(poll); }, 5000);
+
+        // Re-init on login so the widget picks up the new token immediately
+        window.addEventListener('o.auth.success', reinitBubble);
+        window.addEventListener('o.auth.login',   reinitBubble);
+        // Re-init on logout so the widget resets to guest mode
+        window.addEventListener('o.auth.logout',  reinitBubble);
+
+        // React Router navigation — watch for URL changes via popstate and
+        // a MutationObserver on the title (fires on every client-side route change).
+        // When the user navigates AWAY from /ai, init the bubble.
+        var _lastPath = window.location.pathname;
+        function onRouteChange() {
+          var newPath = window.location.pathname;
+          if (newPath === _lastPath) return;
+          _lastPath = newPath;
+          if (newPath !== '/ai') {
+            // Navigated away from /ai — ensure bubble is running
+            if (!_bubbleInited) initBubble();
+          } else {
+            // Navigated to /ai — destroy bubble, React component takes over
+            if (window.DepthAI && typeof DepthAI.destroy === 'function') {
+              try { DepthAI.destroy(); } catch(e) {}
+            }
+            _bubbleInited = false;
+          }
+        }
+        window.addEventListener('popstate', onRouteChange);
+        // Also catch pushState/replaceState (React Router uses these)
+        var _origPush    = history.pushState;
+        var _origReplace = history.replaceState;
+        history.pushState = function() {
+          _origPush.apply(history, arguments);
+          setTimeout(onRouteChange, 50);
+        };
+        history.replaceState = function() {
+          _origReplace.apply(history, arguments);
+          setTimeout(onRouteChange, 50);
+        };
+      })();
+    </script>
+
+    <!-- Outseta -->
+    <script>
+      var o_options = {
+        domain: 'in-depth-insights-llc.outseta.com',
+        load: 'auth,customForm,emailList,leadCapture,nocode,profile,support',
+        showNotifications: false,
+        monitorDom: true,
+        stopImmediatePropagation: true
+      };
+    </script>
+    <script src="https://cdn.outseta.com/outseta.min.js" data-options="o_options"></script>
+    <script>
+      function addFootballIcon() {
+        var selectors = ['.o-notification-header','[class*="notification-header"]','.o-notification h2','.o-notification h3','[class*="CFBDepth"]'];
+        for (var i = 0; i < selectors.length; i++) {
+          var elements = document.querySelectorAll(selectors[i]);
+          elements.forEach(function(el) {
+            if (el && el.textContent && el.textContent.includes('CFBDepth') && !el.textContent.includes('🏈')) {
+              el.textContent = '🏈 ' + el.textContent;
+            }
+          });
+        }
+      }
+      window.addEventListener('load', function() {
+        setTimeout(addFootballIcon, 500);
+        setTimeout(addFootballIcon, 1500);
+        var attempts = 0;
+        var interval = setInterval(function() { addFootballIcon(); if (++attempts > 5) clearInterval(interval); }, 2000);
+      });
+      var _observer = new MutationObserver(function(mutations) { mutations.forEach(function(m) { if (m.addedNodes.length) addFootballIcon(); }); });
+      document.addEventListener('DOMContentLoaded', function() { _observer.observe(document.body, { childList: true, subtree: true }); });
+    </script>
+    <script type="module" crossorigin src="/assets/js/index-30564537-1785789432454.js"></script>
+    <link rel="stylesheet" href="/assets/style-ae1bdd1b-1785789432454.css">
+  </head>
+  <body>
+    <!-- Static fallback for crawlers that don't execute JS -->
+    <noscript>
+      <div style="max-width:900px;margin:40px auto;padding:20px;font-family:Arial,sans-serif;">
+        <h1 style="color:#0057FF;">CFBDepth — Everything College Football</h1>
+        <p>CFBDepth provides real-time college football depth charts, player ratings, injury reports, roster breakdowns, and AI-powered analytics for all 138 FBS teams. Covering SEC, Big Ten, Big 12, ACC, and every other FBS conference.</p>
+        <h2>Browse Team Depth Charts</h2>
+        <ul>
+          <li><a href="/alabama">Alabama Crimson Tide — SEC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/uga">Georgia Bulldogs — SEC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/osu">Ohio State Buckeyes — Big Ten Depth Chart &amp; Analytics</a></li>
+          <li><a href="/michigan">Michigan Wolverines — Big Ten Depth Chart &amp; Analytics</a></li>
+          <li><a href="/texas">Texas Longhorns — SEC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/lsu">LSU Tigers — SEC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/notre-dame">Notre Dame Fighting Irish — Independent Depth Chart</a></li>
+          <li><a href="/oregon">Oregon Ducks — Big Ten Depth Chart &amp; Analytics</a></li>
+          <li><a href="/penn-state">Penn State Nittany Lions — Big Ten Depth Chart</a></li>
+          <li><a href="/clemson">Clemson Tigers — ACC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/tennessee">Tennessee Volunteers — SEC Depth Chart &amp; Analytics</a></li>
+          <li><a href="/usc">USC Trojans — Big Ten Depth Chart &amp; Analytics</a></li>
+          <li><a href="/teams">View All 138 FBS Team Depth Charts</a></li>
+        </ul>
+        <h2>Platform Features</h2>
+        <ul>
+          <li>Real-time depth chart updates for all 138 FBS teams</li>
+          <li>Player ratings and recruiting rankings</li>
+          <li>Weekly injury and status reports</li>
+          <li>Roster breakdown by position, class, and home state</li>
+          <li>AI-powered college football analytics (CFBAI)</li>
+          <li>Proprietary metrics: dWIN, SOS+, AIR Rankings, Pace+</li>
+        </ul>
+        <p>Enable JavaScript to access the full interactive platform.</p>
+      </div>
+    </noscript>
+    <div id="root"></div>
+    
+    <script>
+      window.addEventListener('error', function(e) {
+        if (e.error && e.error.message && e.error.message.includes('module')) {
+          document.getElementById('root').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;text-align:center;padding:20px;"><div><h1 style="color:#1A1A2E;margin-bottom:16px;">Browser Not Supported</h1><p style="color:#4A5568;">Please update your browser or use Chrome, Firefox, or Safari.</p></div></div>';
+        }
+      });
+    </script>
+  </body>
+</html>

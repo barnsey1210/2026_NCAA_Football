@@ -1,0 +1,471 @@
+{
+  "schema_version": "active-combo-projection-recalculation-v2",
+  "canonical_db": "data/snapshots/preseason/preseason_db.json",
+  "active_ratings": "data/ratings/ratings_master_latest.csv",
+  "active_rating_teams": 138,
+  "database_teams": 138,
+  "team_ratings_updated": 138,
+  "games": 902,
+  "games_updated": 0,
+  "games_unchanged": 765,
+  "games_skipped": 137,
+  "neutral_games_recalculated": 13,
+  "non_neutral_games_recalculated": 752,
+  "hfa": {
+    "neutral": 0.0,
+    "non_neutral": 2.6
+  },
+  "missing_database_ratings": [],
+  "missing_game_team_examples": [
+    {
+      "game_id": "g9",
+      "away_team": "UAlbany",
+      "home_team": "Buffalo",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g10",
+      "away_team": "Bethune-Cookman",
+      "home_team": "Central Florida",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g11",
+      "away_team": "Merrimack",
+      "home_team": "Delaware",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g13",
+      "away_team": "West Georgia",
+      "home_team": "Kennesaw State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g14",
+      "away_team": "Eastern Illinois",
+      "home_team": "Minnesota",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g15",
+      "away_team": "UAPB",
+      "home_team": "Missouri",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g17",
+      "away_team": "Idaho",
+      "home_team": "Utah",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g20",
+      "away_team": "North Carolina A&T",
+      "home_team": "Georgia State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g21",
+      "away_team": "LIU",
+      "home_team": "Kansas",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g23",
+      "away_team": "Duquesne",
+      "home_team": "Air Force",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g25",
+      "away_team": "Maine",
+      "home_team": "Appalachian State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g26",
+      "away_team": "Northern Arizona",
+      "home_team": "Arizona",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g27",
+      "away_team": "Morgan State",
+      "home_team": "Arizona State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g28",
+      "away_team": "North Alabama",
+      "home_team": "Arkansas",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g29",
+      "away_team": "Bryant",
+      "home_team": "Army",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g31",
+      "away_team": "Utah Tech",
+      "home_team": "BYU",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g32",
+      "away_team": "Tarleton State",
+      "home_team": "Bowling Green",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g34",
+      "away_team": "The Citadel",
+      "home_team": "Charlotte",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g37",
+      "away_team": "Lafayette",
+      "home_team": "Connecticut",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g40",
+      "away_team": "Tennessee State",
+      "home_team": "Georgia",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g41",
+      "away_team": "Charleston So.",
+      "home_team": "Georgia Southern",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g47",
+      "away_team": "Southeast Missouri",
+      "home_team": "Iowa State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g49",
+      "away_team": "Eastern Kentucky",
+      "home_team": "Jacksonville State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g50",
+      "away_team": "Nicholls",
+      "home_team": "Kansas State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g51",
+      "away_team": "Youngstown State",
+      "home_team": "Kentucky",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g53",
+      "away_team": "Lamar",
+      "home_team": "Louisiana",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g54",
+      "away_team": "Northwestern State",
+      "home_team": "Louisiana Tech",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g55",
+      "away_team": "Hampton",
+      "home_team": "Maryland",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g59",
+      "away_team": "Murray State",
+      "home_team": "Middle Tennessee",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g61",
+      "away_team": "Towson",
+      "home_team": "Navy",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g65",
+      "away_team": "Mercyhurst",
+      "home_team": "New Mexico State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g66",
+      "away_team": "Fordham",
+      "home_team": "North Dakota State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g67",
+      "away_team": "South Dakota State",
+      "home_team": "Northwestern",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g70",
+      "away_team": "Norfolk State",
+      "home_team": "Old Dominion",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g74",
+      "away_team": "Indiana State",
+      "home_team": "Purdue",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g75",
+      "away_team": "HCU",
+      "home_team": "Rice",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g76",
+      "away_team": "MVSU",
+      "home_team": "Sacramento State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g77",
+      "away_team": "Portland State",
+      "home_team": "San Diego State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g78",
+      "away_team": "Southeastern La.",
+      "home_team": "South Alabama",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g81",
+      "away_team": "Alcorn State",
+      "home_team": "Southern Miss",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g82",
+      "away_team": "New Hampshire",
+      "home_team": "Syracuse",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g83",
+      "away_team": "Rhode Island",
+      "home_team": "Temple",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g84",
+      "away_team": "Furman",
+      "home_team": "Tennessee",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g87",
+      "away_team": "Abilene Christian",
+      "home_team": "Texas Tech",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g91",
+      "away_team": "UTRGV",
+      "home_team": "UTSA",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g92",
+      "away_team": "Idaho State",
+      "home_team": "Utah State",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g93",
+      "away_team": "Austin Peay",
+      "home_team": "Vanderbilt",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g94",
+      "away_team": "VMI",
+      "home_team": "Virginia Tech",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g100",
+      "away_team": "Florida A&M",
+      "home_team": "Miami-FL",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    },
+    {
+      "game_id": "g103",
+      "away_team": "Villanova",
+      "home_team": "Louisville",
+      "away_rating_found": false,
+      "home_rating_found": true,
+      "away_db_team_found": false,
+      "home_db_team_found": true
+    }
+  ]
+}

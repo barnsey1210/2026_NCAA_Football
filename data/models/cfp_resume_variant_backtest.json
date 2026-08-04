@@ -1,0 +1,1658 @@
+{
+  "method": "leave-one-season-out; weights trained on other seasons; within-week percentiles",
+  "championship_flags_used": false,
+  "selection_objective": "maximize Top-12 recall, then Top-25 recall, then minimize Top-25 MAE",
+  "warning": "same-week top25_wins is descriptive/circular; prior_top25_wins is the preferred live-prediction input.",
+  "variants": [
+    {
+      "name": "control_qw_t25",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "prior_top25_wins"
+      ],
+      "top25_definition": "prior_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6145833333333334,
+        "top12_recall": 0.7013888888888888,
+        "top25_recall": 0.7733333333333333,
+        "top25_mae": 7.615,
+        "spearman": 0.6752106491954388
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5416666666666666,
+          "top12_recall": 0.7291666666666666,
+          "top25_recall": 0.77,
+          "top25_mae": 7.493333333333333,
+          "spearman": 0.6532112531218329,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.7083333333333334,
+          "top12_recall": 0.7638888888888888,
+          "top25_recall": 0.7966666666666666,
+          "top25_mae": 7.086666666666667,
+          "spearman": 0.7343093084872307,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.707,
+            "quality_wins": 0.198,
+            "prior_top25_wins": 0.095
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7083333333333334,
+            "top25_recall": 0.7066666666666667,
+            "top25_mae": 7.946666666666666,
+            "spearman": 0.6729086151506158,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.802,
+            "quality_wins": 0.051,
+            "prior_top25_wins": 0.147
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.6388888888888888,
+            "top25_recall": 0.8266666666666667,
+            "top25_mae": 7.006666666666667,
+            "spearman": 0.6470911974658679,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.614,
+            "quality_wins": 0.35,
+            "prior_top25_wins": 0.035
+          },
+          "test": {
+            "top4_recall": 0.5833333333333334,
+            "top12_recall": 0.8194444444444444,
+            "top25_recall": 0.84,
+            "top25_mae": 5.626666666666667,
+            "spearman": 0.7463383170113937,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.592,
+            "quality_wins": 0.38,
+            "prior_top25_wins": 0.028
+          },
+          "test": {
+            "top4_recall": 0.4583333333333333,
+            "top12_recall": 0.6388888888888888,
+            "top25_recall": 0.72,
+            "top25_mae": 9.88,
+            "spearman": 0.6345044671538776,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "prior_top25_wins",
+        "losses"
+      ],
+      "top25_definition": "prior_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6979166666666666,
+        "top12_recall": 0.7847222222222223,
+        "top25_recall": 0.8266666666666667,
+        "top25_mae": 4.878333333333333,
+        "spearman": 0.7951309169984315
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.6458333333333334,
+          "top12_recall": 0.8194444444444444,
+          "top25_recall": 0.8033333333333333,
+          "top25_mae": 5.25,
+          "spearman": 0.7965325452854176,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.8333333333333334,
+          "top12_recall": 0.8402777777777778,
+          "top25_recall": 0.8266666666666667,
+          "top25_mae": 4.64,
+          "spearman": 0.8113740343954093,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.171,
+            "quality_wins": 0.149,
+            "prior_top25_wins": 0.068,
+            "losses": 0.612
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.8,
+            "top25_mae": 5.386666666666667,
+            "spearman": 0.7791080207740708,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.207,
+            "quality_wins": 0.068,
+            "prior_top25_wins": 0.155,
+            "losses": 0.57
+          },
+          "test": {
+            "top4_recall": 0.7916666666666666,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.88,
+            "top25_mae": 3.74,
+            "spearman": 0.8449845278447257,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.145,
+            "quality_wins": 0.122,
+            "prior_top25_wins": 0.104,
+            "losses": 0.629
+          },
+          "test": {
+            "top4_recall": 0.8333333333333334,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.7866666666666666,
+            "top25_mae": 4.566666666666666,
+            "spearman": 0.8469015343751343,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.09,
+            "quality_wins": 0.145,
+            "prior_top25_wins": 0.193,
+            "losses": 0.572
+          },
+          "test": {
+            "top4_recall": 0.4583333333333333,
+            "top12_recall": 0.6944444444444444,
+            "top25_recall": 0.84,
+            "top25_mae": 5.82,
+            "spearman": 0.7095295849997951,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "prior_top25_wins",
+        "bad_losses"
+      ],
+      "top25_definition": "prior_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.625,
+        "top12_recall": 0.732638888888889,
+        "top25_recall": 0.8016666666666666,
+        "top25_mae": 6.805,
+        "spearman": 0.7251918006278201
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5,
+          "top12_recall": 0.7361111111111112,
+          "top25_recall": 0.7933333333333333,
+          "top25_mae": 6.5633333333333335,
+          "spearman": 0.675568292634742,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.7083333333333334,
+          "top12_recall": 0.8125,
+          "top25_recall": 0.8,
+          "top25_mae": 6.1033333333333335,
+          "spearman": 0.7951431265676737,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.438,
+            "quality_wins": 0.144,
+            "prior_top25_wins": 0.092,
+            "bad_losses": 0.327
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.6805555555555556,
+            "top25_recall": 0.7533333333333333,
+            "top25_mae": 7.253333333333333,
+            "spearman": 0.6756192286851653,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.568,
+            "quality_wins": 0.115,
+            "prior_top25_wins": 0.162,
+            "bad_losses": 0.155
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7638888888888888,
+            "top25_recall": 0.8666666666666667,
+            "top25_mae": 5.64,
+            "spearman": 0.7417023681441286,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.484,
+            "quality_wins": 0.208,
+            "prior_top25_wins": 0.069,
+            "bad_losses": 0.238
+          },
+          "test": {
+            "top4_recall": 0.625,
+            "top12_recall": 0.8194444444444444,
+            "top25_recall": 0.8133333333333334,
+            "top25_mae": 5.88,
+            "spearman": 0.7960480924650084,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.626,
+            "quality_wins": 0.183,
+            "prior_top25_wins": 0.085,
+            "bad_losses": 0.106
+          },
+          "test": {
+            "top4_recall": 0.4583333333333333,
+            "top12_recall": 0.6666666666666666,
+            "top25_recall": 0.7733333333333333,
+            "top25_mae": 8.446666666666667,
+            "spearman": 0.687397513216978,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "prior_top25_wins",
+        "losses",
+        "bad_losses"
+      ],
+      "top25_definition": "prior_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6875,
+        "top12_recall": 0.7881944444444444,
+        "top25_recall": 0.83,
+        "top25_mae": 4.915,
+        "spearman": 0.7906267136335479
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.625,
+          "top12_recall": 0.8194444444444444,
+          "top25_recall": 0.82,
+          "top25_mae": 5.26,
+          "spearman": 0.7879997411110671,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.875,
+          "top12_recall": 0.8472222222222222,
+          "top25_recall": 0.85,
+          "top25_mae": 4.36,
+          "spearman": 0.8350702850005893,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.227,
+            "quality_wins": 0.09,
+            "prior_top25_wins": 0.038,
+            "losses": 0.461,
+            "bad_losses": 0.184
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7638888888888888,
+            "top25_recall": 0.8,
+            "top25_mae": 5.78,
+            "spearman": 0.7399791049247031,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.293,
+            "quality_wins": 0.06,
+            "prior_top25_wins": 0.169,
+            "losses": 0.375,
+            "bad_losses": 0.103
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8194444444444444,
+            "top25_recall": 0.8733333333333333,
+            "top25_mae": 3.6533333333333333,
+            "spearman": 0.8543861236416749,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.249,
+            "quality_wins": 0.104,
+            "prior_top25_wins": 0.061,
+            "losses": 0.434,
+            "bad_losses": 0.152
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8472222222222222,
+            "top25_recall": 0.8,
+            "top25_mae": 4.773333333333333,
+            "spearman": 0.8375213139726271,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.202,
+            "quality_wins": 0.096,
+            "prior_top25_wins": 0.182,
+            "losses": 0.404,
+            "bad_losses": 0.115
+          },
+          "test": {
+            "top4_recall": 0.5416666666666666,
+            "top12_recall": 0.7222222222222222,
+            "top25_recall": 0.8466666666666667,
+            "top25_mae": 5.453333333333333,
+            "spearman": 0.7306203119951864,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "full_resume_no_separate_sos",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "prior_top25_wins",
+        "losses",
+        "bad_losses",
+        "avg_capped_mov",
+        "avg_weighted_mol"
+      ],
+      "top25_definition": "prior_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.7395833333333334,
+        "top12_recall": 0.8125000000000001,
+        "top25_recall": 0.825,
+        "top25_mae": 4.863333333333333,
+        "spearman": 0.8080067080612091
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.8194444444444444,
+          "top25_recall": 0.81,
+          "top25_mae": 4.876666666666667,
+          "spearman": 0.8133801472397035,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.7083333333333334,
+          "top12_recall": 0.8541666666666666,
+          "top25_recall": 0.82,
+          "top25_mae": 4.35,
+          "spearman": 0.8356787340539413,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.043,
+            "quality_wins": 0.149,
+            "prior_top25_wins": 0.124,
+            "losses": 0.478,
+            "bad_losses": 0.067,
+            "avg_capped_mov": 0.099,
+            "avg_weighted_mol": 0.04
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8,
+            "top25_mae": 5.52,
+            "spearman": 0.7818025027786716,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.065,
+            "quality_wins": 0.223,
+            "prior_top25_wins": 0.097,
+            "losses": 0.492,
+            "bad_losses": 0.042,
+            "avg_capped_mov": 0.019,
+            "avg_weighted_mol": 0.062
+          },
+          "test": {
+            "top4_recall": 0.875,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8866666666666667,
+            "top25_mae": 3.7266666666666666,
+            "spearman": 0.8391246213741218,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.086,
+            "quality_wins": 0.002,
+            "prior_top25_wins": 0.072,
+            "losses": 0.726,
+            "bad_losses": 0.088,
+            "avg_capped_mov": 0.015,
+            "avg_weighted_mol": 0.01
+          },
+          "test": {
+            "top4_recall": 0.8333333333333334,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.7533333333333333,
+            "top25_mae": 5.426666666666667,
+            "spearman": 0.8314989945019737,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.026,
+            "quality_wins": 0.104,
+            "prior_top25_wins": 0.149,
+            "losses": 0.515,
+            "bad_losses": 0.062,
+            "avg_capped_mov": 0.142,
+            "avg_weighted_mol": 0.003
+          },
+          "test": {
+            "top4_recall": 0.5416666666666666,
+            "top12_recall": 0.7777777777777778,
+            "top25_recall": 0.86,
+            "top25_mae": 4.78,
+            "spearman": 0.7796007135900695,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "provisional_top25_wins"
+      ],
+      "top25_definition": "provisional_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.5729166666666666,
+        "top12_recall": 0.7256944444444445,
+        "top25_recall": 0.79,
+        "top25_mae": 7.205,
+        "spearman": 0.6953152658282096
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.4583333333333333,
+          "top12_recall": 0.7222222222222222,
+          "top25_recall": 0.7833333333333333,
+          "top25_mae": 7.283333333333333,
+          "spearman": 0.671627988637087,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.7638888888888888,
+          "top25_recall": 0.81,
+          "top25_mae": 7.016666666666667,
+          "spearman": 0.7242152017242572,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.707,
+            "quality_wins": 0.198,
+            "provisional_top25_wins": 0.095
+          },
+          "test": {
+            "top4_recall": 0.5833333333333334,
+            "top12_recall": 0.7361111111111112,
+            "top25_recall": 0.7266666666666667,
+            "top25_mae": 8.033333333333333,
+            "spearman": 0.6864265183439109,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.731,
+            "quality_wins": 0.174,
+            "provisional_top25_wins": 0.096
+          },
+          "test": {
+            "top4_recall": 0.625,
+            "top12_recall": 0.7361111111111112,
+            "top25_recall": 0.8333333333333334,
+            "top25_mae": 6.02,
+            "spearman": 0.6963441785881049,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.71,
+            "quality_wins": 0.253,
+            "provisional_top25_wins": 0.038
+          },
+          "test": {
+            "top4_recall": 0.5833333333333334,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.86,
+            "top25_mae": 5.8533333333333335,
+            "spearman": 0.7490086393133448,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.67,
+            "quality_wins": 0.274,
+            "provisional_top25_wins": 0.056
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.625,
+            "top25_recall": 0.74,
+            "top25_mae": 8.913333333333334,
+            "spearman": 0.6494817270674781,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "provisional_top25_wins",
+        "losses"
+      ],
+      "top25_definition": "provisional_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.7083333333333334,
+        "top12_recall": 0.7951388888888888,
+        "top25_recall": 0.8283333333333334,
+        "top25_mae": 4.985,
+        "spearman": 0.7885854060404914
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5625,
+          "top12_recall": 0.8055555555555556,
+          "top25_recall": 0.82,
+          "top25_mae": 5.683333333333334,
+          "spearman": 0.7564090361133774,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.7916666666666666,
+          "top12_recall": 0.8263888888888888,
+          "top25_recall": 0.8066666666666666,
+          "top25_mae": 5.506666666666667,
+          "spearman": 0.7638536990729717,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.373,
+            "quality_wins": 0.111,
+            "provisional_top25_wins": 0.05,
+            "losses": 0.466
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.75,
+            "top25_recall": 0.7666666666666667,
+            "top25_mae": 6.32,
+            "spearman": 0.7205913228903257,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.232,
+            "quality_wins": 0.194,
+            "provisional_top25_wins": 0.072,
+            "losses": 0.502
+          },
+          "test": {
+            "top4_recall": 0.7916666666666666,
+            "top12_recall": 0.8472222222222222,
+            "top25_recall": 0.88,
+            "top25_mae": 3.6066666666666665,
+            "spearman": 0.8525718023489112,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.255,
+            "quality_wins": 0.09,
+            "provisional_top25_wins": 0.055,
+            "losses": 0.601
+          },
+          "test": {
+            "top4_recall": 0.8333333333333334,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.7933333333333333,
+            "top25_mae": 4.973333333333334,
+            "spearman": 0.8296881304812432,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.209,
+            "quality_wins": 0.175,
+            "provisional_top25_wins": 0.075,
+            "losses": 0.54
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.7777777777777778,
+            "top25_recall": 0.8733333333333333,
+            "top25_mae": 5.04,
+            "spearman": 0.7514903684414854,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "provisional_top25_wins",
+        "bad_losses"
+      ],
+      "top25_definition": "provisional_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.59375,
+        "top12_recall": 0.732638888888889,
+        "top25_recall": 0.81,
+        "top25_mae": 6.615,
+        "spearman": 0.7236664259518261
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5208333333333334,
+          "top12_recall": 0.75,
+          "top25_recall": 0.8033333333333333,
+          "top25_mae": 6.616666666666666,
+          "spearman": 0.6959941281733738,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6666666666666666,
+          "top12_recall": 0.7777777777777778,
+          "top25_recall": 0.8166666666666667,
+          "top25_mae": 6.593333333333334,
+          "spearman": 0.7622472525177096,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.45,
+            "quality_wins": 0.164,
+            "provisional_top25_wins": 0.098,
+            "bad_losses": 0.288
+          },
+          "test": {
+            "top4_recall": 0.5416666666666666,
+            "top12_recall": 0.6527777777777778,
+            "top25_recall": 0.7733333333333333,
+            "top25_mae": 7.793333333333333,
+            "spearman": 0.6640375652619696,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.427,
+            "quality_wins": 0.387,
+            "provisional_top25_wins": 0.046,
+            "bad_losses": 0.14
+          },
+          "test": {
+            "top4_recall": 0.6666666666666666,
+            "top12_recall": 0.7777777777777778,
+            "top25_recall": 0.86,
+            "top25_mae": 5.586666666666667,
+            "spearman": 0.7445103193348368,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.505,
+            "quality_wins": 0.212,
+            "provisional_top25_wins": 0.077,
+            "bad_losses": 0.206
+          },
+          "test": {
+            "top4_recall": 0.625,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8266666666666667,
+            "top25_mae": 5.746666666666667,
+            "spearman": 0.781808109084709,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.555,
+            "quality_wins": 0.234,
+            "provisional_top25_wins": 0.045,
+            "bad_losses": 0.167
+          },
+          "test": {
+            "top4_recall": 0.5416666666666666,
+            "top12_recall": 0.6666666666666666,
+            "top25_recall": 0.78,
+            "top25_mae": 7.333333333333333,
+            "spearman": 0.7043097101257894,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "provisional_top25_wins",
+        "losses",
+        "bad_losses"
+      ],
+      "top25_definition": "provisional_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6770833333333334,
+        "top12_recall": 0.7881944444444444,
+        "top25_recall": 0.8433333333333334,
+        "top25_mae": 5.085,
+        "spearman": 0.7836783161761882
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5833333333333334,
+          "top12_recall": 0.8194444444444444,
+          "top25_recall": 0.8233333333333334,
+          "top25_mae": 5.173333333333333,
+          "spearman": 0.7812449413617091,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.7083333333333334,
+          "top12_recall": 0.8194444444444444,
+          "top25_recall": 0.84,
+          "top25_mae": 5.076666666666667,
+          "spearman": 0.7815206891952465,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.328,
+            "quality_wins": 0.05,
+            "provisional_top25_wins": 0.035,
+            "losses": 0.468,
+            "bad_losses": 0.118
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7222222222222222,
+            "top25_recall": 0.7933333333333333,
+            "top25_mae": 6.253333333333333,
+            "spearman": 0.7042575929174377,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.276,
+            "quality_wins": 0.231,
+            "provisional_top25_wins": 0.062,
+            "losses": 0.4,
+            "bad_losses": 0.031
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8194444444444444,
+            "top25_recall": 0.9,
+            "top25_mae": 3.8133333333333335,
+            "spearman": 0.8348003597102186,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.272,
+            "quality_wins": 0.031,
+            "provisional_top25_wins": 0.087,
+            "losses": 0.468,
+            "bad_losses": 0.142
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8194444444444444,
+            "top25_recall": 0.7933333333333333,
+            "top25_mae": 5.3133333333333335,
+            "spearman": 0.8189343639911542,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.292,
+            "quality_wins": 0.081,
+            "provisional_top25_wins": 0.094,
+            "losses": 0.456,
+            "bad_losses": 0.076
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.7916666666666666,
+            "top25_recall": 0.8866666666666667,
+            "top25_mae": 4.96,
+            "spearman": 0.7767209480859423,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "full_resume_no_separate_sos",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "provisional_top25_wins",
+        "losses",
+        "bad_losses",
+        "avg_capped_mov",
+        "avg_weighted_mol"
+      ],
+      "top25_definition": "provisional_top25_wins",
+      "prospective": true,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6875,
+        "top12_recall": 0.7881944444444445,
+        "top25_recall": 0.835,
+        "top25_mae": 5.086666666666667,
+        "spearman": 0.7855475240599645
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.8263888888888888,
+          "top25_recall": 0.8433333333333334,
+          "top25_mae": 4.7,
+          "spearman": 0.8025951618895842,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.8125,
+          "top25_recall": 0.8333333333333334,
+          "top25_mae": 4.786666666666667,
+          "spearman": 0.8067691876345094,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.05,
+            "quality_wins": 0.081,
+            "provisional_top25_wins": 0.113,
+            "losses": 0.511,
+            "bad_losses": 0.063,
+            "avg_capped_mov": 0.17,
+            "avg_weighted_mol": 0.011
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7361111111111112,
+            "top25_recall": 0.7533333333333333,
+            "top25_mae": 7.033333333333333,
+            "spearman": 0.6924223337926603,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.167,
+            "quality_wins": 0.194,
+            "provisional_top25_wins": 0.069,
+            "losses": 0.49,
+            "bad_losses": 0.038,
+            "avg_capped_mov": 0.041,
+            "avg_weighted_mol": 0.002
+          },
+          "test": {
+            "top4_recall": 0.7916666666666666,
+            "top12_recall": 0.8472222222222222,
+            "top25_recall": 0.8933333333333333,
+            "top25_mae": 3.3666666666666667,
+            "spearman": 0.8644943747413618,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.081,
+            "quality_wins": 0.028,
+            "provisional_top25_wins": 0.071,
+            "losses": 0.621,
+            "bad_losses": 0.066,
+            "avg_capped_mov": 0.056,
+            "avg_weighted_mol": 0.077
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.7933333333333333,
+            "top25_mae": 5.3533333333333335,
+            "spearman": 0.8231464097115553,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.163,
+            "quality_wins": 0.176,
+            "provisional_top25_wins": 0.086,
+            "losses": 0.382,
+            "bad_losses": 0.146,
+            "avg_capped_mov": 0.042,
+            "avg_weighted_mol": 0.006
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.7638888888888888,
+            "top25_recall": 0.9,
+            "top25_mae": 4.593333333333334,
+            "spearman": 0.7621269779942808,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "top25_wins"
+      ],
+      "top25_definition": "top25_wins",
+      "prospective": false,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.59375,
+        "top12_recall": 0.7395833333333334,
+        "top25_recall": 0.7766666666666666,
+        "top25_mae": 7.411666666666667,
+        "spearman": 0.704763638315217
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.4791666666666667,
+          "top12_recall": 0.7361111111111112,
+          "top25_recall": 0.7766666666666666,
+          "top25_mae": 7.283333333333333,
+          "spearman": 0.6712987258695957,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.7708333333333334,
+          "top25_recall": 0.8,
+          "top25_mae": 7.053333333333334,
+          "spearman": 0.7366911275276371,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.696,
+            "quality_wins": 0.203,
+            "top25_wins": 0.101
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.7222222222222222,
+            "top25_recall": 0.72,
+            "top25_mae": 7.913333333333333,
+            "spearman": 0.6651815968297524,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.831,
+            "quality_wins": 0.03,
+            "top25_wins": 0.139
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.6944444444444444,
+            "top25_recall": 0.8066666666666666,
+            "top25_mae": 6.926666666666667,
+            "spearman": 0.6855211219345957,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.7,
+            "quality_wins": 0.194,
+            "top25_wins": 0.106
+          },
+          "test": {
+            "top4_recall": 0.5416666666666666,
+            "top12_recall": 0.8611111111111112,
+            "top25_recall": 0.8466666666666667,
+            "top25_mae": 5.206666666666667,
+            "spearman": 0.8076522694545686,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.666,
+            "quality_wins": 0.216,
+            "top25_wins": 0.118
+          },
+          "test": {
+            "top4_recall": 0.4166666666666667,
+            "top12_recall": 0.6805555555555556,
+            "top25_recall": 0.7333333333333333,
+            "top25_mae": 9.6,
+            "spearman": 0.6606995650419515,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "top25_wins",
+        "losses"
+      ],
+      "top25_definition": "top25_wins",
+      "prospective": false,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.71875,
+        "top12_recall": 0.7986111111111112,
+        "top25_recall": 0.82,
+        "top25_mae": 4.9366666666666665,
+        "spearman": 0.8046829133637226
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5833333333333334,
+          "top12_recall": 0.8333333333333334,
+          "top25_recall": 0.8466666666666667,
+          "top25_mae": 4.93,
+          "spearman": 0.807075800052462,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.8125,
+          "top12_recall": 0.8472222222222222,
+          "top25_recall": 0.84,
+          "top25_mae": 4.526666666666666,
+          "spearman": 0.8119995754803787,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.185,
+            "quality_wins": 0.005,
+            "top25_wins": 0.139,
+            "losses": 0.671
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8055555555555556,
+            "top25_recall": 0.82,
+            "top25_mae": 5.3,
+            "spearman": 0.7846936661538148,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.01,
+            "quality_wins": 0.023,
+            "top25_wins": 0.163,
+            "losses": 0.805
+          },
+          "test": {
+            "top4_recall": 0.9166666666666666,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8266666666666667,
+            "top25_mae": 4.213333333333333,
+            "spearman": 0.8611728939657772,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.045,
+            "quality_wins": 0.152,
+            "top25_wins": 0.128,
+            "losses": 0.675
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8066666666666666,
+            "top25_mae": 4.506666666666667,
+            "spearman": 0.8484530473207121,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.09,
+            "quality_wins": 0.145,
+            "top25_wins": 0.193,
+            "losses": 0.572
+          },
+          "test": {
+            "top4_recall": 0.4583333333333333,
+            "top12_recall": 0.7222222222222222,
+            "top25_recall": 0.8266666666666667,
+            "top25_mae": 5.726666666666667,
+            "spearman": 0.7244120460145865,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "top25_wins",
+        "bad_losses"
+      ],
+      "top25_definition": "top25_wins",
+      "prospective": false,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.59375,
+        "top12_recall": 0.7638888888888887,
+        "top25_recall": 0.805,
+        "top25_mae": 6.505,
+        "spearman": 0.7426198420287317
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.5,
+          "top12_recall": 0.7569444444444444,
+          "top25_recall": 0.8066666666666666,
+          "top25_mae": 6.376666666666667,
+          "spearman": 0.7011062108070573,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6458333333333334,
+          "top12_recall": 0.7986111111111112,
+          "top25_recall": 0.7966666666666666,
+          "top25_mae": 6.2,
+          "spearman": 0.7916712571883052,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.474,
+            "quality_wins": 0.245,
+            "top25_wins": 0.084,
+            "bad_losses": 0.198
+          },
+          "test": {
+            "top4_recall": 0.6666666666666666,
+            "top12_recall": 0.7222222222222222,
+            "top25_recall": 0.7533333333333333,
+            "top25_mae": 7.22,
+            "spearman": 0.688402413816601,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.568,
+            "quality_wins": 0.115,
+            "top25_wins": 0.162,
+            "bad_losses": 0.155
+          },
+          "test": {
+            "top4_recall": 0.625,
+            "top12_recall": 0.7638888888888888,
+            "top25_recall": 0.8533333333333334,
+            "top25_mae": 5.54,
+            "spearman": 0.7638220449780909,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.505,
+            "quality_wins": 0.212,
+            "top25_wins": 0.077,
+            "bad_losses": 0.206
+          },
+          "test": {
+            "top4_recall": 0.5833333333333334,
+            "top12_recall": 0.875,
+            "top25_recall": 0.8333333333333334,
+            "top25_mae": 5.513333333333334,
+            "spearman": 0.8057222747666097,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.558,
+            "quality_wins": 0.217,
+            "top25_wins": 0.062,
+            "bad_losses": 0.163
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.6944444444444444,
+            "top25_recall": 0.78,
+            "top25_mae": 7.746666666666667,
+            "spearman": 0.7125326345536248,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "control_qw_t25_losses_bad_losses",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "top25_wins",
+        "losses",
+        "bad_losses"
+      ],
+      "top25_definition": "top25_wins",
+      "prospective": false,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.7395833333333334,
+        "top12_recall": 0.8333333333333334,
+        "top25_recall": 0.8216666666666667,
+        "top25_mae": 4.818333333333333,
+        "spearman": 0.8116850756353293
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.6666666666666666,
+          "top12_recall": 0.8541666666666666,
+          "top25_recall": 0.83,
+          "top25_mae": 4.796666666666667,
+          "spearman": 0.813798410565156,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.8541666666666666,
+          "top12_recall": 0.8402777777777778,
+          "top25_recall": 0.8366666666666667,
+          "top25_mae": 4.283333333333333,
+          "spearman": 0.8275963579881129,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.099,
+            "quality_wins": 0.026,
+            "top25_wins": 0.126,
+            "losses": 0.643,
+            "bad_losses": 0.106
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8472222222222222,
+            "top25_recall": 0.8466666666666667,
+            "top25_mae": 4.993333333333333,
+            "spearman": 0.7781729099186817,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.044,
+            "quality_wins": 0.023,
+            "top25_wins": 0.136,
+            "losses": 0.718,
+            "bad_losses": 0.078
+          },
+          "test": {
+            "top4_recall": 0.9583333333333334,
+            "top12_recall": 0.875,
+            "top25_recall": 0.8133333333333334,
+            "top25_mae": 3.9,
+            "spearman": 0.8872985367365165,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.038,
+            "quality_wins": 0.046,
+            "top25_wins": 0.125,
+            "losses": 0.705,
+            "bad_losses": 0.087
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.875,
+            "top25_recall": 0.78,
+            "top25_mae": 5.0,
+            "spearman": 0.8482427857619655,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.077,
+            "quality_wins": 0.08,
+            "top25_wins": 0.199,
+            "losses": 0.623,
+            "bad_losses": 0.021
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.7361111111111112,
+            "top25_recall": 0.8466666666666667,
+            "top25_mae": 5.38,
+            "spearman": 0.7330260701241537,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    },
+    {
+      "name": "full_resume_no_separate_sos",
+      "metrics": [
+        "game_control",
+        "quality_wins",
+        "top25_wins",
+        "losses",
+        "bad_losses",
+        "avg_capped_mov",
+        "avg_weighted_mol"
+      ],
+      "top25_definition": "top25_wins",
+      "prospective": false,
+      "sos_handling": "embedded only in schedule-adjusted game_control",
+      "held_out_aggregate": {
+        "top4_recall": 0.6770833333333334,
+        "top12_recall": 0.8263888888888888,
+        "top25_recall": 0.83,
+        "top25_mae": 4.583333333333333,
+        "spearman": 0.8285870107880008
+      },
+      "week_band_diagnostics": {
+        "early": {
+          "top4_recall": 0.6666666666666666,
+          "top12_recall": 0.8402777777777778,
+          "top25_recall": 0.82,
+          "top25_mae": 4.49,
+          "spearman": 0.8442960387031836,
+          "ranked_rows": 300
+        },
+        "late": {
+          "top4_recall": 0.6875,
+          "top12_recall": 0.8611111111111112,
+          "top25_recall": 0.8266666666666667,
+          "top25_mae": 4.333333333333333,
+          "spearman": 0.8359119072351354,
+          "ranked_rows": 300
+        }
+      },
+      "folds": [
+        {
+          "held_out_season": 2021,
+          "weights": {
+            "game_control": 0.043,
+            "quality_wins": 0.149,
+            "top25_wins": 0.124,
+            "losses": 0.478,
+            "bad_losses": 0.067,
+            "avg_capped_mov": 0.099,
+            "avg_weighted_mol": 0.04
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8133333333333334,
+            "top25_mae": 5.473333333333334,
+            "spearman": 0.7768873032729386,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2022,
+          "weights": {
+            "game_control": 0.215,
+            "quality_wins": 0.039,
+            "top25_wins": 0.151,
+            "losses": 0.37,
+            "bad_losses": 0.134,
+            "avg_capped_mov": 0.062,
+            "avg_weighted_mol": 0.029
+          },
+          "test": {
+            "top4_recall": 0.75,
+            "top12_recall": 0.8333333333333334,
+            "top25_recall": 0.8333333333333334,
+            "top25_mae": 3.7466666666666666,
+            "spearman": 0.8816278237385602,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2023,
+          "weights": {
+            "game_control": 0.252,
+            "quality_wins": 0.057,
+            "top25_wins": 0.103,
+            "losses": 0.427,
+            "bad_losses": 0.041,
+            "avg_capped_mov": 0.073,
+            "avg_weighted_mol": 0.045
+          },
+          "test": {
+            "top4_recall": 0.7083333333333334,
+            "top12_recall": 0.8472222222222222,
+            "top25_recall": 0.8133333333333334,
+            "top25_mae": 4.473333333333334,
+            "spearman": 0.8559740812402511,
+            "ranked_rows": 150
+          }
+        },
+        {
+          "held_out_season": 2024,
+          "weights": {
+            "game_control": 0.026,
+            "quality_wins": 0.104,
+            "top25_wins": 0.149,
+            "losses": 0.515,
+            "bad_losses": 0.062,
+            "avg_capped_mov": 0.142,
+            "avg_weighted_mol": 0.003
+          },
+          "test": {
+            "top4_recall": 0.5,
+            "top12_recall": 0.7916666666666666,
+            "top25_recall": 0.86,
+            "top25_mae": 4.64,
+            "spearman": 0.7998588349002529,
+            "ranked_rows": 150
+          }
+        }
+      ]
+    }
+  ]
+}

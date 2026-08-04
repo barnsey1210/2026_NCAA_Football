@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "scope": "frozen prediction replay; production upstream gate remains blocked",
+  "checks": [
+    {
+      "component": "market",
+      "n": 1385,
+      "max_abs_difference": 4.884981308350689e-14,
+      "passed": true
+    },
+    {
+      "component": "sp_plus",
+      "n": 1127,
+      "max_abs_difference": 3.708144902248023e-14,
+      "passed": true
+    },
+    {
+      "component": "sp_offense",
+      "n": 1127,
+      "max_abs_difference": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "component": "sp_defense_improvement",
+      "n": 1127,
+      "max_abs_difference": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "component": "fpi",
+      "n": 218,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true
+    },
+    {
+      "component": "teamrankings",
+      "n": 218,
+      "max_abs_difference": 1.0658141036401503e-14,
+      "passed": true
+    },
+    {
+      "component": "final_spread_ensemble",
+      "n": 218,
+      "max_abs_difference": 1.0658141036401503e-14,
+      "passed": true
+    },
+    {
+      "component": "sp_plus_component_total",
+      "n": 411,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true
+    },
+    {
+      "component": "final_corrected_total",
+      "n": 411,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true,
+      "legacy_unrounded_correction_max_difference": 4.452945168509359e-05,
+      "detail": "approved -1.1573 reference; legacy candidate used -1.1572554705483324"
+    }
+  ]
+}

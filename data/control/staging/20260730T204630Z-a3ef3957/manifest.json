@@ -1,0 +1,157 @@
+{
+  "acceptance_block_reason": "preview-only; acceptance disabled",
+  "acceptance_dry_run_design": "A future provider-free command may copy same-book comparable staged values into a temporary accepted-data clone, run canonical builders/audits, diff outputs, and stop before promotion/publication.",
+  "acceptance_eligibility": false,
+  "accepted_display_book_priority": "DraftKings then Bovada (build_season_game_lines_2026.py); replay does not redefine it",
+  "accepted_state_modified": false,
+  "actual_api_cost": null,
+  "archive_page_coverage": "complete_bounded_fetch",
+  "books_returned": [
+    "betmgm",
+    "bovada",
+    "caesars",
+    "draftkings",
+    "fanduel"
+  ],
+  "canonical_week_counts_mapped": {
+    "0": 8,
+    "1": 82,
+    "10": 1,
+    "12": 1,
+    "13": 3,
+    "2": 8,
+    "3": 7
+  },
+  "comparison_method": "same accepted display sportsbook, paired sides, current-to-current only",
+  "comparison_status_counts": {
+    "moneyline:comparable": 8,
+    "spread:comparable": 8,
+    "total:comparable": 8
+  },
+  "composite_games_staged": 8,
+  "consensus_and_best_price_behavior": "separate quote-level observations; not used for canonical movement",
+  "coverage_status": "COMPLETE",
+  "estimated_api_cost": 2,
+  "events_ambiguous": 0,
+  "events_excluded": 0,
+  "events_in_archived_page": 111,
+  "events_mapped": 110,
+  "events_staged_for_canonical_week": 8,
+  "events_unmatched": 1,
+  "events_unmatched_or_excluded": 1,
+  "excluded_events": [
+    {
+      "away_team": "UAB",
+      "candidate_count": 1,
+      "event_id": "HTi8ZufisDnaYtVhvz6J",
+      "home_team": "Illinois",
+      "reason": "unmatched",
+      "start_time_utc": "2026-09-04T01:00:00+00:00"
+    }
+  ],
+  "expected_canonical_game_ids": [
+    "g1",
+    "g2",
+    "g3",
+    "g4",
+    "g5",
+    "g6",
+    "g7",
+    "g8"
+  ],
+  "expected_canonical_games": 8,
+  "external_calls": 2,
+  "fbs_vs_fbs_staged": 8,
+  "fbs_vs_fcs_staged": 0,
+  "fcs_vs_fcs_staged": 0,
+  "files_that_would_change_in_acceptance": [
+    "data/odds/season_game_lines_2026.csv",
+    "canonical per-book market history",
+    "derived V2 market JSON after validation"
+  ],
+  "games_changed": 0,
+  "games_returned": 111,
+  "largest_valid_same_book_spread_changes": [],
+  "largest_valid_same_book_total_changes": [],
+  "mapped_canonical_game_ids": [
+    "g1",
+    "g2",
+    "g3",
+    "g4",
+    "g5",
+    "g6",
+    "g7",
+    "g8"
+  ],
+  "mapped_canonical_games": 8,
+  "missing_book_behavior": "comparison unavailable; no newer-book substitution",
+  "missing_canonical_game_ids": [],
+  "missing_canonical_games": 0,
+  "mode": "live_preview",
+  "moneylines_changed": 0,
+  "neutral_site_games_staged": 2,
+  "new_observations": 206,
+  "next_cursor_present": false,
+  "observation_ledger": "data/control/observations/sports_game_odds/20260730T204630Z-a3ef3957.jsonl",
+  "original_preview_counts": {
+    "games_changed": 39,
+    "moneylines_changed": 7,
+    "spreads_changed": 29,
+    "totals_changed": 14
+  },
+  "page_count": 2,
+  "pagination_design": "Live preview follows nextCursor up to an explicit maximum page/request budget and blocks acceptance if a cursor remains.",
+  "populated_market_components": {
+    "moneyline": 60,
+    "spread": 80,
+    "total": 80
+  },
+  "provider": "sports_game_odds",
+  "provider_week_counts": {
+    "1": 91,
+    "10": 1,
+    "12": 1,
+    "13": 3,
+    "2": 8,
+    "3": 7
+  },
+  "provider_week_is_authoritative": false,
+  "publication": "SKIPPED",
+  "pulled_at": "2026-07-30T20:46:30.623426+00:00",
+  "quote_audit_ledger_total": 844,
+  "quote_observations_added_to_audit_ledger": 206,
+  "quote_observations_retained": 220,
+  "quote_rows_by_sportsbook": {
+    "betmgm": 32,
+    "bovada": 46,
+    "caesars": 46,
+    "draftkings": 48,
+    "fanduel": 48
+  },
+  "raw_retention": "archived response replayed; quote observations remain audit-only",
+  "replay_source_run_id": null,
+  "request_success": true,
+  "requested_week": "current",
+  "resolved_canonical_week": 0,
+  "run_id": "20260730T204630Z-a3ef3957",
+  "selected_week_date_range": [
+    "2026-08-29",
+    "2026-08-29"
+  ],
+  "shared_deduplicated_ledger": "data/control/observations/sports_game_odds/quote_observations.jsonl",
+  "spreads_changed": 0,
+  "stale_quote_rows": 6,
+  "stale_threshold_hours": 24.0,
+  "stale_threshold_rationale": "24 hours is a proposed conservative preview threshold; it is explicit/configurable and is not an acceptance policy.",
+  "supported_books": [
+    "betmgm",
+    "bovada",
+    "caesars",
+    "draftkings",
+    "fanduel"
+  ],
+  "suspended_quote_rows": 0,
+  "totals_changed": 0,
+  "unavailable_quote_rows": 19,
+  "v2_structural_hashes": "unchanged"
+}

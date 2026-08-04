@@ -1,0 +1,126 @@
+{
+  "schema_version": "shadow-opener-timestamp-audit-v1",
+  "generated_at": "2026-07-26T18:29:48.519887+00:00",
+  "scope": {
+    "spread_game_ids": 601,
+    "total_game_ids": 653,
+    "union_game_ids": 678,
+    "source_study": "data/research/shadow_opener_incorporation/game_level_audit.csv",
+    "model_selection_rerun": false
+  },
+  "provenance": {
+    "original_source_file": "cfbd_cache/coach_full_game_fav_dog/lines_2025_regular.json",
+    "intermediate_source_file": "data/research/pbp_market_modeling_2021_2025/full_game_modeling_rows.csv",
+    "selection_logic": "build_pbp_market_modeling_dataset.py selects one event provider row with both closing spread and total, ordered by fixed provider priority: consensus, ESPN Bet, DraftKings, Draft Kings, William Hill (New Jersey), Bovada, teamrankings, Caesars Sportsbook (Colorado), Caesars (Pennsylvania).",
+    "opening_fields": "spreadOpen and overUnderOpen on that selected provider row",
+    "source_is_sgo": false,
+    "source_is_cfbd": true,
+    "book_specific": true,
+    "earliest_across_books": false,
+    "consensus_derived": false,
+    "timestamp_field_available": false,
+    "first_record_retained_by_sgo": "not used by this study",
+    "first_observation_in_local_collection": "not retained per event; cache file mtime is not a line observation timestamp",
+    "sportsbook_actual_initial_posting_time": "not available",
+    "warning": "CFBD opening fields identify a provider-specific retained opener value, but do not prove when that book first posted it or when CFBD first observed it."
+  },
+  "spreads": {
+    "total_games": 601,
+    "games_with_valid_timestamp": 0,
+    "median_first_recorded_time_et": null,
+    "earliest_recorded_opener": null,
+    "latest_recorded_opener": null,
+    "percentage_recorded_saturday": 0.0,
+    "percentage_recorded_saturday_night": 0.0,
+    "percentage_recorded_sunday_morning": 0.0,
+    "percentage_recorded_sunday_afternoon_evening": 0.0,
+    "percentage_recorded_monday_or_later": 0.0,
+    "sportsbook_counts": {
+      "other sportsbooks": 600,
+      "DraftKings": 1
+    },
+    "raw_sportsbook_counts": {
+      "ESPN Bet": 600,
+      "DraftKings": 1
+    },
+    "percentage_from_draftkings": 0.0016638935108153079,
+    "percentage_from_fanduel": 0.0,
+    "percentage_from_dk_or_fanduel": 0.0016638935108153079,
+    "percentage_consensus_derived": 0.0,
+    "percentage_with_unknown_book": 0.0,
+    "percentage_with_unknown_timestamp": 1.0
+  },
+  "totals": {
+    "total_games": 653,
+    "games_with_valid_timestamp": 0,
+    "median_first_recorded_time_et": null,
+    "earliest_recorded_opener": null,
+    "latest_recorded_opener": null,
+    "percentage_recorded_saturday": 0.0,
+    "percentage_recorded_saturday_night": 0.0,
+    "percentage_recorded_sunday_morning": 0.0,
+    "percentage_recorded_sunday_afternoon_evening": 0.0,
+    "percentage_recorded_monday_or_later": 0.0,
+    "sportsbook_counts": {
+      "other sportsbooks": 653
+    },
+    "raw_sportsbook_counts": {
+      "ESPN Bet": 653
+    },
+    "percentage_from_draftkings": 0.0,
+    "percentage_from_fanduel": 0.0,
+    "percentage_from_dk_or_fanduel": 0.0,
+    "percentage_consensus_derived": 0.0,
+    "percentage_with_unknown_book": 0.0,
+    "percentage_with_unknown_timestamp": 1.0
+  },
+  "timing_bucket_comparison": {
+    "spread": [
+      {
+        "timing_bucket": "timestamp unknown",
+        "sample_size": 601,
+        "opener_to_close_mae": 1.7371048252911814,
+        "average_absolute_movement": 1.7371048252911814,
+        "percentage_moving_at_least_0_5": 0.762063227953411,
+        "percentage_moving_at_least_1_0": 0.7587354409317804,
+        "percentage_moving_at_least_2_0": 0.389351081530782,
+        "team_rating_model_positive_clv_rate": 0.415973377703827,
+        "team_rating_model_average_clv": 0.33277870216306155,
+        "projected_close_mae": 1.7733476763922584,
+        "model_definition": "completed-study predicted_residual_move; projected close = opener + predicted residual move"
+      }
+    ],
+    "total": [
+      {
+        "timing_bucket": "timestamp unknown",
+        "sample_size": 653,
+        "opener_to_close_mae": 1.8131699846860643,
+        "average_absolute_movement": 1.8131699846860643,
+        "percentage_moving_at_least_0_5": 0.8131699846860643,
+        "percentage_moving_at_least_1_0": 0.8131699846860643,
+        "percentage_moving_at_least_2_0": 0.4226646248085758,
+        "team_rating_model_positive_clv_rate": 0.4777947932618683,
+        "team_rating_model_average_clv": 0.49617151607963245,
+        "projected_close_mae": 1.8373994856448845,
+        "model_definition": "completed-study predicted_residual_move; projected close = opener + predicted residual move"
+      }
+    ],
+    "empty_buckets": [
+      "Saturday recorded",
+      "Sunday before noon ET",
+      "Sunday after noon ET",
+      "Monday or later"
+    ]
+  },
+  "source_value_mismatches": [],
+  "central_answer": "No. The prior study cannot be characterized as using Saturday-night DraftKings/FanDuel low-limit lines. Its 2025 sample uses provider-specific CFBD retained opener fields, overwhelmingly ESPN Bet, with no timestamps. It also is not a later-Sunday consensus dataset: consensus was not selected. Timing relative to early movement is unobservable from the retained source.",
+  "limitations": [
+    "No line-level UTC timestamps",
+    "No book posting timestamps",
+    "No historical observation sequence",
+    "No first-across-books calculation",
+    "No consensus methodology",
+    "No SGO records used",
+    "Local cache modification time postdates the season and is not evidence of market timing"
+  ]
+}

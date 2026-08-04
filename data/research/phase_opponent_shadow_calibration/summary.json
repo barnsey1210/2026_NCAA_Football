@@ -1,0 +1,294 @@
+{
+  "schema_version": "phase-opponent-shadow-calibration-v1",
+  "primary_goal": "predict next closing spread and total",
+  "validation_design": {
+    "delta_train_for_2024": "2021-2023",
+    "calibration_selection": "2024 only",
+    "locked_holdout": "2025"
+  },
+  "spread": {
+    "opponent_adjustment_note": "The matchup adjustment already uses both teams: -home delta + away delta. Additional candidates test separate home/away coefficients and games-played phase effects.",
+    "spread_modeling_rows": "data/research/postgame_pbp_market_rating_update_2021_2024/modeling_rows_2021_2025.csv",
+    "selected_on_2024": {
+      "kind": "phase_home_away",
+      "coef": [
+        0.3701572533770354,
+        0.6387247521798898,
+        0.4974273823059815,
+        0.5182297091764045,
+        0.5894621654009566,
+        0.4712519257049618
+      ],
+      "columns": [
+        "home_g1",
+        "home_g2_3",
+        "home_g4_plus",
+        "away_g1",
+        "away_g2_3",
+        "away_g4_plus"
+      ],
+      "validation": {
+        "n": 667,
+        "mae": 4.497877853681362,
+        "rmse": 5.931915454151322,
+        "mean_error": 0.09667687883186052,
+        "direction_accuracy": 0.6131934032983508,
+        "correlation": 0.4238415420398367
+      },
+      "holdout": {
+        "n": 679,
+        "mae": 4.713226477624147,
+        "rmse": 6.675027747491304,
+        "mean_error": 1.019959128365183,
+        "direction_accuracy": 0.8483063328424153,
+        "correlation": 0.8646733240778042
+      },
+      "holdout_baseline": {
+        "n": 679,
+        "mae": 5.2823282626422685,
+        "rmse": 7.190979066023584,
+        "mean_error": 0.6849707353766473,
+        "direction_accuracy": 0.8365243004418262,
+        "correlation": 0.8611625394695387
+      },
+      "validation_full_line": {
+        "n": 667,
+        "mae": 4.497877853681361,
+        "rmse": 5.931915454151322,
+        "mean_error": 0.09667687883186048,
+        "direction_accuracy": 0.848575712143928,
+        "correlation": 0.8818158936355519
+      }
+    },
+    "all_candidates": [
+      {
+        "kind": "phase_home_away",
+        "coef": [
+          0.3701572533770354,
+          0.6387247521798898,
+          0.4974273823059815,
+          0.5182297091764045,
+          0.5894621654009566,
+          0.4712519257049618
+        ],
+        "columns": [
+          "home_g1",
+          "home_g2_3",
+          "home_g4_plus",
+          "away_g1",
+          "away_g2_3",
+          "away_g4_plus"
+        ],
+        "validation": {
+          "n": 667,
+          "mae": 4.497877853681362,
+          "rmse": 5.931915454151322,
+          "mean_error": 0.09667687883186052,
+          "direction_accuracy": 0.6131934032983508,
+          "correlation": 0.4238415420398367
+        },
+        "holdout": {
+          "n": 679,
+          "mae": 4.713226477624147,
+          "rmse": 6.675027747491304,
+          "mean_error": 1.019959128365183,
+          "direction_accuracy": 0.8483063328424153,
+          "correlation": 0.8646733240778042
+        },
+        "holdout_baseline": {
+          "n": 679,
+          "mae": 5.2823282626422685,
+          "rmse": 7.190979066023584,
+          "mean_error": 0.6849707353766473,
+          "direction_accuracy": 0.8365243004418262,
+          "correlation": 0.8611625394695387
+        },
+        "validation_full_line": {
+          "n": 667,
+          "mae": 4.497877853681361,
+          "rmse": 5.931915454151322,
+          "mean_error": 0.09667687883186048,
+          "direction_accuracy": 0.848575712143928,
+          "correlation": 0.8818158936355519
+        }
+      },
+      {
+        "kind": "phase",
+        "coef": [
+          0.4420037905725929,
+          0.6135454261182722,
+          0.48453353410501826
+        ],
+        "columns": [
+          "g1",
+          "g2_3",
+          "g4_plus"
+        ],
+        "validation": {
+          "n": 667,
+          "mae": 4.4982556878503495,
+          "rmse": 5.936192855767167,
+          "mean_error": 0.10152770562932942,
+          "direction_accuracy": 0.6131934032983508,
+          "correlation": 0.42246569216176205
+        },
+        "holdout": {
+          "n": 679,
+          "mae": 4.708061901678085,
+          "rmse": 6.677937986718595,
+          "mean_error": 1.025636474078156,
+          "direction_accuracy": 0.8468335787923417,
+          "correlation": 0.8645600642109592
+        },
+        "holdout_baseline": {
+          "n": 679,
+          "mae": 5.2823282626422685,
+          "rmse": 7.190979066023584,
+          "mean_error": 0.6849707353766473,
+          "direction_accuracy": 0.8365243004418262,
+          "correlation": 0.8611625394695387
+        },
+        "validation_full_line": {
+          "n": 667,
+          "mae": 4.4982556878503495,
+          "rmse": 5.936192855767167,
+          "mean_error": 0.10152770562932939,
+          "direction_accuracy": 0.8500749625187406,
+          "correlation": 0.8816335379657032
+        }
+      },
+      {
+        "kind": "global",
+        "coef": [
+          0.5
+        ],
+        "columns": [
+          "global"
+        ],
+        "validation": {
+          "n": 667,
+          "mae": 4.501470242763837,
+          "rmse": 5.943749940685201,
+          "mean_error": 0.10306337090603529,
+          "direction_accuracy": 0.6131934032983508,
+          "correlation": 0.42028734765026166
+        },
+        "holdout": {
+          "n": 679,
+          "mae": 4.7067686887340425,
+          "rmse": 6.669079694297905,
+          "mean_error": 1.0260100719215226,
+          "direction_accuracy": 0.8468335787923417,
+          "correlation": 0.8652772969221656
+        },
+        "holdout_baseline": {
+          "n": 679,
+          "mae": 5.2823282626422685,
+          "rmse": 7.190979066023584,
+          "mean_error": 0.6849707353766473,
+          "direction_accuracy": 0.8365243004418262,
+          "correlation": 0.8611625394695387
+        },
+        "validation_full_line": {
+          "n": 667,
+          "mae": 4.501470242763837,
+          "rmse": 5.943749940685201,
+          "mean_error": 0.10306337090603536,
+          "direction_accuracy": 0.848575712143928,
+          "correlation": 0.8814695276981558
+        }
+      },
+      {
+        "kind": "separate_home_away",
+        "coef": [
+          0.515620136764276,
+          0.49988802713307706
+        ],
+        "columns": [
+          "home",
+          "away"
+        ],
+        "validation": {
+          "n": 667,
+          "mae": 4.503191091279744,
+          "rmse": 5.943225617811217,
+          "mean_error": 0.10318531349800823,
+          "direction_accuracy": 0.6131934032983508,
+          "correlation": 0.4202174178633313
+        },
+        "holdout": {
+          "n": 679,
+          "mae": 4.710276148211426,
+          "rmse": 6.670645504230605,
+          "mean_error": 1.0311227164976011,
+          "direction_accuracy": 0.8468335787923417,
+          "correlation": 0.8650239561222886
+        },
+        "holdout_baseline": {
+          "n": 679,
+          "mae": 5.2823282626422685,
+          "rmse": 7.190979066023584,
+          "mean_error": 0.6849707353766473,
+          "direction_accuracy": 0.8365243004418262,
+          "correlation": 0.8611625394695387
+        },
+        "validation_full_line": {
+          "n": 667,
+          "mae": 4.503191091279744,
+          "rmse": 5.943225617811217,
+          "mean_error": 0.10318531349800822,
+          "direction_accuracy": 0.8500749625187406,
+          "correlation": 0.8813732748927284
+        }
+      }
+    ],
+    "holdout_improved_games_pct": 0.5949926362297496
+  },
+  "total": {
+    "pbp_note": "Totals use the validated score-plus-PBP feature set for both-prior games. One-prior and neither-prior retain baseline.",
+    "lambda": 0.85,
+    "validation": {
+      "n": 749,
+      "mae": 6.682200954013428,
+      "rmse": 13.66143602048321,
+      "mean_error": 2.585024152298912,
+      "direction_accuracy": 1.0,
+      "correlation": 0.19002174220055654
+    },
+    "holdout_baseline": {
+      "n": 762,
+      "mae": 7.320298261618029,
+      "rmse": 14.790991889613894,
+      "mean_error": 3.5890199591382452,
+      "direction_accuracy": 1.0,
+      "correlation": 0.10539756320169287
+    },
+    "holdout_shadow": {
+      "n": 762,
+      "mae": 6.840165914649892,
+      "rmse": 14.633078440849,
+      "mean_error": 3.0838539441385433,
+      "direction_accuracy": 1.0,
+      "correlation": 0.18722833169046021
+    },
+    "holdout_both_prior_baseline": {
+      "n": 679,
+      "mae": 4.03654009416929,
+      "rmse": 5.028430631551757,
+      "mean_error": 0.061248077964457595,
+      "direction_accuracy": 1.0,
+      "correlation": 0.7900061785642715
+    },
+    "holdout_both_prior_shadow": {
+      "n": 679,
+      "mae": 3.4977170479399518,
+      "rmse": 4.480031465292528,
+      "mean_error": -0.5056687164829254,
+      "direction_accuracy": 1.0,
+      "correlation": 0.7111193900804667
+    },
+    "uses_pbp": true,
+    "pbp_feature_source": "score_plus_pbp feature set from analyze_postgame_total_market_update.py"
+  },
+  "adoption_rule": "Choose structure and coefficients on 2024 only. Adopt only if frozen settings improve 2025 closing-line MAE."
+}

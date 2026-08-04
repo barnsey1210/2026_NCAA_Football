@@ -1,0 +1,136 @@
+{
+  "schema_version": "baseline-aware-total-market-v1",
+  "target": "next-game closing-total innovation versus rolling market-implied offense/defense baseline",
+  "design": {
+    "development": "2021-2023",
+    "validation": "2024",
+    "holdout": "2025",
+    "missing_prior_policy": "neutral feature values plus explicit has-prior and games-played indicators"
+  },
+  "holdout_score_only": {
+    "n": 762,
+    "baseline_mae": 7.320298261618029,
+    "model_mae": 5.362640783226757,
+    "mae_improvement_pct": 26.742864954775275,
+    "direction_accuracy": 0.6325459317585301,
+    "correlation": 0.8244071250487459
+  },
+  "holdout_score_plus_pbp": {
+    "n": 762,
+    "baseline_mae": 7.320298261618029,
+    "model_mae": 5.083879641888668,
+    "mae_improvement_pct": 30.55092210457335,
+    "direction_accuracy": 0.6850393700787402,
+    "correlation": 0.8322741592183427
+  },
+  "holdout_by_prior_data_state": {
+    "both_prior": {
+      "score_only": {
+        "n": 679,
+        "baseline_mae": 4.03654009416929,
+        "model_mae": 3.830952178188527,
+        "mae_improvement_pct": 5.093171656531564,
+        "direction_accuracy": 0.6082474226804123,
+        "correlation": 0.32140283588581875
+      },
+      "score_plus_pbp": {
+        "n": 679,
+        "baseline_mae": 4.03654009416929,
+        "model_mae": 3.5429589611951853,
+        "mae_improvement_pct": 12.227826838313177,
+        "direction_accuracy": 0.6671575846833578,
+        "correlation": 0.47555702433572616
+      }
+    },
+    "neither_prior": {
+      "score_only": {
+        "n": 56,
+        "baseline_mae": 48.133957466481725,
+        "model_mae": 18.48998898041862,
+        "mae_improvement_pct": 61.58639356987383,
+        "direction_accuracy": 0.8928571428571429,
+        "correlation": NaN
+      },
+      "score_plus_pbp": {
+        "n": 56,
+        "baseline_mae": 48.133957466481725,
+        "model_mae": 18.442347349838005,
+        "mae_improvement_pct": 61.685370743345985,
+        "direction_accuracy": 0.8928571428571429,
+        "correlation": NaN
+      }
+    },
+    "one_prior": {
+      "score_only": {
+        "n": 27,
+        "baseline_mae": 5.250182714407867,
+        "model_mae": 16.65468018241987,
+        "mae_improvement_pct": -217.2209633145737,
+        "direction_accuracy": 0.7037037037037037,
+        "correlation": -0.025380481079892596
+      },
+      "score_plus_pbp": {
+        "n": 27,
+        "baseline_mae": 5.250182714407867,
+        "model_mae": 16.1287296621002,
+        "mae_improvement_pct": -207.20320681104621,
+        "direction_accuracy": 0.7037037037037037,
+        "correlation": 0.12891277392386846
+      }
+    }
+  },
+  "rows": {
+    "all": 3727,
+    "train": 2965,
+    "holdout": 762,
+    "both_prior": 3324,
+    "one_prior": 118,
+    "neither_prior": 285
+  },
+  "features": {
+    "score_only": [
+      "home_prev_scored_vs_implied",
+      "home_prev_allowed_vs_implied",
+      "home_prev_total_residual",
+      "home_prev_ats_margin",
+      "away_prev_scored_vs_implied",
+      "away_prev_allowed_vs_implied",
+      "away_prev_total_residual",
+      "away_prev_ats_margin",
+      "home_has_prior_game",
+      "away_has_prior_game",
+      "home_games_played_before",
+      "away_games_played_before"
+    ],
+    "score_plus_pbp": [
+      "home_prev_scored_vs_implied",
+      "home_prev_allowed_vs_implied",
+      "home_prev_total_residual",
+      "home_prev_ats_margin",
+      "away_prev_scored_vs_implied",
+      "away_prev_allowed_vs_implied",
+      "away_prev_total_residual",
+      "away_prev_ats_margin",
+      "home_has_prior_game",
+      "away_has_prior_game",
+      "home_games_played_before",
+      "away_games_played_before",
+      "home_prev_off_success_rate",
+      "home_prev_off_ppa",
+      "home_prev_off_explosiveness",
+      "home_prev_def_success_allowed",
+      "home_prev_def_ppa_allowed",
+      "home_prev_def_explosiveness_allowed",
+      "home_prev_off_drive_elapsed_seconds_per_play",
+      "home_prev_off_plays",
+      "away_prev_off_success_rate",
+      "away_prev_off_ppa",
+      "away_prev_off_explosiveness",
+      "away_prev_def_success_allowed",
+      "away_prev_def_ppa_allowed",
+      "away_prev_def_explosiveness_allowed",
+      "away_prev_off_drive_elapsed_seconds_per_play",
+      "away_prev_off_plays"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "market-implied-production-2026-audit-v1",
+  "generated_at": "2026-08-04T12:01:14.353816+00:00",
+  "canonical_current_line_source": "data/site/matchups_view.json market.spread.home_line",
+  "line_selection_owner": "existing odds builders and scripts/site/build_matchups_view.py; exactly one selected home-perspective spread per canonical game_id",
+  "completed_close_policy": "only an explicit canonical closing_home_spread/closing_spread_home is eligible; current state is never relabeled as close",
+  "rejected_completed_games_without_explicit_close": [],
+  "solver": "existing weighted ridge least squares, sum-to-zero constraint, HFA 2.5; neutral HFA 0 in target fair spread",
+  "selected_parameters": {
+    "lookback_weeks": 99,
+    "half_life_weeks": 8.0,
+    "ridge_alpha": 1.0
+  },
+  "board_games": 130,
+  "teams": 142,
+  "sample_status_distribution": {
+    "disconnected_component": 58,
+    "early_one_game": 38,
+    "connected_low_sample": 18,
+    "early_limited": 15,
+    "connected_moderate_sample": 13
+  },
+  "component_size_distribution": {
+    "2": 58,
+    "3": 6,
+    "4": 4,
+    "74": 74
+  },
+  "readiness_distribution": {
+    "market_context_only": 78,
+    "independent_market_ready": 52
+  },
+  "historical_rows_preserved": 10022
+}

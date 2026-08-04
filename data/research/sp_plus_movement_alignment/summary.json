@@ -1,0 +1,287 @@
+{
+  "generated_at": "2026-07-26T18:55:04.806307+00:00",
+  "exact_sp_plus_sources": [
+    "data/import/sp_plus/espn_sp_plus_weekly_2021_2024.csv",
+    "data/import/sp_plus/espn_sp_plus_weekly_2025.csv"
+  ],
+  "observations_genuine_week_to_week": true,
+  "sequence_rule": "target snapshot week must equal current snapshot week + 1; missing calendar weeks never bridged",
+  "completed_game_alignment": "completed game week equals target SP+ week",
+  "team_week_sample_by_season": [
+    {
+      "season": 2021,
+      "all_adjacent_targets": 1686,
+      "eligible_team_games": 1013
+    },
+    {
+      "season": 2022,
+      "all_adjacent_targets": 1569,
+      "eligible_team_games": 1042
+    },
+    {
+      "season": 2023,
+      "all_adjacent_targets": 1856,
+      "eligible_team_games": 1173
+    },
+    {
+      "season": 2024,
+      "all_adjacent_targets": 1601,
+      "eligible_team_games": 822
+    },
+    {
+      "season": 2025,
+      "all_adjacent_targets": 1899,
+      "eligible_team_games": 1127
+    }
+  ],
+  "selection": {
+    "threshold": 1.0,
+    "direction_model": "ordinal_ridge_proxy",
+    "magnitude_model": "huber",
+    "features": [
+      "ats_margin",
+      "total_residual",
+      "final_margin",
+      "closing_spread",
+      "raw_pbp_performance",
+      "rules_repeatable_spread",
+      "regularized_repeatable_spread",
+      "residualized_repeatable_spread",
+      "repeatable_offense_performance",
+      "repeatable_defense_performance",
+      "off_ppa",
+      "off_success_rate",
+      "off_explosiveness",
+      "def_ppa_allowed",
+      "def_success_allowed",
+      "def_explosiveness_allowed",
+      "def_havoc_rate",
+      "off_plays",
+      "drive_off_points_per_opportunity",
+      "drive_def_points_per_opportunity_allowed",
+      "gc_game_control_index",
+      "trailing_2_game_ats",
+      "trailing_3_game_ats",
+      "trailing_2_game_ppa",
+      "trailing_3_game_ppa",
+      "recent_form_vs_season",
+      "opponent_adjusted_recent_form",
+      "current_sp_plus_overall",
+      "opponent_sp_plus_rating",
+      "games_played",
+      "completed_week"
+    ],
+    "blend": "simple_average",
+    "blend_2024_scores": {
+      "simple_average": 3.2019509752788218,
+      "market_when_conflict": 4.245672293754799,
+      "sp_plus_when_conflict": 3.653031355766649,
+      "suppress_conflict": 4.575043712502849
+    },
+    "selected_without_2025": true
+  },
+  "holdout_2025_direction": {
+    "n": 1127,
+    "accuracy": 0.7151730257320319,
+    "balanced_accuracy": 0.7094505130751406,
+    "macro_f1": 0.7198003964692603,
+    "per_class": {
+      "downgrade": {
+        "precision": 0.8109756097560976,
+        "recall": 0.7368421052631579,
+        "f1": 0.7721335268505078,
+        "support": 361
+      },
+      "no_change": {
+        "precision": 0.6222222222222222,
+        "recall": 0.75,
+        "f1": 0.680161943319838,
+        "support": 448
+      },
+      "upgrade": {
+        "precision": 0.7876447876447876,
+        "recall": 0.6415094339622641,
+        "f1": 0.7071057192374349,
+        "support": 318
+      }
+    },
+    "confusion_matrix": [
+      [
+        266,
+        95,
+        0
+      ],
+      [
+        57,
+        336,
+        55
+      ],
+      [
+        5,
+        109,
+        204
+      ]
+    ],
+    "multiclass_brier": 0.4286569818731747,
+    "log_loss": 0.7130184048937601
+  },
+  "holdout_2025_magnitude": {
+    "n": 1127,
+    "mae": 0.9472085348802962,
+    "median_absolute_error": 0.6891069722959666,
+    "rmse": 1.3160581792227608,
+    "signed_bias": -0.1012609301475786,
+    "correlation": 0.8113321019488854,
+    "overshoot_rate": 0.35226264418811004,
+    "undershoot_rate": 0.64773735581189
+  },
+  "strongest_predictive_features_train_only": [
+    {
+      "feature": "ats_margin",
+      "train_only_correlation": 0.6211271649085134,
+      "absolute_correlation": 0.6211271649085134,
+      "rows": 3228
+    },
+    {
+      "feature": "final_margin",
+      "train_only_correlation": 0.5897278290506531,
+      "absolute_correlation": 0.5897278290506531,
+      "rows": 3228
+    },
+    {
+      "feature": "residualized_repeatable_spread",
+      "train_only_correlation": 0.5696512031500819,
+      "absolute_correlation": 0.5696512031500819,
+      "rows": 3228
+    },
+    {
+      "feature": "gc_game_control_index",
+      "train_only_correlation": 0.5550400156158287,
+      "absolute_correlation": 0.5550400156158287,
+      "rows": 3228
+    },
+    {
+      "feature": "rules_repeatable_spread",
+      "train_only_correlation": 0.537437732512156,
+      "absolute_correlation": 0.537437732512156,
+      "rows": 3228
+    },
+    {
+      "feature": "raw_pbp_performance",
+      "train_only_correlation": 0.5230975748252263,
+      "absolute_correlation": 0.5230975748252263,
+      "rows": 3228
+    },
+    {
+      "feature": "regularized_repeatable_spread",
+      "train_only_correlation": 0.5187163540168593,
+      "absolute_correlation": 0.5187163540168593,
+      "rows": 3228
+    },
+    {
+      "feature": "trailing_2_game_ats",
+      "train_only_correlation": 0.5016206948676831,
+      "absolute_correlation": 0.5016206948676831,
+      "rows": 3228
+    },
+    {
+      "feature": "trailing_3_game_ats",
+      "train_only_correlation": 0.47790617303505767,
+      "absolute_correlation": 0.47790617303505767,
+      "rows": 3228
+    },
+    {
+      "feature": "repeatable_offense_performance",
+      "train_only_correlation": 0.4025478048281635,
+      "absolute_correlation": 0.4025478048281635,
+      "rows": 3228
+    },
+    {
+      "feature": "off_ppa",
+      "train_only_correlation": 0.4022504712380736,
+      "absolute_correlation": 0.4022504712380736,
+      "rows": 3228
+    },
+    {
+      "feature": "repeatable_defense_performance",
+      "train_only_correlation": 0.38867468183503256,
+      "absolute_correlation": 0.38867468183503256,
+      "rows": 3228
+    }
+  ],
+  "market_predictions_out_of_sample": "2024 selection and 2025 locked_holdout rows from existing model; SP+ crossfit/refit provenance stored per row",
+  "timing_limit": "Opening field is timing unknown; no claim of actual SP+ availability at sportsbook open",
+  "protected_before": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_after": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_unchanged": true,
+  "publication_repo_before": "",
+  "publication_repo_after": "",
+  "publication_repo_clean": true,
+  "recommendation": "Do not change production unless locked-2025 improvement is stable across direction, magnitude, fair-spread MAE, and agreement categories.",
+  "timing_unknown_diagnostics": [
+    {
+      "model": "market_movement",
+      "n": 391,
+      "positive_clv_rate": 0.42455242966751916,
+      "average_clv": 0.5396419437340153,
+      "median_clv": 0.0,
+      "ats_win_rate": 0.49742268041237114,
+      "roi_at_minus_110": -0.049988374796558904,
+      "label": "TIMING-UNKNOWN ESPN BET OPENING-FIELD DIAGNOSTIC"
+    },
+    {
+      "model": "SP_plus_movement",
+      "n": 406,
+      "positive_clv_rate": 0.4408866995073892,
+      "average_clv": 0.770935960591133,
+      "median_clv": 0.0,
+      "ats_win_rate": 0.5632754342431762,
+      "roi_at_minus_110": 0.0747872816838334,
+      "label": "TIMING-UNKNOWN ESPN BET OPENING-FIELD DIAGNOSTIC"
+    },
+    {
+      "model": "aligned_blend",
+      "n": 391,
+      "positive_clv_rate": 0.46035805626598464,
+      "average_clv": 0.8132992327365729,
+      "median_clv": 0.0,
+      "ats_win_rate": 0.520618556701031,
+      "roi_at_minus_110": -0.006045105789351331,
+      "label": "TIMING-UNKNOWN ESPN BET OPENING-FIELD DIAGNOSTIC"
+    }
+  ]
+}

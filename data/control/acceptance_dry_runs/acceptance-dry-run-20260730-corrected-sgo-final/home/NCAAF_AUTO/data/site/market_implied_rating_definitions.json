@@ -1,0 +1,8 @@
+{
+  "schema_version": "market-implied-rating-definitions-v1",
+  "market_implied_rating": "Team strength inferred from closing spreads; positive is stronger.",
+  "fundamental_rating": "Independent SP+/FPI/TeamRankings/Powers blend.",
+  "fundamental_minus_market": "Positive means the fundamental blend rates the team higher than the closing market.",
+  "blend_policy": "Keep market rating separate unless a later backtest proves that blending improves closing-line prediction.",
+  "saturday_shadow_formula": "Market baseline spread plus validated postgame adjustment equals predicted next closing spread."
+}

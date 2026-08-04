@@ -1,0 +1,20 @@
+{
+  "status": "FAIL",
+  "historical_parity": {
+    "status": "FAIL",
+    "features_checked": 164,
+    "max_abs_difference": 3.552713678800501e-15,
+    "identical_feature_order": false,
+    "historical_transforms_reused_directly": true
+  },
+  "current_2026_rows": 0,
+  "no_future_data_leakage": "exact historical cutoff transforms reused; no 2026 rows without final games",
+  "week_0_1": "explicitly unavailable until a prior finalized game exists",
+  "byes": "historical next_game_id uses chronological shift, not week+1",
+  "fbs_fcs": "retained when canonical identities exist; classification unavailable historically",
+  "neutral_site": "historical source lacks flag and records this limitation",
+  "publication_repo_clean": true,
+  "failures": [
+    "historical parity failed"
+  ]
+}

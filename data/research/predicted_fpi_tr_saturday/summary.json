@@ -1,0 +1,103 @@
+{
+  "schema_version": "predicted-fpi-tr-saturday-research-v1",
+  "split": {
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection": 2024,
+    "locked_holdout": 2025
+  },
+  "selection": {
+    "source_models": {
+      "FPI": "elastic_net",
+      "TeamRankings": "elastic_net"
+    },
+    "selected_on_2024_only": true,
+    "fixed_weights": {
+      "market": 0.25,
+      "sp_plus": 0.25,
+      "predicted_fpi": 0.4,
+      "predicted_teamrankings": 0.1
+    },
+    "ridge_stack_coefficients": [
+      -2.503787878787879,
+      1.3173442519763883,
+      2.391685428522175,
+      3.2230440517510375,
+      3.3376631476433762
+    ],
+    "holdout_never_used_for_selection": true
+  },
+  "audit": {
+    "genuine_targets": true,
+    "target_columns": {
+      "FPI": "lineespn -> fpi_home_spread = -home margin",
+      "TeamRankings": "lineteamrank -> teamrankings_home_spread = -home margin"
+    },
+    "all_features_precede_target": true,
+    "missing_weeks": "byes preserved only through genuine next_game_id pointer; no SP+ snapshot gaps bridged",
+    "next_week_market_or_result_feature_leakage": false,
+    "holdout_excluded_from_selection": true,
+    "oracle_labeled_only": true,
+    "predicted_sources_out_of_sample": true,
+    "identical_closing_sample": true,
+    "eligible_rows_by_season": {
+      "2021": 192,
+      "2022": 203,
+      "2023": 215,
+      "2024": 132,
+      "2025": 218
+    },
+    "protected_unchanged": true,
+    "publication_repo_before": "",
+    "publication_repo_after": "",
+    "publication_repo_clean": true
+  },
+  "locked_2025_best_saturday_model": {
+    "split": "2025_locked_holdout",
+    "n": 218,
+    "mae": 2.740157044231913,
+    "median_absolute_error": 2.1262261296330744,
+    "rmse": 3.6977404823583653,
+    "bias": 0.13408558796913939,
+    "correlation": 0.9486109390311761,
+    "direction_agreement": 0.9128440366972477,
+    "model": "fixed_weight_predicted_source",
+    "availability": "saturday_available",
+    "coverage": 1.0,
+    "weekly_mae_stddev": 1.6593221264236375,
+    "movement_direction_toward_close": 0.4954128440366973,
+    "timing_unknown_positive_clv_rate": 0.4954128440366973,
+    "average_clv": 0.44954128440366975,
+    "ats_record": "115-99-4",
+    "ats_roi_at_minus_110": 0.025437864887406177
+  },
+  "locked_2025_current_blend": {
+    "split": "2025_locked_holdout",
+    "n": 218,
+    "mae": 2.9544640311019346,
+    "median_absolute_error": 2.4105701136840607,
+    "rmse": 3.8516757810963824,
+    "bias": 0.2309059988880173,
+    "correlation": 0.9454821568226288,
+    "direction_agreement": 0.9220183486238532,
+    "model": "current_50_50_market_sp",
+    "availability": "saturday_available",
+    "coverage": 1.0,
+    "weekly_mae_stddev": 2.029841335028096,
+    "movement_direction_toward_close": 0.44036697247706424,
+    "timing_unknown_positive_clv_rate": 0.44036697247706424,
+    "average_clv": 0.27522935779816515,
+    "ats_record": "107-107-4",
+    "ats_roi_at_minus_110": -0.044620517097581344
+  },
+  "recommendation": "Saturday predicted-source ensemble improves the current market/SP+ blend on locked 2025.",
+  "limitations": [
+    "Prediction Tracker provides game projections, not latent weekly FPI/TR team ratings.",
+    "Rows without two genuine pre-target team feature states are excluded, never backfilled.",
+    "Opening field timing is unknown and is not claimed Saturday-available.",
+    "Neutral-site status is unavailable in the inherited historical feature artifact; 2.5 HFA remains in the SP+ fair spread."
+  ]
+}

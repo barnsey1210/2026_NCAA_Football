@@ -1,0 +1,676 @@
+{
+  "schema_version": "shadow-opener-incorporation-research-v1",
+  "split": {
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection": 2024,
+    "holdout": 2025
+  },
+  "selection": {
+    "schema_version": "shadow-opener-incorporation-selection-v1",
+    "train_seasons": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection_season": 2024,
+    "holdout_season": 2025,
+    "choices_locked_before_holdout": true,
+    "category_thresholds": {
+      "spread": {
+        "near_zero": 0.2,
+        "partial_upper": 0.55,
+        "mostly_upper": 0.85,
+        "full_upper": 1.15
+      },
+      "total": {
+        "near_zero": 0.25,
+        "partial_upper": 0.6,
+        "mostly_upper": 0.9,
+        "full_upper": 1.1
+      }
+    },
+    "residual_models": {
+      "spread": {
+        "direction_threshold": 0.25,
+        "family": "elastic",
+        "edge_threshold": 1.0,
+        "probability_threshold": 0.525,
+        "features": [
+          "week",
+          "home_games_played_after",
+          "away_games_played_after",
+          "home_predicted_movement",
+          "away_predicted_movement",
+          "predicted_game_adjustment",
+          "home_prob_down",
+          "home_prob_no_change",
+          "home_prob_up",
+          "away_prob_down",
+          "away_prob_no_change",
+          "away_prob_up",
+          "home_feature_coverage",
+          "away_feature_coverage",
+          "home_raw_ats_performance",
+          "away_raw_ats_performance",
+          "home_raw_pbp_performance",
+          "away_raw_pbp_performance",
+          "home_repeatable_spread_performance",
+          "away_repeatable_spread_performance",
+          "home_trailing_2_game_ats",
+          "away_trailing_2_game_ats",
+          "home_recent_form_vs_season",
+          "away_recent_form_vs_season",
+          "home_opponent_adjusted_recent_form",
+          "away_opponent_adjusted_recent_form",
+          "spread_opener",
+          "spread_pricing_gap",
+          "spread_incorporation_ratio",
+          "no_movement_projection",
+          "preopener_projected_close"
+        ]
+      },
+      "total": {
+        "direction_threshold": 0.75,
+        "family": "boost",
+        "edge_threshold": 0.75,
+        "probability_threshold": 0.525,
+        "features": [
+          "week",
+          "home_games_played_after",
+          "away_games_played_after",
+          "predicted_combined_total_adjustment",
+          "frozen_combined_total_baseline",
+          "preopener_projected_total",
+          "total_opener",
+          "total_pricing_gap",
+          "total_incorporation_ratio"
+        ]
+      }
+    }
+  },
+  "benchmark_reconciliation_complete": true,
+  "team_prediction_provenance": [
+    {
+      "prediction_season": 2021,
+      "fit_seasons": [
+        2022,
+        2023
+      ],
+      "rows": 1464,
+      "same_season_rows_in_fit": false
+    },
+    {
+      "prediction_season": 2022,
+      "fit_seasons": [
+        2021,
+        2023
+      ],
+      "rows": 1468,
+      "same_season_rows_in_fit": false
+    },
+    {
+      "prediction_season": 2023,
+      "fit_seasons": [
+        2021,
+        2022
+      ],
+      "rows": 1500,
+      "same_season_rows_in_fit": false
+    },
+    {
+      "prediction_season": 2024,
+      "fit_seasons": [
+        2021,
+        2022,
+        2023
+      ],
+      "rows": 1498,
+      "same_season_rows_in_fit": false
+    },
+    {
+      "prediction_season": 2025,
+      "fit_seasons": [
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "rows": 1524,
+      "same_season_rows_in_fit": false
+    }
+  ],
+  "opener_incorporation_by_available_axes": [
+    {
+      "market": "spread",
+      "axis": "season",
+      "value": "2021",
+      "n": 1,
+      "incorporated_abs_mean": 2.023219982944063,
+      "remaining_move_mae": 1.0,
+      "pricing_gap_positive_clv_rate": 0.0
+    },
+    {
+      "market": "spread",
+      "axis": "season",
+      "value": "2022",
+      "n": 8,
+      "incorporated_abs_mean": 6.4020461484400135,
+      "remaining_move_mae": 1.0625,
+      "pricing_gap_positive_clv_rate": 0.375
+    },
+    {
+      "market": "spread",
+      "axis": "season",
+      "value": "2023",
+      "n": 350,
+      "incorporated_abs_mean": 5.232589262692204,
+      "remaining_move_mae": 1.2157142857142857,
+      "pricing_gap_positive_clv_rate": 0.36857142857142855
+    },
+    {
+      "market": "spread",
+      "axis": "season",
+      "value": "2024",
+      "n": 596,
+      "incorporated_abs_mean": 5.0077953325035,
+      "remaining_move_mae": 1.4421140939597314,
+      "pricing_gap_positive_clv_rate": 0.4429530201342282
+    },
+    {
+      "market": "spread",
+      "axis": "season",
+      "value": "2025",
+      "n": 601,
+      "incorporated_abs_mean": 5.2158254905699915,
+      "remaining_move_mae": 1.7371048252911814,
+      "pricing_gap_positive_clv_rate": 0.39600665557404324
+    },
+    {
+      "market": "spread",
+      "axis": "week_bucket",
+      "value": "W1-3",
+      "n": 8,
+      "incorporated_abs_mean": 9.43750000000027,
+      "remaining_move_mae": 2.25,
+      "pricing_gap_positive_clv_rate": 0.25
+    },
+    {
+      "market": "spread",
+      "axis": "week_bucket",
+      "value": "W4-6",
+      "n": 440,
+      "incorporated_abs_mean": 7.006772892916137,
+      "remaining_move_mae": 1.4068181818181817,
+      "pricing_gap_positive_clv_rate": 0.4090909090909091
+    },
+    {
+      "market": "spread",
+      "axis": "week_bucket",
+      "value": "W7-9",
+      "n": 502,
+      "incorporated_abs_mean": 4.5458218284789815,
+      "remaining_move_mae": 1.4790836653386454,
+      "pricing_gap_positive_clv_rate": 0.4123505976095618
+    },
+    {
+      "market": "spread",
+      "axis": "week_bucket",
+      "value": "W10-12",
+      "n": 324,
+      "incorporated_abs_mean": 4.3621806141105335,
+      "remaining_move_mae": 1.6296296296296295,
+      "pricing_gap_positive_clv_rate": 0.4166666666666667
+    },
+    {
+      "market": "spread",
+      "axis": "week_bucket",
+      "value": "W13+",
+      "n": 282,
+      "incorporated_abs_mean": 4.0786305651277415,
+      "remaining_move_mae": 1.5283687943262412,
+      "pricing_gap_positive_clv_rate": 0.3900709219858156
+    },
+    {
+      "market": "spread",
+      "axis": "games_bucket",
+      "value": "2-3",
+      "n": 393,
+      "incorporated_abs_mean": 7.359503253963906,
+      "remaining_move_mae": 1.3549618320610688,
+      "pricing_gap_positive_clv_rate": 0.3893129770992366
+    },
+    {
+      "market": "spread",
+      "axis": "games_bucket",
+      "value": "4-6",
+      "n": 599,
+      "incorporated_abs_mean": 4.598724120023961,
+      "remaining_move_mae": 1.511686143572621,
+      "pricing_gap_positive_clv_rate": 0.42237061769616024
+    },
+    {
+      "market": "spread",
+      "axis": "games_bucket",
+      "value": "7-9",
+      "n": 414,
+      "incorporated_abs_mean": 4.217738948393239,
+      "remaining_move_mae": 1.5929951690821256,
+      "pricing_gap_positive_clv_rate": 0.4178743961352657
+    },
+    {
+      "market": "spread",
+      "axis": "games_bucket",
+      "value": "10+",
+      "n": 150,
+      "incorporated_abs_mean": 4.0729234518694515,
+      "remaining_move_mae": 1.6066666666666667,
+      "pricing_gap_positive_clv_rate": 0.36666666666666664
+    },
+    {
+      "market": "spread",
+      "axis": "move_size_bucket",
+      "value": "<0.5",
+      "n": 588,
+      "incorporated_abs_mean": 4.397792939974079,
+      "remaining_move_mae": 1.403061224489796,
+      "pricing_gap_positive_clv_rate": 0.3758503401360544
+    },
+    {
+      "market": "spread",
+      "axis": "move_size_bucket",
+      "value": "0.5-1",
+      "n": 463,
+      "incorporated_abs_mean": 4.4779074876922635,
+      "remaining_move_mae": 1.4730021598272138,
+      "pricing_gap_positive_clv_rate": 0.4103671706263499
+    },
+    {
+      "market": "spread",
+      "axis": "move_size_bucket",
+      "value": "1-2",
+      "n": 414,
+      "incorporated_abs_mean": 6.052221097262602,
+      "remaining_move_mae": 1.5096618357487923,
+      "pricing_gap_positive_clv_rate": 0.4420289855072464
+    },
+    {
+      "market": "spread",
+      "axis": "move_size_bucket",
+      "value": "2-4",
+      "n": 90,
+      "incorporated_abs_mean": 8.917281802990525,
+      "remaining_move_mae": 2.2888888888888888,
+      "pricing_gap_positive_clv_rate": 0.43333333333333335
+    },
+    {
+      "market": "spread",
+      "axis": "move_size_bucket",
+      "value": "4+",
+      "n": 1,
+      "incorporated_abs_mean": 36.6546570752465,
+      "remaining_move_mae": 0.5,
+      "pricing_gap_positive_clv_rate": 1.0
+    },
+    {
+      "market": "spread",
+      "axis": "spread_bucket",
+      "value": "0-3",
+      "n": 325,
+      "incorporated_abs_mean": 3.5553347678344833,
+      "remaining_move_mae": 1.5261538461538462,
+      "pricing_gap_positive_clv_rate": 0.35384615384615387
+    },
+    {
+      "market": "spread",
+      "axis": "spread_bucket",
+      "value": "3.5-7",
+      "n": 443,
+      "incorporated_abs_mean": 3.6762995314304545,
+      "remaining_move_mae": 1.275395033860045,
+      "pricing_gap_positive_clv_rate": 0.39954853273137697
+    },
+    {
+      "market": "spread",
+      "axis": "spread_bucket",
+      "value": "7.5-14",
+      "n": 433,
+      "incorporated_abs_mean": 4.887930929919421,
+      "remaining_move_mae": 1.6501154734411085,
+      "pricing_gap_positive_clv_rate": 0.48267898383371827
+    },
+    {
+      "market": "spread",
+      "axis": "spread_bucket",
+      "value": "14.5-28",
+      "n": 315,
+      "incorporated_abs_mean": 7.982396041465037,
+      "remaining_move_mae": 1.6095238095238096,
+      "pricing_gap_positive_clv_rate": 0.36507936507936506
+    },
+    {
+      "market": "spread",
+      "axis": "spread_bucket",
+      "value": "28+",
+      "n": 40,
+      "incorporated_abs_mean": 14.724740785772306,
+      "remaining_move_mae": 1.4,
+      "pricing_gap_positive_clv_rate": 0.45
+    },
+    {
+      "market": "spread",
+      "axis": "both_teams_updated",
+      "value": "True",
+      "n": 1556,
+      "incorporated_abs_mean": 5.143960777067729,
+      "remaining_move_mae": 1.5028920308483291,
+      "pricing_gap_positive_clv_rate": 0.4074550128534704
+    },
+    {
+      "market": "total",
+      "axis": "season",
+      "value": "2021",
+      "n": 1,
+      "incorporated_abs_mean": 4.75,
+      "remaining_move_mae": 3.0,
+      "pricing_gap_positive_clv_rate": 0.0
+    },
+    {
+      "market": "total",
+      "axis": "season",
+      "value": "2022",
+      "n": 8,
+      "incorporated_abs_mean": 3.759449404761906,
+      "remaining_move_mae": 1.9375,
+      "pricing_gap_positive_clv_rate": 0.5
+    },
+    {
+      "market": "total",
+      "axis": "season",
+      "value": "2023",
+      "n": 272,
+      "incorporated_abs_mean": 3.9489789571131486,
+      "remaining_move_mae": 1.255514705882353,
+      "pricing_gap_positive_clv_rate": 0.33455882352941174
+    },
+    {
+      "market": "total",
+      "axis": "season",
+      "value": "2024",
+      "n": 657,
+      "incorporated_abs_mean": 3.4674926312483394,
+      "remaining_move_mae": 1.6468797564687976,
+      "pricing_gap_positive_clv_rate": 0.410958904109589
+    },
+    {
+      "market": "total",
+      "axis": "season",
+      "value": "2025",
+      "n": 653,
+      "incorporated_abs_mean": 3.610453528945107,
+      "remaining_move_mae": 1.8131699846860643,
+      "pricing_gap_positive_clv_rate": 0.5114854517611026
+    },
+    {
+      "market": "total",
+      "axis": "week_bucket",
+      "value": "W1-3",
+      "n": 127,
+      "incorporated_abs_mean": 7.830708661417323,
+      "remaining_move_mae": 1.641732283464567,
+      "pricing_gap_positive_clv_rate": 0.3937007874015748
+    },
+    {
+      "market": "total",
+      "axis": "week_bucket",
+      "value": "W4-6",
+      "n": 408,
+      "incorporated_abs_mean": 4.483660130718954,
+      "remaining_move_mae": 1.6556372549019607,
+      "pricing_gap_positive_clv_rate": 0.41421568627450983
+    },
+    {
+      "market": "total",
+      "axis": "week_bucket",
+      "value": "W7-9",
+      "n": 464,
+      "incorporated_abs_mean": 2.9766022680623974,
+      "remaining_move_mae": 1.7392241379310345,
+      "pricing_gap_positive_clv_rate": 0.4482758620689655
+    },
+    {
+      "market": "total",
+      "axis": "week_bucket",
+      "value": "W10-12",
+      "n": 313,
+      "incorporated_abs_mean": 2.572262158324459,
+      "remaining_move_mae": 1.5479233226837061,
+      "pricing_gap_positive_clv_rate": 0.46645367412140576
+    },
+    {
+      "market": "total",
+      "axis": "week_bucket",
+      "value": "W13+",
+      "n": 279,
+      "incorporated_abs_mean": 2.6330532022736324,
+      "remaining_move_mae": 1.614695340501792,
+      "pricing_gap_positive_clv_rate": 0.45161290322580644
+    },
+    {
+      "market": "total",
+      "axis": "games_bucket",
+      "value": "0-1",
+      "n": 148,
+      "incorporated_abs_mean": 7.750563063063064,
+      "remaining_move_mae": 1.6047297297297298,
+      "pricing_gap_positive_clv_rate": 0.3716216216216216
+    },
+    {
+      "market": "total",
+      "axis": "games_bucket",
+      "value": "2-3",
+      "n": 364,
+      "incorporated_abs_mean": 4.368818681318682,
+      "remaining_move_mae": 1.6428571428571428,
+      "pricing_gap_positive_clv_rate": 0.42032967032967034
+    },
+    {
+      "market": "total",
+      "axis": "games_bucket",
+      "value": "4-6",
+      "n": 529,
+      "incorporated_abs_mean": 2.9867461067602847,
+      "remaining_move_mae": 1.772211720226843,
+      "pricing_gap_positive_clv_rate": 0.44801512287334594
+    },
+    {
+      "market": "total",
+      "axis": "games_bucket",
+      "value": "7-9",
+      "n": 402,
+      "incorporated_abs_mean": 2.642556068862039,
+      "remaining_move_mae": 1.5472636815920398,
+      "pricing_gap_positive_clv_rate": 0.47512437810945274
+    },
+    {
+      "market": "total",
+      "axis": "games_bucket",
+      "value": "10+",
+      "n": 148,
+      "incorporated_abs_mean": 2.4668048730548735,
+      "remaining_move_mae": 1.5608108108108107,
+      "pricing_gap_positive_clv_rate": 0.42567567567567566
+    },
+    {
+      "market": "total",
+      "axis": "move_size_bucket",
+      "value": "<0.5",
+      "n": 255,
+      "incorporated_abs_mean": 3.683619316413434,
+      "remaining_move_mae": 1.6901960784313725,
+      "pricing_gap_positive_clv_rate": 0.40784313725490196
+    },
+    {
+      "market": "total",
+      "axis": "move_size_bucket",
+      "value": "0.5-1",
+      "n": 292,
+      "incorporated_abs_mean": 3.318070628002135,
+      "remaining_move_mae": 1.5582191780821917,
+      "pricing_gap_positive_clv_rate": 0.4383561643835616
+    },
+    {
+      "market": "total",
+      "axis": "move_size_bucket",
+      "value": "1-2",
+      "n": 494,
+      "incorporated_abs_mean": 3.304726998148051,
+      "remaining_move_mae": 1.6032388663967612,
+      "pricing_gap_positive_clv_rate": 0.4149797570850202
+    },
+    {
+      "market": "total",
+      "axis": "move_size_bucket",
+      "value": "2-4",
+      "n": 451,
+      "incorporated_abs_mean": 3.928706609970468,
+      "remaining_move_mae": 1.6973392461197339,
+      "pricing_gap_positive_clv_rate": 0.4700665188470067
+    },
+    {
+      "market": "total",
+      "axis": "move_size_bucket",
+      "value": "4+",
+      "n": 99,
+      "incorporated_abs_mean": 4.365003206669875,
+      "remaining_move_mae": 1.8434343434343434,
+      "pricing_gap_positive_clv_rate": 0.5050505050505051
+    },
+    {
+      "market": "total",
+      "axis": "spread_bucket",
+      "value": "0-3",
+      "n": 294,
+      "incorporated_abs_mean": 3.054036477505865,
+      "remaining_move_mae": 1.5697278911564625,
+      "pricing_gap_positive_clv_rate": 0.43537414965986393
+    },
+    {
+      "market": "total",
+      "axis": "spread_bucket",
+      "value": "3.5-7",
+      "n": 412,
+      "incorporated_abs_mean": 3.1699504143375505,
+      "remaining_move_mae": 1.674757281553398,
+      "pricing_gap_positive_clv_rate": 0.4344660194174757
+    },
+    {
+      "market": "total",
+      "axis": "spread_bucket",
+      "value": "7.5-14",
+      "n": 400,
+      "incorporated_abs_mean": 3.2293911435786438,
+      "remaining_move_mae": 1.86375,
+      "pricing_gap_positive_clv_rate": 0.4625
+    },
+    {
+      "market": "total",
+      "axis": "spread_bucket",
+      "value": "14.5-28",
+      "n": 292,
+      "incorporated_abs_mean": 3.2807842984640927,
+      "remaining_move_mae": 1.4434931506849316,
+      "pricing_gap_positive_clv_rate": 0.4452054794520548
+    },
+    {
+      "market": "total",
+      "axis": "spread_bucket",
+      "value": "28+",
+      "n": 38,
+      "incorporated_abs_mean": 2.8941112250322774,
+      "remaining_move_mae": 1.4473684210526316,
+      "pricing_gap_positive_clv_rate": 0.5
+    },
+    {
+      "market": "total",
+      "axis": "both_teams_updated",
+      "value": "True",
+      "n": 1591,
+      "incorporated_abs_mean": 3.6107584441886766,
+      "remaining_move_mae": 1.650534255185418,
+      "pricing_gap_positive_clv_rate": 0.4393463230672533
+    }
+  ],
+  "unavailable_axes": [
+    "opening sportsbook",
+    "sportsbook dispersion",
+    "first-opener time",
+    "Power Four/Group of Five",
+    "FBS/FCS",
+    "rivalry",
+    "conference game",
+    "weather"
+  ],
+  "recommendation": {
+    "spread": {
+      "residual_model_improves_no_move_mae": false,
+      "selected_residual_mae": 1.7733476763922584,
+      "opener_no_move_mae": 1.7371048252911814,
+      "high_tier_recommended": false
+    },
+    "total": {
+      "residual_model_improves_no_move_mae": false,
+      "selected_residual_mae": 1.8373994856448845,
+      "opener_no_move_mae": 1.8131699846860643,
+      "high_tier_recommended": false
+    }
+  },
+  "limitations": [
+    "2021-22 opener coverage is nearly absent; residual fitting is effectively dominated by 2023.",
+    "Historical opener timestamps, book dispersion, neutral sites, rivalry flags, and reliable FBS/FCS labels are unavailable and withheld.",
+    "Historical weather/injury fields are unavailable.",
+    "ATS/total ROI is secondary context and never a selection objective.",
+    "Legacy benchmark adjustments are transplanted onto one canonical baseline; their original full-line MAEs are not directly comparable.",
+    "Quantile regression is unavailable in the installed dependency set; deterministic boosted, ridge, elastic, Huber, zero, full-gap, and fractional challengers were evaluated."
+  ],
+  "protected_hashes_before": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_hashes_after": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_changes": []
+}

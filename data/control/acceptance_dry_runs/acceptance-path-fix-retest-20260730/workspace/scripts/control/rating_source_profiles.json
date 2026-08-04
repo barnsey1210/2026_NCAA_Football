@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "spplus": {"display_name": "SP+", "input": "data/ratings/spplus_2026_latest.csv", "team_column": "team", "rating_column": "spplus", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "READY BUT MANUAL INPUT"},
+    "fpi": {"display_name": "FPI", "input": "data/ratings/fpi_2025_test_latest.csv", "team_column": "team", "rating_column": "fpi", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "READY BUT MANUAL INPUT"},
+    "teamrankings": {"display_name": "TeamRankings", "input": "data/ratings/teamrankings_2025_test_latest.csv", "team_column": "team", "rating_column": "teamrankings", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "READY BUT MANUAL INPUT"},
+    "brad_powers": {"display_name": "Brad Powers", "input": "data/ratings/bradpowers_2026_latest.csv", "team_column": "team", "rating_column": "bradpowers", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "READY BUT MANUAL INPUT"},
+    "sagarin": {"display_name": "Sagarin", "input": "data/ratings/external_sources/sagarin_latest.csv", "team_column": "team", "rating_column": "predictor_rating", "season_column": "season", "date_column": "snapshot_date", "season": 2026, "min_teams": 130, "range": [-150, 150], "classification": "NEEDS WRAPPER"},
+    "donchess": {"display_name": "Donchess", "input": "data/ratings/external_sources/donchess_latest.csv", "team_column": "team", "rating_column": "rating", "season_column": "season", "date_column": "snapshot_date", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "NEEDS WRAPPER"},
+    "massey": {"display_name": "Massey", "input": "data/ratings/external_sources/massey_latest.csv", "team_column": "team", "rating_column": "power", "season_column": "season", "date_column": "snapshot_date", "season": 2026, "min_teams": 130, "range": [-150, 150], "classification": "READY BUT MANUAL INPUT"},
+    "kford": {"display_name": "KFord", "input": "data/ratings/kford_2025_test_latest.csv", "team_column": "team", "rating_column": "kford", "season": 2026, "min_teams": 130, "range": [-100, 100], "classification": "READY BUT MANUAL INPUT"}
+  }
+}

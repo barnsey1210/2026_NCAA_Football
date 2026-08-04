@@ -1,0 +1,229 @@
+{
+  "n": 1554,
+  "path": [],
+  "prediction": -0.1776061776061776,
+  "feature": "home_change_pass_adv",
+  "threshold": 0.058980354670627774,
+  "left": {
+    "n": 1088,
+    "path": [
+      [
+        "home_change_pass_adv",
+        "<=",
+        0.058980354670627774
+      ]
+    ],
+    "prediction": -0.32674632352941174,
+    "feature": "home_change_pass_adv",
+    "threshold": 0.011257614207769155,
+    "left": {
+      "n": 870,
+      "path": [
+        [
+          "home_change_pass_adv",
+          "<=",
+          0.058980354670627774
+        ],
+        [
+          "home_change_pass_adv",
+          "<=",
+          0.011257614207769155
+        ]
+      ],
+      "prediction": -0.22701149425287356,
+      "feature": "home_change_xpass_adv",
+      "threshold": 0.01480788746471613,
+      "left": {
+        "n": 609,
+        "path": [
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.058980354670627774
+          ],
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.011257614207769155
+          ],
+          [
+            "home_change_xpass_adv",
+            "<=",
+            0.01480788746471613
+          ]
+        ],
+        "prediction": -0.30049261083743845
+      },
+      "right": {
+        "n": 261,
+        "path": [
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.058980354670627774
+          ],
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.011257614207769155
+          ],
+          [
+            "home_change_xpass_adv",
+            ">",
+            0.01480788746471613
+          ]
+        ],
+        "prediction": -0.05555555555555555
+      }
+    },
+    "right": {
+      "n": 218,
+      "path": [
+        [
+          "home_change_pass_adv",
+          "<=",
+          0.058980354670627774
+        ],
+        [
+          "home_change_pass_adv",
+          ">",
+          0.011257614207769155
+        ]
+      ],
+      "prediction": -0.7247706422018348,
+      "feature": "home_change_xpass_adv",
+      "threshold": 0.006629661040853441,
+      "left": {
+        "n": 109,
+        "path": [
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.058980354670627774
+          ],
+          [
+            "home_change_pass_adv",
+            ">",
+            0.011257614207769155
+          ],
+          [
+            "home_change_xpass_adv",
+            "<=",
+            0.006629661040853441
+          ]
+        ],
+        "prediction": -1.2706422018348624
+      },
+      "right": {
+        "n": 109,
+        "path": [
+          [
+            "home_change_pass_adv",
+            "<=",
+            0.058980354670627774
+          ],
+          [
+            "home_change_pass_adv",
+            ">",
+            0.011257614207769155
+          ],
+          [
+            "home_change_xpass_adv",
+            ">",
+            0.006629661040853441
+          ]
+        ],
+        "prediction": -0.17889908256880735
+      }
+    }
+  },
+  "right": {
+    "n": 466,
+    "path": [
+      [
+        "home_change_pass_adv",
+        ">",
+        0.058980354670627774
+      ]
+    ],
+    "prediction": 0.17060085836909872,
+    "feature": "home_change_def_improve_adv",
+    "threshold": 0.0322301343540512,
+    "left": {
+      "n": 280,
+      "path": [
+        [
+          "home_change_pass_adv",
+          ">",
+          0.058980354670627774
+        ],
+        [
+          "home_change_def_improve_adv",
+          "<=",
+          0.0322301343540512
+        ]
+      ],
+      "prediction": -0.02857142857142857,
+      "feature": "home_change_success_adv",
+      "threshold": 0.06918273634796404,
+      "left": {
+        "n": 140,
+        "path": [
+          [
+            "home_change_pass_adv",
+            ">",
+            0.058980354670627774
+          ],
+          [
+            "home_change_def_improve_adv",
+            "<=",
+            0.0322301343540512
+          ],
+          [
+            "home_change_success_adv",
+            "<=",
+            0.06918273634796404
+          ]
+        ],
+        "prediction": -0.25357142857142856
+      },
+      "right": {
+        "n": 140,
+        "path": [
+          [
+            "home_change_pass_adv",
+            ">",
+            0.058980354670627774
+          ],
+          [
+            "home_change_def_improve_adv",
+            "<=",
+            0.0322301343540512
+          ],
+          [
+            "home_change_success_adv",
+            ">",
+            0.06918273634796404
+          ]
+        ],
+        "prediction": 0.19642857142857142
+      }
+    },
+    "right": {
+      "n": 186,
+      "path": [
+        [
+          "home_change_pass_adv",
+          ">",
+          0.058980354670627774
+        ],
+        [
+          "home_change_def_improve_adv",
+          ">",
+          0.0322301343540512
+        ]
+      ],
+      "prediction": 0.47043010752688175
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "status": "COMPLETE_RESEARCH_ONLY",
+  "offense_selection": {
+    "threshold": 1.0,
+    "direction_model": "ordinal_ridge_proxy",
+    "magnitude_model": "huber"
+  },
+  "defense_selection": {
+    "threshold": 1.0,
+    "direction_model": "ordinal_ridge_proxy",
+    "magnitude_model": "huber"
+  },
+  "total_selection": {
+    "sp_component_formula": "pure_sp_plus_total",
+    "team_points_formula": {
+      "intercept": -12.496722647353003,
+      "coefficients": {
+        "team_offense": 0.7972529349790207,
+        "opponent_defense": 0.7102345404718297,
+        "home_indicator": 2.604990084984197,
+        "team_prior_pace": 0.02934894274872691,
+        "opponent_prior_pace": -0.04306838442244006,
+        "team_prior_plays": -0.043217340395479406,
+        "opponent_prior_plays": 0.003456288964456256
+      }
+    },
+    "pace_improved_2024": false,
+    "optimized_sp_weight": 0.6000000000000001,
+    "selected_total_model": "optimized_fixed_blend",
+    "confidence_difference_thresholds": {
+      "high_max": 3.6670441904000697,
+      "medium_max": 6.084339069544043
+    },
+    "selected_without_2025": true,
+    "conversion_fit_seasons": [
+      2021,
+      2022,
+      2023
+    ]
+  },
+  "holdout_opened_after_selection": true,
+  "production_change_justified": false
+}

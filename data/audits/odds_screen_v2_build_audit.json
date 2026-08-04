@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-07-29T04:15:34.081607+00:00",
+  "built_at": "2026-08-04T12:01:13.933934+00:00",
   "prototype_only": false,
   "files_read": [
     "data/odds/actionnetwork_ncaaf_game_lines_2026.csv",
@@ -15,33 +15,34 @@
   "production_files_changed": false,
   "production_scope_confirmation": "Builder writes only the production Odds V2 payload and its build audit; publication remains a separate controlled step.",
   "coverage_counts": {
-    "games": 107,
-    "spread_coverage": 107,
+    "games": 106,
+    "spread_coverage": 106,
     "total_coverage": 106,
     "moneyline_coverage": 90,
-    "spread_opener_coverage": 60,
-    "total_opener_coverage": 59,
-    "spread_history_coverage": 95,
-    "total_history_coverage": 95,
+    "spread_opener_coverage": 46,
+    "total_opener_coverage": 28,
+    "spread_history_coverage": 94,
+    "total_history_coverage": 94,
     "per_book_game_coverage": {
       "DraftKings": {
-        "spread": 54,
+        "spread": 53,
         "total": 58,
-        "moneyline": 50
+        "moneyline": 49
       },
       "FanDuel": {
         "spread": 105,
         "total": 105,
-        "moneyline": 88
+        "moneyline": 89
       },
       "BetMGM": {
         "spread": 55,
-        "total": 53
+        "total": 53,
+        "moneyline": 40
       },
       "Caesars": {
         "spread": 53,
         "total": 53,
-        "moneyline": 47
+        "moneyline": 46
       }
     }
   },
@@ -125,12 +126,12 @@
       "latest_first"
     ],
     "spread_history_timestamp_coverage": {
-      "snapshots": 523,
-      "with_full_timestamp": 523
+      "snapshots": 658,
+      "with_full_timestamp": 658
     },
     "total_history_timestamp_coverage": {
-      "snapshots": 504,
-      "with_full_timestamp": 504
+      "snapshots": 647,
+      "with_full_timestamp": 647
     },
     "production_files_unchanged": true
   },

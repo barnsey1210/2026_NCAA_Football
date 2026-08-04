@@ -1,0 +1,193 @@
+# Daily NCAAF Betting Angles — 2026-07-29
+
+Game line moves are listed first, then game-line edges, arbs/middles, and futures market moves.
+
+## Game line move
+
+- **Baylor at Auburn — Caesars Total Over Price -117 → -107** — LINE MOVE 10.0
+  - Moved +10 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Baylor at Auburn — Caesars Total Under Price -105 → -113** — LINE MOVE 8.0
+  - Moved -8 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Boise State at Oregon — Caesars Total Under Price -115 → -108** — LINE MOVE 7.0
+  - Moved +7 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Boise State at Oregon — Caesars Total Over Price -106 → -112** — LINE MOVE 6.0
+  - Moved -6 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Louisville at Ole Miss — Caesars Total Over Price -110 → -114** — LINE MOVE 4.0
+  - Moved -4 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Oregon State Beavers at Houston — Bally Bet Total Over Price -113 → -109** — LINE MOVE 4.0
+  - Moved +4 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Oregon State Beavers at Houston — Bally Bet Total Under Price -108 → -112** — LINE MOVE 4.0
+  - Moved -4 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas Razorbacks at Utah Utes — DraftKings Total Over Price -115 → -112** — LINE MOVE 3.0
+  - Moved +3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas Razorbacks at Utah Utes — DraftKings Total Under Price -105 → -108** — LINE MOVE 3.0
+  - Moved -3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas State Red Wolves at Memphis — Bally Bet Total Over Price -110 → -113** — LINE MOVE 3.0
+  - Moved -3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas at Utah — DraftKings Total Over Price -115 → -112** — LINE MOVE 3.0
+  - Moved +3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas at Utah — DraftKings Total Under Price -105 → -108** — LINE MOVE 3.0
+  - Moved -3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Clemson at LSU — Bally Bet Total Over Price -113 → -110** — LINE MOVE 3.0
+  - Moved +3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Louisville at Ole Miss — Caesars Total Under Price -110 → -107** — LINE MOVE 3.0
+  - Moved +3 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas State Red Wolves at Memphis — Bally Bet Total Under Price -110 → -108** — LINE MOVE 2.0
+  - Moved +2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Clemson at LSU — Bally Bet Total Under Price -108 → -110** — LINE MOVE 2.0
+  - Moved -2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Kent State at South Carolin — Caesars Total Under Price +100 → +102** — LINE MOVE 2.0
+  - Moved +2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Notre Dame at BYU — DraftKings Total Over Price -110 → -112** — LINE MOVE 2.0
+  - Moved -2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Notre Dame at BYU — DraftKings Total Under Price -110 → -108** — LINE MOVE 2.0
+  - Moved +2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI Keydets at Virginia Tech Hokies — FanDuel Total Over Price -112 → -110** — LINE MOVE 2.0
+  - Moved +2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI Keydets at Virginia Tech Hokies — FanDuel Total Under Price -108 → -110** — LINE MOVE 2.0
+  - Moved -2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI at Virginia Tech — FanDuel Total Over Price -112 → -110** — LINE MOVE 2.0
+  - Moved +2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI at Virginia Tech — FanDuel Total Under Price -108 → -110** — LINE MOVE 2.0
+  - Moved -2 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Baylor at Auburn — Caesars Total +59.5 → +60.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Central Michigan at New Mexico — Caesars Total Under Price -109 → -110** — LINE MOVE 1.0
+  - Moved -1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Clemson at LSU — FanDuel Spread -10.5 → -9.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price -105 → -120 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Coastal Carolina at West Virgini — Caesars Total Over Price -112 → -113** — LINE MOVE 1.0
+  - Moved -1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Eastern Kentucky Colonels at Jacksonville State Gamecocks — FanDuel Spread -19.5 → -20.5** — LINE MOVE 1.0
+  - Moved -1 point(s) · price -115 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Eastern Kentucky at Jacksonville State — FanDuel Spread -19.5 → -20.5** — LINE MOVE 1.0
+  - Moved -1 point(s) · price -115 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Idaho State Bengals at Utah State — FanDuel Spread -18.5 → -17.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price -110 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Idaho State at Utah State — FanDuel Spread -18.5 → -17.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price -110 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Louisiana-Monroe at Mississippi State — Caesars Spread -28.5 → -29.5** — LINE MOVE 1.0
+  - Moved -1 point(s) · price -110 → -105 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Murray State Racers at Middle Tennessee Blue Raiders — FanDuel Spread -25.5 → -24.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price -110 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Murray State at Middle Tennessee — FanDuel Spread -25.5 → -24.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price -110 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **New Mexico State at Florida State — Caesars Total Over Price -105 → -106** — LINE MOVE 1.0
+  - Moved -1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **North Texas at Indian — Caesars Spread -39.5 → -40.5** — LINE MOVE 1.0
+  - Moved -1 point(s) · price -110 → -109 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Oregon State at Houston — Caesars Spread -18.5 → -19.5** — LINE MOVE 1.0
+  - Moved -1 point(s) · price -110 → -108 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **UTEP at Oklahom — Caesars Total Under Price -108 → -109** — LINE MOVE 1.0
+  - Moved -1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI Keydets at Virginia Tech Hokies — FanDuel Total +57.5 → +58.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **VMI at Virginia Tech — FanDuel Total +57.5 → +58.5** — LINE MOVE 1.0
+  - Moved +1 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Arkansas Razorbacks at Utah Utes — DraftKings Spread -10 → -9.5** — LINE MOVE 0.5
+  - Moved +0.5 point(s) · price -110 → -108 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Boise State at Oregon — Caesars Total +52.5 → +52** — LINE MOVE 0.5
+  - Moved -0.5 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Clemson at LSU — Bally Bet Total +49.5 → +50** — LINE MOVE 0.5
+  - Moved +0.5 point(s) · price nan → nan · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Clemson at LSU — DraftKings Spread -10.5 → -10** — LINE MOVE 0.5
+  - Moved +0.5 point(s) · price -108 → -112 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Notre Dame at BYU — DraftKings Spread +10.5 → +10** — LINE MOVE 0.5
+  - Moved -0.5 point(s) · price -112 → -108 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+- **Tulane at Duke — Caesars Spread -9.5 → -10** — LINE MOVE 0.5
+  - Moved -0.5 point(s) · price -110 → -110 · moved between 2026-07-28 8:01 AM EDT and 2026-07-29 8:36 AM EDT
+
+## Game line edge
+
+- **ATS: North Texas +40.5 (-109)** — ATS 100.0
+  - North Texas at Indiana · edge North Texas +6.6 · EV +24.9%
+- **ATS: Ohio +23.5 (-105)** — ATS 100.0
+  - Ohio at Nebraska · edge Ohio +5.9 · EV +24.3%
+- **ATS: James Madison -6.5 (-105)** — ATS 100.0
+  - Liberty at James Madison · edge James Madison +5.7 · EV +23.2%
+- **ATS: Ohio State -49.5 (-112)** — ATS 100.0
+  - Ball State at Ohio State · edge Ohio State +6.4 · EV +22.2%
+- **ATS: Ohio State -11.5 (-110)** — ATS 100.0
+  - Michigan at Ohio State · edge Ohio State +5.4 · EV +19.3%
+- **ATS: Ohio State +1.5 (-105)** — ATS 100.0
+  - Ohio State at Texas · edge Ohio State +4.2 · EV +16.8%
+- **ATS: Georgia -13.5 (+100)** — ATS 96.55
+  - Georgia at Arkansas · edge Georgia +3.6 · EV +16.7%
+- **ATS: Oregon -17.5 (-115)** — ATS 100.0
+  - Oregon at Oklahoma State · edge Oregon +5.2 · EV +15.8%
+- **ATS: South Florida -12.5 (-110)** — ATS 100.0
+  - Florida International at South Florida · edge South Florida +4.1 · EV +13.7%
+- **ATS: Texas Tech -13.5 (-115)** — ATS 97.84
+  - Houston at Texas Tech · edge Texas Tech +4.4 · EV +12.7%
+- **ATS: Texas Tech -15.5 (-105)** — ATS 87.48
+  - Texas Tech at Oklahoma State · edge Texas Tech +3.1 · EV +11.8%
+- **ATS: Washington State +21.5 (-105)** — ATS 91.67
+  - Washington State at Washington · edge Washington State +3.1 · EV +11.7%
+- **ATS: Iowa -30.5 (-110)** — ATS 94.31
+  - Northern Illinois at Iowa · edge Iowa +3.5 · EV +11.2%
+- **ATS: San Jose State +4 (-110)** — ATS 92.4
+  - San Jose State at Eastern Michigan · edge San Jose State +3.4 · EV +10.6%
+- **ATS: Sacramento State +7.5 (-115)** — ATS 95.46
+  - Sacramento State at Eastern Michigan · edge Sacramento State +3.9 · EV +10.3%
+- **ATS: East Carolina +26.5 (-105)** — ATS 86.91
+  - East Carolina at Alabama · edge East Carolina +2.7 · EV +10.0%
+- **ATS: Cincinnati -7.5 (-100)** — ATS 80.48
+  - Boston College at Cincinnati · edge Cincinnati +1.9 · EV +9.1%
+- **ATS: Penn State -23.5 (-115)** — ATS 91.25
+  - Marshall at Penn State · edge Penn State +3.5 · EV +8.8%
+
+## Arbitrage
+
+- **Fresno State Over 7.5 / Under 7.5** — ARB 9.22
+  - DraftKings 200 vs BetMGM -135 on same total 7.5.
+- **Ohio Over 6.5 / Under 6.5** — ARB 2.16
+  - FanDuel -110 vs BetMGM 120 on same total 6.5.
+- **LSU Over 8.5 / Under 8.5** — ARB 1.4
+  - FanDuel -104 vs Caesars 110 on same total 8.5.
+- **Air Force Over 7.5 / Under 7.5** — ARB 1.01
+  - BetMGM 125 vs Caesars -120 on same total 7.5.
+- **San Jose State Over 4.5 / Under 4.5** — ARB 0.42
+  - FanDuel -118 vs BetMGM 120 on same total 4.5.
+
+## Market move
+
+- **Arkansas State 6.5 win total moved at BetMGM** — MOVE
+  - line 5.5 → 6.5; Over 6.5: -200.0 → 115.0 (implied probability 66.7% → 46.5% (-20.2 pp)); Under 6.5: 155.0 → -150.0 (implied probability 39.2% → 60.0% (+20.8 pp)) on 2026-07-29.
+- **Buffalo 5.5 win total moved at BetMGM** — MOVE
+  - line 6.5 → 5.5; Over 5.5: 135.0 → -155.0 (implied probability 42.6% → 60.8% (+18.2 pp)); Under 5.5: -175.0 → 120.0 (implied probability 63.6% → 45.5% (-18.2 pp)) on 2026-07-26.
+- **Oregon State 4.5 win total moved at BetMGM** — MOVE
+  - line 3.5 → 4.5; Over 4.5: -150.0 → 150.0 (implied probability 60.0% → 40.0% (-20.0 pp)); Under 4.5: 120.0 → -190.0 (implied probability 45.5% → 65.5% (+20.1 pp)) on 2026-07-23.
+- **TCU Horned Frogs 7.5 win total moved at DraftKings** — MOVE
+  - line 6.5 → 7.5; Over 7.5: -146.0 → 125.0 (implied probability 59.3% → 44.4% (-14.9 pp)); Under 7.5: 125.0 → -150.0 (implied probability 44.4% → 60.0% (+15.6 pp)) on 2026-07-27.
+- **Virginia 7.5 win total moved at FanDuel** — MOVE
+  - line 8.5 → 7.5; Over 7.5: 132.0 → -144.0 (implied probability 43.1% → 59.0% (+15.9 pp)); Under 7.5: -162.0 → 118.0 (implied probability 61.8% → 45.9% (-16.0 pp)) on 2026-07-29.
+- **UCLA 6.5 win total moved at BetMGM** — MOVE
+  - Over 6.5: -135.0 → 110.0 (implied probability 57.4% → 47.6% (-9.8 pp)); Under 6.5: 105.0 → -145.0 (implied probability 48.8% → 59.2% (+10.4 pp)) on 2026-07-28.
+- **Texas St 6.5 win total moved at BetMGM** — MOVE
+  - Over 6.5: 130.0 → 100.0 (implied probability 43.5% → 50.0% (+6.5 pp)); Under 6.5: -165.0 → -120.0 (implied probability 62.3% → 54.5% (-7.7 pp)) on 2026-07-29.
+- **UCLA 6.5 win total moved at BetMGM** — MOVE
+  - Over 6.5: 100.0 → -135.0 (implied probability 50.0% → 57.4% (+7.4 pp)); Under 6.5: -125.0 → 105.0 (implied probability 55.6% → 48.8% (-6.8 pp)) on 2026-07-27.
+- **Northern Illinois 3.5 win total moved at Caesars** — MOVE
+  - Over 3.5: -115.0 → 105.0 (implied probability 53.5% → 48.8% (-4.7 pp)); Under 3.5: -115.0 → -135.0 (implied probability 53.5% → 57.4% (+4.0 pp)) on 2026-07-23.
+- **Alabama 8.5 win total moved at DraftKings** — MOVE
+  - Over 8.5: 100.0 → -120.0 (implied probability 50.0% → 54.5% (+4.5 pp)); Under 8.5: -120.0 → 100.0 (implied probability 54.5% → 50.0% (-4.5 pp)) on 2026-07-28.
+- **San Diego State 6.5 win total moved at BetMGM** — MOVE
+  - Over 6.5: -145.0 → -175.0 (implied probability 59.2% → 63.6% (+4.5 pp)); Under 6.5: 115.0 → 135.0 (implied probability 46.5% → 42.6% (-4.0 pp)) on 2026-07-28.
+- **Florida 7.5 win total moved at BetMGM** — MOVE
+  - Over 7.5: 110.0 → 130.0 (implied probability 47.6% → 43.5% (-4.1 pp)); Under 7.5: -145.0 → -165.0 (implied probability 59.2% → 62.3% (+3.1 pp)) on 2026-07-24.
+- **Kennesaw State 6.5 win total moved at FanDuel** — MOVE
+  - Over 6.5: -120.0 → -102.0 (implied probability 54.5% → 50.5% (-4.1 pp)); Under 6.5: -102.0 → -120.0 (implied probability 50.5% → 54.5% (+4.1 pp)) on 2026-07-23.
+- **FL Atlantic Title Odds moved** — MOVE
+  - Caesars Title Odds: price 2500.0 → 1200.0; implied probability 3.8% → 7.7% (+3.8 pp) on 2026-07-28.
+- **Tulane 7.5 win total moved at Caesars** — MOVE
+  - Over 7.5: 130.0 → 115.0 (implied probability 43.5% → 46.5% (+3.0 pp)); Under 7.5: -170.0 → -145.0 (implied probability 63.0% → 59.2% (-3.8 pp)) on 2026-07-27.
+- **Maryland 5.5 win total moved at BetMGM** — MOVE
+  - Over 5.5: 110.0 → 100.0 (implied probability 47.6% → 50.0% (+2.4 pp)); Under 5.5: -145.0 → -125.0 (implied probability 59.2% → 55.6% (-3.6 pp)) on 2026-07-23.
+- **California Golden 6.5 win total moved at DraftKings** — MOVE
+  - Over 6.5: 100.0 → 115.0 (implied probability 50.0% → 46.5% (-3.5 pp)); Under 6.5: -120.0 → -136.0 (implied probability 54.5% → 57.6% (+3.1 pp)) on 2026-07-24.
+- **Missouri 6.5 win total moved at DraftKings** — MOVE
+  - Over 6.5: -136.0 → -120.0 (implied probability 57.6% → 54.5% (-3.1 pp)); Under 6.5: 115.0 → 100.0 (implied probability 46.5% → 50.0% (+3.5 pp)) on 2026-07-27.
+- **Sacramento State 4.5 win total moved at Caesars** — MOVE
+  - Over 4.5: -130.0 → -115.0 (implied probability 56.5% → 53.5% (-3.0 pp)); Under 4.5: 100.0 → -115.0 (implied probability 50.0% → 53.5% (+3.5 pp)) on 2026-07-28.
+- **Texas A&M 8.5 win total moved at BetMGM** — MOVE
+  - Over 8.5: -115.0 → 100.0 (implied probability 53.5% → 50.0% (-3.5 pp)); Under 8.5: -110.0 → -125.0 (implied probability 52.4% → 55.6% (+3.2 pp)) on 2026-07-24.

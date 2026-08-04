@@ -1,0 +1,25 @@
+status,check,detail
+PASS,required artifacts present,15/15
+PASS,strict temporal split declared,"{'train': [2021, 2022, 2023], 'selection': 2024, 'holdout': 2025}"
+PASS,selection lock precedes holdout,true
+PASS,team movement predictions genuinely out of sample,"[{""prediction_season"": 2021, ""fit_seasons"": [2022, 2023], ""rows"": 1464, ""same_season_rows_in_fit"": false}, {""prediction_season"": 2022, ""fit_seasons"": [2021, 2023], ""rows"": 1468, ""same_season_rows_in_fit"": false}, {""prediction_season"": 2023, ""fit_seasons"": [2021, 2022], ""rows"": 1500, ""same_season_rows_in_fit"": false}, {""prediction_season"": 2024, ""fit_seasons"": [2021, 2022, 2023], ""rows"": 1498, ""same_season_rows_in_fit"": false}, {""prediction_season"": 2025, ""fit_seasons"": [2021, 2022, 2023, 2024], ""rows"": 1524, ""same_season_rows_in_fit"": false}]"
+PASS,game rows use cross-fitted movement predictions,n=3324
+PASS,spread sign formula exact,baseline - home change + away change
+PASS,spread pricing gap exact,projected close - opener
+PASS,combined total formula exact,baseline + one combined adjustment
+PASS,lambda 0.85 total benchmark reproduced,baseline + .85 * mean(prior team total residuals)
+PASS,no fabricated team-side total movement,combined only
+PASS,benchmark models use identical rows,"{'spread': array([601]), 'total': array([653])}"
+PASS,benchmark sample manifest matches metrics,spread/total
+PASS,prior discrepancies explicitly reconciled,6 causes
+PASS,no duplicate residual predictions,duplicates=0
+PASS,prediction partitions explicit,"['locked_holdout', 'selection']"
+PASS,2025 used only as locked holdout,rows=1254
+PASS,all edge thresholds evaluated,"[0.25, 0.5, 0.75, 1, 1.5, 2]"
+PASS,all probability thresholds evaluated,"[0.525, 0.55, 0.575, 0.6, 0.625, 0.65]"
+PASS,locked model comparison complete,rows=14
+PASS,confidence selected then held out,2024 and 2025
+PASS,local HTML report present,/Users/jameslindesmith/NCAAF_AUTO/build/research/shadow_opener_incorporation/index.html
+PASS,protected production files unchanged,none
+PASS,publication repository clean,clean
+PASS,no unsupported confidence recommendation,both false

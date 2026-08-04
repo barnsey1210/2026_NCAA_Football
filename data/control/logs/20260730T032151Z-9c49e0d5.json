@@ -1,0 +1,72 @@
+{
+  "api": {
+    "calls_consumed": 0,
+    "estimated_cost": 0,
+    "remaining": {}
+  },
+  "completion_timestamp": "2026-07-30T03:21:51.815003+00:00",
+  "deployed_commit_after": "83a14098a70271b4798e6cc243332c86baaf1c27",
+  "deployed_commit_before": "83a14098a70271b4798e6cc243332c86baaf1c27",
+  "errors": [],
+  "execution_environment": "darwin",
+  "files_changed": [],
+  "host": "Mac.attlocal.net",
+  "mode_plan": {
+    "description": "Validate and publish already accepted canonical outputs; never calls providers.",
+    "stages": [
+      "canonical_publish_check",
+      "publication_gate"
+    ]
+  },
+  "providers_called": [],
+  "publication": {
+    "status": "SKIPPED"
+  },
+  "requested_mode": "publish-existing",
+  "requested_scope": {
+    "markets": [
+      "spread",
+      "total",
+      "moneyline"
+    ],
+    "providers": [],
+    "scope": "both",
+    "week": "current"
+  },
+  "requester_identity": "local-user",
+  "run_id": "20260730T032151Z-9c49e0d5",
+  "schema_version": 1,
+  "stage": "complete",
+  "stages": [
+    {
+      "name": "exclusive_lock",
+      "status": "PASSED",
+      "timestamp": "2026-07-30T03:21:51.799653+00:00"
+    },
+    {
+      "commands": [
+        "bash scripts/publish/publish_site.sh --check"
+      ],
+      "name": "canonical_publish_check",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-30T03:21:51.799667+00:00"
+    },
+    {
+      "commands": [
+        "bash scripts/publish/publish_site.sh --push"
+      ],
+      "name": "publication_gate",
+      "providers": [],
+      "status": "DRY_RUN",
+      "timestamp": "2026-07-30T03:21:51.799670+00:00"
+    }
+  ],
+  "start_timestamp": "2026-07-30T03:21:51.774350+00:00",
+  "status": "COMPLETED",
+  "trigger_source": "local",
+  "validation_results": {
+    "v2_shell_hashes_unchanged": true
+  },
+  "warnings": []
+}

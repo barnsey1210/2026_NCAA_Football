@@ -1,0 +1,4299 @@
+{
+  "status": "PASS",
+  "summary": {
+    "games": 130,
+    "internal_baseline_games": 108,
+    "displayed_shadow_games": 0,
+    "postgame_updated_games": 0,
+    "independent_50_50_games": 52,
+    "unavailable_games": 130,
+    "populated_totals": 0,
+    "line_rows": 902,
+    "baseline_team_sides": 238,
+    "postgame_team_sides": 0
+  },
+  "fixture_results": [
+    {
+      "name": "neither_team_updated",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 0,
+        "has_genuine_postgame_update": false,
+        "shadow_display_ready": false,
+        "spread_active": false,
+        "total_active": false,
+        "spread_impact_display": "\u2014",
+        "total_value_tier": null
+      },
+      "expected": {
+        "completed_team_update_count": 0,
+        "has_genuine_postgame_update": false,
+        "shadow_display_ready": false,
+        "spread_active": false,
+        "total_active": false,
+        "spread_impact_display": "\u2014",
+        "total_value_tier": null
+      }
+    },
+    {
+      "name": "away_team_updated",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": null
+      },
+      "expected": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true
+      }
+    },
+    {
+      "name": "home_team_updated",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": null
+      },
+      "expected": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true
+      }
+    },
+    {
+      "name": "both_teams_updated",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 2,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": null
+      },
+      "expected": {
+        "completed_team_update_count": 2,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true
+      }
+    },
+    {
+      "name": "updated_missing_total_input",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": false,
+        "spread_impact_display": "numeric",
+        "total_value_tier": null
+      },
+      "expected": {
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": false,
+        "total_value_tier": null
+      }
+    },
+    {
+      "name": "fbs_fcs_missing_sp_plus",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": false,
+        "spread_active": false,
+        "total_active": false,
+        "spread_impact_display": "\u2014",
+        "total_value_tier": null
+      },
+      "expected": {
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": false,
+        "spread_active": false,
+        "total_active": false
+      }
+    },
+    {
+      "name": "active_zero_impact",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "0.0",
+        "total_value_tier": null
+      },
+      "expected": {
+        "shadow_display_ready": true,
+        "spread_impact_display": "0.0"
+      }
+    },
+    {
+      "name": "active_total_green",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": "green"
+      },
+      "expected": {
+        "total_value_tier": "green"
+      }
+    },
+    {
+      "name": "active_total_yellow",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": "yellow"
+      },
+      "expected": {
+        "total_value_tier": "yellow"
+      }
+    },
+    {
+      "name": "active_total_red",
+      "passed": true,
+      "actual": {
+        "completed_team_update_count": 1,
+        "has_genuine_postgame_update": true,
+        "shadow_display_ready": true,
+        "spread_active": true,
+        "total_active": true,
+        "spread_impact_display": "numeric",
+        "total_value_tier": "red"
+      },
+      "expected": {
+        "total_value_tier": "red"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "check": "frozen artifacts not refit",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "FPI and TeamRankings excluded",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "targeted parity passed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "fixture isolation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no dry-run source paths",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "production rejects fixture rows",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g1 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g1 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g2 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g2 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g3 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g3 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g4 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g4 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g5 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g5 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g6 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g6 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g7 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g7 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g8 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g8 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g11 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g12 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g12 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g14 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g16 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g16 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g17 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g18 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g18 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g19 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g19 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g20 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g21 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g22 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g22 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g24 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g24 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g25 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g28 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g29 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g30 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g30 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g33 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g33 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g34 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g35 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g35 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g36 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g36 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g38 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g38 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g39 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g39 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g40 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g42 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g42 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g43 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g43 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g44 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g44 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g45 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g45 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g46 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g46 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g48 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g48 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g51 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g52 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g52 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g53 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g55 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g56 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g56 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g57 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g57 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g58 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g58 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g60 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g60 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g61 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g62 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g62 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g63 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g63 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g64 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g64 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g65 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g66 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g68 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g68 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g69 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g69 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g71 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g71 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g72 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g72 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g73 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g73 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g74 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g79 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g79 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g80 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g80 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g81 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g82 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g84 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g85 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g85 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g86 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g86 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g88 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g88 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g89 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g89 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g90 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g90 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g93 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g94 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g95 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g95 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g96 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g96 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g97 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g97 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g98 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g98 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g99 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g99 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g102 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g102 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g131 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g131 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g142 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g142 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g155 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g155 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g167 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g167 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g168 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g168 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g177 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g177 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g187 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g187 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g189 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g189 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g192 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g192 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g193 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g193 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g216 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g216 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g232 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g232 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g283 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g283 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g291 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g291 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g315 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g315 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g321 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g321 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g345 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g345 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g373 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g373 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g401 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g401 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g430 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g430 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g434 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g434 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g459 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g459 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g468 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g468 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g470 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g470 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g473 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g473 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g475 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g475 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g479 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g479 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g481 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g481 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g498 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g498 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g519 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g519 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g540 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g540 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g556 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g556 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g562 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g562 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g563 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g563 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g584 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g584 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g586 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g586 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g665 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g665 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g710 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g710 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g719 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g719 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g729 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g729 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g730 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g730 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g731 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g731 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g741 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g741 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g762 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g762 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g800 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g800 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g801 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g801 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g825 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g825 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g827 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g827 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g830 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g830 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g832 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g832 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g834 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g834 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g843 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g843 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g870 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g870 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g873 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g873 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g885 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g885 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g886 away",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "zero baseline g886 home",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "entering SP+ snapshots precede cutoff",
+      "passed": true,
+      "detail": "checked=238"
+    },
+    {
+      "check": "HFA once g1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g1",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g3",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g4",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g5",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g6",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g7",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g8",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g11",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g12",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g14",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g16",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g17",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g18",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g18",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g18",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g18",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g18",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g19",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g19",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g19",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g19",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g19",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g20",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g21",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g22",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g22",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g22",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g22",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g22",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g24",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g24",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g24",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g24",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g24",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g25",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g28",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g29",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g30",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g30",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g30",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g30",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g30",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g33",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g33",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g33",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g33",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g33",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g34",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g35",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g35",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g35",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g35",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g35",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g36",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g36",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g36",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g36",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g36",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g38",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g38",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g38",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g38",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g38",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g39",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g39",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g39",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g39",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g39",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g40",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g42",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g42",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g42",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g42",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g42",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g43",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g43",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g43",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g43",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g43",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g44",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g44",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g44",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g44",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g44",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g45",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g45",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g45",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g45",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g45",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g46",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g46",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g46",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g46",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g46",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g48",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g48",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g48",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g48",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g48",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g51",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g52",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g52",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g52",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g52",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g52",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g53",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g55",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g56",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g56",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g56",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g56",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g56",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g57",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g57",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g57",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g57",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g57",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g58",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g58",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g58",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g58",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g58",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g60",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g60",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g60",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g60",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g60",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g61",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g62",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g62",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g62",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g62",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g62",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g63",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g63",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g63",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g63",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g63",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g64",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g64",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g64",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g64",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g64",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g65",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g66",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g68",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g68",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g68",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g68",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g68",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g69",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g69",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g69",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g69",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g69",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g71",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g71",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g71",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g71",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g71",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g72",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g72",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g72",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g72",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g72",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g73",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g73",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g73",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g73",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g73",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g74",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g79",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g79",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g79",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g79",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g79",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g80",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g80",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g80",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g80",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g80",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g81",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g82",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g84",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g85",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g85",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g85",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g85",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g85",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g86",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g86",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g86",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g86",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g86",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g88",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g88",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g88",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g88",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g88",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g89",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g89",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g89",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g89",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g89",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g90",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g90",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g90",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g90",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g90",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g93",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g94",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g95",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g95",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g95",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g95",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g95",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g96",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g96",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g96",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g96",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g96",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g97",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g97",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g97",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g97",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g97",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g98",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g98",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g98",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g98",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g98",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g99",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g99",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g99",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g99",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g99",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g102",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g102",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g102",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g102",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g102",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g131",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g131",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g131",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g131",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g131",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g142",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g142",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g142",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g142",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g142",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g155",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g155",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g155",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g155",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g155",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g167",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g167",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g167",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g167",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g167",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g168",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g168",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g168",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g168",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g168",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g177",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g177",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g177",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g177",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g177",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g187",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g187",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g187",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g187",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g187",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g189",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g189",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g189",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g189",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g189",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g192",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g192",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g192",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g192",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g192",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g193",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g193",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g193",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g193",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g193",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g216",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g216",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g216",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g216",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g216",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g232",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g232",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g232",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g232",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g232",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g283",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g283",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g283",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g283",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g283",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g291",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g291",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g291",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g291",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g291",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g315",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g315",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g315",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g315",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g315",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g321",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g321",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g321",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g321",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g321",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g345",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g345",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g345",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g345",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g345",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g373",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g373",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g373",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g373",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g373",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g401",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g401",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g401",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g401",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g401",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g430",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g430",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g430",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g430",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g430",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g434",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g434",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g434",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g434",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g434",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g459",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g459",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g459",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g459",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g459",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g468",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g468",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g468",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g468",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g468",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g470",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g470",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g470",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g470",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g470",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g473",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g473",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g473",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g473",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g473",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g475",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g475",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g475",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g475",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g475",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g479",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g479",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g479",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g479",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g479",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g481",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g481",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g481",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g481",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g481",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g498",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g498",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g498",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g498",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g498",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g519",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g519",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g519",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g519",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g519",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g540",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g540",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g540",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g540",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g540",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g556",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g556",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g556",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g556",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g556",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g562",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g562",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g562",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g562",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g562",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g563",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g563",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g563",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g563",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g563",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g584",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g584",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g584",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g584",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g584",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g586",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g586",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g586",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g586",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g586",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g665",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g665",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g665",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g665",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g665",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g710",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g710",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g710",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g710",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g710",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g719",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g719",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g719",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g719",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g719",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g729",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g729",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g729",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g729",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g729",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g730",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g730",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g730",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g730",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g730",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g731",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g731",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g731",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g731",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g731",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g741",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g741",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g741",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g741",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g741",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g762",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g762",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g762",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g762",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g762",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g800",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g800",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g800",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g800",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g800",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g801",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g801",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g801",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g801",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g801",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g827",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g827",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g827",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g827",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g827",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g830",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g830",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g830",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g830",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g830",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g832",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g832",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g832",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g832",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g832",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g834",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g834",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g834",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g834",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g834",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g843",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g843",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g843",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g843",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g843",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g870",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g870",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g870",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g870",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g870",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g873",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g873",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g873",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g873",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g873",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g885",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g885",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g885",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g885",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g885",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "HFA once g886",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "total correction once g886",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "preseason gate g886",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model spread retained g886",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Current Model total retained g886",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "mixed-state fixture",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "fixture file isolated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: neither_team_updated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: away_team_updated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: home_team_updated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: both_teams_updated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: updated_missing_total_input",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: fbs_fcs_missing_sp_plus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: active_zero_impact",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: active_total_green",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: active_total_yellow",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "activation fixture: active_total_red",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

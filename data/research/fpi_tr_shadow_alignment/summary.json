@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-07-26T20:31:02.062668+00:00",
+  "research_only": true,
+  "exact_archive_columns": {
+    "FPI": "lineespn",
+    "TeamRankings": "lineteamrank",
+    "market_updated_line": "line",
+    "market_opening_line": "lineopen",
+    "week": "week",
+    "actual_margin": "actual"
+  },
+  "timing_conclusion": "The files contain genuine weekly game predictions tracked by The Prediction Tracker. They do not include row-level publication times, game dates, neutral flags, or revision history, so exact pregame availability and freeze timing cannot be independently established.",
+  "direct_projection_coverage": {
+    "FPI": 3891,
+    "TeamRankings": 3898,
+    "both_matched_to_alignment": 581
+  },
+  "reconstruction_conclusion": "Not reconstructable honestly: each weekly schedule graph is predominantly disconnected matchup pairs, making source HFA and relative ratings across games unidentified.",
+  "calibration": {
+    "FPI": {
+      "choice": "intercept_slope",
+      "train_seasons": [
+        2021,
+        2022,
+        2023
+      ],
+      "selection_season": 2024,
+      "intercept": 0.43324712643678154,
+      "slope": 0.9720037816982133,
+      "regression_intercept": 0.3089479396220061,
+      "selection_scores": {
+        "none": {
+          "n": 589,
+          "mae": 2.9881324278438033,
+          "median_absolute_error": 2.4800000000000004,
+          "rmse": 3.876668729905374,
+          "signed_bias": -0.4201867572156198,
+          "correlation": 0.9559899960858538
+        },
+        "intercept": {
+          "n": 589,
+          "mae": 2.985129334738403,
+          "median_absolute_error": 2.4467528735632182,
+          "rmse": 3.8538518528520216,
+          "signed_bias": 0.013060369221161886,
+          "correlation": 0.9559899960858538
+        },
+        "intercept_slope": {
+          "n": 589,
+          "mae": 2.9516553431440107,
+          "median_absolute_error": 2.432889110653387,
+          "rmse": 3.8283173612540864,
+          "signed_bias": 0.017334171445690147,
+          "correlation": 0.9559899960858536
+        }
+      }
+    },
+    "TeamRankings": {
+      "choice": "intercept_slope",
+      "train_seasons": [
+        2021,
+        2022,
+        2023
+      ],
+      "selection_season": 2024,
+      "intercept": -0.12952298850574712,
+      "slope": 0.9140147100725309,
+      "regression_intercept": -0.4628953700795386,
+      "selection_scores": {
+        "none": {
+          "n": 589,
+          "mae": 3.0807979626485573,
+          "median_absolute_error": 2.6,
+          "rmse": 3.87174916490277,
+          "signed_bias": -0.38269949066213926,
+          "correlation": 0.9631728093016501
+        },
+        "intercept": {
+          "n": 589,
+          "mae": 3.0933938781882406,
+          "median_absolute_error": 2.570477011494253,
+          "rmse": 3.8866894092449855,
+          "signed_bias": -0.5122224791678864,
+          "correlation": 0.9631728093016501
+        },
+        "intercept_slope": {
+          "n": 589,
+          "mae": 2.8201465601854663,
+          "median_absolute_error": 2.275013050659785,
+          "rmse": 3.5566981446548898,
+          "signed_bias": -0.4539296753438745,
+          "correlation": 0.9631728093016496
+        }
+      }
+    }
+  },
+  "fixed_weights_2024": {
+    "market_fair_spread": 0.1,
+    "sp_plus_fair_spread": 0.1,
+    "fpi_calibrated": 0.4,
+    "teamrankings_calibrated": 0.4
+  },
+  "ridge_2024": {
+    "alpha": 5,
+    "intercept": 0.23006560155175304,
+    "coefficients": {
+      "market_fair_spread": 0.07242996619320781,
+      "sp_plus_fair_spread": 0.18812861804245015,
+      "fpi_calibrated": 0.3677776620286839,
+      "teamrankings_calibrated": 0.3185383692706215
+    }
+  },
+  "identical_holdout_n": 357,
+  "best_locked_2025": {
+    "model": "2024-selected fixed-weight ensemble",
+    "mae": 2.121926017907121
+  },
+  "confidence_monotonic": false,
+  "production_addition_justified": false,
+  "reason": "Timing is not exactly frozen, latent reconstruction fails, and production adoption requires explicit approval even if direct archive ensembles show incremental value."
+}

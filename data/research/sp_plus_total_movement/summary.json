@@ -1,0 +1,345 @@
+{
+  "generated_at": "2026-07-26T20:00:46.770261+00:00",
+  "snapshot_summary": {
+    "sources": [
+      "data/import/sp_plus/espn_sp_plus_weekly_2021_2024.csv",
+      "data/import/sp_plus/espn_sp_plus_weekly_2025.csv"
+    ],
+    "genuine_weekly_observations": true,
+    "weeks_by_season": {
+      "2021": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "2022": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "2023": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "2024": [
+        0,
+        1,
+        2,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "2025": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "defense_sign_convention": "lower raw defensive SP+ is better because overall = offense - defense + special teams",
+    "defense_improvement_formula": "actual_defense_improvement = -actual_sp_def_change",
+    "offense_sign_convention": "higher offensive SP+ is better",
+    "units": "SP+ rating points",
+    "tempo_present": false,
+    "missing_weeks_not_bridged": true
+  },
+  "component_coverage_by_season": [
+    {
+      "season": 2021,
+      "snapshots": 14,
+      "teams": 130,
+      "missing_offense": 0,
+      "missing_defense": 0,
+      "missing_special_teams": 130
+    },
+    {
+      "season": 2022,
+      "snapshots": 13,
+      "teams": 131,
+      "missing_offense": 0,
+      "missing_defense": 0,
+      "missing_special_teams": 0
+    },
+    {
+      "season": 2023,
+      "snapshots": 15,
+      "teams": 133,
+      "missing_offense": 0,
+      "missing_defense": 0,
+      "missing_special_teams": 0
+    },
+    {
+      "season": 2024,
+      "snapshots": 13,
+      "teams": 134,
+      "missing_offense": 0,
+      "missing_defense": 0,
+      "missing_special_teams": 0
+    },
+    {
+      "season": 2025,
+      "snapshots": 15,
+      "teams": 136,
+      "missing_offense": 0,
+      "missing_defense": 0,
+      "missing_special_teams": 0
+    }
+  ],
+  "component_results": [
+    {
+      "component": "offense",
+      "threshold": 1.0,
+      "direction_model": "ordinal_ridge_proxy",
+      "magnitude_model": "huber",
+      "n": 1127,
+      "mae": 0.612586006211451,
+      "median_absolute_error": 0.4306692209339078,
+      "rmse": 0.8395503397783945,
+      "signed_bias": -0.12254505619581704,
+      "correlation": 0.8330718291241517,
+      "within_1": 0.8012422360248447,
+      "within_2": 0.9724933451641526,
+      "within_3": 0.9955634427684117,
+      "accuracy": 0.7444543034605147,
+      "balanced_accuracy": 0.6966127579283081,
+      "macro_f1": 0.7195803657955052,
+      "per_class": "{\"downgrade\": {\"precision\": 0.7090163934426229, \"recall\": 0.6705426356589147, \"f1\": 0.6892430278884462, \"support\": 258}, \"no_change\": {\"precision\": 0.7321178120617111, \"recall\": 0.8432956381260097, \"f1\": 0.7837837837837838, \"support\": 619}, \"upgrade\": {\"precision\": 0.8470588235294118, \"recall\": 0.576, \"f1\": 0.6857142857142857, \"support\": 250}}"
+    },
+    {
+      "component": "defense_improvement",
+      "threshold": 1.0,
+      "direction_model": "ordinal_ridge_proxy",
+      "magnitude_model": "huber",
+      "n": 1127,
+      "mae": 0.604365976587096,
+      "median_absolute_error": 0.44851349055982537,
+      "rmse": 0.8128093777967252,
+      "signed_bias": 0.01316062998060196,
+      "correlation": 0.8229443178639577,
+      "within_1": 0.8189884649511979,
+      "within_2": 0.968944099378882,
+      "within_3": 0.997338065661047,
+      "accuracy": 0.7586512866015972,
+      "balanced_accuracy": 0.7132708949328755,
+      "macro_f1": 0.736054740755721,
+      "per_class": "{\"downgrade\": {\"precision\": 0.8831168831168831, \"recall\": 0.7010309278350515, \"f1\": 0.7816091954022988, \"support\": 291}, \"no_change\": {\"precision\": 0.733142037302726, \"recall\": 0.8602693602693603, \"f1\": 0.7916343919442294, \"support\": 594}, \"upgrade\": {\"precision\": 0.7035175879396985, \"recall\": 0.5785123966942148, \"f1\": 0.6349206349206349, \"support\": 242}}"
+    }
+  ],
+  "strongest_features": {
+    "offense": [
+      {
+        "feature": "points_scored",
+        "train_only_correlation": 0.5930608385391344
+      },
+      {
+        "feature": "off_ppa",
+        "train_only_correlation": 0.5152193163629848
+      },
+      {
+        "feature": "repeatable_offense_performance",
+        "train_only_correlation": 0.5142280748415022
+      },
+      {
+        "feature": "total_residual",
+        "train_only_correlation": 0.47804068516864506
+      },
+      {
+        "feature": "drive_off_points_per_opportunity",
+        "train_only_correlation": 0.43830960649077133
+      },
+      {
+        "feature": "off_success_rate",
+        "train_only_correlation": 0.3993880363931469
+      },
+      {
+        "feature": "off_pass_success_rate",
+        "train_only_correlation": 0.36946331234836866
+      },
+      {
+        "feature": "final_margin",
+        "train_only_correlation": 0.3531145718647121
+      },
+      {
+        "feature": "gc_game_control_index",
+        "train_only_correlation": 0.3329684775646904
+      },
+      {
+        "feature": "off_explosiveness",
+        "train_only_correlation": 0.28967289391473594
+      }
+    ],
+    "defense": [
+      {
+        "feature": "points_allowed",
+        "train_only_correlation": -0.6678496836328494
+      },
+      {
+        "feature": "repeatable_defense_performance",
+        "train_only_correlation": 0.5864081994881942
+      },
+      {
+        "feature": "def_ppa_allowed",
+        "train_only_correlation": -0.5770524203688181
+      },
+      {
+        "feature": "def_success_allowed",
+        "train_only_correlation": -0.4883229927638447
+      },
+      {
+        "feature": "final_margin",
+        "train_only_correlation": 0.4784747544281597
+      },
+      {
+        "feature": "drive_def_points_per_opportunity_allowed",
+        "train_only_correlation": -0.4676126109959411
+      },
+      {
+        "feature": "gc_game_control_index",
+        "train_only_correlation": 0.45061333580783275
+      },
+      {
+        "feature": "total_residual",
+        "train_only_correlation": -0.43622207996410967
+      },
+      {
+        "feature": "def_pass_success_allowed",
+        "train_only_correlation": -0.42923069764927246
+      },
+      {
+        "feature": "trailing_2_game_def_eff",
+        "train_only_correlation": -0.4266288336120901
+      }
+    ]
+  },
+  "total_selection": {
+    "sp_component_formula": "pure_sp_plus_total",
+    "team_points_formula": {
+      "intercept": -12.496722647353003,
+      "coefficients": {
+        "team_offense": 0.7972529349790207,
+        "opponent_defense": 0.7102345404718297,
+        "home_indicator": 2.604990084984197,
+        "team_prior_pace": 0.02934894274872691,
+        "opponent_prior_pace": -0.04306838442244006,
+        "team_prior_plays": -0.043217340395479406,
+        "opponent_prior_plays": 0.003456288964456256
+      }
+    },
+    "pace_improved_2024": false,
+    "optimized_sp_weight": 0.6000000000000001,
+    "selected_total_model": "optimized_fixed_blend",
+    "confidence_difference_thresholds": {
+      "high_max": 3.6670441904000697,
+      "medium_max": 6.084339069544043
+    },
+    "selected_without_2025": true,
+    "conversion_fit_seasons": [
+      2021,
+      2022,
+      2023
+    ]
+  },
+  "special_teams_decision": "excluded from total model: 130 missing historical values and not needed for offense/defense total conversion",
+  "identical_comparison_games_by_season": {
+    "2022": 5,
+    "2023": 156,
+    "2024": 278,
+    "2025": 392
+  },
+  "timing_limitation": "historical ESPN Bet opening-total field timing unknown",
+  "protected_before": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "scripts/research/build_sp_plus_movement_alignment.py": "b78de27d6cebe662bc133061d9dae22ccc26904a06811b4a03c6f0f1b7808dd7",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_after": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "scripts/research/build_team_rating_movement_model.py": "d32216d77273fdd81da65ac6e1f6f2d1e29f549745da9ec21926b682b07df612",
+    "scripts/research/build_sp_plus_movement_alignment.py": "b78de27d6cebe662bc133061d9dae22ccc26904a06811b4a03c6f0f1b7808dd7",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  },
+  "protected_unchanged": true,
+  "publication_repo_before": "",
+  "publication_repo_after": "",
+  "publication_repo_clean": true,
+  "recommendation": "No production change unless locked-2025 selected blend stably improves current total projection on identical games."
+}

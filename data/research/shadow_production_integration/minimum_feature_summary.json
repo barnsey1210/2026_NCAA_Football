@@ -1,0 +1,17 @@
+{
+  "status": "BLOCKED_REQUIRED_INPUT",
+  "features_by_classification": {
+    "required deterministic intermediate": 216,
+    "required model input": 126
+  },
+  "previous_unresolved_fields": 122,
+  "genuinely_unavailable_upstream_fields": [
+    "home_prior_fpi_team_margin",
+    "away_prior_fpi_team_margin",
+    "home_prior_tr_team_margin",
+    "away_prior_tr_team_margin"
+  ],
+  "cause": "No canonical timestamped prior-game FPI or TeamRankings game-projection history exists for prospective 2026. game_projection_sources_2026.csv currently contains Massey only.",
+  "unsafe_substitution_rejected": "Current FPI/TR team ratings are not equivalent to the Prediction Tracker game projections used during training.",
+  "production_integration_performed": false
+}

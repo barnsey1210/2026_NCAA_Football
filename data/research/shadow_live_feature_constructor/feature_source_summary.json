@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-08-04T12:01:18.091428+00:00",
+  "frozen_models": [
+    "market_rating_movement",
+    "sp_plus_overall_movement",
+    "sp_plus_offense_movement",
+    "sp_plus_defense_improvement"
+  ],
+  "feature_counts_by_model": {
+    "market_rating_movement": 27,
+    "sp_plus_overall_movement": 31,
+    "sp_plus_offense_movement": 24,
+    "sp_plus_defense_improvement": 24
+  },
+  "unique_direct_market_sp_plus_features": 48,
+  "excluded_models": [
+    "fpi_next_game_spread",
+    "teamrankings_next_game_spread"
+  ],
+  "feature_rows": 106,
+  "historical_builders": [
+    "build_team_states",
+    "build_features",
+    "build_repeatable"
+  ],
+  "schedule_candidates": [
+    {
+      "file": "data/research/pbp_market_modeling_2021_2025/full_game_modeling_rows.csv",
+      "rows_2025": 762,
+      "unique_games_2025": 762,
+      "fbs_fcs_identifiable": false,
+      "bowls_included": "likely if provider retained",
+      "week_0_included": false,
+      "neutral_identifiable": false
+    },
+    {
+      "file": "data/research/pbp_market_modeling_2021_2025/provider_market_rows.csv",
+      "rows_2025": 3202,
+      "unique_games_2025": 1547,
+      "fbs_fcs_identifiable": false,
+      "bowls_included": "likely if provider retained",
+      "week_0_included": false,
+      "neutral_identifiable": false
+    },
+    {
+      "file": "data/research/shadow_blended_live_candidate/game_level_audit.csv",
+      "rows_2025": 411,
+      "unique_games_2025": 411,
+      "fbs_fcs_identifiable": false,
+      "bowls_included": "likely if provider retained",
+      "week_0_included": false,
+      "neutral_identifiable": false
+    }
+  ],
+  "authoritative_schedule_candidate": "data/research/pbp_market_modeling_2021_2025/provider_market_rows.csv for broad provider inventory; not declarable as full NCAA schedule because FBS/FCS and neutral status are absent",
+  "production_files_modified": false
+}

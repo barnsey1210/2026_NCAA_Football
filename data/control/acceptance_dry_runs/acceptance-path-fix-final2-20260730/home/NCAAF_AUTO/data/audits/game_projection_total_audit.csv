@@ -1,0 +1,903 @@
+severity,flags,notes,is_fbs_mapped,game_id,cfbd_game_id,week,date,away_team,home_team,projected_total,market_total,market_total_diff,massey_total,massey_total_diff,projected_margin_home,implied_away_points,implied_home_points,market_total_book,market_total_last_update,projection_total_sources
+MAJOR,IMPOSSIBLE_SCORE,"implied score has negative points: Ball State -3.4, Ohio State 52.5",True,g68,401858432,1,2026-09-05,Ball State,Ohio State,49.15,56.5,-7.35,,,55.85,-3.35,52.5,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+MAJOR,IMPOSSIBLE_SCORE,"implied score has negative points: Kent State -1.6, Ohio State 52.0",True,g228,401858454,3,2026-09-19,Kent State,Ohio State,50.4,,,,,53.523,-1.562,51.962,,,Site Projection
+WARN,MISSING_TOTAL_WITH_MARKET_NON_FBS,non-FBS/unmapped game has market total but no model total,False,g14,401858422,1,2026-09-03,Eastern Illinois,Minnesota,,51.5,,48.5,,,,,fanduel,2026-07-21T17:16:55.000Z,
+WARN,MISSING_TOTAL_WITH_MARKET_NON_FBS,non-FBS/unmapped game has market total but no model total,False,g17,401856768,1,2026-09-03,Idaho,Utah,,57.5,,53.5,,,,,fanduel,2026-07-21T17:17:27.205Z,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g9,401866409,1,2026-09-03,UAlbany,Buffalo,,,,50.5,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g10,401856767,1,2026-09-03,Bethune-Cookman,Central Florida,,,,53.5,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g11,401864424,1,2026-09-03,Merrimack,Delaware,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g13,401864425,1,2026-09-03,West Georgia,Kennesaw State,,,,52.5,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g15,401856663,1,2026-09-03,UAPB,Missouri,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g20,401866623,1,2026-09-04,North Carolina A&T,Georgia State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g21,401856769,1,2026-09-04,LIU,Kansas,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g23,401864496,1,2026-09-05,Duquesne,Air Force,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g25,401866627,1,2026-09-05,Maine,Appalachian State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g26,401856773,1,2026-09-05,Northern Arizona,Arizona,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g27,401856774,1,2026-09-05,Morgan State,Arizona State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g28,401856635,1,2026-09-05,North Alabama,Arkansas,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g29,401862701,1,2026-09-05,Bryant,Army,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g31,401856775,1,2026-09-05,Utah Tech,BYU,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g32,401866410,1,2026-09-05,Tarleton State,Bowling Green,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g34,401862694,1,2026-09-05,The Citadel,Charlotte,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g37,401861962,1,2026-09-05,Lafayette,Connecticut,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g40,401856658,1,2026-09-05,Tennessee State,Georgia,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g41,401868170,1,2026-09-05,Charleston So.,Georgia Southern,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g47,401856779,1,2026-09-05,Southeast Missouri,Iowa State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g49,401868140,1,2026-09-05,Eastern Kentucky,Jacksonville State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g50,401856771,1,2026-09-05,Nicholls,Kansas State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g51,401856659,1,2026-09-05,Youngstown State,Kentucky,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g53,401869142,1,2026-09-05,Lamar,Louisiana,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g54,401869129,1,2026-09-05,Northwestern State,Louisiana Tech,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g55,,1,2026-09-05,Hampton,Maryland,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g59,401867866,1,2026-09-05,Murray State,Middle Tennessee,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g61,401862696,1,2026-09-05,Towson,Navy,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g65,,1,2026-09-05,Mercyhurst,New Mexico State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g66,401864499,1,2026-09-05,Fordham,North Dakota State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g67,401858431,1,2026-09-05,South Dakota State,Northwestern,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g70,401867973,1,2026-09-05,Norfolk State,Old Dominion,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g74,401858435,1,2026-09-05,Indiana State,Purdue,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g75,401862697,1,2026-09-05,HCU,Rice,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g76,401866411,1,2026-09-05,MVSU,Sacramento State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g77,401860879,1,2026-09-05,Portland State,San Diego State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g78,401868316,1,2026-09-05,Southeastern La.,South Alabama,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g81,401868356,1,2026-09-05,Alcorn State,Southern Miss,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g82,401858208,1,2026-09-05,New Hampshire,Syracuse,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g83,401862698,1,2026-09-05,Rhode Island,Temple,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g84,401856666,1,2026-09-05,Furman,Tennessee,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g87,401856770,1,2026-09-05,Abilene Christian,Texas Tech,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g91,401862700,1,2026-09-05,UTRGV,UTSA,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g92,401860880,1,2026-09-05,Idaho State,Utah State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g93,401856669,1,2026-09-05,Austin Peay,Vanderbilt,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g94,401858211,1,2026-09-05,VMI,Virginia Tech,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g100,401858213,2,2026-09-10,Florida A&M,Miami-FL,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g103,401858215,2,2026-09-11,Villanova,Louisville,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g105,401866412,2,2026-09-12,Robert Morris,Akron,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g106,401868241,2,2026-09-12,West Georgia,Arkansas State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g110,401866413,2,2026-09-12,Stony Brook,Ball State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g111,401856784,2,2026-09-12,Prairie View A&M,Baylor,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g113,401866415,2,2026-09-12,Colgate,Central Michigan,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g114,401856786,2,2026-09-12,Western Carolina,Cincinnati,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g116,401868008,2,2026-09-12,Fordham,Coastal Carolina,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g117,401856785,2,2026-09-12,Weber State,Colorado,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g118,401860882,2,2026-09-12,Southern Utah,Colorado State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g121,401856672,2,2026-09-12,Campbell,Florida,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g128,401856787,2,2026-09-12,Southern,Houston,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g130,401858439,2,2026-09-12,Howard,Indiana,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g132,401867929,2,2026-09-12,Wagner,James Madison,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g135,401866416,2,2026-09-12,Wofford,Kent State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g138,401868187,2,2026-09-12,Gardner-Webb,Liberty,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g140,401866420,2,2026-09-12,Sacred Heart,Massachusetts,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g141,401866417,2,2026-09-12,Holy Cross,Miami-OH,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g145,,2,2026-09-12,Lindenwood,Missouri State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g146,401858222,2,2026-09-12,Richmond,NC State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g148,401864500,2,2026-09-12,Montana State,Nevada,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g149,401865252,2,2026-09-12,Mercyhurst,New Mexico,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g150,401858218,2,2026-09-12,ETSU,North Carolina,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g152,401864503,2,2026-09-12,Illinois State,Northern Illinois,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g160,401858223,2,2026-09-12,UC Davis,SMU,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g162,401864504,2,2026-09-12,Cal Poly,San Jose State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g163,401856680,2,2026-09-12,Towson,South Carolina,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g165,401856789,2,2026-09-12,Grambling State,TCU,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g170,401866419,2,2026-09-12,CCSU,Toledo,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g171,401868326,2,2026-09-12,Alabama State,Troy,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g176,401864505,2,2026-09-12,Texas Southern,UTEP,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g179,401858220,2,2026-09-12,Norfolk State,Virginia,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g182,401856791,2,2026-09-12,UT Martin,West Virginia,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g183,401866421,2,2026-09-12,Monmouth,Western Michigan,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g184,401858447,2,2026-09-12,Western Illinois,Wisconsin,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g185,401864506,2,2026-09-12,Northern Colorado,Wyoming,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g195,401860885,3,2026-09-19,South Dakota,Boise State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g196,401858227,3,2026-09-19,Maine,Boston College,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g197,401858233,3,2026-09-19,Wagner,California,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g206,401858228,3,2026-09-19,Mercer,Georgia Tech,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g207,401858448,3,2026-09-19,Southern Illinois,Illinois,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g209,401858471,3,2026-09-19,Northern Iowa,Iowa,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g218,401866424,3,2026-09-19,Stonehill,Massachusetts,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g219,401862772,3,2026-09-19,UT Martin,Memphis,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g225,401858452,3,2026-09-19,North Dakota,Nebraska,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g230,401856803,3,2026-09-19,Murray State,Oklahoma State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g233,401858455,3,2026-09-19,Portland State,Oregon,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g234,401860886,3,2026-09-19,Montana,Oregon State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g239,,3,2026-09-19,Nicholls,Sam Houston,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g244,401862777,3,2026-09-19,Delaware State,South Florida,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g252,401862775,3,2026-09-19,East Texas A&M,Tulsa,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g254,401868317,3,2026-09-19,Southeastern La.,UL-Monroe,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g257,401858459,3,2026-09-19,Eastern Washington,Washington,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g258,401860890,3,2026-09-19,Duquesne,Washington State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g272,401866426,4,2026-09-26,Robert Morris,Buffalo,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g276,401858244,4,2026-09-26,William & Mary,Duke,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g277,401862781,4,2026-09-26,NC Central,East Carolina,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g278,401866427,4,2026-09-26,Lindenwood,Eastern Michigan,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g280,401867909,4,2026-09-26,LIU,Florida International,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g281,401858237,4,2026-09-26,Central Arkansas,Florida State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g293,401868188,4,2026-09-26,Gardner-Webb,Marshall,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g303,401862783,4,2026-09-26,HCU,North Texas,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g304,401866428,4,2026-09-26,Stonehill,Ohio,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g308,401858236,4,2026-09-26,Bucknell,Pittsburgh,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g310,401858468,4,2026-09-26,Howard,Rutgers,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g316,401860892,4,2026-09-26,UIW,Texas State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g329,,4,2026-09-26,Mercyhurst,Western Kentucky,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g350,401862790,5,2026-10-03,Texas Southern,Florida Atlantic,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g362,401856706,5,2026-10-03,McNeese,LSU,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g385,401862793,5,2026-10-03,Samford,UAB,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g466,401858261,7,2026-10-17,Charleston So.,Clemson,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g495,401858262,7,2026-10-17,Elon,Stanford,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g500,401856725,7,2026-10-17,The Citadel,Texas A&M,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g683,401858290,10,2026-11-07,Merrimack,Wake Forest,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g764,401856746,12,2026-11-21,Chattanooga,Alabama,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g768,401856747,12,2026-11-21,Samford,Auburn,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g793,401856750,12,2026-11-21,Tennessee Tech,Mississippi State,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g802,401856749,12,2026-11-21,Wofford,Ole Miss,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g892,,14,2026-12-04,Big 12 No. 2,Big 12 No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g893,,14,2026-12-04,CUSA No. 2,CUSA No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g894,,14,2026-12-04,Pac-12 No. 2,Pac-12 No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g895,,14,2026-12-05,AAC No. 2,AAC No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g896,,14,2026-12-05,ACC No. 2,ACC No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g897,,14,2026-12-05,Big Ten No. 2,Big Ten No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g898,,14,2026-12-05,MAC No. 2,MAC No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g899,,14,2026-12-05,MWC No. 2,MWC No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g900,,14,2026-12-05,SEC No. 2,SEC No. 1,,,,,,,,,,,
+INFO,INFO_MISSING_TOTAL_NON_FBS,non-FBS/unmapped opponent; model total not expected yet,False,g901,,14,2026-12-05,Sun Belt East,Sun Belt West,,,,,,,,,,,
+OK,OK,,True,g232,401856688,3,2026-09-19,LSU,Ole Miss,49.85,57.5,-7.65,,,2.928,23.461,26.389,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g24,401856634,1,2026-09-05,East Carolina,Alabama,47.05,54.5,-7.45,,,23.793,11.628,35.421,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g89,401856772,1,2026-09-05,Oklahoma State,Tulsa,54.3,61.5,-7.2,,,-10.592,32.446,21.854,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g30,401856636,1,2026-09-05,Baylor,Auburn,53.2,59.5,-6.3,,,7.255,22.973,30.228,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g155,401856782,2,2026-09-12,Oregon,Oklahoma State,53.35,59.5,-6.15,,,-22.672,38.011,15.339,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g18,401858204,1,2026-09-03,Akron,Wake Forest,44.9,49.5,-4.6,50.5,-5.6,24.805,10.047,34.852,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g36,401860878,1,2026-09-05,Wyoming,Colorado State,43.4,48.5,-5.1,,,1.995,20.703,22.697,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g3,401864577,0,2026-08-29,Jacksonville State,North Dakota State,53.5,48.5,5.0,55.5,-2.0,7.756,22.872,30.628,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g131,401856788,2,2026-09-12,Iowa State,Iowa,46.45,41.5,4.95,,,13.982,16.234,30.216,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g96,401856780,1,2026-09-05,Coastal Carolina,West Virginia,53.7,58.5,-4.8,,,18.413,17.644,36.056,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g52,401856660,1,2026-09-05,Clemson,LSU,45.75,50.5,-4.75,,,9.8,17.975,27.775,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g1,401866408,0,2026-08-29,Sacramento State,Eastern Michigan,51.8,53.5,-1.7,56.5,-4.7,3.63,24.085,27.715,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g72,401858434,1,2026-09-05,Marshall,Penn State,57.95,53.5,4.45,,,27.023,15.464,42.486,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g12,401856776,1,2026-09-03,Colorado,Georgia Tech,51.7,51.5,0.2,55.5,-3.8,7.66,22.02,29.68,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g870,401858540,13,2026-11-28,Michigan,Ohio State,49.2,45.5,3.7,,,16.918,16.141,33.059,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g8,401858202,0,2026-08-29,NC State,Virginia,51.1,54.5,-3.4,53.5,-2.4,3.603,23.748,27.352,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g39,401856637,1,2026-09-05,Florida Atlantic,Florida,54.1,57.5,-3.4,,,26.108,13.996,40.104,draftkings,2026-07-21T17:17:05.832Z,Site Projection
+OK,OK,,True,g62,401858430,1,2026-09-05,Ohio,Nebraska,45.1,48.5,-3.4,,,17.558,13.771,31.329,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g7,401864494,0,2026-08-29,San Jose State,USC,55.2,58.5,-3.3,55.5,-0.3,34.77,10.215,44.985,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g177,401856670,2,2026-09-12,Arkansas,Utah,58.75,55.5,3.25,,,10.43,24.16,34.59,fanduel,2026-07-21T17:17:00.044Z,Site Projection
+OK,OK,,True,g167,401856682,2,2026-09-12,Ohio State,Texas,50.65,47.5,3.15,,,-2.723,26.686,23.963,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g5,401856766,0,2026-08-29,North Carolina,TCU,49.4,49.5,-0.1,52.5,-3.1,6.98,21.21,28.19,draftkings,2026-07-21T17:17:05.832Z,Site Projection
+OK,OK,,True,g19,401864495,1,2026-09-04,San Jose State,Eastern Michigan,51.4,54.5,-3.1,,,0.608,25.396,26.004,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g665,401858291,10,2026-11-07,Miami-FL,Notre Dame,51.45,54.5,-3.05,,,7.298,22.076,29.374,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g95,401858437,1,2026-09-05,Washington State,Washington,47.5,50.5,-3.0,,,18.41,14.545,32.955,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g98,401856661,1,2026-09-06,Louisville,Ole Miss,52.5,55.5,-3.0,,,7.622,22.439,30.061,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g80,401862699,1,2026-09-05,Florida International,South Florida,57.05,54.5,2.55,,,16.605,20.222,36.828,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g73,401858207,1,2026-09-05,Miami-OH,Pittsburgh,48.2,50.5,-2.3,,,17.395,15.403,32.797,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g88,,1,2026-09-05,Sam Houston,Troy,53.75,51.5,2.25,,,17.455,18.148,35.602,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g2,401864570,0,2026-08-29,New Mexico State,Florida State,50.35,52.5,-2.15,51.5,-1.15,27.968,11.191,39.159,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g142,401856679,2,2026-09-12,Oklahoma,Michigan,47.65,45.5,2.15,,,0.81,23.42,24.23,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g22,401858206,1,2026-09-04,Miami-FL,Stanford,47.4,49.5,-2.1,,,-24.808,36.104,11.296,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g99,401858212,1,2026-09-07,SMU,Florida State,51.45,53.5,-2.05,,,-1.445,26.448,25.003,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g60,401856662,1,2026-09-05,UL-Monroe,Mississippi State,54.5,56.5,-2.0,,,28.323,13.088,41.412,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g48,,1,2026-09-05,Liberty,James Madison,54.45,52.5,1.95,,,12.19,21.13,33.32,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g192,401856686,3,2026-09-19,Georgia,Arkansas,57.45,55.5,1.95,,,-17.078,37.264,20.186,fanduel,2026-07-21T17:17:00.044Z,Site Projection
+OK,OK,,True,g38,401858209,1,2026-09-05,Tulane,Duke,55.4,53.5,1.9,,,7.933,23.733,31.666,betmgm,2026-07-21T17:16:17.000Z,Site Projection
+OK,OK,,True,g69,401856664,1,2026-09-05,UTEP,Oklahoma,47.85,49.5,-1.65,,,41.182,3.334,44.516,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g4,401858201,0,2026-08-29,Hawaii,Stanford,50.9,50.5,0.4,52.5,-1.6,2.42,24.24,26.66,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g85,401856667,1,2026-09-05,Texas State,Texas,60.75,59.5,1.25,,,31.137,14.806,45.944,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g42,401864497,1,2026-09-05,UNLV,Hawaii,57.35,58.5,-1.15,,,-2.272,29.811,27.539,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g46,401858426,1,2026-09-05,Northern Illinois,Iowa,46.6,45.5,1.1,,,34.047,6.277,40.323,draftkings,2026-07-21T17:17:05.832Z,Site Projection
+OK,OK,,True,g33,401858210,1,2026-09-05,UCLA,California,53.65,54.5,-0.85,,,1.667,25.991,27.659,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g64,401864498,1,2026-09-05,Central Michigan,New Mexico,49.35,48.5,0.85,,,11.188,19.081,30.269,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g63,401864432,1,2026-09-05,Western Kentucky,Nevada,51.8,52.5,-0.7,,,-5.43,28.615,23.185,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g56,401862695,1,2026-09-05,Arkansas State,Memphis,57.15,56.5,0.65,,,11.03,23.06,34.09,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g79,401856665,1,2026-09-05,Kent State,South Carolina,49.85,50.5,-0.65,,,33.843,8.003,41.847,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g35,401856777,1,2026-09-05,Boston College,Cincinnati,53.9,54.5,-0.6,,,9.44,22.23,31.67,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g6,401862693,0,2026-08-29,Memphis,UNLV,58.95,58.5,0.45,59.5,-0.55,3.697,27.627,31.324,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g97,401858438,1,2026-09-06,Wisconsin,Notre Dame,46.95,47.5,-0.55,,,22.88,12.035,34.915,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g71,401858433,1,2026-09-05,Boise State,Oregon,53.0,52.5,0.5,,,24.468,14.266,38.734,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g102,401856678,2,2026-09-11,Missouri,Kansas,52.0,51.5,0.5,,,-7.905,29.953,22.047,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g57,401858428,1,2026-09-05,Western Michigan,Michigan,46.9,46.5,0.4,,,25.26,10.82,36.08,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g45,401858425,1,2026-09-05,North Texas,Indiana,54.85,54.5,0.35,,,33.888,10.481,44.369,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g90,401858436,1,2026-09-05,Fresno State,USC,50.85,50.5,0.35,,,22.35,14.25,36.6,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g44,401858424,1,2026-09-05,UAB,Illinois,56.2,56.5,-0.3,,,27.395,14.403,41.797,draftkings,2026-07-21T17:17:05.832Z,Site Projection
+OK,OK,,True,g86,401856668,1,2026-09-05,Missouri State,Texas A&M,52.8,52.5,0.3,,,38.89,6.955,45.845,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g187,401856811,3,2026-09-18,Houston,Texas Tech,53.2,53.5,-0.3,,,17.938,17.631,35.569,fanduel,2026-07-21T17:17:00.044Z,Site Projection
+OK,OK,,True,g43,401856778,1,2026-09-05,Oregon State,Houston,50.75,50.5,0.25,,,19.235,15.758,34.992,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g16,401858423,1,2026-09-03,Massachusetts,Rutgers,54.4,54.5,-0.1,54.5,-0.1,31.105,11.647,42.752,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g58,401858429,1,2026-09-05,Toledo,Michigan State,48.6,48.5,0.1,,,7.785,20.407,28.193,fanduel,2026-07-21T17:17:27.205Z,Site Projection
+OK,OK,,True,g101,401858214,2,2026-09-11,Rutgers,Boston College,55.95,,,,,-2.627,29.289,26.662,,,Site Projection
+OK,OK,,True,g104,401864502,2,2026-09-12,North Dakota State,Air Force,51.6,,,,,0.436,25.582,26.018,,,Site Projection
+OK,OK,,True,g107,401862702,2,2026-09-12,South Florida,Army,54.85,,,,,-2.127,28.489,26.361,,,Site Projection
+OK,OK,,True,g108,401856671,2,2026-09-12,Southern Miss,Auburn,50.75,,,,,28.87,10.94,39.81,,,Site Projection
+OK,OK,,True,g109,401856810,2,2026-09-12,Arizona,BYU,51.85,,,,,6.888,22.481,29.369,,,Site Projection
+OK,OK,,True,g112,401860881,2,2026-09-12,Memphis,Boise State,55.5,,,,,9.262,23.119,32.381,,,Site Projection
+OK,OK,,True,g115,401858219,2,2026-09-12,Georgia Southern,Clemson,50.9,,,,,24.74,13.08,37.82,,,Site Projection
+OK,OK,,True,g119,401858444,2,2026-09-12,Maryland,Connecticut,50.6,,,,,-8.957,29.779,20.822,,,Site Projection
+OK,OK,,True,g120,401864571,2,2026-09-12,Appalachian State,East Carolina,52.5,,,,,12.515,19.992,32.508,,,Site Projection
+OK,OK,,True,g122,401862703,2,2026-09-12,Navy,Florida Atlantic,58.4,,,,,-8.805,33.602,24.797,,,Site Projection
+OK,OK,,True,g123,401866414,2,2026-09-12,Buffalo,Florida International,50.15,,,,,1.958,24.096,26.054,,,Site Projection
+OK,OK,,True,g124,401860883,2,2026-09-12,Sacramento State,Fresno State,48.25,,,,,18.143,15.053,33.197,,,Site Projection
+OK,OK,,True,g125,401856673,2,2026-09-12,Western Kentucky,Georgia,53.85,,,,,33.913,9.969,43.882,,,Site Projection
+OK,OK,,True,g126,401856681,2,2026-09-12,Tennessee,Georgia Tech,56.95,,,,,-8.24,32.595,24.355,,,Site Projection
+OK,OK,,True,g127,401864578,2,2026-09-12,New Mexico State,Hawaii,52.75,,,,,15.482,18.634,34.116,,,Site Projection
+OK,OK,,True,g129,401858217,2,2026-09-12,Duke,Illinois,57.25,,,,,6.162,25.544,31.706,,,Site Projection
+OK,OK,,True,g133,401856781,2,2026-09-12,Washington State,Kansas State,50.55,,,,,14.838,17.856,32.694,,,Site Projection
+OK,OK,,True,g134,,2,2026-09-12,Georgia State,Kennesaw State,54.9,,,,,11.562,21.669,33.231,,,Site Projection
+OK,OK,,True,g136,401856674,2,2026-09-12,Alabama,Kentucky,45.05,,,,,-10.867,27.959,17.091,,,Site Projection
+OK,OK,,True,g137,401867796,2,2026-09-12,Louisiana Tech,LSU,48.95,,,,,31.17,8.89,40.06,,,Site Projection
+OK,OK,,True,g139,,2,2026-09-12,Middle Tennessee,Marshall,58.65,,,,,13.332,22.659,35.991,,,Site Projection
+OK,OK,,True,g143,401858440,2,2026-09-12,Eastern Michigan,Michigan State,51.6,,,,,17.85,16.875,34.725,,,Site Projection
+OK,OK,,True,g144,401856677,2,2026-09-12,Mississippi State,Minnesota,50.8,,,,,0.502,25.149,25.651,,,Site Projection
+OK,OK,,True,g147,401858441,2,2026-09-12,Bowling Green,Nebraska,46.9,,,,,23.887,11.506,35.394,,,Site Projection
+OK,OK,,True,g151,401862705,2,2026-09-12,UNLV,North Texas,59.2,,,,,-2.155,30.678,28.523,,,Site Projection
+OK,OK,,True,g153,401859184,2,2026-09-12,Rice,Notre Dame,52.0,,,,,45.648,3.176,48.824,,,Site Projection
+OK,OK,,True,g154,401866418,2,2026-09-12,Jacksonville State,Ohio,48.15,,,,,3.208,22.471,25.679,,,Site Projection
+OK,OK,,True,g156,401856676,2,2026-09-12,Charlotte,Ole Miss,53.7,,,,,44.112,4.794,48.906,,,Site Projection
+OK,OK,,True,g157,401856783,2,2026-09-12,Texas Tech,Oregon State,49.85,,,,,-28.773,39.312,10.539,,,Site Projection
+OK,OK,,True,g158,401856790,2,2026-09-12,Central Florida,Pittsburgh,50.3,,,,,7.897,21.201,29.098,,,Site Projection
+OK,OK,,True,g159,401858224,2,2026-09-12,Wake Forest,Purdue,48.05,,,,,-5.168,26.609,21.441,,,Site Projection
+OK,OK,,True,g161,401862707,2,2026-09-12,Tulsa,Sam Houston,54.65,,,,,-11.537,33.093,21.556,,,Site Projection
+OK,OK,,True,g164,401858216,2,2026-09-12,California,Syracuse,51.65,,,,,-2.112,26.881,24.769,,,Site Projection
+OK,OK,,True,g166,401858442,2,2026-09-12,Penn State,Temple,55.85,,,,,-21.915,38.883,16.968,,,Site Projection
+OK,OK,,True,g168,401856683,2,2026-09-12,Arizona State,Texas A&M,51.7,,,,,17.168,17.266,34.434,,,Site Projection
+OK,OK,,True,g169,401860884,2,2026-09-12,UTSA,Texas State,65.15,,,,,1.242,31.954,33.196,,,Site Projection
+OK,OK,,True,g172,401864575,2,2026-09-12,South Alabama,Tulane,54.3,,,,,13.762,20.269,34.031,,,Site Projection
+OK,OK,,True,g173,401862708,2,2026-09-12,UL-Monroe,UAB,55.2,,,,,7.263,23.969,31.232,,,Site Projection
+OK,OK,,True,g174,401858443,2,2026-09-12,San Diego State,UCLA,50.5,,,,,4.695,22.902,27.598,,,Site Projection
+OK,OK,,True,g175,401858445,2,2026-09-12,Louisiana,USC,58.65,,,,,30.22,14.215,44.435,,,Site Projection
+OK,OK,,True,g178,401856684,2,2026-09-12,Delaware,Vanderbilt,57.8,,,,,23.992,16.904,40.896,,,Site Projection
+OK,OK,,True,g180,401858221,2,2026-09-12,Old Dominion,Virginia Tech,49.05,,,,,10.502,19.274,29.776,,,Site Projection
+OK,OK,,True,g181,401858446,2,2026-09-12,Utah State,Washington,52.3,,,,,21.635,15.332,36.968,,,Site Projection
+OK,OK,,True,g186,401858225,3,2026-09-17,Syracuse,Pittsburgh,51.45,,,,,12.877,19.287,32.163,,,Site Projection
+OK,OK,,True,g188,401858226,3,2026-09-18,Miami-FL,Wake Forest,46.5,,,,,-16.29,31.395,15.105,,,Site Projection
+OK,OK,,True,g189,401856685,3,2026-09-19,Florida State,Alabama,47.1,,,,,14.07,16.515,30.585,,,Site Projection
+OK,OK,,True,g190,401864574,3,2026-09-19,Charlotte,Appalachian State,53.75,,,,,13.29,20.23,33.52,,,Site Projection
+OK,OK,,True,g191,401856793,3,2026-09-19,Northern Illinois,Arizona,48.95,,,,,30.08,9.435,39.515,,,Site Projection
+OK,OK,,True,g193,401856687,3,2026-09-19,Florida,Auburn,46.0,,,,,1.087,22.456,23.544,,,Site Projection
+OK,OK,,True,g194,401867804,3,2026-09-19,Louisiana Tech,Baylor,56.7,,,,,17.08,19.81,36.89,,,Site Projection
+OK,OK,,True,g198,401856800,3,2026-09-19,Georgia State,Central Florida,52.5,,,,,24.008,14.246,38.254,,,Site Projection
+OK,OK,,True,g199,401864508,3,2026-09-19,Wyoming,Central Michigan,44.0,,,,,1.413,21.294,22.706,,,Site Projection
+OK,OK,,True,g200,401856797,3,2026-09-19,Miami-OH,Cincinnati,48.7,,,,,11.488,18.606,30.094,,,Site Projection
+OK,OK,,True,g201,401858229,3,2026-09-19,North Carolina,Clemson,46.05,,,,,12.685,16.682,29.367,,,Site Projection
+OK,OK,,True,g202,401856795,3,2026-09-19,BYU,Colorado State,48.6,,,,,-24.305,36.453,12.148,,,Site Projection
+OK,OK,,True,g203,,3,2026-09-19,Coastal Carolina,Delaware,56.8,,,,,5.402,25.699,31.101,,,Site Projection
+OK,OK,,True,g204,401858231,3,2026-09-19,Stanford,Duke,53.5,,,,,10.635,21.433,32.068,,,Site Projection
+OK,OK,,True,g205,401862771,3,2026-09-19,Florida International,Florida Atlantic,59.3,,,,,5.53,26.885,32.415,,,Site Projection
+OK,OK,,True,g208,401858449,3,2026-09-19,Western Kentucky,Indiana,53.55,,,,,35.9,8.825,44.725,,,Site Projection
+OK,OK,,True,g210,401856798,3,2026-09-19,Bowling Green,Iowa State,44.2,,,,,20.203,11.999,32.202,,,Site Projection
+OK,OK,,True,g211,,3,2026-09-19,Georgia Southern,Jacksonville State,56.05,,,,,3.203,26.423,29.627,,,Site Projection
+OK,OK,,True,g212,401856812,3,2026-09-19,Arizona State,Kansas,52.15,,,,,-2.223,27.186,24.963,,,Site Projection
+OK,OK,,True,g213,401856792,3,2026-09-19,Tulane,Kansas State,53.3,,,,,12.498,20.401,32.899,,,Site Projection
+OK,OK,,True,g214,401866422,3,2026-09-19,Ball State,Liberty,53.05,,,,,17.363,17.843,35.206,,,Site Projection
+OK,OK,,True,g215,401862776,3,2026-09-19,UAB,Louisiana,58.65,,,,,9.645,24.502,34.148,,,Site Projection
+OK,OK,,True,g216,401858230,3,2026-09-19,SMU,Louisville,51.45,,,,,1.817,24.817,26.634,,,Site Projection
+OK,OK,,True,g217,401858232,3,2026-09-19,Virginia Tech,Maryland,50.7,,,,,-1.95,26.325,24.375,,,Site Projection
+OK,OK,,True,g220,401858450,3,2026-09-19,UTEP,Michigan,49.2,,,,,38.693,5.254,43.947,,,Site Projection
+OK,OK,,True,g221,401864443,3,2026-09-19,Nevada,Middle Tennessee,50.5,,,,,-2.902,26.701,23.799,,,Site Projection
+OK,OK,,True,g222,401858451,3,2026-09-19,Akron,Minnesota,44.85,,,,,23.852,10.499,34.351,,,Site Projection
+OK,OK,,True,g223,401856689,3,2026-09-19,Troy,Missouri,51.25,,,,,24.913,13.168,38.081,,,Site Projection
+OK,OK,,True,g224,,3,2026-09-19,Marshall,Missouri State,57.65,,,,,-4.44,31.045,26.605,,,Site Projection
+OK,OK,,True,g226,401856796,3,2026-09-19,Colorado,Northwestern,48.05,,,,,6.265,20.892,27.157,,,Site Projection
+OK,OK,,True,g227,401858453,3,2026-09-19,Michigan State,Notre Dame,53.7,,,,,29.95,11.875,41.825,,,Site Projection
+OK,OK,,True,g229,401856690,3,2026-09-19,New Mexico,Oklahoma,49.0,,,,,24.128,12.436,36.564,,,Site Projection
+OK,OK,,True,g231,401862710,3,2026-09-19,East Carolina,Old Dominion,47.85,,,,,0.56,23.645,24.205,,,Site Projection
+OK,OK,,True,g235,401858456,3,2026-09-19,Buffalo,Penn State,48.0,,,,,32.102,7.949,40.051,,,Site Projection
+OK,OK,,True,g236,401862773,3,2026-09-19,Western Michigan,Rice,47.0,,,,,-6.487,26.744,20.256,,,Site Projection
+OK,OK,,True,g237,401858457,3,2026-09-19,USC,Rutgers,58.65,,,,,-14.82,36.735,21.915,,,Site Projection
+OK,OK,,True,g238,401864507,3,2026-09-19,North Dakota State,Sacramento State,51.6,,,,,-10.767,31.184,20.416,,,Site Projection
+OK,OK,,True,g240,401860887,3,2026-09-19,James Madison,San Diego State,49.9,,,,,0.915,24.492,25.407,,,Site Projection
+OK,OK,,True,g241,401860888,3,2026-09-19,Fresno State,San Jose State,47.85,,,,,-9.92,28.885,18.965,,,Site Projection
+OK,OK,,True,g242,401866423,3,2026-09-19,Ohio,South Alabama,48.8,,,,,0.647,24.076,24.723,,,Site Projection
+OK,OK,,True,g243,401856691,3,2026-09-19,Mississippi State,South Carolina,52.55,,,,,8.38,22.085,30.465,,,Site Projection
+OK,OK,,True,g245,401861963,3,2026-09-19,Connecticut,Southern Miss,54.0,,,,,-2.48,28.24,25.76,,,Site Projection
+OK,OK,,True,g246,401856799,3,2026-09-19,Arkansas State,TCU,54.6,,,,,20.892,16.854,37.746,,,Site Projection
+OK,OK,,True,g247,401856692,3,2026-09-19,Kennesaw State,Tennessee,56.55,,,,,28.453,14.048,42.502,,,Site Projection
+OK,OK,,True,g248,401856693,3,2026-09-19,UTSA,Texas,56.3,,,,,30.08,13.11,43.19,,,Site Projection
+OK,OK,,True,g249,401856694,3,2026-09-19,Kentucky,Texas A&M,50.1,,,,,17.668,16.216,33.884,,,Site Projection
+OK,OK,,True,g250,401860889,3,2026-09-19,North Texas,Texas State,64.2,,,,,3.665,30.268,33.933,,,Site Projection
+OK,OK,,True,g251,401862774,3,2026-09-19,Temple,Toledo,52.05,,,,,6.878,22.586,29.464,,,Site Projection
+OK,OK,,True,g253,401858458,3,2026-09-19,Purdue,UCLA,52.05,,,,,7.285,22.383,29.667,,,Site Projection
+OK,OK,,True,g255,401856801,3,2026-09-19,Utah State,Utah,54.35,,,,,22.212,16.069,38.281,,,Site Projection
+OK,OK,,True,g256,401856695,3,2026-09-19,NC State,Vanderbilt,56.75,,,,,8.06,24.345,32.405,,,Site Projection
+OK,OK,,True,g259,401856802,3,2026-09-19,Virginia,West Virginia,49.05,,,,,-7.425,28.237,20.812,,,Site Projection
+OK,OK,,True,g260,401858460,3,2026-09-19,Eastern Michigan,Wisconsin,44.85,,,,,21.72,11.565,33.285,,,Site Projection
+OK,OK,,True,g261,,4,2026-09-24,Liberty,Coastal Carolina,56.35,,,,,-3.397,29.873,26.477,,,Site Projection
+OK,OK,,True,g262,401858234,4,2026-09-25,Clemson,California,50.45,,,,,-7.42,28.935,21.515,,,Site Projection
+OK,OK,,True,g263,401862778,4,2026-09-25,Navy,UAB,56.45,,,,,-14.095,35.273,21.178,,,Site Projection
+OK,OK,,True,g264,401864512,4,2026-09-26,UNLV,Akron,52.25,,,,,-17.54,34.895,17.355,,,Site Projection
+OK,OK,,True,g265,401856696,4,2026-09-26,South Carolina,Alabama,46.1,,,,,11.193,17.454,28.646,,,Site Projection
+OK,OK,,True,g266,401856697,4,2026-09-26,Tulsa,Arkansas,59.3,,,,,17.9,20.7,38.6,,,Site Projection
+OK,OK,,True,g267,,4,2026-09-26,Kennesaw State,Arkansas State,53.7,,,,,3.5,25.1,28.6,,,Site Projection
+OK,OK,,True,g268,401856698,4,2026-09-26,Vanderbilt,Auburn,51.7,,,,,3.355,24.173,27.527,,,Site Projection
+OK,OK,,True,g269,401856813,4,2026-09-26,Colorado,Baylor,55.85,,,,,7.955,23.948,31.902,,,Site Projection
+OK,OK,,True,g270,401858242,4,2026-09-26,Virginia Tech,Boston College,52.7,,,,,-7.585,30.143,22.558,,,Site Projection
+OK,OK,,True,g271,401862785,4,2026-09-26,South Florida,Bowling Green,50.35,,,,,-14.705,32.528,17.823,,,Site Projection
+OK,OK,,True,g273,401856815,4,2026-09-26,TCU,Central Florida,49.9,,,,,-4.348,27.124,22.776,,,Site Projection
+OK,OK,,True,g274,401862780,4,2026-09-26,Louisiana,Charlotte,55.9,,,,,-11.61,33.755,22.145,,,Site Projection
+OK,OK,,True,g275,401856814,4,2026-09-26,Kansas State,Cincinnati,55.55,,,,,-2.44,28.995,26.555,,,Site Projection
+OK,OK,,True,g279,401856699,4,2026-09-26,Ole Miss,Florida,50.4,,,,,-1.95,26.175,24.225,,,Site Projection
+OK,OK,,True,g282,401860891,4,2026-09-26,Rice,Fresno State,46.35,,,,,15.86,15.245,31.105,,,Site Projection
+OK,OK,,True,g283,401856700,4,2026-09-26,Oklahoma,Georgia,48.9,,,,,8.502,20.199,28.701,,,Site Projection
+OK,OK,,True,g284,401856806,4,2026-09-26,Houston,Georgia Southern,54.7,,,,,-14.908,34.804,19.896,,,Site Projection
+OK,OK,,True,g285,401864511,4,2026-09-26,Northern Illinois,Georgia State,52.0,,,,,0.263,25.869,26.131,,,Site Projection
+OK,OK,,True,g286,401858461,4,2026-09-26,Northwestern,Indiana,47.9,,,,,25.142,11.379,36.521,,,Site Projection
+OK,OK,,True,g287,401856816,4,2026-09-26,Utah,Iowa State,49.7,,,,,-8.285,28.992,20.708,,,Site Projection
+OK,OK,,True,g288,,4,2026-09-26,Middle Tennessee,Jacksonville State,55.2,,,,,13.432,20.884,34.316,,,Site Projection
+OK,OK,,True,g289,401866425,4,2026-09-26,Ball State,Kent State,50.15,,,,,4.428,22.861,27.289,,,Site Projection
+OK,OK,,True,g290,401864576,4,2026-09-26,South Alabama,Kentucky,52.15,,,,,19.628,16.261,35.889,,,Site Projection
+OK,OK,,True,g291,401856702,4,2026-09-26,Texas A&M,LSU,49.5,,,,,0.787,24.357,25.143,,,Site Projection
+OK,OK,,True,g292,401858243,4,2026-09-26,Wake Forest,Louisville,47.6,,,,,9.91,18.845,28.755,,,Site Projection
+OK,OK,,True,g294,401858462,4,2026-09-26,UCLA,Maryland,50.85,,,,,1.02,24.915,25.935,,,Site Projection
+OK,OK,,True,g295,401858238,4,2026-09-26,Central Michigan,Miami-FL,47.55,,,,,37.328,5.111,42.439,,,Site Projection
+OK,OK,,True,g296,401861970,4,2026-09-26,Connecticut,Miami-OH,47.4,,,,,4.175,21.613,25.787,,,Site Projection
+OK,OK,,True,g297,401858463,4,2026-09-26,Iowa,Michigan,48.3,,,,,5.857,21.221,27.078,,,Site Projection
+OK,OK,,True,g298,401858464,4,2026-09-26,Nebraska,Michigan State,51.65,,,,,-4.395,28.023,23.627,,,Site Projection
+OK,OK,,True,g299,401856703,4,2026-09-26,Missouri,Mississippi State,52.95,,,,,-6.487,29.719,23.232,,,Site Projection
+OK,OK,,True,g300,401864572,4,2026-09-26,Appalachian State,NC State,55.4,,,,,19.445,17.977,37.422,,,Site Projection
+OK,OK,,True,g301,401864509,4,2026-09-26,Air Force,Nevada,50.2,,,,,-5.223,27.712,22.489,,,Site Projection
+OK,OK,,True,g302,401864579,4,2026-09-26,New Mexico,New Mexico State,51.05,,,,,-12.27,31.66,19.39,,,Site Projection
+OK,OK,,True,g305,401858465,4,2026-09-26,Illinois,Ohio State,51.8,,,,,24.425,13.687,38.112,,,Site Projection
+OK,OK,,True,g306,,4,2026-09-26,James Madison,Old Dominion,48.6,,,,,-1.522,25.061,23.539,,,Site Projection
+OK,OK,,True,g307,401858466,4,2026-09-26,Wisconsin,Penn State,45.65,,,,,14.283,15.683,29.966,,,Site Projection
+OK,OK,,True,g309,401858467,4,2026-09-26,Notre Dame,Purdue,53.0,,,,,-28.555,40.778,12.223,,,Site Projection
+OK,OK,,True,g311,401858241,4,2026-09-26,Missouri State,SMU,52.1,,,,,30.665,10.718,41.383,,,Site Projection
+OK,OK,,True,g312,401866429,4,2026-09-26,Massachusetts,Sacramento State,51.35,,,,,13.032,19.159,32.191,,,Site Projection
+OK,OK,,True,g313,401858240,4,2026-09-26,Georgia Tech,Stanford,49.45,,,,,-7.737,28.594,20.857,,,Site Projection
+OK,OK,,True,g314,401862779,4,2026-09-26,Army,Temple,55.8,,,,,-3.447,29.623,26.176,,,Site Projection
+OK,OK,,True,g315,401856704,4,2026-09-26,Texas,Tennessee,56.8,,,,,-6.723,31.761,25.038,,,Site Projection
+OK,OK,,True,g317,401856805,4,2026-09-26,Sam Houston,Texas Tech,53.2,,,,,49.945,1.628,51.573,,,Site Projection
+OK,OK,,True,g318,401860893,4,2026-09-26,San Diego State,Toledo,46.35,,,,,-2.67,24.51,21.84,,,Site Projection
+OK,OK,,True,g319,401862784,4,2026-09-26,Southern Miss,Tulane,53.05,,,,,16.485,18.282,34.767,,,Site Projection
+OK,OK,,True,g320,401862782,4,2026-09-26,Florida Atlantic,UL-Monroe,57.15,,,,,-9.252,33.201,23.949,,,Site Projection
+OK,OK,,True,g321,401858469,4,2026-09-26,Oregon,USC,55.75,,,,,-6.817,31.284,24.466,,,Site Projection
+OK,OK,,True,g322,401860895,4,2026-09-26,Oregon State,UTEP,48.4,,,,,-7.543,27.971,20.428,,,Site Projection
+OK,OK,,True,g323,401860896,4,2026-09-26,Colorado State,UTSA,53.25,,,,,11.857,20.697,32.553,,,Site Projection
+OK,OK,,True,g324,401860894,4,2026-09-26,Troy,Utah State,54.0,,,,,4.7,24.65,29.35,,,Site Projection
+OK,OK,,True,g325,401858239,4,2026-09-26,Delaware,Virginia,52.15,,,,,22.835,14.657,37.492,,,Site Projection
+OK,OK,,True,g326,401858470,4,2026-09-26,Minnesota,Washington,47.4,,,,,12.207,17.596,29.803,,,Site Projection
+OK,OK,,True,g327,401856804,4,2026-09-26,Arizona,Washington State,48.65,,,,,-8.717,28.683,19.966,,,Site Projection
+OK,OK,,True,g328,401856881,4,2026-09-26,Oklahoma State,West Virginia,52.65,,,,,2.538,25.056,27.594,,,Site Projection
+OK,OK,,True,g330,401860897,4,2026-09-26,Boise State,Western Michigan,48.75,,,,,-8.473,28.611,20.139,,,Site Projection
+OK,OK,,True,g331,401864510,4,2026-09-26,Hawaii,Wyoming,48.05,,,,,-5.112,26.581,21.469,,,Site Projection
+OK,OK,,True,g332,,5,2026-10-01,Western Kentucky,New Mexico State,53.3,,,,,-7.688,30.494,22.806,,,Site Projection
+OK,OK,,True,g333,401862786,5,2026-10-01,North Texas,Tulsa,57.0,,,,,-4.178,30.589,26.411,,,Site Projection
+OK,OK,,True,g334,,5,2026-10-02,Liberty,Delaware,57.65,,,,,-0.295,28.973,28.677,,,Site Projection
+OK,OK,,True,g335,401858476,5,2026-10-02,Penn State,Northwestern,48.55,,,,,-9.165,28.857,19.692,,,Site Projection
+OK,OK,,True,g336,401858245,5,2026-10-02,Pittsburgh,Virginia Tech,53.3,,,,,0.438,26.431,26.869,,,Site Projection
+OK,OK,,True,g337,401862791,5,2026-10-03,Navy,Air Force,53.85,,,,,-4.82,29.335,24.515,,,Site Projection
+OK,OK,,True,g338,401856820,5,2026-10-03,Cincinnati,Arizona,53.65,,,,,8.22,22.715,30.935,,,Site Projection
+OK,OK,,True,g339,401856817,5,2026-10-03,Baylor,Arizona State,54.95,,,,,3.335,25.808,29.143,,,Site Projection
+OK,OK,,True,g340,401866431,5,2026-10-03,Toledo,Ball State,46.75,,,,,-15.598,31.174,15.576,,,Site Projection
+OK,OK,,True,g341,401860898,5,2026-10-03,Utah State,Boise State,53.65,,,,,13.88,19.885,33.765,,,Site Projection
+OK,OK,,True,g342,401866432,5,2026-10-03,Western Michigan,Buffalo,44.3,,,,,-4.84,24.57,19.73,,,Site Projection
+OK,OK,,True,g343,401866430,5,2026-10-03,Akron,Central Michigan,45.95,,,,,7.168,19.391,26.559,,,Site Projection
+OK,OK,,True,g344,401862787,5,2026-10-03,Memphis,Charlotte,55.5,,,,,-20.218,37.859,17.641,,,Site Projection
+OK,OK,,True,g345,401858249,5,2026-10-03,Miami-FL,Clemson,47.3,,,,,-8.585,27.942,19.357,,,Site Projection
+OK,OK,,True,g346,,5,2026-10-03,Georgia Southern,Coastal Carolina,55.4,,,,,-1.745,28.572,26.828,,,Site Projection
+OK,OK,,True,g347,401856821,5,2026-10-03,Texas Tech,Colorado,51.75,,,,,-20.65,36.2,15.55,,,Site Projection
+OK,OK,,True,g348,401860899,5,2026-10-03,Oregon State,Colorado State,46.6,,,,,-0.993,23.797,22.803,,,Site Projection
+OK,OK,,True,g349,401858252,5,2026-10-03,Syracuse,Connecticut,50.65,,,,,-4.093,27.371,23.279,,,Site Projection
+OK,OK,,True,g351,401858253,5,2026-10-03,Virginia,Florida State,48.25,,,,,2.29,22.98,25.27,,,Site Projection
+OK,OK,,True,g352,401856705,5,2026-10-03,Vanderbilt,Georgia,54.5,,,,,15.365,19.567,34.932,,,Site Projection
+OK,OK,,True,g353,,5,2026-10-03,Old Dominion,Georgia State,51.95,,,,,-15.54,33.745,18.205,,,Site Projection
+OK,OK,,True,g354,401864513,5,2026-10-03,San Jose State,Hawaii,53.65,,,,,12.482,20.584,33.066,,,Site Projection
+OK,OK,,True,g355,401856819,5,2026-10-03,Central Florida,Houston,50.35,,,,,8.22,21.065,29.285,,,Site Projection
+OK,OK,,True,g356,401858472,5,2026-10-03,Purdue,Illinois,52.7,,,,,13.148,19.776,32.924,,,Site Projection
+OK,OK,,True,g357,401858473,5,2026-10-03,Ohio State,Iowa,48.5,,,,,-14.475,31.488,17.012,,,Site Projection
+OK,OK,,True,g358,401856822,5,2026-10-03,West Virginia,Iowa State,48.6,,,,,3.915,22.343,26.258,,,Site Projection
+OK,OK,,True,g359,,5,2026-10-03,Marshall,James Madison,57.7,,,,,12.04,22.83,34.87,,,Site Projection
+OK,OK,,True,g360,401856807,5,2026-10-03,Middle Tennessee,Kansas,54.25,,,,,26.992,13.629,40.621,,,Site Projection
+OK,OK,,True,g361,401866434,5,2026-10-03,Ohio,Kent State,45.45,,,,,-8.793,27.122,18.329,,,Site Projection
+OK,OK,,True,g363,,5,2026-10-03,Arkansas State,Louisiana,57.55,,,,,2.623,27.463,30.086,,,Site Projection
+OK,OK,,True,g364,,5,2026-10-03,Army,Louisiana Tech,52.5,,,,,-3.688,28.094,24.406,,,Site Projection
+OK,OK,,True,g365,401866433,5,2026-10-03,Eastern Michigan,Massachusetts,50.15,,,,,-11.062,30.606,19.544,,,Site Projection
+OK,OK,,True,g366,401866477,5,2026-10-03,Bowling Green,Miami-OH,42.75,,,,,10.51,16.12,26.63,,,Site Projection
+OK,OK,,True,g367,401858474,5,2026-10-03,Michigan,Minnesota,46.9,,,,,-10.64,28.77,18.13,,,Site Projection
+OK,OK,,True,g368,401856707,5,2026-10-03,Alabama,Mississippi State,50.35,,,,,-11.473,30.912,19.439,,,Site Projection
+OK,OK,,True,g369,401856708,5,2026-10-03,Florida,Missouri,47.6,,,,,2.95,22.325,25.275,,,Site Projection
+OK,OK,,True,g370,401858248,5,2026-10-03,Louisville,NC State,53.15,,,,,-3.155,28.152,24.997,,,Site Projection
+OK,OK,,True,g371,401858475,5,2026-10-03,Maryland,Nebraska,49.75,,,,,6.695,21.527,28.223,,,Site Projection
+OK,OK,,True,g372,401864514,5,2026-10-03,UTEP,New Mexico,50.55,,,,,17.955,16.297,34.252,,,Site Projection
+OK,OK,,True,g373,401858250,5,2026-10-03,Notre Dame,North Carolina,50.2,,,,,-22.867,36.534,13.667,,,Site Projection
+OK,OK,,True,g374,401864515,5,2026-10-03,Wyoming,North Dakota State,45.6,,,,,10.474,17.563,28.037,,,Site Projection
+OK,OK,,True,g375,401862788,5,2026-10-03,UTSA,Rice,54.95,,,,,-9.963,32.456,22.494,,,Site Projection
+OK,OK,,True,g376,401858477,5,2026-10-03,Indiana,Rutgers,55.0,,,,,-24.137,39.569,15.431,,,Site Projection
+OK,OK,,True,g377,401858246,5,2026-10-03,Boston College,SMU,52.7,,,,,18.89,16.905,35.795,,,Site Projection
+OK,OK,,True,g378,401860900,5,2026-10-03,Texas State,San Diego State,58.85,,,,,5.277,26.787,32.063,,,Site Projection
+OK,OK,,True,g379,,5,2026-10-03,UL-Monroe,South Alabama,55.15,,,,,11.8,21.675,33.475,,,Site Projection
+OK,OK,,True,g380,401856709,5,2026-10-03,Kentucky,South Carolina,47.25,,,,,7.875,19.688,27.562,,,Site Projection
+OK,OK,,True,g381,401862792,5,2026-10-03,Temple,South Florida,58.55,,,,,12.875,22.837,35.712,,,Site Projection
+OK,OK,,True,g382,401856818,5,2026-10-03,BYU,TCU,52.3,,,,,-3.05,27.675,24.625,,,Site Projection
+OK,OK,,True,g383,401856710,5,2026-10-03,Auburn,Tennessee,53.8,,,,,5.49,24.155,29.645,,,Site Projection
+OK,OK,,True,g384,401856711,5,2026-10-03,Arkansas,Texas A&M,58.7,,,,,17.715,20.492,38.208,,,Site Projection
+OK,OK,,True,g386,401858247,5,2026-10-03,California,UNLV,57.0,,,,,0.55,28.225,28.775,,,Site Projection
+OK,OK,,True,g387,401858478,5,2026-10-03,Washington,USC,54.1,,,,,6.695,23.703,30.398,,,Site Projection
+OK,OK,,True,g388,401858251,5,2026-10-03,Stanford,Wake Forest,45.8,,,,,9.918,17.941,27.859,,,Site Projection
+OK,OK,,True,g389,401860921,5,2026-10-03,Fresno State,Washington State,44.25,,,,,2.645,20.802,23.448,,,Site Projection
+OK,OK,,True,g390,401858479,5,2026-10-03,Michigan State,Wisconsin,45.85,,,,,5.87,19.99,25.86,,,Site Projection
+OK,OK,,True,g391,,6,2026-10-06,Southern Miss,Troy,54.5,,,,,7.52,23.49,31.01,,,Site Projection
+OK,OK,,True,g392,,6,2026-10-07,New Mexico State,Florida International,53.45,,,,,5.965,23.742,29.708,,,Site Projection
+OK,OK,,True,g393,,6,2026-10-07,Jacksonville State,Kennesaw State,54.1,,,,,1.54,26.28,27.82,,,Site Projection
+OK,OK,,True,g394,,6,2026-10-08,South Alabama,Arkansas State,57.05,,,,,4.085,26.482,30.567,,,Site Projection
+OK,OK,,True,g395,,6,2026-10-08,Sam Houston,Liberty,55.65,,,,,18.652,18.499,37.151,,,Site Projection
+OK,OK,,True,g396,401862794,6,2026-10-08,South Florida,UTSA,59.15,,,,,-1.048,30.099,29.051,,,Site Projection
+OK,OK,,True,g397,,6,2026-10-08,Missouri State,Western Kentucky,53.9,,,,,11.34,21.28,32.62,,,Site Projection
+OK,OK,,True,g398,401856826,6,2026-10-09,Iowa State,BYU,48.35,,,,,14.203,17.074,31.276,,,Site Projection
+OK,OK,,True,g399,401858254,6,2026-10-09,Florida State,Louisville,50.3,,,,,5.162,22.569,27.731,,,Site Projection
+OK,OK,,True,g400,401866435,6,2026-10-10,Eastern Michigan,Akron,47.75,,,,,-1.893,24.822,22.928,,,Site Projection
+OK,OK,,True,g401,401856712,6,2026-10-10,Georgia,Alabama,47.7,,,,,-2.663,25.181,22.519,,,Site Projection
+OK,OK,,True,g402,,6,2026-10-10,Old Dominion,Appalachian State,50.15,,,,,-7.675,28.912,21.238,,,Site Projection
+OK,OK,,True,g403,401856808,6,2026-10-10,Hawaii,Arizona State,52.25,,,,,12.688,19.781,32.469,,,Site Projection
+OK,OK,,True,g404,401856713,6,2026-10-10,Tennessee,Arkansas,62.55,,,,,-7.457,35.003,27.546,,,Site Projection
+OK,OK,,True,g405,401862795,6,2026-10-10,Tulane,Army,51.3,,,,,-1.062,26.181,25.119,,,Site Projection
+OK,OK,,True,g406,401866436,6,2026-10-10,Sacramento State,Bowling Green,48.05,,,,,3.488,22.281,25.769,,,Site Projection
+OK,OK,,True,g407,401858259,6,2026-10-10,Virginia Tech,California,53.5,,,,,-1.302,27.401,26.099,,,Site Projection
+OK,OK,,True,g408,401862797,6,2026-10-10,Rice,East Carolina,49.7,,,,,15.985,16.858,32.843,,,Site Projection
+OK,OK,,True,g409,401856714,6,2026-10-10,South Carolina,Florida,47.2,,,,,5.058,21.071,26.129,,,Site Projection
+OK,OK,,True,g410,401860901,6,2026-10-10,Boise State,Fresno State,48.1,,,,,-4.5,26.3,21.8,,,Site Projection
+OK,OK,,True,g411,,6,2026-10-10,James Madison,Georgia Southern,53.5,,,,,-7.543,30.521,22.979,,,Site Projection
+OK,OK,,True,g412,401858255,6,2026-10-10,Duke,Georgia Tech,56.25,,,,,3.103,26.573,29.677,,,Site Projection
+OK,OK,,True,g413,401856825,6,2026-10-10,Houston,Kansas State,55.1,,,,,3.81,25.645,29.455,,,Site Projection
+OK,OK,,True,g414,401856715,6,2026-10-10,LSU,Kentucky,45.6,,,,,-9.355,27.477,18.123,,,Site Projection
+OK,OK,,True,g415,,6,2026-10-10,Louisiana,Louisiana Tech,56.0,,,,,3.005,26.497,29.503,,,Site Projection
+OK,OK,,True,g416,,6,2026-10-10,Coastal Carolina,Marshall,59.6,,,,,7.147,26.227,33.373,,,Site Projection
+OK,OK,,True,g417,401866440,6,2026-10-10,Miami-OH,Massachusetts,46.05,,,,,-18.73,32.39,13.66,,,Site Projection
+OK,OK,,True,g418,401862798,6,2026-10-10,UAB,Memphis,58.25,,,,,18.052,20.099,38.151,,,Site Projection
+OK,OK,,True,g419,401858480,6,2026-10-10,Illinois,Michigan State,53.4,,,,,-6.543,29.971,23.428,,,Site Projection
+OK,OK,,True,g420,401856716,6,2026-10-10,Texas A&M,Missouri,51.55,,,,,-4.085,27.817,23.732,,,Site Projection
+OK,OK,,True,g421,401858260,6,2026-10-10,Wake Forest,NC State,50.45,,,,,3.855,23.298,27.152,,,Site Projection
+OK,OK,,True,g422,401862799,6,2026-10-10,Tulsa,Navy,54.95,,,,,13.277,20.837,34.114,,,Site Projection
+OK,OK,,True,g423,401858481,6,2026-10-10,Indiana,Nebraska,50.8,,,,,-18.835,34.817,15.982,,,Site Projection
+OK,OK,,True,g424,401862796,6,2026-10-10,Charlotte,North Texas,55.75,,,,,21.36,17.195,38.555,,,Site Projection
+OK,OK,,True,g425,401864516,6,2026-10-10,Air Force,Northern Illinois,49.3,,,,,-9.977,29.639,19.661,,,Site Projection
+OK,OK,,True,g426,401858482,6,2026-10-10,Ball State,Northwestern,46.9,,,,,28.47,9.215,37.685,,,Site Projection
+OK,OK,,True,g427,401858257,6,2026-10-10,Stanford,Notre Dame,50.75,,,,,33.505,8.622,42.127,,,Site Projection
+OK,OK,,True,g428,401866438,6,2026-10-10,Central Michigan,Ohio,43.25,,,,,6.213,18.518,24.732,,,Site Projection
+OK,OK,,True,g429,401858483,6,2026-10-10,Maryland,Ohio State,49.1,,,,,31.767,8.667,40.434,,,Site Projection
+OK,OK,,True,g430,401856717,6,2026-10-10,Texas,Oklahoma,49.1,,,,,-6.105,27.602,21.498,,,Site Projection
+OK,OK,,True,g431,401856824,6,2026-10-10,Central Florida,Oklahoma State,50.0,,,,,2.643,23.678,26.322,,,Site Projection
+OK,OK,,True,g432,401858484,6,2026-10-10,UCLA,Oregon,53.1,,,,,26.65,13.225,39.875,,,Site Projection
+OK,OK,,True,g433,401860902,6,2026-10-10,San Diego State,Oregon State,47.75,,,,,-5.685,26.718,21.032,,,Site Projection
+OK,OK,,True,g434,401858485,6,2026-10-10,USC,Penn State,55.2,,,,,0.74,27.23,27.97,,,Site Projection
+OK,OK,,True,g435,401858256,6,2026-10-10,North Carolina,Pittsburgh,49.8,,,,,7.83,20.985,28.815,,,Site Projection
+OK,OK,,True,g436,401858486,6,2026-10-10,Minnesota,Purdue,48.0,,,,,-4.815,26.407,21.593,,,Site Projection
+OK,OK,,True,g437,401864519,6,2026-10-10,Wyoming,San Jose State,46.6,,,,,0.23,23.185,23.415,,,Site Projection
+OK,OK,,True,g438,401861964,6,2026-10-10,Connecticut,Temple,55.95,,,,,2.495,26.728,29.223,,,Site Projection
+OK,OK,,True,g439,401866437,6,2026-10-10,Buffalo,Toledo,44.2,,,,,10.765,16.718,27.483,,,Site Projection
+OK,OK,,True,g440,401864518,6,2026-10-10,North Dakota State,UNLV,54.9,,,,,6.611,24.145,30.755,,,Site Projection
+OK,OK,,True,g441,401864517,6,2026-10-10,Nevada,UTEP,48.4,,,,,-2.442,25.421,22.979,,,Site Projection
+OK,OK,,True,g442,401856827,6,2026-10-10,Kansas,Utah,54.5,,,,,12.105,21.197,33.303,,,Site Projection
+OK,OK,,True,g443,401860922,6,2026-10-10,Washington State,Utah State,49.8,,,,,-0.525,25.162,24.637,,,Site Projection
+OK,OK,,True,g444,401856718,6,2026-10-10,Ole Miss,Vanderbilt,56.1,,,,,-5.817,30.959,25.142,,,Site Projection
+OK,OK,,True,g445,401858258,6,2026-10-10,Syracuse,Virginia,47.55,,,,,14.685,16.432,31.117,,,Site Projection
+OK,OK,,True,g446,401858487,6,2026-10-10,Iowa,Washington,48.8,,,,,2.125,23.337,25.462,,,Site Projection
+OK,OK,,True,g447,401856823,6,2026-10-10,Arizona,West Virginia,52.1,,,,,-5.13,28.615,23.485,,,Site Projection
+OK,OK,,True,g448,401866439,6,2026-10-10,Kent State,Western Michigan,48.1,,,,,16.745,15.678,32.422,,,Site Projection
+OK,OK,,True,g449,,7,2026-10-13,Florida International,Jacksonville State,56.65,,,,,6.322,25.164,31.486,,,Site Projection
+OK,OK,,True,g450,,7,2026-10-13,Delaware,Middle Tennessee,55.85,,,,,-5.888,30.869,24.981,,,Site Projection
+OK,OK,,True,g451,,7,2026-10-14,Missouri State,Kennesaw State,51.5,,,,,7.38,22.06,29.44,,,Site Projection
+OK,OK,,True,g452,,7,2026-10-14,Western Kentucky,Sam Houston,55.15,,,,,-14.402,34.776,20.374,,,Site Projection
+OK,OK,,True,g453,,7,2026-10-15,Georgia Southern,Old Dominion,50.4,,,,,9.62,20.39,30.01,,,Site Projection
+OK,OK,,True,g454,401862800,7,2026-10-15,East Carolina,UAB,54.2,,,,,-11.94,33.07,21.13,,,Site Projection
+OK,OK,,True,g455,,7,2026-10-16,Appalachian State,Coastal Carolina,55.15,,,,,-0.19,27.67,27.48,,,Site Projection
+OK,OK,,True,g456,401862801,7,2026-10-16,Memphis,Tulane,54.4,,,,,4.048,25.176,29.224,,,Site Projection
+OK,OK,,True,g457,401864524,7,2026-10-17,UNLV,Air Force,56.3,,,,,-4.075,30.188,26.112,,,Site Projection
+OK,OK,,True,g458,401862802,7,2026-10-17,Florida Atlantic,Army,57.1,,,,,8.148,24.476,32.624,,,Site Projection
+OK,OK,,True,g459,401856809,7,2026-10-17,Notre Dame,BYU,53.1,,,,,-11.037,32.069,21.032,,,Site Projection
+OK,OK,,True,g460,401856832,7,2026-10-17,TCU,Baylor,56.85,,,,,-1.085,28.968,27.883,,,Site Projection
+OK,OK,,True,g461,401858267,7,2026-10-17,Pittsburgh,Boston College,53.4,,,,,-9.447,31.423,21.977,,,Site Projection
+OK,OK,,True,g462,401866441,7,2026-10-17,Ball State,Bowling Green,46.0,,,,,8.39,18.805,27.195,,,Site Projection
+OK,OK,,True,g463,401866442,7,2026-10-17,Massachusetts,Buffalo,46.75,,,,,17.363,14.694,32.056,,,Site Projection
+OK,OK,,True,g464,401858269,7,2026-10-17,Wake Forest,California,49.65,,,,,0.785,24.433,25.217,,,Site Projection
+OK,OK,,True,g465,401866443,7,2026-10-17,Western Michigan,Central Michigan,45.9,,,,,-4.965,25.432,20.468,,,Site Projection
+OK,OK,,True,g467,401856833,7,2026-10-17,Utah,Colorado,52.65,,,,,-10.572,31.611,21.039,,,Site Projection
+OK,OK,,True,g468,401858266,7,2026-10-17,North Carolina,Duke,52.95,,,,,5.697,23.627,29.324,,,Site Projection
+OK,OK,,True,g469,401866444,7,2026-10-17,Toledo,Eastern Michigan,47.6,,,,,-8.565,28.082,19.518,,,Site Projection
+OK,OK,,True,g470,401856719,7,2026-10-17,Auburn,Georgia,48.7,,,,,14.61,17.045,31.655,,,Site Projection
+OK,OK,,True,g471,401864521,7,2026-10-17,New Mexico,Hawaii,53.4,,,,,0.212,26.594,26.806,,,Site Projection
+OK,OK,,True,g472,401856831,7,2026-10-17,Oklahoma State,Houston,53.75,,,,,8.377,22.686,31.064,,,Site Projection
+OK,OK,,True,g473,401858488,7,2026-10-17,Ohio State,Indiana,50.15,,,,,-1.337,25.744,24.406,,,Site Projection
+OK,OK,,True,g474,,7,2026-10-17,Georgia State,James Madison,55.05,,,,,23.163,15.943,39.106,,,Site Projection
+OK,OK,,True,g475,401856830,7,2026-10-17,Kansas,Kansas State,55.5,,,,,7.955,23.773,31.727,,,Site Projection
+OK,OK,,True,g476,401856720,7,2026-10-17,Mississippi State,LSU,50.9,,,,,16.46,17.22,33.68,,,Site Projection
+OK,OK,,True,g477,,7,2026-10-17,Troy,Louisiana,56.25,,,,,0.71,27.77,28.48,,,Site Projection
+OK,OK,,True,g478,401858489,7,2026-10-17,Rutgers,Maryland,53.95,,,,,3.007,25.472,28.479,,,Site Projection
+OK,OK,,True,g479,401858263,7,2026-10-17,Florida State,Miami-FL,49.2,,,,,16.242,16.479,32.721,,,Site Projection
+OK,OK,,True,g480,401866478,7,2026-10-17,Akron,Miami-OH,43.65,,,,,12.96,15.345,28.305,,,Site Projection
+OK,OK,,True,g481,401858490,7,2026-10-17,Penn State,Michigan,50.6,,,,,4.197,23.201,27.399,,,Site Projection
+OK,OK,,True,g482,401858491,7,2026-10-17,Northwestern,Michigan State,48.75,,,,,-1.488,25.119,23.631,,,Site Projection
+OK,OK,,True,g483,401864520,7,2026-10-17,Nevada,North Dakota State,48.8,,,,,12.586,18.107,30.693,,,Site Projection
+OK,OK,,True,g484,401856722,7,2026-10-17,Kentucky,Oklahoma,46.25,,,,,16.027,15.111,31.139,,,Site Projection
+OK,OK,,True,g485,401856721,7,2026-10-17,Missouri,Ole Miss,51.9,,,,,6.4,22.75,29.15,,,Site Projection
+OK,OK,,True,g486,401858492,7,2026-10-17,Nebraska,Oregon,52.0,,,,,22.735,14.633,37.367,,,Site Projection
+OK,OK,,True,g487,401860903,7,2026-10-17,Washington State,Oregon State,46.2,,,,,-3.007,24.604,21.597,,,Site Projection
+OK,OK,,True,g488,401858493,7,2026-10-17,Washington,Purdue,50.6,,,,,-14.922,32.761,17.839,,,Site Projection
+OK,OK,,True,g489,401862805,7,2026-10-17,Tulsa,Rice,52.2,,,,,-2.663,27.431,24.769,,,Site Projection
+OK,OK,,True,g490,401858268,7,2026-10-17,Virginia,SMU,49.4,,,,,7.135,21.133,28.267,,,Site Projection
+OK,OK,,True,g491,401866445,7,2026-10-17,Ohio,Sacramento State,46.25,,,,,-5.818,26.034,20.216,,,Site Projection
+OK,OK,,True,g492,401860904,7,2026-10-17,Fresno State,San Diego State,45.8,,,,,3.922,20.939,24.861,,,Site Projection
+OK,OK,,True,g493,401862806,7,2026-10-17,Kent State,South Florida,54.5,,,,,23.367,15.566,38.934,,,Site Projection
+OK,OK,,True,g494,,7,2026-10-17,Arkansas State,Southern Miss,55.8,,,,,-1.808,28.804,26.996,,,Site Projection
+OK,OK,,True,g496,401858265,7,2026-10-17,Louisville,Syracuse,49.6,,,,,-11.137,30.369,19.232,,,Site Projection
+OK,OK,,True,g497,401862803,7,2026-10-17,Charlotte,Temple,56.1,,,,,16.555,19.773,36.328,,,Site Projection
+OK,OK,,True,g498,401856723,7,2026-10-17,Alabama,Tennessee,52.8,,,,,-1.458,27.129,25.671,,,Site Projection
+OK,OK,,True,g499,401856724,7,2026-10-17,Florida,Texas,49.0,,,,,13.7,17.65,31.35,,,Site Projection
+OK,OK,,True,g501,401860923,7,2026-10-17,Colorado State,Texas State,57.7,,,,,11.1,23.3,34.4,,,Site Projection
+OK,OK,,True,g502,401856828,7,2026-10-17,Arizona State,Texas Tech,50.85,,,,,19.86,15.495,35.355,,,Site Projection
+OK,OK,,True,g503,401858494,7,2026-10-17,Wisconsin,UCLA,46.0,,,,,0.31,22.845,23.155,,,Site Projection
+OK,OK,,True,g504,,7,2026-10-17,Louisiana Tech,UL-Monroe,52.55,,,,,-9.512,31.031,21.519,,,Site Projection
+OK,OK,,True,g505,401864523,7,2026-10-17,San Jose State,UTEP,50.8,,,,,-2.285,26.542,24.258,,,Site Projection
+OK,OK,,True,g506,401862804,7,2026-10-17,Navy,UTSA,57.7,,,,,-1.377,29.539,28.162,,,Site Projection
+OK,OK,,True,g507,401856726,7,2026-10-17,Arkansas,Vanderbilt,60.45,,,,,6.812,26.819,33.631,,,Site Projection
+OK,OK,,True,g508,401858264,7,2026-10-17,Georgia Tech,Virginia Tech,52.4,,,,,2.167,25.116,27.284,,,Site Projection
+OK,OK,,True,g509,401856829,7,2026-10-17,Cincinnati,West Virginia,53.45,,,,,0.39,26.53,26.92,,,Site Projection
+OK,OK,,True,g510,401864522,7,2026-10-17,Northern Illinois,Wyoming,43.3,,,,,8.867,17.216,26.084,,,Site Projection
+OK,OK,,True,g511,,8,2026-10-20,Missouri State,Delaware,54.85,,,,,6.495,24.178,30.672,,,Site Projection
+OK,OK,,True,g512,,8,2026-10-20,Middle Tennessee,Florida International,55.05,,,,,8.91,23.07,31.98,,,Site Projection
+OK,OK,,True,g513,,8,2026-10-20,South Alabama,Marshall,60.9,,,,,3.945,28.477,32.422,,,Site Projection
+OK,OK,,True,g514,,8,2026-10-21,Liberty,Kennesaw State,54.3,,,,,0.59,26.855,27.445,,,Site Projection
+OK,OK,,True,g515,,8,2026-10-21,New Mexico State,Sam Houston,52.25,,,,,-3.715,27.983,24.267,,,Site Projection
+OK,OK,,True,g516,,8,2026-10-22,James Madison,Appalachian State,53.25,,,,,-10.898,32.074,21.176,,,Site Projection
+OK,OK,,True,g517,401862807,8,2026-10-22,East Carolina,Memphis,54.25,,,,,2.312,25.969,28.281,,,Site Projection
+OK,OK,,True,g518,401862808,8,2026-10-23,Army,Tulsa,53.65,,,,,-5.72,29.685,23.965,,,Site Projection
+OK,OK,,True,g519,401856727,8,2026-10-24,Texas A&M,Alabama,48.95,,,,,1.6,23.675,25.275,,,Site Projection
+OK,OK,,True,g520,401856838,8,2026-10-24,Iowa State,Arizona,48.8,,,,,10.015,19.392,29.407,,,Site Projection
+OK,OK,,True,g521,401856839,8,2026-10-24,Kansas State,Arizona State,52.75,,,,,0.268,26.241,26.509,,,Site Projection
+OK,OK,,True,g522,,8,2026-10-24,Georgia State,Arkansas State,57.2,,,,,12.562,22.319,34.881,,,Site Projection
+OK,OK,,True,g523,401856728,8,2026-10-24,LSU,Auburn,45.45,,,,,-2.835,24.143,21.308,,,Site Projection
+OK,OK,,True,g524,401866447,8,2026-10-24,Sacramento State,Ball State,50.95,,,,,-3.402,27.176,23.774,,,Site Projection
+OK,OK,,True,g525,401866448,8,2026-10-24,Bowling Green,Buffalo,43.45,,,,,4.843,19.303,24.147,,,Site Projection
+OK,OK,,True,g526,401856835,8,2026-10-24,BYU,Central Florida,49.0,,,,,-9.598,29.299,19.701,,,Site Projection
+OK,OK,,True,g527,401866476,8,2026-10-24,Miami-OH,Central Michigan,44.7,,,,,-3.092,23.896,20.804,,,Site Projection
+OK,OK,,True,g528,401856840,8,2026-10-24,Texas Tech,Cincinnati,53.65,,,,,-17.168,35.409,18.241,,,Site Projection
+OK,OK,,True,g529,401858276,8,2026-10-24,Virginia Tech,Clemson,49.55,,,,,8.617,20.466,29.084,,,Site Projection
+OK,OK,,True,g530,401860905,8,2026-10-24,San Diego State,Colorado State,46.95,,,,,-10.178,28.564,18.386,,,Site Projection
+OK,OK,,True,g531,401861965,8,2026-10-24,Massachusetts,Connecticut,51.05,,,,,20.755,15.147,35.902,,,Site Projection
+OK,OK,,True,g532,401862809,8,2026-10-24,Rice,Florida Atlantic,55.65,,,,,7.435,24.107,31.543,,,Site Projection
+OK,OK,,True,g533,401858273,8,2026-10-24,Boston College,Georgia Tech,52.5,,,,,11.018,20.741,31.759,,,Site Projection
+OK,OK,,True,g534,401858495,8,2026-10-24,Oregon,Illinois,53.75,,,,,-16.587,35.169,18.581,,,Site Projection
+OK,OK,,True,g535,401856834,8,2026-10-24,Baylor,Kansas,57.7,,,,,1.312,28.194,29.506,,,Site Projection
+OK,OK,,True,g536,401866446,8,2026-10-24,Akron,Kent State,48.15,,,,,-0.013,24.081,24.069,,,Site Projection
+OK,OK,,True,g537,401856729,8,2026-10-24,Vanderbilt,Kentucky,51.85,,,,,-3.165,27.508,24.343,,,Site Projection
+OK,OK,,True,g538,,8,2026-10-24,Old Dominion,Louisiana Tech,49.2,,,,,-4.65,26.925,22.275,,,Site Projection
+OK,OK,,True,g539,401858274,8,2026-10-24,Pittsburgh,Miami-FL,51.05,,,,,17.04,17.005,34.045,,,Site Projection
+OK,OK,,True,g540,401858496,8,2026-10-24,Indiana,Michigan,49.95,,,,,-7.78,28.865,21.085,,,Site Projection
+OK,OK,,True,g541,401858497,8,2026-10-24,Iowa,Minnesota,46.2,,,,,-7.683,26.942,19.259,,,Site Projection
+OK,OK,,True,g542,401856730,8,2026-10-24,Oklahoma,Mississippi State,51.55,,,,,-10.633,31.091,20.459,,,Site Projection
+OK,OK,,True,g543,401862810,8,2026-10-24,North Texas,Navy,56.75,,,,,8.4,24.175,32.575,,,Site Projection
+OK,OK,,True,g544,401864528,8,2026-10-24,San Jose State,Nevada,49.8,,,,,2.257,23.771,26.028,,,Site Projection
+OK,OK,,True,g545,401864527,8,2026-10-24,North Dakota State,New Mexico,50.95,,,,,2.926,24.012,26.938,,,Site Projection
+OK,OK,,True,g546,401858275,8,2026-10-24,Syracuse,North Carolina,47.25,,,,,7.548,19.851,27.399,,,Site Projection
+OK,OK,,True,g547,401864526,8,2026-10-24,Hawaii,Northern Illinois,50.35,,,,,-12.88,31.615,18.735,,,Site Projection
+OK,OK,,True,g548,401858498,8,2026-10-24,Rutgers,Northwestern,52.0,,,,,5.095,23.453,28.547,,,Site Projection
+OK,OK,,True,g549,401866449,8,2026-10-24,Eastern Michigan,Ohio,45.05,,,,,9.088,17.981,27.069,,,Site Projection
+OK,OK,,True,g550,401856836,8,2026-10-24,Colorado,Oklahoma State,52.3,,,,,4.635,23.832,28.467,,,Site Projection
+OK,OK,,True,g551,401858270,8,2026-10-24,California,SMU,53.5,,,,,13.508,19.996,33.504,,,Site Projection
+OK,OK,,True,g552,401856731,8,2026-10-24,Tennessee,South Carolina,55.0,,,,,-1.935,28.468,26.532,,,Site Projection
+OK,OK,,True,g553,,8,2026-10-24,Louisiana,Southern Miss,57.35,,,,,-1.73,29.54,27.81,,,Site Projection
+OK,OK,,True,g554,401858272,8,2026-10-24,NC State,Stanford,51.35,,,,,-6.272,28.811,22.539,,,Site Projection
+OK,OK,,True,g555,401856841,8,2026-10-24,West Virginia,TCU,52.55,,,,,10.268,21.141,31.409,,,Site Projection
+OK,OK,,True,g556,401856732,8,2026-10-24,Ole Miss,Texas,53.3,,,,,9.25,22.025,31.275,,,Site Projection
+OK,OK,,True,g557,401860906,8,2026-10-24,Utah State,Texas State,62.1,,,,,4.825,28.637,33.462,,,Site Projection
+OK,OK,,True,g558,401866450,8,2026-10-24,Western Michigan,Toledo,44.7,,,,,3.125,20.788,23.913,,,Site Projection
+OK,OK,,True,g559,,8,2026-10-24,UL-Monroe,Troy,52.8,,,,,14.098,19.351,33.449,,,Site Projection
+OK,OK,,True,g560,401862811,8,2026-10-24,UTSA,Tulane,55.6,,,,,5.082,25.259,30.341,,,Site Projection
+OK,OK,,True,g561,401858499,8,2026-10-24,Michigan State,UCLA,52.75,,,,,4.18,24.285,28.465,,,Site Projection
+OK,OK,,True,g562,401856837,8,2026-10-24,Houston,Utah,54.1,,,,,7.96,23.07,31.03,,,Site Projection
+OK,OK,,True,g563,401858271,8,2026-10-24,Duke,Virginia,53.25,,,,,7.14,23.055,30.195,,,Site Projection
+OK,OK,,True,g564,401860907,8,2026-10-24,Boise State,Washington State,48.85,,,,,-4.555,26.703,22.148,,,Site Projection
+OK,OK,,True,g565,401858500,8,2026-10-24,USC,Wisconsin,48.65,,,,,-11.543,30.096,18.553,,,Site Projection
+OK,OK,,True,g566,401864525,8,2026-10-24,Air Force,Wyoming,47.0,,,,,-2.21,24.605,22.395,,,Site Projection
+OK,OK,,True,g567,,9,2026-10-27,Sam Houston,Missouri State,52.85,,,,,10.863,20.994,31.857,,,Site Projection
+OK,OK,,True,g568,,9,2026-10-27,Delaware,Western Kentucky,57.15,,,,,7.345,24.902,32.248,,,Site Projection
+OK,OK,,True,g569,,9,2026-10-28,Kennesaw State,Middle Tennessee,52.5,,,,,-6.772,29.636,22.864,,,Site Projection
+OK,OK,,True,g570,,9,2026-10-28,Jacksonville State,New Mexico State,53.6,,,,,-4.987,29.294,24.306,,,Site Projection
+OK,OK,,True,g571,,9,2026-10-29,Troy,James Madison,52.55,,,,,11.588,20.481,32.069,,,Site Projection
+OK,OK,,True,g572,401862812,9,2026-10-29,Florida Atlantic,North Texas,60.45,,,,,7.705,26.373,34.078,,,Site Projection
+OK,OK,,True,g573,401856844,9,2026-10-30,Baylor,Central Florida,53.55,,,,,-0.762,27.156,26.394,,,Site Projection
+OK,OK,,True,g574,401862813,9,2026-10-30,Tulane,Charlotte,51.6,,,,,-21.165,36.383,15.218,,,Site Projection
+OK,OK,,True,g575,401866451,9,2026-10-30,Kent State,Sacramento State,52.2,,,,,5.075,23.562,28.638,,,Site Projection
+OK,OK,,True,g576,401861966,9,2026-10-31,Connecticut,Air Force,52.7,,,,,5.38,23.66,29.04,,,Site Projection
+OK,OK,,True,g577,401856733,9,2026-10-31,Missouri,Arkansas,56.25,,,,,-6.23,31.24,25.01,,,Site Projection
+OK,OK,,True,g578,401856843,9,2026-10-31,Arizona State,BYU,50.4,,,,,9.8,20.3,30.1,,,Site Projection
+OK,OK,,True,g579,401860908,9,2026-10-31,Texas State,Boise State,61.15,,,,,11.355,24.898,36.252,,,Site Projection
+OK,OK,,True,g580,401856848,9,2026-10-31,Utah,Cincinnati,54.55,,,,,-7.09,30.82,23.73,,,Site Projection
+OK,OK,,True,g581,401856846,9,2026-10-31,Kansas State,Colorado,53.65,,,,,-5.923,29.787,23.863,,,Site Projection
+OK,OK,,True,g582,401858279,9,2026-10-31,Boston College,Duke,56.55,,,,,11.115,22.717,33.832,,,Site Projection
+OK,OK,,True,g583,401862815,9,2026-10-31,Temple,East Carolina,54.85,,,,,10.35,22.25,32.6,,,Site Projection
+OK,OK,,True,g584,401858280,9,2026-10-31,Clemson,Florida State,48.4,,,,,-1.558,24.979,23.421,,,Site Projection
+OK,OK,,True,g585,401860924,9,2026-10-31,Oregon State,Fresno State,45.45,,,,,9.863,17.794,27.657,,,Site Projection
+OK,OK,,True,g586,401856734,9,2026-10-31,Florida,Georgia,48.8,,,,,11.297,18.752,30.048,,,Site Projection
+OK,OK,,True,g587,,9,2026-10-31,Appalachian State,Georgia Southern,55.05,,,,,5.155,24.947,30.102,,,Site Projection
+OK,OK,,True,g588,,9,2026-10-31,Coastal Carolina,Georgia State,56.95,,,,,-3.575,30.263,26.688,,,Site Projection
+OK,OK,,True,g589,401858501,9,2026-10-31,Minnesota,Indiana,47.85,,,,,25.62,11.115,36.735,,,Site Projection
+OK,OK,,True,g590,401858502,9,2026-10-31,Wisconsin,Iowa,43.35,,,,,11.623,15.864,27.486,,,Site Projection
+OK,OK,,True,g591,401856847,9,2026-10-31,Oklahoma State,Iowa State,49.35,,,,,3.053,23.149,26.201,,,Site Projection
+OK,OK,,True,g592,,9,2026-10-31,Florida International,Liberty,56.85,,,,,8.273,24.288,32.562,,,Site Projection
+OK,OK,,True,g593,401858283,9,2026-10-31,Stanford,Louisville,48.5,,,,,16.828,15.836,32.664,,,Site Projection
+OK,OK,,True,g594,401858503,9,2026-10-31,Illinois,Maryland,51.5,,,,,-5.043,28.271,23.229,,,Site Projection
+OK,OK,,True,g595,401862814,9,2026-10-31,Army,Memphis,55.2,,,,,4.415,25.393,29.808,,,Site Projection
+OK,OK,,True,g596,401858277,9,2026-10-31,California,NC State,55.2,,,,,5.87,24.665,30.535,,,Site Projection
+OK,OK,,True,g597,401859185,9,2026-10-31,Notre Dame,Navy,54.75,,,,,-26.207,40.478,14.271,,,Site Projection
+OK,OK,,True,g598,401858504,9,2026-10-31,Washington,Nebraska,50.35,,,,,-5.223,27.787,22.564,,,Site Projection
+OK,OK,,True,g599,401858282,9,2026-10-31,Miami-FL,North Carolina,46.85,,,,,-18.77,32.81,14.04,,,Site Projection
+OK,OK,,True,g600,401864531,9,2026-10-31,UTEP,North Dakota State,49.8,,,,,17.529,16.136,33.664,,,Site Projection
+OK,OK,,True,g601,401856736,9,2026-10-31,South Carolina,Oklahoma,47.3,,,,,10.453,18.423,28.877,,,Site Projection
+OK,OK,,True,g602,,9,2026-10-31,Marshall,Old Dominion,54.6,,,,,7.817,23.392,31.209,,,Site Projection
+OK,OK,,True,g603,401856735,9,2026-10-31,Auburn,Ole Miss,50.3,,,,,8.363,20.968,29.331,,,Site Projection
+OK,OK,,True,g604,401858505,9,2026-10-31,Northwestern,Oregon,49.1,,,,,25.642,11.729,37.371,,,Site Projection
+OK,OK,,True,g605,401858506,9,2026-10-31,Purdue,Penn State,51.7,,,,,21.258,15.221,36.479,,,Site Projection
+OK,OK,,True,g606,401858281,9,2026-10-31,Georgia Tech,Pittsburgh,53.1,,,,,3.63,24.735,28.365,,,Site Projection
+OK,OK,,True,g607,401858507,9,2026-10-31,Michigan,Rutgers,54.05,,,,,-13.457,33.754,20.296,,,Site Projection
+OK,OK,,True,g608,401860909,9,2026-10-31,Washington State,San Diego State,46.55,,,,,4.577,20.986,25.563,,,Site Projection
+OK,OK,,True,g609,401864529,9,2026-10-31,New Mexico,San Jose State,51.95,,,,,-9.77,30.86,21.09,,,Site Projection
+OK,OK,,True,g610,,9,2026-10-31,Louisiana Tech,South Alabama,55.5,,,,,0.787,27.357,28.143,,,Site Projection
+OK,OK,,True,g611,401862816,9,2026-10-31,UAB,South Florida,57.9,,,,,20.165,18.867,39.032,,,Site Projection
+OK,OK,,True,g612,401858278,9,2026-10-31,SMU,Syracuse,50.75,,,,,-12.22,31.485,19.265,,,Site Projection
+OK,OK,,True,g613,401856845,9,2026-10-31,Kansas,TCU,54.05,,,,,6.872,23.589,30.461,,,Site Projection
+OK,OK,,True,g614,401856737,9,2026-10-31,Mississippi State,Texas,54.35,,,,,22.337,16.007,38.343,,,Site Projection
+OK,OK,,True,g615,401856842,9,2026-10-31,Arizona,Texas Tech,52.3,,,,,16.948,17.676,34.624,,,Site Projection
+OK,OK,,True,g616,401858508,9,2026-10-31,Nevada,UCLA,50.15,,,,,18.98,15.585,34.565,,,Site Projection
+OK,OK,,True,g617,,9,2026-10-31,Southern Miss,UL-Monroe,53.9,,,,,-5.077,29.488,24.412,,,Site Projection
+OK,OK,,True,g618,401864530,9,2026-10-31,Northern Illinois,UNLV,52.6,,,,,20.453,16.074,36.526,,,Site Projection
+OK,OK,,True,g619,401858509,9,2026-10-31,Ohio State,USC,53.8,,,,,-10.155,31.977,21.822,,,Site Projection
+OK,OK,,True,g620,401860910,9,2026-10-31,Colorado State,Utah State,50.2,,,,,8.975,20.613,29.588,,,Site Projection
+OK,OK,,True,g621,401858284,9,2026-10-31,Virginia,Wake Forest,45.55,,,,,-1.357,23.453,22.096,,,Site Projection
+OK,OK,,True,g622,401866452,9,2026-10-31,Bowling Green,Western Michigan,43.95,,,,,12.182,15.884,28.066,,,Site Projection
+OK,OK,,True,g623,401866453,10,2026-11-03,Ohio,Akron,42.2,,,,,-8.08,25.14,17.06,,,Site Projection
+OK,OK,,True,g624,401866454,10,2026-11-03,Buffalo,Miami-OH,43.1,,,,,8.467,17.317,25.784,,,Site Projection
+OK,OK,,True,g625,401866456,10,2026-11-04,Central Michigan,Eastern Michigan,48.8,,,,,-2.875,25.837,22.962,,,Site Projection
+OK,OK,,True,g626,401866455,10,2026-11-04,Ball State,Massachusetts,49.3,,,,,-4.03,26.665,22.635,,,Site Projection
+OK,OK,,True,g627,401866457,10,2026-11-04,Toledo,Sacramento State,48.8,,,,,-9.695,29.247,19.552,,,Site Projection
+OK,OK,,True,g628,401862817,10,2026-11-05,UTSA,Florida Atlantic,61.4,,,,,-5.428,33.414,27.986,,,Site Projection
+OK,OK,,True,g629,,10,2026-11-05,James Madison,Southern Miss,53.65,,,,,-12.607,33.129,20.521,,,Site Projection
+OK,OK,,True,g630,401856855,10,2026-11-06,TCU,Arizona,52.75,,,,,3.163,24.794,27.956,,,Site Projection
+OK,OK,,True,g631,401862818,10,2026-11-06,South Florida,East Carolina,53.9,,,,,0.075,26.912,26.988,,,Site Projection
+OK,OK,,True,g632,,10,2026-11-07,Georgia State,Appalachian State,56.6,,,,,9.565,23.518,33.083,,,Site Projection
+OK,OK,,True,g633,401856852,10,2026-11-07,Colorado,Arizona State,50.3,,,,,8.79,20.755,29.545,,,Site Projection
+OK,OK,,True,g634,,10,2026-11-07,UL-Monroe,Arkansas State,54.1,,,,,13.385,20.358,33.742,,,Site Projection
+OK,OK,,True,g635,401862823,10,2026-11-07,Air Force,Army,52.55,,,,,5.562,23.494,29.056,,,Site Projection
+OK,OK,,True,g636,401856738,10,2026-11-07,Arkansas,Auburn,54.65,,,,,9.268,22.691,31.959,,,Site Projection
+OK,OK,,True,g637,401856853,10,2026-11-07,Iowa State,Baylor,52.9,,,,,5.768,23.566,29.334,,,Site Projection
+OK,OK,,True,g638,401858289,10,2026-11-07,Florida State,Boston College,51.55,,,,,-10.245,30.897,20.652,,,Site Projection
+OK,OK,,True,g639,,10,2026-11-07,Old Dominion,Coastal Carolina,50.5,,,,,-9.665,30.082,20.418,,,Site Projection
+OK,OK,,True,g640,401860911,10,2026-11-07,Boise State,Colorado State,49.25,,,,,-15.355,32.303,16.947,,,Site Projection
+OK,OK,,True,g641,401858292,10,2026-11-07,North Carolina,Connecticut,49.0,,,,,-9.14,29.07,19.93,,,Site Projection
+OK,OK,,True,g642,401856739,10,2026-11-07,Oklahoma,Florida,46.2,,,,,-2.095,24.148,22.053,,,Site Projection
+OK,OK,,True,g643,,10,2026-11-07,Missouri State,Florida International,54.05,,,,,3.817,25.116,28.933,,,Site Projection
+OK,OK,,True,g644,,10,2026-11-07,Marshall,Georgia Southern,59.5,,,,,1.798,28.851,30.649,,,Site Projection
+OK,OK,,True,g645,401858287,10,2026-11-07,Louisville,Georgia Tech,51.25,,,,,-3.39,27.32,23.93,,,Site Projection
+OK,OK,,True,g646,401856851,10,2026-11-07,Cincinnati,Houston,54.55,,,,,6.23,24.16,30.39,,,Site Projection
+OK,OK,,True,g647,401858510,10,2026-11-07,Nebraska,Illinois,52.45,,,,,3.647,24.402,28.049,,,Site Projection
+OK,OK,,True,g648,,10,2026-11-07,Sam Houston,Jacksonville State,55.45,,,,,16.703,19.373,36.077,,,Site Projection
+OK,OK,,True,g649,401856850,10,2026-11-07,Central Florida,Kansas,50.75,,,,,4.775,22.988,27.762,,,Site Projection
+OK,OK,,True,g650,401856854,10,2026-11-07,Oklahoma State,Kansas State,54.75,,,,,10.488,22.131,32.619,,,Site Projection
+OK,OK,,True,g651,,10,2026-11-07,Delaware,Kennesaw State,54.75,,,,,3.385,25.683,29.067,,,Site Projection
+OK,OK,,True,g652,401856740,10,2026-11-07,Alabama,LSU,44.45,,,,,2.388,21.031,23.419,,,Site Projection
+OK,OK,,True,g653,,10,2026-11-07,South Alabama,Louisiana,58.6,,,,,3.808,27.396,31.204,,,Site Projection
+OK,OK,,True,g654,401858511,10,2026-11-07,Michigan State,Michigan,50.8,,,,,18.95,15.925,34.875,,,Site Projection
+OK,OK,,True,g655,,10,2026-11-07,Western Kentucky,Middle Tennessee,54.9,,,,,-10.432,32.666,22.234,,,Site Projection
+OK,OK,,True,g656,401858512,10,2026-11-07,UCLA,Minnesota,48.85,,,,,2.93,22.96,25.89,,,Site Projection
+OK,OK,,True,g657,401856742,10,2026-11-07,Vanderbilt,Mississippi State,57.15,,,,,-3.77,30.46,26.69,,,Site Projection
+OK,OK,,True,g658,401856743,10,2026-11-07,Texas,Missouri,50.5,,,,,-7.75,29.125,21.375,,,Site Projection
+OK,OK,,True,g659,401858286,10,2026-11-07,Duke,NC State,58.15,,,,,3.337,27.406,30.744,,,Site Projection
+OK,OK,,True,g660,401862820,10,2026-11-07,Temple,Navy,57.1,,,,,13.205,21.948,35.153,,,Site Projection
+OK,OK,,True,g661,401864533,10,2026-11-07,New Mexico,Nevada,49.55,,,,,-10.012,29.781,19.769,,,Site Projection
+OK,OK,,True,g662,,10,2026-11-07,Liberty,New Mexico State,53.8,,,,,-5.938,29.869,23.931,,,Site Projection
+OK,OK,,True,g663,401862821,10,2026-11-07,Rice,North Texas,54.0,,,,,13.34,20.33,33.67,,,Site Projection
+OK,OK,,True,g664,401858513,10,2026-11-07,Iowa,Northwestern,46.25,,,,,-7.505,26.878,19.372,,,Site Projection
+OK,OK,,True,g666,401858514,10,2026-11-07,Oregon,Ohio State,51.35,,,,,6.338,22.506,28.844,,,Site Projection
+OK,OK,,True,g667,401856741,10,2026-11-07,Georgia,Ole Miss,53.1,,,,,-4.447,28.774,24.326,,,Site Projection
+OK,OK,,True,g668,401860912,10,2026-11-07,Texas State,Oregon State,58.5,,,,,-2.308,30.404,28.096,,,Site Projection
+OK,OK,,True,g669,401858515,10,2026-11-07,Maryland,Purdue,50.0,,,,,-3.005,26.503,23.497,,,Site Projection
+OK,OK,,True,g670,401858288,10,2026-11-07,Virginia Tech,SMU,52.6,,,,,9.405,21.598,31.003,,,Site Projection
+OK,OK,,True,g671,401864534,10,2026-11-07,Northern Illinois,San Jose State,48.9,,,,,6.098,21.401,27.499,,,Site Projection
+OK,OK,,True,g672,401856744,10,2026-11-07,Texas A&M,South Carolina,51.15,,,,,-7.293,29.221,21.928,,,Site Projection
+OK,OK,,True,g673,401858285,10,2026-11-07,Clemson,Syracuse,47.7,,,,,-12.332,30.016,17.684,,,Site Projection
+OK,OK,,True,g674,401856745,10,2026-11-07,Kentucky,Tennessee,53.95,,,,,12.11,20.92,33.03,,,Site Projection
+OK,OK,,True,g675,401856856,10,2026-11-07,West Virginia,Texas Tech,52.1,,,,,25.477,13.312,38.788,,,Site Projection
+OK,OK,,True,g676,,10,2026-11-07,Louisiana Tech,Troy,53.15,,,,,3.085,25.032,28.117,,,Site Projection
+OK,OK,,True,g677,401862822,10,2026-11-07,Tulsa,Tulane,52.85,,,,,12.383,20.233,32.617,,,Site Projection
+OK,OK,,True,g678,401862819,10,2026-11-07,Charlotte,UAB,55.45,,,,,10.165,22.643,32.808,,,Site Projection
+OK,OK,,True,g679,401864535,10,2026-11-07,Wyoming,UNLV,50.3,,,,,14.585,17.857,32.442,,,Site Projection
+OK,OK,,True,g680,401864532,10,2026-11-07,Hawaii,UTEP,52.25,,,,,-12.668,32.459,19.791,,,Site Projection
+OK,OK,,True,g681,401856849,10,2026-11-07,BYU,Utah,52.75,,,,,2.183,25.284,27.466,,,Site Projection
+OK,OK,,True,g682,401860913,10,2026-11-07,Fresno State,Utah State,49.05,,,,,-1.18,25.115,23.935,,,Site Projection
+OK,OK,,True,g684,401858516,10,2026-11-07,Penn State,Washington,51.1,,,,,0.465,25.317,25.783,,,Site Projection
+OK,OK,,True,g685,401858517,10,2026-11-07,Rutgers,Wisconsin,49.1,,,,,5.378,21.861,27.239,,,Site Projection
+OK,OK,,True,g686,401866458,11,2026-11-10,Western Michigan,Akron,44.85,,,,,-11.432,28.141,16.709,,,Site Projection
+OK,OK,,True,g687,401866459,11,2026-11-10,Kent State,Bowling Green,47.25,,,,,6.062,20.594,26.656,,,Site Projection
+OK,OK,,True,g688,401866460,11,2026-11-10,Ohio,Miami-OH,40.95,,,,,4.18,18.385,22.565,,,Site Projection
+OK,OK,,True,g689,401866461,11,2026-11-11,Buffalo,Ball State,46.35,,,,,-7.433,26.892,19.459,,,Site Projection
+OK,OK,,True,g690,401866462,11,2026-11-11,Sacramento State,Central Michigan,50.0,,,,,6.705,21.648,28.352,,,Site Projection
+OK,OK,,True,g691,401866463,11,2026-11-11,Massachusetts,Toledo,47.15,,,,,25.328,10.911,36.239,,,Site Projection
+OK,OK,,True,g692,401862824,11,2026-11-12,Memphis,South Florida,57.95,,,,,4.612,26.669,31.281,,,Site Projection
+OK,OK,,True,g693,,11,2026-11-12,Louisiana,UL-Monroe,55.65,,,,,-8.908,32.279,23.371,,,Site Projection
+OK,OK,,True,g694,401856860,11,2026-11-13,Houston,Colorado,52.65,,,,,-5.912,29.281,23.369,,,Site Projection
+OK,OK,,True,g695,401858293,11,2026-11-13,Florida State,Pittsburgh,52.15,,,,,1.103,25.523,26.627,,,Site Projection
+OK,OK,,True,g696,401864538,11,2026-11-14,San Jose State,Air Force,52.6,,,,,10.68,20.96,31.64,,,Site Projection
+OK,OK,,True,g697,401856864,11,2026-11-14,Utah,Arizona,53.2,,,,,-0.97,27.085,26.115,,,Site Projection
+OK,OK,,True,g698,401856882,11,2026-11-14,South Carolina,Arkansas,55.85,,,,,-3.223,29.537,26.314,,,Site Projection
+OK,OK,,True,g699,401856858,11,2026-11-14,Baylor,BYU,55.95,,,,,10.935,22.508,33.443,,,Site Projection
+OK,OK,,True,g700,401860914,11,2026-11-14,Oregon State,Boise State,50.05,,,,,17.163,16.444,33.606,,,Site Projection
+OK,OK,,True,g701,401856857,11,2026-11-14,Arizona State,Central Florida,48.0,,,,,-1.897,24.948,23.052,,,Site Projection
+OK,OK,,True,g702,401862825,11,2026-11-14,East Carolina,Charlotte,51.45,,,,,-20.405,35.928,15.523,,,Site Projection
+OK,OK,,True,g703,401858297,11,2026-11-14,Georgia Tech,Clemson,49.35,,,,,8.485,20.433,28.918,,,Site Projection
+OK,OK,,True,g704,,11,2026-11-14,Arkansas State,Coastal Carolina,55.75,,,,,-2.087,28.919,26.831,,,Site Projection
+OK,OK,,True,g705,401861967,11,2026-11-14,James Madison,Connecticut,52.05,,,,,-8.227,30.139,21.911,,,Site Projection
+OK,OK,,True,g706,,11,2026-11-14,Florida International,Delaware,57.3,,,,,4.478,26.411,30.889,,,Site Projection
+OK,OK,,True,g707,401856883,11,2026-11-14,Missouri,Georgia,50.3,,,,,12.648,18.826,31.474,,,Site Projection
+OK,OK,,True,g708,,11,2026-11-14,Georgia Southern,Georgia State,56.85,,,,,-7.62,32.235,24.615,,,Site Projection
+OK,OK,,True,g709,401864537,11,2026-11-14,North Dakota State,Hawaii,52.65,,,,,2.239,25.206,27.444,,,Site Projection
+OK,OK,,True,g710,401858518,11,2026-11-14,USC,Indiana,54.55,,,,,11.217,21.666,32.883,,,Site Projection
+OK,OK,,True,g711,401858519,11,2026-11-14,Purdue,Iowa,49.4,,,,,18.598,15.401,33.999,,,Site Projection
+OK,OK,,True,g712,401856859,11,2026-11-14,Cincinnati,Iowa State,50.15,,,,,0.905,24.622,25.527,,,Site Projection
+OK,OK,,True,g713,401856884,11,2026-11-14,Florida,Kentucky,46.15,,,,,-5.433,25.791,20.358,,,Site Projection
+OK,OK,,True,g714,401856885,11,2026-11-14,Texas,LSU,48.45,,,,,-2.877,25.664,22.787,,,Site Projection
+OK,OK,,True,g715,,11,2026-11-14,Middle Tennessee,Liberty,55.4,,,,,15.383,20.008,35.392,,,Site Projection
+OK,OK,,True,g716,,11,2026-11-14,Southern Miss,Louisiana Tech,54.25,,,,,6.835,23.707,30.543,,,Site Projection
+OK,OK,,True,g717,,11,2026-11-14,Appalachian State,Marshall,59.25,,,,,4.657,27.297,31.953,,,Site Projection
+OK,OK,,True,g718,401858520,11,2026-11-14,Wisconsin,Maryland,43.95,,,,,-0.37,22.16,21.79,,,Site Projection
+OK,OK,,True,g719,401858296,11,2026-11-14,Duke,Miami-FL,54.2,,,,,20.473,16.864,37.337,,,Site Projection
+OK,OK,,True,g720,401858521,11,2026-11-14,Washington,Michigan State,51.3,,,,,-11.117,31.209,20.091,,,Site Projection
+OK,OK,,True,g721,401856886,11,2026-11-14,Auburn,Mississippi State,51.35,,,,,-4.525,27.938,23.413,,,Site Projection
+OK,OK,,True,g722,,11,2026-11-14,New Mexico State,Missouri State,51.0,,,,,4.647,23.177,27.823,,,Site Projection
+OK,OK,,True,g723,401858300,11,2026-11-14,Syracuse,NC State,52.45,,,,,10.883,20.784,31.666,,,Site Projection
+OK,OK,,True,g724,401864539,11,2026-11-14,UNLV,New Mexico,55.65,,,,,-1.585,28.617,27.032,,,Site Projection
+OK,OK,,True,g725,401858298,11,2026-11-14,Louisville,North Carolina,47.95,,,,,-6.49,27.22,20.73,,,Site Projection
+OK,OK,,True,g726,401864536,11,2026-11-14,Nevada,Northern Illinois,46.5,,,,,-2.655,24.578,21.922,,,Site Projection
+OK,OK,,True,g727,401858294,11,2026-11-14,Boston College,Notre Dame,53.8,,,,,33.985,9.907,43.892,,,Site Projection
+OK,OK,,True,g728,401858522,11,2026-11-14,Northwestern,Ohio State,47.15,,,,,29.48,8.835,38.315,,,Site Projection
+OK,OK,,True,g729,401856887,11,2026-11-14,Ole Miss,Oklahoma,50.5,,,,,3.445,23.527,26.973,,,Site Projection
+OK,OK,,True,g730,401856863,11,2026-11-14,Texas Tech,Oklahoma State,52.85,,,,,-18.615,35.733,17.117,,,Site Projection
+OK,OK,,True,g731,401858523,11,2026-11-14,Michigan,Oregon,51.15,,,,,13.08,19.035,32.115,,,Site Projection
+OK,OK,,True,g732,401858524,11,2026-11-14,Minnesota,Penn State,48.5,,,,,15.143,16.678,31.822,,,Site Projection
+OK,OK,,True,g733,401862828,11,2026-11-14,Tulane,Rice,49.85,,,,,-11.945,30.898,18.953,,,Site Projection
+OK,OK,,True,g734,401858525,11,2026-11-14,Nebraska,Rutgers,54.9,,,,,-3.803,29.351,25.549,,,Site Projection
+OK,OK,,True,g735,401858301,11,2026-11-14,Wake Forest,SMU,48.75,,,,,11.492,18.629,30.121,,,Site Projection
+OK,OK,,True,g736,,11,2026-11-14,Kennesaw State,Sam Houston,52.75,,,,,-10.742,31.746,21.004,,,Site Projection
+OK,OK,,True,g737,401860915,11,2026-11-14,Utah State,San Diego State,51.35,,,,,7.803,21.774,29.576,,,Site Projection
+OK,OK,,True,g738,,11,2026-11-14,Troy,South Alabama,55.75,,,,,-0.598,28.174,27.576,,,Site Projection
+OK,OK,,True,g739,401856862,11,2026-11-14,Kansas State,TCU,54.65,,,,,2.717,25.966,28.683,,,Site Projection
+OK,OK,,True,g740,401862829,11,2026-11-14,UAB,Temple,58.85,,,,,10.19,24.33,34.52,,,Site Projection
+OK,OK,,True,g741,401856888,11,2026-11-14,Tennessee,Texas A&M,57.85,,,,,7.857,24.997,32.854,,,Site Projection
+OK,OK,,True,g742,401860916,11,2026-11-14,Fresno State,Texas State,56.55,,,,,0.945,27.802,28.747,,,Site Projection
+OK,OK,,True,g743,401862826,11,2026-11-14,Florida Atlantic,Tulsa,58.65,,,,,0.627,29.011,29.639,,,Site Projection
+OK,OK,,True,g744,401858526,11,2026-11-14,Illinois,UCLA,53.55,,,,,-4.362,28.956,24.594,,,Site Projection
+OK,OK,,True,g745,401864540,11,2026-11-14,Wyoming,UTEP,45.2,,,,,-4.555,24.878,20.323,,,Site Projection
+OK,OK,,True,g746,401862827,11,2026-11-14,North Texas,UTSA,59.75,,,,,4.423,27.663,32.087,,,Site Projection
+OK,OK,,True,g747,401856889,11,2026-11-14,Alabama,Vanderbilt,50.7,,,,,-6.803,28.752,21.949,,,Site Projection
+OK,OK,,True,g748,401858295,11,2026-11-14,California,Virginia,50.3,,,,,9.672,20.314,29.986,,,Site Projection
+OK,OK,,True,g749,401858299,11,2026-11-14,Stanford,Virginia Tech,49.65,,,,,11.305,19.172,30.477,,,Site Projection
+OK,OK,,True,g750,401860917,11,2026-11-14,Colorado State,Washington State,45.4,,,,,12.8,16.3,29.1,,,Site Projection
+OK,OK,,True,g751,401856861,11,2026-11-14,Kansas,West Virginia,53.4,,,,,0.005,26.697,26.703,,,Site Projection
+OK,OK,,True,g752,,11,2026-11-14,Jacksonville State,Western Kentucky,56.5,,,,,5.5,25.5,31.0,,,Site Projection
+OK,OK,,True,g753,401866466,12,2026-11-17,Miami-OH,Kent State,46.9,,,,,-10.273,28.587,18.313,,,Site Projection
+OK,OK,,True,g754,401866464,12,2026-11-17,Ball State,Ohio,44.2,,,,,16.12,14.04,30.16,,,Site Projection
+OK,OK,,True,g755,401866465,12,2026-11-17,Eastern Michigan,Western Michigan,47.7,,,,,12.04,17.83,29.87,,,Site Projection
+OK,OK,,True,g756,401866469,12,2026-11-18,Central Michigan,Buffalo,45.4,,,,,1.825,21.787,23.613,,,Site Projection
+OK,OK,,True,g757,401866467,12,2026-11-18,Akron,Massachusetts,47.3,,,,,-8.47,27.885,19.415,,,Site Projection
+OK,OK,,True,g758,401866468,12,2026-11-18,Bowling Green,Toledo,43.85,,,,,12.807,15.521,28.329,,,Site Projection
+OK,OK,,True,g759,,12,2026-11-19,Arkansas State,Louisiana Tech,54.45,,,,,2.928,25.761,28.689,,,Site Projection
+OK,OK,,True,g760,401862830,12,2026-11-19,Rice,Temple,54.35,,,,,8.535,22.907,31.443,,,Site Projection
+OK,OK,,True,g761,401856869,12,2026-11-20,Iowa State,Central Florida,45.95,,,,,2.505,21.723,24.228,,,Site Projection
+OK,OK,,True,g762,401858302,12,2026-11-20,Virginia Tech,Miami-FL,50.35,,,,,18.902,15.724,34.626,,,Site Projection
+OK,OK,,True,g763,401864545,12,2026-11-21,UTEP,Air Force,51.2,,,,,15.465,17.867,33.333,,,Site Projection
+OK,OK,,True,g765,,12,2026-11-21,UL-Monroe,Appalachian State,53.5,,,,,10.387,21.556,31.944,,,Site Projection
+OK,OK,,True,g766,401856870,12,2026-11-21,Oklahoma State,Arizona State,51.4,,,,,6.955,22.223,29.177,,,Site Projection
+OK,OK,,True,g767,401862831,12,2026-11-21,East Carolina,Army,51.15,,,,,-0.302,25.726,25.424,,,Site Projection
+OK,OK,,True,g769,401856871,12,2026-11-21,Texas Tech,Baylor,56.4,,,,,-15.295,35.847,20.552,,,Site Projection
+OK,OK,,True,g770,401860925,12,2026-11-21,San Diego State,Boise State,50.4,,,,,7.978,21.211,29.189,,,Site Projection
+OK,OK,,True,g771,401858309,12,2026-11-21,Syracuse,Boston College,50.85,,,,,1.53,24.66,26.19,,,Site Projection
+OK,OK,,True,g772,401858308,12,2026-11-21,Stanford,California,50.55,,,,,7.702,21.424,29.126,,,Site Projection
+OK,OK,,True,g773,401856867,12,2026-11-21,Colorado,Cincinnati,53.1,,,,,6.082,23.509,29.591,,,Site Projection
+OK,OK,,True,g774,401861968,12,2026-11-21,Old Dominion,Connecticut,48.95,,,,,-5.005,26.978,21.973,,,Site Projection
+OK,OK,,True,g775,401858303,12,2026-11-21,Clemson,Duke,53.4,,,,,-4.487,28.944,24.456,,,Site Projection
+OK,OK,,True,g776,401856748,12,2026-11-21,Vanderbilt,Florida,51.8,,,,,4.768,23.516,28.284,,,Site Projection
+OK,OK,,True,g777,401862833,12,2026-11-21,South Florida,Florida Atlantic,59.85,,,,,-8.475,34.163,25.688,,,Site Projection
+OK,OK,,True,g778,401858304,12,2026-11-21,NC State,Florida State,53.15,,,,,5.893,23.628,29.521,,,Site Projection
+OK,OK,,True,g779,401860918,12,2026-11-21,Colorado State,Fresno State,44.65,,,,,12.855,15.897,28.752,,,Site Projection
+OK,OK,,True,g780,401858310,12,2026-11-21,Wake Forest,Georgia Tech,48.55,,,,,3.62,22.465,26.085,,,Site Projection
+OK,OK,,True,g781,401858527,12,2026-11-21,Iowa,Illinois,50.9,,,,,-3.05,26.975,23.925,,,Site Projection
+OK,OK,,True,g782,,12,2026-11-21,Missouri State,Jacksonville State,54.2,,,,,8.34,22.93,31.27,,,Site Projection
+OK,OK,,True,g783,401856866,12,2026-11-21,BYU,Kansas,53.15,,,,,-7.522,30.336,22.814,,,Site Projection
+OK,OK,,True,g784,401856865,12,2026-11-21,Arizona,Kansas State,54.2,,,,,2.82,25.69,28.51,,,Site Projection
+OK,OK,,True,g785,,12,2026-11-21,Florida International,Kennesaw State,53.95,,,,,5.362,24.294,29.656,,,Site Projection
+OK,OK,,True,g786,,12,2026-11-21,Western Kentucky,Liberty,56.7,,,,,1.75,27.475,29.225,,,Site Projection
+OK,OK,,True,g787,,12,2026-11-21,Coastal Carolina,Louisiana,57.3,,,,,7.01,25.145,32.155,,,Site Projection
+OK,OK,,True,g788,401858306,12,2026-11-21,Pittsburgh,Louisville,52.15,,,,,5.96,23.095,29.055,,,Site Projection
+OK,OK,,True,g789,,12,2026-11-21,Georgia State,Marshall,61.05,,,,,12.422,24.314,36.736,,,Site Projection
+OK,OK,,True,g790,401858528,12,2026-11-21,UCLA,Michigan,50.95,,,,,16.47,17.24,33.71,,,Site Projection
+OK,OK,,True,g791,401858529,12,2026-11-21,Oregon,Michigan State,52.95,,,,,-24.63,38.79,14.16,,,Site Projection
+OK,OK,,True,g792,401858530,12,2026-11-21,Northwestern,Minnesota,44.85,,,,,1.923,21.463,23.387,,,Site Projection
+OK,OK,,True,g794,401856751,12,2026-11-21,Kentucky,Missouri,47.65,,,,,11.082,18.284,29.366,,,Site Projection
+OK,OK,,True,g795,401862834,12,2026-11-21,Memphis,Navy,56.5,,,,,4.942,25.779,30.721,,,Site Projection
+OK,OK,,True,g796,401858531,12,2026-11-21,Ohio State,Nebraska,50.05,,,,,-22.073,36.061,13.988,,,Site Projection
+OK,OK,,True,g797,401864541,12,2026-11-21,Hawaii,Nevada,51.25,,,,,-8.125,29.688,21.562,,,Site Projection
+OK,OK,,True,g798,,12,2026-11-21,Delaware,New Mexico State,54.25,,,,,-3.143,28.697,25.553,,,Site Projection
+OK,OK,,True,g799,401864543,12,2026-11-21,Northern Illinois,North Dakota State,47.9,,,,,16.341,15.779,32.12,,,Site Projection
+OK,OK,,True,g800,401858307,12,2026-11-21,SMU,Notre Dame,53.7,,,,,18.495,17.602,36.098,,,Site Projection
+OK,OK,,True,g801,401856752,12,2026-11-21,Texas A&M,Oklahoma,50.15,,,,,0.86,24.645,25.505,,,Site Projection
+OK,OK,,True,g803,401860919,12,2026-11-21,Utah State,Oregon State,51.0,,,,,0.217,25.392,25.608,,,Site Projection
+OK,OK,,True,g804,401858532,12,2026-11-21,Rutgers,Penn State,55.65,,,,,17.66,18.995,36.655,,,Site Projection
+OK,OK,,True,g805,401858533,12,2026-11-21,Wisconsin,Purdue,45.15,,,,,-5.675,25.412,19.738,,,Site Projection
+OK,OK,,True,g806,,12,2026-11-21,Middle Tennessee,Sam Houston,53.85,,,,,-0.77,27.31,26.54,,,Site Projection
+OK,OK,,True,g807,401864544,12,2026-11-21,UNLV,San Jose State,55.9,,,,,-12.255,34.078,21.822,,,Site Projection
+OK,OK,,True,g808,401856753,12,2026-11-21,Georgia,South Carolina,49.9,,,,,-11.555,30.727,19.172,,,Site Projection
+OK,OK,,True,g809,,12,2026-11-21,South Alabama,Southern Miss,56.85,,,,,-0.623,28.736,28.114,,,Site Projection
+OK,OK,,True,g810,401856872,12,2026-11-21,Utah,TCU,53.65,,,,,-1.933,27.791,25.858,,,Site Projection
+OK,OK,,True,g811,401856754,12,2026-11-21,LSU,Tennessee,53.35,,,,,0.055,26.648,26.703,,,Site Projection
+OK,OK,,True,g812,401856755,12,2026-11-21,Arkansas,Texas,57.65,,,,,21.88,17.885,39.765,,,Site Projection
+OK,OK,,True,g813,401860920,12,2026-11-21,Washington State,Texas State,57.3,,,,,1.6,27.85,29.45,,,Site Projection
+OK,OK,,True,g814,,12,2026-11-21,Georgia Southern,Troy,54.35,,,,,3.955,25.198,29.152,,,Site Projection
+OK,OK,,True,g815,401862835,12,2026-11-21,North Texas,Tulane,54.65,,,,,7.505,23.572,31.078,,,Site Projection
+OK,OK,,True,g816,401862832,12,2026-11-21,Charlotte,Tulsa,53.95,,,,,14.283,19.834,34.117,,,Site Projection
+OK,OK,,True,g817,401862836,12,2026-11-21,UTSA,UAB,59.45,,,,,-10.717,35.084,24.367,,,Site Projection
+OK,OK,,True,g818,401858534,12,2026-11-21,Maryland,USC,53.5,,,,,18.613,17.444,36.056,,,Site Projection
+OK,OK,,True,g819,401858305,12,2026-11-21,North Carolina,Virginia,45.9,,,,,9.637,18.131,27.768,,,Site Projection
+OK,OK,,True,g820,401858535,12,2026-11-21,Indiana,Washington,50.45,,,,,-11.512,30.981,19.469,,,Site Projection
+OK,OK,,True,g821,401856868,12,2026-11-21,Houston,West Virginia,53.0,,,,,-4.14,28.57,24.43,,,Site Projection
+OK,OK,,True,g822,401864542,12,2026-11-21,New Mexico,Wyoming,46.35,,,,,-7.0,26.675,19.675,,,Site Projection
+OK,OK,,True,g823,401866470,13,2026-11-24,Kent State,Eastern Michigan,51.0,,,,,6.205,22.398,28.602,,,Site Projection
+OK,OK,,True,g824,401866471,13,2026-11-24,Miami-OH,Western Michigan,43.6,,,,,4.372,19.614,23.986,,,Site Projection
+OK,OK,,True,g825,401856879,13,2026-11-26,TCU,Texas Tech,52.75,,,,,17.41,17.67,35.08,,,Site Projection
+OK,OK,,True,g826,401866472,13,2026-11-27,Buffalo,Akron,44.35,,,,,-3.792,24.071,20.279,,,Site Projection
+OK,OK,,True,g827,401856759,13,2026-11-27,Florida,Florida State,48.2,,,,,-3.535,25.867,22.333,,,Site Projection
+OK,OK,,True,g828,401858536,13,2026-11-27,Nebraska,Iowa,49.15,,,,,9.098,20.026,29.124,,,Site Projection
+OK,OK,,True,g829,401866473,13,2026-11-27,Toledo,Ohio,42.05,,,,,-0.978,21.514,20.536,,,Site Projection
+OK,OK,,True,g830,401856762,13,2026-11-27,Mississippi State,Ole Miss,55.75,,,,,15.488,20.131,35.619,,,Site Projection
+OK,OK,,True,g831,,13,2026-11-27,Appalachian State,South Alabama,56.45,,,,,3.212,26.619,29.831,,,Site Projection
+OK,OK,,True,g832,401856756,13,2026-11-27,Texas,Texas A&M,52.95,,,,,-1.165,27.058,25.893,,,Site Projection
+OK,OK,,True,g833,401856880,13,2026-11-27,West Virginia,Utah,53.0,,,,,15.5,18.75,34.25,,,Site Projection
+OK,OK,,True,g834,401856757,13,2026-11-28,Auburn,Alabama,44.9,,,,,10.148,17.376,27.524,,,Site Projection
+OK,OK,,True,g835,401856873,13,2026-11-28,Arizona State,Arizona,50.85,,,,,5.612,22.619,28.231,,,Site Projection
+OK,OK,,True,g836,401856758,13,2026-11-28,LSU,Arkansas,54.2,,,,,-9.703,31.952,22.248,,,Site Projection
+OK,OK,,True,g837,,13,2026-11-28,Troy,Arkansas State,54.7,,,,,0.988,26.856,27.844,,,Site Projection
+OK,OK,,True,g838,401856876,13,2026-11-28,Cincinnati,BYU,53.2,,,,,12.408,20.396,32.804,,,Site Projection
+OK,OK,,True,g839,401866474,13,2026-11-28,Central Michigan,Ball State,47.95,,,,,-8.408,28.179,19.771,,,Site Projection
+OK,OK,,True,g840,401866475,13,2026-11-28,Massachusetts,Bowling Green,46.4,,,,,14.02,16.19,30.21,,,Site Projection
+OK,OK,,True,g841,401858315,13,2026-11-28,Pittsburgh,California,54.2,,,,,-3.165,28.683,25.518,,,Site Projection
+OK,OK,,True,g842,401862842,13,2026-11-28,Navy,Charlotte,53.7,,,,,-22.56,38.13,15.57,,,Site Projection
+OK,OK,,True,g843,401856764,13,2026-11-28,South Carolina,Clemson,47.4,,,,,3.08,22.16,25.24,,,Site Projection
+OK,OK,,True,g844,401856875,13,2026-11-28,Central Florida,Colorado,48.9,,,,,0.608,24.146,24.754,,,Site Projection
+OK,OK,,True,g845,,13,2026-11-28,Texas State,Colorado State,57.7,,,,,-6.8,32.25,25.45,,,Site Projection
+OK,OK,,True,g846,,13,2026-11-28,Jacksonville State,Delaware,57.45,,,,,0.655,28.398,29.053,,,Site Projection
+OK,OK,,True,g847,401862837,13,2026-11-28,Florida Atlantic,East Carolina,56.15,,,,,10.35,22.9,33.25,,,Site Projection
+OK,OK,,True,g848,,13,2026-11-28,Sam Houston,Florida International,55.3,,,,,12.18,21.56,33.74,,,Site Projection
+OK,OK,,True,g849,,13,2026-11-28,San Diego State,Fresno State,45.8,,,,,0.677,22.561,23.238,,,Site Projection
+OK,OK,,True,g850,401856760,13,2026-11-28,Georgia Tech,Georgia,51.85,,,,,21.06,15.395,36.455,,,Site Projection
+OK,OK,,True,g851,,13,2026-11-28,Louisiana Tech,Georgia Southern,54.1,,,,,2.73,25.685,28.415,,,Site Projection
+OK,OK,,True,g852,,13,2026-11-28,Louisiana,Georgia State,58.75,,,,,-7.885,33.318,25.433,,,Site Projection
+OK,OK,,True,g853,401864547,13,2026-11-28,Sacramento State,Hawaii,54.05,,,,,15.505,19.272,34.777,,,Site Projection
+OK,OK,,True,g854,401856874,13,2026-11-28,Baylor,Houston,57.3,,,,,4.758,26.271,31.029,,,Site Projection
+OK,OK,,True,g855,401858538,13,2026-11-28,Purdue,Indiana,51.05,,,,,31.735,9.657,41.392,,,Site Projection
+OK,OK,,True,g856,401856878,13,2026-11-28,Kansas State,Iowa State,50.7,,,,,-3.635,27.168,23.533,,,Site Projection
+OK,OK,,True,g857,,13,2026-11-28,Coastal Carolina,James Madison,53.6,,,,,17.887,17.857,35.743,,,Site Projection
+OK,OK,,True,g858,401856761,13,2026-11-28,Louisville,Kentucky,48.25,,,,,-2.26,25.255,22.995,,,Site Projection
+OK,OK,,True,g859,401858539,13,2026-11-28,Penn State,Maryland,50.5,,,,,-11.252,30.876,19.624,,,Site Projection
+OK,OK,,True,g860,401862838,13,2026-11-28,Temple,Memphis,58.9,,,,,10.762,24.069,34.831,,,Site Projection
+OK,OK,,True,g861,401858311,13,2026-11-28,Boston College,Miami-FL,50.45,,,,,28.387,11.032,39.419,,,Site Projection
+OK,OK,,True,g862,,13,2026-11-28,New Mexico State,Middle Tennessee,52.0,,,,,0.255,25.872,26.128,,,Site Projection
+OK,OK,,True,g863,401856763,13,2026-11-28,Oklahoma,Missouri,47.7,,,,,-1.645,24.673,23.027,,,Site Projection
+OK,OK,,True,g864,,13,2026-11-28,Liberty,Missouri State,54.4,,,,,-4.29,29.345,25.055,,,Site Projection
+OK,OK,,True,g865,401864546,13,2026-11-28,Air Force,New Mexico,52.35,,,,,5.69,23.33,29.02,,,Site Projection
+OK,OK,,True,g866,401858313,13,2026-11-28,NC State,North Carolina,50.8,,,,,-0.235,25.517,25.282,,,Site Projection
+OK,OK,,True,g867,401862843,13,2026-11-28,UAB,North Texas,58.5,,,,,14.995,21.753,36.748,,,Site Projection
+OK,OK,,True,g868,401864550,13,2026-11-28,UTEP,Northern Illinois,47.5,,,,,2.288,22.606,24.894,,,Site Projection
+OK,OK,,True,g869,401858537,13,2026-11-28,Illinois,Northwestern,49.55,,,,,-2.955,26.252,23.297,,,Site Projection
+OK,OK,,True,g871,401856877,13,2026-11-28,Kansas,Oklahoma State,54.15,,,,,0.268,26.941,27.209,,,Site Projection
+OK,OK,,True,g872,,13,2026-11-28,Southern Miss,Old Dominion,50.55,,,,,13.185,18.682,31.867,,,Site Projection
+OK,OK,,True,g873,401858541,13,2026-11-28,Washington,Oregon,51.65,,,,,16.012,17.819,33.831,,,Site Projection
+OK,OK,,True,g874,401862841,13,2026-11-28,Army,Rice,50.65,,,,,-9.082,29.866,20.784,,,Site Projection
+OK,OK,,True,g875,401858542,13,2026-11-28,Michigan State,Rutgers,55.85,,,,,2.592,26.629,29.221,,,Site Projection
+OK,OK,,True,g876,401864549,13,2026-11-28,North Dakota State,San Jose State,51.2,,,,,-7.744,29.472,21.728,,,Site Projection
+OK,OK,,True,g877,401862839,13,2026-11-28,Tulane,South Florida,54.05,,,,,3.665,25.192,28.857,,,Site Projection
+OK,OK,,True,g878,401858316,13,2026-11-28,SMU,Stanford,49.65,,,,,-13.61,31.63,18.02,,,Site Projection
+OK,OK,,True,g879,401858314,13,2026-11-28,Notre Dame,Syracuse,51.85,,,,,-27.515,39.683,12.168,,,Site Projection
+OK,OK,,True,g880,401858543,13,2026-11-28,USC,UCLA,55.55,,,,,-13.232,34.391,21.159,,,Site Projection
+OK,OK,,True,g881,,13,2026-11-28,Marshall,UL-Monroe,57.95,,,,,-10.445,34.198,23.753,,,Site Projection
+OK,OK,,True,g882,401864548,13,2026-11-28,Nevada,UNLV,53.5,,,,,16.698,18.401,35.099,,,Site Projection
+OK,OK,,True,g883,401862840,13,2026-11-28,Tulsa,UTSA,57.95,,,,,9.3,24.325,33.625,,,Site Projection
+OK,OK,,True,g884,,13,2026-11-28,Boise State,Utah State,53.65,,,,,-8.38,31.015,22.635,,,Site Projection
+OK,OK,,True,g885,401856765,13,2026-11-28,Tennessee,Vanderbilt,59.6,,,,,-3.045,31.323,28.277,,,Site Projection
+OK,OK,,True,g886,401858317,13,2026-11-28,Virginia,Virginia Tech,49.4,,,,,0.03,24.685,24.715,,,Site Projection
+OK,OK,,True,g887,401858312,13,2026-11-28,Duke,Wake Forest,52.6,,,,,2.482,25.059,27.541,,,Site Projection
+OK,OK,,True,g888,,13,2026-11-28,Oregon State,Washington State,46.2,,,,,9.807,18.197,28.004,,,Site Projection
+OK,OK,,True,g889,,13,2026-11-28,Kennesaw State,Western Kentucky,53.8,,,,,6.46,23.67,30.13,,,Site Projection
+OK,OK,,True,g890,401858544,13,2026-11-28,Minnesota,Wisconsin,41.95,,,,,2.86,19.545,22.405,,,Site Projection
+OK,OK,,True,g891,401861969,13,2026-11-28,Connecticut,Wyoming,46.7,,,,,-0.03,23.365,23.335,,,Site Projection
+OK,OK,,True,g902,401862844,15,2026-12-12,Navy,Army,53.4,,,,,-4.258,28.829,24.571,,,Site Projection

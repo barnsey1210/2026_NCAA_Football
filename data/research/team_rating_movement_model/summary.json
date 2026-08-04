@@ -1,0 +1,589 @@
+{
+  "schema_version": "team-rating-movement-research-v1",
+  "target_definition": "market-implied rating snapshot through completed Week N minus snapshot through Week N-1 for the same team; positive means upgrade",
+  "rating_state_source": "data/ratings/market_implied_ratings_history.csv",
+  "rating_definition": "close-only ridge; home closing margin = home rating - away rating + 2.5 HFA",
+  "weekly_cutoff": "all closing lines through completed week",
+  "neutral_site": "unavailable in historical core source; uncertainty explicit; 2.5 HFA retained",
+  "offense_defense_target": "not identifiable honestly from combined spread rating; not modeled",
+  "dataset_by_season": [
+    {
+      "season": 2021,
+      "team_game_rows": 1464,
+      "eligible_targets": 1330,
+      "games": 732,
+      "opener_spread_coverage": 1,
+      "opener_total_coverage": 1
+    },
+    {
+      "season": 2022,
+      "team_game_rows": 1468,
+      "eligible_targets": 1328,
+      "games": 734,
+      "opener_spread_coverage": 11,
+      "opener_total_coverage": 11
+    },
+    {
+      "season": 2023,
+      "team_game_rows": 1500,
+      "eligible_targets": 1362,
+      "games": 750,
+      "opener_spread_coverage": 420,
+      "opener_total_coverage": 318
+    },
+    {
+      "season": 2024,
+      "team_game_rows": 1498,
+      "eligible_targets": 1361,
+      "games": 749,
+      "opener_spread_coverage": 716,
+      "opener_total_coverage": 708
+    },
+    {
+      "season": 2025,
+      "team_game_rows": 1524,
+      "eligible_targets": 1385,
+      "games": 762,
+      "opener_spread_coverage": 756,
+      "opener_total_coverage": 735
+    }
+  ],
+  "movement_distribution": {
+    "count": 6766.0,
+    "mean": 0.013745284185213449,
+    "std": 1.6713828582885935,
+    "min": -11.786899916106954,
+    "5%": -2.3260266423699862,
+    "25%": -0.6584282705613151,
+    "50%": -0.011671739665878533,
+    "75%": 0.6333112490501351,
+    "95%": 2.4089800570704223,
+    "max": 11.510922365788648
+  },
+  "feature_availability": [
+    {
+      "feature": "ats_margin",
+      "coverage": 1.0
+    },
+    {
+      "feature": "total_residual",
+      "coverage": 1.0
+    },
+    {
+      "feature": "final_margin",
+      "coverage": 1.0
+    },
+    {
+      "feature": "closing_spread",
+      "coverage": 1.0
+    },
+    {
+      "feature": "raw_pbp_performance",
+      "coverage": 1.0
+    },
+    {
+      "feature": "rules_repeatable_spread",
+      "coverage": 1.0
+    },
+    {
+      "feature": "regularized_repeatable_spread",
+      "coverage": 1.0
+    },
+    {
+      "feature": "residualized_repeatable_spread",
+      "coverage": 1.0
+    },
+    {
+      "feature": "repeatable_offense_performance",
+      "coverage": 1.0
+    },
+    {
+      "feature": "repeatable_defense_performance",
+      "coverage": 1.0
+    },
+    {
+      "feature": "off_ppa",
+      "coverage": 1.0
+    },
+    {
+      "feature": "off_success_rate",
+      "coverage": 1.0
+    },
+    {
+      "feature": "off_explosiveness",
+      "coverage": 1.0
+    },
+    {
+      "feature": "def_ppa_allowed",
+      "coverage": 1.0
+    },
+    {
+      "feature": "def_success_allowed",
+      "coverage": 1.0
+    },
+    {
+      "feature": "def_explosiveness_allowed",
+      "coverage": 1.0
+    },
+    {
+      "feature": "def_havoc_rate",
+      "coverage": 0.9967802522135766
+    },
+    {
+      "feature": "off_plays",
+      "coverage": 1.0
+    },
+    {
+      "feature": "drive_off_points_per_opportunity",
+      "coverage": 0.9930238797960826
+    },
+    {
+      "feature": "drive_def_points_per_opportunity_allowed",
+      "coverage": 0.9930238797960826
+    },
+    {
+      "feature": "gc_game_control_index",
+      "coverage": 1.0
+    },
+    {
+      "feature": "trailing_2_game_ats",
+      "coverage": 1.0
+    },
+    {
+      "feature": "trailing_3_game_ats",
+      "coverage": 1.0
+    },
+    {
+      "feature": "trailing_2_game_ppa",
+      "coverage": 1.0
+    },
+    {
+      "feature": "trailing_3_game_ppa",
+      "coverage": 1.0
+    },
+    {
+      "feature": "recent_form_vs_season",
+      "coverage": 1.0
+    },
+    {
+      "feature": "opponent_adjusted_recent_form",
+      "coverage": 0.9077005634558626
+    }
+  ],
+  "selection": {
+    "train_seasons": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection_season": 2024,
+    "holdout_season": 2025,
+    "no_move_threshold": 0.75,
+    "direction_model": "ordinal_ridge_proxy",
+    "magnitude_model": "huber",
+    "features": [
+      "ats_margin",
+      "total_residual",
+      "final_margin",
+      "closing_spread",
+      "raw_pbp_performance",
+      "rules_repeatable_spread",
+      "regularized_repeatable_spread",
+      "residualized_repeatable_spread",
+      "repeatable_offense_performance",
+      "repeatable_defense_performance",
+      "off_ppa",
+      "off_success_rate",
+      "off_explosiveness",
+      "def_ppa_allowed",
+      "def_success_allowed",
+      "def_explosiveness_allowed",
+      "def_havoc_rate",
+      "off_plays",
+      "drive_off_points_per_opportunity",
+      "drive_def_points_per_opportunity_allowed",
+      "gc_game_control_index",
+      "trailing_2_game_ats",
+      "trailing_3_game_ats",
+      "trailing_2_game_ppa",
+      "trailing_3_game_ppa",
+      "recent_form_vs_season",
+      "opponent_adjusted_recent_form"
+    ],
+    "confidence_cutoffs": {
+      "high_probability": 0.65,
+      "high_magnitude": 0.5,
+      "medium_probability": 0.52,
+      "minimum_feature_coverage": 0.75
+    },
+    "selected_without_holdout": true
+  },
+  "selection_lock_sha256": "2b716a00a3b85ed1d9dfdb261a69d57ef2e57816c021a1fce30b88065321da74",
+  "holdout_direction": {
+    "n": 1385,
+    "accuracy": 0.6620938628158844,
+    "balanced_accuracy": 0.6260565659056647,
+    "macro_f1": 0.637596290900286,
+    "per_class": {
+      "downgrade": {
+        "precision": 0.6544117647058824,
+        "recall": 0.55625,
+        "f1": 0.6013513513513513,
+        "support": 320
+      },
+      "no_change": {
+        "precision": 0.676039119804401,
+        "recall": 0.7442799461641992,
+        "f1": 0.7085201793721974,
+        "support": 743
+      },
+      "upgrade": {
+        "precision": 0.6305084745762712,
+        "recall": 0.577639751552795,
+        "f1": 0.6029173419773096,
+        "support": 322
+      }
+    },
+    "confusion_matrix": [
+      [
+        178,
+        135,
+        7
+      ],
+      [
+        88,
+        553,
+        102
+      ],
+      [
+        6,
+        130,
+        186
+      ]
+    ],
+    "multiclass_brier": 0.561293274336595,
+    "log_loss": 0.9254878307059489
+  },
+  "holdout_magnitude": {
+    "n": 1385,
+    "mae": 0.840494539327848,
+    "median_absolute_error": 0.5162090432232076,
+    "rmse": 1.4060445410852094,
+    "signed_bias": -0.02094501925056912,
+    "correlation": 0.6867281278185365,
+    "overshoot_rate": 0.35018050541516244,
+    "undershoot_rate": 0.6498194945848376
+  },
+  "direction_family_comparison": [
+    {
+      "model": "rules_based",
+      "n": 1385,
+      "accuracy": 0.38483754512635376,
+      "balanced_accuracy": 0.48863519835929,
+      "macro_f1": 0.3866541507282239
+    },
+    {
+      "model": "ordinal_ridge_proxy",
+      "n": 1385,
+      "accuracy": 0.6620938628158844,
+      "balanced_accuracy": 0.6260565659056647,
+      "macro_f1": 0.637596290900286
+    },
+    {
+      "model": "multinomial_logistic",
+      "n": 1385,
+      "accuracy": 0.6483754512635379,
+      "balanced_accuracy": 0.5203093782132199,
+      "macro_f1": 0.5459604895649077
+    },
+    {
+      "model": "gradient_boosted_stumps",
+      "n": 1385,
+      "accuracy": 0.6606498194945848,
+      "balanced_accuracy": 0.5732180823643168,
+      "macro_f1": 0.6018465726085652
+    }
+  ],
+  "team_movement_method_comparison": [
+    {
+      "method": "raw_ats",
+      "n": 1385,
+      "mae": 11.990627808021603,
+      "median_absolute_error": 10.21198527476082,
+      "rmse": 15.200466124175879,
+      "signed_bias": -0.03813379362471791,
+      "correlation": -0.02497884802739768,
+      "overshoot_rate": 0.9249097472924188,
+      "undershoot_rate": 0.07509025270758123
+    },
+    {
+      "method": "raw_pbp",
+      "n": 1385,
+      "mae": 3.321390790007988,
+      "median_absolute_error": 2.461682807181969,
+      "rmse": 4.578625654282202,
+      "signed_bias": -0.020789562845653083,
+      "correlation": 0.41515385206799,
+      "overshoot_rate": 0.8093862815884476,
+      "undershoot_rate": 0.19061371841155234
+    },
+    {
+      "method": "rules_cleanup",
+      "n": 1385,
+      "mae": 3.7051238365767016,
+      "median_absolute_error": 2.7081747874641455,
+      "rmse": 5.095581321129096,
+      "signed_bias": -0.019764209441013807,
+      "correlation": 0.4130924132659301,
+      "overshoot_rate": 0.8397111913357401,
+      "undershoot_rate": 0.16028880866425993
+    },
+    {
+      "method": "regularized_repeatable",
+      "n": 1385,
+      "mae": 1.055636851168506,
+      "median_absolute_error": 0.7004693553653665,
+      "rmse": 1.6490848908392595,
+      "signed_bias": -0.005967795641165383,
+      "correlation": 0.4307444173104572,
+      "overshoot_rate": 0.348014440433213,
+      "undershoot_rate": 0.651985559566787
+    },
+    {
+      "method": "residualized",
+      "n": 1385,
+      "mae": 11.668723720813498,
+      "median_absolute_error": 9.535794917605804,
+      "rmse": 14.878507998814706,
+      "signed_bias": -0.3822984257679061,
+      "correlation": -0.06944913767219016,
+      "overshoot_rate": 0.9285198555956679,
+      "undershoot_rate": 0.07148014440433213
+    },
+    {
+      "method": "selected_huber",
+      "n": 1385,
+      "mae": 0.840494539327848,
+      "median_absolute_error": 0.5162090432232076,
+      "rmse": 1.4060445410852094,
+      "signed_bias": -0.02094501925056912,
+      "correlation": 0.6867281278185365,
+      "overshoot_rate": 0.35018050541516244,
+      "undershoot_rate": 0.6498194945848376
+    },
+    {
+      "method": "gradient_boosted_stumps",
+      "n": 1385,
+      "mae": 0.903971300896847,
+      "median_absolute_error": 0.5638527038304577,
+      "rmse": 1.4900921990657527,
+      "signed_bias": 0.004983014663913325,
+      "correlation": 0.609262629607394,
+      "overshoot_rate": 0.35090252707581226,
+      "undershoot_rate": 0.6490974729241877
+    }
+  ],
+  "adjustment_size_results": [
+    {
+      "predicted_size": "0-.25",
+      "n": 388,
+      "mae": 0.6122512907919553,
+      "median_absolute_error": 0.48162178931165844,
+      "rmse": 0.8609043901337379,
+      "signed_bias": -0.01632448343364571,
+      "correlation": 0.21695799527788603,
+      "overshoot_rate": 0.13659793814432988,
+      "undershoot_rate": 0.8634020618556701
+    },
+    {
+      "predicted_size": ".25-.5",
+      "n": 356,
+      "mae": 0.6947666758847199,
+      "median_absolute_error": 0.4625905641609601,
+      "rmse": 1.0727291890988575,
+      "signed_bias": 0.018185139245454878,
+      "correlation": 0.38568245259390777,
+      "overshoot_rate": 0.3651685393258427,
+      "undershoot_rate": 0.6348314606741573
+    },
+    {
+      "predicted_size": ".5-1",
+      "n": 377,
+      "mae": 0.7164232398508371,
+      "median_absolute_error": 0.470065599144013,
+      "rmse": 1.0998926374055273,
+      "signed_bias": 0.035164679800680256,
+      "correlation": 0.6587890728296389,
+      "overshoot_rate": 0.48010610079575594,
+      "undershoot_rate": 0.519893899204244
+    },
+    {
+      "predicted_size": "1-2",
+      "n": 236,
+      "mae": 1.3608374597835327,
+      "median_absolute_error": 0.7114850974520871,
+      "rmse": 2.1141473036538247,
+      "signed_bias": -0.19933998460036131,
+      "correlation": 0.7541132975432852,
+      "overshoot_rate": 0.4661016949152542,
+      "undershoot_rate": 0.5338983050847458
+    },
+    {
+      "predicted_size": "2+",
+      "n": 28,
+      "mae": 3.1409034855054023,
+      "median_absolute_error": 1.6395349567262978,
+      "rmse": 4.35047372388313,
+      "signed_bias": 0.16565322927368548,
+      "correlation": 0.7996366970199844,
+      "overshoot_rate": 0.39285714285714285,
+      "undershoot_rate": 0.6071428571428571
+    }
+  ],
+  "week_by_week_results": [
+    {
+      "week": 3,
+      "n": 3,
+      "projected_close_mae": 9.594581900388897,
+      "positive_clv_rate": 0.6666666666666666,
+      "average_clv": 1.6666666666666667,
+      "ats_win_rate": 0.3333333333333333
+    },
+    {
+      "week": 4,
+      "n": 36,
+      "projected_close_mae": 7.942728043974948,
+      "positive_clv_rate": 0.3888888888888889,
+      "average_clv": 0.0,
+      "ats_win_rate": 0.5428571428571428
+    },
+    {
+      "week": 5,
+      "n": 51,
+      "projected_close_mae": 6.521822651919462,
+      "positive_clv_rate": 0.35294117647058826,
+      "average_clv": 0.1568627450980392,
+      "ats_win_rate": 0.49019607843137253
+    },
+    {
+      "week": 6,
+      "n": 50,
+      "projected_close_mae": 6.545934251586301,
+      "positive_clv_rate": 0.3541666666666667,
+      "average_clv": -0.020833333333333332,
+      "ats_win_rate": 0.5208333333333334
+    },
+    {
+      "week": 7,
+      "n": 56,
+      "projected_close_mae": 4.103508627066287,
+      "positive_clv_rate": 0.45454545454545453,
+      "average_clv": 0.43636363636363634,
+      "ats_win_rate": 0.6
+    },
+    {
+      "week": 8,
+      "n": 59,
+      "projected_close_mae": 4.66938787555341,
+      "positive_clv_rate": 0.423728813559322,
+      "average_clv": 0.3305084745762712,
+      "ats_win_rate": 0.5862068965517241
+    },
+    {
+      "week": 9,
+      "n": 53,
+      "projected_close_mae": 4.8230569320115,
+      "positive_clv_rate": 0.5283018867924528,
+      "average_clv": 0.5188679245283019,
+      "ats_win_rate": 0.4528301886792453
+    },
+    {
+      "week": 10,
+      "n": 52,
+      "projected_close_mae": 4.235305739745665,
+      "positive_clv_rate": 0.34615384615384615,
+      "average_clv": 0.019230769230769232,
+      "ats_win_rate": 0.5384615384615384
+    },
+    {
+      "week": 11,
+      "n": 51,
+      "projected_close_mae": 4.499903677985449,
+      "positive_clv_rate": 0.38,
+      "average_clv": 0.81,
+      "ats_win_rate": 0.58
+    },
+    {
+      "week": 12,
+      "n": 58,
+      "projected_close_mae": 4.142299542855859,
+      "positive_clv_rate": 0.39655172413793105,
+      "average_clv": 0.23275862068965517,
+      "ats_win_rate": 0.4827586206896552
+    },
+    {
+      "week": 13,
+      "n": 60,
+      "projected_close_mae": 4.005059852834021,
+      "positive_clv_rate": 0.38333333333333336,
+      "average_clv": 0.4583333333333333,
+      "ats_win_rate": 0.38333333333333336
+    },
+    {
+      "week": 14,
+      "n": 67,
+      "projected_close_mae": 4.685455354494742,
+      "positive_clv_rate": 0.373134328358209,
+      "average_clv": 0.20149253731343283,
+      "ats_win_rate": 0.4393939393939394
+    },
+    {
+      "week": 15,
+      "n": 9,
+      "projected_close_mae": 3.457892517252681,
+      "positive_clv_rate": 0.125,
+      "average_clv": -0.25,
+      "ats_win_rate": 0.625
+    },
+    {
+      "week": 16,
+      "n": 1,
+      "projected_close_mae": 2.4091350629083905,
+      "positive_clv_rate": 0.0,
+      "average_clv": 0.0,
+      "ats_win_rate": 0.0
+    }
+  ],
+  "rating_system_snapshot_audit": {
+    "SP+": "not historically frozen/legitimate for weekly 2021-25",
+    "FPI": "not historically frozen/legitimate for weekly 2021-25",
+    "TeamRankings": "not historically frozen/legitimate for weekly 2021-25"
+  },
+  "recommendation": "The two-stage structure wins projected-close MAE on locked 2025, but production adoption still requires an independent forward-season confirmation because opener coverage is sparse before 2024.",
+  "limitations": [
+    "Historical neutral-site flags are absent, so HFA treatment is uncertain for neutral games.",
+    "2021-22 opener coverage is nearly absent; CLV and betting evaluation is dominated by 2024-25.",
+    "Turnover, non-offensive touchdown, weather, and injury fields are not present in the frozen source and are left missing, never imputed as observed facts.",
+    "Separate offensive and defensive market-rating changes cannot be identified from the combined spread-rating state.",
+    "Combined total projection is secondary and does not claim separate offense/defense market movements.",
+    "SP+/FPI/TeamRankings weekly movement models are withheld because snapshots are not verifiably frozen.",
+    "Quantile regression was unavailable in the installed dependency set; a deterministic gradient-boosted-stump challenger was evaluated."
+  ],
+  "protected_hashes_before": {
+    "config/market_shadow_production.json": "ec4926e1961c12132dd30e2d49ca7d5cbd1b10bc4e66ee6e0fb475d4a51e0a24",
+    "scripts/site/build_saturday_shadow_lines.py": "58cda329e2e1c65f08613fd3dba59aff5d7eca93288966f09eeb0bd03f9445db",
+    "scripts/site/build_postgame_shadow_updates.py": "238f2403c4bb7702729799d303ba7c522a5ce4e1d4637d99df43563d71dabf78",
+    "scripts/site/build_market_shadow_production_layer.py": "d905fd24a43e6559a88e171b1bece528409d06d1a905c36382b6c36f0d39747f",
+    "openers_v2.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "schedule_v2.html": "72c67241a6e47b9bba3abc31486c1fbd1fa64b9efd5c608f5ba3d2bb9d425d3d",
+    "build/public_site/openers.html": "7501047d520c05216d51065e32837a0386579f7e3f2595e78c2fc72d5cd163ef",
+    "build/public_site/schedule.html": "6f6441bd87454d8785aa1e1df9140f10ab89690e4cc085486472457646db97c6",
+    "data/site/postgame_shadow_updates.json": "4a8f023c92ebbdcf17bd2f8c939413ca078b6f537f69fa7333b1c7443bfeffba",
+    "data/site/saturday_shadow_lines.json": "bba0ee75906637598c54e42f030c2ca27fea2a22d1dd30fd713a7a777a177e83",
+    "data/site/schedule_live_enrichment.json": "fe788eb85face5325562e4bd0a24a46a2a3a14a13d629c8122a48834aea091f6",
+    "daily_market_update.sh": "550e85d12b01c83ec351598d70c3e5a70a01210841e8910e23f6fe2ca0a8588b",
+    "scripts/publish/publish_site.sh": "5863009231ccd545e0cac6efb0f0dde99a51aa117661d8367192b6fc49e1b903",
+    "data/ratings/ratings_latest.csv": "d1a2be380aae39ebdb820ce6c5b0d9f0c81783917334637a0adde85d4fe08ba5",
+    "data/projections/game_projections_2026.csv": null
+  }
+}

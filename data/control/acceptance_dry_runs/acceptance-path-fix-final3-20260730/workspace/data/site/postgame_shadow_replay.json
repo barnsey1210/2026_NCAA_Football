@@ -1,0 +1,98 @@
+{
+  "schema_version": "postgame-shadow-replay-v2",
+  "built_at": "2026-07-24T17:02:19.734303+00:00",
+  "mode": "historical_replay_shadow_only",
+  "applied_to_ratings": false,
+  "applied_to_projections": false,
+  "source_manifest": "data/replay/cfbd_shadow/2025_week_1/401756846_manifest.json",
+  "game": {
+    "game_id": "401756846",
+    "season": 2025,
+    "week": 1,
+    "away_team": "Iowa State",
+    "home_team": "Kansas State",
+    "away_points": 24.0,
+    "home_points": 21.0,
+    "closing_spread_home": -2.5,
+    "closing_total": 51.5,
+    "line_provider": "ESPN Bet",
+    "plays_count": 168
+  },
+  "spread_updates": [
+    {
+      "team": "Kansas State",
+      "opponent": "Iowa State",
+      "team_margin": -3.0,
+      "team_closing_spread": -2.5,
+      "team_ats_margin": -5.5,
+      "abs_team_closing_spread": 2.5,
+      "predicted_next_market_innovation": 0.1490378412876834,
+      "actual_next_market_innovation_2025": 14.0,
+      "score_plus_pbp_prediction": -0.039377782282193664,
+      "evidence_file": "data/research/postgame_pbp_market_rating_update_2021_2024/holdout_2025_predictions.csv"
+    },
+    {
+      "team": "Iowa State",
+      "opponent": "Kansas State",
+      "team_margin": 3.0,
+      "team_closing_spread": 2.5,
+      "team_ats_margin": 5.5,
+      "abs_team_closing_spread": 2.5,
+      "predicted_next_market_innovation": -0.017472927167222093,
+      "actual_next_market_innovation_2025": 1.0,
+      "score_plus_pbp_prediction": -0.6138742917976371,
+      "evidence_file": "data/research/postgame_pbp_market_rating_update_2021_2024/holdout_2025_predictions.csv"
+    }
+  ],
+  "total_update": {
+    "closing_total": 51.5,
+    "actual_total": 45.0,
+    "completed_game_total_residual": -6.5,
+    "next_game_predictions": [
+      {
+        "next_game_id": "401752822",
+        "next_home_team": "Iowa State",
+        "next_away_team": "Iowa",
+        "home_prev_game_id": "401756846.0",
+        "away_prev_game_id": "",
+        "predicted_next_total_innovation": -16.254690953561713,
+        "score_only_prediction": -16.333824692153783,
+        "actual_next_total_innovation_2025": -9.030879180151118,
+        "evidence_file": "data/research/postgame_total_market_update_baseline_aware_2021_2025/holdout_2025_predictions_baseline_aware.csv"
+      },
+      {
+        "next_game_id": "401756882",
+        "next_home_team": "Kansas State",
+        "next_away_team": "Army",
+        "home_prev_game_id": "401756846.0",
+        "away_prev_game_id": "",
+        "predicted_next_total_innovation": -16.048808238341746,
+        "score_only_prediction": -16.317815860474884,
+        "actual_next_total_innovation_2025": -4.030879180151118,
+        "evidence_file": "data/research/postgame_total_market_update_baseline_aware_2021_2025/holdout_2025_predictions_baseline_aware.csv"
+      }
+    ],
+    "pbp_metrics": {
+      "Iowa State": {
+        "offensive_plays": 76,
+        "yards_per_play": 5.211,
+        "success_rate": 0.36,
+        "explosive_plays": 11,
+        "mean_ppa": 0.1205,
+        "scoring_plays": 4
+      },
+      "Kansas State": {
+        "offensive_plays": 59,
+        "yards_per_play": 6.831,
+        "success_rate": 0.3559,
+        "explosive_plays": 12,
+        "mean_ppa": 0.1144,
+        "scoring_plays": 3
+      }
+    }
+  },
+  "matched_research_rows": 4,
+  "total_linkage_candidates": [],
+  "warnings": [],
+  "status": "complete"
+}

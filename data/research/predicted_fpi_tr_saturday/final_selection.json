@@ -1,0 +1,21 @@
+{
+  "source_models": {
+    "FPI": "elastic_net",
+    "TeamRankings": "elastic_net"
+  },
+  "selected_on_2024_only": true,
+  "fixed_weights": {
+    "market": 0.25,
+    "sp_plus": 0.25,
+    "predicted_fpi": 0.4,
+    "predicted_teamrankings": 0.1
+  },
+  "ridge_stack_coefficients": [
+    -2.503787878787879,
+    1.3173442519763883,
+    2.391685428522175,
+    3.2230440517510375,
+    3.3376631476433762
+  ],
+  "holdout_never_used_for_selection": true
+}

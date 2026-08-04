@@ -1,0 +1,123 @@
+{
+  "schema_version": "historical-hfa-study-v1",
+  "generated_at": "2026-07-31T04:43:43.403471+00:00",
+  "research_only": true,
+  "production_files_changed": false,
+  "design": {
+    "development_seasons": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection_season": 2024,
+    "locked_holdout_season": 2025,
+    "generic_hfa": 2.5,
+    "target": "PredictionTracker closing home margin minus prior-week neutral SP+ rating difference",
+    "current_site_hfa_source": "data/snapshots/preseason/preseason_db.json",
+    "neutral_policy": "Neutral-site games excluded from HFA estimation and retained as a calibration control.",
+    "current_site_benchmark_note": "The current 2026 site HFA is a benchmark only and may contain information from after historical games."
+  },
+  "matching": [
+    {
+      "season": 2021,
+      "prediction_tracker_rows": 770,
+      "cfbd_matched_rows": 609,
+      "cfbd_unmatched_rows": 161
+    },
+    {
+      "season": 2022,
+      "prediction_tracker_rows": 776,
+      "cfbd_matched_rows": 610,
+      "cfbd_unmatched_rows": 166
+    },
+    {
+      "season": 2023,
+      "prediction_tracker_rows": 792,
+      "cfbd_matched_rows": 623,
+      "cfbd_unmatched_rows": 169
+    },
+    {
+      "season": 2024,
+      "prediction_tracker_rows": 799,
+      "cfbd_matched_rows": 631,
+      "cfbd_unmatched_rows": 168
+    },
+    {
+      "season": 2025,
+      "prediction_tracker_rows": 761,
+      "cfbd_matched_rows": 637,
+      "cfbd_unmatched_rows": 124
+    }
+  ],
+  "eligible_games": {
+    "development": 1340,
+    "selection_2024": 436,
+    "holdout_2025": 428,
+    "neutral_control": 81
+  },
+  "winsorization": {
+    "lower_quantile": 0.02,
+    "upper_quantile": 0.98,
+    "lower_value": -7.199999999999999,
+    "upper_value": 13.322000000000003
+  },
+  "selected_shrinkage": {
+    "conference": 80.0,
+    "team": 15.0,
+    "selected_using": "2024 MAE only"
+  },
+  "development_global_hfa": 2.5392492537313434,
+  "holdout_ranking": [
+    {
+      "partition": "holdout_2025",
+      "season_min": 2025,
+      "season_max": 2025,
+      "model": "conference_team",
+      "games": 428,
+      "mae_vs_closing_margin": 3.7332097387306464,
+      "rmse_vs_closing_margin": 5.192471491710333,
+      "mean_error": -0.4335349599734699,
+      "within_1_point_pct": 21.02803738317757
+    },
+    {
+      "partition": "holdout_2025",
+      "season_min": 2025,
+      "season_max": 2025,
+      "model": "conference",
+      "games": 428,
+      "mae_vs_closing_margin": 3.7398391313278796,
+      "rmse_vs_closing_margin": 5.290334375844447,
+      "mean_error": -0.43359788328771026,
+      "within_1_point_pct": 21.261682242990652
+    },
+    {
+      "partition": "holdout_2025",
+      "season_min": 2025,
+      "season_max": 2025,
+      "model": "generic_2_5",
+      "games": 428,
+      "mae_vs_closing_margin": 3.7523364485981308,
+      "rmse_vs_closing_margin": 5.303864752085145,
+      "mean_error": -0.4714953271028038,
+      "within_1_point_pct": 22.19626168224299
+    },
+    {
+      "partition": "holdout_2025",
+      "season_min": 2025,
+      "season_max": 2025,
+      "model": "current_site",
+      "games": 428,
+      "mae_vs_closing_margin": 3.7957943925233644,
+      "rmse_vs_closing_margin": 5.353547168907697,
+      "mean_error": -0.530841121495327,
+      "within_1_point_pct": 21.02803738317757
+    }
+  ],
+  "limitations": [
+    "SP+ is used as the neutral-strength baseline, so the estimated residual includes SP+ projection error.",
+    "PredictionTracker `line` is treated as the later or closing market home margin based on repository usage.",
+    "Current site HFA values are 2026 values and are only a benchmark, not a leakage-safe historical candidate.",
+    "Conference membership is taken from each historical CFBD game, so realignment is handled by season.",
+    "Team estimates are shrunk toward historical conference estimates to reduce small-sample noise."
+  ]
+}

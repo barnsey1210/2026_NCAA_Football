@@ -1,0 +1,25 @@
+{
+  "score_only": {
+    "n": 679,
+    "baseline_mae": 4.03654009416929,
+    "model_mae": 3.8270895259380837,
+    "mae_improvement_pct": 5.188863812693293,
+    "direction_accuracy": 0.6023564064801178,
+    "correlation": 0.3237847498753636
+  },
+  "score_plus_pbp": {
+    "n": 679,
+    "baseline_mae": 4.03654009416929,
+    "model_mae": 3.5336425179225865,
+    "mae_improvement_pct": 12.458629532086892,
+    "direction_accuracy": 0.7069219440353461,
+    "correlation": 0.5078985168388337
+  },
+  "linkage_columns": [
+    "home_prev_game_id",
+    "away_prev_game_id"
+  ],
+  "target": "next-game closing-total innovation versus rolling market-implied offense/defense baseline",
+  "games_source": "data/research/pbp_market_modeling_2021_2025/full_game_modeling_rows.csv",
+  "rows": 679
+}

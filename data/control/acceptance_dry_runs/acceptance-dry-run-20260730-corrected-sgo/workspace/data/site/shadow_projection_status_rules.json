@@ -1,0 +1,14 @@
+{
+  "schema_version": "shadow-projection-status-v1",
+  "statuses": {
+    "pending": "Required completed-game data is missing or processing has not finished.",
+    "partial": "One team's update is available, but the next opponent has an intervening game that is not yet processed.",
+    "complete": "All applicable team updates are current. An idle or bye opponent uses its unchanged current rating."
+  },
+  "independent_models": true,
+  "notes": [
+    "Spread and total statuses are evaluated separately.",
+    "A bye does not prevent completion.",
+    "Use each team's most recent completed eligible game before the upcoming matchup."
+  ]
+}
