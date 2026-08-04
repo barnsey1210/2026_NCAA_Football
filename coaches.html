@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coaches | War Room</title>
+<style>
+:root{
+  --bg:#020812;--panel:#07182a;--line:#214a70;--text:#f8fbff;
+  --muted:#9eb1c5;--gold:#ffc83d;--purple:#c18cff;--blue:#3caaff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--text);
+  font:14px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at 18% -8%,rgba(61,168,255,.16),transparent 30%),linear-gradient(180deg,#020b18,#01070f);
+}
+a{color:inherit;text-decoration:none}
+.page{width:min(1180px,calc(100vw - 24px));margin:auto}
+header{
+  min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  border-bottom:1px solid #17395d
+}
+.brand strong{display:block;font:900 38px/.9 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif}
+.brand strong span{color:var(--blue)}
+.brand small{display:block;margin-top:7px;color:var(--gold);font-size:9px;font-weight:1000;letter-spacing:.15em}
+nav{display:flex;gap:16px;align-items:center;font-size:12px;font-weight:900;color:#c3cfdd}
+nav a.active{color:var(--gold)}
+.hero{
+  margin-top:24px;padding:28px;border:1px solid var(--line);border-radius:12px;
+  background:radial-gradient(circle at 85% 0,rgba(193,140,255,.12),transparent 34%),linear-gradient(180deg,#081b2f,#04111f)
+}
+.kicker{color:var(--purple);font-weight:1000;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+h1{margin:8px 0 0;font:900 42px/1 "Arial Narrow",Inter,sans-serif}
+p{max-width:780px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.card{padding:16px;border:1px solid #2d5278;border-radius:9px;background:#061421}
+.card span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}
+.card b{display:block;margin-top:7px;color:var(--purple);font-size:22px}
+.notice{
+  margin-top:12px;padding:14px 16px;border-left:4px solid var(--gold);
+  background:#111b27;color:#d9e4ef
+}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.button{padding:10px 14px;border-radius:7px;background:#153c61;border:1px solid #3c6d9c;font-weight:900}
+.button.primary{background:#5b3b84;border-color:#9f75d3}
+footer{margin-top:28px;padding:16px 0;border-top:1px solid #17395d;color:#7f93aa;font-size:11px}
+@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}nav{display:none}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <a class="brand" href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="ratings.html">Ratings</a>
+    <a href="matchups.html">Matchups</a>
+    <a href="odds.html">Odds</a>
+    <a href="futures.html">Futures</a>
+    <a class="active" href="coaches.html">Coaches</a>
+    <a href="betting.html">Betting</a>
+  </nav>
+</header>
+
+<main class="hero">
+  <div class="kicker">Coach Trends</div>
+  <h1>Coaches</h1>
+  <p>The dedicated Coaches page is now reserved in the production site. The full page will surface current coach profiles, weekly matchup edges, and full-game, first-half, second-half, totals, favorite, and underdog trends.</p>
+
+  <div class="grid">
+    <div class="card"><span>Full Game</span><b>ATS</b></div>
+    <div class="card"><span>First Half</span><b>1H ATS</b></div>
+    <div class="card"><span>Second Half</span><b>2H ATS</b></div>
+    <div class="card"><span>Game Style</span><b>Totals</b></div>
+  </div>
+
+  <div class="notice">This temporary landing page keeps every War Room navigation link functional while the complete Coaches experience is built.</div>
+
+  <div class="actions">
+    <a class="button primary" href="index.html">Return to War Room Home</a>
+    <a class="button" href="matchups.html">View Weekly Matchups</a>
+    <a class="button" href="betting.html">View Betting Dashboard</a>
+  </div>
+</main>
+
+<footer>War Room · College Football Intelligence & Betting Analytics</footer>
+</div>
+</body>
+</html>
