@@ -63,7 +63,17 @@ git -C "$MAIN_REPO" checkout main
 git -C "$MAIN_REPO" pull --ff-only origin main
 
 TMP_MANIFEST="$(mktemp)"
-trap 'rm -f "$TMP_MANIFEST"' EXIT
+PUBLISH_COMMITTED=0
+cleanup(){
+  rc=$?
+  rm -f "$TMP_MANIFEST"
+  if [[ $rc -ne 0 && "$PUBLISH_COMMITTED" = "0" ]]; then
+    log "publish failed before commit; restoring tracked canonical worktree"
+    git -C "$MAIN_REPO" reset --hard origin/main >/dev/null 2>&1 || true
+  fi
+  exit $rc
+}
+trap cleanup EXIT
 
 # Copy generated public files to the canonical repo, but never replace the
 # locked War Room homepage or the temporary Coaches landing page.
@@ -120,8 +130,10 @@ PY
 
 grep -q 'data-war-room-home-release=' "$MAIN_REPO/index.html" || \
   die "locked War Room homepage marker disappeared"
-grep -q 'data/site/odds_screen_v2.json' "$MAIN_REPO/index.html" || \
-  die "War Room homepage no longer references the odds payload"
+grep -q 'data/site/matchups_view.json' "$MAIN_REPO/index.html" || \
+  die "War Room homepage no longer references the matchup market payload"
+grep -q 'data/site/matchup_line_history.json' "$MAIN_REPO/index.html" || \
+  die "War Room homepage no longer references line history"
 
 # Stage only files synchronized by this publisher plus the regenerated homepage.
 if [[ -s "$TMP_MANIFEST" ]]; then
@@ -136,6 +148,7 @@ fi
 
 STAMP="$(date +%Y-%m-%d)"
 git -C "$MAIN_REPO" commit -m "Daily NCAAF data update $STAMP"
+PUBLISH_COMMITTED=1
 
 # A site-design commit may land while the refresh is running. Rebase the data
 # commit once rather than failing on a non-fast-forward push.
