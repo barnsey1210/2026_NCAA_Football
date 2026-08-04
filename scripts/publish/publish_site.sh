@@ -1,138 +1,148 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-PUBLISH_REPO="${NCAAF_PUBLISH_REPO:-/Users/jameslindesmith/Sites/NCAAF_SITE}"
 MODE="${1:---check}"
+RUNTIME_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PUBLIC_DIR="$RUNTIME_ROOT/build/public_site"
+MAIN_REPO="${NCAAF_MAIN_REPO:-/Users/jameslindesmith/NCAAF_MAIN_REPO}"
+MAX_ODDS_AGE_HOURS="${NCAAF_MAX_ODDS_AGE_HOURS:-18}"
 
-cd "$ROOT"
-# The canonical publication shell is V2. The former checker validates the
-# embedded database in the legacy monolith and is intentionally not used here.
-python3 scripts/audit/audit_canonical_v2_index.py index.html
-python3 scripts/audit/audit_game_projection_spreads.py
-python3 scripts/audit/audit_page_payload_size.py
-python3 scripts/site/build_postgame_shadow_updates.py
-python3 scripts/betting/build_betting_activity_view.py
-python3 scripts/site/build_matchups_view.py
-python3 scripts/history/build_matchup_line_history_clean.py
-python3 scripts/site/inject_matchup_line_history.py --asset-only
-python3 scripts/research/build_market_implied_power_ratings.py --production-2026
-python3 scripts/site/build_ratings_view.py
-python3 scripts/site/build_shadow_team_game_features.py --mode all
-python3 scripts/site/build_saturday_shadow_component_predictions.py
-python3 scripts/site/build_saturday_shadow_lines.py
-python3 scripts/site/build_schedule_live_enrichment.py
-python3 scripts/audit/audit_market_shadow_production_layer.py
-python3 scripts/audit/audit_saturday_shadow_production_integration.py
-python3 scripts/audit/audit_coach_betting_consistency.py || echo "WARNING: coach betting consistency audit could not complete (report-only)"
-python3 scripts/site/build_futures_view.py
-python3 scripts/site/build_conference_workspace.py
-echo "Building production Odds payloads..."
-python3 scripts/site/build_odds_screen_v2.py
-python3 scripts/site/build_odds_futures_v2.py
-python3 scripts/model_tracking/build_model_performance_view.py
-# MATCHUP_PREPUBLISH_AUDITS_START
-echo "Running matchup pre-publish audits..."
-python3 scripts/audit/audit_matchup_workspace.py
-python3 scripts/audit/audit_matchup_card_data.py
-python3 scripts/audit/audit_v2_dark_logo_badges.py
-echo "Matchup pre-publish audits passed."
-# MATCHUP_PREPUBLISH_AUDITS_END
+log(){ printf '[canonical-publish] %s\n' "$*"; }
+die(){ printf '[canonical-publish] ERROR: %s\n' "$*" >&2; exit 1; }
 
-python3 scripts/site/build_public_site.py
-python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
-python3 scripts/publish/check_public_site.py
+[[ "$MODE" == "--check" || "$MODE" == "--push" ]] || die "usage: $0 --check|--push"
+[[ -d "$RUNTIME_ROOT/.git" ]] || log "runtime is not the publishing Git repository; using generated public artifacts only"
+[[ -d "$PUBLIC_DIR" ]] || die "missing public build: $PUBLIC_DIR"
+[[ -s "$PUBLIC_DIR/odds.html" ]] || die "missing public Odds page"
+[[ -s "$PUBLIC_DIR/matchups.html" ]] || die "missing public Matchups page"
+[[ -s "$PUBLIC_DIR/data/site/odds_screen_v2.json" ]] || die "missing public odds payload"
+[[ -s "$PUBLIC_DIR/data/site/matchups_view.json" ]] || die "missing public matchup payload"
 
-if [ ! -d "$PUBLISH_REPO/.git" ]; then
-  echo "FAIL: publication repository not found: $PUBLISH_REPO" >&2
-  exit 1
+# Use the project's established public-site validator when available.
+if [[ -f "$RUNTIME_ROOT/scripts/publish/check_public_site.py" ]]; then
+  (
+    cd "$RUNTIME_ROOT"
+    python3 scripts/publish/check_public_site.py
+  )
 fi
 
-if [ -n "$(git -C "$PUBLISH_REPO" status --porcelain)" ]; then
-  echo "FAIL: publication repository has uncommitted changes" >&2
-  git -C "$PUBLISH_REPO" status --short
-  exit 1
-fi
-
-if [ "$MODE" = "--check" ]; then
-  echo "PASS: local site validated; publication repository is clean"
-  exit 0
-fi
-
-if [ "$MODE" != "--publish" ] && [ "$MODE" != "--push" ]; then
-  echo "Usage: $0 [--check|--publish|--push]" >&2
-  exit 2
-fi
-
-stage_dir="$(mktemp -d "$PUBLISH_REPO/.site-stage.XXXXXX")"
-trap 'rm -rf "$stage_dir"' EXIT
-cp build/public_site/*.html "$stage_dir/"
-cp build/public_site/*.js "$stage_dir/"
-cp build/public_site/*.css "$stage_dir/"
-mkdir -p "$stage_dir/data/bets" "$stage_dir/data/site" "$stage_dir/data/agents" "$PUBLISH_REPO/data/bets" "$PUBLISH_REPO/data/site" "$PUBLISH_REPO/data/agents"
-for file in bets_enriched.csv betting_dashboard.json market_clv_match_audit.csv betting_performance_history.csv bet_closing_clv.csv bet_closing_clv_audit.csv; do
-  [ -f "data/bets/$file" ] && cp "data/bets/$file" "$stage_dir/data/bets/$file"
-done
-for file in matchup_line_history.json matchups_view.json betting_activity_view.json futures_view.json conference_workspace.json postgame_shadow_updates.json ratings_view.json game_control_team_games_2026.json playoff_model_2026.json schedule_live_enrichment.json odds_screen_v2.json odds_futures_v2.json page_health_status.json model_performance_view.json; do
-  [ -f "data/site/$file" ] && cp "data/site/$file" "$stage_dir/data/site/$file"
-done
-[ -f data/agents/home_top_bets.json ] && cp data/agents/home_top_bets.json "$stage_dir/data/agents/home_top_bets.json"
-
-SCHEDULE_ENRICHMENT_STAGE="$stage_dir/data/site/schedule_live_enrichment.json"
-
-if [[ ! -f "$SCHEDULE_ENRICHMENT_STAGE" ]]; then
-  echo "ERROR: missing staged Schedule enrichment: $SCHEDULE_ENRICHMENT_STAGE" >&2
-  exit 1
-fi
-
-python3 - "$SCHEDULE_ENRICHMENT_STAGE" <<'PYVALIDATE'
-import json
-import sys
+python3 - "$PUBLIC_DIR/data/site/odds_screen_v2.json" "$MAX_ODDS_AGE_HOURS" <<'PY'
+from datetime import datetime, timezone
 from pathlib import Path
+import sys
 
 path = Path(sys.argv[1])
-data = json.loads(path.read_text())
-games = data.get("games", [])
-confirmed = sum(1 for row in games if row.get("kickoff_status") == "confirmed")
-fbs_tagged = sum(1 for row in games if "fbs_matchup" in row)
+limit = float(sys.argv[2])
+age_hours = (datetime.now(timezone.utc).timestamp() - path.stat().st_mtime) / 3600
+print(f"[canonical-publish] odds payload age: {age_hours:.2f} hours")
+if age_hours > limit:
+    raise SystemExit(
+        f"odds payload is {age_hours:.1f}h old; refusing to publish "
+        f"(limit {limit:.1f}h, override with NCAAF_MAX_ODDS_AGE_HOURS)"
+    )
+PY
 
-if not games:
-    raise SystemExit(f"ERROR: no games in {path}")
-if confirmed == 0:
-    raise SystemExit(f"ERROR: no confirmed kickoff times in {path}")
-if fbs_tagged == 0:
-    raise SystemExit(f"ERROR: no FBS/FCS classifications in {path}")
+log "public build validation passed"
+[[ "$MODE" == "--push" ]] || exit 0
 
-print(
-    "validated staged artifact: data/site/schedule_live_enrichment.json "
-    f"(games={len(games)}, confirmed_kickoffs={confirmed}, "
-    f"fbs_tagged={fbs_tagged})"
+[[ -d "$MAIN_REPO/.git" ]] || die "canonical repository not found: $MAIN_REPO"
+[[ -f "$MAIN_REPO/scripts/site/build_war_room_home.py" ]] || \
+  die "locked War Room homepage builder missing from canonical repository"
+
+# Tracked changes are unsafe because this process is about to update generated
+# production assets. Untracked design previews are intentionally ignored.
+TRACKED_DIRTY="$(git -C "$MAIN_REPO" status --porcelain --untracked-files=no)"
+[[ -z "$TRACKED_DIRTY" ]] || {
+  printf '%s\n' "$TRACKED_DIRTY" >&2
+  die "canonical repository has tracked local changes; review them before the daily publish"
+}
+
+log "synchronizing canonical repository with origin/main"
+git -C "$MAIN_REPO" fetch origin main
+git -C "$MAIN_REPO" checkout main
+git -C "$MAIN_REPO" pull --ff-only origin main
+
+TMP_MANIFEST="$(mktemp)"
+trap 'rm -f "$TMP_MANIFEST"' EXIT
+
+# Copy generated public files to the canonical repo, but never replace the
+# locked War Room homepage or the temporary Coaches landing page.
+python3 - "$PUBLIC_DIR" "$MAIN_REPO" "$TMP_MANIFEST" <<'PY'
+from pathlib import Path
+import hashlib
+import shutil
+import sys
+
+source = Path(sys.argv[1])
+target = Path(sys.argv[2])
+manifest = Path(sys.argv[3])
+
+excluded = {
+    Path("index.html"),      # locked War Room homepage
+    Path("coaches.html"),    # reserved Coaches landing page
+}
+changed = []
+
+def digest(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for block in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(block)
+    return h.hexdigest()
+
+for src in sorted(source.rglob("*")):
+    if not src.is_file():
+        continue
+    rel = src.relative_to(source)
+    if rel in excluded:
+        continue
+    dst = target / rel
+    if dst.exists() and digest(src) == digest(dst):
+        continue
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    changed.append(rel.as_posix())
+
+manifest.write_text("\n".join(changed) + ("\n" if changed else ""), encoding="utf-8")
+print(f"[canonical-publish] synchronized {len(changed)} changed public files")
+for rel in changed[:30]:
+    print(f"[canonical-publish]   {rel}")
+if len(changed) > 30:
+    print(f"[canonical-publish]   ... and {len(changed)-30} more")
+PY
+
+# Rebuild the locked homepage after data synchronization. This preserves its
+# design and navigation while allowing it to read the newly published JSON.
+(
+  cd "$MAIN_REPO"
+  PYTHONPATH="$MAIN_REPO" python3 scripts/site/build_war_room_home.py
 )
-PYVALIDATE
-for staged in "$stage_dir"/*.html; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
-for staged in "$stage_dir"/*.js; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
-for staged in "$stage_dir"/*.css; do mv "$staged" "$PUBLISH_REPO/$(basename "$staged")"; done
-for staged in "$stage_dir"/data/bets/*; do
-  [ -f "$staged" ] && mv "$staged" "$PUBLISH_REPO/data/bets/$(basename "$staged")"
-done
-for staged in "$stage_dir"/data/site/*; do
-  [ -f "$staged" ] && mv "$staged" "$PUBLISH_REPO/data/site/$(basename "$staged")"
-done
-for staged in "$stage_dir"/data/agents/*; do
-  [ -f "$staged" ] && mv "$staged" "$PUBLISH_REPO/data/agents/$(basename "$staged")"
-done
 
-git -C "$PUBLISH_REPO" add index.html dashboard.html openers.html matchups.html odds.html schedule.html futures.html conferences.html playoff.html betting.html team.html ratings.html simulations.html legacy.html v1.html matchup.html playoff_futures_tab.js dashboard_playoff_edges.js coach_cards.js team_coach_card.js matchup_workspace.js page_health.js page_health.css data/bets data/site data/agents
-if git -C "$PUBLISH_REPO" diff --cached --quiet; then
-  echo "No website changes to publish"
+grep -q 'data-war-room-home-release=' "$MAIN_REPO/index.html" || \
+  die "locked War Room homepage marker disappeared"
+grep -q 'data/site/odds_screen_v2.json' "$MAIN_REPO/index.html" || \
+  die "War Room homepage no longer references the odds payload"
+
+# Stage only files synchronized by this publisher plus the regenerated homepage.
+if [[ -s "$TMP_MANIFEST" ]]; then
+  git -C "$MAIN_REPO" add --pathspec-from-file="$TMP_MANIFEST"
+fi
+git -C "$MAIN_REPO" add index.html
+
+if git -C "$MAIN_REPO" diff --cached --quiet; then
+  log "no public data changes to commit"
   exit 0
 fi
 
-git -C "$PUBLISH_REPO" diff --cached --check
-git -C "$PUBLISH_REPO" commit -m "Daily NCAAF site update $(date +%Y-%m-%d)"
+STAMP="$(date +%Y-%m-%d)"
+git -C "$MAIN_REPO" commit -m "Daily NCAAF data update $STAMP"
 
-if [ "$MODE" = "--push" ]; then
-  git -C "$PUBLISH_REPO" push
-else
-  echo "Committed locally; run $0 --push after review to publish"
+# A site-design commit may land while the refresh is running. Rebase the data
+# commit once rather than failing on a non-fast-forward push.
+if ! git -C "$MAIN_REPO" push origin main; then
+  log "remote main moved during publish; rebasing once"
+  git -C "$MAIN_REPO" pull --rebase origin main
+  git -C "$MAIN_REPO" push origin main
 fi
+
+log "published canonical main at $(git -C "$MAIN_REPO" rev-parse --short HEAD)"
