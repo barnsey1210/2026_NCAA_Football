@@ -109,8 +109,11 @@ for dirpath, dirnames, filenames in os.walk(source, followlinks=True):
         if not src.is_file():
             continue
         rel = src.relative_to(source)
-        if rel in excluded:
+        allowed = (len(rel.parts)==1 and rel.suffix.lower() in {".html",".js",".css",".json",".png",".svg",".ico"}) or (rel.parts and rel.parts[0] in {"logos","assets"}) or (len(rel.parts)>=2 and rel.parts[:2]==("data","site"))
+        if not allowed or rel in excluded:
             continue
+        if src.stat().st_size > 26214400:
+            raise SystemExit(f"public file exceeds 25 MiB: {rel}")
         dst = target / rel
         if dst.exists() and digest(src) == digest(dst):
             continue

@@ -331,6 +331,7 @@ PY2
   # the public repository by this script.
   # STAGE: site_build
   stage_start "site_build"
+  python3 scripts/ratings/refresh_ratings_source_status.py
   python3 scripts/site/build_public_site.py
   stage_pass "site_build"
 
