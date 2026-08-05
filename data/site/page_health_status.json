@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-08-05T12:03:00+00:00",
+  "built_at": "2026-08-05T20:26:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -10,8 +10,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-05T12:01:53.384896+00:00",
       "artifact_built_at": "2026-08-05T12:01:53.384896+00:00",
-      "age_minutes": 1.1,
-      "age_hours": 0.02,
+      "age_minutes": 504.1,
+      "age_hours": 8.4,
       "metrics": [
         {
           "label": "Slate games",
@@ -39,8 +39,8 @@
           "detail": ""
         },
         {
-          "label": "Current run at build",
-          "value": "RUNNING \u00b7 2026-08-05T12:00:01Z",
+          "label": "Last completed run",
+          "value": "PASSED_WITH_WARNINGS \u00b7 2026-08-05T12:04:03Z",
           "detail": ""
         }
       ],
@@ -62,8 +62,8 @@
       "summary": "Market-Derived Ratings have partial team coverage; they remain separate from the composite.",
       "last_success_at": "2026-08-05T00:00:00+00:00",
       "artifact_built_at": "2026-08-05T12:01:53.384896+00:00",
-      "age_minutes": 723.0,
-      "age_hours": 12.05,
+      "age_minutes": 1226.0,
+      "age_hours": 20.43,
       "metrics": [
         {
           "label": "Composite",
@@ -118,8 +118,8 @@
       "summary": "Retained opener history is partial for market-covered games.",
       "last_success_at": "2026-08-05T12:00:40.408767+00:00",
       "artifact_built_at": "2026-08-05T12:02:06.789649+00:00",
-      "age_minutes": 2.3,
-      "age_hours": 0.04,
+      "age_minutes": 505.3,
+      "age_hours": 8.42,
       "metrics": [
         {
           "label": "Games",
@@ -173,8 +173,8 @@
       "summary": "Advanced matchup coverage is partial for the current inventory.",
       "last_success_at": "2026-08-05T12:01:53.384896+00:00",
       "artifact_built_at": "2026-08-05T12:01:53.384896+00:00",
-      "age_minutes": 1.1,
-      "age_hours": 0.02,
+      "age_minutes": 504.1,
+      "age_hours": 8.4,
       "metrics": [
         {
           "label": "Matchups",
@@ -226,8 +226,8 @@
       "summary": "Spread coverage is partial.",
       "last_success_at": "2026-08-05T12:00:40.408767+00:00",
       "artifact_built_at": "2026-08-05T12:02:55.180418+00:00",
-      "age_minutes": 2.3,
-      "age_hours": 0.04,
+      "age_minutes": 505.3,
+      "age_hours": 8.42,
       "metrics": [
         {
           "label": "Games",
@@ -281,10 +281,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-08-05T12:01:53.384896+00:00",
-      "artifact_built_at": "2026-08-05T12:01:53.384896+00:00",
-      "age_minutes": 1.1,
-      "age_hours": 0.02,
+      "last_success_at": "2026-08-05T16:04:24.069005+00:00",
+      "artifact_built_at": "2026-08-05T16:04:24.069005+00:00",
+      "age_minutes": 261.6,
+      "age_hours": 4.36,
       "metrics": [
         {
           "label": "Games",
@@ -335,8 +335,8 @@
       "summary": "Futures team-market coverage is partial or has missing teams.",
       "last_success_at": "2026-08-05T12:02:53.277119+00:00",
       "artifact_built_at": "2026-08-05T12:02:55.178292+00:00",
-      "age_minutes": 0.1,
-      "age_hours": 0.0,
+      "age_minutes": 503.1,
+      "age_hours": 8.39,
       "metrics": [
         {
           "label": "Teams",
@@ -385,13 +385,13 @@
     {
       "page_id": "conferences",
       "display_name": "Conferences",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Conference simulations or records are aging.",
       "last_success_at": "2026-08-03T12:04:00.491730+00:00",
       "artifact_built_at": "2026-08-05T12:02:55.178292+00:00",
-      "age_minutes": 2879.0,
-      "age_hours": 47.98,
+      "age_minutes": 3382.0,
+      "age_hours": 56.37,
       "metrics": [
         {
           "label": "Conferences",
@@ -424,7 +424,10 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "Conference simulations or records are aging.",
+        "Critical page data is aging (56.4 hours old)."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "conferences.html",
@@ -442,8 +445,8 @@
       "summary": "Newer ratings inputs exist than the playoff simulation output.",
       "last_success_at": "2026-08-05T12:02:55.178292+00:00",
       "artifact_built_at": "2026-08-05T12:02:55.178292+00:00",
-      "age_minutes": 0.1,
-      "age_hours": 0.0,
+      "age_minutes": 503.1,
+      "age_hours": 8.38,
       "metrics": [
         {
           "label": "Simulations",
@@ -489,11 +492,11 @@
       "display_name": "Simulations",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "No latest successful daily-run record is available to verify simulation completion.",
+      "summary": "Simulation did not complete during the latest successful daily run.",
       "last_success_at": "2026-08-03T12:04:00.491730+00:00",
       "artifact_built_at": "2026-08-03T12:04:00.491730+00:00",
-      "age_minutes": 2879.0,
-      "age_hours": 47.98,
+      "age_minutes": 3382.0,
+      "age_hours": 56.37,
       "metrics": [
         {
           "label": "Simulations",
@@ -527,7 +530,7 @@
         }
       ],
       "warnings": [
-        "No latest successful daily-run record is available to verify simulation completion."
+        "Simulation did not complete during the latest successful daily run."
       ],
       "critical_failures": [],
       "unavailable_reasons": [],
@@ -546,8 +549,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-05T12:01:53.384896+00:00",
       "artifact_built_at": "2026-08-05T12:01:53.384896+00:00",
-      "age_minutes": 1.1,
-      "age_hours": 0.02,
+      "age_minutes": 504.1,
+      "age_hours": 8.4,
       "metrics": [
         {
           "label": "Games evaluated",
