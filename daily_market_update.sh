@@ -332,6 +332,11 @@ PY2
   # STAGE: site_build
   stage_start "site_build"
   python3 scripts/ratings/refresh_ratings_source_status.py
+  python3 scripts/markets/build_current_market_contract.py
+  python3 scripts/site/build_odds_screen_v2.py
+  python3 scripts/markets/apply_current_market_to_odds_screen.py
+  python3 scripts/markets/apply_current_market_to_matchups.py
+  python3 scripts/audit/audit_current_market_propagation.py
   python3 scripts/site/build_public_site.py
   stage_pass "site_build"
 
