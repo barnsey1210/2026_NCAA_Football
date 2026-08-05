@@ -14,7 +14,7 @@ EXPECTED_HEALTH = {
     "simulations": "simulations.html", "betting": "betting.html",
 }
 VALID_STATUS = {"green", "yellow", "red", "gray"}
-MODERN = list(EXPECTED_HEALTH.values()) + ["dashboard.html", "team.html"]
+MODERN = list(EXPECTED_HEALTH.values()) + ["team.html"]
 REQUIRED = MODERN + ["legacy.html", "matchup.html", "v1.html"]
 HEALTH_FIELDS = {
     "page_id", "display_name", "status", "status_label", "summary", "last_success_at",
@@ -33,6 +33,12 @@ def validate(root: Path, out: Path) -> list[str]:
             continue
         if name in MODERN:
             text = path.read_text(errors="ignore")
+            if name != "index.html":
+                for marker in ('WAR<span>ROOM</span>', 'class="nav war-room-nav"', 'Data Healthy'):
+                    if marker not in text:
+                        errors.append(f"shared War Room shell missing from {name}: {marker}")
+            if 'href="dashboard.html"' in text or '>Dashboard</a>' in text:
+                errors.append(f"retired Dashboard navigation leaked: {name}")
 
             if name == "index.html":
                 required_home_markers = (
@@ -69,11 +75,10 @@ def validate(root: Path, out: Path) -> list[str]:
                 if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
                     errors.append(f"page health loader missing: {name}")
 
-                if name == "dashboard.html":
-                    if "<title>NCAAF Daily Briefing</title>" not in text or "Daily Briefing" not in text:
-                        errors.append(f"canonical V2 dashboard markers missing: {name}")
-                    if '<script id="db" type="application/json">' in text or "<title>2026 NCAA Football</title>" in text:
-                        errors.append(f"legacy V1 shell detected: {name}")
+    matchup_payload = out / "data/site/matchups_view.json"
+    if matchup_payload.is_file() and matchup_payload.stat().st_size > 16 * 1024 * 1024:
+        errors.append(f"public matchup payload exceeds 16 MiB: {matchup_payload.stat().st_size}")
+
     for asset in ("page_health.js", "page_health.css"):
         path = out / asset
         if not path.is_file() or path.stat().st_size < 100:

@@ -112,8 +112,8 @@ for dirpath, dirnames, filenames in os.walk(source, followlinks=True):
         allowed = (len(rel.parts)==1 and rel.suffix.lower() in {".html",".js",".css",".json",".png",".svg",".ico"}) or (rel.parts and rel.parts[0] in {"logos","assets"}) or (len(rel.parts)>=2 and rel.parts[:2]==("data","site"))
         if not allowed or rel in excluded:
             continue
-        if src.stat().st_size > 26214400:
-            raise SystemExit(f"public file exceeds 25 MiB: {rel}")
+        if src.stat().st_size > 16777216:
+            raise SystemExit(f"public file exceeds 16 MiB: {rel}")
         dst = target / rel
         if dst.exists() and digest(src) == digest(dst):
             continue
@@ -147,6 +147,7 @@ PY
 (
   cd "$MAIN_REPO"
   PYTHONPATH="$MAIN_REPO" python3 scripts/site/build_war_room_home.py
+  PYTHONPATH="$MAIN_REPO" python3 scripts/site/apply_shared_war_room_shell.py
 )
 
 grep -q 'data-war-room-home-release=' "$MAIN_REPO/index.html" || \

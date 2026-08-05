@@ -849,7 +849,15 @@ section{margin-top:8px}
 .lower-grid>.panel{align-self:start}
 </style>
 
-</head>
+<style id="canonical-war-room-shell-v2">
+.page{width:calc(100vw - 32px)!important;max-width:none!important;margin:0 auto!important}
+header{grid-template-columns:290px minmax(0,1fr) auto!important;gap:16px!important}
+header nav{overflow:visible!important;justify-content:flex-start!important}
+header nav a{font-size:14px!important;padding:0 10px!important}
+.header-right{min-width:max-content!important}.round{display:none!important}
+@media(max-width:1500px){header{grid-template-columns:250px minmax(0,1fr) auto!important}header nav a{font-size:13px!important;padding:0 7px!important}.brand strong{font-size:35px!important}}
+@media(max-width:1100px){header{grid-template-columns:210px minmax(0,1fr)!important}.header-right{display:none!important}header nav{overflow:auto!important}}
+</style></head>
 <body data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market">
 <div class="page">
 <header>
@@ -860,7 +868,7 @@ section{margin-top:8px}
     <a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a>
     <a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a>
   </nav>
-  <div class="header-right"><div class="round">⌕</div><div class="round">⚙</div><div class="round">JL</div><div class="health"><span class="pulse"></span>Data Healthy</div></div>
+  <div class="header-right"><div class="health"><span class="pulse"></span>Data Healthy</div></div>
 </header>
 
 <div class="status">

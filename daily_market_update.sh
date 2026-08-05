@@ -336,10 +336,12 @@ PY2
   python3 scripts/site/build_odds_screen_v2.py
   python3 scripts/markets/apply_current_market_to_odds_screen.py
   python3 scripts/markets/apply_current_market_to_matchups.py
+  python3 scripts/site/compact_matchups_payload.py
   python3 scripts/audit/audit_current_market_propagation.py
   python3 scripts/site/build_public_site.py
   python3 scripts/site/build_war_room_home.py
   python3 scripts/site/inject_market_presentation_fixes.py
+  python3 scripts/site/apply_shared_war_room_shell.py
   python3 scripts/audit/audit_war_room_home_market_propagation.py
   stage_pass "site_build"
 
