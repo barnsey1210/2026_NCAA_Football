@@ -37,11 +37,34 @@ else:
         if marker not in text:
             issues.append(f"Openers canonical drawer marker missing: {marker}")
 
-router = PUBLIC / "matchup_workspace.js"
-if router.exists():
-    text = router.read_text(errors="ignore")
-    if 'const CANONICAL_PAGE = "openers.html"' not in text:
-        issues.append("compatibility router does not target Openers drawer")
+renderer = PUBLIC / "matchup_workspace.js"
+if not renderer.exists():
+    issues.append("canonical rich matchup renderer is missing")
+else:
+    renderer_text = renderer.read_text(errors="ignore")
+
+    if renderer.stat().st_size < 50000:
+        issues.append(
+            f"canonical matchup renderer is unexpectedly small: "
+            f"{renderer.stat().st_size} bytes"
+        )
+
+    required_renderer_markers = (
+        "function fiveFactorTable",
+        "function marketCards",
+        "function injuries",
+        "function coachingDetail",
+        "function spotsTable",
+        "function render(game, history, section)",
+        "window.openMatchupWorkspace=open",
+        "window.openDrawer=open",
+    )
+
+    for marker in required_renderer_markers:
+        if marker not in renderer_text:
+            issues.append(
+                f"canonical rich matchup renderer marker missing: {marker}"
+            )
 
 print(json.dumps({"status":"PASS" if not issues else "FAIL","issues":issues}, indent=2))
 if issues:
