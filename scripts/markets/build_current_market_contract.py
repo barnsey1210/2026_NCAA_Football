@@ -26,6 +26,7 @@ import re
 import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -127,6 +128,14 @@ def normalize_book(value: str | None) -> str | None:
 
 def game_key(date, away, home):
     return str(date or "")[:10], normalize_team(away), normalize_team(home)
+
+
+SITE_TZ = ZoneInfo("America/New_York")
+
+
+def site_date_from_timestamp(value: str | None) -> str:
+    parsed = parse_time(value)
+    return parsed.astimezone(SITE_TZ).date().isoformat() if parsed else ""
 
 
 def quote_age_hours(timestamp: str | None, now: datetime) -> float | None:
@@ -252,9 +261,24 @@ def main() -> None:
     # Backup: fresh Action Network only where SGO did not provide that exact
     # game/book/market/side.
     for row in csv_rows(ACTION):
-        key = game_key(row.get("date"), row.get("away_team"), row.get("home_team"))
-        gid = key_to_game_id.get(key)
+        # Action Network's `date` is UTC-derived for late-night games. Resolve
+        # the canonical site date from commence_time in America/New_York first,
+        # then fall back to the raw date for older rows without commence_time.
+        local_date = site_date_from_timestamp(row.get("commence_time"))
+        keys = [
+            game_key(local_date, row.get("away_team"), row.get("home_team")),
+            game_key(row.get("date"), row.get("away_team"), row.get("home_team")),
+        ]
+        gid = next((key_to_game_id.get(key) for key in keys if key_to_game_id.get(key)), None)
         if not gid:
+            excluded.append({
+                "source": "Action Network",
+                "reason": "unmatched_game_identity",
+                "raw_date": row.get("date"),
+                "site_date": local_date,
+                "away_team": row.get("away_team"),
+                "home_team": row.get("home_team"),
+            })
             continue
         book = normalize_book(row.get("book"))
         market = str(row.get("market") or "").lower()

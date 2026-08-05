@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT
 HTML = ROOT / "index.html"
+PUBLIC_HTML = ROOT / "build" / "public_site" / "index.html"
 BACKUP_DIR = ROOT / "build" / "war_room_home_release_backups"
 
 PAGE = r'''<!doctype html>
@@ -849,7 +850,7 @@ section{margin-top:8px}
 </style>
 
 </head>
-<body data-war-room-home-release="locked-v2-navigation-fixed-r2">
+<body data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market">
 <div class="page">
 <header>
   <div class="brand"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></div>
@@ -1209,19 +1210,51 @@ function coachCard(x){
 }
 async function init(){
   const performancePanel=document.getElementById('performance');
-  const [M,B,F,P,C,H]=await Promise.all([
+  const [M,B,F,P,C,H,K]=await Promise.all([
     opt('data/site/matchups_view.json',{games:[]}),
     opt('data/site/betting_activity_view.json',{records:[],summary:{},strategy_metrics:{}}),
     opt('data/site/futures_view.json',{rows:[]}),
     opt('data/site/model_performance_view.json',{}),
     opt('data/site/conference_workspace.json',{conferences:[]}),
-    opt('data/site/matchup_line_history.json',{})
+    opt('data/site/matchup_line_history.json',{}),
+    opt('data/site/current_market_contract.json',{games:[],built_at:null})
   ]);
+
+  const canonicalByGame=new Map((K.games||[]).map(g=>[String(g.game_id),g]));
+  (M.games||[]).forEach(r=>{
+    const c=canonicalByGame.get(String(r?.game?.game_id||''));
+    if(!c)return;
+    r.market=r.market||{};
+    const status=c.availability_status||'MISSING';
+    const rs=c.reference?.spread||null,rt=c.reference?.total||null;
+    const home=rs?.home||null,over=rt?.over||null,under=rt?.under||null;
+    const bestHome=c.best?.home_spread||null,bestAway=c.best?.away_spread||null;
+    r.market.spread={
+      home_line:home?.line??null,
+      price:home?.price??null,
+      book:rs?.sportsbook??null,
+      updated_at:home?.source_updated_at??null,
+      availability_status:status,
+      best_home:bestHome?{home_line:bestHome.line,price:bestHome.price,book:bestHome.sportsbook,updated_at:bestHome.source_updated_at}:null,
+      best_away:bestAway?{home_line:-Number(bestAway.line),price:bestAway.price,book:bestAway.sportsbook,updated_at:bestAway.source_updated_at}:null
+    };
+    r.market.total={
+      line:over?.line??null,
+      over_price:over?.price??null,
+      under_price:under?.price??null,
+      book:rt?.sportsbook??null,
+      updated_at:over?.source_updated_at??null,
+      availability_status:status,
+      best_over:c.best?.over||null,
+      best_under:c.best?.under||null
+    };
+  });
+
   const all=(M.games||[]).filter(r=>!r.game.completed);
   const weeks=[...new Set(all.map(r=>N(r.game.week)).filter(v=>v!=null))].sort((a,b)=>a-b);
   const week=weeks[0]??0,wg=all.filter(r=>N(r.game.week)===week),sorted=[...wg].sort((a,b)=>score(b)-score(a));
   dateText.textContent=`${new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})} · Week ${week}`;
-  oddsText.textContent=`Odds · ${wg.filter(r=>marketSpread(r)!=null).length} spreads`;
+  oddsText.textContent=`Odds · ${wg.filter(r=>marketSpread(r)!=null).length} spreads · ${String(K.built_at||'current').slice(0,16).replace('T',' ')}`;
   ratingsText.textContent=`Ratings · ${M.production_model?.sources?.length||4} sources`;
   injuryText.textContent='Injuries · live status';
   modelText.textContent=`Models · ${String(M.built_at||M.production_model?.updated||'current').slice(0,16).replace('T',' ')}`;
@@ -1345,15 +1378,17 @@ async function init(){
   const ps=P.summary||P.overall||{};
 
   const betCandidates=[
-    ...spreads.map(x=>{
+    ...spreads.filter(x=>marketSpread(x.r)!=null).map(x=>{
       const pick=spreadBet(x.r);
-      return {r:x.r,type:'Spread',edge:Math.abs(x.se),signedEdge:x.se,team:pick.team,title:`${pick.name} ${pick.line==null?'':signed(pick.line)}`.trim(),detail:'Spread model edge'};
+      if(pick.line==null)return null;
+      return {r:x.r,type:'Spread',edge:Math.abs(x.se),signedEdge:x.se,team:pick.team,title:`${pick.name} ${signed(pick.line)}`.trim(),detail:'Spread model edge'};
     }),
-    ...totals.map(x=>{
+    ...totals.filter(x=>N(x.r?.market?.total?.line)!=null).map(x=>{
       const pick=totalBet(x.r);
-      return {r:x.r,type:'Total',edge:Math.abs(x.te),signedEdge:x.te,team:x.r.teams.home,title:`${pick.side} ${pick.line==null?'':num(pick.line)}`.trim(),detail:'Total model edge'};
+      if(pick.line==null)return null;
+      return {r:x.r,type:'Total',edge:Math.abs(x.te),signedEdge:x.te,team:x.r.teams.home,title:`${pick.side} ${num(pick.line)}`.trim(),detail:'Total model edge'};
     })
-  ].sort((a,b)=>b.edge-a.edge).slice(0,5);
+  ].filter(Boolean).sort((a,b)=>b.edge-a.edge).slice(0,5);
   actions.innerHTML=`
     <div class="action-summary">
       <div class="action-summary-card"><span>Largest Edge</span><b class="pos">${betCandidates[0]?signed(betCandidates[0].edge):'—'}</b></div>
@@ -1453,26 +1488,32 @@ def main() -> None:
         shutil.copy2(HTML, backup)
         print(f"Backed up: {backup}")
 
-    fd, temporary = tempfile.mkstemp(prefix=".index.", suffix=".html", dir=ROOT)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(PAGE)
-        os.replace(temporary, HTML)
-    except Exception:
+    def atomic_write(path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(prefix=".index.", suffix=".html", dir=path.parent)
         try:
-            os.unlink(temporary)
-        except FileNotFoundError:
-            pass
-        raise
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(PAGE)
+            os.replace(temporary, path)
+        except Exception:
+            try:
+                os.unlink(temporary)
+            except FileNotFoundError:
+                pass
+            raise
+
+    atomic_write(HTML)
+    atomic_write(PUBLIC_HTML)
 
     required = [
-        'data-war-room-home-release="locked-v2-navigation-fixed-r2"',
+        'data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market"',
         "This Week’s Top Games",
         "Viewer’s Guide",
         "Actionable Board",
         "Explore Every Tool",
         "data/site/matchups_view.json",
         "data/site/matchup_line_history.json",
+        "data/site/current_market_contract.json",
         'href="ratings.html"',
         'href="matchups.html"',
         'href="betting.html"',
@@ -1488,8 +1529,12 @@ def main() -> None:
     if '../../' in rendered:
         raise SystemExit("Homepage validation failed; preview-relative ../../ paths remain.")
 
+    public_rendered = PUBLIC_HTML.read_text(encoding="utf-8")
+    if public_rendered != rendered:
+        raise SystemExit("Homepage validation failed; root/public homepage parity mismatch.")
     print(f"Wrote production homepage: {HTML}")
-    print("Release marker: locked-v2-navigation-fixed-r2")
+    print(f"Wrote public homepage: {PUBLIC_HTML}")
+    print("Release marker: locked-v2-navigation-fixed-r2-canonical-market")
 
 
 if __name__ == "__main__":
