@@ -132,16 +132,16 @@ trap on_exit EXIT
 
   # STAGE: futures_market_acquisition
   stage_start "futures_market_acquisition"
-  run_py "pull_actionnetwork_win_totals_api.py"
+  run_py "pull_actionnetwork_win_totals_api.py" || warn "Action Network win totals API pull unavailable; preserving cached data"
   run_py "odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || warn "visible DK win totals pull failed"
   run_py "odds/merge_visible_dk_win_totals.py" "merge_visible_dk_win_totals.py" || warn "visible DK win totals merge failed"
-  run_py "pull_fanduel_win_totals.py"
+  run_py "pull_fanduel_win_totals.py" || warn "FanDuel win totals pull unavailable; preserving cached data"
   run_py "pull_bettingpros_caesars_win_totals.py" || warn "Caesars/BettingPros pull failed; preserving cached data"
-  run_py "pulls/pull_actionnetwork_conference_futures_api.py"
+  run_py "pulls/pull_actionnetwork_conference_futures_api.py" || warn "Action Network conference futures pull failed; preserving cached data"
   run_py "odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || warn "bad DraftKings win total quarantine failed"
-  run_py "append_market_history.py"
-  run_py "build_daily_market_movement_report.py"
-  run_py "build_market_arbitrage_report.py"
+  run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
+  run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
+  run_py "build_market_arbitrage_report.py" || warn "market arbitrage report build failed; preserving prior report"
   stage_pass "futures_market_acquisition"
 
   # STAGE: game_market_acquisition
