@@ -338,6 +338,9 @@ PY2
   python3 scripts/markets/apply_current_market_to_matchups.py
   python3 scripts/audit/audit_current_market_propagation.py
   python3 scripts/site/build_public_site.py
+  python3 scripts/site/build_war_room_home.py
+  python3 scripts/site/inject_market_presentation_fixes.py
+  python3 scripts/audit/audit_war_room_home_market_propagation.py
   stage_pass "site_build"
 
   # STAGE: site_validation
