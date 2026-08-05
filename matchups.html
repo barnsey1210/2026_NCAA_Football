@@ -261,6 +261,9 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 })();
 </script>
 <!-- V2_DARK_LOGO_BADGES_END -->
+<script id="canonical-openers-drawer-route">
+(()=>{const id=new URLSearchParams(location.search).get('game_id');if(id)location.replace('openers.html?game_id='+encodeURIComponent(id));})();
+</script>
 <script id="canonical-spread-side-label-v1">
 (()=>{
   const parseTeams=()=>{
@@ -292,8 +295,5 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
   document.addEventListener('click',()=>setTimeout(enhance,0),true);
   enhance();
 })();
-</script>
-<script id="canonical-openers-drawer-route">
-(()=>{const id=new URLSearchParams(location.search).get('game_id');if(id)location.replace('openers.html?game_id='+encodeURIComponent(id));})();
 </script>
 </body></html>
