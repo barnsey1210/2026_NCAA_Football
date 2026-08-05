@@ -116,13 +116,23 @@
 
   // Compatibility API for older generated pages. These names now navigate to
   // the one canonical full matchup report instead of opening a second renderer.
+  const pageName = (window.location.pathname.split("/").pop() || "").toLowerCase();
+  const isCanonicalOpenersPage =
+    pageName === "openers.html" || pageName === "openers_v2.html";
+
   window.openMatchupWorkspace = openCanonicalMatchup;
-  window.openDrawer = openCanonicalMatchup;
-  window.openGame = openCanonicalMatchup;
-  window.showMatchup = openCanonicalMatchup;
-  window.openWorkspace = openCanonicalMatchup;
+
+  // Openers owns its native drawer functions. Overriding them here causes
+  // openers.html?game_id=... to reload itself instead of opening the drawer.
+  if (!isCanonicalOpenersPage) {
+    window.openDrawer = openCanonicalMatchup;
+    window.openGame = openCanonicalMatchup;
+    window.showMatchup = openCanonicalMatchup;
+    window.openWorkspace = openCanonicalMatchup;
+    window.closeDrawer = () => {};
+  }
+
   window.closeMatchupWorkspace = () => {};
-  window.closeDrawer = () => {};
 
   const params = new URLSearchParams(window.location.search);
   const linkedGameId = params.get("game_id");

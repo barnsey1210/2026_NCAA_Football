@@ -1483,9 +1483,9 @@ if(document.readyState==='loading'){
 <!-- V2_DARK_LOGO_BADGES_END -->
 
 
-/* OPENERS_BETTING_ANGLES_HEADER_PERSISTENT_START */
+<!-- OPENERS_BETTING_ANGLES_HEADER_PERSISTENT_START -->
 <!-- Source table templates renamed: 1 -->
-/* OPENERS_BETTING_ANGLES_HEADER_PERSISTENT_END */
+<!-- OPENERS_BETTING_ANGLES_HEADER_PERSISTENT_END -->
 <script id="postgame-shadow-ui">
 fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const n=d.summary?.completed_team_updates||0;box.querySelector('summary').textContent=`Saturday shadow · ${d.status.replaceAll('_',' ')} · ${n} team estimates · not applied`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Spread</b><br>${d.spread_model.status}<br><span class="muted">Score/ATS model; PBP excluded after holdout</span></div><div class="freshnessSource"><b>Total</b><br>${d.total_model.status.replaceAll('_',' ')}<br><span class="muted">Requires current-season PBP</span></div><div class="freshnessSource"><b>Safety</b><br>Shadow only<br><span class="muted">Official ratings and projections unchanged</span></div>`}).catch(()=>{});
 </script><script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script><script id="canonical-spread-side-label-v1">
