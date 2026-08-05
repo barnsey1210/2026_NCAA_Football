@@ -33,18 +33,47 @@ def validate(root: Path, out: Path) -> list[str]:
             continue
         if name in MODERN:
             text = path.read_text(errors="ignore")
-            if 'class="top"' not in text or 'href="openers.html"' not in text or 'href="matchups.html"' not in text:
-                errors.append(f"top navigation missing: {name}")
-            if "_v2.html" in text:
-                errors.append(f"prototype link leaked: {name}")
-            if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
-                errors.append(f"page health loader missing: {name}")
-            if name in ("index.html", "dashboard.html"):
-                if "<title>NCAAF Daily Briefing</title>" not in text or "Daily Briefing" not in text:
-                    errors.append(f"canonical V2 dashboard markers missing: {name}")
-                if '<script id="db" type="application/json">' in text or "<title>2026 NCAA Football</title>" in text:
-                    errors.append(f"legacy V1 shell detected: {name}")
 
+            if name == "index.html":
+                required_home_markers = (
+                    'data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market"',
+                    "This Week’s Top Games",
+                    "Viewer’s Guide",
+                    "data/site/current_market_contract.json",
+                    'href="openers.html"',
+                    'href="matchups.html"',
+                    'href="betting.html"',
+                )
+                for marker in required_home_markers:
+                    if marker not in text:
+                        errors.append(f"War Room homepage marker missing: {marker}")
+
+                forbidden_home_markers = (
+                    "<title>NCAAF Daily Briefing</title>",
+                    "Daily Briefing",
+                    '<script id="db" type="application/json">',
+                    "<title>2026 NCAA Football</title>",
+                )
+                for marker in forbidden_home_markers:
+                    if marker in text:
+                        errors.append(f"legacy homepage marker detected: {marker}")
+
+                if "_v2.html" in text:
+                    errors.append("prototype link leaked: index.html")
+
+            else:
+                if 'class="top"' not in text or 'href="openers.html"' not in text or 'href="matchups.html"' not in text:
+                    errors.append(f"top navigation missing: {name}")
+                if "_v2.html" in text:
+                    errors.append(f"prototype link leaked: {name}")
+                if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
+                    errors.append(f"page health loader missing: {name}")
+
+                if name == "dashboard.html":
+                    if "<title>NCAAF Daily Briefing</title>" not in text or "Daily Briefing" not in text:
+                        errors.append(f"canonical V2 dashboard markers missing: {name}")
+                    if '<script id="db" type="application/json">' in text or "<title>2026 NCAA Football</title>" in text:
+                        errors.append(f"legacy V1 shell detected: {name}")
     for asset in ("page_health.js", "page_health.css"):
         path = out / asset
         if not path.is_file() or path.stat().st_size < 100:
