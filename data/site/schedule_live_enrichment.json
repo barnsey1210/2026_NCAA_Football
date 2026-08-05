@@ -1,6 +1,6 @@
 {
   "schema_version": "schedule-live-enrichment-v1",
-  "built_at": "2026-08-05T00:24:29.047505",
+  "built_at": "2026-08-05T08:03:56.568065",
   "source_hits": [
     {
       "source": "data/projections/game_projection_sources_audit_2026.csv",
@@ -39196,7 +39196,7 @@
       "season": 2026,
       "week": 7,
       "date": "2026-10-17",
-      "kickoff_raw": null,
+      "kickoff_raw": "2026-10-17T16:00:00Z",
       "status": "not_in_forecast_window",
       "home_score": null,
       "away_score": null,
@@ -39264,10 +39264,11 @@
       "home_sp_plus_defense_entering": 23.0,
       "home_predicted_sp_plus_offense_change": 0.0,
       "home_predicted_sp_plus_defense_change": 0.0,
-      "kickoff_utc": null,
-      "kickoff_et": null,
-      "kickoff_status": "TBD",
-      "kickoff_source": null,
+      "kickoff_utc": "2026-10-17T16:00:00Z",
+      "kickoff_et": "2026-10-17T12:00:00-04:00",
+      "kickoff_status": "confirmed",
+      "kickoff_source": "Action Network",
+      "start_time": "2026-10-17T16:00:00Z",
       "fbs_matchup": true,
       "fcs_excluded": false
     },
@@ -44541,7 +44542,7 @@
       "season": 2026,
       "week": 8,
       "date": "2026-10-24",
-      "kickoff_raw": null,
+      "kickoff_raw": "2026-10-24T16:00:00Z",
       "status": "not_in_forecast_window",
       "home_score": null,
       "away_score": null,
@@ -44609,10 +44610,11 @@
       "home_sp_plus_defense_entering": 16.2,
       "home_predicted_sp_plus_offense_change": 0.0,
       "home_predicted_sp_plus_defense_change": 0.0,
-      "kickoff_utc": null,
-      "kickoff_et": null,
-      "kickoff_status": "TBD",
-      "kickoff_source": null,
+      "kickoff_utc": "2026-10-24T16:00:00Z",
+      "kickoff_et": "2026-10-24T12:00:00-04:00",
+      "kickoff_status": "confirmed",
+      "kickoff_source": "Action Network",
+      "start_time": "2026-10-24T16:00:00Z",
       "fbs_matchup": true,
       "fcs_excluded": false
     },
@@ -74573,11 +74575,11 @@
   ],
   "kickoff_enrichment": {
     "games": 902,
-    "games_with_kickoff": 586,
-    "games_tbd": 316,
+    "games_with_kickoff": 588,
+    "games_tbd": 314,
     "sources": {
       "Action": 2,
-      "Action Network": 3,
+      "Action Network": 5,
       "CFBD lines": 581
     },
     "timezone_display": "America/New_York"
