@@ -1,60 +1,62 @@
 #!/usr/bin/env python3
-"""Block publication when the canonical index is not the V2 dashboard shell."""
+"""Validate that index.html is the locked War Room homepage."""
+
+from __future__ import annotations
+
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
-candidate = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "index.html"
-if not candidate.is_absolute():
-    candidate = ROOT / candidate
 
-errors: list[str] = []
-if not candidate.exists():
-    errors.append("file is missing")
-else:
-    html = candidate.read_text(errors="ignore")
-    required_markers = {
-        "V2 page title": "<title>NCAAF Daily Briefing</title>",
-        "V2 dashboard heading": "Daily Briefing",
-        "V2 navigation container": 'class="top"',
-        "dashboard summary": 'class="summary"',
+def validate(path: Path) -> list[str]:
+    if not path.is_file():
+        return [f"missing index file: {path}"]
+
+    html = path.read_text(errors="ignore")
+    errors: list[str] = []
+
+    required = {
+        "locked War Room release marker": "data-war-room-home-release=",
+        "War Room brand": "WAR<span>ROOM</span>",
+        "native War Room header": "<header>",
+        "native War Room navigation": "<nav>",
+        "data-health indicator": "Data Healthy",
+        "Top Games lane": "This Week’s Top Games",
+        "Viewer’s Guide lane": "Viewer’s Guide",
+        "canonical current-market contract": "data/site/current_market_contract.json",
+        "canonical matchup payload": "data/site/matchups_view.json",
+        "canonical Openers drawer route": "openers.html?game_id=",
     }
-    for label, marker in required_markers.items():
+    for label, marker in required.items():
         if marker not in html:
             errors.append(f"missing {label}: {marker}")
 
-    required_links = (
-        "index.html", "ratings.html", "openers.html", "matchups.html",
-        "odds.html", "schedule.html", "futures.html", "conferences.html",
-        "playoff.html", "simulations.html", "betting.html", "v1.html",
-    )
-    for href in required_links:
-        if f'href="{href}"' not in html:
-            errors.append(f"missing V2 navigation link: {href}")
-
-    required_data = (
-        "data/site/matchups_view.json",
-        "data/site/betting_activity_view.json",
-        "data/site/matchup_line_history.json",
-        "data/agents/home_top_bets.json",
-    )
-    for ref in required_data:
-        if ref not in html:
-            errors.append(f"missing dashboard data reference: {ref}")
-
     forbidden = {
+        "retired Daily Briefing title": "<title>NCAAF Daily Briefing</title>",
+        "retired Daily Briefing heading": ">Daily Briefing<",
+        "retired Dashboard route": 'href="dashboard.html"',
+        "retired V1 route": 'href="v1.html"',
+        "retired V1 label": "V1 Reference",
         "legacy embedded database": '<script id="db" type="application/json">',
-        "legacy page title": "<title>2026 NCAA Football</title>",
-        "prototype navigation link": "_v2.html",
+        "legacy NCAA page title": "<title>2026 NCAA Football</title>",
     }
     for label, marker in forbidden.items():
         if marker in html:
             errors.append(f"contains {label}: {marker}")
 
-if errors:
-    print(f"CANONICAL V2 INDEX AUDIT FAILED: {candidate}")
-    for error in errors:
-        print(f"- {error}")
-    raise SystemExit(1)
+    return errors
 
-print(f"CANONICAL V2 INDEX AUDIT PASSED: {candidate}")
+
+def main() -> int:
+    path = Path(sys.argv[1] if len(sys.argv) > 1 else "index.html").resolve()
+    errors = validate(path)
+    if errors:
+        print(f"WAR ROOM INDEX AUDIT FAILED: {path}")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+    print(f"WAR ROOM INDEX AUDIT PASSED: {path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

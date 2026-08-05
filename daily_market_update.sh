@@ -342,6 +342,7 @@ PY2
   python3 scripts/site/build_war_room_home.py
   python3 scripts/site/inject_market_presentation_fixes.py
   python3 scripts/site/apply_shared_war_room_shell.py
+  cp matchup_workspace.js build/public_site/matchup_workspace.js
   python3 scripts/audit/audit_war_room_home_market_propagation.py
   stage_pass "site_build"
 
@@ -349,6 +350,7 @@ PY2
   stage_start "site_validation"
   python3 scripts/audit/audit_canonical_v2_index.py index.html
   python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
+  python3 scripts/audit/audit_canonical_openers_drawer.py
   python3 scripts/publish/check_public_site.py
   stage_pass "site_validation"
 
