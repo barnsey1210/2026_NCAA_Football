@@ -983,7 +983,7 @@ function syncCanonicalNavigation(tools){
   document.documentElement.dataset.canonicalNavigation='synced';
 }
 
-function href(r){return `${BASE}matchup.html?game_id=${encodeURIComponent(r?.game?.game_id||'')}`}
+function href(r){return `${BASE}openers.html?game_id=${encodeURIComponent(r?.game?.game_id||'')}`}
 function marketSpread(r){return N(r?.market?.spread?.home_line)}
 function modelSpread(r){return N(r?.model?.home_spread)}
 function spreadEdge(r){const a=modelSpread(r),b=marketSpread(r);return a==null||b==null?null:b-a}
@@ -1525,7 +1525,7 @@ def main() -> None:
         'href="ratings.html"',
         'href="matchups.html"',
         'href="betting.html"',
-        "matchup.html?game_id=",
+        "openers.html?game_id=",
         "syncCanonicalNavigation(tools)",
     ]
     rendered = HTML.read_text(encoding="utf-8")

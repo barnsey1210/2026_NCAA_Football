@@ -29,7 +29,8 @@ def transform(text,target):
                     'conferences_v2.html':'conferences.html','betting_v2.html':'betting.html',
                     'schedule_v2.html':'schedule.html',
                     'index.html#team/':'team.html?team='}.items(): text=text.replace(old,new)
-    text=text.replace('matchups.html?game_id=', 'matchup.html?game_id=')
+    text=text.replace('matchups.html?game_id=', 'openers.html?game_id=')
+    text=text.replace('openers.html?game_id=', 'openers.html?game_id=')
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     text=text.replace('</head>',CSS+'</head>')

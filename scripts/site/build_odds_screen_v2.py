@@ -323,7 +323,7 @@ def main() -> None:
             "home_team": canonical_home,
             "away_logo": team_logo_path((site_obj or {}).get("teams", {}).get("away", {}).get("logo_slug") or slug(canonical_away or "")),
             "home_logo": team_logo_path((site_obj or {}).get("teams", {}).get("home", {}).get("logo_slug") or slug(canonical_home or "")),
-            "matchup_url": f"matchup.html?game_id={game_id}" if game_id else None,
+            "matchup_url": f"openers.html?game_id={game_id}" if game_id else None,
             "quotes": quotes,
             "best_flags": flags,
             "opener": opener,

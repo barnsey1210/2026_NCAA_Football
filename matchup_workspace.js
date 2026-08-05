@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const CANONICAL_PAGE = "matchup.html";
+  const CANONICAL_PAGE = "openers.html";
 
   function normalizeGameId(value) {
     const text = String(value ?? "").trim();
@@ -126,7 +126,7 @@
 
   const params = new URLSearchParams(window.location.search);
   const linkedGameId = params.get("game_id");
-  if (linkedGameId && /\/matchups\.html$/i.test(window.location.pathname)) {
+  if (linkedGameId && /\/(matchups|matchup)\.html$/i.test(window.location.pathname)) {
     window.location.replace(canonicalUrl(linkedGameId));
     return;
   }

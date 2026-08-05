@@ -108,14 +108,14 @@ def validate(root: Path, out: Path) -> list[str]:
             'Conf SOS:',
             'Rem SOS:',
             'id="healthToggle"',
-            'matchup.html?game_id=',
+            'openers.html?game_id=',
         ):
             if marker not in conference_text:
                 errors.append(f"Conference Logo Schedule marker missing: {marker}")
         if "Conference Workspace" in conference_text:
             errors.append("legacy Conference Workspace shell detected")
-        if "matchup.html?game=" in conference_text:
-            errors.append("legacy Conference matchup query parameter detected")
+        if "matchup.html?game=" in conference_text or "matchup.html?game_id=" in conference_text:
+            errors.append("legacy Conference matchup route detected")
 
     betting = out / "betting.html"
     if betting.is_file():
