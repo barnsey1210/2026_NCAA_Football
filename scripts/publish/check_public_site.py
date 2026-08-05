@@ -15,7 +15,7 @@ EXPECTED_HEALTH = {
 }
 VALID_STATUS = {"green", "yellow", "red", "gray"}
 MODERN = list(EXPECTED_HEALTH.values()) + ["team.html"]
-REQUIRED = MODERN + ["legacy.html", "matchup.html", "v1.html"]
+REQUIRED = MODERN
 HEALTH_FIELDS = {
     "page_id", "display_name", "status", "status_label", "summary", "last_success_at",
     "artifact_built_at", "metrics", "warnings", "critical_failures", "unavailable_reasons",
@@ -27,7 +27,7 @@ def validate(root: Path, out: Path) -> list[str]:
     errors: list[str] = []
     for name in REQUIRED:
         path = out / name
-        minimum = 100 if name == "legacy.html" else 1000
+        minimum = 1000
         if not path.exists() or path.stat().st_size < minimum:
             errors.append(f"missing or too small: {name}")
             continue
@@ -80,6 +80,10 @@ def validate(root: Path, out: Path) -> list[str]:
                     errors.append(f"prototype link leaked: {name}")
                 if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
                     errors.append(f"page health loader missing: {name}")
+
+    for retired in ("dashboard.html", "legacy.html", "v1.html"):
+        if (out / retired).exists():
+            errors.append(f"retired public artifact returned: {retired}")
 
     matchup_payload = out / "data/site/matchups_view.json"
     if matchup_payload.is_file() and matchup_payload.stat().st_size > 16 * 1024 * 1024:

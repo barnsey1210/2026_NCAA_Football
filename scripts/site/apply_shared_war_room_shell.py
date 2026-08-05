@@ -93,7 +93,6 @@ def apply(path:Path)->None:
 def main():
     if not OUT.exists():
         raise SystemExit(f'missing public build: {OUT}')
-    (OUT/'dashboard.html').write_text('<!doctype html><meta charset="utf-8"><title>Home</title><meta http-equiv="refresh" content="0;url=index.html"><script>location.replace("index.html")</script>\n')
     for path in sorted(OUT.glob('*.html')):
         if path.name in CANONICAL or path.name=='index.html':
             apply(path)

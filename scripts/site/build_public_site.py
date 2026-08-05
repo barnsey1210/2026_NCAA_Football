@@ -5,15 +5,15 @@ import re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
-PAGES = {"dashboard_v2.html":"index.html", "openers_v2.html":"openers.html",
+PAGES = {"openers_v2.html":"openers.html",
          "matchups_v2.html":"matchups.html", "futures_v2.html":"futures.html",
          "betting_v2.html":"betting.html",
          "team_v2.html":"team.html", "ratings_v2.html":"ratings.html",
          "simulations_v2.html":"simulations.html", "playoff_v2.html":"playoff.html",
          "schedule_v2.html":"schedule.html", "odds_v2.html":"odds.html"}
-LINKS = [('Dashboard','index.html'), ('Ratings','ratings.html'), ('Openers','openers.html'), ('Matchups','matchups.html'),
+LINKS = [('Home','index.html'), ('Ratings','ratings.html'), ('Openers','openers.html'), ('Matchups','matchups.html'),
          ('ODDS','odds.html'), ('Schedule','schedule.html'), ('Futures','futures.html'), ('Conferences','conferences.html'), ('Playoff','playoff.html'),
-         ('Simulations','simulations.html'), ('Betting','betting.html'), ('V1 Reference','v1.html')]
+         ('Simulations','simulations.html'), ('Betting','betting.html')]
 CSS = """<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style>"""
@@ -25,7 +25,7 @@ def nav(target):
 
 def transform(text,target):
     for old,new in {'openers_v2.html':'openers.html','matchups_v2.html':'matchups.html',
-                    'dashboard_v2.html':'index.html','futures_v2.html':'futures.html',
+                    'futures_v2.html':'futures.html',
                     'conferences_v2.html':'conferences.html','betting_v2.html':'betting.html',
                     'schedule_v2.html':'schedule.html',
                     'index.html#team/':'team.html?team='}.items(): text=text.replace(old,new)
@@ -64,9 +64,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
     if target == 'odds.html':
         text=text.replace('<title>Odds Screen — Isolated V2 Prototype</title>', '<title>NCAAF Odds</title>')
     if target == 'team.html':
-        text=text.replace('<section id="app">','<div class="v1TeamLink"><a id="v1TeamReport" href="v1.html">Open complete V1 team report</a></div><section id="app">',1)
-        text=text.replace('</head>','<style>.v1TeamLink{margin:12px 0}.v1TeamLink a{display:inline-block;border:1px solid var(--l);border-radius:999px;padding:7px 11px;color:#fff;text-decoration:none;font-weight:900}</style></head>')
-        text=text.replace('</body>','<script>const v1q=new URLSearchParams(location.search).get("team");document.getElementById("v1TeamReport").href="v1.html#team/"+encodeURIComponent(v1q||"")</script></body>')
+        pass
     if target == 'conferences.html':
         text=text.replace('<span>${e(x.team)}<span class="sub">#${x.rank} rating · #${x.projected_finish} projected</span></span>', '<span>${e(x.team)}</span>')
         text=text.replace('<tr><th>Proj finish</th><th>Team</th><th>Current overall</th><th>Current conf</th><th>Projected overall</th><th>Projected conf</th><th>Overall SOS</th><th>Remaining SOS</th><th>Title game</th><th>Win title</th><th>Wagers</th></tr>', '<tr><th>Proj finish</th><th>Team</th><th>Rating</th><th>Current overall</th><th>Current conf</th><th>Projected overall</th><th>Projected conf</th><th>Conf SOS</th><th>Remaining SOS</th><th>Make Title</th><th>Win title</th><th>Wagers</th></tr>')
@@ -93,7 +91,7 @@ def main():
         if not source_path.exists():
             # The authoritative repository tracks the canonical public names;
             # the runtime retains *_v2 source names for compatibility.
-            source_path=ROOT/('dashboard.html' if target=='index.html' else target)
+            source_path=ROOT/source
         (OUT/target).write_text(transform(source_path.read_text(),target))
     for asset in PAGE_HEALTH_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
@@ -103,19 +101,7 @@ def main():
     # Keep the canonical Odds publication artifact aligned with odds_v2.html;
     # daily_market_update.sh publishes this root copy when it is present.
     shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
-    (OUT/'legacy.html').write_text('<!doctype html><meta charset="utf-8"><title>Moved</title><script>const h=location.hash;location.replace(h.includes("simulations")?"simulations.html":h.includes("team/")?"team.html?team="+h.split("team/")[1]:"ratings.html")</script>')
-    # The legacy monolith remains available as an explicit reference page, but
-    # it must never be sourced from or promoted over the canonical V2 index.
-    v1_source=ROOT/'v1.html'
-    if not v1_source.exists():
-        raise FileNotFoundError(f'Missing legacy V1 source: {v1_source}')
-    v1=v1_source.read_text(errors='ignore')
-    (OUT/'v1.html').write_text('\n'.join(line.rstrip() for line in v1.splitlines())+'\n')
-    shutil.copy2(ROOT/'matchup.html',OUT/'matchup.html')
-    shutil.copy2(OUT/'index.html',OUT/'dashboard.html')
-    # Keep the root publication shell canonical and V2. Legacy automation may
-    # still build index_auto_market.html, but only this V2 build owns index.html.
-    shutil.copy2(OUT/'index.html',ROOT/'index.html')
+
     shutil.copy2(ROOT/'playoff_futures_tab.js',OUT/'playoff_futures_tab.js')
     shutil.copy2(ROOT/'dashboard_playoff_edges.js',OUT/'dashboard_playoff_edges.js')
     shutil.copy2(ROOT/'coach_cards.js',OUT/'coach_cards.js')
@@ -125,7 +111,7 @@ def main():
     for name in ('data','logos','helmets'):
         target=ROOT/name
         if target.exists(): (OUT/name).symlink_to(target, target_is_directory=True)
-    print(f'Built {len(PAGES)+3} pages in {OUT}')
+    print(f'Built {len(PAGES)} non-home pages in {OUT}')
 
 if __name__=='__main__': main()
 
