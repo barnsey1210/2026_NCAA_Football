@@ -808,7 +808,7 @@ section{margin-top:8px}
 .guide-summary span{font-size:7px}
 
 /* Give the top-games / viewer-guide row more room now that headlines are gone. */
-.main-grid{grid-template-columns:minmax(0,2.35fr) minmax(340px,1fr)}
+.main-grid{grid-template-columns:minmax(0,1.62fr) minmax(520px,1fr)}
 @media(max-width:1100px){.main-grid{grid-template-columns:1fr}}
 </style>
 
@@ -850,7 +850,7 @@ section{margin-top:8px}
 </style>
 
 <style id="canonical-war-room-shell-v2">
-.page{width:calc(100vw - 32px)!important;max-width:none!important;margin:0 auto!important}
+.page{width:min(1680px,calc(100vw - 32px))!important;max-width:1680px!important;margin:0 auto!important}
 header{grid-template-columns:290px minmax(0,1fr) auto!important;gap:16px!important}
 header nav{overflow:visible!important;justify-content:flex-start!important}
 header nav a{font-size:14px!important;padding:0 10px!important}

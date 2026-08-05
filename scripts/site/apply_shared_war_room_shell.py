@@ -40,7 +40,7 @@ def apply(path:Path)->None:
     if target=='index.html':
         text=text.replace('<div class="header-right"><div class="round">⌕</div><div class="round">⚙</div><div class="round">JL</div><div class="health"><span class="pulse"></span>Data Healthy</div></div>','<div class="header-right"><div class="health"><span class="pulse"></span>Data Healthy</div></div>')
         if 'canonical-war-room-shell-v2' not in text:
-            text=text.replace('</head>','<style id="canonical-war-room-shell-v2">.page{width:calc(100vw - 32px)!important;max-width:none!important}header{grid-template-columns:290px minmax(0,1fr) auto!important}header nav a{font-size:14px!important}.round{display:none!important}</style></head>',1)
+            text=text.replace('</head>','<style id="canonical-war-room-shell-v2">.page{width:min(1680px,calc(100vw - 32px))!important;max-width:1680px!important;margin-inline:auto!important}header{grid-template-columns:290px minmax(0,1fr) auto!important}header nav a{font-size:14px!important}.round{display:none!important}</style></head>',1)
     else:
         markup=shell_markup(target)
 
@@ -63,8 +63,8 @@ def apply(path:Path)->None:
             )
             if 'class="war-room-global"' not in text:
                 text=text.replace(
-                    '<header class="top">',
-                    '<header class="war-room-global">'+markup+'</header>\n  <header class="top">',
+                    '<header class="odds-controls-header">',
+                    '<header class="war-room-global">'+markup+'</header>\n  <header class="odds-controls-header">',
                     1,
                 )
             if 'shared-war-room-shell-v2' not in text:

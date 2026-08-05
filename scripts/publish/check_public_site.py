@@ -68,7 +68,13 @@ def validate(root: Path, out: Path) -> list[str]:
                     errors.append("prototype link leaked: index.html")
 
             else:
-                if 'class="top"' not in text or 'href="openers.html"' not in text or 'href="matchups.html"' not in text:
+                has_shared_nav = (
+                    'class="nav war-room-nav"' in text
+                    and 'href="index.html"' in text
+                    and 'href="openers.html"' in text
+                    and 'href="matchups.html"' in text
+                )
+                if not has_shared_nav:
                     errors.append(f"top navigation missing: {name}")
                 if "_v2.html" in text:
                     errors.append(f"prototype link leaked: {name}")
