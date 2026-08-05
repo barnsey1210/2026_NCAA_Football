@@ -1473,4 +1473,36 @@ if(document.readyState==='loading'){
 /* OPENERS_BETTING_ANGLES_HEADER_PERSISTENT_END */
 <script id="postgame-shadow-ui">
 fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const n=d.summary?.completed_team_updates||0;box.querySelector('summary').textContent=`Saturday shadow · ${d.status.replaceAll('_',' ')} · ${n} team estimates · not applied`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Spread</b><br>${d.spread_model.status}<br><span class="muted">Score/ATS model; PBP excluded after holdout</span></div><div class="freshnessSource"><b>Total</b><br>${d.total_model.status.replaceAll('_',' ')}<br><span class="muted">Requires current-season PBP</span></div><div class="freshnessSource"><b>Safety</b><br>Shadow only<br><span class="muted">Official ratings and projections unchanged</span></div>`}).catch(()=>{});
-</script><script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script></body></html>
+</script><script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script><script id="canonical-spread-side-label-v1">
+(()=>{
+  const parseTeams=()=>{
+    const headings=[...document.querySelectorAll('h1,h2,.drawerHead h2,.drawer-head h2')];
+    for(const h of headings){
+      const m=(h.textContent||'').trim().match(/^(.+?)\s+at\s+(.+?)$/i);
+      if(m)return {away:m[1].trim(),home:m[2].trim()};
+    }
+    return null;
+  };
+  const fmt=n=>`${n>0?'+':''}${n.toFixed(1)}`;
+  const enhance=()=>{
+    const teams=parseTeams(); if(!teams)return;
+    for(const table of document.querySelectorAll('table')){
+      const heads=[...table.querySelectorAll('thead th')].map(x=>(x.textContent||'').trim().toUpperCase());
+      const idx=heads.findIndex(x=>x.includes('ATS SPREAD'));
+      if(idx<0)continue;
+      for(const row of table.querySelectorAll('tbody tr')){
+        const cell=row.children[idx];
+        if(!cell||cell.dataset.sideLabeled==='1')continue;
+        const raw=(cell.textContent||'').trim().replace(/[−–]/g,'-');
+        const v=Number(raw); if(!Number.isFinite(v))continue;
+        cell.textContent=v<0?`${teams.home} ${fmt(v)}`:v>0?`${teams.away} ${fmt(-v)}`:`Pick'em`;
+        cell.dataset.sideLabeled='1';
+      }
+    }
+  };
+  new MutationObserver(enhance).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('click',()=>setTimeout(enhance,0),true);
+  enhance();
+})();
+</script>
+</body></html>
