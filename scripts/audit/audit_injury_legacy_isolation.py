@@ -65,6 +65,33 @@ else:
     if status.get("coverage_state") != "UNAVAILABLE":
         errors.append("coverage_state must be UNAVAILABLE")
 
+active_consumers = {
+    "scripts/site/build_matchups_view.py": {
+        "data/injuries/injury_events_normalized.csv",
+        "data/rosters/player_importance_2026_normalized.csv",
+    },
+    "scripts/site/build_page_health_status.py": {
+        "data/injuries/injury_events_normalized.csv",
+        "data/injuries/injury_alerts.csv",
+        "data/injuries/team_injury_scores.csv",
+        "data/injuries/game_injury_alerts.csv",
+    },
+}
+
+for relative_path, forbidden_inputs in active_consumers.items():
+    consumer_path = ROOT / relative_path
+    if not consumer_path.is_file():
+        errors.append(f"missing active consumer: {relative_path}")
+        continue
+
+    consumer_text = consumer_path.read_text()
+    for forbidden_input in sorted(forbidden_inputs):
+        if forbidden_input in consumer_text:
+            errors.append(
+                f"active consumer {relative_path} still reads legacy input: "
+                f"{forbidden_input}"
+            )
+
 if errors:
     print("INJURY LEGACY ISOLATION: FAIL")
     for error in errors:

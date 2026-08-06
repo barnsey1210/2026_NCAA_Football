@@ -3,11 +3,9 @@
   "valid_statuses": ["green", "yellow", "red", "gray"],
   "shared_checks": {
     "injuries": {
-      "fresh_hours": 36,
-      "stale_hours": 96,
-      "raw_artifacts": ["data/injuries/cfbdepth_latest_injury_status_raw.csv", "data/injuries/cfbdepth_injury_articles_raw.csv"],
-      "normalized_artifact": "data/injuries/injury_events_normalized.csv",
-      "alerts_artifact": "data/injuries/injury_alerts.csv"
+      "status_artifact": "data/injuries/injury_source_status.json",
+      "available_source_state": "AVAILABLE",
+      "unavailable_states": ["SOURCE_NOT_CONFIGURED", "SOURCE_STATUS_MISSING", "SOURCE_STATUS_INVALID"]
     }
   },
   "pages": {

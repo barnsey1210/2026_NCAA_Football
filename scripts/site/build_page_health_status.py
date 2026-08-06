@@ -84,32 +84,73 @@ def matchup_data(c: Context) -> tuple[dict[str, Any], list[dict[str, Any]], dict
 
 
 def injury_health(c: Context) -> dict[str, Any]:
-    """Classify source availability without treating unreleased reports as failure."""
+    """Report explicit injury-source state without interpreting missing data as zero injuries."""
     cfg = c.shared.get("injuries", {})
-    raw_paths = [c.root / rel for rel in cfg.get("raw_artifacts", [])]
-    normalized_path = c.root / cfg.get("normalized_artifact", "data/injuries/injury_events_normalized.csv")
-    alerts_path = c.root / cfg.get("alerts_artifact", "data/injuries/injury_alerts.csv")
-    raw_rows = [row for path in raw_paths for row in csv_rows(path)]
-    normalized = csv_rows(normalized_path)
-    alerts = csv_rows(alerts_path)
-    error_tokens = ("error", "failed", "fetch_error")
-    source_failed = any(any(token in str(value).lower() for token in error_tokens) for row in raw_rows for value in row.values())
-    existing = [path for path in [*raw_paths, normalized_path, alerts_path] if path.is_file()]
-    latest = max((datetime.fromtimestamp(path.stat().st_mtime, timezone.utc) for path in existing), default=None)
-    age = (c.now - latest).total_seconds() / 3600 if latest else None
-    if source_failed or (raw_rows and not normalized_path.is_file()):
-        state, label = "source_failed", "RED · Source failed"
-    elif not raw_rows and not normalized and not alerts:
-        state, label = "not_released", "GRAY · No reports released"
-    elif alerts and age is not None and age > cfg.get("stale_hours", 96):
-        state, label = "active_stale", "RED · Active reports stale"
-    elif latest and age is not None and age > cfg.get("fresh_hours", 36):
-        state, label = "active_aging", "YELLOW · Reports aging"
-    elif alerts:
-        state, label = "active", f"{len(alerts)} active alerts"
+    status_path = c.root / cfg.get(
+        "status_artifact",
+        "data/injuries/injury_source_status.json",
+    )
+
+    if not status_path.is_file():
+        return {
+            "state": "source_status_missing",
+            "label": "GRAY · Injury source status missing",
+            "source_state": "SOURCE_STATUS_MISSING",
+            "freshness_state": "MISSING",
+            "coverage_state": "UNAVAILABLE",
+            "alerts": None,
+            "age_hours": None,
+        }
+
+    try:
+        status = json.loads(status_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {
+            "state": "source_status_invalid",
+            "label": "GRAY · Injury source status invalid",
+            "source_state": "SOURCE_STATUS_INVALID",
+            "freshness_state": "UNKNOWN",
+            "coverage_state": "UNAVAILABLE",
+            "alerts": None,
+            "age_hours": None,
+        }
+
+    source_state = str(status.get("source_state") or "UNKNOWN")
+    freshness_state = str(status.get("freshness_state") or "UNKNOWN")
+    coverage_state = str(status.get("coverage_state") or "UNKNOWN")
+    updated_at = status.get("updated_at")
+    age = None
+
+    if updated_at:
+        try:
+            parsed = datetime.fromisoformat(str(updated_at).replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            age = (c.now - parsed.astimezone(timezone.utc)).total_seconds() / 3600
+        except (TypeError, ValueError):
+            age = None
+
+    if source_state == cfg.get("available_source_state", "AVAILABLE"):
+        if freshness_state == "STALE":
+            state, label = "active_stale", "RED · Injury source stale"
+        elif freshness_state in {"AGING", "DEGRADED"}:
+            state, label = "active_aging", "YELLOW · Injury source aging"
+        else:
+            state, label = "active", "Injury source available"
     else:
-        state, label = "no_injuries", "No injuries found"
-    return {"state": state, "label": label, "alerts": len(alerts), "age_hours": age}
+        state = "source_unavailable"
+        label = "GRAY · Injury source not configured"
+
+    return {
+        "state": state,
+        "label": label,
+        "source_state": source_state,
+        "freshness_state": freshness_state,
+        "coverage_state": coverage_state,
+        "alerts": None,
+        "age_hours": age,
+        "reason": status.get("reason"),
+    }
 
 
 def explicitly_inactive(data: Any) -> bool:

@@ -13,7 +13,11 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.lib.ncaaf_config import canonical_team, production_model
+try:
+    from scripts.lib.ncaaf_config import canonical_team, production_model
+except ModuleNotFoundError:
+    # Source repository layout keeps shared configuration under lib/.
+    from lib.ncaaf_config import canonical_team, production_model
 
 INDEX = ROOT / "v1.html"
 OUT = ROOT / "data/site/matchups_view.json"
@@ -310,19 +314,31 @@ def main():
         return {"overall": overall_rank_by_team.get(team), "offense": offense_rank_by_team.get(team), "defense": defense_rank_by_team.get(team)}
 
     line_history = json.loads((ROOT / "data/site/matchup_line_history.json").read_text()) if (ROOT / "data/site/matchup_line_history.json").exists() else {}
-    injury_rows = csv_rows(ROOT / "data/injuries/injury_events_normalized.csv")
+
+    injury_status_path = ROOT / "data/injuries/injury_source_status.json"
+    if injury_status_path.exists():
+        try:
+            injury_source_status = json.loads(injury_status_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            injury_source_status = {
+                "source_state": "SOURCE_STATUS_INVALID",
+                "freshness_state": "UNKNOWN",
+                "coverage_state": "UNAVAILABLE",
+                "legacy_inputs_allowed": False,
+                "reason": "Unable to read injury source status.",
+            }
+    else:
+        injury_source_status = {
+            "source_state": "SOURCE_STATUS_MISSING",
+            "freshness_state": "MISSING",
+            "coverage_state": "UNAVAILABLE",
+            "legacy_inputs_allowed": False,
+            "reason": "Injury source status file is missing.",
+        }
+
+    # Player-level injuries remain unavailable until a validated canonical
+    # injury source is configured. Never infer zero injuries from missing data.
     injuries_by_team = defaultdict(list)
-    for row in injury_rows:
-        team = canonical_team(row.get("team"))
-        if team:
-            injuries_by_team[team].append({
-                "player": clean(row.get("player")), "position": clean(row.get("position")), "status": clean(row.get("status")),
-                "importance_score": number(row.get("importance_score")), "impact_score": number(row.get("impact_score")),
-                "tier": clean(row.get("alert_tier")), "source": clean(row.get("source")), "source_url": clean(row.get("source_url")),
-                "updated_at": clean(row.get("built_at")),
-            })
-    for rows in injuries_by_team.values():
-        rows.sort(key=lambda row: row.get("impact_score") or 0, reverse=True)
 
     recent_games_by_team = defaultdict(list)
     record_2025_by_team = defaultdict(lambda: {"wins": 0, "losses": 0, "ties": 0})
@@ -347,22 +363,9 @@ def main():
         rows.sort(key=lambda row: row.get("date") or "", reverse=True)
         recent_games_by_team[team] = rows[:3]
 
+    # Quarterback depth data from the June-era Ourlads pipeline is isolated.
+    # Leave this empty until a validated canonical depth source is configured.
     qb_by_team = defaultdict(list)
-    for row in csv_rows(ROOT / "data/rosters/player_importance_2026_normalized.csv"):
-        if not str(row.get("position") or "").upper().startswith("QB"):
-            continue
-        team = canonical_team(row.get("team"))
-        qb_by_team[team].append({
-            "player": clean(row.get("player")), "depth_rank": integer(row.get("depth_rank")), "role": clean(row.get("role")),
-            "importance_score": number(row.get("importance_score")), "source": clean(row.get("source")), "updated_at": clean(row.get("last_updated")),
-        })
-    for team, rows in qb_by_team.items():
-        rows.sort(key=lambda row: row.get("depth_rank") or 99)
-        for qb in rows[:2]:
-            matched = next((inj for inj in injuries_by_team.get(team, []) if clean(inj.get("player")) == clean(qb.get("player"))), None)
-            qb["health_status"] = matched.get("status") if matched else "No matched injury"
-            qb["injury_impact"] = matched.get("impact_score") if matched else None
-        qb_by_team[team] = rows[:2]
 
     # Opening-possession / coin-toss tendency inputs used by the shared V2 workspace.
     opening_tendency_by_team = canonical_map(
@@ -618,7 +621,10 @@ def main():
             "Market rows are current best fields; a quote-level atomic-offer array should be added before production EV selection.",
         ]}
     payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "rating_freshness": rating_freshness,
-        "assets": {"line_history": "data/site/matchup_line_history.json", "betting_activity": "data/site/betting_activity_view.json"}, "audit_summary": coverage, "games": records}
+        "assets": {"line_history": "data/site/matchup_line_history.json", "betting_activity": "data/site/betting_activity_view.json"},
+        "injury_source_status": injury_source_status,
+        "audit_summary": coverage,
+        "games": records}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     AUDIT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, separators=(",", ":")) + "\n")

@@ -2,7 +2,24 @@
 from pathlib import Path
 import json
 
-ROOT = Path(__file__).resolve().parents[2]
+def _find_repo_root() -> Path:
+    """Support both lib/ and scripts/lib/ repository layouts."""
+    current = Path(__file__).resolve()
+
+    for candidate in current.parents:
+        if (
+            (candidate / "config/team_aliases.json").is_file()
+            and (candidate / "data/ratings/ratings_config.json").is_file()
+        ):
+            return candidate
+
+    raise FileNotFoundError(
+        "Unable to locate repository root containing "
+        "config/team_aliases.json and data/ratings/ratings_config.json"
+    )
+
+
+ROOT = _find_repo_root()
 TEAM_CONFIG = ROOT / "config/team_aliases.json"
 RATINGS_CONFIG = ROOT / "data/ratings/ratings_config.json"
 RATINGS_MASTER = ROOT / "data/ratings/ratings_master_latest.csv"
