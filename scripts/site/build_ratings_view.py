@@ -440,18 +440,41 @@ for item in out:
         if item["market"]["rating"] != item["market"]["scaled_rating"]:
             raise SystemExit(f"Displayed market rating mismatch for {item['team']}")
 
-# Scaling must preserve the exact raw-market rank ordering.
-raw_ranked = sorted(
-    [x for x in out if x.get("market")],
-    key=lambda x: x["market"]["raw_rating"],
-    reverse=True,
-)
+# Scaling must not create a genuine market-rank inversion.
+# Rounded scaled ratings may legitimately create ties, so exact list equality
+# is too strict. A higher raw rating may tie after scaling, but may not become
+# lower than a team that began below it.
+market_items = [x for x in out if x.get("market")]
+ordering_violations = []
 
-scaled_ranked = sorted(
-    [x for x in out if x.get("market")],
-    key=lambda x: x["market"]["scaled_rating"],
-    reverse=True,
-)
+for i, left in enumerate(market_items):
+    for right in market_items[i + 1:]:
+        left_raw = float(left["market"]["raw_rating"])
+        right_raw = float(right["market"]["raw_rating"])
+        left_scaled = float(left["market"]["scaled_rating"])
+        right_scaled = float(right["market"]["scaled_rating"])
 
-if [x["team"] for x in raw_ranked] != [x["team"] for x in scaled_ranked]:
-    raise SystemExit("Market scaling changed team ordering")
+        raw_diff = left_raw - right_raw
+        scaled_diff = left_scaled - right_scaled
+
+        if abs(raw_diff) <= 1e-12:
+            continue
+
+        if raw_diff * scaled_diff < -1e-9:
+            ordering_violations.append(
+                {
+                    "left": left["team"],
+                    "right": right["team"],
+                    "left_raw": left_raw,
+                    "right_raw": right_raw,
+                    "left_scaled": left_scaled,
+                    "right_scaled": right_scaled,
+                }
+            )
+
+if ordering_violations:
+    example = ordering_violations[0]
+    raise SystemExit(
+        "Market scaling created a genuine ordering inversion: "
+        f"{example}"
+    )
