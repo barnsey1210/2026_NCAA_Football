@@ -12,10 +12,16 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
-
-from scripts.lib.ncaaf_config import canonical_team, is_neutral_site
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from scripts.lib.ncaaf_config import canonical_team, is_neutral_site
+except ModuleNotFoundError:
+    from lib.ncaaf_config import canonical_team, is_neutral_site
 ENDPOINT = "https://api.sportsgameodds.com/v2/events"
 SUPPORTED_BOOKS = {"draftkings", "fanduel", "betmgm", "caesars", "bovada"}
 MARKETS = {
