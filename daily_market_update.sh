@@ -269,10 +269,8 @@ PY2
   # canonical V2 JSON/view builders below. The legacy intermediate remains an
   # optional diagnostic artifact and is never a publication source.
   echo "Skipping legacy index injectors; V2 builders own the canonical site shell."
-  # STAGE: injury_scores
-  stage_start "injury_scores"
+  # Legacy injury scoring is retired until the canonical injury contract exists.
   echo "Skipping legacy game injury scores; canonical injury source not configured."
-  stage_pass "injury_scores"
 
   # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
   # STAGE: ratings_refresh
