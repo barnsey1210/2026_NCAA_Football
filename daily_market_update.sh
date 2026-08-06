@@ -188,9 +188,9 @@ trap on_exit EXIT
 
   # STAGE: injuries_and_signals
   stage_start "injuries_and_signals"
-  run_py "injuries/pull_cfbdepth_injuries.py" "pull_cfbdepth_injuries.py" || warn "CFBDepth injury pull failed"
-  run_py "injuries/pull_cfbdepth_article_bodies.py" "pull_cfbdepth_article_bodies.py" || warn "CFBDepth injury article pull failed"
-  run_py "scripts/injuries/build_injury_alerts.py" "build_injury_alerts.py" || warn "injury alert build failed"
+  echo "Skipping legacy CFBDepth injury pull; redesigned source not configured."
+  echo "Skipping legacy CFBDepth article pull; redesigned source not configured."
+  echo "Skipping legacy injury alert build; canonical injury source not configured."
   run_py "agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
   run_py "agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || warn "game line email edges append failed"
   stage_pass "injuries_and_signals"
@@ -218,7 +218,7 @@ PY2
   # STAGE: email_build
   stage_start "email_build"
   run_py "agents/prepend_game_line_moves_to_daily_betting_angles.py" "prepend_game_line_moves_to_daily_betting_angles.py" || warn "prepend game line moves to email failed"
-  run_py "agents/prepend_injury_alerts_to_daily_betting_angles.py" "prepend_injury_alerts_to_daily_betting_angles.py" || warn "prepend injury alerts failed"
+  echo "Skipping legacy injury email rows; canonical injury source not configured."
   run_py "scripts/agents/clean_daily_game_line_moves.py" "clean_daily_game_line_moves.py" || warn "daily game-line move cleaning failed"
   run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
   stage_pass "email_build"
@@ -235,7 +235,7 @@ PY2
   echo "Skipping legacy index injectors; V2 builders own the canonical site shell."
   # STAGE: injury_scores
   stage_start "injury_scores"
-  run_py "injuries/build_game_injury_scores.py" "build_game_injury_scores.py" || warn "game injury score build failed"
+  echo "Skipping legacy game injury scores; canonical injury source not configured."
   stage_pass "injury_scores"
 
   # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.

@@ -86,20 +86,18 @@
     },
     {
       "id": "injuries_and_signals",
-      "name": "Injuries and betting signals",
+      "name": "Betting signals (injury source isolated)",
       "order": 60,
       "required": true,
-      "external_network": true,
+      "external_network": false,
       "email_dependency": true,
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#injuries_and_signals",
       "scripts": [
-        "injuries/pull_cfbdepth_injuries.py",
-        "injuries/pull_cfbdepth_article_bodies.py",
-        "scripts/injuries/build_injury_alerts.py",
         "agents/build_daily_betting_angles.py",
         "agents/append_daily_game_line_edges.py"
-      ]
+      ],
+      "notes": "Legacy CFBDepth injury acquisition disabled pending redesigned Data Hub integration."
     },
     {
       "id": "email_build",
@@ -112,7 +110,6 @@
       "entrypoint": "daily_market_update.sh#email_build",
       "scripts": [
         "agents/prepend_game_line_moves_to_daily_betting_angles.py",
-        "agents/prepend_injury_alerts_to_daily_betting_angles.py",
         "scripts/agents/clean_daily_game_line_moves.py",
         "scripts/agents/build_daily_betting_angles_html.py"
       ]
@@ -128,19 +125,6 @@
       "entrypoint": "daily_market_update.sh#email_regression",
       "scripts": [
         "scripts/audit/test_daily_betting_email_regression.py"
-      ]
-    },
-    {
-      "id": "injury_scores",
-      "name": "Game injury scores",
-      "order": 90,
-      "required": false,
-      "external_network": false,
-      "email_dependency": false,
-      "publication_dependency": true,
-      "entrypoint": "daily_market_update.sh#injury_scores",
-      "scripts": [
-        "injuries/build_game_injury_scores.py"
       ]
     },
     {
