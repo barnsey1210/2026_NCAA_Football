@@ -58,7 +58,7 @@ def main():
     if not crosswalk_path.exists(): raise SystemExit(f"Missing {crosswalk_path}")
     xw=pd.read_csv(crosswalk_path,dtype=str).fillna("")
     mapping=dict(zip(xw["cfbdepth_school"],xw["site_team"]))
-    audit={"schema_version":"cfbdepth-import-audit-v1","as_of":args.as_of,"built_at":datetime.now(timezone.utc).isoformat(),"inputs":{},"outputs":{},"warnings":[]}
+    audit={"schema_version":"cfbdepth-import-audit-v1","as_of":args.as_of,"built_at": f"{args.as_of}T00:00:00+00:00","inputs":{},"outputs":{},"warnings":[]}
     team_sets={}
     # team-level datasets
     for token,outname in TEAM_DATASETS.items():
