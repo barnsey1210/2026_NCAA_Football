@@ -64,6 +64,13 @@ STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 CURRENT_STAGE=""
 RUN_FINALIZED=0
 
+# Email may be built for diagnostics, but sending requires a healthy primary
+# SportsGameOdds refresh. Site generation may continue with approved fallbacks.
+SGO_EMAIL_ELIGIBLE=1
+SGO_EMAIL_BLOCK_REASON=""
+SGO_PULL_OK=0
+SGO_NORMALIZATION_OK=0
+
 status_stage() {
   local stage_id="$1"
   local status="$2"
@@ -158,22 +165,51 @@ trap on_exit EXIT
   # SportsGameOdds is the preferred live source for game lines.
   # STAGE: sgo_pull
   stage_start "sgo_pull"
-  run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py" \
-    || warn "live SGO pull failed; preserving prior SGO and fallback data"
-  stage_pass "sgo_pull"
+  if run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py"; then
+    SGO_PULL_OK=1
+    stage_pass "sgo_pull"
+  else
+    SGO_EMAIL_ELIGIBLE=0
+    SGO_EMAIL_BLOCK_REASON="live SportsGameOdds pull failed"
+    warn "live SGO pull failed; preserving prior SGO and fallback data"
+    stage_fail "sgo_pull" "$SGO_EMAIL_BLOCK_REASON"
+  fi
 
-  # If an SGO response is present, normalize it through the same canonical
-  # controller mapping/pairing/coverage path. Partial coverage remains
-  # preview-only and cannot change accepted state or history.
+  # Normalize only a raw response produced by a successful current run.
+  # A primary-source failure does not stop fallback-based site generation,
+  # but it blocks delivery of the daily betting email.
   # STAGE: sgo_normalization
   stage_start "sgo_normalization"
-  if [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
-    run_py "scripts/markets/build_sgo_daily_canonical.py" || warn "canonical SGO preview build failed"
-    run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py" || warn "SGO coverage blocked accepted compatibility export"
-    run_py "scripts/odds/append_sgo_game_book_line_history.py" || warn "SGO coverage blocked canonical history append"
-    stage_pass "sgo_normalization"
+  if [ "$SGO_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
+    if run_py "scripts/markets/build_sgo_daily_canonical.py"; then
+      if run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py"; then
+        SGO_NORMALIZATION_OK=1
+        run_py "scripts/odds/append_sgo_game_book_line_history.py" \
+          || warn "SGO canonical history append failed"
+        stage_pass "sgo_normalization"
+      else
+        SGO_EMAIL_ELIGIBLE=0
+        SGO_EMAIL_BLOCK_REASON="SGO compatibility export failed"
+        warn "SGO coverage blocked accepted compatibility export"
+        stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
+      fi
+    else
+      SGO_EMAIL_ELIGIBLE=0
+      SGO_EMAIL_BLOCK_REASON="canonical SGO normalization failed"
+      warn "canonical SGO normalization failed; preserving fallback data"
+      stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
+    fi
+  elif [ "$SGO_PULL_OK" -eq 1 ]; then
+    SGO_EMAIL_ELIGIBLE=0
+    SGO_EMAIL_BLOCK_REASON="successful SGO pull produced no raw response"
+    warn "$SGO_EMAIL_BLOCK_REASON"
+    stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
   else
-    stage_skip "sgo_normalization" "no SGO raw response available; cached accepted data preserved"
+    SGO_EMAIL_ELIGIBLE=0
+    if [ -z "$SGO_EMAIL_BLOCK_REASON" ]; then
+      SGO_EMAIL_BLOCK_REASON="SGO pull unavailable"
+    fi
+    stage_skip "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON; cached accepted data preserved"
   fi
 
 
@@ -314,6 +350,9 @@ PY2
   if [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
     echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
     stage_skip "email_send" "disabled by NCAAF_SEND_EMAIL=0"
+  elif [ "$SGO_EMAIL_ELIGIBLE" -ne 1 ]; then
+    echo "EMAIL BLOCKED: ${SGO_EMAIL_BLOCK_REASON:-primary SGO refresh was not healthy}"
+    stage_skip "email_send" "${SGO_EMAIL_BLOCK_REASON:-primary SGO refresh was not healthy}"
   elif [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
     if run_py "email/send_daily_betting_angles_email.py" "send_daily_betting_angles_email.py"; then
       stage_pass "email_send"
