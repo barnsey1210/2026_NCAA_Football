@@ -208,11 +208,30 @@ def main() -> None:
         missing = [team for team in (args.away, args.home) if team not in team_payload["teams"]]
         if missing:
             raise SystemExit(f"Unknown team name(s): {missing}. Use exact canonical team names.")
+        matchup_comparisons = build_matchup(
+            positions,
+            args.away,
+            args.home,
+        )
+
         matchup_payload = {
-            "schema_version": "cfbdepth-matchup-preview-v1",
+            "schema_version": "cfbdepth-matchup-preview-v2",
             "as_of": args.as_of,
             "research_only": True,
-            "matchup": build_matchup(positions, args.away, args.home),
+            "matchup": {
+                "away_team": args.away,
+                "home_team": args.home,
+            },
+            "away": team_payload["teams"][args.away],
+            "home": team_payload["teams"][args.home],
+            "comparisons": {
+                "away_offense_vs_home_defense": matchup_comparisons[
+                    "away_offense_vs_home_defense"
+                ],
+                "home_offense_vs_away_defense": matchup_comparisons[
+                    "home_offense_vs_away_defense"
+                ],
+            },
         }
         safe_away = args.away.lower().replace(" ", "_")
         safe_home = args.home.lower().replace(" ", "_")
