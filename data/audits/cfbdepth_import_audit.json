@@ -1,0 +1,362 @@
+{
+  "schema_version": "cfbdepth-import-audit-v1",
+  "as_of": "2026-08-05",
+  "built_at": "2026-08-06T04:33:08.228062+00:00",
+  "inputs": {
+    "cfbdepth-air-ratings_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Overall",
+        "Offense",
+        "Passing",
+        "Rushing",
+        "Pass Block",
+        "Run Block",
+        "OL",
+        "Defense",
+        "Run Defense",
+        "Pass Rush",
+        "Coverage",
+        "Tackling",
+        "Special Teams",
+        "team"
+      ],
+      "sha256": "82f5c2bea8d48004646a487335e1ef56c4a27562a233af520693354a9f0b8427"
+    },
+    "cfbdepth-coaching_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Head Coach",
+        "HC Rating",
+        "OFF Play Caller",
+        "OPC Rating",
+        "DEF Play Caller",
+        "DPC Rating",
+        "Overall Impact",
+        "team"
+      ],
+      "sha256": "902537051c79b8cfcda1ccbb510a0114d9516d9ade6ab34903871ba2175af818"
+    },
+    "cfbdepth-depth_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Overall",
+        "Offense",
+        "Defense",
+        "QB",
+        "RB",
+        "WR",
+        "TE",
+        "OL",
+        "DL",
+        "LB",
+        "DB",
+        "team"
+      ],
+      "sha256": "7b3771c57ee49797e0569760192a05bd5b7c3a7719008dc48c2de3ea4a418de7"
+    },
+    "cfbdepth-rotation_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Overall",
+        "Offense",
+        "Defense",
+        "Passing",
+        "Rushing",
+        "Pass Block",
+        "Run Block",
+        "OLine",
+        "Run Defense",
+        "Pass Rush",
+        "Pass Coverage",
+        "Tackling",
+        "Special Teams",
+        "team"
+      ],
+      "sha256": "5679b9b2cadd1691dec1d8c7d83ffe78742f6ea9771b2ffc62c18340009989da"
+    },
+    "cfbdepth-injury_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Injury Number",
+        "Injury New",
+        "OFS",
+        "O",
+        "D",
+        "Q",
+        "P",
+        "S",
+        "GTD",
+        "OPT",
+        "RET",
+        "Injury Impact",
+        "Impact PP",
+        "team"
+      ],
+      "sha256": "aa80dc52d764ebab4775f6ef5bccd8dffd45bcb90e468cfccedf1443e1d04efe"
+    },
+    "cfbdepth-offense-profile_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conference",
+        "Off AIR",
+        "AIR Rank",
+        "Style",
+        "Play Caller",
+        "Run%",
+        "Proj Run%",
+        "Pass%",
+        "Proj Pass%",
+        "Plays/G",
+        "Proj Plays/G",
+        "Diff",
+        "SecPP",
+        "SecPP+",
+        "Pace+",
+        "team"
+      ],
+      "sha256": "603fe2f91b139a7f0c98cb51962f1b5bff9c2127a037fa09f99e3c5a488d3307"
+    },
+    "cfbdepth-defense-profile_08-05-2026.csv": {
+      "rows": 138,
+      "columns": [
+        "as_of",
+        "School",
+        "Conf",
+        "Def AIR",
+        "Rank",
+        "Style",
+        "Play Caller",
+        "Blitz%",
+        "Pass Rush",
+        "Run Stop",
+        "Coverage",
+        "Tackling",
+        "team"
+      ],
+      "sha256": "d7b6c1757598c0a769d84d927e6cee21078432d2b78a262cfe98713275456182"
+    },
+    "cfbdepth-qb-ratings_08-05-2026.csv": {
+      "rows": 723,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Passing",
+        "Running",
+        "Deep Ball",
+        "Pressure",
+        "Clean",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "3275b333ca7ee5ba12d09ed3c9c1bd2bbf831e391a15bc1181d3757b115bfbec"
+    },
+    "cfbdepth-rb-ratings_08-05-2026.csv": {
+      "rows": 1031,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Running",
+        "Receiving",
+        "Pass Pro",
+        "Elusive/Explosive",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "e15fead432c53b608e9bbdcf4e8a94849921059f7f6e36df89773dc50bde0800"
+    },
+    "cfbdepth-wr-ratings_08-05-2026.csv": {
+      "rows": 1997,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Routes",
+        "Hands",
+        "Explosive",
+        "Pass Block",
+        "Running",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "1bbf26f9c2bdf419de85d38698384c3de93cd471a8b99c0744fb36ffecb65d25"
+    },
+    "cfbdepth-te-ratings_08-05-2026.csv": {
+      "rows": 999,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Routes",
+        "Hands",
+        "Run Block",
+        "Pass Block",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "56916d685e1d0b95180072678ca230b95b8df2adcd106e71a42241221fb8884a"
+    },
+    "cfbdepth-ol-ratings_08-05-2026.csv": {
+      "rows": 2675,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Pass Block",
+        "Run Block",
+        "Discipline",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "f4db1ff0e0111c616bad134b9f626c5930a0d25fb7581916a02805a57214a231"
+    },
+    "cfbdepth-dl-ratings_08-05-2026.csv": {
+      "rows": 1652,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Pass Rush",
+        "Run D",
+        "Tackle",
+        "Coverage",
+        "Discipline",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "6dd5077ea8869bae80b28c237f3c5e2fd0b39723af1f2b17021e096931e1c8d9"
+    },
+    "cfbdepth-lb-ratings_08-05-2026.csv": {
+      "rows": 1652,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Pass Rush",
+        "Run D",
+        "Tackle",
+        "Coverage",
+        "Discipline",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "fc84e77bb4a30f833bf95939b8c5a36aab9f50b0e5a6f1dd4a922ecbfdf90f11"
+    },
+    "cfbdepth-db-ratings_08-05-2026.csv": {
+      "rows": 1652,
+      "columns": [
+        "as_of",
+        "position_group",
+        "Name",
+        "School",
+        "Conference",
+        "Overall",
+        "Pass Rush",
+        "Run D",
+        "Tackle",
+        "Coverage",
+        "Discipline",
+        "team",
+        "source_school",
+        "player"
+      ],
+      "sha256": "8a18591c8e1b212342b14bb244c93926a60fc7f87b7801b87a8810a7babac119"
+    }
+  },
+  "outputs": {
+    "data/canonical/cfbdepth_air_ratings_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_coaching_impacts_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_depth_grades_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_rotation_talent_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_team_injury_impact_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_offense_profile_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_defense_profile_2026.csv": {
+      "rows": 138,
+      "teams": 138
+    },
+    "data/canonical/cfbdepth_players_2026.csv": {
+      "rows": 12381,
+      "mapped_rows": 12381,
+      "unmapped_rows": 0
+    },
+    "data/canonical/cfbdepth_team_top_players_2026.json": {
+      "teams": 140,
+      "players": 696
+    },
+    "data/canonical/cfbdepth_position_groups_2026.csv": {
+      "rows": 1110,
+      "teams": 140
+    },
+    "data/audits/cfbdepth_team_crosswalk_audit.csv": {
+      "rows": 142,
+      "unmapped": 0,
+      "outside_team_set": 2
+    }
+  },
+  "warnings": []
+}
