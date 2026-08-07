@@ -33,8 +33,7 @@ def transform(text,target):
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     text=text.replace('</head>',CSS+'</head>')
-    if target != 'matchups.html':
-        text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
+    text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
     text=text.replace('</head>','<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head>')
     if target == 'index.html':
         text=text.replace('changes.innerHTML=movements().slice(0,7)', "changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7)")
@@ -53,6 +52,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         week_script="""<script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script>"""
         text=text.replace('</body>',script+week_script+'</body>')
     if target == 'matchups.html':
+        text=text.replace('</head>','<style id="matchups-hide-page-health">#page-health-summary{display:none!important}</style></head>')
         text=text.replace('</head>','<style id="single-line-matchups">.shell{max-width:none;padding-left:10px;padding-right:10px}.tableWrap{overflow-x:hidden;max-height:calc(100vh - 260px)}.tableWrap table{min-width:0;width:100%;table-layout:fixed;font-size:12px}.tableWrap th{position:sticky;top:0;z-index:4}.tableWrap th,.tableWrap td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:6px}.tableWrap td{height:50px}.tableWrap th:nth-child(1){width:8%}.tableWrap th:nth-child(2){width:30%}.tableWrap th:nth-child(3){width:13%}.tableWrap th:nth-child(4){width:18%}.tableWrap th:nth-child(5){width:8%}.tableWrap th:nth-child(6){width:14%}.tableWrap th:nth-child(7){width:6%}.tableWrap th:nth-child(8){width:3%}.tableWrap .teamLine{min-width:0}.tableWrap .team img{width:21px;height:21px}.tableWrap .book{width:27px;height:22px}.tableWrap .edge{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:13px}.tableWrap .angle{white-space:nowrap}.tableWrap .open{padding:4px 6px}</style></head>')
     if target == 'futures.html':
         text=text.replace(
