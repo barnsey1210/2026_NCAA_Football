@@ -64,10 +64,9 @@ STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 CURRENT_STAGE=""
 RUN_FINALIZED=0
 
-# Email may be built for diagnostics, but sending requires a healthy primary
-# SportsGameOdds refresh. Site generation may continue with approved fallbacks.
-SGO_EMAIL_ELIGIBLE=1
-SGO_EMAIL_BLOCK_REASON=""
+# SportsGameOdds is an optional secondary market source.
+# Email eligibility is not tied to SGO health; the canonical current-market
+# contract owns provider priority and fallback selection.
 SGO_PULL_OK=0
 SGO_NORMALIZATION_OK=0
 
@@ -179,8 +178,7 @@ trap on_exit EXIT
   fi
 
   # Normalize only a raw response produced by a successful current run.
-  # A primary-source failure does not stop fallback-based site generation,
-  # but it blocks delivery of the daily betting email.
+  # SGO is optional; failure does not block canonical market/site/email work.
   # STAGE: sgo_normalization
   stage_start "sgo_normalization"
   if [ "$SGO_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
@@ -191,28 +189,18 @@ trap on_exit EXIT
           || warn "SGO canonical history append failed"
         stage_pass "sgo_normalization"
       else
-        SGO_EMAIL_ELIGIBLE=0
-        SGO_EMAIL_BLOCK_REASON="SGO compatibility export failed"
-        warn "SGO coverage blocked accepted compatibility export"
-        stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
+        warn "SGO compatibility export failed; preserving fallback data"
+        stage_fail "sgo_normalization" "SGO compatibility export failed"
       fi
     else
-      SGO_EMAIL_ELIGIBLE=0
-      SGO_EMAIL_BLOCK_REASON="canonical SGO normalization failed"
       warn "canonical SGO normalization failed; preserving fallback data"
-      stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
+      stage_fail "sgo_normalization" "canonical SGO normalization failed"
     fi
   elif [ "$SGO_PULL_OK" -eq 1 ]; then
-    SGO_EMAIL_ELIGIBLE=0
-    SGO_EMAIL_BLOCK_REASON="successful SGO pull produced no raw response"
-    warn "$SGO_EMAIL_BLOCK_REASON"
-    stage_fail "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON"
+    warn "successful SGO pull produced no raw response"
+    stage_fail "sgo_normalization" "successful SGO pull produced no raw response"
   else
-    SGO_EMAIL_ELIGIBLE=0
-    if [ -z "$SGO_EMAIL_BLOCK_REASON" ]; then
-      SGO_EMAIL_BLOCK_REASON="SGO pull unavailable"
-    fi
-    stage_skip "sgo_normalization" "$SGO_EMAIL_BLOCK_REASON; cached accepted data preserved"
+    stage_skip "sgo_normalization" "SGO pull unavailable; cached accepted/fallback data preserved"
   fi
 
 
@@ -353,9 +341,6 @@ PY2
   if [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
     echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
     stage_skip "email_send" "disabled by NCAAF_SEND_EMAIL=0"
-  elif [ "$SGO_EMAIL_ELIGIBLE" -ne 1 ]; then
-    echo "EMAIL BLOCKED: ${SGO_EMAIL_BLOCK_REASON:-primary SGO refresh was not healthy}"
-    stage_skip "email_send" "${SGO_EMAIL_BLOCK_REASON:-primary SGO refresh was not healthy}"
   elif [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
     if run_py "email/send_daily_betting_angles_email.py" "send_daily_betting_angles_email.py"; then
       stage_pass "email_send"

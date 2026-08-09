@@ -48,7 +48,7 @@
       "order": 30,
       "required": false,
       "external_network": true,
-      "email_dependency": true,
+      "email_dependency": false,
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#sgo_pull",
       "scripts": [
@@ -61,7 +61,7 @@
       "order": 40,
       "required": false,
       "external_network": false,
-      "email_dependency": true,
+      "email_dependency": false,
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#sgo_normalization",
       "scripts": [
