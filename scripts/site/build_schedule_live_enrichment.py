@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json, math, re
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 import pandas as pd
 
 ROOT=Path.home()/"NCAAF_AUTO"
-# Schedule enrichment still consumes the embedded legacy database. Keep that
-# dependency explicit so the canonical V2 index remains a presentation shell.
-INDEX=ROOT/"v1.html"
+# Canonical schedule truth comes from the structured preseason DB, refreshed
+# from CFBD before projections and site builds.
+PRESEASON_DB=ROOT/"data/snapshots/preseason/preseason_db.json"
 SHADOW=ROOT/"data/site/saturday_shadow_lines.json"
+ET=ZoneInfo("America/New_York")
 OUT=ROOT/"data/site/schedule_live_enrichment.json"
 TIME_KEYS=["start_time","start_date","start_datetime","kickoff","kickoff_time","scheduled","date_time","datetime"]
 ID_KEYS=["game_id","id","event_id","sgo_game_id"]
@@ -39,11 +41,33 @@ def projected_market_value(score, market):
     if value>=0.37464212056867763: return "Moderate"
     return "Weak or negative"
 
-def embedded_games():
-    html=INDEX.read_text(encoding="utf-8",errors="ignore")
-    m=re.search(r'<script id="db" type="application/json">(.*?)</script>',html,re.S)
-    if not m: raise SystemExit("Could not locate embedded DB")
-    return json.loads(m.group(1)).get("games",[])
+def canonical_games():
+    if not PRESEASON_DB.exists():
+        raise SystemExit(f"Missing canonical preseason DB: {PRESEASON_DB}")
+    data=json.loads(PRESEASON_DB.read_text(encoding="utf-8",errors="ignore"))
+    games=data.get("games",[])
+    if not isinstance(games,list) or not games:
+        raise SystemExit("Canonical preseason DB contains no games")
+    return games
+
+def et_datetime(value):
+    if value in (None,""):
+        return None
+    try:
+        dt=datetime.fromisoformat(str(value).replace("Z","+00:00"))
+        if dt.tzinfo is None:
+            dt=dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(ET)
+    except Exception:
+        return None
+
+def et_display(value):
+    dt=et_datetime(value)
+    return dt.strftime("%b %-d, %-I:%M %p ET") if dt else None
+
+def et_iso(value):
+    dt=et_datetime(value)
+    return dt.isoformat() if dt else None
 
 def row_key(r):
     gid=norm_id(first(r,ID_KEYS)); home=first(r,HOME_KEYS); away=first(r,AWAY_KEYS)
@@ -55,7 +79,7 @@ def canon(r):
     return {
       "game_id":norm_id(first(r,ID_KEYS)),"home_team":first(r,HOME_KEYS),"away_team":first(r,AWAY_KEYS),
       "season":int(num(r.get("season")) or 2026),"week":int(num(r.get("week")) or 0),
-      "date":r.get("date"),"kickoff_raw":first(r,TIME_KEYS),"status":r.get("status"),
+      "date":r.get("date"),"kickoff_raw":first(r,["cfbd_start_date"]+TIME_KEYS),"status":r.get("status") or r.get("cfbd_status"),
       "home_score":num(r.get("home_score") or r.get("home_points")),
       "away_score":num(r.get("away_score") or r.get("away_points")),
       "opening_spread":num(r.get("opening_spread") or r.get("open_spread")),
@@ -77,7 +101,7 @@ def load_rows(path):
 
 def main():
     records={}
-    for raw in embedded_games():
+    for raw in canonical_games():
       r=canon(raw)
       if r["season"]==2026 and row_key(r): records[row_key(r)]=r
     hits=[]
@@ -110,7 +134,11 @@ def main():
       s=shadow.get(norm_id(r.get("game_id")),{})
       spread=s.get("spread_status"); total=s.get("total_status")
       status="Complete" if str(spread).startswith("Complete") and str(total).startswith("Complete") else ("Partial" if spread or total else "Pending")
+      kickoff_raw=r.get("kickoff_raw")
       games.append({**r,
+        "kickoff_et":et_display(kickoff_raw),
+        "kickoff_iso_et":et_iso(kickoff_raw),
+        "time_zone_display":"ET",
         "spread_impact":s.get("applied_spread_delta"),"total_impact":s.get("applied_total_delta"),
         "away_spread_impact":s.get("away_spread_impact"),
         "home_spread_impact":s.get("home_spread_impact"),
@@ -146,8 +174,25 @@ def main():
           )
         }
       })
-    payload={"schema_version":"schedule-live-enrichment-v1","built_at":datetime.now().isoformat(),"source_hits":hits,"games":games}
-    OUT.parent.mkdir(parents=True,exist_ok=True); OUT.write_text(json.dumps(payload,indent=2)+"\n")
-    print(json.dumps({"games":len(games),"games_with_kickoff":sum(bool(g.get("kickoff_raw")) for g in games),"source_hits":hits},indent=2))
+    now_utc=datetime.now(timezone.utc)
+    payload={
+        "schema_version":"schedule-live-enrichment-v2",
+        "built_at":now_utc.isoformat(),
+        "built_at_et":now_utc.astimezone(ET).isoformat(),
+        "time_zone":"America/New_York",
+        "time_zone_display":"ET",
+        "schedule_source":"data/snapshots/preseason/preseason_db.json",
+        "source_hits":hits,
+        "games":games
+    }
+    OUT.parent.mkdir(parents=True,exist_ok=True)
+    OUT.write_text(json.dumps(payload,indent=2)+"\n")
+    print(json.dumps({
+        "games":len(games),
+        "games_with_kickoff":sum(bool(g.get("kickoff_raw")) for g in games),
+        "source_hits":hits
+    },indent=2))
     print("wrote:",OUT)
-if __name__=="__main__": main()
+
+if __name__=="__main__":
+    main()
