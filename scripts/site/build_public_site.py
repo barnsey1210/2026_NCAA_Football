@@ -5,12 +5,12 @@ import re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
-PAGES = {"openers_v2.html":"openers.html",
-         "matchups.html":"matchups.html", "matchup.html":"matchup.html", "futures_v2.html":"futures.html",
+PAGES = {"openers.html":"openers.html",
+         "matchups.html":"matchups.html", "matchup.html":"matchup.html", "futures.html":"futures.html",
          "betting_v2.html":"betting.html",
-         "team_v2.html":"team.html", "ratings_v2.html":"ratings.html",
-         "simulations_v2.html":"simulations.html", "playoff_v2.html":"playoff.html",
-         "schedule_v2.html":"schedule.html", "odds_v2.html":"odds.html"}
+         "team.html":"team.html", "ratings.html":"ratings.html",
+         "simulations.html":"simulations.html", "playoff.html":"playoff.html",
+         "schedule.html":"schedule.html", "odds_v2.html":"odds.html"}
 LINKS = [('Home','index.html'), ('Ratings','ratings.html'), ('Openers','openers.html'), ('Matchups','matchups.html'),
          ('ODDS','odds.html'), ('Schedule','schedule.html'), ('Futures','futures.html'), ('Conferences','conferences.html'), ('Playoff','playoff.html'),
          ('Simulations','simulations.html'), ('Betting','betting.html')]
@@ -24,16 +24,17 @@ def nav(target):
     return f'<div class="brand"><a href="index.html">NCAAF</a></div><div class="nav">{links}</div>'
 
 def transform(text,target):
-    for old,new in {'openers_v2.html':'openers.html','matchups_v2.html':'matchups.html',
-                    'futures_v2.html':'futures.html',
-                    'conferences_v2.html':'conferences.html','betting_v2.html':'betting.html',
-                    'schedule_v2.html':'schedule.html',
+    for old,new in {'openers.html':'openers.html','matchups.html':'matchups.html',
+                    'futures.html':'futures.html',
+                    'conferences.html':'conferences.html','betting_v2.html':'betting.html',
+                    'schedule.html':'schedule.html',
                     'index.html#team/':'team.html?team='}.items(): text=text.replace(old,new)
     text=text.replace('openers.html?game_id=', 'openers.html?game_id=')
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     text=text.replace('</head>',CSS+'</head>')
-    text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
+    if target != 'openers.html':
+        text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
     text=text.replace('</head>','<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head>')
     if target == 'index.html':
         text=text.replace('changes.innerHTML=movements().slice(0,7)', "changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7)")
@@ -42,10 +43,12 @@ def transform(text,target):
         dash_script="""<script id="dashboard-week-js">const dashboardWeek=document.getElementById('week'),dashboardWeekChips=document.getElementById('dashboardWeekChips');function syncDashboardWeeks(){dashboardWeekChips.innerHTML=[...dashboardWeek.options].map(o=>`<button class="${o.value===dashboardWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');dashboardWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{dashboardWeek.value=b.dataset.week;dashboardWeek.dispatchEvent(new Event('input',{bubbles:true}));syncDashboardWeeks()})}new MutationObserver(syncDashboardWeeks).observe(dashboardWeek,{childList:true});dashboardWeek.addEventListener('input',syncDashboardWeeks);</script>"""
         text=text.replace('</body>',dash_script+'</body>')
     if target == 'openers.html':
-        text=text.replace('<div class="filters">','<div class="weekChips" id="openerWeekChips"></div><div class="filters">',1)
+        if 'id="openerWeekChips"' not in text:
+            text=text.replace('<div class="filters">','<div class="weekChips" id="openerWeekChips"></div><div class="filters">',1)
         text=text.replace('</head>','<style id="opener-week-css">#week{display:none}.weekChips{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.weekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:6px 10px;font-weight:900;cursor:pointer}.weekChips button.active{background:#1857a7;color:#fff}</style></head>')
         panel = '<details class="freshness" id="postgameShadow"><summary>Saturday shadow: loading…</summary><div class="freshnessBody"></div></details>'
-        text=text.replace('<div class="mode" id="modes">',panel+'<div class="mode" id="modes">',1)
+        if 'id="postgameShadow"' not in text:
+            text=text.replace('<div class="mode" id="modes">',panel+'<div class="mode" id="modes">',1)
         script="""<script id="postgame-shadow-ui">
 fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const n=d.summary?.completed_team_updates||0;box.querySelector('summary').textContent=`Saturday shadow · ${d.status.replaceAll('_',' ')} · ${n} team estimates · not applied`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Spread</b><br>${d.spread_model.status}<br><span class="muted">Score/ATS model; PBP excluded after holdout</span></div><div class="freshnessSource"><b>Total</b><br>${d.total_model.status.replaceAll('_',' ')}<br><span class="muted">Requires current-season PBP</span></div><div class="freshnessSource"><b>Safety</b><br>Shadow only<br><span class="muted">Official ratings and projections unchanged</span></div>`}).catch(()=>{});
 </script>"""
@@ -158,7 +161,7 @@ def _sync_openers_v2_public_artifacts():
                 '<a href="odds.html">ODDS</a><a href="futures.html">Futures</a>',
                 1,
             )
-        if 'href="page_health.css"' not in _text:
+        if _name != 'openers.html' and 'href="page_health.css"' not in _text:
             _text = _text.replace(
                 '</head>',
                 '<link rel="stylesheet" href="page_health.css">'

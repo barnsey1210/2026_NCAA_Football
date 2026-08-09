@@ -502,7 +502,7 @@ body:has(#projectionMode button[data-projection-mode="shadow"].active)
 
 <style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
-</style><link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="opener-week-css">#week{display:none}.weekChips{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.weekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:6px 10px;font-weight:900;cursor:pointer}.weekChips button.active{background:#1857a7;color:#fff}</style><style id="shared-war-room-shell-v2">
+</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="opener-week-css">#week{display:none}.weekChips{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.weekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:6px 10px;font-weight:900;cursor:pointer}.weekChips button.active{background:#1857a7;color:#fff}</style><style id="shared-war-room-shell-v2">
 :root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
 .top{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:300px minmax(0,1fr) auto!important;gap:14px!important;align-items:center!important;padding:0 22px!important;background:#020914!important;border-bottom:1px solid #17395d!important}
 .top .brand.war-room-brand{min-width:0!important}.war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-brand strong span{color:var(--wr-blue)!important}.war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
@@ -517,12 +517,183 @@ body:has(#projectionMode button[data-projection-mode="shadow"].active)
 .war-room-global .war-room-health{justify-self:end!important}
 @media(max-width:1550px){.war-room-global{grid-template-columns:255px minmax(0,1fr) auto!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:36px!important}.war-room-global .war-room-nav a{font-size:13px!important;padding:0 7px!important}}
 @media(max-width:1180px){.war-room-global{grid-template-columns:220px minmax(0,1fr)!important}.war-room-global .war-room-health{display:none!important}.war-room-global .war-room-nav{overflow:auto!important;scrollbar-width:none}.war-room-global .war-room-nav::-webkit-scrollbar{display:none}}
-</style></head><body>
+</style>
+<!-- HISTORICAL_BETTING_UI_CSS_START -->
+<style id="HISTORICAL_BETTING_UI_CSS">
+.histSection{margin:12px 0}
+.histGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+.histCard{border:1px solid var(--line);background:#081731;border-radius:13px;overflow:hidden}
+.histHead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.histHead h2{font-size:14px;margin:0}
+.histHead small{color:var(--muted);max-width:760px}
+.histTableWrap{overflow:auto}
+.histTable{width:100%;border-collapse:collapse;min-width:720px}
+.histTable th,.histTable td{padding:7px 8px;border-top:1px solid #17345c;text-align:right;white-space:nowrap;font-size:10px}
+.histTable th{color:var(--muted);text-transform:uppercase;font-size:9px}
+.histTable th:first-child,.histTable td:first-child{text-align:left}
+.histCoreRow{background:rgba(67,223,150,.09)}
+.histActionRow{background:rgba(69,156,255,.08)}
+.histBadge{display:inline-flex;border-radius:999px;padding:2px 6px;font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
+.histStrong{color:#baf8d6;border:1px solid #2f7d5a;background:#0c2d25}
+.histActionable{color:#cbe5ff;border:1px solid #356fa8;background:#102b50}
+.histWatch{color:#ffe2a8;border:1px solid #8a6c31;background:#302711}
+.histNote{padding:9px 12px;color:var(--muted);font-size:9px;border-top:1px solid #17345c}
+.keyRef{margin:10px 0 12px;border:1px solid var(--line);background:#081731;border-radius:12px;padding:10px 12px}
+.keyRefTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.keyRefTop b{font-size:12px}
+.keyRefTop small{color:var(--muted);font-size:9px}
+.keyRefGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.keyNumGroup{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.keyNumLabel{color:var(--muted);font-size:9px;text-transform:uppercase;font-weight:900;min-width:50px}
+.keyNumItem{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #28517d;background:#0d2240;border-radius:8px;padding:4px 7px}
+.keyNumItem b{font-size:12px}
+.keyNumItem small{font-size:8px;color:var(--muted)}
+@media(max-width:900px){.histGrid,.keyRefGrid{grid-template-columns:1fr}}
+</style>
+<!-- HISTORICAL_BETTING_UI_CSS_END -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- OPENERS_FINAL_CLEAN_LAYOUT_START -->
+<style id="OPENERS_FINAL_CLEAN_LAYOUT_CSS">
+.openersStatusStrip{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:6px!important;margin:6px 0 8px!important}
+.openersStatusStrip>details.freshness{width:auto!important;margin:0!important;border-radius:999px!important;overflow:hidden!important}
+.openersStatusStrip>details.freshness>summary{padding:6px 10px!important;font-size:10px!important;line-height:1.1!important;white-space:nowrap!important}
+.openersStatusStrip>details.freshness[open]{flex-basis:100%!important;border-radius:10px!important}
+.openersStatusStrip .projectionMode{display:flex!important;align-items:center!important;gap:6px!important;margin:0!important}
+.openersStatusStrip .projectionMode>span:first-child{font-size:8px!important}
+.openersStatusStrip .projectionMode button{padding:6px 11px!important;font-size:10px!important}
+.openersStatusStrip .shadowCoverageStatus{padding:5px 9px!important;font-size:9px!important}
+.openersFilterUtilityRow{display:flex!important;flex-direction:row!important;align-items:flex-start!important;justify-content:flex-start!important;gap:8px!important;width:100%!important;max-width:100%!important;margin:8px 0 10px!important;box-sizing:border-box!important}
+.openersFilterUtilityRow .filters{flex:0 0 auto!important;width:auto!important;max-width:none!important;min-width:0!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;flex-wrap:wrap!important;margin:0!important}
+.openersFilterUtilityRow #search{flex:0 0 205px!important;width:205px!important;min-width:205px!important;max-width:205px!important}
+.openersFilterUtilityRow .filters .legend{flex:0 0 100%!important;width:100%!important;margin:1px 0 0!important;font-size:8.5px!important;text-align:left!important}
+.openersFilterUtilityRow .keyRef{flex:0 0 300px!important;width:300px!important;min-width:300px!important;max-width:300px!important;margin:0!important;padding:8px 9px!important;box-sizing:border-box!important}
+.openersFilterUtilityRow .keyRefTop{display:flex!important;justify-content:space-between!important;align-items:baseline!important;gap:5px!important;margin-bottom:6px!important}
+.openersFilterUtilityRow .keyRefTop b{font-size:10px!important;white-space:nowrap!important}
+.openersFilterUtilityRow .keyRefTop small{font-size:7px!important;white-space:nowrap!important}
+.openersFilterUtilityRow .keyRefGrid{display:grid!important;grid-template-columns:1fr!important;gap:5px!important}
+.openersFilterUtilityRow .keyNumGroup{display:grid!important;grid-template-columns:38px repeat(5,minmax(0,1fr))!important;align-items:center!important;gap:3px!important}
+.openersFilterUtilityRow .keyNumLabel{min-width:0!important;width:auto!important;font-size:7px!important}
+.openersFilterUtilityRow .keyNumItem{min-width:0!important;width:auto!important;display:flex!important;justify-content:center!important;align-items:baseline!important;gap:2px!important;padding:4px 2px!important;border-radius:7px!important}
+.openersFilterUtilityRow .keyNumItem b{font-size:11px!important;line-height:1!important}
+.openersFilterUtilityRow .keyNumItem small{font-size:9.5px!important;font-weight:950!important;color:#8fc8ff!important;opacity:1!important;line-height:1!important}
+@media(max-width:1050px){.openersFilterUtilityRow{flex-wrap:wrap!important}}
+@media(max-width:900px){.openersFilterUtilityRow{flex-direction:column!important}.openersFilterUtilityRow .keyRef{width:100%!important;min-width:0!important;max-width:none!important}}
+</style>
+<!-- OPENERS_FINAL_CLEAN_LAYOUT_END -->
+
+
+
+<!-- OPENERS_KEY_NUMBER_EMPHASIS_START -->
+<style id="OPENERS_KEY_NUMBER_EMPHASIS">
+/* Fit-safe key-number presentation: number emphasized, % smaller in parentheses */
+.openersFilterUtilityRow .keyRef{
+  flex:0 0 340px!important;
+  width:340px!important;
+  min-width:340px!important;
+  max-width:340px!important;
+  padding:9px 10px!important;
+}
+
+.openersFilterUtilityRow .keyNumGroup{
+  grid-template-columns:40px repeat(5,minmax(0,1fr))!important;
+  gap:4px!important;
+}
+
+.openersFilterUtilityRow .keyNumItem{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:center!important;
+  gap:2px!important;
+  min-width:0!important;
+  padding:4px 3px!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+}
+
+.openersFilterUtilityRow .keyNumItem b{
+  font-size:12.5px!important;
+  font-weight:950!important;
+  letter-spacing:-0.02em!important;
+  color:#f4f8ff!important;
+  line-height:1!important;
+}
+
+.openersFilterUtilityRow .keyNumItem small{
+  font-size:8.5px!important;
+  font-weight:800!important;
+  color:#9fcfff!important;
+  opacity:1!important;
+  line-height:1!important;
+}
+
+.openersFilterUtilityRow .keyNumItem small::before{content:"("}
+.openersFilterUtilityRow .keyNumItem small::after{content:")"}
+
+.openersFilterUtilityRow .keyNumLabel{
+  font-size:6.8px!important;
+  letter-spacing:.12em!important;
+}
+
+.openersFilterUtilityRow .keyRefTop b{
+  font-size:10.5px!important;
+}
+.openersFilterUtilityRow .keyRefTop small{
+  font-size:7px!important;
+}
+
+/* Keep search + card on the same row at desktop widths */
+@media(min-width:1051px){
+  .openersFilterUtilityRow{
+    flex-wrap:nowrap!important;
+  }
+}
+</style>
+<!-- OPENERS_KEY_NUMBER_EMPHASIS_END -->
+
+</head><body>
 <main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html" class="active">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div><div class="model" id="modelStamp">Production ratings</div></div>
 <section class="hero"><div><h1>Openers</h1><p>Fast first-pass decisions before the market settles.</p></div><div class="metrics"><div class="metric"><span>Games shown</span><b id="shown">—</b></div><div class="metric"><span>With market</span><b id="marketCount">—</b></div></div></section>
+
+
+
+<div class="openersStatusStrip">
 <details class="freshness" id="freshness"><summary id="freshnessSummary">Checking whether ratings changed and were applied…</summary><div class="freshnessBody" id="freshnessBody"></div></details>
-<details class="freshness" id="postgameShadow"><summary>Saturday shadow: loading…</summary><div class="freshnessBody"></div></details><div class="projectionMode" id="projectionMode"><span>Projection view</span><button class="active" data-projection-mode="standard">Standard</button><button data-projection-mode="shadow">Shadow</button><span id="shadowCoverageStatus" class="shadowCoverageStatus">0/0 shadow ready</span></div><details class="freshness" id="postgameShadow"><summary>Saturday shadow: loading…</summary><div class="freshnessBody"></div></details><div class="mode" id="modes"><button class="active" data-mode="all">Projected board</button><button data-mode="market">Market available</button><button data-mode="watch">Watching</button><button data-mode="bet">Bet</button></div>
-<div class="weekChips" id="openerWeekChips"></div><div class="weekChips" id="openerWeekChips"></div><div class="filters"><select id="week"></select><div class="gameTypeButtons" id="gameTypeButtons"><button class="active" data-type="all">All games</button><button data-type="fbs_fbs">FBS only</button><button data-type="fbs_fcs">FBS vs FCS</button></div><select id="gameType" hidden><option value="all">All games</option><option value="fbs_fbs">FBS vs FBS</option><option value="fbs_fcs">FBS vs FCS</option></select><input id="search" placeholder="Find a team"><span class="legend">One row per game · click for independent context</span></div>
+<details class="freshness" id="postgameShadow"><summary>Saturday shadow: loading…</summary><div class="freshnessBody"></div></details><div class="projectionMode" id="projectionMode"><span>Projection view</span><button class="active" data-projection-mode="standard">Standard</button><button data-projection-mode="shadow">Shadow</button><span id="shadowCoverageStatus" class="shadowCoverageStatus">0/0 shadow ready</span></div>
+<!-- OPENERS_STATUS_STRIP_END --></div><div class="mode" id="modes"><button class="active" data-mode="all">Projected board</button><button data-mode="market">Market available</button><button data-mode="watch">Watching</button><button data-mode="bet">Bet</button></div>
+<div class="weekChips" id="openerWeekChips"></div><div class="openersFilterUtilityRow">
+<div class="filters"><select id="week"></select><div class="gameTypeButtons" id="gameTypeButtons"><button class="active" data-type="all">All games</button><button data-type="fbs_fbs">FBS only</button><button data-type="fbs_fcs">FBS vs FCS</button></div><select id="gameType" hidden><option value="all">All games</option><option value="fbs_fbs">FBS vs FBS</option><option value="fbs_fcs">FBS vs FCS</option></select><input id="search" placeholder="Find a team"><span class="legend">One row per game · click for independent context</span></div>
+<!-- MODERN_KEY_NUMBERS_START -->
+<section class="keyRef" id="modernKeyNumbers">
+  <div class="keyRefTop">
+    <b>Modern NCAAF Key Numbers</b>
+    <small>2022–2025 final-score landing frequency</small>
+  </div>
+  <div class="keyRefGrid">
+    <div class="keyNumGroup">
+      <span class="keyNumLabel">Spread</span>
+      <span class="keyNumItem"><b>3</b><small>10.8%</small></span><span class="keyNumItem"><b>7</b><small>8.8%</small></span><span class="keyNumItem"><b>10</b><small>4.8%</small></span><span class="keyNumItem"><b>17</b><small>4.3%</small></span><span class="keyNumItem"><b>14</b><small>4.2%</small></span>
+    </div>
+    <div class="keyNumGroup">
+      <span class="keyNumLabel">Totals</span>
+      <span class="keyNumItem"><b>51</b><small>3.5%</small></span><span class="keyNumItem"><b>55</b><small>3.4%</small></span><span class="keyNumItem"><b>45</b><small>3.0%</small></span><span class="keyNumItem"><b>41</b><small>3.0%</small></span><span class="keyNumItem"><b>59</b><small>2.8%</small></span>
+    </div>
+  </div>
+</section>
+<!-- MODERN_KEY_NUMBERS_END -->
+</div>
 <div class="card"><div class="wrap"><table><thead id="head"></thead><tbody id="rows"><tr><td class="empty">Loading opener data…</td></tr></tbody></table></div></div>
 <p class="muted">Candidate workflow. Watch, Pass, and Add Bet are device-local evaluation state until the Betting integration is connected.</p></main>
 <div class="backdrop" id="backdrop" onclick="closeDrawer()"></div><aside class="drawer" id="drawer"><div id="drawerContent"></div></aside>
