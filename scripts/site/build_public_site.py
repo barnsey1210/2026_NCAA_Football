@@ -126,8 +126,8 @@ def main():
 if __name__=='__main__': main()
 
 # OPENERS_V2_PUBLIC_SYNC_START
-# Keep the published Openers page and shared matchup workspace aligned with
-# their canonical V2 source files after the normal public-site build finishes.
+# Keep the published Openers page aligned with canonical root openers.html and
+# keep the shared matchup workspace synchronized after the public-site build.
 import atexit as _openers_sync_atexit
 import shutil as _openers_sync_shutil
 from pathlib import Path as _OpenersSyncPath
@@ -136,7 +136,7 @@ def _sync_openers_v2_public_artifacts():
     _project_root = ROOT
     _public_root = _project_root / "build" / "public_site"
     _pairs = (
-        ((_project_root / "openers_v2.html") if (_project_root / "openers_v2.html").exists() else (_project_root / "openers.html"), _public_root / "openers.html"),
+        (_project_root / "openers.html", _public_root / "openers.html"),
         (_project_root / "matchup_workspace.js", _public_root / "matchup_workspace.js"),
     )
     _public_root.mkdir(parents=True, exist_ok=True)
