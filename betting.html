@@ -91,7 +91,42 @@ img[src$="west-virginia.webp"] {
 
 <style id="model-performance-preview-css">
 .viewSwitch,.modelTabs,.modelFilters{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.viewSwitch button,.modelTabs button,.modelFilters button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:8px 13px;font-weight:900;cursor:pointer}.viewSwitch button.active,.modelTabs button.active,.modelFilters button.active{background:#1857a7;color:#fff;border-color:#55a2ff}.modelView[hidden]{display:none}.modelNotice{border:1px solid #28558c;background:#0b2444;border-radius:12px;padding:12px;margin:10px 0;color:#bcd0ec}.modelNotice strong{color:#fff}.modelMethod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.modelMethod div{border:1px solid var(--line);background:#081731;border-radius:10px;padding:10px}.modelMethod b{display:block;margin-bottom:3px}.modelMethod span{color:var(--muted);font-size:10px}.modelCards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.modelCard{background:#0a1a35;border:1px solid var(--line);border-radius:12px;padding:12px}.modelCard span{color:var(--muted);font-size:10px;text-transform:uppercase}.modelCard b{display:block;font-size:22px;margin-top:4px}.modelMatrixWrap{overflow:auto}.modelMatrix{width:100%;min-width:1050px;border-collapse:collapse}.modelMatrix th,.modelMatrix td{border-top:1px solid var(--line);padding:8px;text-align:right;white-space:nowrap}.modelMatrix th:first-child,.modelMatrix td:first-child{text-align:left;position:sticky;left:0;background:#0a1a35}.modelMatrix th[data-sort]{cursor:pointer}.modelMatrix th[data-sort]:hover{color:#fff}.statusPill{display:inline-flex;font-size:9px;border:1px solid #37618f;border-radius:999px;padding:3px 6px;color:#bdd5f2}.statusPill.active{border-color:#2b7f5e;color:#baf8d6}.statusPill.warn{border-color:#8a6a2d;color:#ffe0a1}.statusPill.muted{border-color:#42536f;color:#a7b5cc}.modelNameSub{color:var(--muted);font-size:9px;margin-top:3px}.modelEmpty{text-align:center!important;padding:28px!important;color:var(--muted)}.modelSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.modelSummaryBlock{border:1px solid var(--line);background:#081731;border-radius:12px;padding:12px}.modelSummaryBlock h3{margin:0 0 8px;font-size:13px}.modelSummaryBlock p{margin:5px 0;color:var(--muted);font-size:11px}.modelSummaryBlock b{color:#fff}.modelFilterLabel{align-self:center;color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:900;margin-right:2px}@media(max-width:900px){.modelMethod,.modelSummaryGrid{grid-template-columns:1fr}.modelCards{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.modelMatrix{min-width:760px}.modelAdvanced{display:none}}
-</style><style id="production-nav-css">
+</style>
+<!-- HISTORICAL_BETTING_UI_CSS_START -->
+<style id="HISTORICAL_BETTING_UI_CSS">
+.histSection{margin:12px 0}
+.histGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+.histCard{border:1px solid var(--line);background:#081731;border-radius:13px;overflow:hidden}
+.histHead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.histHead h2{font-size:14px;margin:0}
+.histHead small{color:var(--muted);max-width:760px}
+.histTableWrap{overflow:auto}
+.histTable{width:100%;border-collapse:collapse;min-width:720px}
+.histTable th,.histTable td{padding:7px 8px;border-top:1px solid #17345c;text-align:right;white-space:nowrap;font-size:10px}
+.histTable th{color:var(--muted);text-transform:uppercase;font-size:9px}
+.histTable th:first-child,.histTable td:first-child{text-align:left}
+.histCoreRow{background:rgba(67,223,150,.09)}
+.histActionRow{background:rgba(69,156,255,.08)}
+.histBadge{display:inline-flex;border-radius:999px;padding:2px 6px;font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;margin-left:4px}
+.histStrong{color:#baf8d6;border:1px solid #2f7d5a;background:#0c2d25}
+.histActionable{color:#cbe5ff;border:1px solid #356fa8;background:#102b50}
+.histWatch{color:#ffe2a8;border:1px solid #8a6c31;background:#302711}
+.histNote{padding:9px 12px;color:var(--muted);font-size:9px;border-top:1px solid #17345c}
+.keyRef{margin:10px 0 12px;border:1px solid var(--line);background:#081731;border-radius:12px;padding:10px 12px}
+.keyRefTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.keyRefTop b{font-size:12px}
+.keyRefTop small{color:var(--muted);font-size:9px}
+.keyRefGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.keyNumGroup{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.keyNumLabel{color:var(--muted);font-size:9px;text-transform:uppercase;font-weight:900;min-width:50px}
+.keyNumItem{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #28517d;background:#0d2240;border-radius:8px;padding:4px 7px}
+.keyNumItem b{font-size:12px}
+.keyNumItem small{font-size:8px;color:var(--muted)}
+@media(max-width:900px){.histGrid,.keyRefGrid{grid-template-columns:1fr}}
+</style>
+<!-- HISTORICAL_BETTING_UI_CSS_END -->
+
+<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style><link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="shared-war-room-shell-v2">
 :root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
@@ -108,7 +143,39 @@ img[src$="west-virginia.webp"] {
 .war-room-global .war-room-health{justify-self:end!important}
 @media(max-width:1550px){.war-room-global{grid-template-columns:255px minmax(0,1fr) auto!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:36px!important}.war-room-global .war-room-nav a{font-size:13px!important;padding:0 7px!important}}
 @media(max-width:1180px){.war-room-global{grid-template-columns:220px minmax(0,1fr)!important}.war-room-global .war-room-health{display:none!important}.war-room-global .war-room-nav{overflow:auto!important;scrollbar-width:none}.war-room-global .war-room-nav::-webkit-scrollbar{display:none}}
-</style></head><body><main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html" class="active">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div><div class="sync" id="sync">Sheet snapshot</div></div><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">Model Performance</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open wagers</span><b id="ownedCount">—</b></div><div class="metric"><span>Open exposure</span><b id="exposure">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div></div></section><section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Process scorecard</h2><small>Overall, Powers, and Opener bets</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section><div class="tabs" id="tabs"><button class="active" data-tab="open">All open wagers</button><button data-tab="powers">Powers bets</button><button data-tab="opener">Opener bets</button><button data-tab="drafts">Site-entered drafts</button><button data-tab="all">All records</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger"><thead><tr><th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Current market</th><th>Current CLV / EV</th><th>Status</th><th>Game</th></tr></thead><tbody id="rows"><tr><td colspan="10" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Google Sheet rows are treated as James’s wagers regardless of Account. “Site-entered drafts” are bets entered through this site that have not yet been added to the Google Sheet; they remain device-local and are not part of official performance.</p></div><section id="modelPerformanceView" class="modelView" hidden>
+</style></head><body><main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html" class="active">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div><div class="sync" id="sync">Sheet snapshot</div></div><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">Model Performance</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open wagers</span><b id="ownedCount">—</b></div><div class="metric"><span>Open exposure</span><b id="exposure">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div></div></section>
+
+
+<section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Process scorecard</h2><small>Overall, Powers, and Opener bets</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section><div class="tabs" id="tabs"><button class="active" data-tab="open">All open wagers</button><button data-tab="powers">Powers bets</button><button data-tab="opener">Opener bets</button><button data-tab="drafts">Site-entered drafts</button><button data-tab="all">All records</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger"><thead><tr><th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Current market</th><th>Current CLV / EV</th><th>Status</th><th>Game</th></tr></thead><tbody id="rows"><tr><td colspan="10" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Google Sheet rows are treated as James’s wagers regardless of Account. “Site-entered drafts” are bets entered through this site that have not yet been added to the Google Sheet; they remain device-local and are not part of official performance.</p></div><section id="modelPerformanceView" class="modelView" hidden>
+<!-- HISTORICAL_BETTING_SECTION_START -->
+<section class="histSection" id="historicalBettingResearch">
+  <div class="histGrid">
+    <div class="histCard">
+      <div class="histHead">
+        <div><h2>Historical Consensus Edge</h2><small>2022–2025 · five-system consensus vs recorded opener</small></div>
+        <small>Results + market-process validation</small>
+      </div>
+      <div class="histTableWrap"><table class="histTable">
+        <thead><tr><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>ROI @ -110</th><th>Beat Close</th><th>+CLV movers</th><th>Avg CLV</th></tr></thead>
+        <tbody><tr class=""><td><b>1+</b> </td><td>2,050</td><td>1018-998-34</td><td>50.5%</td><td>-3.6%</td><td>50.3%</td><td>59.9%</td><td>0.42</td></tr><tr class=""><td><b>2+</b> </td><td>1,188</td><td>609-557-22</td><td>52.2%</td><td>-0.3%</td><td>52.5%</td><td>62.3%</td><td>0.56</td></tr><tr class=""><td><b>3+</b> <span class="histBadge histWatch">Watch</span></td><td>618</td><td>319-288-11</td><td>52.6%</td><td>0.3%</td><td>56.1%</td><td>66.5%</td><td>0.81</td></tr><tr class="histActionRow"><td><b>3.5+</b> <span class="histBadge histActionable">Actionable</span></td><td>441</td><td>237-198-6</td><td>54.5%</td><td>4.0%</td><td>58.0%</td><td>69.0%</td><td>0.99</td></tr><tr class="histCoreRow"><td><b>4+</b> <span class="histBadge histStrong">Strong</span></td><td>303</td><td>168-132-3</td><td>56.0%</td><td>6.9%</td><td>61.7%</td><td>71.9%</td><td>1.20</td></tr><tr class=""><td><b>5+</b> </td><td>142</td><td>79-61-2</td><td>56.4%</td><td>7.7%</td><td>60.6%</td><td>69.9%</td><td>1.57</td></tr><tr class=""><td><b>7+</b> </td><td>27</td><td>15-11-1</td><td>57.7%</td><td>10.1%</td><td>66.7%</td><td>78.3%</td><td>4.48</td></tr></tbody>
+      </table></div>
+      <div class="histNote">3.5+ is the broader actionable historical threshold; 4+ is the stronger core threshold. Beat Close includes unchanged lines in the denominator. +CLV movers excludes no-move games.</div>
+    </div>
+    <div class="histCard">
+      <div class="histHead">
+        <div><h2>Historical Key-Number Angles</h2><small>Major spread keys: 3, 7, 10, 14</small></div>
+        <small>Context, not an automatic trigger</small>
+      </div>
+      <div class="histTableWrap"><table class="histTable">
+        <thead><tr><th>Angle</th><th>Games</th><th>ATS</th><th>ROI @ -110</th><th>Beat Close</th><th>+CLV movers</th><th>Avg CLV</th></tr></thead>
+        <tbody><tr><td>Broad 2+ + major key</td><td>673</td><td>52.7%</td><td>0.7%</td><td>53.9%</td><td>64.8%</td><td>0.59</td></tr><tr><td>Secondary 2-&lt;3 + major key</td><td>295</td><td>53.9%</td><td>2.8%</td><td>50.8%</td><td>61.7%</td><td>0.24</td></tr><tr><td>3-&lt;4 + major key</td><td>170</td><td>52.4%</td><td>0.1%</td><td>51.2%</td><td>63.0%</td><td>0.38</td></tr><tr><td>4+ + major key</td><td>208</td><td>51.5%</td><td>-1.8%</td><td>60.6%</td><td>70.4%</td><td>1.25</td></tr><tr><td>4+ all lines</td><td>303</td><td>56.0%</td><td>6.9%</td><td>61.7%</td><td>71.9%</td><td>1.20</td></tr></tbody>
+      </table></div>
+      <div class="histNote">Lower-edge key-number groups remain historical context because their CLV/process validation was weaker than the 3.5+ and 4+ consensus thresholds.</div>
+    </div>
+  </div>
+</section>
+<!-- HISTORICAL_BETTING_SECTION_END -->
+
 <div class="modelNotice" id="modelTrackerNotice"><strong>Prospective tracking has not started.</strong> Official records begin with the first accepted market capture. Preview and dry-run predictions are excluded.</div>
 <div class="modelMethod"><div><b>Spread formula</b><span>Home rating − away rating + HFA</span></div><div><b>Home-field advantage</b><span>2.6 points for non-neutral games; 0.0 at neutral sites</span></div><div><b>Core Spread Consensus</b><span>SP+, FPI, TeamRankings, and Brad Powers at 25% each; all four required</span></div></div>
 <div class="modelTabs"><button class="active" data-model-tab="spread">Spread</button><button data-model-tab="totals">Totals</button><button data-model-tab="summary">Summary</button></div>
@@ -266,4 +333,51 @@ function render(){if(!MP)return;const summary=mode==='summary';modelMatrixSectio
 function bindButtons(){document.querySelectorAll('.viewSwitch button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-model-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.modelTab;render()});document.querySelectorAll('[data-model-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');modelFilter=b.dataset.modelFilter;render()});document.querySelectorAll('[data-opportunity-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-opportunity-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');opportunityFilter=b.dataset.opportunityFilter;render()});document.querySelectorAll('#modelMatrixSection th[data-sort]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.sort)sortDir*=-1;else{sortKey=th.dataset.sort;sortDir=1}renderMatrix()})}
 fetch('data/site/model_performance_view.json').then(r=>r.json()).then(d=>{MP=d;modelPeriods.innerHTML=d.periods.map(p=>`<button class="${p==='All'?'active':''}" data-period="${p}">${p}</button>`).join('');modelPeriods.querySelectorAll('button').forEach(b=>b.onclick=()=>{modelPeriods.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');period=b.dataset.period;renderLedger()});if(d.tracking_started)modelTrackerNotice.innerHTML='<strong>Official prospective tracking is active.</strong> Results include accepted captures only; personal wagers remain separate.';bindButtons();render()}).catch(e=>modelMatrixRows.innerHTML=`<tr><td colspan="12" class="modelEmpty">Unable to load preview data: ${e.message}</td></tr>`);switchView('bets')
 })();
-</script></body></html>
+</script>
+<!-- BETTING_VIEW_SWITCH_REPAIR_START -->
+<script id="BETTING_VIEW_SWITCH_REPAIR">
+(function(){
+  function setBettingView(view){
+    const bets = document.getElementById('myBetsView');
+    const model = document.getElementById('modelPerformanceView');
+    const buttons = Array.from(document.querySelectorAll('.viewSwitch button[data-view]'));
+    if(!bets || !model || !buttons.length) return;
+
+    const showModel = view === 'model';
+    bets.hidden = showModel;
+    model.hidden = !showModel;
+    bets.style.display = showModel ? 'none' : '';
+    model.style.display = showModel ? '' : 'none';
+
+    buttons.forEach(btn => {
+      const active = btn.dataset.view === view;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+
+  function bind(){
+    const buttons = Array.from(document.querySelectorAll('.viewSwitch button[data-view]'));
+    if(!buttons.length) return;
+    buttons.forEach(btn => {
+      if(btn.dataset.viewSwitchBound === '1') return;
+      btn.dataset.viewSwitchBound = '1';
+      btn.addEventListener('click', function(ev){
+        ev.preventDefault();
+        setBettingView(btn.dataset.view);
+      });
+    });
+    const active = buttons.find(x => x.classList.contains('active'));
+    setBettingView(active ? active.dataset.view : 'bets');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind, {once:true});
+  } else {
+    bind();
+  }
+})();
+</script>
+<!-- BETTING_VIEW_SWITCH_REPAIR_END -->
+
+</body></html>
