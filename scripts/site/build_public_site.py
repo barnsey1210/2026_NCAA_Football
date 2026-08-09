@@ -5,12 +5,19 @@ import re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
-PAGES = {"openers.html":"openers.html",
-         "matchups.html":"matchups.html", "matchup.html":"matchup.html", "futures.html":"futures.html",
-         "betting_v2.html":"betting.html",
-         "team.html":"team.html", "ratings.html":"ratings.html",
-         "simulations.html":"simulations.html", "playoff.html":"playoff.html",
-         "schedule.html":"schedule.html", "odds_v2.html":"odds.html"}
+PAGES = {
+    "openers.html":"openers.html",
+    "matchups.html":"matchups.html",
+    "matchup.html":"matchup.html",
+    "futures_v2.html":"futures.html",
+    "betting_v2.html":"betting.html",
+    "team_v2.html":"team.html",
+    "ratings_v2.html":"ratings.html",
+    "simulations_v2.html":"simulations.html",
+    "playoff_v2.html":"playoff.html",
+    "schedule_v2.html":"schedule.html",
+    "odds_v2.html":"odds.html",
+}
 LINKS = [('Home','index.html'), ('Ratings','ratings.html'), ('Openers','openers.html'), ('Matchups','matchups.html'),
          ('ODDS','odds.html'), ('Schedule','schedule.html'), ('Futures','futures.html'), ('Conferences','conferences.html'), ('Playoff','playoff.html'),
          ('Simulations','simulations.html'), ('Betting','betting.html')]
