@@ -20,6 +20,7 @@ except ModuleNotFoundError:
     from lib.ncaaf_config import canonical_team, production_model
 
 INDEX = ROOT / "v1.html"
+PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 OUT = ROOT / "data/site/matchups_view.json"
 AUDIT = ROOT / "data/audits/matchups_view_audit.json"
 
@@ -59,11 +60,12 @@ def csv_rows(path):
 
 
 def extract_index_data():
+    # Canonical game data comes from the normalized preseason DB.
+    # v1.html remains only as a temporary source for legacy supplemental JS constants.
     html = INDEX.read_text(errors="ignore")
-    match = re.search(r'<script id="db" type="application/json">(.*?)</script>', html, re.S)
-    if not match:
-        raise SystemExit("Missing embedded DB in v1.html")
-    db = json.loads(match.group(1))
+    if not PRESEASON_DB.exists():
+        raise SystemExit(f"Missing canonical preseason DB: {PRESEASON_DB}")
+    db = json.loads(PRESEASON_DB.read_text())
 
     def js_const(name):
         found = re.search(r"const\s+" + re.escape(name) + r"\s*=\s*(\{.*?\});", html, re.S)
@@ -542,7 +544,32 @@ def main():
                 "home_score": integer(game.get("home_score") if game.get("home_score") is not None else game.get("cfbd_home_score")),
                 "cfbd_last_updated": clean(game.get("cfbd_last_updated"))},
             "teams": {"away": team_view(away, away_row, away_conf, home), "home": team_view(home, home_row, home_conf, away)},
-            "model": {"home_spread": model_home, "total": number(game.get("projected_total")), "home_win_probability": number(game.get("home_win_prob"))},
+            "model": {
+                "family": clean(game.get("projection_model_family")) or "Game Projection Consensus",
+                "home_spread": model_home,
+                "total": number(game.get("projected_total")),
+                "home_win_probability": number(game.get("home_win_prob")),
+                "spread_version": clean(game.get("projection_spread_model_version")),
+                "spread_source_count": integer(game.get("projection_spread_source_count")),
+                "spread_source_max": integer(game.get("projection_spread_source_max")),
+                "spread_coverage": clean(game.get("projection_spread_coverage")),
+                "spread_sources": game.get("projection_spread_sources") or [],
+                "spread_source_label": clean(game.get("projection_spread_source_label")),
+                "total_version": clean(game.get("projection_total_model_version")),
+                "total_source_count": integer(game.get("projection_total_source_count")),
+                "total_source_max": integer(game.get("projection_total_source_max")),
+                "total_coverage": clean(game.get("projection_total_coverage")),
+                "total_sources": [
+                    "SP+" if source == "Site Projection" else ("DRatings" if source == "DRatings Predictions" else source)
+                    for source in (game.get("projection_total_sources") or [])
+                ],
+                "total_source_label": (
+                    (clean(game.get("projection_total_source_label")) or "")
+                    .replace("Site Projection", "SP+")
+                    .replace("DRatings Predictions", "DRatings")
+                    or None
+                ),
+            },
             "market": {"spread": {"home_line": market_spread_home, "price": number(game.get("market_spread_price")), "book": clean(game.get("market_spread_book")), "updated_at": clean(game.get("market_spread_last_update")),
                     "best_home": {"home_line": number(game.get("market_best_home_spread_home")), "price": number(game.get("market_best_home_spread_price")), "book": clean(game.get("market_best_home_spread_book"))},
                     "best_away": {"home_line": number(game.get("market_best_away_spread_home")), "price": number(game.get("market_best_away_spread_price")), "book": clean(game.get("market_best_away_spread_book"))}},
@@ -620,7 +647,7 @@ def main():
             "CFBDepth normalization exists, but current player-level coverage may be empty outside the active injury-news window.",
             "Market rows are current best fields; a quote-level atomic-offer array should be added before production EV selection.",
         ]}
-    payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "rating_freshness": rating_freshness,
+    payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "site_composite_model": production_model(), "game_projection_model": db.get("projection_model_metadata") or {}, "rating_freshness": rating_freshness,
         "assets": {"line_history": "data/site/matchup_line_history.json", "betting_activity": "data/site/betting_activity_view.json"},
         "injury_source_status": injury_source_status,
         "audit_summary": coverage,

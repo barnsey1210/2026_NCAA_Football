@@ -9,9 +9,10 @@ Priority is applied independently for each:
   canonical_game_id × sportsbook × market_type × side
 
 Source priority:
-  1. Fresh SportsGameOdds accepted quote
-  2. Fresh Action Network quote
-  3. Missing
+  1. Fresh The Odds API quote
+  2. Fresh SportsGameOdds accepted quote
+  3. Fresh Action Network quote
+  4. Missing
 
 Stale quotes are retained only in the audit counts, never as current values.
 """
@@ -31,18 +32,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MATCHUPS = ROOT / "data/site/matchups_view.json"
+THEODDS = ROOT / "data/odds/theodds_ncaaf_lines_2026.csv"
 SGO = ROOT / "data/markets/sgo/sgo_accepted_quotes.csv"
 ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
 OUT = ROOT / "data/site/current_market_contract.json"
 AUDIT = ROOT / "data/audits/current_market_contract_build_audit.json"
 
 TARGET_BOOKS = (
+    "Pinnacle",
+    "Novig",
+    "ProphetX",
+    "Kalshi",
     "DraftKings",
     "FanDuel",
     "BetMGM",
     "Caesars",
+    "Fanatics",
     "Hard Rock Bet",
-    "Bovada",
 )
 REFERENCE_BOOK_PRIORITY = TARGET_BOOKS
 MAX_AGE_HOURS = float(os.environ.get("NCAAF_CURRENT_MARKET_MAX_AGE_HOURS", "18"))
@@ -105,6 +111,86 @@ def normalize_team(value: str | None) -> str:
         "uconn": "connecticut",
         "umass": "massachusetts",
         "southern miss": "southern mississippi",
+
+        # The Odds API provider-name aliases / mascot suffixes.
+        "umass minutemen": "massachusetts",
+        "rutgers scarlet knights": "rutgers",
+        "albany": "ualbany",
+        "buffalo bulls": "buffalo",
+        "bethune cookman wildcats": "bethune cookman",
+        "ucf knights": "central florida",
+        "arkansas pine bluff golden lions": "uapb",
+        "uab blazers": "uab",
+        "illinois fighting illini": "illinois",
+        "indiana state sycamores": "indiana state",
+        "purdue boilermakers": "purdue",
+        "miami hurricanes": "miami florida",
+        "stanford cardinal": "stanford",
+        "lafayette leopards": "lafayette",
+        "uconn huskies": "connecticut",
+        "youngstown st penguins": "youngstown state",
+        "citadel bulldogs": "the citadel",
+        "ut rio grande valley vaqueros": "utrgv",
+        "utsa roadrunners": "texas san antonio",
+        "charleston southern buccaneers": "charleston so",
+        "georgia southern eagles": "georgia southern",
+        "houston baptist huskies": "hcu",
+        "rice owls": "rice",
+        "southeastern louisiana lions": "southeastern la",
+        "south alabama jaguars": "south alabama",
+        "mississippi valley state delta devils": "mvsu",
+        "sacramento state hornets": "sacramento state",
+        "washington state cougars": "washington state",
+        "washington huskies": "washington",
+        "louisville cardinals": "louisville",
+        "ole miss rebels": "mississippi",
+        "lsu tigers": "lsu",
+        "houston cougars": "houston",
+        "texas tech red raiders": "texas tech",
+        "clemson tigers": "clemson",
+        "oklahoma sooners": "oklahoma",
+        "texas longhorns": "texas",
+        "notre dame fighting irish": "notre dame",
+
+        # The Odds API provider-name aliases / mascot suffixes.
+        "umass minutemen": "massachusetts",
+        "rutgers scarlet knights": "rutgers",
+        "albany": "ualbany",
+        "buffalo bulls": "buffalo",
+        "bethune cookman wildcats": "bethune cookman",
+        "ucf knights": "central florida",
+        "arkansas pine bluff golden lions": "uapb",
+        "uab blazers": "uab",
+        "illinois fighting illini": "illinois",
+        "indiana state sycamores": "indiana state",
+        "purdue boilermakers": "purdue",
+        "miami hurricanes": "miami florida",
+        "stanford cardinal": "stanford",
+        "lafayette leopards": "lafayette",
+        "uconn huskies": "connecticut",
+        "youngstown st penguins": "youngstown state",
+        "citadel bulldogs": "the citadel",
+        "ut rio grande valley vaqueros": "utrgv",
+        "utsa roadrunners": "texas san antonio",
+        "charleston southern buccaneers": "charleston so",
+        "georgia southern eagles": "georgia southern",
+        "houston baptist huskies": "hcu",
+        "rice owls": "rice",
+        "southeastern louisiana lions": "southeastern la",
+        "south alabama jaguars": "south alabama",
+        "mississippi valley state delta devils": "mvsu",
+        "sacramento state hornets": "sacramento state",
+        "washington state cougars": "washington state",
+        "washington huskies": "washington",
+        "louisville cardinals": "louisville",
+        "ole miss rebels": "mississippi",
+        "lsu tigers": "lsu",
+        "houston cougars": "houston",
+        "texas tech red raiders": "texas tech",
+        "clemson tigers": "clemson",
+        "oklahoma sooners": "oklahoma",
+        "texas longhorns": "texas",
+        "notre dame fighting irish": "notre dame",
     }
     cleaned = " ".join(text.split())
     return aliases.get(cleaned, cleaned)
@@ -120,7 +206,13 @@ def normalize_book(value: str | None) -> str | None:
         "caesars": "Caesars",
         "caesar": "Caesars",
         "hardrockbet": "Hard Rock Bet",
+        "hardrockbetoh": "Hard Rock Bet",
         "hardrock": "Hard Rock Bet",
+        "pinnacle": "Pinnacle",
+        "novig": "Novig",
+        "prophetx": "ProphetX",
+        "kalshi": "Kalshi",
+        "fanatics": "Fanatics",
         "bovada": "Bovada",
     }
     return aliases.get(text)
@@ -128,6 +220,86 @@ def normalize_book(value: str | None) -> str | None:
 
 def game_key(date, away, home):
     return str(date or "")[:10], normalize_team(away), normalize_team(home)
+
+
+def team_name_compatible(left, right):
+    # Fallback for provider mascot/nickname suffixes.
+    a = normalize_team(left)
+    b = normalize_team(right)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    return a.startswith(b + " ") or b.startswith(a + " ")
+
+
+def resolve_game_id(date_candidates, away, home, identity, key_to_game_id):
+    # 1) Exact date + canonical orientation.
+    for date in date_candidates:
+        gid = key_to_game_id.get(game_key(date, away, home))
+        if gid:
+            return gid, "exact", False
+
+    candidate_dates = {str(d or "")[:10] for d in date_candidates if d}
+
+    # 2) Same date + compatible provider names.
+    matches = []
+    for gid, meta in identity.items():
+        if str(meta.get("date") or "")[:10] not in candidate_dates:
+            continue
+        if team_name_compatible(away, meta.get("away_team")) and team_name_compatible(home, meta.get("home_team")):
+            matches.append(gid)
+    if len(matches) == 1:
+        return matches[0], "nickname_prefix", False
+
+    # 3) Same date + reversed orientation.
+    reversed_matches = []
+    for gid, meta in identity.items():
+        if str(meta.get("date") or "")[:10] not in candidate_dates:
+            continue
+        if team_name_compatible(away, meta.get("home_team")) and team_name_compatible(home, meta.get("away_team")):
+            reversed_matches.append(gid)
+    if len(reversed_matches) == 1:
+        return reversed_matches[0], "reversed_same_date", True
+
+    # 4) Unique same two teams within +/- 2 days.
+    from datetime import date as _date
+    parsed_dates = []
+    for d in date_candidates:
+        try:
+            parsed_dates.append(_date.fromisoformat(str(d)[:10]))
+        except Exception:
+            pass
+
+    nearby = []
+    for gid, meta in identity.items():
+        try:
+            canonical_date = _date.fromisoformat(str(meta.get("date") or "")[:10])
+        except Exception:
+            continue
+        if not any(abs((canonical_date - d).days) <= 2 for d in parsed_dates):
+            continue
+
+        same_orientation = (
+            team_name_compatible(away, meta.get("away_team"))
+            and team_name_compatible(home, meta.get("home_team"))
+        )
+        reversed_orientation = (
+            team_name_compatible(away, meta.get("home_team"))
+            and team_name_compatible(home, meta.get("away_team"))
+        )
+        if same_orientation:
+            nearby.append((gid, False))
+        elif reversed_orientation:
+            nearby.append((gid, True))
+
+    unique_ids = {gid for gid, _ in nearby}
+    if len(unique_ids) == 1:
+        gid = next(iter(unique_ids))
+        reversed_orientation = next(flag for g, flag in nearby if g == gid)
+        return gid, "unique_teams_within_2_days", reversed_orientation
+
+    return None, "ambiguous_or_missing", False
 
 
 SITE_TZ = ZoneInfo("America/New_York")
@@ -233,7 +405,75 @@ def main() -> None:
     excluded = []
     source_counts = Counter()
 
-    # Primary: accepted, paired, non-stale SGO quote inventory.
+    # Primary: fresh The Odds API quote inventory.
+    for row in csv_rows(THEODDS):
+        local_date = site_date_from_timestamp(row.get("commence_time"))
+        date_candidates = [
+            local_date,
+            str(row.get("commence_time") or "")[:10],
+        ]
+        gid, match_method, reversed_orientation = resolve_game_id(
+            date_candidates,
+            row.get("away_team"),
+            row.get("home_team"),
+            identity,
+            key_to_game_id,
+        )
+        if not gid:
+            excluded.append({
+                "source": "The Odds API",
+                "reason": "unmatched_game_identity",
+                "date_candidates": date_candidates,
+                "away_team": row.get("away_team"),
+                "home_team": row.get("home_team"),
+            })
+            continue
+
+        book = normalize_book(row.get("book_key") or row.get("book"))
+        raw_market = str(row.get("market") or "").lower()
+        market = {
+            "h2h": "moneyline",
+            "spreads": "spread",
+            "totals": "total",
+            "moneyline": "moneyline",
+            "spread": "spread",
+            "total": "total",
+        }.get(raw_market)
+        raw_side = str(row.get("side") or "").strip()
+
+        if market in {"spread", "moneyline"}:
+            if normalize_team(raw_side) == normalize_team(row.get("away_team")):
+                provider_side = "away"
+            elif normalize_team(raw_side) == normalize_team(row.get("home_team")):
+                provider_side = "home"
+            else:
+                continue
+
+            if reversed_orientation:
+                side = "home" if provider_side == "away" else "away"
+            else:
+                side = provider_side
+        elif market == "total":
+            side = raw_side.lower()
+        else:
+            continue
+
+        if not book or side not in {"away", "home", "over", "under"}:
+            continue
+
+        q = quote_record(
+            source="The Odds API", game_id=gid, book=book, market=market, side=side,
+            line=number(row.get("point")), price=number(row.get("price")),
+            updated_at=row.get("last_update") or row.get("pulled_at"), now=now,
+        )
+        if q["freshness_status"] != "LIVE":
+            excluded.append({"source": "The Odds API", "reason": "stale_current_quote", **q})
+            continue
+
+        candidates[gid][book][market][side] = q
+        source_counts["The Odds API"] += 1
+
+    # Secondary: accepted, paired, non-stale SGO quote inventory.
     for row in csv_rows(SGO):
         gid = str(row.get("canonical_game_id") or "")
         if gid not in identity:
@@ -246,6 +486,8 @@ def main() -> None:
         if not book or market not in {"spread", "total", "moneyline"}:
             continue
         if side not in {"away", "home", "over", "under"}:
+            continue
+        if side in candidates[gid][book][market]:
             continue
         q = quote_record(
             source="SportsGameOdds", game_id=gid, book=book, market=market, side=side,
@@ -350,7 +592,7 @@ def main() -> None:
             if q.get("source_updated_at")
         ]
         availability = "LIVE" if any(
-            q.get("source") == "SportsGameOdds"
+            q.get("source") == "The Odds API"
             for book_data in quotes.values()
             for market_data in book_data.values()
             for q in market_data.values()
@@ -371,7 +613,7 @@ def main() -> None:
         "schema_version": "current-market-contract-v1",
         "built_at": now.isoformat(),
         "max_quote_age_hours": MAX_AGE_HOURS,
-        "source_priority": ["SportsGameOdds", "Action Network", "MISSING"],
+        "source_priority": ["The Odds API", "SportsGameOdds", "Action Network", "MISSING"],
         "stale_data_policy": "Stale quotes are never exposed as current. Historical snapshots remain separate.",
         "target_sportsbooks": list(TARGET_BOOKS),
         "games": contract_games,
@@ -386,7 +628,12 @@ def main() -> None:
         "stale_current_quotes_displayed": stale_current_quotes_displayed,
         "excluded_count": len(excluded),
         "excluded_sample": excluded[:100],
-        "inputs": [str(MATCHUPS.relative_to(ROOT)), str(SGO.relative_to(ROOT)), str(ACTION.relative_to(ROOT))],
+        "inputs": [
+            str(MATCHUPS.relative_to(ROOT)),
+            str(THEODDS.relative_to(ROOT)),
+            str(SGO.relative_to(ROOT)),
+            str(ACTION.relative_to(ROOT)),
+        ],
         "output": str(OUT.relative_to(ROOT)),
     }
     atomic_json(OUT, payload)

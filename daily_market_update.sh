@@ -158,21 +158,24 @@ trap on_exit EXIT
   run_py "odds/pull_actionnetwork_ncaaf_game_lines_2026.py" "pull_actionnetwork_ncaaf_game_lines_2026.py" || warn "Action Network game lines pull failed"
   run_py "odds/build_actionnetwork_season_lines_2026.py" "build_actionnetwork_season_lines_2026.py" || warn "Action Network season game lines build failed"
   run_py "build_season_game_lines_2026.py" || warn "season game lines build failed"
-  run_py "pull_theodds_ncaaf_lines_2026.py" || warn "The Odds API line pull failed"
-  run_py "build_theodds_season_lines_2026.py" || warn "The Odds API line normalization failed"
+  # The Odds API is the preferred live source for current game lines.
+  if run_py "pull_theodds_ncaaf_lines_2026.py"; then
+    run_py "build_theodds_season_lines_2026.py" || warn "The Odds API line normalization failed"
+  else
+    warn "The Odds API primary live line pull failed; preserving cached/fallback data"
+  fi
   stage_pass "game_market_acquisition"
 
-  # SportsGameOdds is the preferred live source for game lines.
+  # SportsGameOdds is an optional secondary source while quota/subscription
+  # strategy is evaluated. Failure must not block downstream site/email work.
   # STAGE: sgo_pull
   stage_start "sgo_pull"
   if run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py"; then
     SGO_PULL_OK=1
     stage_pass "sgo_pull"
   else
-    SGO_EMAIL_ELIGIBLE=0
-    SGO_EMAIL_BLOCK_REASON="live SportsGameOdds pull failed"
     warn "live SGO pull failed; preserving prior SGO and fallback data"
-    stage_fail "sgo_pull" "$SGO_EMAIL_BLOCK_REASON"
+    stage_skip "sgo_pull" "optional secondary SportsGameOdds source unavailable; cached/fallback data preserved"
   fi
 
   # Normalize only a raw response produced by a successful current run.
@@ -289,8 +292,10 @@ PY2
 
   # STAGE: projections
   stage_start "projections"
+  run_py "scripts/projections/pull_dratings_ncaaf_predictions.py" "pull_dratings_ncaaf_predictions.py" || warn "DRatings NCAAF predictions refresh failed"
   run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || warn "game projection source build failed"
   run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || warn "game projection blend build failed"
+  run_py "scripts/projections/apply_game_projection_blend_to_preseason_db.py" "apply_game_projection_blend_to_preseason_db.py" || warn "game projection site overlay failed"
   stage_pass "projections"
 
   # Shadow production bridge. Current selected market lines must already be in
