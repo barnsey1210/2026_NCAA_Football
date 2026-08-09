@@ -937,6 +937,54 @@ const pct=x=>N(x)==null?'—':(N(x)*100).toFixed(1)+'%';
 const num=(x,d=1)=>N(x)==null?'—':N(x).toFixed(d);
 const signed=(x,d=1)=>N(x)==null?'—':(N(x)>0?'+':'')+N(x).toFixed(d);
 const money=x=>N(x)==null?'—':'$'+N(x).toLocaleString(undefined,{maximumFractionDigits:0});
+
+const ET_ZONE='America/New_York';
+
+function etDateObj(v){
+  if(!v)return null;
+  const d=new Date(v);
+  return Number.isNaN(d.valueOf())?null:d;
+}
+
+function formatETDate(v,opts={}){
+  const d=etDateObj(v);
+  if(!d)return '—';
+  return d.toLocaleDateString('en-US',{
+    timeZone:ET_ZONE,
+    ...opts
+  });
+}
+
+function formatETTime(v){
+  const d=etDateObj(v);
+  if(!d)return 'TBD';
+  return d.toLocaleTimeString('en-US',{
+    timeZone:ET_ZONE,
+    hour:'numeric',
+    minute:'2-digit'
+  })+' ET';
+}
+
+function formatETDateTime(v){
+  const d=etDateObj(v);
+  if(!d)return '—';
+  return d.toLocaleString('en-US',{
+    timeZone:ET_ZONE,
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit'
+  })+' ET';
+}
+
+function todayETLabel(){
+  return new Date().toLocaleDateString('en-US',{
+    timeZone:ET_ZONE,
+    weekday:'long',
+    month:'short',
+    day:'numeric'
+  });
+}
 function slug(t){return t?.logo_slug||t?.slug||String(t?.team||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function logo(t,cls='logo'){const s=slug(t);return `<span class="${cls}">${s?`<img src="${BASE}logos/${esc(s)}.png" alt="">`:''}</span>`}
 
@@ -1261,11 +1309,12 @@ async function init(){
   const all=(M.games||[]).filter(r=>!r.game.completed);
   const weeks=[...new Set(all.map(r=>N(r.game.week)).filter(v=>v!=null))].sort((a,b)=>a-b);
   const week=weeks[0]??0,wg=all.filter(r=>N(r.game.week)===week),sorted=[...wg].sort((a,b)=>score(b)-score(a));
-  dateText.textContent=`${new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})} · Week ${week}`;
-  oddsText.textContent=`Odds · ${wg.filter(r=>marketSpread(r)!=null).length} spreads · ${String(K.built_at||'current').slice(0,16).replace('T',' ')}`;
+  dateText.textContent=`${todayETLabel()} · Week ${week}`;
+  oddsText.textContent=`Odds · ${wg.filter(r=>marketSpread(r)!=null).length} spreads · ${K.built_at?formatETDateTime(K.built_at):'current'}`;
   ratingsText.textContent=`Ratings · ${M.production_model?.sources?.length||4} sources`;
   injuryText.textContent='Injuries · live status';
-  modelText.textContent=`Models · ${String(M.built_at||M.production_model?.updated||'current').slice(0,16).replace('T',' ')}`;
+  const modelUpdated=M.built_at||M.production_model?.updated||null;
+  modelText.textContent=`Models · ${modelUpdated?formatETDateTime(modelUpdated):'current'}`;
 
   const edgeRows=wg.map(r=>({r,se:spreadEdge(r),te:totalEdge(r)}));
   const spreads=[...edgeRows].filter(x=>x.se!=null).sort((a,b)=>Math.abs(b.se)-Math.abs(a.se));
@@ -1329,7 +1378,7 @@ async function init(){
   });
   if(!weekOpen.length)weekOpen=[...open];
   guide.innerHTML=`<div class="guide-week-label">Week ${guideWeek} open wagers</div>`+weekOpen.slice(0,5).map(b=>{
-    const r=byId.get(b.game_id),d=new Date(b.game_date),time=Number.isNaN(d.valueOf())?'TBD':d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),day=Number.isNaN(d.valueOf())?'Upcoming':d.toLocaleDateString([],{weekday:'short'});
+    const r=byId.get(b.game_id),d=etDateObj(b.game_date),time=d?formatETTime(b.game_date):'TBD',day=d?formatETDate(b.game_date,{weekday:'short'}):'Upcoming';
     const wager=wagerText(b,r);
     return `<a class="guide-row" href="${r?href(r):BASE+'betting.html'}">
       <div class="guide-time">${time}<small>${day}</small></div>

@@ -660,7 +660,26 @@ function rowParts(row,currentWeek){{
  const right=`<tr><td class="proj-finish outcome"><span class="finish-rank">#${{esc(row.projected_finish)}}</span><span class="record">${{num(row.projected_conf_wins)}}–${{num(row.projected_conf_losses)}}</span></td><td class="make-title outcome"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.make_title_game_pct)}}</span><span class="futures-label">View futures</span></a></td><td class="win-title outcome title-prob"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.title_pct)}}</span>${{titleMarket}}</a></td></tr>`;
  return {{left,schedule,right}};
 }}
-function currentWeekFor(c){{const today=new Date();const dated=c.weeks.filter(w=>w.date).map(w=>({{...w,d:new Date(`${{String(w.date).slice(0,10)}}T12:00:00`)}})).sort((a,b)=>a.d-b.d);if(!dated.length)return null;const upcoming=dated.find(w=>w.d>=today);return (upcoming||dated[dated.length-1]).week}}
+function currentWeekFor(c){{
+  const etToday=new Intl.DateTimeFormat('en-CA',{{
+    timeZone:'America/New_York',
+    year:'numeric',
+    month:'2-digit',
+    day:'2-digit'
+  }}).format(new Date());
+
+  const today=new Date(`${{etToday}}T12:00:00`);
+
+  const dated=c.weeks
+    .filter(w=>w.date)
+    .map(w=>({{...w,d:new Date(`${{String(w.date).slice(0,10)}}T12:00:00`)}}))
+    .sort((a,b)=>a.d-b.d);
+
+  if(!dated.length)return null;
+
+  const upcoming=dated.find(w=>w.d>=today);
+  return (upcoming||dated[dated.length-1]).week;
+}}
 function scrollCurrentWeek(currentWeek,behavior='auto'){{
  const th=scheduleHeaderRow.querySelector('.current-week-header');
  if(!th)return;
