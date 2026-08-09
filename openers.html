@@ -663,6 +663,18 @@ body:has(#projectionMode button[data-projection-mode="shadow"].active)
 </style>
 <!-- OPENERS_KEY_NUMBER_EMPHASIS_END -->
 
+
+<!-- OPENERS_LOCAL_HEALTH_PREVIEW_SUPPRESS_START -->
+<style id="OPENERS_LOCAL_HEALTH_PREVIEW_SUPPRESS_CSS">
+html.openersLocalFilePreview #page-health-summary{display:none!important}
+</style>
+<script id="OPENERS_LOCAL_HEALTH_PREVIEW_SUPPRESS_JS">
+if(location.protocol==='file:'){
+  document.documentElement.classList.add('openersLocalFilePreview');
+}
+</script>
+<!-- OPENERS_LOCAL_HEALTH_PREVIEW_SUPPRESS_END -->
+
 </head><body>
 <main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html" class="active">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div><div class="model" id="modelStamp">Production ratings</div></div>
 <section class="hero"><div><h1>Openers</h1><p>Fast first-pass decisions before the market settles.</p></div><div class="metrics"><div class="metric"><span>Games shown</span><b id="shown">—</b></div><div class="metric"><span>With market</span><b id="marketCount">—</b></div></div></section>

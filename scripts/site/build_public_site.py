@@ -31,17 +31,29 @@ def nav(target):
     return f'<div class="brand"><a href="index.html">NCAAF</a></div><div class="nav">{links}</div>'
 
 def transform(text,target):
-    for old,new in {'openers.html':'openers.html','matchups.html':'matchups.html',
+    for old,new in {
+                    'openers_v2.html':'openers.html',
+                    'matchups_v2.html':'matchups.html',
+                    'futures_v2.html':'futures.html',
+                    'conferences_v2.html':'conferences.html',
+                    'schedule_v2.html':'schedule.html',
+                    'team_v2.html':'team.html',
+                    'ratings_v2.html':'ratings.html',
+                    'simulations_v2.html':'simulations.html',
+                    'playoff_v2.html':'playoff.html',
+                    'betting_v2.html':'betting.html',
+                    'openers.html':'openers.html',
+                    'matchups.html':'matchups.html',
                     'futures.html':'futures.html',
-                    'conferences.html':'conferences.html','betting_v2.html':'betting.html',
+                    'conferences.html':'conferences.html',
                     'schedule.html':'schedule.html',
-                    'index.html#team/':'team.html?team='}.items(): text=text.replace(old,new)
+                    'index.html#team/':'team.html?team='
+                    }.items(): text=text.replace(old,new)
     text=text.replace('openers.html?game_id=', 'openers.html?game_id=')
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     text=text.replace('</head>',CSS+'</head>')
-    if target != 'openers.html':
-        text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
+    text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
     text=text.replace('</head>','<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head>')
     if target == 'index.html':
         text=text.replace('changes.innerHTML=movements().slice(0,7)', "changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7)")
@@ -168,7 +180,7 @@ def _sync_openers_v2_public_artifacts():
                 '<a href="odds.html">ODDS</a><a href="futures.html">Futures</a>',
                 1,
             )
-        if _name != 'openers.html' and 'href="page_health.css"' not in _text:
+        if 'href="page_health.css"' not in _text:
             _text = _text.replace(
                 '</head>',
                 '<link rel="stylesheet" href="page_health.css">'
