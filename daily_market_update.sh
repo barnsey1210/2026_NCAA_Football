@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Load CFBD API key from macOS Keychain when it is not already present.
+if [ -z "${CFBD_API_KEY:-}" ]; then
+  CFBD_API_KEY="$(security find-generic-password     -a "$USER"     -s CFBD_API_KEY     -w 2>/dev/null || true)"
+  export CFBD_API_KEY
+fi
+
 WORK="$HOME/NCAAF_AUTO"
 ICLOUD="/Users/jameslindesmith/Library/Mobile Documents/com~apple~CloudDocs/NCAAF"
 LOG="$HOME/Scripts/NCAAF/daily_market_update.log"
@@ -277,6 +283,14 @@ PY2
   run_py "ratings/append_ratings_history.py" "append_ratings_history.py" || warn "ratings history append failed"
   run_py "ratings/build_ratings_movement.py" "build_ratings_movement.py" || warn "ratings movement build failed"
   stage_pass "ratings_normalization"
+
+  # Refresh canonical 2026 schedule from CFBD before projection matching.
+  run_py "scripts/schedule/pull_cfbd_schedule_2026.py" "pull_cfbd_schedule_2026.py" || warn "CFBD canonical schedule refresh failed"
+  if [ -f "data/canonical/cfbd_schedule_2026.json" ]; then
+    python3 scripts/schedule/apply_cfbd_schedule_overlay_2026.py --apply || warn "CFBD schedule overlay failed"
+  else
+    warn "CFBD canonical schedule unavailable; preserving prior canonical schedule"
+  fi
 
   # STAGE: projections
   stage_start "projections"
