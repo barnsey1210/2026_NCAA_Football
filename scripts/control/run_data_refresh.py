@@ -110,10 +110,9 @@ def shell(command: list[str], timeout: int = 1800) -> dict[str, Any]:
 
 
 def deployed_commit() -> str | None:
-    if not (PUBLISH_REPO / ".git").exists():
-        return None
-    result = subprocess.run(["git", "-C", str(PUBLISH_REPO), "rev-parse", "HEAD"], text=True, capture_output=True)
-    return result.stdout.strip() if result.returncode == 0 else None
+    record = load_json(CONTROL / "deployed_source_version.json", {})
+    value = str(record.get("source_commit") or "").strip()
+    return value or None
 
 
 def newest_timestamp(path: Path) -> str | None:
