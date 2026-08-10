@@ -306,6 +306,7 @@ PY2
   # and never refit the frozen movement models.
   # STAGE: matchup_core
   stage_start "matchup_core"
+  run_py "scripts/site/augment_team_advanced_profiles_drives.py" "augment_team_advanced_profiles_drives.py"
   run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py"
   stage_pass "matchup_core"
 
