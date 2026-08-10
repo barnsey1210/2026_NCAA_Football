@@ -2,7 +2,7 @@
 """Safe orchestration layer for the existing NCAAF refresh pipelines.
 
 Status and previews remain safe by default. Controlled production execution is
-enabled only for SportsGameOdds game odds and the provider-free postgame rebuild.
+enabled only for SportsGameOdds game odds and the guarded CFBD postgame rebuild.
 Acceptance/publication require mode policy plus explicit confirmation.
 """
 from __future__ import annotations
@@ -568,23 +568,45 @@ def main() -> int:
                     run["errors"].append("postgame publication policy is disabled")
                 else:
                     commands = [
-                        [sys.executable, "scripts/site/build_postgame_shadow_updates.py"],
-                        [sys.executable, "scripts/site/build_shadow_team_game_features.py", "--mode", "all"],
+                        # 1. Refresh authoritative game status / final scores.
+                        [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
+                        [sys.executable, "scripts/results/build_game_results_2026.py"],
+
+                        # 2. Acquire richer postgame inputs only when completed
+                        #    games exist. The puller makes zero rich-data calls
+                        #    when there are no completed games.
+                        [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
+
+                        # 3. Build season-to-date completed-game PBP, drive,
+                        #    and Game Control features.
+                        [sys.executable, "scripts/postgame/build_postgame_features_2026.py"],
+
+                        # 4. Build genuine no-lookahead 2026 Shadow feature rows.
+                        [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
+
+                        # 5. Existing frozen production inference.
                         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
-                        [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
 
-                        # Settlement reads final scores from matchups_view.json.
+                        # 6. Rebuild downstream matchup / schedule surfaces.
+                        [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
                         [sys.executable, "scripts/site/build_matchups_view.py"],
 
+                        # 7. Settle previously captured model predictions where
+                        #    the matchup layer exposes final results.
                         [sys.executable,
                          "scripts/model_tracking/settle_model_tracking.py",
                          "--accept"],
-
                         [sys.executable,
                          "scripts/model_tracking/build_model_performance_view.py"],
 
+                        # 8. Canonical public-site build order.
                         [sys.executable, "scripts/site/build_public_site.py"],
+                        [sys.executable, "scripts/site/build_war_room_home.py"],
+                        [sys.executable, "scripts/site/inject_market_presentation_fixes.py"],
+                        [sys.executable, "scripts/site/compact_matchups_payload.py"],
+                        [sys.executable, "scripts/site/apply_shared_war_room_shell.py"],
+                        [sys.executable, "scripts/publish/check_public_site.py"],
                     ]
                     failed = False
                     for command in commands:
