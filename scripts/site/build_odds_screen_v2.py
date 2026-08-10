@@ -13,6 +13,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from team_identity import team_logo_path
+
 ROOT = Path(__file__).resolve().parents[2]
 ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
 SGO = ROOT / "data/markets/sgo/sgo_ncaaf_game_odds.csv"
@@ -44,14 +46,6 @@ def source_build_time(paths: tuple[Path, ...]) -> str:
     """Return a stable build timestamp derived from the newest canonical input."""
     modified = max(path.stat().st_mtime for path in paths if path.exists())
     return datetime.fromtimestamp(modified, timezone.utc).isoformat()
-
-
-def team_logo_path(team_slug: str) -> str | None:
-    """Return a public logo path only when the local asset exists."""
-    if not team_slug:
-        return None
-    relative = f"logos/{team_slug}.png"
-    return relative if (ROOT / relative).is_file() else None
 
 
 def rows(path: Path) -> list[dict]:
@@ -321,8 +315,8 @@ def main() -> None:
             "start_time_utc": first.get("commence_time"),
             "away_team": canonical_away,
             "home_team": canonical_home,
-            "away_logo": team_logo_path((site_obj or {}).get("teams", {}).get("away", {}).get("logo_slug") or slug(canonical_away or "")),
-            "home_logo": team_logo_path((site_obj or {}).get("teams", {}).get("home", {}).get("logo_slug") or slug(canonical_home or "")),
+            "away_logo": team_logo_path(canonical_away),
+            "home_logo": team_logo_path(canonical_home),
             "matchup_url": f"openers.html?game_id={game_id}" if game_id else None,
             "quotes": quotes,
             "best_flags": flags,

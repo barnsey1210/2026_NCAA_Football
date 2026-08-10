@@ -12,8 +12,10 @@ The builder writes atomically and saves the previous homepage under:
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
+from team_identity import team_logo_slug_lookup
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT
@@ -985,8 +987,18 @@ function todayETLabel(){
     day:'numeric'
   });
 }
-function slug(t){return t?.logo_slug||t?.slug||String(t?.team||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
-function logo(t,cls='logo'){const s=slug(t);return `<span class="${cls}">${s?`<img src="${BASE}logos/${esc(s)}.png" alt="">`:''}</span>`}
+const TEAM_LOGO_SLUGS=__TEAM_LOGO_SLUGS__;
+function slug(t){
+  if(!t)return '';
+  if(t?.logo_slug)return String(t.logo_slug);
+  if(t?.slug)return String(t.slug);
+  const raw=String(t?.team||t?.name||t||'').trim();
+  return TEAM_LOGO_SLUGS[raw]||'';
+}
+function logo(t,cls='logo'){
+  const s=slug(t);
+  return `<span class="${cls}">${s?`<img src="${BASE}logos/${esc(s)}.png" alt="">`:''}</span>`;
+}
 
 function syncCanonicalNavigation(tools){
   const byTool=Object.fromEntries(tools.map(x=>[x[2],`${BASE}${x[5]}`]));
@@ -1508,14 +1520,14 @@ async function init(){
   playoff.innerHTML=`
     <div class="future-subpanel"><div class="future-subtitle">Best Conference Futures</div>
       ${confTitleEdges.map(x=>`<a class="future-row" href="${BASE}futures.html">
-        <img src="${BASE}logos/${esc(String(x.team||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'))}.png">
+        <img src="${BASE}logos/${esc(slug(x.team))}.png">
         <div><b>${esc(x.team)}</b></div>
         <strong>${signed(N(x.title_edge)*100)}%</strong>
       </a>`).join('')||'<div class="empty"><strong>No conference-title edges</strong></div>'}
     </div>
     <div class="future-subpanel"><div class="future-subtitle">Best CFP Futures</div>
       ${playoffEdges.map(x=>`<a class="future-row" href="${BASE}futures.html">
-        <img src="${BASE}logos/${esc(String(x.team||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'))}.png">
+        <img src="${BASE}logos/${esc(slug(x.team))}.png">
         <div><b>${esc(x.team)}</b></div>
         <strong>${signed(x._edge*100)}%</strong>
       </a>`).join('')||'<div class="empty"><strong>Playoff edges pending</strong><small>Requires market prices for make/miss playoff.</small></div>'}
@@ -1537,6 +1549,14 @@ def main() -> None:
     import tempfile
     from datetime import datetime, timezone
 
+    logo_lookup = team_logo_slug_lookup()
+    page = PAGE.replace(
+        "__TEAM_LOGO_SLUGS__",
+        json.dumps(logo_lookup, separators=(",", ":")),
+    )
+    if "__TEAM_LOGO_SLUGS__" in page:
+        raise SystemExit("Homepage logo lookup injection failed")
+
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
     if HTML.exists():
@@ -1550,7 +1570,7 @@ def main() -> None:
         fd, temporary = tempfile.mkstemp(prefix=".index.", suffix=".html", dir=path.parent)
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                handle.write(PAGE)
+                handle.write(page)
             os.replace(temporary, path)
         except Exception:
             try:

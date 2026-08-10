@@ -1,0 +1,200 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Simulations</title><style>
+:root{--bg:#061126;--p:#0b1b36;--p2:#08182f;--l:#244873;--t:#f5f7ff;--m:#91a6c6;--g:#43df96;--b:#459cff;--gold:#ffc45b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.4 Inter,system-ui}.shell{max-width:1760px;margin:auto;padding:16px}.top,.nav,.hero,.tabs,.filters{display:flex;align-items:center}.top{gap:16px;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{gap:5px}.nav a{color:var(--m);padding:8px 11px;text-decoration:none;font-weight:850}.nav .active{background:#173b72;color:white;border-radius:8px}.hero{justify-content:space-between;margin:20px 0 12px}.hero h1{font-size:36px;margin:0}.hero p,.note,.sub{color:var(--m);margin:2px 0}.stamp{border:1px solid #17784e;border-radius:999px;padding:8px 13px;color:#baf8d6;font-weight:850}.tabs{gap:7px;margin-bottom:12px}.tabs button,.filters button{border:1px solid var(--l);background:#091a34;color:var(--m);border-radius:999px;padding:8px 14px;font-weight:900;cursor:pointer}.tabs .active,.filters .active{background:#1857a7;color:white}.card{border:1px solid var(--l);background:var(--p);border-radius:12px;padding:13px}.card h2{margin:0 0 8px}.conferenceGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;border-top:1px solid #17345c;padding:8px 0;align-items:center}.team{display:flex;align-items:center;gap:7px;color:white;text-decoration:none;font-weight:900}.team img{width:28px;height:28px;object-fit:contain}.prob{color:var(--g);font-weight:950}.bracket{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.field{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.seed{display:flex;align-items:center;gap:7px;background:var(--p2);border:1px solid #173e69;border-radius:9px;padding:8px}.seedNo{display:grid;place-items:center;min-width:25px;height:25px;border-radius:50%;background:#173b72;font-weight:950}.seed.auto .seedNo{background:#7b5b12;color:#fff0bd}.pairings{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.pair{background:var(--p2);border:1px solid #173e69;border-radius:9px;padding:9px}.pair b{display:block;margin-bottom:5px}.filters{gap:7px;margin:10px 0;flex-wrap:wrap}.tableWrap{max-height:650px;overflow:auto;border:1px solid #173e69;border-radius:10px}table{width:100%;border-collapse:collapse}th{position:sticky;top:0;background:#132a50;color:#afbfda;text-transform:uppercase;font-size:10px;text-align:left;padding:9px;cursor:pointer;z-index:2}td{padding:8px;border-top:1px solid #17345c;white-space:nowrap}.rank{font-weight:950}.modelNote{margin-top:10px;padding:9px;border-left:3px solid var(--gold);background:#101f39;color:var(--m)}@media(max-width:950px){.conferenceGrid,.bracket{grid-template-columns:1fr}.field{grid-template-columns:repeat(2,1fr)}}
+.playoff-resume-table th:nth-child(n+2):nth-child(-n+12),.playoff-resume-table td:nth-child(n+2):nth-child(-n+12){background-color:rgba(30,64,111,.20)}.playoff-resume-table th:nth-child(n+13),.playoff-resume-table td:nth-child(n+13){background-color:rgba(78,45,112,.18)}.playoff-resume-table th:nth-child(13),.playoff-resume-table td:nth-child(13){border-left:4px solid #9d6bd8}</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+</head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><nav class="nav"><a href="dashboard_v2.html">Dashboard</a><a href="ratings_v2.html">Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a class="active">Simulations</a><a href="betting_v2.html">Betting</a></nav></div><section class="hero"><div><h1>Simulation Engine</h1><p>Conference races, 2026 CFP selection, bracket paths, and national-title probabilities.</p></div><div class="stamp" id="stamp">Loading model…</div></section><div class="tabs"><button data-mode="conference">Conference races</button><button class="active" data-mode="playoff">Playoff model</button></div><div id="content"></div></main><script>
+let C,P,S={},mode='playoff',sortKey='playoff_pct',sortDir=-1,confFilter='all';const e=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),n=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—',pct=x=>Number.isFinite(Number(x))?(Number(x)*100).toFixed(1)+'%':'—',slug=x=>S[x]||'',logoSlug=x=>slug(x);function teamLink(t){return`<a class="team" href="team.html?team=${slug(t)}"><img src="logos/${logoSlug(t)}.png" onerror="this.style.visibility='hidden'">${e(t)}</a>`}function fair(p){p=Number(p);if(!(p>0&&p<1))return'—';return p>=.5?'-'+Math.round(p/(1-p)*100):'+'+Math.round((1-p)/p*100)}
+function conferenceView(){content.innerHTML=`<div class="conferenceGrid">${C.conferences.map(c=>`<section class="card"><h2><a class="team" href="conferences_v2.html?conference=${encodeURIComponent(c.conference)}"><img src="logos/conferences/${c.slug}.png">${e(c.conference)}</a></h2><p class="note">Projected title game: ${e(c.championship_game?.projected_matchup?.away_team||'—')} vs ${e(c.championship_game?.projected_matchup?.home_team||'—')}</p>${c.teams.slice(0,5).map(x=>`<div class="row">${teamLink(x.team)}<span>${n(x.projected_wins)} wins</span><span class="prob">${pct(x.title_pct)}</span></div>`).join('')}</section>`).join('')}</div>`}
+function bracketView(){const f=P.projected_field,bySeed=Object.fromEntries(f.map(x=>[x.seed,x])),pair=(h,l,b)=>`<div class="pair"><b>First round · winner faces #${b}</b>${teamLink(bySeed[h]?.team||'—')}<div class="sub">hosts</div>${teamLink(bySeed[l]?.team||'—')}</div>`;return`<div class="bracket"><section class="card"><h2>Projected 12-team field</h2><p class="note">Gold seeds are modeled automatic qualifiers. Seeds 1–4 receive first-round byes.</p><div class="field">${f.map(x=>`<div class="seed ${x.automatic_qualifier?'auto':''}"><span class="seedNo">${x.seed}</span>${teamLink(x.team)}</div>`).join('')}</div></section><section class="card"><h2>First-round bracket</h2><div class="pairings">${pair(5,12,4)}${pair(6,11,3)}${pair(7,10,2)}${pair(8,9,1)}</div></section></div>`}
+function playoffRows(){let a=P.teams.filter(x=>confFilter==='all'||x.conference===confFilter);a.sort((x,y)=>{let xv=sortKey==='team'?x.team:x[sortKey],yv=sortKey==='team'?y.team:y[sortKey];return(typeof xv==='string'?xv.localeCompare(yv):(Number(xv)-Number(yv)))*sortDir});return a}function th(k,l){return`<th data-k="${k}">${l}${sortKey===k?(sortDir>0?' ▲':' ▼'):''}</th>`}function playoffTable(){const confs=[...new Set(P.teams.map(x=>x.conference))].sort();return`<section class="card" style="margin-top:12px"><h2>Team playoff paths and simulated resume</h2><div class="filters"><button class="${confFilter==='all'?'active':''}" data-conf="all">All conferences</button>${confs.map(c=>`<button class="${confFilter===c?'active':''}" data-conf="${e(c)}">${e(c)}</button>`).join('')}</div><div class="tableWrap"><table class="playoff-resume-table"><thead><tr>${th('team','Team')}${th('resume_score','Resume')}${th('power_championship_wins','P4 Champ')}${th('g6_championship_wins','G6 Champ')}${th('quality_wins','Quality W')}${th('top25_wins','Top-25 W')}${th('losses','Losses')}${th('avg_capped_mov','MOV')}${th('avg_weighted_mol','MOL')}${th('bad_losses','Bad L')}${th('sos_rank','SOS Rank')}${th('playoff_pct','Make CFP')}${th('auto_bid_pct','Auto bid')}${th('playoff_bye_pct','Bye')}${th('quarterfinal_pct','Quarterfinal')}${th('semifinal_pct','Semifinal')}${th('national_title_game_pct','Title game')}${th('national_title_pct','Win title')}<th>CFP fair</th><th>Title fair</th></tr></thead><tbody>${playoffRows().map(x=>`<tr><td>${teamLink(x.team)}<span class="sub">${e(x.conference)}</span></td><td>${n(x.resume_score,2)}</td><td>${n(x.power_championship_wins,2)}</td><td>${n(x.g6_championship_wins,2)}</td><td>${n(x.quality_wins,2)}</td><td>${n(x.top25_wins,2)}</td><td>${n(x.losses,2)}</td><td>${n(x.avg_capped_mov,1)}</td><td>${n(x.avg_weighted_mol,1)}</td><td>${n(x.bad_losses,2)}</td><td class="rank" title="Raw CFP SOS ${n(x.sos*100,1)}%">#${x.sos_rank}</td><td class="prob">${pct(x.playoff_pct)}</td><td>${pct(x.auto_bid_pct)}</td><td>${pct(x.playoff_bye_pct)}</td><td>${pct(x.quarterfinal_pct)}</td><td>${pct(x.semifinal_pct)}</td><td>${pct(x.national_title_game_pct)}</td><td class="prob">${pct(x.national_title_pct)}</td><td>${fair(x.playoff_pct)}</td><td>${fair(x.national_title_pct)}</td></tr>`).join('')}</tbody></table></div><div class="modelNote"><b>Resume inputs and advancement probabilities are separate.</b> SOS is displayed as a national rank; hover for the underlying NCAA-style value. Modeled committee ordering still determines the bracket but its fractional average rank is omitted here.</div></section>`}
+function playoffView(){content.innerHTML=bracketView()+playoffTable();document.querySelectorAll('[data-conf]').forEach(b=>b.onclick=()=>{confFilter=b.dataset.conf;playoffView()});document.querySelectorAll('th[data-k]').forEach(h=>h.onclick=()=>{sortDir=sortKey===h.dataset.k?-sortDir:-1;sortKey=h.dataset.k;playoffView()})}function render(){mode==='playoff'?playoffView():conferenceView()}async function init(){[C,P]=await Promise.all([fetch('data/site/conference_workspace.json').then(r=>r.json()),fetch('data/site/playoff_model_2026.json').then(r=>r.json())]);C.conferences.flatMap(c=>c.teams).forEach(x=>S[x.team]=x.slug);stamp.textContent=`${P.trials.toLocaleString()} trials · ${P.schema_version}`;render()}document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode;render()});init();
+</script><script>
+// Keep Game Control visible as an independently sortable eighth resume metric.
+const gameControlObserver=new MutationObserver(()=>{const table=[...document.querySelectorAll('table')].find(t=>t.querySelector('th[data-k="resume_score"]'));if(!table||table.querySelector('th[data-k="game_control_index"]'))return;const resumeHead=table.querySelector('th[data-k="resume_score"]'),head=document.createElement('th');head.dataset.k='game_control_index';head.textContent='GC Index';head.title='NCAAF Game Control Index: 100 × (schedule-adjusted control AUC − .500); not the proprietary Matrix/SportSource value';head.onclick=()=>{sortDir=sortKey==='game_control_index'?-sortDir:-1;sortKey='game_control_index';playoffView()};resumeHead.after(head);table.querySelectorAll('tbody tr').forEach(tr=>{const team=tr.querySelector('a')?.textContent.trim(),row=P.teams.find(x=>x.team===team),cell=document.createElement('td'),v=Number(row?.game_control_index);cell.textContent=Number.isFinite(v)?`${v>0?'+':''}${v.toFixed(2)}`:'—';cell.title=`Control AUC ${pct(row?.game_control||0)}`;tr.children[2]?.after(cell)})});gameControlObserver.observe(document.getElementById('content'),{childList:true,subtree:true});
+</script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+</body></html>

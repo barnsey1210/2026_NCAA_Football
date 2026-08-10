@@ -13,6 +13,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from team_identity import team_logo_path
+
 ROOT = Path(__file__).resolve().parents[2]
 ACTION = ROOT / "data/markets/action/action_playoff_futures_2026.json"
 FUTURES_VIEW = ROOT / "data/site/futures_view.json"
@@ -110,11 +112,7 @@ def team_meta(rows: list[dict]) -> tuple[dict, dict]:
     for row in rows:
         meta = {
             "team": row.get("team"), "slug": row.get("slug"), "conference": row.get("conference"),
-            "logo": (
-                "logos/texas-am.png"
-                if row.get("slug") == "texas-a-m"
-                else f"logos/{row.get('slug')}.png" if row.get("slug") else None
-            ),
+            "logo": team_logo_path(row.get("team")),
             "model": {
                 "national_title": number(row.get("national_title_model_prob")),
                 "playoff_yes": number(row.get("playoff_model_prob")),
