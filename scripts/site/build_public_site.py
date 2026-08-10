@@ -52,8 +52,27 @@ def transform(text,target):
     text=text.replace('openers.html?game_id=', 'openers.html?game_id=')
     text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
     text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
+    # Idempotency: canonicalize shared health assets before adding one copy.
+    text=re.sub(
+        r"<link[^>]+href=[\"']page_health\.css[\"'][^>]*>",
+        "",
+        text,
+        flags=re.I,
+    )
+    text=re.sub(
+        r"<script[^>]+src=[\"']page_health\.js[\"'][^>]*>\s*</script>",
+        "",
+        text,
+        flags=re.I,
+    )
+
     text=text.replace('</head>',CSS+'</head>')
-    text=text.replace('</head>','<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script></head>')
+    text=text.replace(
+        '</head>',
+        '<link rel="stylesheet" href="page_health.css">'
+        '<script defer src="page_health.js"></script></head>',
+        1,
+    )
     text=text.replace('</head>','<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head>')
     if target == 'index.html':
         text=text.replace('changes.innerHTML=movements().slice(0,7)', "changes.innerHTML=movements().filter(m=>week.value==='all'||String(m.y.week)===week.value).slice(0,7)")

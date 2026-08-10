@@ -1,24 +1,287 @@
 {
   "schema_version": "page-health-registry-v1",
-  "valid_statuses": ["green", "yellow", "red", "gray"],
+  "valid_statuses": [
+    "green",
+    "yellow",
+    "red",
+    "gray"
+  ],
   "shared_checks": {
     "injuries": {
       "status_artifact": "data/injuries/injury_source_status.json",
       "available_source_state": "AVAILABLE",
-      "unavailable_states": ["SOURCE_NOT_CONFIGURED", "SOURCE_STATUS_MISSING", "SOURCE_STATUS_INVALID"]
+      "unavailable_states": [
+        "SOURCE_NOT_CONFIGURED",
+        "SOURCE_STATUS_MISSING",
+        "SOURCE_STATUS_INVALID"
+      ]
     }
   },
   "pages": {
-    "dashboard": {"display_name": "Dashboard", "page_url": "index.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json", "data/site/betting_activity_view.json"], "core_metrics": ["daily_run", "slate_games", "betting_signals", "market_moves", "site_build"], "optional_metrics": ["injury_alerts", "open_wagers"], "future_metrics": [], "legacy_status_selectors": []},
-    "ratings": {"display_name": "Ratings", "page_url": "ratings.html", "fresh_hours": 48, "stale_hours": 120, "expected_teams": 138, "critical_artifacts": ["data/site/ratings_view.json", "data/site/matchups_view.json"], "core_metrics": ["composite", "spplus", "fpi", "teamrankings", "bradpowers", "market_derived", "offense", "defense", "movement", "variance"], "optional_metrics": [], "future_metrics": [], "legacy_status_selectors": ["#freshness"]},
-    "openers": {"display_name": "Openers", "page_url": "openers.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json", "data/site/odds_screen_v2.json"], "core_metrics": ["opener_coverage", "opener_history", "mapping_quality", "market_freshness"], "optional_metrics": [], "future_metrics": [], "legacy_status_selectors": []},
-    "matchups": {"display_name": "Matchups", "page_url": "matchups.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/matchups_view.json"], "core_metrics": ["matchup_inventory", "model_coverage", "odds_context"], "optional_metrics": ["five_factors", "returning_production", "coaching", "injuries", "schedule_context"], "future_metrics": [], "legacy_status_selectors": []},
-    "odds": {"display_name": "Odds", "page_url": "odds.html", "fresh_hours": 24, "stale_hours": 48, "critical_artifacts": ["data/site/odds_screen_v2.json", "data/site/odds_futures_v2.json"], "core_metrics": ["provider_freshness", "spread_coverage", "total_coverage", "moneyline_coverage", "mapping_quality", "quote_integrity"], "optional_metrics": ["target_book_coverage", "fallback_count"], "future_metrics": [], "legacy_status_selectors": ["#oddsStatus"]},
-    "schedule": {"display_name": "Schedule", "page_url": "schedule.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/schedule_live_enrichment.json", "data/site/matchups_view.json"], "core_metrics": ["game_inventory", "kickoff_coverage", "projection_coverage", "results_integrity"], "optional_metrics": ["odds_coverage", "weather", "injuries"], "future_metrics": [], "legacy_status_selectors": []},
-    "futures": {"display_name": "Futures", "page_url": "futures.html", "fresh_hours": 24, "stale_hours": 48, "expected_teams": 138, "critical_artifacts": ["data/site/futures_view.json"], "core_metrics": ["sportsbook_freshness", "team_market_coverage", "win_totals", "conference_titles", "playoff", "national_title"], "optional_metrics": ["book_count", "movement_history"], "future_metrics": [], "legacy_status_selectors": ["#marketStatus"]},
-    "conferences": {"display_name": "Conferences", "page_url": "conferences.html", "fresh_hours": 48, "stale_hours": 120, "expected_conferences": 10, "expected_teams": 136, "critical_artifacts": ["data/site/conference_workspace.json", "data/site/futures_view.json"], "core_metrics": ["membership", "eligibility", "duplicates", "current_records", "current_conference_records", "conference_simulations", "conference_markets"], "optional_metrics": ["schedule_strength"], "future_metrics": [], "legacy_status_selectors": []},
-    "playoff": {"display_name": "Playoff", "page_url": "playoff.html", "fresh_hours": 24, "stale_hours": 168, "expected_teams": 138, "critical_artifacts": ["data/site/playoff_model_2026.json", "data/site/ratings_view.json", "data/site/futures_view.json"], "core_metrics": ["simulation_current", "eligible_team_coverage", "playoff_market_coverage", "playoff_market_freshness"], "optional_metrics": ["market_comparison"], "future_metrics": [], "legacy_status_selectors": []},
-    "simulations": {"display_name": "Simulations", "page_url": "simulations.html", "fresh_hours": 72, "stale_hours": 168, "expected_teams": 138, "critical_artifacts": ["data/site/playoff_model_2026.json", "data/site/conference_workspace.json"], "core_metrics": ["latest_daily_run", "simulation_completion", "team_coverage", "conference_coverage"], "optional_metrics": ["projected_records"], "future_metrics": [], "legacy_status_selectors": []},
-    "betting": {"display_name": "Betting", "page_url": "betting.html", "fresh_hours": 18, "stale_hours": 48, "critical_artifacts": ["data/site/betting_activity_view.json", "data/site/matchups_view.json"], "core_metrics": ["games_evaluated", "active_signals", "line_edges", "line_moves", "output_integrity", "email_regression"], "optional_metrics": ["historical_evidence", "open_wagers"], "future_metrics": [], "legacy_status_selectors": []}
+    "dashboard": {
+      "display_name": "Dashboard",
+      "page_url": "index.html",
+      "fresh_hours": 18,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/matchups_view.json",
+        "data/site/betting_activity_view.json"
+      ],
+      "core_metrics": [
+        "daily_run",
+        "slate_games",
+        "betting_signals",
+        "market_moves",
+        "site_build"
+      ],
+      "optional_metrics": [
+        "injury_alerts",
+        "open_wagers"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "ratings": {
+      "display_name": "Ratings",
+      "page_url": "ratings.html",
+      "fresh_hours": 48,
+      "stale_hours": 120,
+      "expected_teams": 138,
+      "critical_artifacts": [
+        "data/site/ratings_view.json",
+        "data/site/matchups_view.json"
+      ],
+      "core_metrics": [
+        "composite",
+        "spplus",
+        "fpi",
+        "teamrankings",
+        "bradpowers",
+        "offense",
+        "defense",
+        "movement",
+        "variance"
+      ],
+      "optional_metrics": [
+        "market_derived"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": [
+        "#freshness"
+      ]
+    },
+    "openers": {
+      "display_name": "Openers",
+      "page_url": "openers.html",
+      "fresh_hours": 18,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/matchups_view.json",
+        "data/site/odds_screen_v2.json"
+      ],
+      "core_metrics": [
+        "opener_coverage",
+        "market_freshness"
+      ],
+      "optional_metrics": [
+        "opener_history",
+        "mapping_quality"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "matchups": {
+      "display_name": "Matchups",
+      "page_url": "matchups.html",
+      "fresh_hours": 18,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/matchups_view.json"
+      ],
+      "core_metrics": [
+        "matchup_inventory",
+        "model_coverage",
+        "odds_context"
+      ],
+      "optional_metrics": [
+        "five_factors",
+        "returning_production",
+        "coaching",
+        "injuries",
+        "schedule_context"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "odds": {
+      "display_name": "Odds",
+      "page_url": "odds.html",
+      "fresh_hours": 24,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/odds_screen_v2.json",
+        "data/site/odds_futures_v2.json"
+      ],
+      "core_metrics": [
+        "provider_freshness",
+        "mapping_quality",
+        "quote_integrity"
+      ],
+      "optional_metrics": [
+        "spread_coverage",
+        "total_coverage",
+        "moneyline_coverage",
+        "target_book_coverage",
+        "fallback_count"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": [
+        "#oddsStatus"
+      ]
+    },
+    "schedule": {
+      "display_name": "Schedule",
+      "page_url": "schedule.html",
+      "fresh_hours": 18,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/schedule_live_enrichment.json",
+        "data/site/matchups_view.json"
+      ],
+      "core_metrics": [
+        "game_inventory",
+        "kickoff_coverage",
+        "projection_coverage",
+        "results_integrity"
+      ],
+      "optional_metrics": [
+        "odds_coverage",
+        "weather",
+        "injuries"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "futures": {
+      "display_name": "Futures",
+      "page_url": "futures.html",
+      "fresh_hours": 24,
+      "stale_hours": 48,
+      "expected_teams": 138,
+      "critical_artifacts": [
+        "data/site/futures_view.json"
+      ],
+      "core_metrics": [
+        "sportsbook_freshness",
+        "playoff",
+        "national_title"
+      ],
+      "optional_metrics": [
+        "team_market_coverage",
+        "win_totals",
+        "conference_titles",
+        "book_count",
+        "movement_history"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": [
+        "#marketStatus"
+      ]
+    },
+    "conferences": {
+      "display_name": "Conferences",
+      "page_url": "conferences.html",
+      "fresh_hours": 48,
+      "stale_hours": 120,
+      "expected_conferences": 10,
+      "expected_teams": 136,
+      "critical_artifacts": [
+        "data/site/conference_workspace.json",
+        "data/site/futures_view.json"
+      ],
+      "core_metrics": [
+        "membership",
+        "eligibility",
+        "duplicates",
+        "current_records",
+        "current_conference_records",
+        "conference_simulations",
+        "conference_markets"
+      ],
+      "optional_metrics": [
+        "schedule_strength"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "playoff": {
+      "display_name": "Playoff",
+      "page_url": "playoff.html",
+      "fresh_hours": 24,
+      "stale_hours": 168,
+      "expected_teams": 138,
+      "critical_artifacts": [
+        "data/site/playoff_model_2026.json",
+        "data/site/ratings_view.json",
+        "data/site/futures_view.json"
+      ],
+      "core_metrics": [
+        "simulation_current",
+        "eligible_team_coverage",
+        "playoff_market_coverage",
+        "playoff_market_freshness"
+      ],
+      "optional_metrics": [
+        "market_comparison"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "simulations": {
+      "display_name": "Simulations",
+      "page_url": "simulations.html",
+      "fresh_hours": 72,
+      "stale_hours": 168,
+      "expected_teams": 138,
+      "critical_artifacts": [
+        "data/site/playoff_model_2026.json",
+        "data/site/conference_workspace.json"
+      ],
+      "core_metrics": [
+        "latest_daily_run",
+        "simulation_completion",
+        "team_coverage",
+        "conference_coverage"
+      ],
+      "optional_metrics": [
+        "projected_records"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    },
+    "betting": {
+      "display_name": "Betting",
+      "page_url": "betting.html",
+      "fresh_hours": 18,
+      "stale_hours": 48,
+      "critical_artifacts": [
+        "data/site/betting_activity_view.json",
+        "data/site/matchups_view.json"
+      ],
+      "core_metrics": [
+        "games_evaluated",
+        "active_signals",
+        "line_edges",
+        "line_moves",
+        "output_integrity",
+        "email_regression"
+      ],
+      "optional_metrics": [
+        "historical_evidence",
+        "open_wagers"
+      ],
+      "future_metrics": [],
+      "legacy_status_selectors": []
+    }
   }
 }

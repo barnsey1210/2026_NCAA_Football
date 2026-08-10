@@ -37,6 +37,16 @@ def shell_markup(target:str)->str:
 def apply(path:Path)->None:
     target=path.name
     text=path.read_text(errors='ignore')
+
+    # Idempotency: remove health controls left by previous shell passes.
+    # The canonical shell below will add exactly one.
+    if target != 'index.html':
+        text = re.sub(
+            r'<div class="war-room-health"[^>]*>.*?</div>',
+            '',
+            text,
+            flags=re.S,
+        )
     if target=='index.html':
         text=text.replace('<div class="header-right"><div class="round">⌕</div><div class="round">⚙</div><div class="round">JL</div><div class="health"><span class="pulse"></span>Data Healthy</div></div>','<div class="header-right"><div class="health"><span class="pulse"></span>Data Healthy</div></div>')
         if 'canonical-war-room-shell-v2' not in text:
