@@ -137,9 +137,12 @@
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#ratings_refresh",
       "scripts": [
+        "scripts/ratings/test_rating_sources.py",
+        "scripts/ratings/parse_rating_source_tables.py",
+        "scripts/ratings/accept_live_rating_candidates_with_status.py",
+        "ratings/pull_donchess_ratings.py",
         "ratings/pull_sagarin_ratings.py",
-        "ratings/parse_massey_visible_ratings.py",
-        "ratings/pull_donchess_ratings.py"
+        "ratings/parse_massey_visible_ratings.py"
       ]
     },
     {
@@ -153,8 +156,24 @@
       "entrypoint": "daily_market_update.sh#ratings_normalization",
       "scripts": [
         "scripts/ratings/build_all_ratings_latest.py",
+        "scripts/ratings/build_active_2026_ratings_master.py",
+        "scripts/ratings/merge_live_rating_change_status.py",
         "ratings/append_ratings_history.py",
         "ratings/build_ratings_movement.py"
+      ]
+    },
+    {
+      "id": "schedule_refresh",
+      "name": "Canonical 2026 schedule refresh and overlay",
+      "order": 115,
+      "required": false,
+      "external_network": true,
+      "email_dependency": false,
+      "publication_dependency": true,
+      "entrypoint": "daily_market_update.sh#schedule_refresh",
+      "scripts": [
+        "scripts/schedule/pull_cfbd_schedule_2026.py",
+        "scripts/schedule/apply_cfbd_schedule_overlay_2026.py"
       ]
     },
     {

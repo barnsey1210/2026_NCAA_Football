@@ -1,6 +1,48 @@
 #!/bin/bash
 set -e
 
+# Canonical execution profile.
+#
+# The production stage implementations live only in this file. Profiles select
+# subsets of those same stages; they must never reimplement provider, ratings,
+# projection, or publication logic elsewhere.
+#
+# Default/no argument preserves the existing full 8 AM workflow.
+NCAAF_PROFILE="${NCAAF_PROFILE:-full}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --profile)
+      if [ "$#" -lt 2 ]; then
+        echo "ERROR: --profile requires a value" >&2
+        exit 2
+      fi
+      NCAAF_PROFILE="$2"
+      shift 2
+      ;;
+    --profile=*)
+      NCAAF_PROFILE="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$NCAAF_PROFILE" in
+  full|openers|postgame|market)
+    ;;
+  *)
+    echo "ERROR: unknown NCAAF profile: $NCAAF_PROFILE" >&2
+    exit 2
+    ;;
+esac
+
+export NCAAF_PROFILE
+
+
 # Load CFBD API key from macOS Keychain when it is not already present.
 if [ -z "${CFBD_API_KEY:-}" ]; then
   CFBD_API_KEY="$(security find-generic-password     -a "$USER"     -s CFBD_API_KEY     -w 2>/dev/null || true)"
@@ -114,6 +156,27 @@ warn() {
     --stage-id "$CURRENT_STAGE" --message "$message"
 }
 
+refresh_live_rating_source() {
+  local source="$1"
+
+  echo "Refreshing live rating source: $source"
+
+  if ! python3 scripts/ratings/test_rating_sources.py --sources "$source"; then
+    warn "$source ratings pull failed; retaining last-known-good accepted ratings"
+    return 0
+  fi
+
+  if ! python3 scripts/ratings/parse_rating_source_tables.py --sources "$source"; then
+    warn "$source ratings parse failed; retaining last-known-good accepted ratings"
+    return 0
+  fi
+
+  if ! python3 scripts/ratings/accept_live_rating_candidates_with_status.py --sources "$source"; then
+    warn "$source ratings acceptance failed; retaining last-known-good accepted ratings"
+    return 0
+  fi
+}
+
 finalize_run_status() {
   local exit_code="$1"
   if [ "$RUN_FINALIZED" -eq 1 ]; then
@@ -141,6 +204,7 @@ trap on_exit EXIT
 {
   echo "========================================"
   echo "Daily market update started: $(date)"
+  echo "Execution profile: $NCAAF_PROFILE"
 
   # STAGE: futures_market_acquisition
   stage_start "futures_market_acquisition"
@@ -269,28 +333,55 @@ PY2
   # Legacy injury scoring is retired until the canonical injury contract exists.
   echo "Skipping legacy game injury scores; canonical injury source not configured."
 
-  # Ratings/projection maintenance. Pull/parse refreshes are optional because some sources may be inactive.
+  # Ratings/projection maintenance. Every automated production source is
+  # refreshed independently. A failed source preserves its last-known-good
+  # accepted value rather than preventing successful sources from updating.
   # STAGE: ratings_refresh
   stage_start "ratings_refresh"
-  run_py "ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" || warn "Sagarin ratings refresh failed"
-  run_py "ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" || warn "Massey ratings refresh failed"
-  run_py "ratings/pull_donchess_ratings.py" "pull_donchess_ratings.py" || warn "Donchess ratings refresh failed"
+
+  refresh_live_rating_source "spplus"
+  refresh_live_rating_source "fpi"
+  refresh_live_rating_source "teamrankings"
+
+  run_py "ratings/pull_donchess_ratings.py" "pull_donchess_ratings.py" \
+    || warn "Donchess/DRatings ratings refresh failed; retaining last-known-good data"
+
+  run_py "ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" \
+    || warn "Sagarin ratings refresh failed; retaining last-known-good data"
+
+  # Massey remains a non-production reference source.
+  run_py "ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" \
+    || warn "Massey ratings refresh failed; retaining last-known-good reference data"
+
   stage_pass "ratings_refresh"
 
+  # Build the same canonical five-source production ratings model used by the
+  # site: SP+, FPI, TeamRankings, Donchess/DRatings, and Sagarin.
   # STAGE: ratings_normalization
   stage_start "ratings_normalization"
-  run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" || warn "ratings latest build failed"
-  run_py "ratings/append_ratings_history.py" "append_ratings_history.py" || warn "ratings history append failed"
-  run_py "ratings/build_ratings_movement.py" "build_ratings_movement.py" || warn "ratings movement build failed"
+  run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" \
+    || warn "ratings latest build failed"
+  run_py "scripts/ratings/build_active_2026_ratings_master.py" "build_active_2026_ratings_master.py" \
+    || warn "active five-source ratings master build failed"
+  run_py "scripts/ratings/merge_live_rating_change_status.py" "merge_live_rating_change_status.py" \
+    || warn "live rating change-status merge failed"
+  run_py "ratings/append_ratings_history.py" "append_ratings_history.py" \
+    || warn "ratings history append failed"
+  run_py "ratings/build_ratings_movement.py" "build_ratings_movement.py" \
+    || warn "ratings movement build failed"
   stage_pass "ratings_normalization"
 
-  # Refresh canonical 2026 schedule from CFBD before projection matching.
-  run_py "scripts/schedule/pull_cfbd_schedule_2026.py" "pull_cfbd_schedule_2026.py" || warn "CFBD canonical schedule refresh failed"
+  # STAGE: schedule_refresh
+  stage_start "schedule_refresh"
+  run_py "scripts/schedule/pull_cfbd_schedule_2026.py" "pull_cfbd_schedule_2026.py" \
+    || warn "CFBD canonical schedule refresh failed"
   if [ -f "data/canonical/cfbd_schedule_2026.json" ]; then
-    python3 scripts/schedule/apply_cfbd_schedule_overlay_2026.py --apply || warn "CFBD schedule overlay failed"
+    python3 scripts/schedule/apply_cfbd_schedule_overlay_2026.py --apply \
+      || warn "CFBD schedule overlay failed"
   else
     warn "CFBD canonical schedule unavailable; preserving prior canonical schedule"
   fi
+  stage_pass "schedule_refresh"
 
   # STAGE: projections
   stage_start "projections"
