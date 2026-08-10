@@ -124,7 +124,16 @@ def american_from_prob(p: float) -> Optional[int]:
     return int(round(100 * (1 - p) / p))
 
 
+WIN_PROB_LOGISTIC_SCALE = 6.5
+WIN_PROB_MODEL_VERSION = "logistic_margin_scale_6_5_v1"
+
+def canonical_home_prob_from_margin(margin_home: float) -> float:
+    """Canonical 2026 Game Projection Consensus win-probability conversion."""
+    p = 1.0 / (1.0 + math.exp(-float(margin_home) / WIN_PROB_LOGISTIC_SCALE))
+    return max(0.001, min(0.999, p))
+
 def implied_home_prob_from_margin(margin_home: float, sigma: float) -> float:
+    # Legacy/fallback probability path only.
     return max(0.001, min(0.999, normal_cdf(margin_home / sigma)))
 
 
@@ -231,7 +240,8 @@ def game_home_prob(g: Dict[str, Any], team_by_name: Dict[str, Dict[str, Any]], s
     model_version = str(g.get("projection_spread_model_version") or "")
     consensus_margin = g.get("projected_margin_home")
     if model_version.startswith("spread_consensus_") and consensus_margin is not None:
-        return implied_home_prob_from_margin(fnum(consensus_margin), sigma)
+        # Scheduled production games use one canonical margin -> probability model.
+        return canonical_home_prob_from_margin(fnum(consensus_margin))
 
     p = g.get("win_prob_home")
     if p is not None and 0 < fnum(p, -1) < 1:
@@ -426,7 +436,7 @@ def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sig
             home_team = team_by_name.get(no1, {})
             away_team = team_by_name.get(no2, {})
             margin_home = estimate_margin_home(home_team, away_team, neutral)
-            p_home = implied_home_prob_from_margin(margin_home, title_sigma)
+            p_home = canonical_home_prob_from_margin(margin_home)
             champ = no1 if rng.random() < p_home else no2
             conf_title[champ] += 1
 
@@ -488,14 +498,21 @@ def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sig
             total = estimate_total(home, away)
             cg["projected_spread"] = margin_home
             cg["projected_total"] = total
-            cg["home_win_pct"] = implied_home_prob_from_margin(margin_home, title_sigma)
+            cg["home_win_pct"] = canonical_home_prob_from_margin(margin_home)
             if any((conf, n) in title_rules for n in names):
                 notes = [f"{team} excluded: {note}" for (rule_conf, team), note in title_rules.items() if rule_conf == conf]
                 cg["eligibility_note"] = " ".join(notes)
 
     db.setdefault("meta", {})["conference_sims_rerun_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     db["meta"]["conference_sims_num_trials"] = sims
-    db["meta"]["conference_sims_model"] = "Monte Carlo from DB.games, win_prob_home/projected_margin_home, explicit conference-game overrides and eligibility rules."
+    db["meta"]["conference_sims_model"] = (
+        "Monte Carlo from canonical Game Projection Consensus margins/probabilities "
+        "for scheduled games and Site Composite rating-derived margins for hypothetical "
+        "conference title games; all model margins convert to win probability with "
+        "logistic scale 6.5."
+    )
+    db["meta"]["win_probability_model_version"] = WIN_PROB_MODEL_VERSION
+    db["meta"]["win_probability_logistic_scale"] = WIN_PROB_LOGISTIC_SCALE
     return db
 
 

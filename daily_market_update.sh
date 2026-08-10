@@ -308,6 +308,17 @@ stage_start "conference_simulations"
 run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
 stage_pass "conference_simulations"
 
+# Current CFP selection and playoff Monte Carlo simulation. This consumes the
+# canonical preseason DB after current projections and probability aliases have
+# been applied. CFP selection retains the validated resume model; game winners
+# use the canonical logistic margin-to-win-probability conversion.
+# STAGE: playoff_simulations
+
+stage_start "playoff_simulations"
+run_py "scripts/simulations/run_playoff_model_2026.py" "run_playoff_model_2026.py"
+run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
+stage_pass "playoff_simulations"
+
 
   # Shadow production bridge. Current selected market lines must already be in
   # matchups_view; completed-game results/PBP/game-control builders run through

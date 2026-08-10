@@ -187,6 +187,20 @@
       ]
     },
     {
+      "id": "playoff_simulations",
+      "name": "Current 2026 CFP and national championship simulations",
+      "order": 127,
+      "required": true,
+      "external_network": false,
+      "email_dependency": false,
+      "publication_dependency": true,
+      "entrypoint": "daily_market_update.sh#playoff_simulations",
+      "scripts": [
+        "scripts/simulations/run_playoff_model_2026.py",
+        "scripts/audit/audit_playoff_model_2026.py"
+      ]
+    },
+    {
       "id": "matchup_core",
       "name": "Canonical matchup core",
       "order": 130,

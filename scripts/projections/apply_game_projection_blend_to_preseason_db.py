@@ -16,6 +16,19 @@ def finite(x):
     except Exception:
         return None
 
+WIN_PROB_LOGISTIC_SCALE = 6.5
+WIN_PROB_MODEL_VERSION = "logistic_margin_scale_6_5_v1"
+
+def win_prob_from_margin(margin_home):
+    """Canonical 2026 spread-to-win-probability conversion."""
+    return 1.0 / (1.0 + math.exp(-float(margin_home) / WIN_PROB_LOGISTIC_SCALE))
+
+def spread_text(away, home, margin_home):
+    if margin_home is None:
+        return None
+    favorite = home if margin_home >= 0 else away
+    return f"{favorite} -{abs(float(margin_home)):.1f}"
+
 def main():
     if not DB.exists():
         raise SystemExit(f"Missing canonical preseason DB: {DB}")
@@ -58,8 +71,34 @@ def main():
 
         changed = False
         if spread is not None:
-            g["projected_margin_home"] = round(spread, 4)
-            g["blend_spread_home"] = round(spread, 4)
+            spread = round(spread, 4)
+            wp_home = win_prob_from_margin(spread)
+
+            # Canonical production spread aliases must never disagree.
+            g["projected_margin_home"] = spread
+            g["projection_spread_home"] = spread
+            g["site_spread_home"] = spread
+            g["blend_spread_home"] = spread
+            g["projection_spread_text"] = spread_text(
+                str(g.get("away_team") or ""),
+                str(g.get("home_team") or ""),
+                spread,
+            )
+
+            # Canonical probability derived only from the production consensus margin.
+            g["win_prob_home"] = round(wp_home, 12)
+            g["home_win_prob"] = round(wp_home, 6)
+            g["away_win_prob"] = round(1.0 - wp_home, 6)
+            g["projection_win_probability_model_version"] = WIN_PROB_MODEL_VERSION
+            g["projection_win_probability_scale"] = WIN_PROB_LOGISTIC_SCALE
+
+            g["projection_status"] = "game_projection_consensus"
+            g["projection_note"] = (
+                "Equal-weight Game Projection Consensus across available eligible "
+                "production sources; win probability calibrated from consensus margin "
+                "with logistic scale 6.5."
+            )
+
             spread_updated += 1
             changed = True
         if total is not None:
@@ -112,6 +151,11 @@ def main():
         ],
         "spread_fallback": "equal weight across available eligible production sources",
 
+        "win_probability_version": WIN_PROB_MODEL_VERSION,
+        "win_probability_method": "logistic from canonical projected home margin",
+        "win_probability_logistic_scale": WIN_PROB_LOGISTIC_SCALE,
+        "win_probability_calibration": "logistic scale 6.5 validated against fitted alternatives on 2025 holdout using current-style four-source historical proxy",
+
         "total_version": "total_consensus_equal_available_v1",
         "total_max_sources": 4,
         "total_sources": [
@@ -132,6 +176,66 @@ def main():
 
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
+
+    # Fail closed if canonical production projection aliases disagree.
+    consistency_errors = []
+
+    for g in games:
+        version = str(g.get("projection_spread_model_version") or "")
+        if not version.startswith("spread_consensus_"):
+            continue
+
+        canonical = finite(g.get("projected_margin_home"))
+        if canonical is None:
+            continue
+
+        gid = str(g.get("game_id") or "")
+        matchup = f"{g.get('away_team')} at {g.get('home_team')}"
+
+        for field in (
+            "projection_spread_home",
+            "site_spread_home",
+            "blend_spread_home",
+        ):
+            value = finite(g.get(field))
+            if value is None or abs(value - canonical) > 0.0001:
+                consistency_errors.append({
+                    "game_id": gid,
+                    "matchup": matchup,
+                    "field": field,
+                    "canonical": canonical,
+                    "stored": value,
+                })
+
+        expected_wp = win_prob_from_margin(canonical)
+
+        for field in ("win_prob_home", "home_win_prob"):
+            value = finite(g.get(field))
+            if value is None or abs(value - expected_wp) > 0.00001:
+                consistency_errors.append({
+                    "game_id": gid,
+                    "matchup": matchup,
+                    "field": field,
+                    "expected": expected_wp,
+                    "stored": value,
+                })
+
+        away_wp = finite(g.get("away_win_prob"))
+        if away_wp is None or abs(away_wp - (1.0 - expected_wp)) > 0.00001:
+            consistency_errors.append({
+                "game_id": gid,
+                "matchup": matchup,
+                "field": "away_win_prob",
+                "expected": 1.0 - expected_wp,
+                "stored": away_wp,
+            })
+
+    if consistency_errors:
+        sample = json.dumps(consistency_errors[:10], indent=2)
+        raise SystemExit(
+            f"STOP: canonical projection consistency audit failed "
+            f"for {len(consistency_errors)} fields. Sample:\n{sample}"
+        )
 
     tmp = DB.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(db, indent=2) + "\n")
