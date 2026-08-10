@@ -65,6 +65,7 @@ TEAM_ALIASES = {
     "ULM Warhawks": "UL-Monroe",
     "Louisiana Ragin' Cajuns": "Louisiana",
     "JMU Dukes": "James Madison",
+    "Sacramento State Hornets": "Sacramento State",
 }
 
 def now_utc():

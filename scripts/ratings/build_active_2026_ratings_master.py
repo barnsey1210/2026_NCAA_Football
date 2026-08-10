@@ -9,14 +9,14 @@ ACTIVE_SOURCES = {
     "SP+": "spplus",
     "FPI": "fpi",
     "TeamRankings": "teamrankings",
+    "Donchess Overall": "dratings",
+    "Sagarin Predictor": "sagarin",
 }
 
 REFERENCE_SOURCES = [
     "Brad Powers",
     "KFord",
     "Massey Power",
-    "Sagarin Predictor",
-    "Donchess Overall",
 ]
 
 def main():
@@ -60,10 +60,14 @@ def main():
         "spplus",
         "fpi",
         "teamrankings",
+        "dratings",
+        "sagarin",
         "power_rating",
         "spplus_weight",
         "fpi_weight",
         "teamrankings_weight",
+        "dratings_weight",
+        "sagarin_weight",
         "source_count",
         "power_rank",
     ]].copy()
@@ -79,12 +83,16 @@ def main():
         "spplus",
         "fpi",
         "teamrankings",
+        "dratings",
+        "sagarin",
         "kford",
         "bradpowers",
         "power_rating",
         "spplus_weight",
         "fpi_weight",
         "teamrankings_weight",
+        "dratings_weight",
+        "sagarin_weight",
         "kford_weight",
         "bradpowers_weight",
         "source_count",
@@ -113,7 +121,7 @@ def main():
     status.to_csv(STATUS, index=False)
 
     print(f"wrote {OUT}: {len(out)} rows")
-    print(out[["power_rank","team","power_rating","spplus","fpi","teamrankings","source_count"]].head(20).to_string(index=False))
+    print(out[["power_rank","team","power_rating","spplus","fpi","teamrankings","dratings","sagarin","source_count"]].head(20).to_string(index=False))
     print()
     print("source count coverage:")
     print(out["source_count"].value_counts().sort_index().to_string())
