@@ -557,33 +557,63 @@ def main():
         print(json.dumps(audit, indent=2))
         return
 
-    results = [
-        r for r in all_results
-        if int(r["week"]) == week
-    ]
+    target_weeks = [args.week] if args.week is not None else weeks
 
-    week_dir = POSTGAME_ROOT / f"week_{week:02d}"
-    plays_path = week_dir / "plays.json.gz"
-    drives_path = week_dir / "drives.json.gz"
-    havoc_path = week_dir / "havoc.json.gz"
+    pbp_rows = []
+    drive_rows = []
+    gc_rows = []
+    processed_weeks = []
+    missing_week_caches = []
 
-    for path in (plays_path, drives_path, havoc_path):
-        if not path.exists():
-            raise SystemExit(f"Missing required postgame cache: {path}")
+    for week in target_weeks:
+        results = [
+            r for r in all_results
+            if int(r["week"]) == int(week)
+        ]
+        if not results:
+            continue
 
-    plays = read_gzip(plays_path)
-    drives = read_gzip(drives_path)
-    havoc = read_gzip(havoc_path)
+        week_dir = POSTGAME_ROOT / f"week_{week:02d}"
+        plays_path = week_dir / "plays.json.gz"
+        drives_path = week_dir / "drives.json.gz"
+        havoc_path = week_dir / "havoc.json.gz"
 
-    pbp_rows = build_pbp_rows(week, results, plays, havoc)
-    drive_rows = build_drive_rows(week, results, plays, drives)
-    gc_rows = build_game_control_rows(week, results, plays)
+        missing = [
+            str(path.relative_to(ROOT))
+            for path in (plays_path, drives_path, havoc_path)
+            if not path.exists()
+        ]
+        if missing:
+            missing_week_caches.append({
+                "week": week,
+                "missing": missing,
+            })
+            continue
+
+        plays = read_gzip(plays_path)
+        drives = read_gzip(drives_path)
+        havoc = read_gzip(havoc_path)
+
+        pbp_rows.extend(
+            build_pbp_rows(week, results, plays, havoc)
+        )
+        drive_rows.extend(
+            build_drive_rows(week, results, plays, drives)
+        )
+        gc_rows.extend(
+            build_game_control_rows(week, results, plays)
+        )
+        processed_weeks.append(week)
 
     write_csv(pbp_rows, PBP_OUT)
     write_csv(drive_rows, DRIVE_OUT)
     write_csv(gc_rows, GC_OUT)
 
-    expected = len(results) * 2
+    completed_in_processed_weeks = [
+        r for r in all_results
+        if int(r["week"]) in set(processed_weeks)
+    ]
+    expected = len(completed_in_processed_weeks) * 2
 
     def coverage(rows, key):
         return sum(finite(r.get(key)) is not None for r in rows)
@@ -593,13 +623,17 @@ def main():
         "season": 2026,
         "status": (
             "READY"
-            if len(pbp_rows) == expected
+            if not missing_week_caches
+            and len(pbp_rows) == expected
             and len(drive_rows) == expected
             and len(gc_rows) == expected
             else "PARTIAL"
         ),
-        "week": week,
-        "completed_games": len(results),
+        "week": max(processed_weeks) if processed_weeks else None,
+        "weeks_requested": target_weeks,
+        "weeks_processed": processed_weeks,
+        "missing_week_caches": missing_week_caches,
+        "completed_games": len(completed_in_processed_weeks),
         "team_game_rows_expected": expected,
         "pbp_rows": len(pbp_rows),
         "drive_rows": len(drive_rows),
