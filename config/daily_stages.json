@@ -168,7 +168,22 @@
       "entrypoint": "daily_market_update.sh#projections",
       "scripts": [
         "scripts/projections/build_game_projection_sources_2026.py",
-        "scripts/projections/build_game_projection_blend_2026.py"
+        "scripts/projections/build_game_projection_blend_2026.py",
+        "scripts/projections/pull_dratings_ncaaf_predictions.py",
+        "scripts/projections/apply_game_projection_blend_to_preseason_db.py"
+      ]
+    },
+    {
+      "id": "conference_simulations",
+      "name": "Current 2026 season and conference simulations",
+      "order": 125,
+      "required": true,
+      "external_network": false,
+      "email_dependency": false,
+      "publication_dependency": true,
+      "entrypoint": "daily_market_update.sh#conference_simulations",
+      "scripts": [
+        "scripts/simulations/build_season_simulations_2026.py"
       ]
     },
     {
@@ -230,7 +245,8 @@
       "entrypoint": "daily_market_update.sh#playoff_futures",
       "scripts": [
         "scripts/markets/pull_actionnetwork_playoff_futures.py",
-        "scripts/site/build_futures_view.py"
+        "scripts/site/build_futures_view.py",
+        "scripts/site/build_conference_workspace.py"
       ]
     },
     {

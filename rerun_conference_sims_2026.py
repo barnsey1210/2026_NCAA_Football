@@ -226,9 +226,17 @@ def estimate_total(home: Dict[str, Any], away: Dict[str, Any]) -> float:
 
 
 def game_home_prob(g: Dict[str, Any], team_by_name: Dict[str, Dict[str, Any]], sigma: float) -> float:
+    # Current scheduled-game projection consensus is canonical when present.
+    # Legacy win_prob_home values may still reflect an old Active Combo / Site Projection.
+    model_version = str(g.get("projection_spread_model_version") or "")
+    consensus_margin = g.get("projected_margin_home")
+    if model_version.startswith("spread_consensus_") and consensus_margin is not None:
+        return implied_home_prob_from_margin(fnum(consensus_margin), sigma)
+
     p = g.get("win_prob_home")
     if p is not None and 0 < fnum(p, -1) < 1:
         return fnum(p)
+
     home = team_by_name.get(g.get("home_team"))
     away = team_by_name.get(g.get("away_team"))
     if not home or not away:

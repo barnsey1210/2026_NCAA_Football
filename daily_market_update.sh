@@ -300,6 +300,15 @@ PY2
   run_py "scripts/projections/apply_game_projection_blend_to_preseason_db.py" "apply_game_projection_blend_to_preseason_db.py" || warn "game projection site overlay failed"
   stage_pass "projections"
 
+# Current season/conference Monte Carlo simulations. This stage consumes the
+# canonical projection consensus already applied to preseason_db.json.
+# STAGE: conference_simulations
+
+stage_start "conference_simulations"
+run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
+stage_pass "conference_simulations"
+
+
   # Shadow production bridge. Current selected market lines must already be in
   # matchups_view; completed-game results/PBP/game-control builders run through
   # the existing site build and postgame paths. These steps do no acquisition
@@ -339,6 +348,7 @@ PY2
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
   run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || warn "Futures V2 data build failed"
+run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py"
   stage_pass "playoff_futures"
 
   # Refresh the production Odds page payloads after the current game and
