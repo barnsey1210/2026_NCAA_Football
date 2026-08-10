@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+import argparse
 import json
 import subprocess
 import sys
@@ -32,6 +33,23 @@ SPECS = {
         "value_columns": ["teamrankings"],
     },
 }
+
+CLI_SOURCES = {
+    "spplus": "SP+",
+    "fpi": "FPI",
+    "teamrankings": "TeamRankings",
+}
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--sources",
+        default="spplus,fpi,teamrankings",
+        help="Comma-separated sources: spplus,fpi,teamrankings",
+    )
+    return parser.parse_args()
+
 
 
 def now_utc() -> str:
@@ -170,6 +188,13 @@ def atomic_json(path: Path, value: dict) -> None:
 
 
 def main() -> int:
+    args = parse_args()
+    requested_keys = [x.strip().lower() for x in args.sources.split(",") if x.strip()]
+    unknown = sorted(set(requested_keys) - set(CLI_SOURCES))
+    if unknown:
+        raise SystemExit(f"Unknown rating sources: {unknown}")
+    requested_names = [CLI_SOURCES[x] for x in requested_keys]
+
     if not ACCEPT_SCRIPT.exists():
         raise SystemExit(f"Missing acceptance script: {ACCEPT_SCRIPT}")
 
@@ -179,7 +204,8 @@ def main() -> int:
 
     # Compare before promotion while the accepted files still represent
     # the prior accepted version.
-    for name, spec in SPECS.items():
+    for name in requested_names:
+        spec = SPECS[name]
         candidate = spec["candidate"]
         accepted = spec["accepted"]
 
@@ -197,16 +223,24 @@ def main() -> int:
 
     # Retain the existing all-or-nothing validation and promotion behavior.
     result = subprocess.run(
-        [sys.executable, str(ACCEPT_SCRIPT)],
+        [
+            sys.executable,
+            str(ACCEPT_SCRIPT),
+            "--sources",
+            ",".join(requested_keys),
+        ],
         text=True,
     )
     if result.returncode != 0:
         return result.returncode
 
+    merged_sources = dict(previous_state.get("sources", {}))
+    merged_sources.update(comparisons)
+
     next_state = {
         "schema_version": 1,
         "updated_at": checked_at,
-        "sources": comparisons,
+        "sources": merged_sources,
     }
     atomic_json(STATE, next_state)
 

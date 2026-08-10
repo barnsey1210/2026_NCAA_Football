@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
+import argparse
 import shutil
 import pandas as pd
 
@@ -26,6 +27,23 @@ SOURCES = {
         "required": ["team", "teamrankings"],
     },
 }
+
+CLI_SOURCES = {
+    "spplus": "SP+",
+    "fpi": "FPI",
+    "teamrankings": "TeamRankings",
+}
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--sources",
+        default="spplus,fpi,teamrankings",
+        help="Comma-separated sources: spplus,fpi,teamrankings",
+    )
+    return parser.parse_args()
+
 
 
 def validate(name, spec):
@@ -60,9 +78,17 @@ def validate(name, spec):
 
 
 def main():
+    args = parse_args()
+    requested_keys = [x.strip().lower() for x in args.sources.split(",") if x.strip()]
+    unknown = sorted(set(requested_keys) - set(CLI_SOURCES))
+    if unknown:
+        raise SystemExit(f"Unknown rating sources: {unknown}")
+
+    requested_names = [CLI_SOURCES[x] for x in requested_keys]
     validated = {}
 
-    for name, spec in SOURCES.items():
+    for name in requested_names:
+        spec = SOURCES[name]
         validated[name] = validate(name, spec)
         print(f"{name}: candidate passed validation")
 
@@ -70,7 +96,7 @@ def main():
         name: set(df["team"])
         for name, df in validated.items()
     }
-    baseline = team_sets["SP+"]
+    baseline = next(iter(team_sets.values()))
     for name, teams in team_sets.items():
         if teams != baseline:
             missing = sorted(baseline - teams)
@@ -82,7 +108,8 @@ def main():
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     BACKUPS.mkdir(parents=True, exist_ok=True)
 
-    for name, spec in SOURCES.items():
+    for name in requested_names:
+        spec = SOURCES[name]
         accepted = spec["accepted"]
         candidate = spec["candidate"]
 
@@ -94,7 +121,7 @@ def main():
         shutil.copy2(candidate, accepted)
         print(f"{name}: promoted {candidate.name} -> {accepted.name}")
 
-    print("All three live rating candidates accepted.")
+    print("Requested live rating candidates accepted:", ", ".join(requested_names))
 
 
 if __name__ == "__main__":

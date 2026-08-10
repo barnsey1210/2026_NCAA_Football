@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import argparse
 import re
 import pandas as pd
 
@@ -467,19 +468,42 @@ def audit(name, df, expected=None):
         print(f"missing {c}:", df[c].isna().sum())
     print(df.head(15).to_string(index=False))
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--sources",
+        default="teamrankings,fpi,spplus",
+        help="Comma-separated sources: teamrankings,fpi,spplus",
+    )
+    return parser.parse_args()
+
+
 def main():
-    tr = parse_teamrankings()
-    fpi = parse_fpi()
-    sp = parse_spplus()
+    args = parse_args()
+    requested = [x.strip().lower() for x in args.sources.split(",") if x.strip()]
+    allowed = {"teamrankings", "fpi", "spplus"}
+    unknown = sorted(set(requested) - allowed)
+    if unknown:
+        raise SystemExit(f"Unknown rating sources: {unknown}")
 
-    audit("TeamRankings parsed", tr)
-    audit("FPI parsed", fpi)
-    audit("SP+ parsed", sp)
+    parsed = {}
 
-    # Compare coverage to current 2026 SP+ team universe.
+    if "teamrankings" in requested:
+        parsed["teamrankings"] = parse_teamrankings()
+        audit("TeamRankings parsed", parsed["teamrankings"])
+
+    if "fpi" in requested:
+        parsed["fpi"] = parse_fpi()
+        audit("FPI parsed", parsed["fpi"])
+
+    if "spplus" in requested:
+        parsed["spplus"] = parse_spplus()
+        audit("SP+ parsed", parsed["spplus"])
+
     current = pd.read_csv(OUT / "spplus_2026_latest.csv")
     current_teams = set(current["team"])
-    for name, df in [("teamrankings", tr), ("fpi", fpi), ("spplus_espn", sp)]:
+
+    for name, df in parsed.items():
         teams = set(df["team"])
         missing = sorted(current_teams - teams)
         extra = sorted(teams - current_teams)
