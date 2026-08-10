@@ -12,20 +12,20 @@ OUT = Path("data/projections/game_projection_blend_2026.csv")
 AUDIT = Path("data/projections/game_projection_blend_audit_2026.csv")
 
 DEFAULT_CONFIG = {
-    "spread_weights": {
-        "Site Projection": 0.50,
-        "Massey Games": 0.50,
-        "Sagarin Predictor Prediction": 0.0,
-        "Sagarin Predictor Home/Away Experimental": 0.0,
-        "DRatings Predictions": 0.0
+    "blend_mode": "equal_available",
+    "spread_sources": {
+        "SP+": True,
+        "FPI": True,
+        "TeamRankings": True,
+        "DRatings Predictions": True,
+        "Sagarin Predictor Prediction": False,
     },
-    "total_weights": {
-        "Site Projection": 0.50,
-        "Massey Games": 0.50,
-        "Sagarin Predictor Prediction": 0.0,
-        "Sagarin Predictor Home/Away Experimental": 0.0,
-        "DRatings Predictions": 0.0
-    }
+    "total_sources": {
+        "SP+": True,
+        "DRatings Predictions": True,
+        "Massey Games": False,
+        "Sagarin Predictor Prediction": False,
+    },
 }
 
 def load_config():
@@ -39,11 +39,27 @@ def load_config():
         CONFIG.parent.mkdir(parents=True, exist_ok=True)
         CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
 
-    spread = dict(DEFAULT_CONFIG["spread_weights"])
-    spread.update(cfg.get("spread_weights", {}))
-    total = dict(DEFAULT_CONFIG["total_weights"])
-    total.update(cfg.get("total_weights", {}))
-    return spread, total
+    spread_sources = dict(DEFAULT_CONFIG["spread_sources"])
+    spread_sources.update(cfg.get("spread_sources", {}))
+
+    total_sources = dict(DEFAULT_CONFIG["total_sources"])
+    total_sources.update(cfg.get("total_sources", {}))
+
+    return spread_sources, total_sources
+
+
+def equal_available_weights(values, eligibility):
+    available = [
+        source
+        for source, enabled in eligibility.items()
+        if enabled and values.get(source) is not None
+    ]
+
+    if not available:
+        return {}
+
+    weight = 1.0 / len(available)
+    return {source: weight for source in available}
 
 def load_db():
     if not PRESEASON_DB.exists():
@@ -130,7 +146,7 @@ def is_non_fbs_game(g) -> bool:
     return away_conf in NON_FBS_CONFS_FOR_GAME_PROJECTION or home_conf in NON_FBS_CONFS_FOR_GAME_PROJECTION
 
 def main():
-    spread_weights, total_weights = load_config()
+    spread_eligibility, total_eligibility = load_config()
     db = load_db()
     games = pd.DataFrame(db.get("games", []))
     src = read_sources()
@@ -144,28 +160,54 @@ def main():
                 src[col] = pd.to_numeric(src[col], errors="coerce")
 
     source_names = sorted(set(src["source"].dropna().astype(str))) if not src.empty and "source" in src.columns else []
-    configured_sources = sorted(set(spread_weights) | set(total_weights) | set(source_names))
+    configured_sources = sorted(
+        set(spread_eligibility) | set(total_eligibility) | set(source_names)
+    )
 
     for _, g in games.iterrows():
         game_id = g.get("game_id")
-        if is_non_fbs_game(g):
-            # Do not use stale embedded site projections for FCS/non-FBS games.
-            # These need a validated FCS-capable projection source later.
-            source_values_spread = {}
-            source_values_total = {}
-        else:
-            source_values_spread = {"Site Projection": num(g.get("projected_margin_home"))}
-            source_values_total = {"Site Projection": num(g.get("projected_total"))}
+        # Projection sources must be explicit provider observations.
+        # Do not feed the prior blended DB projection back into the blender.
+        source_values_spread = {}
+        source_values_total = {}
+
+        # Preserve the original preseason SP+ total as an explicit source.
+        # apply_game_projection_blend_to_preseason_db.py stores this once before
+        # replacing projected_total with the production consensus.
+        if not is_non_fbs_game(g):
+            spplus_total = num(g.get("projection_overlay_previous_total"))
+            if spplus_total is None:
+                spplus_total = num(g.get("projected_total"))
+            source_values_total["SP+"] = spplus_total
 
         if not src.empty and "game_id" in src.columns:
             sg = src[src["game_id"].astype(str) == str(game_id)]
             for _, r in sg.iterrows():
                 source = str(r.get("source"))
-                source_values_spread[source] = num(r.get("spread_home"))
-                source_values_total[source] = num(r.get("total"))
 
-        blend_spread, used_spread, used_spread_detail = weighted_avg(source_values_spread, spread_weights)
-        blend_total, used_total, used_total_detail = weighted_avg(source_values_total, total_weights)
+                spread_value = num(r.get("spread_home"))
+                total_value = num(r.get("total"))
+
+                # Never let a blank provider field erase an already-established
+                # value for that source (notably the canonical SP+ total).
+                if spread_value is not None:
+                    source_values_spread[source] = spread_value
+                if total_value is not None:
+                    source_values_total[source] = total_value
+
+        spread_weights = equal_available_weights(
+            source_values_spread, spread_eligibility
+        )
+        total_weights = equal_available_weights(
+            source_values_total, total_eligibility
+        )
+
+        blend_spread, used_spread, used_spread_detail = weighted_avg(
+            source_values_spread, spread_weights
+        )
+        blend_total, used_total, used_total_detail = weighted_avg(
+            source_values_total, total_weights
+        )
 
         row = {
             "game_id": game_id,
@@ -174,9 +216,9 @@ def main():
             "away_team": g.get("away_team"),
             "home_team": g.get("home_team"),
             "neutral_site": g.get("neutral_site"),
-            "site_spread_home": source_values_spread.get("Site Projection"),
-            "site_spread_text": spread_text(g.get("home_team"), g.get("away_team"), source_values_spread.get("Site Projection")),
-            "site_total": source_values_total.get("Site Projection"),
+            "site_spread_home": source_values_spread.get("SP+"),
+            "site_spread_text": spread_text(g.get("home_team"), g.get("away_team"), source_values_spread.get("SP+")),
+            "site_total": source_values_total.get("SP+"),
             "blend_spread_home": round(blend_spread, 3) if blend_spread is not None else "",
             "blend_spread_text": spread_text(g.get("home_team"), g.get("away_team"), blend_spread),
             "blend_total": round(blend_total, 3) if blend_total is not None else "",
@@ -198,8 +240,8 @@ def main():
             row[f"{key}_spread_home"] = spread_v
             row[f"{key}_spread_text"] = spread_text(g.get("home_team"), g.get("away_team"), spread_v)
             row[f"{key}_total"] = total_v
-            row[f"spread_disagreement_{key}"] = round(abs(source_values_spread.get("Site Projection") - spread_v), 3) if source_values_spread.get("Site Projection") is not None and spread_v is not None else ""
-            row[f"total_disagreement_{key}"] = round(abs(source_values_total.get("Site Projection") - total_v), 3) if source_values_total.get("Site Projection") is not None and total_v is not None else ""
+            row[f"spread_disagreement_{key}"] = round(abs(source_values_spread.get("SP+") - spread_v), 3) if source_values_spread.get("SP+") is not None and spread_v is not None else ""
+            row[f"total_disagreement_{key}"] = round(abs(source_values_total.get("SP+") - total_v), 3) if source_values_total.get("SP+") is not None and total_v is not None else ""
             row[f"spread_weight_{key}"] = spread_weights.get(source, 0)
             row[f"total_weight_{key}"] = total_weights.get(source, 0)
 
@@ -216,8 +258,8 @@ def main():
             "game_id": game_id,
             "away_team": g.get("away_team"),
             "home_team": g.get("home_team"),
-            "has_site_spread": source_values_spread.get("Site Projection") is not None,
-            "has_site_total": source_values_total.get("Site Projection") is not None,
+            "has_site_spread": source_values_spread.get("SP+") is not None,
+            "has_site_total": source_values_total.get("SP+") is not None,
         }
         for source in configured_sources:
             if source == "Site Projection":

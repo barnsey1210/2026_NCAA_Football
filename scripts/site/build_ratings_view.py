@@ -22,17 +22,32 @@ if not dates:
 
 latest = dates[-1]
 
-active = {
+CORE_COMPOSITE = {
     "SP+": "spplus",
     "FPI": "fpi",
     "TeamRankings": "teamrankings",
     "Brad Powers": "bradpowers",
 }
 
+OPTIONAL_COMPOSITE = {
+    "Sagarin Predictor": "sagarin",
+}
+
+REFERENCE_ONLY = {
+    "Donchess Overall": "dratings",
+    "Massey Power": "massey",
+}
+
+DISPLAY_SOURCES = {
+    **CORE_COMPOSITE,
+    **OPTIONAL_COMPOSITE,
+    **REFERENCE_ONLY,
+}
+
 vectors = defaultdict(dict)
 
 for r in rows:
-    if r.get("source") in active and r.get("snapshot_date"):
+    if r.get("source") in DISPLAY_SOURCES and r.get("snapshot_date"):
         try:
             vectors[(r["snapshot_date"], r["source"])][r["team"]] = float(r["rating"])
         except (ValueError, TypeError):
@@ -45,9 +60,24 @@ if ratings_source_status_path.exists():
         if source:
             source_status[source] = row
 
+def truthy(value):
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y"}
+
+
+# Core four remain the production Site Composite.
+# Optional providers enter only when explicitly activated by source status.
+active_composite = dict(CORE_COMPOSITE)
+
+for label, key in OPTIONAL_COMPOSITE.items():
+    status = source_status.get(label, {})
+    if truthy(status.get("active_2026")):
+        active_composite[label] = key
+
+reference_only = dict(REFERENCE_ONLY)
+
 source_meta = {}
 
-for label, key in active.items():
+for label, key in DISPLAY_SOURCES.items():
     available = [d for d in dates if vectors.get((d, label))]
     last_change = None
 
@@ -105,6 +135,18 @@ for label, key in active.items():
         "changed_teams_from_prior": tracked_changed,
         "change_status": tracked_change_status,
         "previous_snapshot": previous,
+        "active_2026": (
+            label in CORE_COMPOSITE
+            or truthy(status.get("active_2026"))
+        ),
+        "composite_eligible": label in active_composite,
+        "reference_only": label in REFERENCE_ONLY,
+        "display_status": status.get("display_status") or None,
+        "production_weight_pct": (
+            float(status["production_weight_pct"])
+            if status.get("production_weight_pct") not in (None, "")
+            else None
+        ),
     }
 
 # Build equal-weight historical composites for preseason and recent movement.
@@ -113,13 +155,13 @@ history = defaultdict(dict)
 for r in csv.DictReader(ratings_history_path.open()):
     if (
         r.get("season") != "2026"
-        or r.get("source") not in active
+        or r.get("source") not in active_composite
         or not r.get("snapshot_date")
     ):
         continue
 
     try:
-        history[(r["team"], r["snapshot_date"])][active[r["source"]]] = float(r["rating"])
+        history[(r["team"], r["snapshot_date"])][active_composite[r["source"]]] = float(r["rating"])
     except (ValueError, TypeError):
         pass
 
@@ -145,7 +187,7 @@ def at_or_before(series, target):
 by_team = {}
 
 for r in rows:
-    if r.get("snapshot_date") != latest or r.get("source") not in active:
+    if r.get("snapshot_date") != latest or r.get("source") not in DISPLAY_SOURCES:
         continue
 
     try:
@@ -154,7 +196,7 @@ for r in rows:
     except (ValueError, TypeError):
         continue
 
-    by_team.setdefault(r["team"], {})[active[r["source"]]] = {
+    by_team.setdefault(r["team"], {})[DISPLAY_SOURCES[r["source"]]] = {
         "rating": rating,
         "rank": rank,
         "pulled_at": r.get("pulled_at"),
@@ -201,7 +243,15 @@ if market_latest_path.exists():
 out = []
 
 for team, sources in by_team.items():
-    values = [x["rating"] for x in sources.values()]
+    composite_keys = set(active_composite.values())
+
+    composite_sources = {
+        key: value
+        for key, value in sources.items()
+        if key in composite_keys
+    }
+
+    values = [x["rating"] for x in composite_sources.values()]
 
     if len(values) < 3:
         continue
@@ -212,9 +262,17 @@ for team, sources in by_team.items():
         "team": team,
         "rating": current,
         "sources": sources,
+        "composite_sources": composite_sources,
+        "source_count": len(composite_sources),
         "variance": max(values) - min(values),
-        "high_source": max(sources, key=lambda k: sources[k]["rating"]),
-        "low_source": min(sources, key=lambda k: sources[k]["rating"]),
+        "high_source": max(
+            composite_sources,
+            key=lambda k: composite_sources[k]["rating"],
+        ),
+        "low_source": min(
+            composite_sources,
+            key=lambda k: composite_sources[k]["rating"],
+        ),
     }
 
     market = market_by_team.get(team)
@@ -401,9 +459,35 @@ market_meta = {
 }
 
 
+active_weight = (
+    1.0 / len(active_composite)
+    if active_composite
+    else 0.0
+)
+
 payload = {
     "snapshot_date": latest,
-    "weights": {key: 0.25 for key in active.values()},
+    "composite_model": {
+        "label": "Site Composite Rating",
+        "method": "equal weight across available active composite sources",
+        "eligible_sources": {
+            key: label
+            for label, key in {**CORE_COMPOSITE, **OPTIONAL_COMPOSITE}.items()
+        },
+        "active_sources": {
+            key: label
+            for label, key in active_composite.items()
+        },
+        "reference_only_sources": {
+            key: label
+            for label, key in REFERENCE_ONLY.items()
+        },
+        "active_source_count": len(active_composite),
+    },
+    "weights": {
+        key: active_weight
+        for key in active_composite.values()
+    },
     "source_meta": source_meta,
     "market_meta": market_meta,
     "teams": out,
@@ -424,9 +508,12 @@ if len(out) < 130:
 for item in out:
     expected = sum(
         item["sources"][key]["rating"]
-        for key in active.values()
+        for key in active_composite.values()
         if key in item["sources"]
-    ) / len(item["sources"])
+    ) / len([
+        key for key in active_composite.values()
+        if key in item["sources"]
+    ])
 
     if abs(item["rating"] - expected) > 1e-9:
         raise SystemExit(f"Composite changed unexpectedly for {item['team']}")

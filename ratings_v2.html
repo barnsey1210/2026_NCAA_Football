@@ -1,0 +1,663 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NCAAF Ratings</title><style>
+:root{--bg:#061126;--p:#0b1b36;--l:#244873;--t:#f5f7ff;--m:#91a6c6;--g:#43df96;--a:#ffc45b;--r:#ff7280}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:13px/1.4 Inter,system-ui}.shell{max-width:1760px;margin:auto;padding:16px}.top,.nav,.hero,.filters{display:flex;align-items:center}.top{gap:16px;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{gap:5px}.nav a{color:var(--m);padding:8px 11px;text-decoration:none;font-weight:850}.nav .active{background:#173b72;color:white;border-radius:8px}.hero{justify-content:space-between;margin:20px 0 12px}.hero h1{font-size:36px;margin:0}.hero p{color:var(--m);margin:2px 0}.stamp{color:#baf8d6;border:1px solid #176747;border-radius:999px;padding:7px 11px}.filters{gap:8px;margin-bottom:10px}.filters input,.filters select{background:#091a34;border:1px solid var(--l);color:white;border-radius:8px;padding:9px}.filters input{min-width:280px}.card{border:1px solid var(--l);border-radius:12px;overflow:hidden}.wrap{max-height:760px;overflow:auto}table{width:100%;border-collapse:collapse}th{position:sticky;top:0;background:#132a50;color:#afbfda;text-align:left;text-transform:uppercase;font-size:9px;padding:9px;cursor:pointer}td{border-top:1px solid #17345c;padding:8px;white-space:nowrap}.team{display:flex;align-items:center;gap:8px;color:white;text-decoration:none;font-weight:900}.team img{width:27px;height:27px;object-fit:contain}.rank{font-weight:950}.good{color:var(--g)}.mid{color:var(--a)}.bad{color:var(--r)}.source{font-variant-numeric:tabular-nums}.hi,.lo{background:transparent}.sub{display:block;color:var(--m);font-size:9px}.fresh{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.fresh>div{border:1px solid var(--l);background:var(--p);border-radius:10px;padding:9px}.fresh b,.fresh span{display:block}.fresh span{color:var(--m);font-size:10px}@media(max-width:900px){.fresh{grid-template-columns:1fr 1fr}}</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_START -->
+<style id="V2_DARK_LOGO_BADGES_CSS_V2">
+img[src*="/air-force.png"],
+img[src$="air-force.png"],
+img[src*="/air-force.webp"],
+img[src$="air-force.webp"],
+img[src*="/boise-state.png"],
+img[src$="boise-state.png"],
+img[src*="/boise-state.webp"],
+img[src$="boise-state.webp"],
+img[src*="/byu.png"],
+img[src$="byu.png"],
+img[src*="/byu.webp"],
+img[src$="byu.webp"],
+img[src*="/duke.png"],
+img[src$="duke.png"],
+img[src*="/duke.webp"],
+img[src$="duke.webp"],
+img[src*="/georgia-tech.png"],
+img[src$="georgia-tech.png"],
+img[src*="/georgia-tech.webp"],
+img[src$="georgia-tech.webp"],
+img[src*="/iowa.png"],
+img[src$="iowa.png"],
+img[src*="/iowa.webp"],
+img[src$="iowa.webp"],
+img[src*="/navy.png"],
+img[src$="navy.png"],
+img[src*="/navy.webp"],
+img[src$="navy.webp"],
+img[src*="/north-carolina.png"],
+img[src$="north-carolina.png"],
+img[src*="/north-carolina.webp"],
+img[src$="north-carolina.webp"],
+img[src*="/north-dakota-state.png"],
+img[src$="north-dakota-state.png"],
+img[src*="/north-dakota-state.webp"],
+img[src$="north-dakota-state.webp"],
+img[src*="/notre-dame.png"],
+img[src$="notre-dame.png"],
+img[src*="/notre-dame.webp"],
+img[src$="notre-dame.webp"],
+img[src*="/penn-state.png"],
+img[src$="penn-state.png"],
+img[src*="/penn-state.webp"],
+img[src$="penn-state.webp"],
+img[src*="/pittsburgh.png"],
+img[src$="pittsburgh.png"],
+img[src*="/pittsburgh.webp"],
+img[src$="pittsburgh.webp"],
+img[src*="/rice.png"],
+img[src$="rice.png"],
+img[src*="/rice.webp"],
+img[src$="rice.webp"],
+img[src*="/toledo.png"],
+img[src$="toledo.png"],
+img[src*="/toledo.webp"],
+img[src$="toledo.webp"],
+img[src*="/tulane.png"],
+img[src$="tulane.png"],
+img[src*="/tulane.webp"],
+img[src$="tulane.webp"],
+img[src*="/utep.png"],
+img[src$="utep.png"],
+img[src*="/utep.webp"],
+img[src$="utep.webp"],
+img[src*="/virginia.png"],
+img[src$="virginia.png"],
+img[src*="/virginia.webp"],
+img[src$="virginia.webp"],
+img[src*="/wake-forest.png"],
+img[src$="wake-forest.png"],
+img[src*="/wake-forest.webp"],
+img[src$="wake-forest.webp"],
+img[src*="/west-virginia.png"],
+img[src$="west-virginia.png"],
+img[src*="/west-virginia.webp"],
+img[src$="west-virginia.webp"] {
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  padding: 3px !important;
+  box-shadow: 0 2px 7px rgba(0,0,0,.24) !important;
+}
+</style>
+<!-- V2_DARK_LOGO_BADGES_CSS_END -->
+
+
+<style id="ratings-market-derived-css">
+.fresh{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+th:nth-child(2),
+td:nth-child(2){
+  width:235px;
+  max-width:235px;
+}
+
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6){
+  width:72px;
+}
+
+.marketCell{
+  font-variant-numeric:tabular-nums;
+  cursor:help;
+}
+
+.marketDelta{
+  font-variant-numeric:tabular-nums;
+  font-weight:900;
+}
+
+.ratingsTipTarget{
+  cursor:help;
+  text-decoration:underline dotted rgba(255,255,255,.35);
+  text-underline-offset:3px;
+}
+
+.ratingsHeaderTip{
+  position:fixed;
+  z-index:9999;
+  display:none;
+  max-width:340px;
+  padding:10px 12px;
+  border:1px solid #315f92;
+  border-radius:9px;
+  background:#0b1d38;
+  color:#eaf3ff;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  font-size:11px;
+  line-height:1.45;
+  pointer-events:none;
+  white-space:normal;
+}
+
+.ratingsHeaderTip.show{
+  display:block;
+}
+
+.marketStatus{
+  margin-top:2px;
+  color:var(--m);
+  font-size:9px;
+}
+
+@media(max-width:1150px){
+  .fresh{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+</style>
+
+</head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><nav class="nav"><a class="active">Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></nav></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">BP 25% · SP+ 25% · FPI 25% · TR 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+<thead>
+<tr>
+  <th data-k="overall_rank">Rank</th>
+  <th data-k="team">Team</th>
+  <th data-k="conference">Conf</th>
+  <th data-k="rating">Composite</th>
+  <th data-k="offense_rank">Off rank</th>
+  <th data-k="defense_rank">Def rank</th>
+  <th data-k="spplus">SP+</th>
+  <th data-k="fpi">FPI</th>
+  <th data-k="teamrankings">TR</th>
+  <th data-k="bradpowers">Powers</th>
+  <th class="ratingsTipTarget"
+      data-k="sagarin"
+      data-tip="Sagarin Predictor rating/rank. Reference only until the current 2026 Sagarin source is activated for the Site Composite.">Sagarin</th>
+  <th class="ratingsTipTarget"
+      data-k="dratings"
+      data-tip="DRatings Donchess Overall rating/rank. Reference only; not included in the Site Composite.">DRatings</th>
+  <th class="ratingsTipTarget"
+      data-k="massey"
+      data-tip="Massey Power rating/rank. Reference only; not included in the Site Composite because its matchup conversion formula is not used by the site.">Massey</th>
+  <th class="ratingsTipTarget"
+      data-k="market_rating"
+      data-tip="Team strength inferred from the site’s canonical selected spreads after removing home-field advantage. The raw market ratings are rescaled to the composite distribution for comparison while preserving the original market rank.">Market</th>
+  <th class="ratingsTipTarget"
+      data-k="market_delta"
+      data-tip="Market-derived rating minus the Site Composite Rating. Positive values mean the betting market rates the team higher than the current active composite.">Market Δ</th>
+  <th data-k="variance">Variance</th>
+  <th data-k="preseason_rating">Preseason</th>
+  <th data-k="preseason_delta">Δ preseason</th>
+  <th data-k="l2_change">L2 change</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table></div></div></main>
+
+<script>
+
+function formatEasternTimestamp(value, fallback='not supplied'){
+  if(!value) return fallback;
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    timeZoneName:'short'
+  }).format(d);
+}
+
+let teams=[],key='overall_rank',dir=1;
+
+const e=x=>String(x??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+}[c]));
+
+const tone=r=>r<=35?'good':r<=75?'mid':'bad';
+
+const fmt=x=>Number.isFinite(Number(x))
+  ? Number(x).toFixed(1)
+  : '—';
+
+const signed=x=>Number.isFinite(Number(x))
+  ? `${Number(x)>0?'+':''}${Number(x).toFixed(1)}`
+  : '—';
+
+function sourceCell(x,key,referenceOnly=false){
+  const source=x.sources[key];
+
+  if(!source){
+    return '<td>—</td>';
+  }
+
+  if(referenceOnly){
+    return `<td class="source">
+      <b>#${source.rank}</b>
+      <span class="sub">${source.rating.toFixed(1)}</span>
+    </td>`;
+  }
+
+  return `<td class="source ${x.high_source===key?'hi':x.low_source===key?'lo':''}">
+    <b>${source.rating.toFixed(1)}</b>
+    <span class="sub ${tone(source.rank)}">#${source.rank}</span>
+  </td>`;
+}
+
+function friendlySampleStatus(value){
+  const labels={
+    connected_moderate_sample:'Connected, moderate sample',
+    connected_low_sample:'Connected, low sample',
+    early_limited:'Limited sample',
+    early_one_game:'One-game sample',
+    disconnected_component:'Disconnected matchup group'
+  };
+
+  return labels[value]||String(value||'Unavailable').replaceAll('_',' ');
+}
+
+function marketTip(x){
+  const market=x.market;
+
+  if(!market){
+    return 'No valid market-derived rating is currently available for this team.';
+  }
+
+  const timestamp=market.snapshot_timestamp||market.snapshot_date||'Unavailable';
+
+  return [
+    `Scaled market rating: ${fmt(market.scaled_rating ?? market.rating)}`,
+    `Raw market rating: ${fmt(market.raw_rating)}`,
+    `Market rank: #${market.rank}`,
+    `Market vs composite: ${signed(x.market_delta)}`,
+    `Games informing rating: ${market.games_in_rating ?? market.games_used ?? '—'}`,
+    `Effective game weight: ${fmt(market.effective_games_weight)}`,
+    `Sample: ${friendlySampleStatus(market.sample_status)}`,
+    `Connected component: ${market.component_size || '—'} teams`,
+    `Snapshot: ${timestamp}`
+  ].join(' · ');
+}
+
+function marketCell(x){
+  const market=x.market;
+
+  if(!market){
+    return `<td class="marketCell ratingsTipTarget"
+      data-tip="${e(marketTip(x))}">—</td>`;
+  }
+
+  return `<td class="marketCell ratingsTipTarget"
+    data-tip="${e(marketTip(x))}">
+    <b>${fmt(market.rating)}</b>
+    <span class="sub ${tone(market.rank)}">#${market.rank}</span>
+  </td>`;
+}
+
+function val(x,k){
+  if(['spplus','fpi','teamrankings','bradpowers','sagarin','dratings','massey'].includes(k)){
+    return x.sources[k]?.rating;
+  }
+
+  if(k==='market_rating'){
+    return x.market?.rating;
+  }
+
+  return x[k];
+}
+
+function sortedShown(){
+  const q=search.value.toLowerCase();
+
+  return teams
+    .filter(x=>
+      (conf.value==='all'||x.conference===conf.value)
+      && x.team.toLowerCase().includes(q)
+    )
+    .sort((a,b)=>{
+      const x=val(a,key);
+      const y=val(b,key);
+
+      if(typeof x==='string'){
+        return x.localeCompare(y)*dir;
+      }
+
+      return (Number(x??999)-Number(y??999))*dir;
+    });
+}
+
+function render(){
+  const shown=sortedShown();
+
+  rows.innerHTML=shown.map(x=>{
+    const marketDeltaClass=
+      x.market_delta>0?'good':
+      x.market_delta<0?'bad':'';
+
+    const preseasonDeltaClass=
+      x.preseason_delta>0?'good':
+      x.preseason_delta<0?'bad':'';
+
+    const l2Class=
+      x.l2_change>0?'good':
+      x.l2_change<0?'bad':'';
+
+    return `<tr>
+      <td class="rank ${tone(x.overall_rank)}">#${x.overall_rank}</td>
+
+      <td>
+        <a class="team" href="team.html?team=${e(x.logo_slug)}">
+          <img src="logos/${e(x.logo_slug)}.png">
+          ${e(x.team)}
+        </a>
+      </td>
+
+      <td>${e(x.conference)}</td>
+
+      <td>
+        <b>${x.rating.toFixed(1)}</b>
+        <span class="sub ${tone(x.overall_rank)}">#${x.overall_rank}</span>
+      </td>
+
+      <td class="${tone(x.offense_rank)}">#${x.offense_rank??'—'}</td>
+      <td class="${tone(x.defense_rank)}">#${x.defense_rank??'—'}</td>
+
+      ${sourceCell(x,'spplus')}
+      ${sourceCell(x,'fpi')}
+      ${sourceCell(x,'teamrankings')}
+      ${sourceCell(x,'bradpowers')}
+      ${sourceCell(x,'sagarin',true)}
+      ${sourceCell(x,'dratings',true)}
+      ${sourceCell(x,'massey',true)}
+
+      ${marketCell(x)}
+
+      <td class="marketDelta ${marketDeltaClass}">
+        ${signed(x.market_delta)}
+      </td>
+
+      <td class="${x.variance>=10?'bad':x.variance>=6?'mid':'good'}">
+        <b>${x.variance.toFixed(1)}</b>
+      </td>
+
+      <td>
+        ${x.preseason_rating==null
+          ? '—'
+          : `<b>${x.preseason_rating.toFixed(1)}</b>
+             <span class="sub ${tone(x.preseason_rank)}">#${x.preseason_rank}</span>`
+        }
+      </td>
+
+      <td class="${preseasonDeltaClass}">
+        ${signed(x.preseason_delta)}
+      </td>
+
+      <td class="${l2Class}">
+        ${signed(x.l2_change)}
+      </td>
+    </tr>`;
+  }).join('');
+
+  initRatingsTips();
+}
+
+function formatEastern(value){
+  if(!value){
+    return 'not supplied';
+  }
+
+  const d=new Date(value);
+
+  if(Number.isNaN(d.getTime())){
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    timeZoneName:'short'
+  }).format(d);
+}
+
+function marketFreshnessCard(meta){
+  if(!meta){
+    return '';
+  }
+
+  return `<div>
+    <b>${e(meta.label||'Market-Derived')}</b>
+    <span>Latest snapshot: ${e(formatEastern(meta.snapshot_timestamp||meta.snapshot_date))}</span>
+    <span>Board games: ${e(meta.board_games??'—')}</span>
+    <span>Board teams rated: ${e(meta.board_teams_rated??'—')}</span>
+    <span>Ratings-page matched: ${e(meta.ratings_page_matched??'—')}</span>
+    <span>Ratings-page missing: ${e(meta.ratings_page_missing??'—')}</span>
+    <span>Independent-ready: ${e(meta.independent_ready??'—')} · Context-only: ${e(meta.context_only??'—')}</span>
+  </div>`;
+}
+
+function initRatingsTips(){
+  let tip=document.getElementById('ratingsHeaderTip');
+
+  if(!tip){
+    tip=document.createElement('div');
+    tip.id='ratingsHeaderTip';
+    tip.className='ratingsHeaderTip';
+    document.body.appendChild(tip);
+  }
+
+  document.querySelectorAll('.ratingsTipTarget').forEach(target=>{
+    if(target.dataset.tipBound==='1'){
+      return;
+    }
+
+    target.dataset.tipBound='1';
+
+    const show=()=>{
+      tip.textContent=target.dataset.tip||'';
+      tip.classList.add('show');
+
+      const rect=target.getBoundingClientRect();
+      const width=tip.offsetWidth;
+      const height=tip.offsetHeight;
+
+      let left=rect.left+(rect.width/2)-(width/2);
+      left=Math.max(8,Math.min(left,window.innerWidth-width-8));
+
+      let top=rect.bottom+8;
+
+      if(top+height>window.innerHeight-8){
+        top=rect.top-height-8;
+      }
+
+      tip.style.left=`${left}px`;
+      tip.style.top=`${top}px`;
+    };
+
+    const hide=()=>tip.classList.remove('show');
+
+    target.addEventListener('mouseenter',show);
+    target.addEventListener('mouseleave',hide);
+    target.addEventListener('focusin',show);
+    target.addEventListener('focusout',hide);
+  });
+}
+
+async function init(){
+  const [matchups,ratingView]=await Promise.all([
+    fetch('data/site/matchups_view.json').then(x=>x.json()),
+    fetch('data/site/ratings_view.json').then(x=>x.json())
+  ]);
+
+  const meta=new Map();
+
+  matchups.games.forEach(game=>
+    [game.teams.away,game.teams.home].forEach(team=>{
+      if(team.rating!=null){
+        meta.set(team.team,team);
+      }
+    })
+  );
+
+  teams=ratingView.teams
+    .map(x=>{
+      const matchupMeta=meta.get(x.team)||{};
+
+      // Matchup metadata supplies presentation/context fields, while the
+      // Ratings payload remains authoritative for composite rating and rank.
+      return Object.assign({},matchupMeta,x);
+    })
+    .filter(x=>x.rating!=null);
+
+  conf.innerHTML+=[
+    ...new Set(
+      teams.map(x=>x.conference).filter(Boolean)
+    )
+  ]
+    .sort()
+    .map(x=>`<option>${e(x)}</option>`)
+    .join('');
+
+  stamp.textContent+=` · Applied ${ratingView.snapshot_date}`;
+
+  const providerCards=Object.values(ratingView.source_meta)
+    .map(s=>`<div>
+      <b>${e(s.label)}</b>
+      ${s.change_status==='MANUAL_SOURCE'
+        ? `<span>Manual source · Last updated: ${e(formatEasternTimestamp(s.last_observed_value_change||s.latest_pull,'not supplied'))}</span>`
+        : `<span>Last observed value change: ${e(formatEasternTimestamp(s.last_observed_value_change,'not established'))}</span>
+      <span>Provider update: ${e(formatEasternTimestamp(s.provider_updated_at,'not supplied'))}</span>
+      <span>Latest pull: ${e(formatEasternTimestamp(s.latest_pull,'not supplied'))}</span>
+      <span>${e(s.changed_teams_from_prior??0)} teams changed vs ${e(s.previous_snapshot||'prior')}</span>`}
+    </div>`)
+    .join('');
+
+  freshness.innerHTML=
+    providerCards+
+    marketFreshnessCard(ratingView.market_meta);
+
+  render();
+}
+
+document.querySelectorAll('th[data-k]').forEach(header=>{
+  header.onclick=()=>{
+    const selected=header.dataset.k;
+    dir=key===selected?-dir:1;
+    key=selected;
+    render();
+  };
+});
+
+[search,conf].forEach(control=>{
+  control.oninput=render;
+});
+
+init();
+</script>
+<!-- V2_DARK_LOGO_BADGES_START -->
+<style>
+img.v2-dark-logo-badge{
+  box-sizing:border-box !important;
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(255,255,255,.30) !important;
+  border-radius:8px !important;
+  padding:3px !important;
+  box-shadow:0 2px 7px rgba(0,0,0,.22) !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-small{
+  border-radius:6px !important;
+  padding:2px !important;
+}
+img.v2-dark-logo-badge.v2-dark-logo-large{
+  border-radius:11px !important;
+  padding:5px !important;
+}
+</style>
+<script>
+(function(){
+  'use strict';
+  const DARK_LOGO_KEYS=new Set([
+    'air-force','boise-state','byu','duke','georgia-tech','iowa','navy',
+    'north-carolina','north-dakota-state','notre-dame','penn-state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake-forest','west-virginia'
+  ]);
+  const DARK_TEAM_NAMES=[
+    'air force','boise state','byu','duke','georgia tech','iowa','navy',
+    'north carolina','north dakota state','notre dame','penn state',
+    'pittsburgh','rice','toledo','tulane','utep','virginia',
+    'wake forest','west virginia'
+  ];
+  function normalize(value){
+    return String(value||'').toLowerCase()
+      .replace(/\.(png|webp|jpe?g|svg)(?:[?#].*)?$/,'')
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function logoKey(img){
+    const src=img.getAttribute('src')||'';
+    if(!/(^|\/)logos\//i.test(src) || /\/logos\/books\//i.test(src)) return '';
+    return normalize(src.split('/').pop()||'');
+  }
+  function nearbyText(img){
+    const host=img.closest('.team,.matchup,.mwTeam,.teamSummary,.team-card,.teamCard,.rating-row,.ratings-row,tr,td,a,span,div');
+    return String(img.getAttribute('alt')||img.getAttribute('title')||host?.textContent||'').toLowerCase();
+  }
+  function isDarkTeamLogo(img){
+    const key=logoKey(img);
+    if(!key) return false;
+    if(DARK_LOGO_KEYS.has(key)) return true;
+    const text=nearbyText(img);
+    return DARK_TEAM_NAMES.some(name=>{
+      const pattern=new RegExp('(^|[^a-z])'+name.replace(/\s+/g,'\\s+')+'([^a-z]|$)','i');
+      return pattern.test(text);
+    });
+  }
+  function classifySize(img){
+    const rect=img.getBoundingClientRect();
+    const size=Math.max(rect.width||0,rect.height||0);
+    img.classList.toggle('v2-dark-logo-small',size>0&&size<=24);
+    img.classList.toggle('v2-dark-logo-large',size>=48);
+  }
+  function decorate(root=document){
+    const imgs=[];
+    if(root instanceof HTMLImageElement) imgs.push(root);
+    if(root.querySelectorAll) imgs.push(...root.querySelectorAll('img'));
+    for(const img of imgs){
+      if(isDarkTeamLogo(img)){
+        img.classList.add('v2-dark-logo-badge');
+        if(img.complete) classifySize(img);
+        else img.addEventListener('load',()=>classifySize(img),{once:true});
+      }else{
+        img.classList.remove('v2-dark-logo-badge','v2-dark-logo-small','v2-dark-logo-large');
+      }
+    }
+  }
+  let queued=false;
+  function queue(root=document){
+    if(queued)return;
+    queued=true;
+    requestAnimationFrame(()=>{queued=false;decorate(root)});
+  }
+  document.addEventListener('DOMContentLoaded',()=>queue(document));
+  window.addEventListener('load',()=>queue(document));
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){if(node.nodeType===1)queue(node)}
+      if(mutation.type==='attributes'&&mutation.target instanceof HTMLImageElement)queue(mutation.target);
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','title']});
+  setTimeout(()=>queue(document),250);
+  setTimeout(()=>queue(document),1000);
+})();
+</script>
+<!-- V2_DARK_LOGO_BADGES_END -->
+
+</body></html>

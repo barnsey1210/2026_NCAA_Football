@@ -65,6 +65,9 @@ while IFS= read -r line; do
   path="${line:3}"
 
   case "$path" in
+    data/projections/game_projection_blend_config.json)
+      UNSAFE_DIRTY+="$line"$'\n'
+      ;;
     data/audits/*|\
     data/odds/*|\
     data/projections/*|\

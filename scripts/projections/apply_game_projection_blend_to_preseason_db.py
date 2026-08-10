@@ -69,39 +69,67 @@ def main():
             changed = True
 
         g["projection_model_family"] = "Game Projection Consensus"
-        g["projection_spread_model_version"] = "spread_core_4of5_v1"
-        g["projection_total_model_version"] = "production_total_spplus_dratings_v1"
+        g["projection_spread_model_version"] = "spread_consensus_equal_available_v1"
+        g["projection_total_model_version"] = "total_consensus_equal_available_v1"
 
         g["projection_spread_source_count"] = spread_count
-        g["projection_spread_source_max"] = 4
-        g["projection_spread_coverage"] = f"{spread_count}/4"
+        g["projection_spread_source_max"] = 5
+        g["projection_spread_coverage"] = f"{spread_count}/5"
         g["projection_spread_sources"] = spread_sources
         g["projection_spread_source_label"] = ", ".join(spread_sources)
 
         g["projection_total_source_count"] = total_count
-        g["projection_total_source_max"] = 2
-        g["projection_total_coverage"] = f"{total_count}/2"
+        g["projection_total_source_max"] = 4
+        g["projection_total_coverage"] = f"{total_count}/4"
         g["projection_total_sources"] = total_sources
         g["projection_total_source_label"] = ", ".join(total_sources)
 
         if changed:
             updated += 1
-            key = f"spread_{spread_count}of4_total_{total_count}of2"
+            key = f"spread_{spread_count}of5_total_{total_count}of4"
             coverage[key] = coverage.get(key, 0) + 1
 
     db["projection_model_metadata"] = {
         "family": "Game Projection Consensus",
-        "spread_version": "spread_core_4of5_v1",
-        "spread_max_sources": 4,
-        "spread_sources": ["SP+", "FPI", "TeamRankings", "DRatings Predictions"],
-        "spread_fallback": "equal weight across available production sources",
-        "pending_future_source": "Sagarin Predictor Prediction",
-        "future_spread_version": "spread_core_5of5_v1",
-        "total_version": "production_total_spplus_dratings_v1",
-        "total_max_sources": 2,
-        "total_sources": ["Site Projection", "DRatings Predictions"],
-        "total_source_display_names": ["SP+", "DRatings"],
-        "total_fallback": "use available source when one is missing",
+
+        "spread_version": "spread_consensus_equal_available_v1",
+        "spread_max_sources": 5,
+        "spread_sources": [
+            "SP+",
+            "FPI",
+            "TeamRankings",
+            "DRatings Predictions",
+            "Sagarin Predictor Prediction",
+        ],
+        "spread_active_sources": [
+            "SP+",
+            "FPI",
+            "TeamRankings",
+            "DRatings Predictions",
+        ],
+        "spread_pending_sources": [
+            "Sagarin Predictor Prediction",
+        ],
+        "spread_fallback": "equal weight across available eligible production sources",
+
+        "total_version": "total_consensus_equal_available_v1",
+        "total_max_sources": 4,
+        "total_sources": [
+            "SP+",
+            "DRatings Predictions",
+            "Massey Games",
+            "Sagarin Predictor Prediction",
+        ],
+        "total_active_sources": [
+            "SP+",
+            "DRatings Predictions",
+        ],
+        "total_pending_sources": [
+            "Massey Games",
+            "Sagarin Predictor Prediction",
+        ],
+        "total_fallback": "equal weight across available eligible production sources",
+
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
