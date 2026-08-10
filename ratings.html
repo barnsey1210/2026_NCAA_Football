@@ -188,11 +188,20 @@ td:nth-child(6){
   <th data-k="teamrankings">TR</th>
   <th data-k="bradpowers">Powers</th>
   <th class="ratingsTipTarget"
+      data-k="sagarin"
+      data-tip="Sagarin Predictor rating/rank. Reference only until the current 2026 Sagarin source is activated for the Site Composite.">Sagarin</th>
+  <th class="ratingsTipTarget"
+      data-k="dratings"
+      data-tip="DRatings Donchess Overall rating/rank. Reference only; not included in the Site Composite.">DRatings</th>
+  <th class="ratingsTipTarget"
+      data-k="massey"
+      data-tip="Massey Power rating/rank. Reference only; not included in the Site Composite because its matchup conversion formula is not used by the site.">Massey</th>
+  <th class="ratingsTipTarget"
       data-k="market_rating"
       data-tip="Team strength inferred from the site’s canonical selected spreads after removing home-field advantage. The raw market ratings are rescaled to the composite distribution for comparison while preserving the original market rank.">Market</th>
   <th class="ratingsTipTarget"
       data-k="market_delta"
-      data-tip="Market-derived rating minus the four-source composite. Positive values mean the betting market rates the team higher than SP+, FPI, TeamRankings and Brad Powers collectively.">Market Δ</th>
+      data-tip="Market-derived rating minus the Site Composite Rating. Positive values mean the betting market rates the team higher than the current active composite.">Market Δ</th>
   <th data-k="variance">Variance</th>
   <th data-k="preseason_rating">Preseason</th>
   <th data-k="preseason_delta">Δ preseason</th>
@@ -238,11 +247,18 @@ const signed=x=>Number.isFinite(Number(x))
   ? `${Number(x)>0?'+':''}${Number(x).toFixed(1)}`
   : '—';
 
-function sourceCell(x,key){
+function sourceCell(x,key,referenceOnly=false){
   const source=x.sources[key];
 
   if(!source){
     return '<td>—</td>';
+  }
+
+  if(referenceOnly){
+    return `<td class="source">
+      <b>#${source.rank}</b>
+      <span class="sub">${source.rating.toFixed(1)}</span>
+    </td>`;
   }
 
   return `<td class="source ${x.high_source===key?'hi':x.low_source===key?'lo':''}">
@@ -301,7 +317,7 @@ function marketCell(x){
 }
 
 function val(x,k){
-  if(['spplus','fpi','teamrankings','bradpowers'].includes(k)){
+  if(['spplus','fpi','teamrankings','bradpowers','sagarin','dratings','massey'].includes(k)){
     return x.sources[k]?.rating;
   }
 
@@ -372,6 +388,9 @@ function render(){
       ${sourceCell(x,'fpi')}
       ${sourceCell(x,'teamrankings')}
       ${sourceCell(x,'bradpowers')}
+      ${sourceCell(x,'sagarin',true)}
+      ${sourceCell(x,'dratings',true)}
+      ${sourceCell(x,'massey',true)}
 
       ${marketCell(x)}
 
