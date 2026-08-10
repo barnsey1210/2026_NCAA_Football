@@ -300,6 +300,17 @@ PY2
   run_py "scripts/projections/apply_game_projection_blend_to_preseason_db.py" "apply_game_projection_blend_to_preseason_db.py" || warn "game projection site overlay failed"
   stage_pass "projections"
 
+  # Canonical completed-game/Postgame refresh. The CFBD schedule was already
+  # refreshed above, so do not spend another /games call here. Build final
+  # results from that schedule, acquire rich PBP/drive/havoc data only when
+  # completed games exist, then build season-to-date postgame features.
+  # STAGE: postgame_refresh
+  stage_start "postgame_refresh"
+  run_py "scripts/results/build_game_results_2026.py" "build_game_results_2026.py"
+  run_py "scripts/postgame/pull_cfbd_postgame_2026.py" "pull_cfbd_postgame_2026.py"
+  run_py "scripts/postgame/build_postgame_features_2026.py" "build_postgame_features_2026.py"
+  stage_pass "postgame_refresh"
+
 # Current season/conference Monte Carlo simulations. This stage consumes the
 # canonical projection consensus already applied to preseason_db.json.
 # STAGE: conference_simulations
@@ -320,10 +331,10 @@ run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
 stage_pass "playoff_simulations"
 
 
-  # Shadow production bridge. Current selected market lines must already be in
-  # matchups_view; completed-game results/PBP/game-control builders run through
-  # the existing site build and postgame paths. These steps do no acquisition
-  # and never refit the frozen movement models.
+  # Shadow production bridge. Canonical completed-game results and postgame
+  # PBP/drive/game-control features were built earlier in postgame_refresh.
+  # This stage builds no-lookahead 2026 Shadow features and applies the frozen
+  # movement models; it never refits those models on 2026 outcomes.
   # STAGE: matchup_core
   stage_start "matchup_core"
   run_py "scripts/site/augment_team_advanced_profiles_drives.py" "augment_team_advanced_profiles_drives.py"
@@ -343,7 +354,7 @@ stage_pass "playoff_simulations"
   stage_start "shadow_models"
   python3 scripts/research/build_market_implied_power_ratings.py --production-2026
   run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"
-  python3 scripts/site/build_shadow_team_game_features.py --mode all
+  python3 scripts/postgame/build_shadow_team_game_features_2026.py
   python3 scripts/site/build_saturday_shadow_component_predictions.py
   python3 scripts/site/build_saturday_shadow_lines.py
   python3 scripts/site/build_schedule_live_enrichment.py
