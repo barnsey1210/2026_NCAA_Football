@@ -470,53 +470,56 @@ def main() -> int:
                     run["errors"].append("pregame publication policy is disabled")
                 else:
                     commands = [
-                        # Live pregame rating acquisition: SP+, FPI, TeamRankings only.
+                        # 1. Refresh the three automated Sunday rating sources.
                         [sys.executable, "scripts/ratings/test_rating_sources.py",
                          "--sources", "spplus,fpi,teamrankings"],
-
-                        # Parse into guarded candidate files and promote only if all
-                        # three match the canonical 138-team universe.
                         [sys.executable, "scripts/ratings/parse_rating_source_tables.py"],
                         [sys.executable, "scripts/ratings/accept_live_rating_candidates_with_status.py"],
 
-                        # Rebuild canonical source ratings and the active
-                        # SP+/FPI/TeamRankings/Brad Powers 25% blend.
+                        # 2. Rebuild canonical ratings and preserve movement history.
                         [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
                         [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
-                        [sys.executable,
-                         "scripts/ratings/merge_live_rating_change_status.py"],
+                        [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
+                        [sys.executable, "ratings/append_ratings_history.py"],
+                        [sys.executable, "ratings/build_ratings_movement.py"],
 
-                        # Recalculate the canonical site projection from the
-                        # active combo ratings using validated fixed HFA:
-                        # 2.6 non-neutral, 0.0 neutral.
-                        [sys.executable,
-                         "scripts/site/recalculate_game_projections_from_active_combo.py"],
+                        # 3. Canonical projection owners used by the validated
+                        #    full daily pipeline. No season/CFP simulations here.
+                        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py"],
+                        [sys.executable, "scripts/projections/build_game_projection_blend_2026.py"],
+                        [sys.executable, "scripts/projections/apply_game_projection_blend_to_preseason_db.py"],
 
-                        # These production projection builders live at repo root.
-                        [sys.executable, "build_game_projection_sources_2026.py"],
-                        [sys.executable, "build_game_projection_blend_2026.py"],
-
-                        # Rebuild downstream V2 assets.
+                        # 4. Rebuild current matchup/line/Shadow assets using
+                        #    already-available postgame state.
                         [sys.executable, "scripts/site/build_matchups_view.py"],
                         [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],
                         [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
+                        [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
                         [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
 
-                        # Freeze prospective model predictions and available
-                        # market observations after all pregame assets are current.
-                        [sys.executable,
-                         "scripts/model_tracking/capture_model_tracking.py",
-                         "--accept"],
+                        # 5. Current Ratings / Odds-facing payloads.
+                        [sys.executable, "scripts/site/build_ratings_view.py"],
+                        [sys.executable, "scripts/markets/build_current_market_contract.py"],
+                        [sys.executable, "scripts/site/build_odds_screen_v2.py"],
+                        [sys.executable, "scripts/markets/apply_current_market_to_odds_screen.py"],
+                        [sys.executable, "scripts/markets/apply_current_market_to_matchups.py"],
 
-                        # Also settle games that became final since the last run.
-                        [sys.executable,
-                         "scripts/model_tracking/settle_model_tracking.py",
+                        # 6. Freeze the refreshed pregame model state.
+                        [sys.executable, "scripts/model_tracking/capture_model_tracking.py",
                          "--accept"],
+                        [sys.executable, "scripts/model_tracking/settle_model_tracking.py",
+                         "--accept"],
+                        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
 
-                        [sys.executable,
-                         "scripts/model_tracking/build_model_performance_view.py"],
+                        # 7. Canonical public build and validation.
+                        [sys.executable, "scripts/site/build_public_site.py"],
+                        [sys.executable, "scripts/site/build_war_room_home.py"],
+                        [sys.executable, "scripts/site/inject_market_presentation_fixes.py"],
+                        [sys.executable, "scripts/site/compact_matchups_payload.py"],
+                        [sys.executable, "scripts/site/apply_shared_war_room_shell.py"],
+                        [sys.executable, "scripts/publish/check_public_site.py"],
                     ]
 
                     failed = False
