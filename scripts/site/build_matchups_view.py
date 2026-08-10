@@ -59,6 +59,47 @@ def csv_rows(path):
         return list(csv.DictReader(handle))
 
 
+
+def load_advanced_profiles(path):
+    if not path.exists() or path.stat().st_size == 0:
+        return {}, {}
+
+    payload = json.loads(path.read_text())
+
+    rows = payload.get("teams", [])
+    advanced_team_aliases = {
+        "Hawai'i": "Hawaii",
+        "Miami": "Miami-FL",
+        "Miami (OH)": "Miami-OH",
+        "UCF": "Central Florida",
+        "UConn": "Connecticut",
+        "App State": "Appalachian State",
+        "San José State": "San Jose State",
+        "UL Monroe": "UL-Monroe",
+    }
+
+    by_team = {
+        canonical_team(
+            advanced_team_aliases.get(
+                clean(row.get("team")),
+                clean(row.get("team")),
+            )
+        ): row
+        for row in rows
+        if clean(row.get("team"))
+    }
+
+    metadata = {
+        "schema_version": clean(payload.get("schema_version")),
+        "source": clean(payload.get("source")),
+        "source_season": integer(payload.get("source_season")),
+        "profile_type": clean(payload.get("profile_type")),
+        "current_2026": payload.get("current_2026"),
+        "methodology": payload.get("methodology"),
+    }
+
+    return by_team, metadata
+
 def extract_index_data():
     # Canonical game data comes from the normalized preseason DB.
     # v1.html remains only as a temporary source for legacy supplemental JS constants.
@@ -117,17 +158,65 @@ def metric_rank(score):
 def five_factors(offense, defense, style_by_team):
     off = style_by_team.get(canonical_team(offense), {})
     deff = style_by_team.get(canonical_team(defense), {})
-    result = []
-    for metric in ("success", "explosiveness", "finishing_drives", "field_position", "havoc"):
-        off_score = style_metric(off, metric, "off")
-        def_score = style_metric(deff, metric, "def")
-        off_rank, def_rank = metric_rank(off_score), metric_rank(def_score)
-        edge = None
-        if off_rank is not None and def_rank is not None and abs(def_rank - off_rank) >= 8:
-            edge = offense if off_rank < def_rank else defense
-        result.append({"metric": metric, "offense_rank": off_rank, "defense_rank": def_rank, "edge_team": edge})
-    return result
 
+    off_profile = off.get("offense", {}) if isinstance(off, dict) else {}
+    def_profile = deff.get("defense", {}) if isinstance(deff, dict) else {}
+
+    metric_map = {
+        "success": (
+            off_profile.get("success_rate"),
+            def_profile.get("success_rate_allowed"),
+        ),
+        "explosiveness": (
+            off_profile.get("explosiveness"),
+            def_profile.get("explosiveness_allowed"),
+        ),
+        "finishing_drives": (
+            off_profile.get("finishing_drives"),
+            def_profile.get("finishing_drives_allowed"),
+        ),
+        "field_position": (
+            off_profile.get("field_position"),
+            def_profile.get("field_position_allowed"),
+        ),
+        "havoc": (
+            off_profile.get("havoc_avoidance"),
+            def_profile.get("havoc_rate"),
+        ),
+    }
+
+    result = []
+
+    for metric, (off_row, def_row) in metric_map.items():
+        off_row = off_row or {}
+        def_row = def_row or {}
+
+        off_rank = integer(off_row.get("rank"))
+        def_rank = integer(def_row.get("rank"))
+
+        edge = None
+
+        if (
+            off_rank is not None
+            and def_rank is not None
+            and abs(def_rank - off_rank) >= 8
+        ):
+            edge = offense if off_rank < def_rank else defense
+
+        result.append({
+            "metric": metric,
+            "offense_rank": off_rank,
+            "defense_rank": def_rank,
+            "edge_team": edge,
+            "offense_source_season": integer(
+                (off.get("snapshot") or {}).get("source_season")
+            ),
+            "defense_source_season": integer(
+                (deff.get("snapshot") or {}).get("source_season")
+            ),
+        })
+
+    return result
 
 def coach_record(row, period, ou_rank=None):
     if not row:
@@ -173,6 +262,130 @@ def coach_role_split(row):
     }
 
 
+
+def normalize_half_coach_rows(rows):
+    result = {}
+
+    for row in rows:
+        team = canonical_team(row.get("Current Team") or row.get("current_team") or row.get("team"))
+        coach = clean(row.get("Current Coach") or row.get("current_coach") or row.get("coach"))
+
+        if not team or not coach:
+            continue
+
+        result[(team, coach)] = {
+            "head_coach": coach,
+            "current_team": team,
+            "ats_rank": integer(row.get("ATS Rank") or row.get("ats_rank")),
+            "ats_games": integer(row.get("ATS Games") or row.get("ats_games")),
+            "ats_w": integer(row.get("ATS W") or row.get("ats_w")),
+            "ats_l": integer(row.get("ATS L") or row.get("ats_l")),
+            "ats_push": integer(row.get("ATS Push") or row.get("ats_push")),
+            "avg_ats": number(row.get("Avg ATS +/-") or row.get("avg_ats")),
+            "over_games": integer(row.get("Over Games") or row.get("over_games")),
+            "overs": integer(row.get("Overs") or row.get("overs")),
+            "unders": integer(row.get("Unders") or row.get("unders")),
+            "total_push": integer(row.get("Total Push") or row.get("total_push")),
+            "avg_total": number(row.get("Avg Total +/-") or row.get("avg_total")),
+        }
+
+    return result
+
+
+def aggregate_full_game_coach_rows(rows):
+    grouped = defaultdict(list)
+
+    for row in rows:
+        if clean(row.get("period")) != "Full Game":
+            continue
+
+        team = canonical_team(row.get("current_team"))
+        coach = clean(row.get("coach"))
+
+        if team and coach:
+            grouped[(team, coach)].append(row)
+
+    result = {}
+
+    for identity, group in grouped.items():
+        team, coach = identity
+        ats_w = ats_l = ats_push = 0
+        overs = unders = total_push = 0
+        ats_margin_sum = ats_margin_games = 0
+        total_margin_sum = total_margin_games = 0
+
+        for row in group:
+            games = integer(row.get("games")) or 0
+
+            vals = [int(x) for x in re.findall(r"\d+", clean(row.get("ats_record")) or "")]
+            ats_w += vals[0] if len(vals) > 0 else 0
+            ats_l += vals[1] if len(vals) > 1 else 0
+            ats_push += vals[2] if len(vals) > 2 else 0
+
+            ou = clean(row.get("ou_record")) or ""
+
+            m = re.search(r"(\d+)\s*O\b", ou, re.I)
+            if m:
+                overs += int(m.group(1))
+
+            m = re.search(r"(\d+)\s*U\b", ou, re.I)
+            if m:
+                unders += int(m.group(1))
+
+            m = re.search(r"(\d+)\s*P\b", ou, re.I)
+            if m:
+                total_push += int(m.group(1))
+
+            v = number(row.get("avg_ats_margin"))
+            if v is not None and games:
+                ats_margin_sum += v * games
+                ats_margin_games += games
+
+            v = number(row.get("avg_total_margin"))
+            if v is not None and games:
+                total_margin_sum += v * games
+                total_margin_games += games
+
+        result[identity] = {
+            "head_coach": coach,
+            "team": team,
+            "ats_record": f"{ats_w}-{ats_l}-{ats_push}",
+            "ats_w": ats_w,
+            "ats_l": ats_l,
+            "ats_push": ats_push,
+            "ats_rank": None,
+            "avg_ats_margin": ats_margin_sum / ats_margin_games if ats_margin_games else None,
+            "ou_record": f"{overs} O / {unders} U" + (f" / {total_push} P" if total_push else ""),
+            "avg_total_margin": total_margin_sum / total_margin_games if total_margin_games else None,
+            "betting_stats_through": 2025,
+        }
+
+    ranked = sorted(
+        result.items(),
+        key=lambda item: item[1]["ats_w"] / max(1, item[1]["ats_w"] + item[1]["ats_l"]),
+        reverse=True,
+    )
+
+    for rank, (_, row) in enumerate(ranked, 1):
+        row["ats_rank"] = rank
+
+    return result
+
+
+def rank_coach_identity_rows(rows, value_key):
+    ordered = sorted(
+        (
+            (identity, row)
+            for identity, row in rows.items()
+            if number(row.get(value_key)) is not None
+        ),
+        key=lambda item: abs(number(item[1].get(value_key))),
+        reverse=True,
+    )
+
+    return {identity: rank for rank, (identity, _) in enumerate(ordered, 1)}
+
+
 def compact_signal(row):
     return {key: clean(row.get(key)) for key in (
         "signal_group", "signal_type", "market", "period", "team", "opponent", "direction", "strength",
@@ -215,34 +428,45 @@ def main():
     games = db.get("games", [])
     team_by_name = canonical_map(teams)
     conference_ranks = team_ranks(teams)
-    style_by_team = canonical_map(db.get("team_style_profiles", []))
-    coach_full = canonical_map(db.get("coach_betting", []))
-    coach_1h = canonical_map(db.get("coach_1h_betting", []), "current_team")
-    coach_2h = canonical_map(db.get("coach_2h_betting", []), "current_team")
-    def ou_ranks(rows, team_key, value_key):
-        ordered = sorted((row for row in rows if number(row.get(value_key)) is not None), key=lambda row: abs(number(row.get(value_key))), reverse=True)
-        return {canonical_team(row.get(team_key)): rank for rank, row in enumerate(ordered, 1)}
-    coach_ou_full = ou_ranks(db.get("coach_betting", []), "team", "avg_total_margin")
-    coach_ou_1h = ou_ranks(db.get("coach_1h_betting", []), "current_team", "avg_total")
-    coach_ou_2h = ou_ranks(db.get("coach_2h_betting", []), "current_team", "avg_total")
+    style_by_team, style_metadata = load_advanced_profiles(
+        ROOT / "data/site/team_advanced_profiles.json"
+    )
     coach_role_rows = csv_rows(ROOT / "data/coach/coach_fav_dog_splits_all_periods.csv")
     coach_role_full_history = csv_rows(ROOT / "data/coach/coach_fav_dog_splits_hybrid.csv")
+
+    coach_full = aggregate_full_game_coach_rows(coach_role_full_history)
+    coach_1h = normalize_half_coach_rows(
+        csv_rows(ROOT / "data/import/coach_1h_betting_current_2026.csv")
+    )
+    coach_2h = normalize_half_coach_rows(
+        csv_rows(ROOT / "data/import/coach_2h_betting_current_2026.csv")
+    )
+
+    coach_ou_full = rank_coach_identity_rows(coach_full, "avg_total_margin")
+    coach_ou_1h = rank_coach_identity_rows(coach_1h, "avg_total")
+    coach_ou_2h = rank_coach_identity_rows(coach_2h, "avg_total")
+
     coach_role_by_team = {}
+
     for row in coach_role_rows:
         team = canonical_team(row.get("current_team"))
-        current_coach = clean(coach_full.get(team, {}).get("head_coach"))
-        period, role = clean(row.get("period")), clean(row.get("fav_dog"))
-        if clean(row.get("coach")) == current_coach and period in {"1H", "2H"} and role in {"Favorite", "Underdog"}:
+        coach = clean(row.get("coach"))
+        period = clean(row.get("period"))
+        role = clean(row.get("fav_dog"))
+
+        if team and coach and period in {"1H", "2H"} and role in {"Favorite", "Underdog"}:
             row["source"] = "2024-25 all-period role sample"
-            coach_role_by_team[(team, period, role)] = row
-    # The hybrid artifact has already remapped the longer CFBD full-game history
-    # to active 2026 coach/team assignments. The recent source remains 1H/2H only.
+            coach_role_by_team[(team, coach, period, role)] = row
+
     for row in coach_role_full_history:
         team = canonical_team(row.get("current_team"))
-        current_coach = clean(coach_full.get(team, {}).get("head_coach"))
-        period, role = clean(row.get("period")), clean(row.get("fav_dog"))
-        if clean(row.get("coach")) == current_coach and period == "Full Game" and role in {"Favorite", "Underdog"}:
-            coach_role_by_team[(team, "Full Game", role)] = row
+        coach = clean(row.get("coach"))
+        period = clean(row.get("period"))
+        role = clean(row.get("fav_dog"))
+
+        if team and coach and period == "Full Game" and role in {"Favorite", "Underdog"}:
+            coach_role_by_team[(team, coach, period, role)] = row
+
     trend_by_team = {canonical_team(team): value for team, value in rating_trends.items()}
     rp_by_team = {canonical_team(team): value for team, value in returning_prod.items()}
 
@@ -505,15 +729,40 @@ def main():
 
         coaches = []
         for team in (away, home):
-            full = coach_full.get(team, {})
+            current_staff = staff_view(team)
+            current_coach = clean(current_staff.get("head_coach"))
+            identity = (team, current_coach)
+
+            full = coach_full.get(identity, {})
+            first_half = coach_1h.get(identity, {})
+            second_half = coach_2h.get(identity, {})
+
             role_splits = []
             for period in ("Full Game", "1H", "2H"):
                 for role in ("Favorite", "Underdog"):
-                    split = coach_role_split(coach_role_by_team.get((team, period, role)))
-                    role_splits.append(split or {"period": period, "role": role, "available": False, "source": "No matched current-coach sample"})
-            coaches.append({"team": team, "coach": clean(full.get("head_coach")), "through_season": integer(full.get("betting_stats_through")),
-                "periods": [coach_record(full, "full_game", coach_ou_full.get(team)), coach_record(coach_1h.get(team), "first_half", coach_ou_1h.get(team)), coach_record(coach_2h.get(team), "second_half", coach_ou_2h.get(team))],
-                "role_splits": role_splits})
+                    split = coach_role_split(
+                        coach_role_by_team.get((team, current_coach, period, role))
+                    )
+                    role_splits.append(
+                        split or {
+                            "period": period,
+                            "role": role,
+                            "available": False,
+                            "source": "No matched current-coach sample",
+                        }
+                    )
+
+            coaches.append({
+                "team": team,
+                "coach": current_coach,
+                "through_season": integer(full.get("betting_stats_through")) if full else None,
+                "periods": [
+                    coach_record(full, "full_game", coach_ou_full.get(identity)),
+                    coach_record(first_half, "first_half", coach_ou_1h.get(identity)),
+                    coach_record(second_half, "second_half", coach_ou_2h.get(identity)),
+                ],
+                "role_splits": role_splits,
+            })
 
         away_tendency = opening_tendency_by_team.get(away)
         home_tendency = opening_tendency_by_team.get(home)
