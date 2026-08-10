@@ -134,7 +134,7 @@ const od=x=>Number.isFinite(Number(x))?(Number(x)>0?'+':'')+Math.round(Number(x)
 const pct=x=>Number.isFinite(Number(x))?`${(Number(x)*100).toFixed(1)}%`:'—';
 const signedPct=x=>Number.isFinite(Number(x))?`${Number(x)>=0?'+':''}${(Number(x)*100).toFixed(1)}%`:'—';
 function fairOdds(p){p=Number(p);if(!Number.isFinite(p)||p<=0||p>=1)return p===0?'∞':p===1?'-∞':'—';return p>=.5?Math.round(-100*p/(1-p)):Math.round(100*(1-p)/p)}
-function logo(x){const slugMap={'texas-a-m':'texas-aandm'};const slug=slugMap[x.slug]||x.slug;return`<img src="logos/${e(slug)}.png" alt="" onerror="this.style.display='none'">`}
+function logo(x){const slug=x.slug||'';return slug?`<img src="logos/${e(slug)}.png" alt="" onerror="this.style.display='none'">`:''}
 function bookLogo(name){const k=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,''),m={fanduel:'fanduel',draftkings:'draftkings',betmgm:'betmgm',caesars:'caesars'};return m[k]?`<img class="bookLogo" src="logos/books/${m[k]}.png" title="${e(name)}" alt="${e(name)}">`:`<span class="bookText">${e(name||'—')}</span>`}
 function modelProbCell(p){return`<span class="prob">${pct(p)}</span><span class="secondary">${od(fairOdds(p))} fair</span>`}
 function marketProbCell(p,price,book){return`<span class="marketCell"><span><span class="prob">${pct(p)}</span><span class="secondary">${od(price)} market</span></span>${bookLogo(book)}</span>`}
