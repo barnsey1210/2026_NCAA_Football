@@ -50,8 +50,8 @@ export NCAAF_PROFILE
 CANONICAL_STAGE_ORDER=(
   futures_market_acquisition
   game_market_acquisition
-  sgo_pull
-  sgo_normalization
+  sgo_backup_pull
+  sgo_backup_normalization
   game_line_history
   injuries_and_signals
   email_build
@@ -89,8 +89,8 @@ stage_enabled() {
     # current game markets + ratings + schedule/projections + downstream
     # matchup/Shadow/Odds/site publication. No sims, futures, email or PBP.
     openers:game_market_acquisition|\
-    openers:sgo_pull|\
-    openers:sgo_normalization|\
+    openers:sgo_backup_pull|\
+    openers:sgo_backup_normalization|\
     openers:game_line_history|\
     openers:ratings_refresh|\
     openers:ratings_normalization|\
@@ -123,8 +123,8 @@ stage_enabled() {
     # same canonical live game-market acquisition/fallback/history path plus
     # downstream Odds/Matchups/site publication. No ratings or simulations.
     market:game_market_acquisition|\
-    market:sgo_pull|\
-    market:sgo_normalization|\
+    market:sgo_backup_pull|\
+    market:sgo_backup_normalization|\
     market:game_line_history|\
     market:matchup_core|\
     market:line_history_assets|\
@@ -241,8 +241,8 @@ RUN_FINALIZED=0
 # SportsGameOdds is an optional secondary market source.
 # Email eligibility is not tied to SGO health; the canonical current-market
 # contract owns provider priority and fallback selection.
-SGO_PULL_OK=0
-SGO_NORMALIZATION_OK=0
+SGO_BACKUP_PULL_OK=0
+SGO_BACKUP_NORMALIZATION_OK=0
 
 status_stage() {
   local stage_id="$1"
@@ -379,52 +379,52 @@ trap on_exit EXIT
     profile_skip_stage "game_market_acquisition"
   fi
 
-  # STAGE: sgo_pull
-  if stage_enabled "sgo_pull"; then
-  stage_start "sgo_pull"
+  # STAGE: sgo_backup_pull
+  if stage_enabled "sgo_backup_pull"; then
+  stage_start "sgo_backup_pull"
   if run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py"; then
-    SGO_PULL_OK=1
-    stage_pass "sgo_pull"
+    SGO_BACKUP_PULL_OK=1
+    stage_pass "sgo_backup_pull"
   else
     warn "live SGO pull failed; preserving prior SGO and fallback data"
-    stage_skip "sgo_pull" "optional secondary SportsGameOdds source unavailable; cached/fallback data preserved"
+    stage_skip "sgo_backup_pull" "optional secondary SportsGameOdds source unavailable; cached/fallback data preserved"
   fi
 
   # Normalize only a raw response produced by a successful current run.
   # SGO is optional; failure does not block canonical market/site/email work.
   else
-    profile_skip_stage "sgo_pull"
+    profile_skip_stage "sgo_backup_pull"
   fi
 
-  # STAGE: sgo_normalization
-  if stage_enabled "sgo_normalization"; then
-  stage_start "sgo_normalization"
-  if [ "$SGO_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
+  # STAGE: sgo_backup_normalization
+  if stage_enabled "sgo_backup_normalization"; then
+  stage_start "sgo_backup_normalization"
+  if [ "$SGO_BACKUP_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
     if run_py "scripts/markets/build_sgo_daily_canonical.py"; then
       if run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py"; then
-        SGO_NORMALIZATION_OK=1
+        SGO_BACKUP_NORMALIZATION_OK=1
         run_py "scripts/odds/append_sgo_game_book_line_history.py" \
           || warn "SGO canonical history append failed"
-        stage_pass "sgo_normalization"
+        stage_pass "sgo_backup_normalization"
       else
         warn "SGO compatibility export failed; preserving fallback data"
-        stage_fail "sgo_normalization" "SGO compatibility export failed"
+        stage_fail "sgo_backup_normalization" "SGO compatibility export failed"
       fi
     else
       warn "canonical SGO normalization failed; preserving fallback data"
-      stage_fail "sgo_normalization" "canonical SGO normalization failed"
+      stage_fail "sgo_backup_normalization" "canonical SGO normalization failed"
     fi
-  elif [ "$SGO_PULL_OK" -eq 1 ]; then
+  elif [ "$SGO_BACKUP_PULL_OK" -eq 1 ]; then
     warn "successful SGO pull produced no raw response"
-    stage_fail "sgo_normalization" "successful SGO pull produced no raw response"
+    stage_fail "sgo_backup_normalization" "successful SGO pull produced no raw response"
   else
-    stage_skip "sgo_normalization" "SGO pull unavailable; cached accepted/fallback data preserved"
+    stage_skip "sgo_backup_normalization" "SGO pull unavailable; cached accepted/fallback data preserved"
   fi
 
 
   # Append today's normalized game lines before site/email rendering.
   else
-    profile_skip_stage "sgo_normalization"
+    profile_skip_stage "sgo_backup_normalization"
   fi
 
   # STAGE: game_line_history

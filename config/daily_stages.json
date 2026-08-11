@@ -43,27 +43,27 @@
       ]
     },
     {
-      "id": "sgo_pull",
+      "id": "sgo_backup_pull",
       "name": "SportsGameOdds live pull",
       "order": 30,
       "required": false,
       "external_network": true,
       "email_dependency": false,
       "publication_dependency": true,
-      "entrypoint": "daily_market_update.sh#sgo_pull",
+      "entrypoint": "daily_market_update.sh#sgo_backup_pull",
       "scripts": [
         "scripts/markets/pull_sgo_ncaaf_game_odds.py"
       ]
     },
     {
-      "id": "sgo_normalization",
+      "id": "sgo_backup_normalization",
       "name": "SportsGameOdds normalization and history",
       "order": 40,
       "required": false,
       "external_network": false,
       "email_dependency": false,
       "publication_dependency": true,
-      "entrypoint": "daily_market_update.sh#sgo_normalization",
+      "entrypoint": "daily_market_update.sh#sgo_backup_normalization",
       "scripts": [
         "scripts/markets/build_sgo_daily_canonical.py",
         "scripts/markets/parse_sgo_ncaaf_game_odds.py",
