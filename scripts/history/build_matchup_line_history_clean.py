@@ -4,6 +4,7 @@ import json
 import math
 import pandas as pd
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 MATCHUPS_VIEW = Path("data/site/matchups_view.json")
 OUT = Path("data/history/matchup_line_history_clean.csv")
@@ -92,6 +93,21 @@ def clean_ts(x):
     except Exception:
         return str(x)
 
+
+def snapshot_date_et(*values):
+    """Return the ET calendar date for the first usable snapshot timestamp."""
+    for x in values:
+        if x is None or pd.isna(x) or str(x).strip() == "":
+            continue
+        try:
+            ts = pd.to_datetime(x, utc=True)
+            return ts.tz_convert(
+                ZoneInfo("America/New_York")
+            ).date().isoformat()
+        except Exception:
+            continue
+    return None
+
 def fnum(x):
     try:
         if x is None or pd.isna(x) or str(x).strip() == "":
@@ -153,13 +169,20 @@ def read_source(path, by_pair_date, by_pair):
         if not gid:
             continue
 
+        # Daily chart rows use the ET betting calendar. Prefer a precise
+        # timestamp when available so historical UTC-night snapshots are
+        # normalized back to the correct Eastern calendar date.
         snapshot_date = (
-            clean_date(r.get("snapshot_date"))
-            or clean_date(r.get("snapshot_ts"))
-            or clean_date(r.get("pulled_at"))
-            or clean_date(r.get("market_spread_last_update"))
-            or clean_date(r.get("market_total_last_update"))
-            or datetime.now(timezone.utc).date().isoformat()
+            snapshot_date_et(
+                r.get("snapshot_ts"),
+                r.get("pulled_at"),
+                r.get("market_spread_last_update"),
+                r.get("market_total_last_update"),
+            )
+            or clean_date(r.get("snapshot_date"))
+            or datetime.now(timezone.utc).astimezone(
+                ZoneInfo("America/New_York")
+            ).date().isoformat()
         )
 
         snapshot_ts = (

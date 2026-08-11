@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Assemble approved pages while retaining the monolith for team detail routes."""
 from pathlib import Path
+from datetime import datetime, timezone
 import re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +26,16 @@ CSS = """<style id="production-nav-css">
 .top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
 </style>"""
 PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
+BUILD_VERSION = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def cache_bust_site_json(text):
+    """Version published data/site JSON URLs so browsers/CDNs fetch each build."""
+    return re.sub(
+        r'(data/site/[A-Za-z0-9_./-]+\.json)(?:\?v=[^\'"` )}>]+)?',
+        lambda m: f"{m.group(1)}?v={BUILD_VERSION}",
+        text,
+    )
 
 def nav(target):
     links=''.join(f'<a href="{href}"'+(' class="active"' if href==target else '')+f'>{label}</a>' for label,href in LINKS)
@@ -120,7 +131,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         text=text.replace('</head>','<style id="conference-logo-css">.conferenceBadge{min-width:54px;height:54px}.conferenceBadge img{width:42px;height:42px;object-fit:contain}</style></head>')
         logo_script="""<script id="conference-logo-js">const conferenceLogoObserver=new MutationObserver(()=>{const c=typeof cur==='function'?cur():null,b=document.querySelector('.conferenceBadge');if(c&&b&&!b.querySelector('img'))b.innerHTML=`<img src="logos/conferences/${c.slug}.png" alt="${c.conference} logo">`});conferenceLogoObserver.observe(document.getElementById('conferenceIdentity'),{childList:true,subtree:true});</script>"""
         text=text.replace('</body>',logo_script+'</body>')
-    return text
+    return cache_bust_site_json(text)
 
 def main():
     if OUT.exists(): shutil.rmtree(OUT)
@@ -130,9 +141,9 @@ def main():
     for source,target in PAGES.items():
         source_path=ROOT/source
         if not source_path.exists():
-            # The authoritative repository tracks the canonical public names;
-            # the runtime retains *_v2 source names for compatibility.
-            source_path=ROOT/source
+            # The authoritative repository may track only the canonical public
+            # filename while runtime compatibility retains a *_v2 source name.
+            source_path=ROOT/target
         (OUT/target).write_text(transform(source_path.read_text(),target))
     for asset in PAGE_HEALTH_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
@@ -143,11 +154,16 @@ def main():
     # daily_market_update.sh publishes this root copy when it is present.
     shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
 
-    shutil.copy2(ROOT/'playoff_futures_tab.js',OUT/'playoff_futures_tab.js')
-    shutil.copy2(ROOT/'dashboard_playoff_edges.js',OUT/'dashboard_playoff_edges.js')
-    shutil.copy2(ROOT/'coach_cards.js',OUT/'coach_cards.js')
-    shutil.copy2(ROOT/'team_coach_card.js',OUT/'team_coach_card.js')
-    shutil.copy2(ROOT/'matchup_workspace.js',OUT/'matchup_workspace.js')
+    for js_name in (
+        'playoff_futures_tab.js',
+        'dashboard_playoff_edges.js',
+        'coach_cards.js',
+        'team_coach_card.js',
+        'matchup_workspace.js',
+    ):
+        src = ROOT / js_name
+        dst = OUT / js_name
+        dst.write_text(cache_bust_site_json(src.read_text()))
     # Local preview assets. Publishing copies these directories independently.
     for name in ('data','logos','helmets'):
         target=ROOT/name
@@ -177,7 +193,7 @@ def _sync_openers_v2_public_artifacts():
         if _target.name == "openers.html":
             _target.write_text(transform(_source.read_text(), "openers.html"))
         else:
-            _openers_sync_shutil.copy2(_source, _target)
+            _target.write_text(cache_bust_site_json(_source.read_text()))
         print(f"synced public artifact: {_source.name} -> {_target}")
     # The canonical Openers and Schedule builders run after the shared page
     # transform. Reapply only the production ODDS nav item they would otherwise

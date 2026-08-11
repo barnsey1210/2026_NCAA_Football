@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 import pandas as pd
 
@@ -25,8 +26,10 @@ KEEP_COLS = [
 
 def main():
     now = datetime.now(timezone.utc)
-    snapshot_date = now.date().isoformat()
     snapshot_ts = now.isoformat(timespec="seconds")
+    snapshot_date = now.astimezone(
+        ZoneInfo("America/New_York")
+    ).date().isoformat()
 
     rows = []
     for source, path in SOURCE_FILES:
