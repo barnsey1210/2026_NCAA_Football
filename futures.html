@@ -212,7 +212,7 @@ function renderFreshness(){
  document.getElementById('qaToggle').onclick=()=>document.getElementById('qaDetails').classList.toggle('open');
 }
 async function init(){
- D=await fetch(`data/site/futures_view.json?v=20260811T021416Z)}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()});
+ D=await fetch(`data/site/futures_view.json?v=20260811T041236Z)}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()});
  teams.textContent=D.summary.teams;
  markets.textContent=(D.summary.win_markets||0)+(D.summary.title_markets||0)+(D.summary.playoff_markets||0)+(D.summary.national_title_markets||0);
  wagers.textContent=D.summary.open_wagers;
