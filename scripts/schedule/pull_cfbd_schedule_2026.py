@@ -48,10 +48,21 @@ def main():
             except Exception:
                 local_date = str(start)[:10]
 
+        provider_week = g.get("week")
+
+        # Canonical 2026 site week convention:
+        # Saturday, Aug. 29 is Week 0 even though CFBD currently labels it
+        # Week 1. Normalize here so every downstream consumer receives the
+        # same canonical week numbering.
+        canonical_week = provider_week
+        if local_date == "2026-08-29":
+            canonical_week = 0
+
         games.append({
             "cfbd_game_id": g.get("id"),
             "season": g.get("season"),
-            "week": g.get("week"),
+            "week": canonical_week,
+            "provider_week": provider_week,
             "season_type": g.get("seasonType"),
             "date": local_date,
             "start_date": start,
@@ -85,6 +96,9 @@ def main():
         "normalized_rows": len(games),
         "dated_rows": sum(bool(g["date"]) for g in games),
         "tbd_rows": sum(bool(g["start_time_tbd"]) for g in games),
+        "canonical_week_overrides": sum(
+            g.get("week") != g.get("provider_week") for g in games
+        ),
         "first_date": min((g["date"] for g in games if g["date"]), default=None),
         "last_date": max((g["date"] for g in games if g["date"]), default=None),
     }
