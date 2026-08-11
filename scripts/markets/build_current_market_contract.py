@@ -473,34 +473,18 @@ def main() -> None:
         candidates[gid][book][market][side] = q
         source_counts["The Odds API"] += 1
 
-    # Secondary: accepted, paired, non-stale SGO quote inventory.
-    for row in csv_rows(SGO):
-        gid = str(row.get("canonical_game_id") or "")
-        if gid not in identity:
-            excluded.append({"source": "SportsGameOdds", "reason": "unknown_game_id", "game_id": gid})
-            continue
-        book = normalize_book(row.get("sportsbook"))
-        market = str(row.get("market_type") or "").lower()
-        side = str(row.get("side") or "").lower()
-        timestamp = row.get("source_updated_at") or row.get("ingestion_timestamp")
-        if not book or market not in {"spread", "total", "moneyline"}:
-            continue
-        if side not in {"away", "home", "over", "under"}:
-            continue
-        if side in candidates[gid][book][market]:
-            continue
-        q = quote_record(
-            source="SportsGameOdds", game_id=gid, book=book, market=market, side=side,
-            line=number(row.get("line")), price=number(row.get("price")),
-            updated_at=timestamp, now=now,
-        )
-        if q["freshness_status"] != "LIVE" or str(row.get("stale_flag")).lower() in {"true", "1"}:
-            excluded.append({"source": "SportsGameOdds", "reason": "stale_current_quote", **q})
-            continue
-        candidates[gid][book][market][side] = q
-        source_counts["SportsGameOdds"] += 1
+    # SportsGameOdds is retained as an emergency backup provider only.
+    # It is intentionally excluded from the live current market contract.
+    # Historical SGO artifacts remain available separately.
+    #
+    # Normal production market sourcing:
+    #   1. The Odds API
+    #   2. Action Network fallback
+    #
+    # Do not re-enable SGO here unless primary providers fail.
+    pass
 
-    # Backup: fresh Action Network only where SGO did not provide that exact
+    # Backup: fresh Action Network only where The Odds API did not provide that exact
     # game/book/market/side.
     for row in csv_rows(ACTION):
         # Action Network's `date` is UTC-derived for late-night games. Resolve
@@ -613,7 +597,7 @@ def main() -> None:
         "schema_version": "current-market-contract-v1",
         "built_at": now.isoformat(),
         "max_quote_age_hours": MAX_AGE_HOURS,
-        "source_priority": ["The Odds API", "SportsGameOdds", "Action Network", "MISSING"],
+        "source_priority": ["The Odds API", "Action Network", "MISSING"],
         "stale_data_policy": "Stale quotes are never exposed as current. Historical snapshots remain separate.",
         "target_sportsbooks": list(TARGET_BOOKS),
         "games": contract_games,
