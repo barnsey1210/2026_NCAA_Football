@@ -67,6 +67,7 @@ def cmd_init(args: argparse.Namespace) -> None:
     payload: dict[str, Any] = {
         "schema_version": 1,
         "run_id": args.run_id,
+        "execution_profile": args.profile,
         "started_at_utc": args.started_at,
         "finished_at_utc": None,
         "source_deployed_commit": deployed_commit,
@@ -166,6 +167,7 @@ def parser() -> argparse.ArgumentParser:
     init.add_argument("--registry", type=Path, required=True)
     init.add_argument("--source-record", type=Path, required=True)
     init.add_argument("--run-id", required=True)
+    init.add_argument("--profile", default="full")
     init.add_argument("--started-at", required=True)
     init.set_defaults(func=cmd_init)
 

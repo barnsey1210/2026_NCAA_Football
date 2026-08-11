@@ -9,6 +9,7 @@ set -e
 #
 # Default/no argument preserves the existing full 8 AM workflow.
 NCAAF_PROFILE="${NCAAF_PROFILE:-full}"
+NCAAF_PROFILE_PLAN=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -22,6 +23,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --profile=*)
       NCAAF_PROFILE="${1#*=}"
+      shift
+      ;;
+    --plan)
+      NCAAF_PROFILE_PLAN=1
       shift
       ;;
     *)
@@ -41,6 +46,127 @@ case "$NCAAF_PROFILE" in
 esac
 
 export NCAAF_PROFILE
+
+CANONICAL_STAGE_ORDER=(
+  futures_market_acquisition
+  game_market_acquisition
+  sgo_pull
+  sgo_normalization
+  game_line_history
+  injuries_and_signals
+  email_build
+  email_regression
+  ratings_refresh
+  ratings_normalization
+  schedule_refresh
+  projections
+  postgame_refresh
+  conference_simulations
+  playoff_simulations
+  matchup_core
+  line_history_assets
+  shadow_models
+  playoff_futures
+  odds_payloads
+  email_send
+  site_build
+  site_validation
+  publication
+)
+
+stage_enabled() {
+  local stage="$1"
+
+  # Full is intentionally automatic: every canonical stage runs. This means
+  # adding a future stage does not require separately updating the full profile.
+  if [ "$NCAAF_PROFILE" = "full" ]; then
+    return 0
+  fi
+
+  case "$NCAAF_PROFILE:$stage" in
+
+    # Fast Openers refresh:
+    # current game markets + ratings + schedule/projections + downstream
+    # matchup/Shadow/Odds/site publication. No sims, futures, email or PBP.
+    openers:game_market_acquisition|\
+    openers:sgo_pull|\
+    openers:sgo_normalization|\
+    openers:game_line_history|\
+    openers:ratings_refresh|\
+    openers:ratings_normalization|\
+    openers:schedule_refresh|\
+    openers:projections|\
+    openers:matchup_core|\
+    openers:line_history_assets|\
+    openers:shadow_models|\
+    openers:odds_payloads|\
+    openers:site_build|\
+    openers:site_validation|\
+    openers:publication)
+      return 0
+      ;;
+
+    # Fast Postgame refresh:
+    # authoritative schedule/results + rich postgame features + Shadow and
+    # downstream site publication. No market/rating refresh or simulations.
+    postgame:schedule_refresh|\
+    postgame:postgame_refresh|\
+    postgame:matchup_core|\
+    postgame:shadow_models|\
+    postgame:site_build|\
+    postgame:site_validation|\
+    postgame:publication)
+      return 0
+      ;;
+
+    # Fast Market refresh:
+    # same canonical live game-market acquisition/fallback/history path plus
+    # downstream Odds/Matchups/site publication. No ratings or simulations.
+    market:game_market_acquisition|\
+    market:sgo_pull|\
+    market:sgo_normalization|\
+    market:game_line_history|\
+    market:matchup_core|\
+    market:line_history_assets|\
+    market:shadow_models|\
+    market:odds_payloads|\
+    market:site_build|\
+    market:site_validation|\
+    market:publication)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+print_profile_plan() {
+  local stage
+
+  echo "NCAAF execution profile: $NCAAF_PROFILE"
+  echo
+  echo "RUN:"
+
+  for stage in "${CANONICAL_STAGE_ORDER[@]}"; do
+    if stage_enabled "$stage"; then
+      echo "  $stage"
+    fi
+  done
+
+  echo
+  echo "SKIP:"
+
+  for stage in "${CANONICAL_STAGE_ORDER[@]}"; do
+    if ! stage_enabled "$stage"; then
+      echo "  $stage"
+    fi
+  done
+}
+
+if [ "$NCAAF_PROFILE_PLAN" -eq 1 ]; then
+  print_profile_plan
+  exit 0
+fi
 
 
 # Load CFBD API key from macOS Keychain when it is not already present.
@@ -144,6 +270,11 @@ stage_skip() {
   CURRENT_STAGE=""
 }
 
+profile_skip_stage() {
+  local stage="$1"
+  stage_skip "$stage" "excluded by NCAAF_PROFILE=$NCAAF_PROFILE"
+}
+
 stage_fail() {
   status_stage "$1" FAILED "$2"
   CURRENT_STAGE=""
@@ -198,7 +329,8 @@ on_exit() {
 
 python3 "$STATUS_WRITER" init --output "$STATUS_FILE" \
   --registry "$STAGE_REGISTRY" --source-record "$SOURCE_RECORD" \
-  --run-id "$RUN_ID" --started-at "$STARTED_AT_UTC"
+  --run-id "$RUN_ID" --profile "$NCAAF_PROFILE" \
+  --started-at "$STARTED_AT_UTC"
 trap on_exit EXIT
 
 {
@@ -207,6 +339,7 @@ trap on_exit EXIT
   echo "Execution profile: $NCAAF_PROFILE"
 
   # STAGE: futures_market_acquisition
+  if stage_enabled "futures_market_acquisition"; then
   stage_start "futures_market_acquisition"
   run_py "pull_actionnetwork_win_totals_api.py" || warn "Action Network win totals API pull unavailable; preserving cached data"
   run_py "odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || warn "visible DK win totals pull failed"
@@ -220,7 +353,12 @@ trap on_exit EXIT
   run_py "build_market_arbitrage_report.py" || warn "market arbitrage report build failed; preserving prior report"
   stage_pass "futures_market_acquisition"
 
+  else
+    profile_skip_stage "futures_market_acquisition"
+  fi
+
   # STAGE: game_market_acquisition
+  if stage_enabled "game_market_acquisition"; then
   stage_start "game_market_acquisition"
   # Season game lines from CFBD. Used for early spread/total display while SGO is capped.
   run_py "pull_cfbd_lines_2026.py" || warn "CFBD season lines pull failed"
@@ -237,7 +375,12 @@ trap on_exit EXIT
 
   # SportsGameOdds is an optional secondary source while quota/subscription
   # strategy is evaluated. Failure must not block downstream site/email work.
+  else
+    profile_skip_stage "game_market_acquisition"
+  fi
+
   # STAGE: sgo_pull
+  if stage_enabled "sgo_pull"; then
   stage_start "sgo_pull"
   if run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py"; then
     SGO_PULL_OK=1
@@ -249,7 +392,12 @@ trap on_exit EXIT
 
   # Normalize only a raw response produced by a successful current run.
   # SGO is optional; failure does not block canonical market/site/email work.
+  else
+    profile_skip_stage "sgo_pull"
+  fi
+
   # STAGE: sgo_normalization
+  if stage_enabled "sgo_normalization"; then
   stage_start "sgo_normalization"
   if [ "$SGO_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
     if run_py "scripts/markets/build_sgo_daily_canonical.py"; then
@@ -275,7 +423,12 @@ trap on_exit EXIT
 
 
   # Append today's normalized game lines before site/email rendering.
+  else
+    profile_skip_stage "sgo_normalization"
+  fi
+
   # STAGE: game_line_history
+  if stage_enabled "game_line_history"; then
   stage_start "game_line_history"
   run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || warn "game line history append failed"
   run_py "odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || warn "game line movement report build failed"
@@ -283,7 +436,12 @@ trap on_exit EXIT
 
   echo "Skipping legacy V1 market-site build; canonical V2 owns all public site output."
 
+  else
+    profile_skip_stage "game_line_history"
+  fi
+
   # STAGE: injuries_and_signals
+  if stage_enabled "injuries_and_signals"; then
   stage_start "injuries_and_signals"
   echo "Skipping legacy CFBDepth injury pull; redesigned source not configured."
   echo "Skipping legacy CFBDepth article pull; redesigned source not configured."
@@ -312,7 +470,12 @@ PY2
 
 
   # Add supplemental rows, remove juice-only game moves, then render HTML.
+  else
+    profile_skip_stage "injuries_and_signals"
+  fi
+
   # STAGE: email_build
+  if stage_enabled "email_build"; then
   stage_start "email_build"
   run_py "agents/prepend_game_line_moves_to_daily_betting_angles.py" "prepend_game_line_moves_to_daily_betting_angles.py" || warn "prepend game line moves to email failed"
   echo "Skipping legacy injury email rows; canonical injury source not configured."
@@ -320,7 +483,12 @@ PY2
   run_py "scripts/agents/build_daily_betting_angles_html.py" "build_daily_betting_angles_html.py"
   stage_pass "email_build"
 
+  else
+    profile_skip_stage "email_build"
+  fi
+
   # STAGE: email_regression
+  if stage_enabled "email_regression"; then
   stage_start "email_regression"
   python3 scripts/audit/test_daily_betting_email_regression.py
   stage_pass "email_regression"
@@ -336,7 +504,12 @@ PY2
   # Ratings/projection maintenance. Every automated production source is
   # refreshed independently. A failed source preserves its last-known-good
   # accepted value rather than preventing successful sources from updating.
+  else
+    profile_skip_stage "email_regression"
+  fi
+
   # STAGE: ratings_refresh
+  if stage_enabled "ratings_refresh"; then
   stage_start "ratings_refresh"
 
   refresh_live_rating_source "spplus"
@@ -357,7 +530,12 @@ PY2
 
   # Build the same canonical five-source production ratings model used by the
   # site: SP+, FPI, TeamRankings, Donchess/DRatings, and Sagarin.
+  else
+    profile_skip_stage "ratings_refresh"
+  fi
+
   # STAGE: ratings_normalization
+  if stage_enabled "ratings_normalization"; then
   stage_start "ratings_normalization"
   run_py "scripts/ratings/build_all_ratings_latest.py" "build_all_ratings_latest.py" \
     || warn "ratings latest build failed"
@@ -371,7 +549,12 @@ PY2
     || warn "ratings movement build failed"
   stage_pass "ratings_normalization"
 
+  else
+    profile_skip_stage "ratings_normalization"
+  fi
+
   # STAGE: schedule_refresh
+  if stage_enabled "schedule_refresh"; then
   stage_start "schedule_refresh"
   run_py "scripts/schedule/pull_cfbd_schedule_2026.py" "pull_cfbd_schedule_2026.py" \
     || warn "CFBD canonical schedule refresh failed"
@@ -383,7 +566,12 @@ PY2
   fi
   stage_pass "schedule_refresh"
 
+  else
+    profile_skip_stage "schedule_refresh"
+  fi
+
   # STAGE: projections
+  if stage_enabled "projections"; then
   stage_start "projections"
   run_py "scripts/projections/pull_dratings_ncaaf_predictions.py" "pull_dratings_ncaaf_predictions.py" || warn "DRatings NCAAF predictions refresh failed"
   run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || warn "game projection source build failed"
@@ -395,7 +583,12 @@ PY2
   # refreshed above, so do not spend another /games call here. Build final
   # results from that schedule, acquire rich PBP/drive/havoc data only when
   # completed games exist, then build season-to-date postgame features.
+  else
+    profile_skip_stage "projections"
+  fi
+
   # STAGE: postgame_refresh
+  if stage_enabled "postgame_refresh"; then
   stage_start "postgame_refresh"
   run_py "scripts/results/build_game_results_2026.py" "build_game_results_2026.py"
   run_py "scripts/postgame/pull_cfbd_postgame_2026.py" "pull_cfbd_postgame_2026.py"
@@ -404,7 +597,12 @@ PY2
 
 # Current season/conference Monte Carlo simulations. This stage consumes the
 # canonical projection consensus already applied to preseason_db.json.
+  else
+    profile_skip_stage "postgame_refresh"
+  fi
+
 # STAGE: conference_simulations
+if stage_enabled "conference_simulations"; then
 
 stage_start "conference_simulations"
 run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
@@ -414,7 +612,12 @@ stage_pass "conference_simulations"
 # canonical preseason DB after current projections and probability aliases have
 # been applied. CFP selection retains the validated resume model; game winners
 # use the canonical logistic margin-to-win-probability conversion.
+else
+  profile_skip_stage "conference_simulations"
+fi
+
 # STAGE: playoff_simulations
+if stage_enabled "playoff_simulations"; then
 
 stage_start "playoff_simulations"
 run_py "scripts/simulations/run_playoff_model_2026.py" "run_playoff_model_2026.py"
@@ -426,7 +629,12 @@ stage_pass "playoff_simulations"
   # PBP/drive/game-control features were built earlier in postgame_refresh.
   # This stage builds no-lookahead 2026 Shadow features and applies the frozen
   # movement models; it never refits those models on 2026 outcomes.
+else
+  profile_skip_stage "playoff_simulations"
+fi
+
   # STAGE: matchup_core
+  if stage_enabled "matchup_core"; then
   stage_start "matchup_core"
   run_py "scripts/site/augment_team_advanced_profiles_drives.py" "augment_team_advanced_profiles_drives.py"
   run_py "scripts/site/build_matchups_view.py" "build_matchups_view.py"
@@ -435,13 +643,23 @@ stage_pass "playoff_simulations"
   # Bridge the newly appended daily market snapshot into the normalized V2
   # history assets consumed by both Odds and the shared matchup workspace.
   # Asset-only mode deliberately leaves every canonical V2 HTML file untouched.
+  else
+    profile_skip_stage "matchup_core"
+  fi
+
   # STAGE: line_history_assets
+  if stage_enabled "line_history_assets"; then
   stage_start "line_history_assets"
   run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py"
   python3 scripts/site/inject_matchup_line_history.py --asset-only
   stage_pass "line_history_assets"
 
+  else
+    profile_skip_stage "line_history_assets"
+  fi
+
   # STAGE: shadow_models
+  if stage_enabled "shadow_models"; then
   stage_start "shadow_models"
   python3 scripts/research/build_market_implied_power_ratings.py --production-2026
   run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"
@@ -456,7 +674,12 @@ stage_pass "playoff_simulations"
   # Refresh V2 Futures data after the canonical projection outputs are final.
   # A failed or stale playoff-market pull does not block the rest of the site; the
   # Futures QA banner will surface the issue while cached data remains available.
+  else
+    profile_skip_stage "shadow_models"
+  fi
+
   # STAGE: playoff_futures
+  if stage_enabled "playoff_futures"; then
   stage_start "playoff_futures"
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
@@ -467,14 +690,24 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   # Refresh the production Odds page payloads after the current game and
   # futures sources are complete. Builders write atomically scoped Odds
   # artifacts; on failure the previous valid files remain available.
+  else
+    profile_skip_stage "playoff_futures"
+  fi
+
   # STAGE: odds_payloads
+  if stage_enabled "odds_payloads"; then
   stage_start "odds_payloads"
   run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || warn "Odds game payload build failed; retaining last valid artifact"
   run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || warn "Odds futures payload build failed; retaining last valid artifact"
   stage_pass "odds_payloads"
 
   # Optional email send. Do not let missing Gmail env vars stop the market/site/rating build.
+  else
+    profile_skip_stage "odds_payloads"
+  fi
+
   # STAGE: email_send
+  if stage_enabled "email_send"; then
   stage_start "email_send"
   if [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
     echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
@@ -494,7 +727,12 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   # Build and validate the canonical V2 public bundle. Publication is delegated
   # to the normal staged publisher so a legacy artifact can never be copied to
   # the public repository by this script.
+  else
+    profile_skip_stage "email_send"
+  fi
+
   # STAGE: site_build
+  if stage_enabled "site_build"; then
   stage_start "site_build"
   python3 scripts/ratings/refresh_ratings_source_status.py
   python3 scripts/markets/build_current_market_contract.py
@@ -511,7 +749,12 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   python3 scripts/audit/audit_war_room_home_market_propagation.py
   stage_pass "site_build"
 
+  else
+    profile_skip_stage "site_build"
+  fi
+
   # STAGE: site_validation
+  if stage_enabled "site_validation"; then
   stage_start "site_validation"
   python3 scripts/audit/audit_canonical_v2_index.py index.html
   python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
@@ -519,7 +762,12 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   python3 scripts/publish/check_public_site.py
   stage_pass "site_validation"
 
+  else
+    profile_skip_stage "site_validation"
+  fi
+
   # STAGE: publication
+  if stage_enabled "publication"; then
   stage_start "publication"
   if [ "${NCAAF_AUTO_PUBLISH:-1}" = "0" ]; then
     echo "NCAAF_AUTO_PUBLISH=0: validated V2 build; publication skipped"
@@ -527,6 +775,10 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   else
     bash scripts/publish/publish_site.sh --push
     stage_pass "publication"
+  fi
+
+  else
+    profile_skip_stage "publication"
   fi
 
 # cp market_win_totals_history.csv "$ICLOUD/"
