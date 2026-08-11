@@ -473,16 +473,56 @@ def main() -> None:
         candidates[gid][book][market][side] = q
         source_counts["The Odds API"] += 1
 
-    # SportsGameOdds is retained as an emergency backup provider only.
-    # It is intentionally excluded from the live current market contract.
-    # Historical SGO artifacts remain available separately.
-    #
-    # Normal production market sourcing:
-    #   1. The Odds API
-    #   2. Action Network fallback
-    #
-    # Do not re-enable SGO here unless primary providers fail.
-    pass
+    # Secondary: fresh SportsGameOdds accepted quote inventory.
+    # The Odds API remains primary because it is loaded first.
+    # SGO only fills exact game/book/market/side slots not already populated.
+    for row in csv_rows(SGO):
+        gid = str(row.get("canonical_game_id") or "")
+        if gid not in identity:
+            excluded.append({
+                "source": "SportsGameOdds",
+                "reason": "unknown_game_id",
+                "game_id": gid,
+            })
+            continue
+
+        book = normalize_book(row.get("sportsbook"))
+        market = str(row.get("market_type") or "").lower()
+        side = str(row.get("side") or "").lower()
+        timestamp = row.get("source_updated_at") or row.get("ingestion_timestamp")
+
+        if not book or market not in {"spread", "total", "moneyline"}:
+            continue
+        if side not in {"away", "home", "over", "under"}:
+            continue
+
+        # Preserve The Odds API as the preferred quote source.
+        if side in candidates[gid][book][market]:
+            continue
+
+        q = quote_record(
+            source="SportsGameOdds",
+            game_id=gid,
+            book=book,
+            market=market,
+            side=side,
+            line=number(row.get("line")),
+            price=number(row.get("price")),
+            updated_at=timestamp,
+            now=now,
+        )
+
+        if q["freshness_status"] != "LIVE" or str(row.get("stale_flag")).lower() in {"true", "1"}:
+            excluded.append({
+                "source": "SportsGameOdds",
+                "reason": "stale_current_quote",
+                **q,
+            })
+            continue
+
+        candidates[gid][book][market][side] = q
+        source_counts["SportsGameOdds"] += 1
+
 
     # Backup: fresh Action Network only where The Odds API did not provide that exact
     # game/book/market/side.
