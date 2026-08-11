@@ -1211,7 +1211,7 @@ function wagerText(b,r){
   return 'Wager';
 }
 
-async function opt(path,fallback={}){try{const r=await fetch(BASE+path);if(!r.ok)throw Error(r.status);return await r.json()}catch(e){return fallback}}
+async function opt(path,fallback={}){try{const sep=path.includes('?')?'&':'?';const r=await fetch(BASE+path+sep+'v='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(r.status);return await r.json()}catch(e){return fallback}}
 function dots(n){return `<div class="dots">${[0,1,2,3,4].map(i=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`}
 function dataRow(title,sub,value,cls='',team=null,badge='',confidence=0){
   return `<div class="row">${team?logo(team,'mini-logo'):`<div class="mini-logo">${esc(title.slice(0,1))}</div>`}<div><b>${esc(title)}</b><small>${esc(sub)}</small>${badge?`<span class="badge ${badge}">${badge}</span>`:''}</div><div><div class="row-value ${cls}">${esc(value)}</div>${confidence?dots(confidence):''}</div></div>`;
