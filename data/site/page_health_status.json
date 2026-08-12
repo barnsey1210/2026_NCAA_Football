@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-08-11T12:19:00+00:00",
+  "built_at": "2026-08-12T05:27:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -8,10 +8,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-08-11T12:18:16.025673+00:00",
-      "artifact_built_at": "2026-08-11T12:18:16.025673+00:00",
-      "age_minutes": 0.7,
-      "age_hours": 0.01,
+      "last_success_at": "2026-08-12T05:27:27.916281+00:00",
+      "artifact_built_at": "2026-08-12T05:27:27.916281+00:00",
+      "age_minutes": -0.5,
+      "age_hours": -0.01,
       "metrics": [
         {
           "label": "Slate games",
@@ -39,8 +39,8 @@
           "detail": ""
         },
         {
-          "label": "Current run at build",
-          "value": "RUNNING \u00b7 Aug 11, 2026 at 8:12 AM ET",
+          "label": "Last completed run",
+          "value": "PASSED_WITH_WARNINGS \u00b7 Aug 11, 2026 at 8:20 AM ET",
           "detail": ""
         }
       ],
@@ -62,8 +62,8 @@
       "summary": "At least one ratings source has partial team coverage.",
       "last_success_at": "2026-08-11T00:00:00+00:00",
       "artifact_built_at": "2026-08-11T12:18:16.025673+00:00",
-      "age_minutes": 739.0,
-      "age_hours": 12.32,
+      "age_minutes": 1767.0,
+      "age_hours": 29.45,
       "metrics": [
         {
           "label": "Composite",
@@ -120,8 +120,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:14:09+00:00",
       "artifact_built_at": "2026-08-11T12:18:34.192809+00:00",
-      "age_minutes": 4.8,
-      "age_hours": 0.08,
+      "age_minutes": 1032.9,
+      "age_hours": 17.21,
       "metrics": [
         {
           "label": "Games",
@@ -175,8 +175,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:18:16.025673+00:00",
       "artifact_built_at": "2026-08-11T12:18:16.025673+00:00",
-      "age_minutes": 0.7,
-      "age_hours": 0.01,
+      "age_minutes": 1028.7,
+      "age_hours": 17.15,
       "metrics": [
         {
           "label": "Matchups",
@@ -228,8 +228,8 @@
       "summary": "10 provider events use provider identity and lack canonical matchup links/history; current quotes remain isolated from canonical games.",
       "last_success_at": "2026-08-11T12:14:09+00:00",
       "artifact_built_at": "2026-08-11T12:19:20.907953+00:00",
-      "age_minutes": 4.8,
-      "age_hours": 0.08,
+      "age_minutes": 1032.9,
+      "age_hours": 17.21,
       "metrics": [
         {
           "label": "Games",
@@ -284,10 +284,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-08-11T12:19:17.881909+00:00",
-      "artifact_built_at": "2026-08-11T12:19:17.881909+00:00",
-      "age_minutes": -0.3,
-      "age_hours": -0.0,
+      "last_success_at": "2026-08-11T12:20:14.118538+00:00",
+      "artifact_built_at": "2026-08-11T12:20:14.118538+00:00",
+      "age_minutes": 1026.8,
+      "age_hours": 17.11,
       "metrics": [
         {
           "label": "Games",
@@ -311,7 +311,7 @@
         },
         {
           "label": "Results / integrity",
-          "value": "798 results \u00b7 0 dupes",
+          "value": "72 results \u00b7 0 dupes",
           "detail": ""
         },
         {
@@ -338,8 +338,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:19:18.838256+00:00",
       "artifact_built_at": "2026-08-11T12:19:20.905655+00:00",
-      "age_minutes": -0.3,
-      "age_hours": -0.01,
+      "age_minutes": 1027.7,
+      "age_hours": 17.13,
       "metrics": [
         {
           "label": "Teams",
@@ -393,8 +393,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:19:28.513900+00:00",
       "artifact_built_at": "2026-08-11T12:19:28.513900+00:00",
-      "age_minutes": -0.5,
-      "age_hours": -0.01,
+      "age_minutes": 1027.5,
+      "age_hours": 17.13,
       "metrics": [
         {
           "label": "Conferences",
@@ -445,8 +445,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:19:20.905655+00:00",
       "artifact_built_at": "2026-08-11T12:19:20.905655+00:00",
-      "age_minutes": -0.3,
-      "age_hours": -0.01,
+      "age_minutes": 1027.7,
+      "age_hours": 17.13,
       "metrics": [
         {
           "label": "Simulations",
@@ -488,13 +488,13 @@
     {
       "page_id": "simulations",
       "display_name": "Simulations",
-      "status": "yellow",
-      "status_label": "Usable with warnings",
-      "summary": "No latest successful daily-run record is available to verify simulation completion.",
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-11T12:19:28.513900+00:00",
       "artifact_built_at": "2026-08-11T12:19:28.513900+00:00",
-      "age_minutes": -0.5,
-      "age_hours": -0.01,
+      "age_minutes": 1027.5,
+      "age_hours": 17.13,
       "metrics": [
         {
           "label": "Simulations",
@@ -527,9 +527,7 @@
           "detail": ""
         }
       ],
-      "warnings": [
-        "No latest successful daily-run record is available to verify simulation completion."
-      ],
+      "warnings": [],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "simulations.html",
@@ -545,10 +543,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-08-11T12:18:16.025673+00:00",
-      "artifact_built_at": "2026-08-11T12:18:16.025673+00:00",
-      "age_minutes": 0.7,
-      "age_hours": 0.01,
+      "last_success_at": "2026-08-12T05:27:27.916281+00:00",
+      "artifact_built_at": "2026-08-12T05:27:27.916281+00:00",
+      "age_minutes": -0.5,
+      "age_hours": -0.01,
       "metrics": [
         {
           "label": "Games evaluated",
