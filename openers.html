@@ -563,8 +563,9 @@ body:has(#projectionMode button[data-projection-mode="shadow"].active)
 .keyPriceNote{margin-top:6px;color:var(--muted);font-size:8px}
 .histModelCard{margin-top:12px}
 .histModelControls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px}
-.histModelYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}
-.histModelYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}
+.histModelViewControls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.histModelView,.histModelYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}
+.histModelView.active,.histModelYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}
 .histModelComposite td{background:rgba(24,87,167,.10)}
 .histModelComposite td:first-child{box-shadow:inset 3px 0 0 #55a2ff}
 .histModelMeta{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.45}
@@ -750,10 +751,6 @@ if(location.protocol==='file:'){
       <span class="keyNumItem"><b>51</b><small>3.5%</small></span><span class="keyNumItem"><b>55</b><small>3.4%</small></span><span class="keyNumItem"><b>45</b><small>3.0%</small></span><span class="keyNumItem"><b>41</b><small>3.0%</small></span><span class="keyNumItem"><b>59</b><small>2.8%</small></span>
     </div>
   </div>
-  <div class="keyPriceGrid">
-    <div class="keyPriceItem"><b>3</b><span class="keyPricePair"><small>ONTO</small> <strong>+2.5→+3 -112</strong> · <strong>-3.5→-3 -121</strong></span><span class="keyPricePair"><small>OFF</small> <strong>+3→+3.5 -110</strong> · <strong>-3→-2.5 -110</strong></span></div><div class="keyPriceItem"><b>7</b><span class="keyPricePair"><small>ONTO</small> <strong>+6.5→+7 -117</strong> · <strong>-7.5→-7 -120</strong></span><span class="keyPricePair"><small>OFF</small> <strong>+7→+7.5 -112</strong> · <strong>-7→-6.5 -112</strong></span></div><div class="keyPriceItem"><b>10</b><span class="keyPricePair"><small>ONTO</small> <strong>+9.5→+10 -111</strong> · <strong>-10.5→-10 -110</strong></span><span class="keyPricePair"><small>OFF</small> <strong>+10→+10.5 -110</strong> · <strong>-10→-9.5 -110</strong></span></div><div class="keyPriceItem"><b>17</b><span class="keyPricePair"><small>ONTO</small> <strong>+16.5→+17 -110</strong> · <strong>-17.5→-17 -106</strong></span><span class="keyPricePair"><small>OFF</small> <strong>+17→+17.5 -107</strong> · <strong>-17→-16.5 -107</strong></span></div><div class="keyPriceItem"><b>14</b><span class="keyPricePair"><small>ONTO</small> <strong>+13.5→+14 -107</strong> · <strong>-14.5→-14 -110</strong></span><span class="keyPricePair"><small>OFF</small> <strong>+14→+14.5 -108</strong> · <strong>-14→-13.5 -108</strong></span></div>
-  </div>
-  <div class="keyPriceNote">Fair buy price for gaining the listed half-point · 2021–2025 NCAAF closing-margin calibration · more favorable than fair = estimated value.</div>
 </section>
 <!-- MODERN_KEY_NUMBERS_END -->
 </div>

@@ -29,7 +29,7 @@ ROOT = Path("/Users/jameslindesmith/NCAAF_MAIN_REPO")
 SOURCE = ROOT / "reports/five_source_backtest_validated/corrected/site_history_v2/site_betting_history_v2.json"
 HALF_POINT_VALUES = ROOT / "data/site/ncaaf_spread_half_point_values_2021_2025.json"
 SPREAD_EDGE_VALIDATION = ROOT / "data/research/historical/timestamped_spread_edge_study_2021_2025_v2/cumulative_key_zone_edge_summary.csv"
-HISTORICAL_MODEL_PERFORMANCE = ROOT / "data/research/historical/timestamped_spread_edge_study_2021_2025_v2/spread_threshold_summary.csv"
+HISTORICAL_MODEL_PERFORMANCE = ROOT / "data/site/historical_model_performance_2021_2025.json"
 
 # Current source owners confirmed by repo inventory.
 OPENERS = ROOT / "openers.html"
@@ -53,11 +53,20 @@ with SPREAD_EDGE_VALIDATION.open(newline="") as f:
 
 if not HISTORICAL_MODEL_PERFORMANCE.exists():
     raise SystemExit(
-        f"STOP: missing historical model performance CSV: {HISTORICAL_MODEL_PERFORMANCE}"
+        f"STOP: missing historical model performance JSON: {HISTORICAL_MODEL_PERFORMANCE}"
     )
 
-with HISTORICAL_MODEL_PERFORMANCE.open(newline="") as f:
-    historical_model_rows_raw = list(csv.DictReader(f))
+historical_model_payload = json.loads(
+    HISTORICAL_MODEL_PERFORMANCE.read_text()
+)
+
+if historical_model_payload.get("schema") != "historical-model-performance-v2":
+    raise SystemExit(
+        "STOP: unexpected historical model performance schema: "
+        f"{historical_model_payload.get('schema')}"
+    )
+
+historical_model_rows = historical_model_payload.get("rows") or []
 
 HISTORICAL_MODEL_NAMES = [
     "Five-source equal weight",
@@ -77,27 +86,27 @@ HISTORICAL_MODEL_SCOPES = [
     "2025",
 ]
 
-historical_model_rows = [
-    r for r in historical_model_rows_raw
-    if r.get("slot") == "SUN_9PM_ET"
-    and r.get("model") in HISTORICAL_MODEL_NAMES
-    and r.get("scope") in HISTORICAL_MODEL_SCOPES
-    and abs(float(r.get("threshold") or 0) - 3.5) < 1e-9
+# Only expose the two model-comparison views requested for the site.
+HISTORICAL_MODEL_VIEWS = [
+    "all",
+    "3.0",
 ]
 
 expected_historical_model_rows = (
-    len(HISTORICAL_MODEL_NAMES) * len(HISTORICAL_MODEL_SCOPES)
+    len(HISTORICAL_MODEL_NAMES)
+    * len(HISTORICAL_MODEL_SCOPES)
+    * 3
 )
 
 if len(historical_model_rows) != expected_historical_model_rows:
     raise SystemExit(
         "STOP: expected "
-        f"{expected_historical_model_rows} historical model rows; "
+        f"{expected_historical_model_rows} historical model source rows; "
         f"found {len(historical_model_rows)}"
     )
 
 historical_model_lookup = {
-    (r["scope"], r["model"]): r
+    (r["view"], r["scope"], r["model"]): r
     for r in historical_model_rows
 }
 
@@ -214,38 +223,44 @@ def hist_tone(v):
 def render_historical_model_rows():
     out = []
 
-    for scope in HISTORICAL_MODEL_SCOPES:
-        for model in HISTORICAL_MODEL_NAMES:
-            r = historical_model_lookup[(scope, model)]
+    for view in HISTORICAL_MODEL_VIEWS:
+        for scope in HISTORICAL_MODEL_SCOPES:
+            for model in HISTORICAL_MODEL_NAMES:
+                r = historical_model_lookup[(view, scope, model)]
 
-            wins = integer(r.get("wins"))
-            losses = integer(r.get("losses"))
-            pushes = integer(r.get("pushes"))
-            record = f"{wins}-{losses}-{pushes}"
+                wins = integer(r.get("wins"))
+                losses = integer(r.get("losses"))
+                pushes = integer(r.get("pushes"))
+                record = f"{wins}-{losses}-{pushes}"
 
-            composite = model == "Five-source equal weight"
-            row_class = " histModelComposite" if composite else ""
-            badge = (
-                ' <span class="histBadge histActionable">Composite</span>'
-                if composite else ""
-            )
+                composite = model == "Five-source equal weight"
+                row_class = " histModelComposite" if composite else ""
+                badge = (
+                    ' <span class="histBadge histActionable">Composite</span>'
+                    if composite else ""
+                )
 
-            out.append(
-                f"""<tr class="histModelRow{row_class}"
-                    data-hist-model-scope="{esc(scope)}">
-                  <td><b>{esc(model)}{badge}</b></td>
-                  <td>{integer(r.get("games"))}</td>
-                  <td>{record}</td>
-                  <td>{pct(r.get("ats_pct"))}</td>
-                  <td class="{hist_tone(r.get("roi"))}">
-                    {signed_pct(r.get("roi"), 1)}
-                  </td>
-                  <td>{pct(r.get("positive_closing_clv_pct"))}</td>
-                  <td class="{hist_tone(r.get("avg_closing_clv_points"))}">
-                    {signed_num(r.get("avg_closing_clv_points"), 2)}
-                  </td>
-                </tr>"""
-            )
+                out.append(
+                    f"""<tr class="histModelRow{row_class}"
+                        data-hist-model-view="{esc(view)}"
+                        data-hist-model-scope="{esc(scope)}">
+                      <td><b>{esc(model)}{badge}</b></td>
+                      <td>{integer(r.get("games"))}</td>
+                      <td>{record}</td>
+                      <td>{pct(r.get("ats_pct"))}</td>
+                      <td class="{hist_tone(r.get("roi"))}">
+                        {signed_pct(r.get("roi"), 1)}
+                      </td>
+                      <td>{pct(r.get("beat_close_pct"))}</td>
+                      <td class="{hist_tone(r.get("avg_clv"))}">
+                        {signed_num(r.get("avg_clv"), 2)}
+                      </td>
+                      <td>{num(r.get("mae"), 2)}</td>
+                      <td class="{hist_tone(-abs(float(r.get("bias") or 0)))}">
+                        {signed_num(r.get("bias"), 2)}
+                      </td>
+                    </tr>"""
+                )
 
     return "".join(out)
 
@@ -457,8 +472,9 @@ CSS = r"""
 .keyPriceNote{margin-top:6px;color:var(--muted);font-size:8px}
 .histModelCard{margin-top:12px}
 .histModelControls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px}
-.histModelYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}
-.histModelYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}
+.histModelViewControls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.histModelView,.histModelYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}
+.histModelView.active,.histModelYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}
 .histModelComposite td{background:rgba(24,87,167,.10)}
 .histModelComposite td:first-child{box-shadow:inset 3px 0 0 #55a2ff}
 .histModelMeta{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.45}
@@ -550,9 +566,16 @@ MODEL_COMPARISON_BLOCK = f"""
   <div class="histHead">
     <div>
       <h2>Historical Model Performance</h2>
-      <small>2021–2025 · Sunday 9 PM ET · 3.5+ model edge</small>
+      <small>2021–2025 · Sunday 9 PM ET</small>
     </div>
     <small>Composite vs individual systems</small>
+  </div>
+
+  <div class="histModelViewControls" id="histModelViews">
+    <button class="histModelView active"
+      data-hist-model-view="all">All Games</button>
+    <button class="histModelView"
+      data-hist-model-view="3.0">3.0+ Edge</button>
   </div>
 
   <div class="histModelControls" id="histModelYears">
@@ -583,6 +606,16 @@ MODEL_COMPARISON_BLOCK = f"""
             <span class="histHelp"
               title="Average spread points gained versus the closing market.">?</span>
           </th>
+          <th>
+            MAE
+            <span class="histHelp"
+              title="Mean absolute error between the model projected home margin and the actual final home margin. Lower is better.">?</span>
+          </th>
+          <th>
+            Bias
+            <span class="histHelp"
+              title="Average projected home margin minus actual home margin. Closest to zero is best calibrated; positive means the model overrated home teams and negative means it underrated them.">?</span>
+          </th>
         </tr>
       </thead>
       <tbody id="historicalModelRows">
@@ -592,7 +625,8 @@ MODEL_COMPARISON_BLOCK = f"""
   </div>
 
   <div class="histModelMeta">
-    Same Sunday 9 PM ET checkpoint and 3.5+ cumulative model-edge threshold for every system.
+    All Games includes every directional model selection with an executable Sunday 9 PM ET market observation.
+    3.0+ Edge includes only games where that model differed from the market by at least 3 points.
     Five-source equal weight = SP+ + FPI + TeamRankings + Sagarin + DRatings.
   </div>
 </section>
@@ -602,27 +636,58 @@ MODEL_COMPARISON_BLOCK = f"""
   const root=document.getElementById('historicalModelPerformance');
   if(!root)return;
 
-  const buttons=[...root.querySelectorAll('[data-hist-model-year]')];
-  const rows=[...root.querySelectorAll('[data-hist-model-scope]')];
+  const viewButtons=[
+    ...root.querySelectorAll('[data-hist-model-view]')
+  ];
+  const yearButtons=[
+    ...root.querySelectorAll('[data-hist-model-year]')
+  ];
+  const rows=[
+    ...root.querySelectorAll(
+      'tr[data-hist-model-view][data-hist-model-scope]'
+    )
+  ];
 
-  function setYear(scope){{
-    buttons.forEach(b=>b.classList.toggle(
+  let activeView='all';
+  let activeYear='2021-2025';
+
+  function render(){{
+    viewButtons.forEach(b=>b.classList.toggle(
       'active',
-      b.dataset.histModelYear===scope
+      b.dataset.histModelView===activeView
+    ));
+
+    yearButtons.forEach(b=>b.classList.toggle(
+      'active',
+      b.dataset.histModelYear===activeYear
     ));
 
     rows.forEach(r=>{{
       r.style.display =
-        r.dataset.histModelScope===scope ? '' : 'none';
+        r.dataset.histModelView===activeView
+        && r.dataset.histModelScope===activeYear
+          ? ''
+          : 'none';
     }});
   }}
 
-  buttons.forEach(b=>b.addEventListener(
+  viewButtons.forEach(b=>b.addEventListener(
     'click',
-    ()=>setYear(b.dataset.histModelYear)
+    ()=>{{
+      activeView=b.dataset.histModelView;
+      render();
+    }}
   ));
 
-  setYear('2021-2025');
+  yearButtons.forEach(b=>b.addEventListener(
+    'click',
+    ()=>{{
+      activeYear=b.dataset.histModelYear;
+      render();
+    }}
+  ));
+
+  render();
 }})();
 </script>
 """
@@ -651,10 +716,6 @@ OPENERS_BLOCK = f"""
       {render_key_number_items(total_top5)}
     </div>
   </div>
-  <div class="keyPriceGrid">
-    {render_half_point_key_prices()}
-  </div>
-  <div class="keyPriceNote">Fair buy price for gaining the listed half-point · 2021–2025 NCAAF closing-margin calibration · more favorable than fair = estimated value.</div>
 </section>
 <!-- MODERN_KEY_NUMBERS_END -->
 """
@@ -761,6 +822,10 @@ checks = [
     ("Betting EV%", "EV%" in BETTING.read_text()),
     ("Betting historical model comparison", "Historical Model Performance" in BETTING.read_text()),
     ("Betting five-source model row", "Five-source equal weight" in BETTING.read_text()),
+    ("Betting all-games model view", 'data-hist-model-view="all"' in BETTING.read_text()),
+    ("Betting 3.0 model view", 'data-hist-model-view="3.0"' in BETTING.read_text()),
+    ("Betting MAE", ">MAE" in BETTING.read_text() or "MAE" in BETTING.read_text()),
+    ("Betting Bias", ">Bias" in BETTING.read_text() or "Bias" in BETTING.read_text()),
     ("Betting 2025 model selector", 'data-hist-model-year="2025"' in BETTING.read_text()),
     ("Betting totals placeholder", "Historical Totals Edge Validation" in BETTING.read_text()),
 ]
