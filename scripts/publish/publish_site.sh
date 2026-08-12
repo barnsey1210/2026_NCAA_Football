@@ -17,6 +17,7 @@ die(){ printf '[canonical-publish] ERROR: %s\n' "$*" >&2; exit 1; }
 [[ -s "$PUBLIC_DIR/matchups.html" ]] || die "missing public Matchups page"
 [[ -s "$PUBLIC_DIR/data/site/odds_screen_v2.json" ]] || die "missing public odds payload"
 [[ -s "$PUBLIC_DIR/data/site/matchups_view.json" ]] || die "missing public matchup payload"
+[[ -s "$PUBLIC_DIR/data/site/model_performance_view.json" ]] || die "missing public model performance payload"
 
 # Use the project's established public-site validator when available.
 if [[ -f "$RUNTIME_ROOT/scripts/publish/check_public_site.py" ]]; then
@@ -166,6 +167,7 @@ manifest.write_text("\n".join(changed) + ("\n" if changed else ""), encoding="ut
 required = [
     Path("data/site/odds_screen_v2.json"),
     Path("data/site/matchups_view.json"),
+    Path("data/site/model_performance_view.json"),
 ]
 for rel in required:
     src = source / rel

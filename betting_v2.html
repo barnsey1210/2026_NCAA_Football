@@ -111,6 +111,12 @@ img[src$="west-virginia.webp"] {
 .histStrong{color:#baf8d6;border:1px solid #2f7d5a;background:#0c2d25}
 .histActionable{color:#cbe5ff;border:1px solid #356fa8;background:#102b50}
 .histWatch{color:#ffe2a8;border:1px solid #8a6c31;background:#302711}
+.histEmphasis{font-weight:950;background:rgba(255,255,255,.025)}
+.histPositive{color:#77e8ad}
+.histNegative{color:#ff9a9a}
+.histHelp{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;margin-left:3px;border:1px solid #40638d;border-radius:50%;font-size:8px;color:#a9c4e8;cursor:help;vertical-align:middle}
+.histTotalsPlaceholder{padding:18px 14px;color:var(--muted);font-size:11px;line-height:1.55}
+.histTotalsPlaceholder b{display:block;color:var(--text);font-size:13px;margin-bottom:5px}
 .histNote{padding:9px 12px;color:var(--muted);font-size:9px;border-top:1px solid #17345c}
 .keyRef{margin:10px 0 12px;border:1px solid var(--line);background:#081731;border-radius:12px;padding:10px 12px}
 .keyRefTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
@@ -122,7 +128,22 @@ img[src$="west-virginia.webp"] {
 .keyNumItem{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #28517d;background:#0d2240;border-radius:8px;padding:4px 7px}
 .keyNumItem b{font-size:12px}
 .keyNumItem small{font-size:8px;color:var(--muted)}
-@media(max-width:900px){.histGrid,.keyRefGrid{grid-template-columns:1fr}}
+.keyPriceGrid{margin-top:8px;padding-top:8px;border-top:1px solid #17345c;display:flex;gap:6px;flex-wrap:wrap}
+.keyPriceItem{border:1px solid #28517d;background:#0a1d38;border-radius:8px;padding:5px 7px;display:grid;grid-template-columns:auto 1fr;column-gap:7px;row-gap:2px;align-items:center}
+.keyPriceItem>b{font-size:13px;grid-row:1/3}
+.keyPricePair{font-size:8px;white-space:nowrap;color:#c7d8f2}
+.keyPricePair small{font-size:7px;color:var(--muted);font-weight:900;letter-spacing:.06em}
+.keyPricePair strong{font-size:8px}
+.keyPriceNote{margin-top:6px;color:var(--muted);font-size:8px}
+.histModelCard{margin-top:12px}
+.histModelControls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px}
+.histModelYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}
+.histModelYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}
+.histModelComposite td{background:rgba(24,87,167,.10)}
+.histModelComposite td:first-child{box-shadow:inset 3px 0 0 #55a2ff}
+.histModelMeta{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.45}
+.spreadEvWarning{color:#ffe2a8!important;font-weight:800;letter-spacing:.03em;margin-top:2px}
+@media(max-width:900px){.histGrid,.keyRefGrid{grid-template-columns:1fr}.keyPriceItem{flex:1 1 230px}}
 </style>
 <!-- HISTORICAL_BETTING_UI_CSS_END -->
 
@@ -133,30 +154,624 @@ img[src$="west-virginia.webp"] {
 <!-- HISTORICAL_BETTING_SECTION_START -->
 <section class="histSection" id="historicalBettingResearch">
   <div class="histGrid">
+
     <div class="histCard">
       <div class="histHead">
-        <div><h2>Historical Consensus Edge</h2><small>2022–2025 · five-system consensus vs recorded opener</small></div>
-        <small>Results + market-process validation</small>
+        <div>
+          <h2>Historical Spread Edge Validation</h2>
+          <small>2021–2025 · five-source equal weight · Sunday 9 PM ET market</small>
+        </div>
+        <small>Results + closing-market validation</small>
       </div>
-      <div class="histTableWrap"><table class="histTable">
-        <thead><tr><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>ROI @ -110</th><th>Beat Close</th><th>+CLV movers</th><th>Avg CLV</th></tr></thead>
-        <tbody><tr class=""><td><b>1+</b> </td><td>2,050</td><td>1018-998-34</td><td>50.5%</td><td>-3.6%</td><td>50.3%</td><td>59.9%</td><td>0.42</td></tr><tr class=""><td><b>2+</b> </td><td>1,188</td><td>609-557-22</td><td>52.2%</td><td>-0.3%</td><td>52.5%</td><td>62.3%</td><td>0.56</td></tr><tr class=""><td><b>3+</b> <span class="histBadge histWatch">Watch</span></td><td>618</td><td>319-288-11</td><td>52.6%</td><td>0.3%</td><td>56.1%</td><td>66.5%</td><td>0.81</td></tr><tr class="histActionRow"><td><b>3.5+</b> <span class="histBadge histActionable">Actionable</span></td><td>441</td><td>237-198-6</td><td>54.5%</td><td>4.0%</td><td>58.0%</td><td>69.0%</td><td>0.99</td></tr><tr class="histCoreRow"><td><b>4+</b> <span class="histBadge histStrong">Strong</span></td><td>303</td><td>168-132-3</td><td>56.0%</td><td>6.9%</td><td>61.7%</td><td>71.9%</td><td>1.20</td></tr><tr class=""><td><b>5+</b> </td><td>142</td><td>79-61-2</td><td>56.4%</td><td>7.7%</td><td>60.6%</td><td>69.9%</td><td>1.57</td></tr><tr class=""><td><b>7+</b> </td><td>27</td><td>15-11-1</td><td>57.7%</td><td>10.1%</td><td>66.7%</td><td>78.3%</td><td>4.48</td></tr></tbody>
-      </table></div>
-      <div class="histNote">3.5+ is the broader actionable historical threshold; 4+ is the stronger core threshold. Beat Close includes unchanged lines in the denominator. +CLV movers excludes no-move games.</div>
+
+      <div class="histTableWrap">
+        <table class="histTable">
+          <thead>
+            <tr>
+              <th>Edge</th>
+              <th>Games</th>
+              <th>Record</th>
+              <th>ATS</th>
+              <th>ROI</th>
+              <th>
+                Beat Close
+                <span class="histHelp"
+                  title="Percentage of wagers that finished with a better spread than the closing line. Unchanged lines are not counted as beats.">?</span>
+              </th>
+              <th>
+                Avg CLV
+                <span class="histHelp"
+                  title="Average spread points gained versus the closing market. Positive means the wager beat the eventual closing number.">?</span>
+              </th>
+              <th>
+                EV%
+                <span class="histHelp"
+                  title="Estimated expected return versus the closing market. Uses the actual wager price and our custom 2021–2025 NCAAF half-point value chart to price each 0.5-point spread move crossed. Final closing price is standardized to -110.">?</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody><tr class=""><td><b>0.5+</b> </td><td>2,123</td><td>1068-1030-25</td><td>50.9%</td><td>-3.0%</td><td>53.4%</td><td class="histEmphasis histPositive">+0.52</td><td class="histEmphasis histNegative">-1.61%</td></tr><tr class=""><td><b>1+</b> </td><td>1,745</td><td>884-840-21</td><td>51.3%</td><td>-2.3%</td><td>54.2%</td><td class="histEmphasis histPositive">+0.57</td><td class="histEmphasis histNegative">-1.34%</td></tr><tr class=""><td><b>1.5+</b> </td><td>1,367</td><td>695-652-20</td><td>51.6%</td><td>-1.7%</td><td>55.4%</td><td class="histEmphasis histPositive">+0.63</td><td class="histEmphasis histNegative">-1.08%</td></tr><tr class=""><td><b>2+</b> </td><td>1,046</td><td>544-489-13</td><td>52.7%</td><td>+0.3%</td><td>55.2%</td><td class="histEmphasis histPositive">+0.65</td><td class="histEmphasis histNegative">-1.01%</td></tr><tr class=""><td><b>2.5+</b> </td><td>795</td><td>415-374-6</td><td>52.6%</td><td>+0.2%</td><td>55.7%</td><td class="histEmphasis histPositive">+0.70</td><td class="histEmphasis histNegative">-0.85%</td></tr><tr class=""><td><b>3+</b> <span class="histBadge histWatch">Watch</span></td><td>560</td><td>297-257-6</td><td>53.6%</td><td>+2.1%</td><td>55.5%</td><td class="histEmphasis histPositive">+0.80</td><td class="histEmphasis histNegative">-0.45%</td></tr><tr class="histActionRow"><td><b>3.5+</b> <span class="histBadge histActionable">Actionable</span></td><td>408</td><td>215-188-5</td><td>53.3%</td><td>+1.6%</td><td>58.1%</td><td class="histEmphasis histPositive">+0.94</td><td class="histEmphasis histPositive">+0.24%</td></tr><tr class=""><td><b>4+</b> </td><td>286</td><td>159-125-2</td><td>56.0%</td><td>+6.6%</td><td>56.3%</td><td class="histEmphasis histPositive">+0.98</td><td class="histEmphasis histPositive">+0.22%</td></tr><tr class="histCoreRow"><td><b>4.5+</b> <span class="histBadge histStrong">Strong</span></td><td>198</td><td>106-92-0</td><td>53.5%</td><td>+2.0%</td><td>58.1%</td><td class="histEmphasis histPositive">+1.21</td><td class="histEmphasis histPositive">+1.24%</td></tr><tr class=""><td><b>5+</b> </td><td>142</td><td>77-65-0</td><td>54.2%</td><td>+3.3%</td><td>59.9%</td><td class="histEmphasis histPositive">+1.42</td><td class="histEmphasis histPositive">+1.89%</td></tr><tr class=""><td><b>6+</b> </td><td>69</td><td>41-28-0</td><td>59.4%</td><td>+13.3%</td><td>58.0%</td><td class="histEmphasis histPositive">+2.12</td><td class="histEmphasis histPositive">+3.79%</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="histNote">
+        3+ = Watch · 3.5+ = Actionable candidate · 4.5+ = Strong candidate.
+        Thresholds are cumulative and are not automatic betting rules.
+        Avg CLV and EV% are emphasized because they evaluate whether the process created market value,
+        while ATS and ROI show realized historical results.
+      </div>
     </div>
+
     <div class="histCard">
       <div class="histHead">
-        <div><h2>Historical Key-Number Angles</h2><small>Major spread keys: 3, 7, 10, 14</small></div>
-        <small>Context, not an automatic trigger</small>
+        <div>
+          <h2>Historical Totals Edge Validation</h2>
+          <small>Reserved for the 2021–2025 totals backtest</small>
+        </div>
+        <small>Next research module</small>
       </div>
-      <div class="histTableWrap"><table class="histTable">
-        <thead><tr><th>Angle</th><th>Games</th><th>ATS</th><th>ROI @ -110</th><th>Beat Close</th><th>+CLV movers</th><th>Avg CLV</th></tr></thead>
-        <tbody><tr><td>Broad 2+ + major key</td><td>673</td><td>52.7%</td><td>0.7%</td><td>53.9%</td><td>64.8%</td><td>0.59</td></tr><tr><td>Secondary 2-&lt;3 + major key</td><td>295</td><td>53.9%</td><td>2.8%</td><td>50.8%</td><td>61.7%</td><td>0.24</td></tr><tr><td>3-&lt;4 + major key</td><td>170</td><td>52.4%</td><td>0.1%</td><td>51.2%</td><td>63.0%</td><td>0.38</td></tr><tr><td>4+ + major key</td><td>208</td><td>51.5%</td><td>-1.8%</td><td>60.6%</td><td>70.4%</td><td>1.25</td></tr><tr><td>4+ all lines</td><td>303</td><td>56.0%</td><td>6.9%</td><td>61.7%</td><td>71.9%</td><td>1.20</td></tr></tbody>
-      </table></div>
-      <div class="histNote">Lower-edge key-number groups remain historical context because their CLV/process validation was weaker than the 3.5+ and 4+ consensus thresholds.</div>
+
+      <div class="histTotalsPlaceholder">
+        <b>Totals validation pending</b>
+        This card will use the same framework as spreads:
+        edge threshold, sample size, record, O/U win rate, ROI,
+        Beat Close, Avg CLV, and EV%.
+        Historical Massey / DRatings totals acquisition and validation
+        will populate this section.
+      </div>
     </div>
+
   </div>
 </section>
+
+<section class="histCard histModelCard" id="historicalModelPerformance">
+  <div class="histHead">
+    <div>
+      <h2>Historical Model Performance</h2>
+      <small>2021–2025 · Sunday 9 PM ET · 3.5+ model edge</small>
+    </div>
+    <small>Composite vs individual systems</small>
+  </div>
+
+  <div class="histModelControls" id="histModelYears">
+    <button class="histModelYear active" data-hist-model-year="2021-2025">2021–2025</button>
+    <button class="histModelYear" data-hist-model-year="2021">2021</button>
+    <button class="histModelYear" data-hist-model-year="2022">2022</button>
+    <button class="histModelYear" data-hist-model-year="2023">2023</button>
+    <button class="histModelYear" data-hist-model-year="2024">2024</button>
+    <button class="histModelYear" data-hist-model-year="2025">2025</button>
+  </div>
+
+  <div class="histTableWrap">
+    <table class="histTable">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Games</th>
+          <th>Record</th>
+          <th>ATS</th>
+          <th>ROI</th>
+          <th>
+            Beat Close
+            <span class="histHelp"
+              title="Percentage finishing with a better spread than the closing line. Unchanged lines are not counted as beats.">?</span>
+          </th>
+          <th>
+            Avg CLV
+            <span class="histHelp"
+              title="Average spread points gained versus the closing market.">?</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="historicalModelRows">
+        <tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>408</td>
+                  <td>215-188-5</td>
+                  <td>53.3%</td>
+                  <td class="histPositive">
+                    +1.6%
+                  </td>
+                  <td>58.1%</td>
+                  <td class="histPositive">
+                    +0.94
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>SP+</b></td>
+                  <td>990</td>
+                  <td>523-450-17</td>
+                  <td>53.8%</td>
+                  <td class="histPositive">
+                    +2.4%
+                  </td>
+                  <td>50.7%</td>
+                  <td class="histPositive">
+                    +0.49
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>FPI</b></td>
+                  <td>826</td>
+                  <td>429-385-12</td>
+                  <td>52.7%</td>
+                  <td class="histPositive">
+                    +0.4%
+                  </td>
+                  <td>57.1%</td>
+                  <td class="histPositive">
+                    +0.75
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>TeamRankings</b></td>
+                  <td>828</td>
+                  <td>425-390-13</td>
+                  <td>52.1%</td>
+                  <td class="histNegative">
+                    -0.7%
+                  </td>
+                  <td>55.7%</td>
+                  <td class="histPositive">
+                    +0.70
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>Sagarin</b></td>
+                  <td>754</td>
+                  <td>384-365-5</td>
+                  <td>51.3%</td>
+                  <td class="histNegative">
+                    -2.3%
+                  </td>
+                  <td>51.5%</td>
+                  <td class="histPositive">
+                    +0.52
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021-2025">
+                  <td><b>DRatings</b></td>
+                  <td>777</td>
+                  <td>382-387-8</td>
+                  <td>49.7%</td>
+                  <td class="histNegative">
+                    -5.3%
+                  </td>
+                  <td>49.5%</td>
+                  <td class="histPositive">
+                    +0.48
+                  </td>
+                </tr><tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2021">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>83</td>
+                  <td>40-42-1</td>
+                  <td>48.8%</td>
+                  <td class="histNegative">
+                    -7.5%
+                  </td>
+                  <td>62.7%</td>
+                  <td class="histPositive">
+                    +1.64
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021">
+                  <td><b>SP+</b></td>
+                  <td>175</td>
+                  <td>94-76-5</td>
+                  <td>55.3%</td>
+                  <td class="histPositive">
+                    +4.8%
+                  </td>
+                  <td>65.7%</td>
+                  <td class="histPositive">
+                    +1.24
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021">
+                  <td><b>FPI</b></td>
+                  <td>149</td>
+                  <td>74-74-1</td>
+                  <td>50.0%</td>
+                  <td class="histNegative">
+                    -4.9%
+                  </td>
+                  <td>51.7%</td>
+                  <td class="histPositive">
+                    +0.86
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021">
+                  <td><b>TeamRankings</b></td>
+                  <td>166</td>
+                  <td>85-78-3</td>
+                  <td>52.1%</td>
+                  <td class="histNegative">
+                    -1.0%
+                  </td>
+                  <td>57.8%</td>
+                  <td class="histPositive">
+                    +1.04
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021">
+                  <td><b>Sagarin</b></td>
+                  <td>161</td>
+                  <td>80-80-1</td>
+                  <td>50.0%</td>
+                  <td class="histNegative">
+                    -5.1%
+                  </td>
+                  <td>51.6%</td>
+                  <td class="histPositive">
+                    +0.80
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2021">
+                  <td><b>DRatings</b></td>
+                  <td>154</td>
+                  <td>63-90-1</td>
+                  <td>41.2%</td>
+                  <td class="histNegative">
+                    -21.7%
+                  </td>
+                  <td>48.7%</td>
+                  <td class="histPositive">
+                    +0.61
+                  </td>
+                </tr><tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2022">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>93</td>
+                  <td>42-50-1</td>
+                  <td>45.7%</td>
+                  <td class="histNegative">
+                    -12.8%
+                  </td>
+                  <td>53.8%</td>
+                  <td class="histPositive">
+                    +0.47
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2022">
+                  <td><b>SP+</b></td>
+                  <td>193</td>
+                  <td>98-91-4</td>
+                  <td>51.9%</td>
+                  <td class="histNegative">
+                    -1.1%
+                  </td>
+                  <td>51.8%</td>
+                  <td class="histPositive">
+                    +0.38
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2022">
+                  <td><b>FPI</b></td>
+                  <td>162</td>
+                  <td>78-81-3</td>
+                  <td>49.1%</td>
+                  <td class="histNegative">
+                    -6.4%
+                  </td>
+                  <td>58.0%</td>
+                  <td class="histPositive">
+                    +0.60
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2022">
+                  <td><b>TeamRankings</b></td>
+                  <td>152</td>
+                  <td>75-72-5</td>
+                  <td>51.0%</td>
+                  <td class="histNegative">
+                    -2.8%
+                  </td>
+                  <td>57.9%</td>
+                  <td class="histPositive">
+                    +0.64
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2022">
+                  <td><b>Sagarin</b></td>
+                  <td>157</td>
+                  <td>76-81-0</td>
+                  <td>48.4%</td>
+                  <td class="histNegative">
+                    -7.7%
+                  </td>
+                  <td>49.0%</td>
+                  <td class="histPositive">
+                    +0.24
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2022">
+                  <td><b>DRatings</b></td>
+                  <td>179</td>
+                  <td>89-87-3</td>
+                  <td>50.6%</td>
+                  <td class="histNegative">
+                    -3.5%
+                  </td>
+                  <td>50.3%</td>
+                  <td class="histPositive">
+                    +0.42
+                  </td>
+                </tr><tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2023">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>98</td>
+                  <td>62-34-2</td>
+                  <td>64.6%</td>
+                  <td class="histPositive">
+                    +22.7%
+                  </td>
+                  <td>59.2%</td>
+                  <td class="histPositive">
+                    +0.84
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2023">
+                  <td><b>SP+</b></td>
+                  <td>199</td>
+                  <td>102-93-4</td>
+                  <td>52.3%</td>
+                  <td class="histNegative">
+                    -0.2%
+                  </td>
+                  <td>49.2%</td>
+                  <td class="histPositive">
+                    +0.39
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2023">
+                  <td><b>FPI</b></td>
+                  <td>184</td>
+                  <td>98-81-5</td>
+                  <td>54.7%</td>
+                  <td class="histPositive">
+                    +4.3%
+                  </td>
+                  <td>59.8%</td>
+                  <td class="histPositive">
+                    +0.76
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2023">
+                  <td><b>TeamRankings</b></td>
+                  <td>172</td>
+                  <td>93-77-2</td>
+                  <td>54.7%</td>
+                  <td class="histPositive">
+                    +4.3%
+                  </td>
+                  <td>57.0%</td>
+                  <td class="histPositive">
+                    +0.65
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2023">
+                  <td><b>Sagarin</b></td>
+                  <td>133</td>
+                  <td>76-55-2</td>
+                  <td>58.0%</td>
+                  <td class="histPositive">
+                    +10.6%
+                  </td>
+                  <td>54.9%</td>
+                  <td class="histPositive">
+                    +0.56
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2023">
+                  <td><b>DRatings</b></td>
+                  <td>177</td>
+                  <td>96-77-4</td>
+                  <td>55.5%</td>
+                  <td class="histPositive">
+                    +5.8%
+                  </td>
+                  <td>52.5%</td>
+                  <td class="histPositive">
+                    +0.45
+                  </td>
+                </tr><tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2024">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>69</td>
+                  <td>37-32-0</td>
+                  <td>53.6%</td>
+                  <td class="histPositive">
+                    +2.1%
+                  </td>
+                  <td>58.0%</td>
+                  <td class="histPositive">
+                    +0.69
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2024">
+                  <td><b>SP+</b></td>
+                  <td>217</td>
+                  <td>121-94-2</td>
+                  <td>56.3%</td>
+                  <td class="histPositive">
+                    +7.1%
+                  </td>
+                  <td>44.7%</td>
+                  <td class="histPositive">
+                    +0.24
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2024">
+                  <td><b>FPI</b></td>
+                  <td>161</td>
+                  <td>91-68-2</td>
+                  <td>57.2%</td>
+                  <td class="histPositive">
+                    +8.7%
+                  </td>
+                  <td>56.5%</td>
+                  <td class="histPositive">
+                    +0.58
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2024">
+                  <td><b>TeamRankings</b></td>
+                  <td>181</td>
+                  <td>95-84-2</td>
+                  <td>53.1%</td>
+                  <td class="histPositive">
+                    +0.9%
+                  </td>
+                  <td>48.1%</td>
+                  <td class="histPositive">
+                    +0.26
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2024">
+                  <td><b>Sagarin</b></td>
+                  <td>122</td>
+                  <td>58-64-0</td>
+                  <td>47.5%</td>
+                  <td class="histNegative">
+                    -9.4%
+                  </td>
+                  <td>47.5%</td>
+                  <td class="histPositive">
+                    +0.30
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2024">
+                  <td><b>DRatings</b></td>
+                  <td>133</td>
+                  <td>59-74-0</td>
+                  <td>44.4%</td>
+                  <td class="histNegative">
+                    -15.5%
+                  </td>
+                  <td>48.1%</td>
+                  <td class="histPositive">
+                    +0.35
+                  </td>
+                </tr><tr class="histModelRow histModelComposite"
+                    data-hist-model-scope="2025">
+                  <td><b>Five-source equal weight <span class="histBadge histActionable">Composite</span></b></td>
+                  <td>65</td>
+                  <td>34-30-1</td>
+                  <td>53.1%</td>
+                  <td class="histPositive">
+                    +1.5%
+                  </td>
+                  <td>56.9%</td>
+                  <td class="histPositive">
+                    +1.14
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2025">
+                  <td><b>SP+</b></td>
+                  <td>206</td>
+                  <td>108-96-2</td>
+                  <td>52.9%</td>
+                  <td class="histPositive">
+                    +1.1%
+                  </td>
+                  <td>44.7%</td>
+                  <td class="histPositive">
+                    +0.31
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2025">
+                  <td><b>FPI</b></td>
+                  <td>170</td>
+                  <td>88-81-1</td>
+                  <td>52.1%</td>
+                  <td class="histNegative">
+                    -0.6%
+                  </td>
+                  <td>58.8%</td>
+                  <td class="histPositive">
+                    +0.94
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2025">
+                  <td><b>TeamRankings</b></td>
+                  <td>157</td>
+                  <td>77-79-1</td>
+                  <td>49.4%</td>
+                  <td class="histNegative">
+                    -6.0%
+                  </td>
+                  <td>58.6%</td>
+                  <td class="histPositive">
+                    +0.97
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2025">
+                  <td><b>Sagarin</b></td>
+                  <td>181</td>
+                  <td>94-85-2</td>
+                  <td>52.5%</td>
+                  <td class="histPositive">
+                    +0.2%
+                  </td>
+                  <td>53.6%</td>
+                  <td class="histPositive">
+                    +0.64
+                  </td>
+                </tr><tr class="histModelRow"
+                    data-hist-model-scope="2025">
+                  <td><b>DRatings</b></td>
+                  <td>134</td>
+                  <td>75-59-0</td>
+                  <td>56.0%</td>
+                  <td class="histPositive">
+                    +6.8%
+                  </td>
+                  <td>47.0%</td>
+                  <td class="histPositive">
+                    +0.60
+                  </td>
+                </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="histModelMeta">
+    Same Sunday 9 PM ET checkpoint and 3.5+ cumulative model-edge threshold for every system.
+    Five-source equal weight = SP+ + FPI + TeamRankings + Sagarin + DRatings.
+  </div>
+</section>
+
+<script>
+(function(){
+  const root=document.getElementById('historicalModelPerformance');
+  if(!root)return;
+
+  const buttons=[...root.querySelectorAll('[data-hist-model-year]')];
+  const rows=[...root.querySelectorAll('[data-hist-model-scope]')];
+
+  function setYear(scope){
+    buttons.forEach(b=>b.classList.toggle(
+      'active',
+      b.dataset.histModelYear===scope
+    ));
+
+    rows.forEach(r=>{
+      r.style.display =
+        r.dataset.histModelScope===scope ? '' : 'none';
+    });
+  }
+
+  buttons.forEach(b=>b.addEventListener(
+    'click',
+    ()=>setYear(b.dataset.histModelYear)
+  ));
+
+  setYear('2021-2025');
+})();
+</script>
+
 <!-- HISTORICAL_BETTING_SECTION_END -->
 
 <div class="modelNotice" id="modelTrackerNotice"><strong>Prospective tracking has not started.</strong> Official records begin with the first accepted market capture. Preview and dry-run predictions are excluded.</div>
@@ -178,7 +793,7 @@ function renderRows(){const list=allRecords().filter(visible);rows.innerHTML=lis
 function score(m){return`<div class="score"><h3>${esc(m.label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${num(m.positive_clv_pct*100,1)}%</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd></dl></div>`}function mini(title,list){return`<table class="mini"><thead><tr><th>${title}</th><th>Record</th><th>CLV hit</th><th>Avg CLV</th></tr></thead><tbody>${list.map(m=>`<tr><td>${esc(m.label)}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${num(m.positive_clv_pct*100,0)}%</td><td class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</td></tr>`).join('')||'<tr><td colspan="4">No graded bets yet</td></tr>'}</tbody></table>`}
 function drawChart(){const p=DATA.performance_history||[],vals=p.flatMap(x=>[Number(x.realized_profit)||0,Number(x.total_ev_current_dollars)||0]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?0:i/(p.length-1))*(W-L-R),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(Number(d[k])||0)}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
 async function init(){[DATA,GAMES]=await Promise.all([fetch('data/site/betting_activity_view.json').then(r=>r.json()),fetch('data/site/matchups_view.json').then(r=>r.json())]);const s=DATA.summary,sm=Object.entries(DATA.strategy_metrics).map(([label,m])=>({label,...m})),wm=Object.entries(DATA.week_metrics).map(([label,m])=>({label,...m})),mm=Object.entries(DATA.market_metrics).map(([label,m])=>({label,...m})),overall=DATA.strategy_metrics.Overall;ownedCount.textContent=s.owned_open;exposure.textContent=money(s.open_exposure);totalEv.textContent=money(overall?.current_ev_dollars);totalEv.className=tone(overall?.current_ev_dollars);sync.textContent=`Sheet snapshot · ${String(DATA.built_at).slice(0,16).replace('T',' ')}`;scores.innerHTML=sm.map(score).join('');weeks.innerHTML=mini('Week',wm);markets.innerHTML=mini('Market',mm);drawChart();const ms=[...new Set(DATA.records.map(r=>r.market).filter(Boolean))].sort();market.innerHTML='<option value="all">All markets</option>'+ms.map(x=>`<option>${esc(x)}</option>`).join('');renderRows()}document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;renderRows()});[market,link,search].forEach(x=>x.addEventListener('input',renderRows));init().catch(e=>rows.innerHTML=`<tr><td colspan="10" class="empty">Unable to load betting data: ${esc(e.message)}</td></tr>`);
-</script><script>document.querySelector('[data-tab="opener"]').textContent='Model bets';document.querySelector('.performance .card:nth-child(2) .cardHead small').textContent='Overall, Powers, and Model bets';document.querySelector('.ledger thead tr').innerHTML='<th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Active bet</th><th>Current market</th><th>Current CLV / EV</th><th>Result / P&amp;L</th><th>Game</th>';</script>
+</script><script>document.querySelector('[data-tab="opener"]').textContent='Model bets';document.querySelector('.performance .card:nth-child(2) .cardHead small').textContent='Overall, Powers, and Model bets';document.querySelector('.ledger thead tr').innerHTML='<th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Active bet</th><th>Market reference</th><th>CLV / EV</th><th>Result / P&amp;L</th><th>Game</th>';</script>
 <script>
 let ACTIVE_PERIOD='Futures',PERIODS=[];
 const pPct=(v,d=1)=>v==null?'—':num(Number(v)*100,d)+'%';
@@ -194,8 +809,150 @@ function pChart(list){const by=new Map;list.forEach(r=>{const key=ACTIVE_PERIOD=
 function pPeriodMetrics(period){return pMetrics(pSelected(pRecords().filter(r=>r.actor?.type!=='site_draft'),period))}
 function pResults(){const activity=new Set((DATA.records||[]).map(r=>r.bet_period)),shown=['Futures',...PERIODS.filter(p=>p.startsWith('Week ')&&activity.has(p)),'Conference Championships','Bowl / Playoff',...(activity.has('Unassigned')?['Unassigned']:[])],rowsData=shown.map(p=>[p,pPeriodMetrics(p)]),total=pPeriodMetrics('All Bets');periodResultsBody.innerHTML=rowsData.map(([p,m])=>pResultRow(p,m)).join('')+pResultRow('All Bets',total,true);periodResultsBody.querySelectorAll('tr[data-period]').forEach(r=>r.onclick=()=>pSetPeriod(r.dataset.period))}
 function pResultRow(period,m,total=false){return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_pct)}">${pPct(m.avg_clv_pct,2)}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
+
+function spreadMarketReference(r){
+  if(r.market!=='Spread') return null;
+
+  if(r.ev_state==='FINAL' && r.closing_market_line!=null){
+    return {
+      label:'Closing market',
+      line:r.closing_market_line,
+      price:r.final_closing_price_assumption ?? r.closing_market_price,
+      book:r.closing_market_book||'',
+    };
+  }
+
+  if(r.current_market_line!=null){
+    return {
+      label:'Current market',
+      line:r.current_market_line,
+      price:r.current_market_price,
+      book:r.current_market_book||'',
+    };
+  }
+
+  return null;
+}
+
+function spreadValueDisplay(r){
+  if(r.market!=='Spread') return null;
+
+  const lowSample =
+    Number.isFinite(Number(r.spread_ev_weakest_half_point_sample_n))
+    && Number(r.spread_ev_weakest_half_point_sample_n) < 50;
+
+  const warning = lowSample
+    ? `<div class="sub spreadEvWarning" title="At least one half-point transition in this path has fewer than 50 historical observations before shrinkage.">LOW SAMPLE · weakest N ${esc(r.spread_ev_weakest_half_point_sample_n)}</div>`
+    : '';
+
+  if(r.ev_state==='FINAL'){
+    const clv = r.closing_line_clv;
+
+    return `
+      <div class="${tone(clv)}">
+        ${clv!=null ? `${Number(clv)>0?'+':''}${num(clv,1)} pts CLV` : '—'}
+      </div>
+      <div class="sub">Final CLV EV</div>
+      <div class="${tone(r.final_clv_ev_pct)}">
+        ${r.final_clv_ev_pct!=null ? `${Number(r.final_clv_ev_pct)>0?'+':''}${num(Number(r.final_clv_ev_pct)*100,2)}%` : '—'}
+      </div>
+      ${warning}
+    `;
+  }
+
+  if(r.ev_state==='CURRENT'){
+    const clv = r.line_clv_current;
+
+    return `
+      <div class="${tone(clv)}">
+        ${clv!=null ? `${Number(clv)>0?'+':''}${num(clv,1)} pts CLV` : '—'}
+      </div>
+      <div class="sub">Current Market EV</div>
+      <div class="${tone(r.current_market_ev_pct)}">
+        ${r.current_market_ev_pct!=null ? `${Number(r.current_market_ev_pct)>0?'+':''}${num(Number(r.current_market_ev_pct)*100,2)}%` : '—'}
+      </div>
+      ${warning}
+    `;
+  }
+
+  return `
+    <div>—</div>
+    <div class="sub">Spread EV unavailable</div>
+  `;
+}
+
+function marketReferenceDisplay(r){
+  const spreadRef=spreadMarketReference(r);
+
+  if(spreadRef){
+    return `
+      <div class="sub">${esc(spreadRef.label)}</div>
+      <b>${num(spreadRef.line)} ${odds(spreadRef.price)}</b>
+      <div class="sub">${esc(spreadRef.book)}</div>
+    `;
+  }
+
+  return r.current_market_line!=null
+    ? `${num(r.current_market_line)} ${odds(r.current_market_price)}<div class="sub">${esc(r.current_market_book||'')}</div>`
+    : '—';
+}
+
+function valueDisplay(r){
+  const spread=spreadValueDisplay(r);
+
+  if(spread!==null) return spread;
+
+  return `
+    <div class="${tone(r.clv_value)}">
+      ${r.clv_value!=null ? num(Number(r.clv_value)*100,1)+'% CLV' : '—'}
+    </div>
+    <div class="sub ${tone(r.ev_current_pct)}">
+      ${r.ev_current_pct!=null ? num(Number(r.ev_current_pct)*100,1)+'% EV' : ''}
+    </div>
+  `;
+}
+
 function pVisible(r){if(ACTIVE_PERIOD!=='All Bets'&&r.bet_period!==ACTIVE_PERIOD)return false;if(tab==='open'&&!(r.is_open&&r.actor.type!=='site_draft'))return false;if(tab==='powers'&&!(r.strategy_tags||[]).includes('Powers'))return false;if(tab==='opener'&&!(r.strategy_tags||[]).includes('Model'))return false;if(tab==='drafts'&&r.actor.type!=='site_draft')return false;const q=search.value.toLowerCase();if(q&&!`${r.selection} ${r.team} ${r.actor?.source} ${r.away_team} ${r.home_team} ${r.sportsbook}`.toLowerCase().includes(q))return false;if(market.value!=='all'&&r.market!==market.value)return false;if(link.value==='linked'&&!r.game_id)return false;if(link.value==='team'&&r.game_id)return false;if(link.value==='unlinked'&&(r.game_id||r.game_link_status==='not_game_market'))return false;return true}
-function pRows(){const list=pRecords().filter(pVisible);ledgerTitle.textContent=`${ACTIVE_PERIOD} wager ledger`;ledgerSubtitle.textContent=`${list.length} records in current filters`;rows.innerHTML=list.map(r=>`<tr><td>${tags(r)}</td><td>${esc(r.placed_at||'—')}</td><td>${esc(r.market||'—')}</td><td><b>${esc(r.selection||'—')}</b><div class="sub">${r.game_id?`${esc(r.away_team)} at ${esc(r.home_team)}`:esc(r.team||'Team/future')}</div></td><td>${bookLogo(r.sportsbook)}</td><td>${money(r.stake)}</td><td><b>${r.line!=null?num(r.line):'—'} ${r.price!=null?odds(r.price):''}</b></td><td>${r.current_market_line!=null?`${num(r.current_market_line)} ${odds(r.current_market_price)}`:'—'}<div class="sub">${esc(r.current_market_book||'')}</div></td><td class="${tone(r.clv_value)}">${r.clv_value!=null?num(Number(r.clv_value)*100,1)+'% CLV':'—'}<div class="sub ${tone(r.ev_current_pct)}">${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'% EV':''}</div></td><td><b>${esc(r.status||'—')}</b><div class="sub ${tone(r.realized_pl)}">${r.is_open?'Pending':money(r.realized_pl)}</div></td><td>${r.game_id?`<a class="gameLink" href="matchups_v2.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`:`<span class="sub">${esc(r.game_link_status||'Team market')}</span>`}</td></tr>`).join('')||'<tr><td colspan="11" class="empty">No records in this period and filter combination.</td></tr>'}
+function pRows(){
+  const list=pRecords().filter(pVisible);
+
+  ledgerTitle.textContent=`${ACTIVE_PERIOD} wager ledger`;
+  ledgerSubtitle.textContent=`${list.length} records in current filters`;
+
+  rows.innerHTML=list.map(r=>`
+    <tr>
+      <td>${tags(r)}</td>
+      <td>${esc(r.placed_at||'—')}</td>
+      <td>${esc(r.market||'—')}</td>
+      <td>
+        <b>${esc(r.selection||'—')}</b>
+        <div class="sub">
+          ${r.game_id
+            ? `${esc(r.away_team)} at ${esc(r.home_team)}`
+            : esc(r.team||'Team/future')}
+        </div>
+      </td>
+      <td>${bookLogo(r.sportsbook)}</td>
+      <td>${money(r.stake)}</td>
+      <td>
+        <b>${r.line!=null?num(r.line):'—'} ${r.price!=null?odds(r.price):''}</b>
+      </td>
+      <td>${marketReferenceDisplay(r)}</td>
+      <td>${valueDisplay(r)}</td>
+      <td>
+        <b>${esc(r.status||'—')}</b>
+        <div class="sub ${tone(r.realized_pl)}">
+          ${r.is_open?'Pending':money(r.realized_pl)}
+        </div>
+      </td>
+      <td>
+        ${r.game_id
+          ? `<a class="gameLink" href="matchups_v2.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`
+          : `<span class="sub">${esc(r.game_link_status||'Team market')}</span>`}
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="11" class="empty">No records in this period and filter combination.</td></tr>';
+}
 function pDashboard(){const list=pSelected(),overall=pMetrics(list),powers=list.filter(r=>(r.strategy_tags||[]).includes('Powers')),model=list.filter(r=>(r.strategy_tags||[]).includes('Model'));ownedCount.textContent=overall.open;exposure.textContent=money(overall.open_exposure);totalEv.textContent=money(overall.current_ev_dollars);totalEv.className=tone(overall.current_ev_dollars);scores.innerHTML=pScore('Overall',list)+pScore('Powers',powers)+pScore('Model',model);const categories=pGroup(list,'market_group');if(ACTIVE_PERIOD==='All Bets')weeks.innerHTML=pMini('Period',PERIODS.filter(p=>p!=='All Bets').map(p=>[p,pSelected(pRecords(),p)]).filter(x=>x[1].length));else weeks.innerHTML=pMini('Strategy',[['Powers',powers],['Model',model]]);markets.innerHTML=pMini('Category',categories);pChart(list);pRows();pResults()}
 function pSetPeriod(period){ACTIVE_PERIOD=period;sessionStorage.setItem('ncaaf-betting-period',period);document.querySelectorAll('#periodBar button').forEach(b=>b.classList.toggle('active',b.dataset.period===period));pDashboard()}
 function pInit(){const regular=[...new Set(GAMES.games.map(x=>Number(x.game.week)).filter(x=>Number.isFinite(x)&&x!==14))].sort((a,b)=>a-b).map(x=>`Week ${x}`);PERIODS=['Futures',...regular,'Conference Championships','Bowl / Playoff','All Bets'];const stored=sessionStorage.getItem('ncaaf-betting-period'),gamePeriods=(DATA.records||[]).filter(r=>r.bet_period?.startsWith('Week ')).sort((a,b)=>(a.period_sort||0)-(b.period_sort||0));ACTIVE_PERIOD=stored&&PERIODS.includes(stored)?stored:(gamePeriods.at(-1)?.bet_period||'Futures');const bar=document.createElement('div');bar.id='periodBar';bar.className='periodBar';bar.innerHTML=PERIODS.map(p=>`<button data-period="${esc(p)}">${esc(p.replace('Week ','W'))}</button>`).join('');document.querySelector('.hero').after(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>pSetPeriod(b.dataset.period));const results=document.createElement('section');results.className='card resultsCard';results.innerHTML='<div class="cardHead"><h2>Season Betting Results by Week</h2><small>Graded performance, CLV, current EV, and exposure</small></div><div class="resultsWrap"><table class="resultsTable"><thead><tr><th>Period</th><th>Bets</th><th>Record</th><th>Risked</th><th>Profit/Loss</th><th>ROI</th><th>CLV Hit</th><th>Avg CLV</th><th>CLV Sample</th><th>Current EV</th><th>Open Exposure</th></tr></thead><tbody id="periodResultsBody"></tbody></table></div>';document.querySelector('.performance').after(results);const ledger=document.querySelector('.card:has(.ledger)'),heading=document.createElement('div');heading.className='ledgerHeading';heading.innerHTML='<h2 id="ledgerTitle">Wager ledger</h2><small id="ledgerSubtitle"></small>';ledger.prepend(heading);document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;pRows()});[market,link,search].forEach(x=>x.addEventListener('input',pRows));pSetPeriod(ACTIVE_PERIOD)}

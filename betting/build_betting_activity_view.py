@@ -9,11 +9,12 @@ import json
 import re
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.lib.ncaaf_config import canonical_team
+from lib.ncaaf_config import canonical_team
+from betting.key_aware_spread_ev import SpreadEVCalculator
 
 INFILE = ROOT / "data/bets/bets_enriched.csv"
 GAME_VIEW = ROOT / "data/site/matchups_view.json"
@@ -99,6 +100,8 @@ def main():
     with INFILE.open(newline="", encoding="utf-8-sig") as handle:
         source_rows = list(csv.DictReader(handle))
 
+    spread_ev = SpreadEVCalculator(ROOT)
+
     records = []
     match_reasons = {}
     for position, row in enumerate(source_rows, 1):
@@ -106,22 +109,126 @@ def main():
         match_reasons[reason] = match_reasons.get(reason, 0) + 1
         bet_id = clean(row.get("bet_id")) or hashlib.sha256(f"{position}|{clean(row.get('Date'))}|{clean(row.get('Bet'))}".encode()).hexdigest()[:16]
         team = canonical_team(clean(row.get("team_guess")))
+
+        market = category(row)
+        is_open = boolean(row.get("is_open"))
+
+        bet_line = number(row.get("bet_line"))
+        bet_price = number(row.get("bet_price"))
+
+        current_market_line = number(row.get("current_market_line"))
+        current_market_price = number(row.get("current_market_price"))
+
+        closing_market_line = number(row.get("closing_market_line"))
+        closing_market_price = number(row.get("closing_market_price"))
+        closing_frozen = boolean(row.get("closing_clv_frozen"))
+
+        current_market_ev_pct = None
+        final_clv_ev_pct = None
+        ev_state = "UNAVAILABLE"
+        spread_ev_method = None
+        spread_ev_weakest_step_n = None
+
+        # Full-game spreads only. The calibration is not valid for
+        # 1H/2H spreads, totals, futures, or moneylines.
+        if market == "Spread" and bet_line is not None and bet_price is not None:
+
+            if (
+                is_open
+                and boolean(row.get("current_market_match"))
+                and current_market_line is not None
+                and current_market_price is not None
+            ):
+                priced = spread_ev.current_market_ev(
+                    current_market_line,
+                    current_market_price,
+                    bet_line,
+                    bet_price,
+                )
+
+                if priced is not None:
+                    current_market_ev_pct = priced["ev_pct"]
+                    spread_ev_weakest_step_n = priced["weakest_half_point_sample_n"]
+                    spread_ev_method = "key_aware_current_market_relative_v1"
+                    ev_state = "CURRENT"
+
+            elif (
+                not is_open
+                and closing_frozen
+                and closing_market_line is not None
+            ):
+                # Reproduce historical Final CLV EV methodology.
+                # The close is treated as an efficient spread market;
+                # actual ticket juice determines expected return.
+                priced = spread_ev.ticket_ev(
+                    closing_market_line,
+                    bet_line,
+                    bet_price,
+                )
+
+                if priced is not None:
+                    final_clv_ev_pct = priced["ev_pct"]
+                    spread_ev_weakest_step_n = priced["weakest_half_point_sample_n"]
+                    spread_ev_method = "key_aware_final_clv_v1"
+                    ev_state = "FINAL"
+
+        legacy_ev_current_pct = number(row.get("ev_current_pct"))
+
+        # Existing field remains for backwards compatibility.
+        # Spread rows now receive the key-aware value appropriate to state.
+        if market == "Spread":
+            display_ev_pct = (
+                current_market_ev_pct
+                if ev_state == "CURRENT"
+                else final_clv_ev_pct
+                if ev_state == "FINAL"
+                else None
+            )
+        else:
+            display_ev_pct = legacy_ev_current_pct
+
         records.append({
             "bet_id": bet_id, "game_id": game.get("game_id") if game else None,
             "game_link_status": reason, "week": game.get("week") if game else week_from_row(row),
             "game_date": game.get("date") if game else None,
             "away_team": game.get("away_team") if game else None, "home_team": game.get("home_team") if game else None,
             "actor": actor(row), "placed_at": clean(row.get("Date")), "status": clean(row.get("status")) or "Open",
-            "is_open": boolean(row.get("is_open")), "sport": clean(row.get("Sport")), "market": category(row),
+            "is_open": is_open, "sport": clean(row.get("Sport")), "market": market,
             "strategy_tags": strategy_tags(row),
             "selection": clean(row.get("Bet")), "team": team or None, "side": clean(row.get("side")) or None,
-            "line": number(row.get("bet_line")), "price": number(row.get("bet_price")),
+            "line": bet_line, "price": bet_price,
             "sportsbook": clean(row.get("book_norm")) or clean(row.get("Sportsbook")), "stake": number(row.get("stake")),
             "realized_profit": number(row.get("realized_profit")) or 0,
-            "notes": clean(row.get("Notes")), "current_market_line": number(row.get("current_market_line")),
-            "current_market_price": number(row.get("current_market_price")), "current_market_book": clean(row.get("current_market_book")),
-            "clv_pct_current": number(row.get("clv_pct_current")), "ev_current_pct": number(row.get("ev_current_pct")),
-            "beat_clv": clean(row.get("beat_clv")), "source_pulled_at": clean(row.get("pulled_at")),
+
+            "notes": clean(row.get("Notes")),
+
+            "current_market_line": current_market_line,
+            "current_market_price": current_market_price,
+            "current_market_book": clean(row.get("current_market_book")),
+            "current_market_match": boolean(row.get("current_market_match")),
+            "line_clv_current": number(row.get("line_clv_current")),
+
+            "closing_clv_frozen": closing_frozen,
+            "closing_market_line": closing_market_line,
+            "closing_market_price": closing_market_price,
+            "closing_market_book": clean(row.get("closing_market_book")),
+            "closing_line_clv": number(row.get("closing_line_clv")),
+
+            "current_market_ev_pct": current_market_ev_pct,
+            "final_clv_ev_pct": final_clv_ev_pct,
+            "ev_state": ev_state,
+            "spread_ev_method": spread_ev_method,
+            "spread_ev_weakest_half_point_sample_n": spread_ev_weakest_step_n,
+            "final_closing_price_assumption": -110 if ev_state == "FINAL" else None,
+
+            "legacy_clv_pct_current": number(row.get("clv_pct_current")),
+            "legacy_ev_current_pct": legacy_ev_current_pct,
+
+            "clv_pct_current": number(row.get("clv_pct_current")),
+            "ev_current_pct": display_ev_pct,
+
+            "beat_clv": clean(row.get("beat_clv")),
+            "source_pulled_at": clean(row.get("pulled_at")),
         })
 
     open_rows = [row for row in records if row["is_open"]]
