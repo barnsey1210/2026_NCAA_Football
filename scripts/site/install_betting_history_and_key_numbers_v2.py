@@ -28,7 +28,7 @@ import sys
 ROOT = Path("/Users/jameslindesmith/NCAAF_MAIN_REPO")
 SOURCE = ROOT / "reports/five_source_backtest_validated/corrected/site_history_v2/site_betting_history_v2.json"
 HALF_POINT_VALUES = ROOT / "data/site/ncaaf_spread_half_point_values_2021_2025.json"
-SPREAD_EDGE_VALIDATION = ROOT / "data/research/historical/timestamped_spread_edge_study_2021_2025_v2/cumulative_key_zone_edge_summary.csv"
+SPREAD_EDGE_VALIDATION = ROOT / "data/site/historical_spread_edge_validation_2021_2025.csv"
 HISTORICAL_MODEL_PERFORMANCE = ROOT / "data/site/historical_model_performance_2021_2025.json"
 
 # Current source owners confirmed by repo inventory.
@@ -110,20 +110,15 @@ historical_model_lookup = {
     for r in historical_model_rows
 }
 
-spread_validation_all = [
-    r for r in spread_validation_rows
-    if r.get("population") == "all_lines"
-]
-
-if not spread_validation_all:
-    raise SystemExit(
-        "STOP: spread validation CSV has no all_lines rows"
-    )
-
 spread_validation_by_threshold = {
     float(r["edge_threshold"]): r
-    for r in spread_validation_all
+    for r in spread_validation_rows
 }
+
+if not spread_validation_by_threshold:
+    raise SystemExit(
+        "STOP: spread validation CSV has no threshold rows"
+    )
 half_point_payload = json.loads(HALF_POINT_VALUES.read_text())
 half_point_rows = half_point_payload.get("rows") or []
 
@@ -270,14 +265,30 @@ def spread_threshold_label(t):
         return f"{int(t)}+"
     return f"{t:g}+"
 
-def consensus_badge(t):
-    if t == 4.5:
-        return '<span class="histBadge histStrong">Strong</span>'
-    if t == 3.5:
-        return '<span class="histBadge histActionable">Actionable</span>'
-    if t == 3.0:
-        return '<span class="histBadge histWatch">Watch</span>'
-    return ""
+def consensus_badge(t, r):
+    badges = []
+
+    try:
+        roi = float(r.get("actual_roi"))
+    except Exception:
+        roi = 0.0
+
+    try:
+        ev = float(r.get("ev_pct"))
+    except Exception:
+        ev = 0.0
+
+    if roi > 0:
+        badges.append(
+            '<span class="histBadge histActionable">BET ROI+</span>'
+        )
+
+    if ev > 0:
+        badges.append(
+            '<span class="histBadge histStrong">BET EV+</span>'
+        )
+
+    return " ".join(badges)
 
 def render_consensus_rows():
     rows = []
@@ -285,18 +296,19 @@ def render_consensus_rows():
     for t in spread_thresholds:
         r = spread_validation_by_threshold[t]
 
+        roi = float(r["actual_roi"])
+        ev = float(r["ev_pct"])
+        clv = float(r["avg_clv_points"])
+
         cls = (
             "histCoreRow"
-            if t == 4.5
+            if roi > 0 and ev > 0
             else (
                 "histActionRow"
-                if t == 3.5
+                if roi > 0 or ev > 0
                 else ""
             )
         )
-
-        ev = float(r["ev_pct"])
-        clv = float(r["avg_clv_points"])
 
         ev_cls = (
             "histPositive"
@@ -314,14 +326,23 @@ def render_consensus_rows():
             else ""
         )
 
+        roi_cls = (
+            "histPositive"
+            if roi > 0
+            else "histNegative"
+            if roi < 0
+            else ""
+        )
+
         rows.append(
             f'<tr class="{cls}">'
-            f'<td><b>{spread_threshold_label(t)}</b> {consensus_badge(t)}</td>'
+            f'<td><b>{spread_threshold_label(t)}</b> {consensus_badge(t, r)}</td>'
             f'<td>{integer(r.get("games"))}</td>'
             f'<td>{esc(r.get("record","—"))}</td>'
             f'<td>{pct(r.get("ats_pct"))}</td>'
-            f'<td>{signed_pct(r.get("actual_roi"),1)}</td>'
+            f'<td class="{roi_cls}">{signed_pct(r.get("actual_roi"),1)}</td>'
             f'<td>{pct(r.get("beat_close_pct"))}</td>'
+            f'<td>{pct(r.get("won_line_move_pct"))}</td>'
             f'<td class="histEmphasis {clv_cls}">{signed_num(r.get("avg_clv_points"),2)}</td>'
             f'<td class="histEmphasis {ev_cls}">{signed_pct(r.get("ev_pct"),2)}</td>'
             '</tr>'
@@ -508,9 +529,14 @@ BETTING_BLOCK = f"""
               <th>ATS</th>
               <th>ROI</th>
               <th>
-                Beat Close
+                Beat Closing Line
                 <span class="histHelp"
-                  title="Percentage of wagers that finished with a better spread than the closing line. Unchanged lines are not counted as beats.">?</span>
+                  title="Percentage of wagers whose Sunday 9 PM spread finished better than the CFBD historical closing spread. Same-line closes remain in the denominator but are not counted as beats.">?</span>
+              </th>
+              <th>
+                Won Line Move
+                <span class="histHelp"
+                  title="Among wagers where the closing spread differed from the Sunday 9 PM entry spread, percentage where the move went in the model-selected direction. Same-line closes are excluded.">?</span>
               </th>
               <th>
                 Avg CLV
@@ -518,9 +544,9 @@ BETTING_BLOCK = f"""
                   title="Average spread points gained versus the closing market. Positive means the wager beat the eventual closing number.">?</span>
               </th>
               <th>
-                EV%
+                CLV-Implied EV
                 <span class="histHelp"
-                  title="Estimated expected return versus the closing market. Uses the actual wager price and our custom 2021–2025 NCAAF half-point value chart to price each 0.5-point spread move crossed. Final closing price is standardized to -110.">?</span>
+                  title="Estimated expected return implied by the closing-line advantage. Uses actual entry price, the validated 2021–2025 NCAAF half-point value chart, and a standardized -110 closing price because historical closing juice is unavailable.">?</span>
               </th>
             </tr>
           </thead>
@@ -529,10 +555,11 @@ BETTING_BLOCK = f"""
       </div>
 
       <div class="histNote">
-        3+ = Watch · 3.5+ = Actionable candidate · 4.5+ = Strong candidate.
+        BET ROI+ identifies cumulative thresholds with positive realized historical ROI.
+        BET EV+ identifies cumulative thresholds with positive CLV-Implied EV.
         Thresholds are cumulative and are not automatic betting rules.
-        Avg CLV and EV% are emphasized because they evaluate whether the process created market value,
-        while ATS and ROI show realized historical results.
+        Beat Closing Line includes same-line closes in the denominator; Won Line Move excludes them.
+        ATS and ROI show realized results, while Avg CLV and CLV-Implied EV evaluate market value.
       </div>
     </div>
 
@@ -549,7 +576,7 @@ BETTING_BLOCK = f"""
         <b>Totals validation pending</b>
         This card will use the same framework as spreads:
         edge threshold, sample size, record, O/U win rate, ROI,
-        Beat Close, Avg CLV, and EV%.
+        Beat Closing Line, Avg CLV, and CLV-Implied EV.
         Historical Massey / DRatings totals acquisition and validation
         will populate this section.
       </div>
@@ -597,9 +624,9 @@ MODEL_COMPARISON_BLOCK = f"""
           <th>ATS</th>
           <th>ROI</th>
           <th>
-            Beat Close
+            Beat Closing Line
             <span class="histHelp"
-              title="Percentage finishing with a better spread than the closing line. Unchanged lines are not counted as beats.">?</span>
+              title="Percentage of Sunday 9 PM model selections finishing with a better spread than the CFBD historical closing line. Same-line closes remain in the denominator.">?</span>
           </th>
           <th>
             Avg CLV
@@ -818,8 +845,11 @@ checks = [
     ("Openers totals", "Totals" in OPENERS.read_text()),
     ("Betting source owner", "HISTORICAL_BETTING_SECTION_START" in BETTING.read_text()),
     ("Betting 3.5+", "3.5+" in BETTING.read_text()),
-    ("Betting Beat Close", "Beat Close" in BETTING.read_text()),
-    ("Betting EV%", "EV%" in BETTING.read_text()),
+    ("Betting Beat Closing Line", "Beat Closing Line" in BETTING.read_text()),
+    ("Betting CLV-Implied EV", "CLV-Implied EV" in BETTING.read_text()),
+    ("Betting Won Line Move", "Won Line Move" in BETTING.read_text()),
+    ("Betting ROI badge", "BET ROI+" in BETTING.read_text()),
+    ("Betting EV badge", "BET EV+" in BETTING.read_text()),
     ("Betting historical model comparison", "Historical Model Performance" in BETTING.read_text()),
     ("Betting five-source model row", "Five-source equal weight" in BETTING.read_text()),
     ("Betting all-games model view", 'data-hist-model-view="all"' in BETTING.read_text()),
