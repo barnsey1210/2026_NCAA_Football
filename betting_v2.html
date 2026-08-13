@@ -213,18 +213,53 @@ img[src$="west-virginia.webp"] {
       <div class="histHead">
         <div>
           <h2>Historical Totals Edge Validation</h2>
-          <small>Reserved for the 2021–2025 totals backtest</small>
+          <small>2021–2025 · 40% SP+ / 40% Massey Dual / 20% Sagarin · Sunday 9 PM ET market</small>
         </div>
-        <small>Next research module</small>
+        <small>Primary totals betting system</small>
       </div>
 
-      <div class="histTotalsPlaceholder">
-        <b>Totals validation pending</b>
-        This card will use the same framework as spreads:
-        edge threshold, sample size, record, O/U win rate, ROI,
-        Beat Closing Line, Avg CLV, and CLV-Implied EV.
-        Historical Massey / DRatings totals acquisition and validation
-        will populate this section.
+      <div class="histTableWrap">
+        <table class="histTable">
+          <thead>
+            <tr>
+              <th>Edge</th>
+              <th>Games</th>
+              <th>Record</th>
+              <th>O/U Win %</th>
+              <th>ROI</th>
+              <th>
+                Beat Closing Line
+                <span class="histHelp"
+                  title="Percentage of wagers whose Sunday 9 PM total finished better than the historical closing total. Same-line closes remain in the denominator but are not counted as beats.">?</span>
+              </th>
+              <th>
+                Won Line Move
+                <span class="histHelp"
+                  title="Among wagers where the closing total differed from the Sunday 9 PM entry total, percentage where the move went in the model-selected direction. Same-line closes are excluded.">?</span>
+              </th>
+              <th>
+                Avg CLV
+                <span class="histHelp"
+                  title="Average total points gained versus the closing market. Positive means the wager beat the eventual closing number.">?</span>
+              </th>
+              <th>
+                CLV-Implied EV
+                <span class="histHelp"
+                  title="Temporary totals-specific estimate using a smooth value of roughly 2.8 percentage points of fair win probability per 1 point of total CLV at a -110 benchmark. This is a v1 approximation and will later be replaced by an empirical NCAAF totals point-value curve.">?</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody><tr class="histActionRow"><td><b>0.5+</b> <span class="histBadge histActionable">BET ROI+</span></td><td>2,311</td><td>1222-1076-13</td><td>53.2%</td><td class="histPositive">+1.5%</td><td>49.0%</td><td>57.5%</td><td class="histEmphasis histPositive">+0.31</td><td class="histEmphasis histNegative">-2.87%</td></tr><tr class="histActionRow"><td><b>1+</b> <span class="histBadge histActionable">BET ROI+</span></td><td>2,037</td><td>1088-937-12</td><td>53.7%</td><td class="histPositive">+2.5%</td><td>48.9%</td><td>57.1%</td><td class="histEmphasis histPositive">+0.30</td><td class="histEmphasis histNegative">-2.94%</td></tr><tr class="histActionRow"><td><b>1.5+</b> <span class="histBadge histActionable">BET ROI+</span></td><td>1,734</td><td>932-790-12</td><td>54.1%</td><td class="histPositive">+3.3%</td><td>49.0%</td><td>57.4%</td><td class="histEmphasis histPositive">+0.32</td><td class="histEmphasis histNegative">-2.83%</td></tr><tr class="histActionRow"><td><b>2+</b> <span class="histBadge">LEAN</span> <span class="histBadge histActionable">BET ROI+</span></td><td>1,462</td><td>783-672-7</td><td>53.8%</td><td class="histPositive">+2.7%</td><td>48.4%</td><td>57.1%</td><td class="histEmphasis histPositive">+0.31</td><td class="histEmphasis histNegative">-2.87%</td></tr><tr class="histActionRow"><td><b>2.5+</b> <span class="histBadge">LEAN</span> <span class="histBadge histActionable">BET ROI+</span></td><td>1,232</td><td>685-541-6</td><td>55.9%</td><td class="histPositive">+6.6%</td><td>48.5%</td><td>56.7%</td><td class="histEmphasis histPositive">+0.33</td><td class="histEmphasis histNegative">-2.77%</td></tr><tr class="histActionRow"><td><b>3+</b> <span class="histBadge histActionable">BET SIGNAL</span> <span class="histBadge histActionable">BET ROI+</span></td><td>1,017</td><td>565-446-6</td><td>55.9%</td><td class="histPositive">+6.6%</td><td>49.1%</td><td>57.6%</td><td class="histEmphasis histPositive">+0.39</td><td class="histEmphasis histNegative">-2.45%</td></tr><tr class="histActionRow"><td><b>3.5+</b> <span class="histBadge histActionable">BET SIGNAL</span> <span class="histBadge histActionable">BET ROI+</span></td><td>816</td><td>456-355-5</td><td>56.2%</td><td class="histPositive">+7.2%</td><td>48.5%</td><td>57.1%</td><td class="histEmphasis histPositive">+0.36</td><td class="histEmphasis histNegative">-2.64%</td></tr><tr class="histActionRow"><td><b>4+</b> <span class="histBadge histActionable">ACTIONABLE</span> <span class="histBadge histActionable">BET ROI+</span></td><td>641</td><td>359-280-2</td><td>56.2%</td><td class="histPositive">+7.2%</td><td>49.3%</td><td>57.7%</td><td class="histEmphasis histPositive">+0.41</td><td class="histEmphasis histNegative">-2.38%</td></tr><tr class="histActionRow"><td><b>4.5+</b> <span class="histBadge histActionable">ACTIONABLE</span> <span class="histBadge histActionable">BET ROI+</span></td><td>512</td><td>290-220-2</td><td>56.9%</td><td class="histPositive">+8.5%</td><td>50.0%</td><td>59.0%</td><td class="histEmphasis histPositive">+0.46</td><td class="histEmphasis histNegative">-2.09%</td></tr><tr class="histActionRow"><td><b>5+</b> <span class="histBadge histStrong">STRONG</span> <span class="histBadge histActionable">BET ROI+</span></td><td>404</td><td>224-180-0</td><td>55.4%</td><td class="histPositive">+5.8%</td><td>51.0%</td><td>60.2%</td><td class="histEmphasis histPositive">+0.55</td><td class="histEmphasis histNegative">-1.59%</td></tr><tr class="histActionRow"><td><b>6+</b> <span class="histBadge histStrong">STRONG</span> <span class="histBadge histActionable">BET ROI+</span></td><td>255</td><td>139-116-0</td><td>54.5%</td><td class="histPositive">+4.0%</td><td>52.2%</td><td>61.6%</td><td class="histEmphasis histPositive">+0.70</td><td class="histEmphasis histNegative">-0.79%</td></tr><tr class="histActionRow"><td><b>7+</b> <span class="histBadge histStrong">STRONG</span> <span class="histBadge histActionable">BET ROI+</span></td><td>151</td><td>85-66-0</td><td>56.3%</td><td class="histPositive">+7.4%</td><td>57.6%</td><td>64.9%</td><td class="histEmphasis histPositive">+0.82</td><td class="histEmphasis histNegative">-0.16%</td></tr><tr class="histActionRow"><td><b>8+</b> <span class="histBadge histStrong">STRONG</span> <span class="histBadge histActionable">BET ROI+</span></td><td>97</td><td>55-42-0</td><td>56.7%</td><td class="histPositive">+8.1%</td><td>54.6%</td><td>63.1%</td><td class="histEmphasis histPositive">+0.72</td><td class="histEmphasis histNegative">-0.72%</td></tr><tr class="histActionRow"><td><b>10+</b> <span class="histBadge histStrong">STRONG</span> <span class="histBadge histActionable">BET ROI+</span></td><td>34</td><td>19-15-0</td><td>55.9%</td><td class="histPositive">+6.7%</td><td>58.8%</td><td>66.7%</td><td class="histEmphasis histPositive">+0.56</td><td class="histEmphasis histNegative">-1.56%</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="histNote">
+        Primary model = 40% SP+ + 40% Massey Dual + 20% Sagarin.
+        Massey Dual = equal weight of Massey's published Total and predicted-score sum.
+        LEAN begins at 2+, BET SIGNAL at 3+, ACTIONABLE at 4+, and STRONG at 5+.
+        BET ROI+ identifies positive realized historical ROI.
+        BET EV+ uses the temporary totals CLV-implied EV estimate and is intentionally separate from realized ROI.
+        Thresholds are cumulative and are not automatic betting rules.
       </div>
     </div>
 
@@ -1595,6 +1630,1858 @@ img[src$="west-virginia.webp"] {
     Five-source equal weight = SP+ + FPI + TeamRankings + Sagarin + DRatings.
   </div>
 </section>
+
+<section class="histCard histModelCard" id="historicalTotalsModelPerformance">
+  <div class="histHead">
+    <div>
+      <h2>Historical Totals Model Performance</h2>
+      <small>2021–2025 · Sunday 9 PM ET</small>
+    </div>
+    <small>Composite vs individual totals systems</small>
+  </div>
+
+  <div class="histModelViewControls" id="histTotalsModelViews">
+    <button class="histModelView active"
+      data-hist-totals-model-view="all">All Games</button>
+    <button class="histModelView"
+      data-hist-totals-model-view="3.0">3.0+ Edge</button>
+  </div>
+
+  <div class="histModelControls" id="histTotalsModelYears">
+    <button class="histModelYear active"
+      data-hist-totals-model-year="2021-2025">2021–2025</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2021">2021</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2022">2022</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2023">2023</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2024">2024</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2025">2025</button>
+  </div>
+
+  <div class="histTableWrap">
+    <table class="histTable">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Games</th>
+          <th>Record</th>
+          <th>O/U Win %</th>
+          <th>ROI</th>
+          <th>Beat Closing Line</th>
+          <th>Avg CLV</th>
+          <th>
+            MAE
+            <span class="histHelp"
+              title="Mean absolute error between the projected total and actual final total. Lower is better.">?</span>
+          </th>
+          <th>
+            Bias
+            <span class="histHelp"
+              title="Average projected total minus actual final total. Closest to zero is best calibrated; positive means the model projected too many points and negative means too few.">?</span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="historicalTotalsModelRows">
+        <tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>2,475</td>
+                      <td>1,311-1,150-14</td>
+                      <td>53.3%</td>
+                      <td class="histPositive">
+                        +1.7%
+                      </td>
+                      <td>48.5%</td>
+                      <td class="histPositive">
+                        +0.29
+                      </td>
+                      <td>12.60</td>
+                      <td>
+                        +0.21
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>3,461</td>
+                      <td>1,798-1,650-13</td>
+                      <td>52.1%</td>
+                      <td class="histNegative">
+                        -0.5%
+                      </td>
+                      <td>48.7%</td>
+                      <td class="histPositive">
+                        +0.30
+                      </td>
+                      <td>12.81</td>
+                      <td>
+                        +0.40
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>SP+</b></td>
+                      <td>3,518</td>
+                      <td>1,813-1,694-11</td>
+                      <td>51.7%</td>
+                      <td class="histNegative">
+                        -1.4%
+                      </td>
+                      <td>50.4%</td>
+                      <td class="histPositive">
+                        +0.36
+                      </td>
+                      <td>12.94</td>
+                      <td>
+                        +0.25
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Total</b></td>
+                      <td>3,461</td>
+                      <td>1,793-1,651-17</td>
+                      <td>52.1%</td>
+                      <td class="histNegative">
+                        -0.7%
+                      </td>
+                      <td>45.4%</td>
+                      <td class="histPositive">
+                        +0.13
+                      </td>
+                      <td>12.89</td>
+                      <td>
+                        +1.36
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>3,461</td>
+                      <td>1,810-1,636-15</td>
+                      <td>52.5%</td>
+                      <td class="histPositive">
+                        +0.2%
+                      </td>
+                      <td>48.8%</td>
+                      <td class="histPositive">
+                        +0.31
+                      </td>
+                      <td>12.88</td>
+                      <td>
+                        -0.01
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Dual</b></td>
+                      <td>3,461</td>
+                      <td>1,810-1,634-17</td>
+                      <td>52.6%</td>
+                      <td class="histPositive">
+                        +0.3%
+                      </td>
+                      <td>47.2%</td>
+                      <td class="histPositive">
+                        +0.23
+                      </td>
+                      <td>12.85</td>
+                      <td>
+                        +0.67
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Sagarin</b></td>
+                      <td>2,503</td>
+                      <td>1,295-1,195-13</td>
+                      <td>52.0%</td>
+                      <td class="histNegative">
+                        -0.7%
+                      </td>
+                      <td>49.3%</td>
+                      <td class="histPositive">
+                        +0.35
+                      </td>
+                      <td>13.77</td>
+                      <td>
+                        -0.46
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>159</td>
+                      <td>82-76-1</td>
+                      <td>51.9%</td>
+                      <td class="histNegative">
+                        -0.8%
+                      </td>
+                      <td>52.8%</td>
+                      <td class="histPositive">
+                        +0.59
+                      </td>
+                      <td>12.60</td>
+                      <td>
+                        +0.36
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>233</td>
+                      <td>105-126-2</td>
+                      <td>45.5%</td>
+                      <td class="histNegative">
+                        -13.3%
+                      </td>
+                      <td>43.8%</td>
+                      <td class="histNegative">
+                        -0.10
+                      </td>
+                      <td>12.19</td>
+                      <td>
+                        +0.10
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>623</td>
+                      <td>325-295-3</td>
+                      <td>52.4%</td>
+                      <td class="histNegative">
+                        -0.2%
+                      </td>
+                      <td>49.8%</td>
+                      <td class="histPositive">
+                        +0.25
+                      </td>
+                      <td>12.71</td>
+                      <td>
+                        +0.06
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>SP+</b></td>
+                      <td>633</td>
+                      <td>335-297-1</td>
+                      <td>53.0%</td>
+                      <td class="histPositive">
+                        +0.9%
+                      </td>
+                      <td>53.9%</td>
+                      <td class="histPositive">
+                        +0.40
+                      </td>
+                      <td>12.89</td>
+                      <td>
+                        +0.21
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Total</b></td>
+                      <td>623</td>
+                      <td>315-305-3</td>
+                      <td>50.8%</td>
+                      <td class="histNegative">
+                        -3.2%
+                      </td>
+                      <td>46.1%</td>
+                      <td class="histPositive">
+                        +0.04
+                      </td>
+                      <td>12.76</td>
+                      <td>
+                        +0.86
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>623</td>
+                      <td>314-305-4</td>
+                      <td>50.7%</td>
+                      <td class="histNegative">
+                        -3.4%
+                      </td>
+                      <td>47.0%</td>
+                      <td class="histPositive">
+                        +0.09
+                      </td>
+                      <td>12.95</td>
+                      <td>
+                        -0.59
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Dual</b></td>
+                      <td>623</td>
+                      <td>311-309-3</td>
+                      <td>50.2%</td>
+                      <td class="histNegative">
+                        -4.4%
+                      </td>
+                      <td>47.4%</td>
+                      <td class="histPositive">
+                        +0.07
+                      </td>
+                      <td>12.82</td>
+                      <td>
+                        +0.13
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Sagarin</b></td>
+                      <td>234</td>
+                      <td>108-124-2</td>
+                      <td>46.6%</td>
+                      <td class="histNegative">
+                        -11.1%
+                      </td>
+                      <td>41.5%</td>
+                      <td class="histNegative">
+                        -0.09
+                      </td>
+                      <td>13.80</td>
+                      <td>
+                        -1.14
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>12</td>
+                      <td>7-5-0</td>
+                      <td>58.3%</td>
+                      <td class="histPositive">
+                        +11.3%
+                      </td>
+                      <td>58.3%</td>
+                      <td class="histPositive">
+                        +1.04
+                      </td>
+                      <td>11.58</td>
+                      <td>
+                        +0.48
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>612</td>
+                      <td>319-289-4</td>
+                      <td>52.5%</td>
+                      <td class="histPositive">
+                        +0.3%
+                      </td>
+                      <td>48.5%</td>
+                      <td class="histPositive">
+                        +0.31
+                      </td>
+                      <td>12.87</td>
+                      <td>
+                        +0.58
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>700</td>
+                      <td>368-329-3</td>
+                      <td>52.8%</td>
+                      <td class="histPositive">
+                        +0.9%
+                      </td>
+                      <td>49.9%</td>
+                      <td class="histPositive">
+                        +0.38
+                      </td>
+                      <td>12.73</td>
+                      <td>
+                        +0.66
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>SP+</b></td>
+                      <td>712</td>
+                      <td>367-342-3</td>
+                      <td>51.8%</td>
+                      <td class="histNegative">
+                        -1.1%
+                      </td>
+                      <td>50.6%</td>
+                      <td class="histPositive">
+                        +0.38
+                      </td>
+                      <td>12.73</td>
+                      <td>
+                        +0.39
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Total</b></td>
+                      <td>700</td>
+                      <td>364-331-5</td>
+                      <td>52.4%</td>
+                      <td class="histPositive">
+                        +0.1%
+                      </td>
+                      <td>47.7%</td>
+                      <td class="histPositive">
+                        +0.27
+                      </td>
+                      <td>12.89</td>
+                      <td>
+                        +1.70
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>700</td>
+                      <td>349-346-5</td>
+                      <td>50.2%</td>
+                      <td class="histNegative">
+                        -4.0%
+                      </td>
+                      <td>51.3%</td>
+                      <td class="histPositive">
+                        +0.41
+                      </td>
+                      <td>12.98</td>
+                      <td>
+                        +0.21
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Dual</b></td>
+                      <td>700</td>
+                      <td>361-334-5</td>
+                      <td>51.9%</td>
+                      <td class="histNegative">
+                        -0.7%
+                      </td>
+                      <td>46.9%</td>
+                      <td class="histPositive">
+                        +0.24
+                      </td>
+                      <td>12.90</td>
+                      <td>
+                        +0.96
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Sagarin</b></td>
+                      <td>624</td>
+                      <td>333-287-4</td>
+                      <td>53.7%</td>
+                      <td class="histPositive">
+                        +2.6%
+                      </td>
+                      <td>49.7%</td>
+                      <td class="histPositive">
+                        +0.30
+                      </td>
+                      <td>13.85</td>
+                      <td>
+                        +0.07
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>92</td>
+                      <td>49-42-1</td>
+                      <td>53.8%</td>
+                      <td class="histPositive">
+                        +2.8%
+                      </td>
+                      <td>55.4%</td>
+                      <td class="histPositive">
+                        +0.60
+                      </td>
+                      <td>12.38</td>
+                      <td>
+                        -0.19
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>590</td>
+                      <td>318-267-5</td>
+                      <td>54.4%</td>
+                      <td class="histPositive">
+                        +3.7%
+                      </td>
+                      <td>47.8%</td>
+                      <td class="histPositive">
+                        +0.14
+                      </td>
+                      <td>12.87</td>
+                      <td>
+                        -0.36
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>717</td>
+                      <td>359-354-4</td>
+                      <td>50.4%</td>
+                      <td class="histNegative">
+                        -3.9%
+                      </td>
+                      <td>48.5%</td>
+                      <td class="histPositive">
+                        +0.12
+                      </td>
+                      <td>13.10</td>
+                      <td>
+                        -0.17
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>SP+</b></td>
+                      <td>729</td>
+                      <td>373-352-4</td>
+                      <td>51.4%</td>
+                      <td class="histNegative">
+                        -1.8%
+                      </td>
+                      <td>51.2%</td>
+                      <td class="histPositive">
+                        +0.25
+                      </td>
+                      <td>13.31</td>
+                      <td>
+                        -0.83
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Total</b></td>
+                      <td>717</td>
+                      <td>371-341-5</td>
+                      <td>52.1%</td>
+                      <td class="histNegative">
+                        -0.5%
+                      </td>
+                      <td>42.7%</td>
+                      <td class="histNegative">
+                        -0.13
+                      </td>
+                      <td>13.16</td>
+                      <td>
+                        +1.33
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>717</td>
+                      <td>377-336-4</td>
+                      <td>52.9%</td>
+                      <td class="histPositive">
+                        +0.9%
+                      </td>
+                      <td>47.7%</td>
+                      <td class="histPositive">
+                        +0.18
+                      </td>
+                      <td>13.02</td>
+                      <td>
+                        -0.12
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Dual</b></td>
+                      <td>717</td>
+                      <td>372-340-5</td>
+                      <td>52.2%</td>
+                      <td class="histNegative">
+                        -0.3%
+                      </td>
+                      <td>45.6%</td>
+                      <td class="histPositive">
+                        +0.02
+                      </td>
+                      <td>13.06</td>
+                      <td>
+                        +0.60
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Sagarin</b></td>
+                      <td>594</td>
+                      <td>297-291-6</td>
+                      <td>50.5%</td>
+                      <td class="histNegative">
+                        -3.6%
+                      </td>
+                      <td>49.5%</td>
+                      <td class="histPositive">
+                        +0.26
+                      </td>
+                      <td>13.87</td>
+                      <td>
+                        -0.65
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>2</td>
+                      <td>2-0-0</td>
+                      <td>100.0%</td>
+                      <td class="histPositive">
+                        +90.9%
+                      </td>
+                      <td>50.0%</td>
+                      <td class="histPositive">
+                        +1.00
+                      </td>
+                      <td>7.00</td>
+                      <td>
+                        +7.00
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>510</td>
+                      <td>291-216-3</td>
+                      <td>57.4%</td>
+                      <td class="histPositive">
+                        +9.5%
+                      </td>
+                      <td>51.0%</td>
+                      <td class="histPositive">
+                        +0.39
+                      </td>
+                      <td>12.53</td>
+                      <td>
+                        -0.03
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>709</td>
+                      <td>381-325-3</td>
+                      <td>54.0%</td>
+                      <td class="histPositive">
+                        +3.0%
+                      </td>
+                      <td>49.5%</td>
+                      <td class="histPositive">
+                        +0.35
+                      </td>
+                      <td>12.86</td>
+                      <td>
+                        +0.09
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>SP+</b></td>
+                      <td>716</td>
+                      <td>369-344-3</td>
+                      <td>51.8%</td>
+                      <td class="histNegative">
+                        -1.2%
+                      </td>
+                      <td>50.0%</td>
+                      <td class="histPositive">
+                        +0.36
+                      </td>
+                      <td>13.07</td>
+                      <td>
+                        +0.19
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Total</b></td>
+                      <td>709</td>
+                      <td>386-319-4</td>
+                      <td>54.8%</td>
+                      <td class="histPositive">
+                        +4.5%
+                      </td>
+                      <td>47.2%</td>
+                      <td class="histPositive">
+                        +0.25
+                      </td>
+                      <td>12.81</td>
+                      <td>
+                        +0.70
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>709</td>
+                      <td>395-312-2</td>
+                      <td>55.9%</td>
+                      <td class="histPositive">
+                        +6.6%
+                      </td>
+                      <td>49.4%</td>
+                      <td class="histPositive">
+                        +0.36
+                      </td>
+                      <td>12.79</td>
+                      <td>
+                        -0.62
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Dual</b></td>
+                      <td>709</td>
+                      <td>386-319-4</td>
+                      <td>54.8%</td>
+                      <td class="histPositive">
+                        +4.5%
+                      </td>
+                      <td>48.4%</td>
+                      <td class="histPositive">
+                        +0.34
+                      </td>
+                      <td>12.78</td>
+                      <td>
+                        +0.04
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Sagarin</b></td>
+                      <td>514</td>
+                      <td>273-240-1</td>
+                      <td>53.2%</td>
+                      <td class="histPositive">
+                        +1.5%
+                      </td>
+                      <td>51.4%</td>
+                      <td class="histPositive">
+                        +0.45
+                      </td>
+                      <td>14.22</td>
+                      <td>
+                        -0.38
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>39</td>
+                      <td>17-22-0</td>
+                      <td>43.6%</td>
+                      <td class="histNegative">
+                        -16.7%
+                      </td>
+                      <td>48.7%</td>
+                      <td class="histPositive">
+                        +0.44
+                      </td>
+                      <td>12.61</td>
+                      <td>
+                        -2.50
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>530</td>
+                      <td>278-252-0</td>
+                      <td>52.5%</td>
+                      <td class="histPositive">
+                        +0.1%
+                      </td>
+                      <td>48.9%</td>
+                      <td class="histPositive">
+                        +0.53
+                      </td>
+                      <td>12.23</td>
+                      <td>
+                        +0.68
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>712</td>
+                      <td>365-347-0</td>
+                      <td>51.3%</td>
+                      <td class="histNegative">
+                        -2.2%
+                      </td>
+                      <td>45.8%</td>
+                      <td class="histPositive">
+                        +0.39
+                      </td>
+                      <td>12.65</td>
+                      <td>
+                        +1.33
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>SP+</b></td>
+                      <td>728</td>
+                      <td>369-359-0</td>
+                      <td>50.7%</td>
+                      <td class="histNegative">
+                        -3.3%
+                      </td>
+                      <td>46.8%</td>
+                      <td class="histPositive">
+                        +0.43
+                      </td>
+                      <td>12.71</td>
+                      <td>
+                        +1.31
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Total</b></td>
+                      <td>712</td>
+                      <td>357-355-0</td>
+                      <td>50.1%</td>
+                      <td class="histNegative">
+                        -4.4%
+                      </td>
+                      <td>43.4%</td>
+                      <td class="histPositive">
+                        +0.23
+                      </td>
+                      <td>12.79</td>
+                      <td>
+                        +2.15
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>712</td>
+                      <td>375-337-0</td>
+                      <td>52.7%</td>
+                      <td class="histPositive">
+                        +0.5%
+                      </td>
+                      <td>48.6%</td>
+                      <td class="histPositive">
+                        +0.46
+                      </td>
+                      <td>12.66</td>
+                      <td>
+                        +0.99
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Dual</b></td>
+                      <td>712</td>
+                      <td>380-332-0</td>
+                      <td>53.4%</td>
+                      <td class="histPositive">
+                        +1.8%
+                      </td>
+                      <td>48.0%</td>
+                      <td class="histPositive">
+                        +0.46
+                      </td>
+                      <td>12.70</td>
+                      <td>
+                        +1.57
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Sagarin</b></td>
+                      <td>537</td>
+                      <td>284-253-0</td>
+                      <td>52.9%</td>
+                      <td class="histPositive">
+                        +1.0%
+                      </td>
+                      <td>50.3%</td>
+                      <td class="histPositive">
+                        +0.62
+                      </td>
+                      <td>13.13</td>
+                      <td>
+                        -0.64
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="all"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>14</td>
+                      <td>7-7-0</td>
+                      <td>50.0%</td>
+                      <td class="histNegative">
+                        -4.0%
+                      </td>
+                      <td>42.9%</td>
+                      <td class="histPositive">
+                        +0.50
+                      </td>
+                      <td>15.67</td>
+                      <td>
+                        +10.89
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>1,017</td>
+                      <td>565-446-6</td>
+                      <td>55.9%</td>
+                      <td class="histPositive">
+                        +6.6%
+                      </td>
+                      <td>49.1%</td>
+                      <td class="histPositive">
+                        +0.39
+                      </td>
+                      <td>12.82</td>
+                      <td>
+                        +0.39
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>1,560</td>
+                      <td>835-720-5</td>
+                      <td>53.7%</td>
+                      <td class="histPositive">
+                        +2.4%
+                      </td>
+                      <td>49.3%</td>
+                      <td class="histPositive">
+                        +0.34
+                      </td>
+                      <td>13.04</td>
+                      <td>
+                        +0.63
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>SP+</b></td>
+                      <td>1,818</td>
+                      <td>963-848-7</td>
+                      <td>53.2%</td>
+                      <td class="histPositive">
+                        +1.4%
+                      </td>
+                      <td>51.5%</td>
+                      <td class="histPositive">
+                        +0.42
+                      </td>
+                      <td>12.93</td>
+                      <td>
+                        +0.30
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Total</b></td>
+                      <td>1,927</td>
+                      <td>1,021-898-8</td>
+                      <td>53.2%</td>
+                      <td class="histPositive">
+                        +1.5%
+                      </td>
+                      <td>45.1%</td>
+                      <td class="histPositive">
+                        +0.15
+                      </td>
+                      <td>12.95</td>
+                      <td>
+                        +2.11
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>1,830</td>
+                      <td>981-841-8</td>
+                      <td>53.8%</td>
+                      <td class="histPositive">
+                        +2.7%
+                      </td>
+                      <td>49.8%</td>
+                      <td class="histPositive">
+                        +0.35
+                      </td>
+                      <td>12.99</td>
+                      <td>
+                        -0.16
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Massey Dual</b></td>
+                      <td>1,679</td>
+                      <td>906-766-7</td>
+                      <td>54.2%</td>
+                      <td class="histPositive">
+                        +3.4%
+                      </td>
+                      <td>47.3%</td>
+                      <td class="histPositive">
+                        +0.26
+                      </td>
+                      <td>13.00</td>
+                      <td>
+                        +1.04
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>Sagarin</b></td>
+                      <td>1,718</td>
+                      <td>883-823-12</td>
+                      <td>51.8%</td>
+                      <td class="histNegative">
+                        -1.2%
+                      </td>
+                      <td>51.0%</td>
+                      <td class="histPositive">
+                        +0.44
+                      </td>
+                      <td>14.37</td>
+                      <td>
+                        -0.58
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021-2025">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>84</td>
+                      <td>41-43-0</td>
+                      <td>48.8%</td>
+                      <td class="histNegative">
+                        -6.8%
+                      </td>
+                      <td>50.0%</td>
+                      <td class="histPositive">
+                        +0.64
+                      </td>
+                      <td>13.62</td>
+                      <td>
+                        +0.35
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>90</td>
+                      <td>44-44-2</td>
+                      <td>50.0%</td>
+                      <td class="histNegative">
+                        -4.7%
+                      </td>
+                      <td>45.6%</td>
+                      <td class="histNegative">
+                        -0.17
+                      </td>
+                      <td>13.23</td>
+                      <td>
+                        -2.49
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>283</td>
+                      <td>147-136-0</td>
+                      <td>51.9%</td>
+                      <td class="histNegative">
+                        -1.2%
+                      </td>
+                      <td>52.3%</td>
+                      <td class="histPositive">
+                        +0.21
+                      </td>
+                      <td>13.29</td>
+                      <td>
+                        -1.19
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>SP+</b></td>
+                      <td>350</td>
+                      <td>187-163-0</td>
+                      <td>53.4%</td>
+                      <td class="histPositive">
+                        +1.6%
+                      </td>
+                      <td>55.1%</td>
+                      <td class="histPositive">
+                        +0.40
+                      </td>
+                      <td>13.61</td>
+                      <td>
+                        -0.38
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Total</b></td>
+                      <td>339</td>
+                      <td>183-154-2</td>
+                      <td>54.3%</td>
+                      <td class="histPositive">
+                        +3.4%
+                      </td>
+                      <td>48.1%</td>
+                      <td class="histPositive">
+                        +0.08
+                      </td>
+                      <td>12.86</td>
+                      <td>
+                        +1.24
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>345</td>
+                      <td>182-161-2</td>
+                      <td>53.1%</td>
+                      <td class="histPositive">
+                        +1.0%
+                      </td>
+                      <td>48.1%</td>
+                      <td class="histPositive">
+                        +0.14
+                      </td>
+                      <td>13.03</td>
+                      <td>
+                        -2.09
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Massey Dual</b></td>
+                      <td>310</td>
+                      <td>168-140-2</td>
+                      <td>54.5%</td>
+                      <td class="histPositive">
+                        +3.8%
+                      </td>
+                      <td>47.7%</td>
+                      <td class="histPositive">
+                        +0.15
+                      </td>
+                      <td>12.93</td>
+                      <td>
+                        -0.77
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>Sagarin</b></td>
+                      <td>152</td>
+                      <td>67-83-2</td>
+                      <td>44.7%</td>
+                      <td class="histNegative">
+                        -14.6%
+                      </td>
+                      <td>42.1%</td>
+                      <td class="histNegative">
+                        -0.16
+                      </td>
+                      <td>14.65</td>
+                      <td>
+                        -2.56
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2021">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>3</td>
+                      <td>1-2-0</td>
+                      <td>33.3%</td>
+                      <td class="histNegative">
+                        -35.2%
+                      </td>
+                      <td>33.3%</td>
+                      <td class="histNegative">
+                        -0.50
+                      </td>
+                      <td>17.17</td>
+                      <td>
+                        +6.37
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>285</td>
+                      <td>151-131-3</td>
+                      <td>53.5%</td>
+                      <td class="histPositive">
+                        +2.3%
+                      </td>
+                      <td>47.7%</td>
+                      <td class="histPositive">
+                        +0.42
+                      </td>
+                      <td>13.58</td>
+                      <td>
+                        -0.11
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>337</td>
+                      <td>174-160-3</td>
+                      <td>52.1%</td>
+                      <td class="histNegative">
+                        -0.4%
+                      </td>
+                      <td>49.9%</td>
+                      <td class="histPositive">
+                        +0.52
+                      </td>
+                      <td>13.17</td>
+                      <td>
+                        +1.86
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>SP+</b></td>
+                      <td>402</td>
+                      <td>216-183-3</td>
+                      <td>54.1%</td>
+                      <td class="histPositive">
+                        +3.5%
+                      </td>
+                      <td>51.5%</td>
+                      <td class="histPositive">
+                        +0.52
+                      </td>
+                      <td>12.67</td>
+                      <td>
+                        +0.86
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Total</b></td>
+                      <td>408</td>
+                      <td>209-197-2</td>
+                      <td>51.5%</td>
+                      <td class="histNegative">
+                        -1.7%
+                      </td>
+                      <td>45.1%</td>
+                      <td class="histPositive">
+                        +0.33
+                      </td>
+                      <td>12.99</td>
+                      <td>
+                        +2.59
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>380</td>
+                      <td>194-184-2</td>
+                      <td>51.3%</td>
+                      <td class="histNegative">
+                        -2.0%
+                      </td>
+                      <td>49.7%</td>
+                      <td class="histPositive">
+                        +0.44
+                      </td>
+                      <td>13.05</td>
+                      <td>
+                        +0.38
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Massey Dual</b></td>
+                      <td>356</td>
+                      <td>184-170-2</td>
+                      <td>52.0%</td>
+                      <td class="histNegative">
+                        -0.7%
+                      </td>
+                      <td>48.6%</td>
+                      <td class="histPositive">
+                        +0.41
+                      </td>
+                      <td>12.86</td>
+                      <td>
+                        +2.45
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>Sagarin</b></td>
+                      <td>439</td>
+                      <td>232-203-4</td>
+                      <td>53.3%</td>
+                      <td class="histPositive">
+                        +1.9%
+                      </td>
+                      <td>51.0%</td>
+                      <td class="histPositive">
+                        +0.39
+                      </td>
+                      <td>14.38</td>
+                      <td>
+                        +0.49
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2022">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>54</td>
+                      <td>27-27-0</td>
+                      <td>50.0%</td>
+                      <td class="histNegative">
+                        -4.5%
+                      </td>
+                      <td>53.7%</td>
+                      <td class="histPositive">
+                        +0.72
+                      </td>
+                      <td>13.50</td>
+                      <td>
+                        -0.50
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>218</td>
+                      <td>124-93-1</td>
+                      <td>57.1%</td>
+                      <td class="histPositive">
+                        +9.1%
+                      </td>
+                      <td>48.6%</td>
+                      <td class="histPositive">
+                        +0.09
+                      </td>
+                      <td>13.11</td>
+                      <td>
+                        +1.33
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>320</td>
+                      <td>172-147-1</td>
+                      <td>53.9%</td>
+                      <td class="histPositive">
+                        +2.9%
+                      </td>
+                      <td>47.2%</td>
+                      <td class="histPositive">
+                        +0.02
+                      </td>
+                      <td>13.50</td>
+                      <td>
+                        -0.23
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>SP+</b></td>
+                      <td>400</td>
+                      <td>207-190-3</td>
+                      <td>52.1%</td>
+                      <td class="histNegative">
+                        -0.5%
+                      </td>
+                      <td>51.5%</td>
+                      <td class="histPositive">
+                        +0.25
+                      </td>
+                      <td>13.53</td>
+                      <td>
+                        -1.30
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Total</b></td>
+                      <td>400</td>
+                      <td>204-194-2</td>
+                      <td>51.3%</td>
+                      <td class="histNegative">
+                        -2.1%
+                      </td>
+                      <td>40.5%</td>
+                      <td class="histNegative">
+                        -0.32
+                      </td>
+                      <td>12.99</td>
+                      <td>
+                        +2.65
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>387</td>
+                      <td>199-185-3</td>
+                      <td>51.8%</td>
+                      <td class="histNegative">
+                        -1.1%
+                      </td>
+                      <td>47.8%</td>
+                      <td class="histPositive">
+                        +0.07
+                      </td>
+                      <td>13.28</td>
+                      <td>
+                        +0.49
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Massey Dual</b></td>
+                      <td>338</td>
+                      <td>177-159-2</td>
+                      <td>52.7%</td>
+                      <td class="histPositive">
+                        +0.6%
+                      </td>
+                      <td>41.7%</td>
+                      <td class="histNegative">
+                        -0.20
+                      </td>
+                      <td>13.05</td>
+                      <td>
+                        +1.56
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>Sagarin</b></td>
+                      <td>417</td>
+                      <td>210-202-5</td>
+                      <td>51.0%</td>
+                      <td class="histNegative">
+                        -2.7%
+                      </td>
+                      <td>50.1%</td>
+                      <td class="histPositive">
+                        +0.30
+                      </td>
+                      <td>14.43</td>
+                      <td>
+                        -0.69
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2023">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>1</td>
+                      <td>1-0-0</td>
+                      <td>100.0%</td>
+                      <td class="histPositive">
+                        +90.9%
+                      </td>
+                      <td>0.0%</td>
+                      <td class="">
+                        +0.00
+                      </td>
+                      <td>5.80</td>
+                      <td>
+                        +5.80
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>219</td>
+                      <td>132-87-0</td>
+                      <td>60.3%</td>
+                      <td class="histPositive">
+                        +15.0%
+                      </td>
+                      <td>47.5%</td>
+                      <td class="histPositive">
+                        +0.36
+                      </td>
+                      <td>12.20</td>
+                      <td>
+                        +1.28
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>322</td>
+                      <td>180-141-1</td>
+                      <td>56.1%</td>
+                      <td class="histPositive">
+                        +7.0%
+                      </td>
+                      <td>47.2%</td>
+                      <td class="histPositive">
+                        +0.34
+                      </td>
+                      <td>12.37</td>
+                      <td>
+                        +1.40
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>SP+</b></td>
+                      <td>361</td>
+                      <td>190-170-1</td>
+                      <td>52.8%</td>
+                      <td class="histPositive">
+                        +0.7%
+                      </td>
+                      <td>49.0%</td>
+                      <td class="histPositive">
+                        +0.39
+                      </td>
+                      <td>12.33</td>
+                      <td>
+                        +1.71
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Total</b></td>
+                      <td>389</td>
+                      <td>219-168-2</td>
+                      <td>56.6%</td>
+                      <td class="histPositive">
+                        +8.0%
+                      </td>
+                      <td>46.3%</td>
+                      <td class="histPositive">
+                        +0.26
+                      </td>
+                      <td>13.04</td>
+                      <td>
+                        +1.68
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>366</td>
+                      <td>212-153-1</td>
+                      <td>58.1%</td>
+                      <td class="histPositive">
+                        +10.8%
+                      </td>
+                      <td>51.6%</td>
+                      <td class="histPositive">
+                        +0.49
+                      </td>
+                      <td>12.64</td>
+                      <td>
+                        -0.61
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Massey Dual</b></td>
+                      <td>334</td>
+                      <td>195-138-1</td>
+                      <td>58.6%</td>
+                      <td class="histPositive">
+                        +11.7%
+                      </td>
+                      <td>47.9%</td>
+                      <td class="histPositive">
+                        +0.34
+                      </td>
+                      <td>12.91</td>
+                      <td>
+                        +0.40
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>Sagarin</b></td>
+                      <td>353</td>
+                      <td>184-168-1</td>
+                      <td>52.3%</td>
+                      <td class="histNegative">
+                        -0.3%
+                      </td>
+                      <td>53.8%</td>
+                      <td class="histPositive">
+                        +0.60
+                      </td>
+                      <td>14.69</td>
+                      <td>
+                        -0.18
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2024">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>21</td>
+                      <td>9-12-0</td>
+                      <td>42.9%</td>
+                      <td class="histNegative">
+                        -18.2%
+                      </td>
+                      <td>52.4%</td>
+                      <td class="histPositive">
+                        +0.67
+                      </td>
+                      <td>13.32</td>
+                      <td>
+                        -0.94
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>40/40/20 + Sagarin</b> <span class="histBadge histStrong">PRIMARY</span></td>
+                      <td>205</td>
+                      <td>114-91-0</td>
+                      <td>55.6%</td>
+                      <td class="histPositive">
+                        +6.0%
+                      </td>
+                      <td>54.6%</td>
+                      <td class="histPositive">
+                        +0.96
+                      </td>
+                      <td>11.95</td>
+                      <td>
+                        +0.39
+                      </td>
+                    </tr><tr class="histTotalsModelRow histModelComposite"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>SP+/Massey 50/50</b> <span class="histBadge histActionable">CORE</span></td>
+                      <td>298</td>
+                      <td>162-136-0</td>
+                      <td>54.4%</td>
+                      <td class="histPositive">
+                        +3.6%
+                      </td>
+                      <td>50.3%</td>
+                      <td class="histPositive">
+                        +0.61
+                      </td>
+                      <td>12.90</td>
+                      <td>
+                        +1.07
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>SP+</b></td>
+                      <td>305</td>
+                      <td>163-142-0</td>
+                      <td>53.4%</td>
+                      <td class="histPositive">
+                        +1.9%
+                      </td>
+                      <td>50.2%</td>
+                      <td class="histPositive">
+                        +0.59
+                      </td>
+                      <td>12.40</td>
+                      <td>
+                        +0.79
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Total</b></td>
+                      <td>391</td>
+                      <td>206-185-0</td>
+                      <td>52.7%</td>
+                      <td class="histPositive">
+                        +0.4%
+                      </td>
+                      <td>46.0%</td>
+                      <td class="histPositive">
+                        +0.41
+                      </td>
+                      <td>12.83</td>
+                      <td>
+                        +2.25
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Pred Sum</b></td>
+                      <td>352</td>
+                      <td>194-158-0</td>
+                      <td>55.1%</td>
+                      <td class="histPositive">
+                        +5.1%
+                      </td>
+                      <td>52.0%</td>
+                      <td class="histPositive">
+                        +0.63
+                      </td>
+                      <td>12.92</td>
+                      <td>
+                        +0.88
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Massey Dual</b></td>
+                      <td>341</td>
+                      <td>182-159-0</td>
+                      <td>53.4%</td>
+                      <td class="histPositive">
+                        +1.8%
+                      </td>
+                      <td>50.4%</td>
+                      <td class="histPositive">
+                        +0.56
+                      </td>
+                      <td>13.24</td>
+                      <td>
+                        +1.35
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>Sagarin</b></td>
+                      <td>357</td>
+                      <td>190-167-0</td>
+                      <td>53.2%</td>
+                      <td class="histPositive">
+                        +1.7%
+                      </td>
+                      <td>53.2%</td>
+                      <td class="histPositive">
+                        +0.76
+                      </td>
+                      <td>13.85</td>
+                      <td>
+                        -1.33
+                      </td>
+                    </tr><tr class="histTotalsModelRow"
+                        data-hist-totals-model-view="3.0"
+                        data-hist-totals-model-scope="2025">
+                      <td><b>DRatings</b> <span class="histBadge">LIMITED HISTORY</span></td>
+                      <td>5</td>
+                      <td>3-2-0</td>
+                      <td>60.0%</td>
+                      <td class="histPositive">
+                        +14.4%
+                      </td>
+                      <td>20.0%</td>
+                      <td class="histPositive">
+                        +0.40
+                      </td>
+                      <td>15.62</td>
+                      <td>
+                        +10.26
+                      </td>
+                    </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="histModelMeta">
+    PRIMARY = 40% SP+ + 40% Massey Dual + 20% Sagarin.
+    CORE = 50% SP+ + 50% Massey Dual.
+    All Games includes every directional model selection with an executable Sunday 9 PM ET totals market observation.
+    3.0+ Edge includes only games where that model differed from the market by at least 3 points.
+    DRatings is retained for reference but has materially smaller provenance-safe historical coverage.
+  </div>
+</section>
+
+<script>
+(function(){
+  const root=document.getElementById('historicalTotalsModelPerformance');
+  if(!root)return;
+
+  const rows=[...root.querySelectorAll('.histTotalsModelRow')];
+  const viewButtons=[...root.querySelectorAll('[data-hist-totals-model-view]')];
+  const yearButtons=[...root.querySelectorAll('[data-hist-totals-model-year]')];
+
+  let currentView='all';
+  let currentYear='2021-2025';
+
+  function render(){
+    rows.forEach(row=>{
+      const show=
+        row.dataset.histTotalsModelView===currentView &&
+        row.dataset.histTotalsModelScope===currentYear;
+
+      row.style.display=show ? '' : 'none';
+    });
+
+    viewButtons.forEach(btn=>{
+      btn.classList.toggle(
+        'active',
+        btn.dataset.histTotalsModelView===currentView
+      );
+    });
+
+    yearButtons.forEach(btn=>{
+      btn.classList.toggle(
+        'active',
+        btn.dataset.histTotalsModelYear===currentYear
+      );
+    });
+  }
+
+  viewButtons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      currentView=btn.dataset.histTotalsModelView;
+      render();
+    });
+  });
+
+  yearButtons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      currentYear=btn.dataset.histTotalsModelYear;
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
 
 <script>
 (function(){

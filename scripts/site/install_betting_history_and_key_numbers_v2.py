@@ -30,6 +30,8 @@ SOURCE = ROOT / "reports/five_source_backtest_validated/corrected/site_history_v
 HALF_POINT_VALUES = ROOT / "data/site/ncaaf_spread_half_point_values_2021_2025.json"
 SPREAD_EDGE_VALIDATION = ROOT / "data/site/historical_spread_edge_validation_2021_2025.csv"
 HISTORICAL_MODEL_PERFORMANCE = ROOT / "data/site/historical_model_performance_2021_2025.json"
+TOTALS_EDGE_VALIDATION = ROOT / "data/site/historical_totals_edge_validation_2021_2025.csv"
+HISTORICAL_TOTALS_MODEL_PERFORMANCE = ROOT / "data/site/historical_totals_model_performance_2021_2025.json"
 
 # Current source owners confirmed by repo inventory.
 OPENERS = ROOT / "openers.html"
@@ -67,6 +69,87 @@ if historical_model_payload.get("schema") != "historical-model-performance-v2":
     )
 
 historical_model_rows = historical_model_payload.get("rows") or []
+
+if not TOTALS_EDGE_VALIDATION.exists():
+    raise SystemExit(
+        f"STOP: missing totals validation CSV: {TOTALS_EDGE_VALIDATION}"
+    )
+
+with TOTALS_EDGE_VALIDATION.open(newline="") as f:
+    totals_validation_rows = list(csv.DictReader(f))
+
+totals_validation_by_threshold = {
+    float(r["edge_threshold"]): r
+    for r in totals_validation_rows
+}
+
+if not totals_validation_by_threshold:
+    raise SystemExit(
+        "STOP: totals validation CSV has no threshold rows"
+    )
+
+if not HISTORICAL_TOTALS_MODEL_PERFORMANCE.exists():
+    raise SystemExit(
+        "STOP: missing historical totals model performance JSON: "
+        f"{HISTORICAL_TOTALS_MODEL_PERFORMANCE}"
+    )
+
+historical_totals_model_payload = json.loads(
+    HISTORICAL_TOTALS_MODEL_PERFORMANCE.read_text()
+)
+
+if historical_totals_model_payload.get("schema") != "historical-totals-model-performance-v1":
+    raise SystemExit(
+        "STOP: unexpected historical totals model schema: "
+        f"{historical_totals_model_payload.get('schema')}"
+    )
+
+historical_totals_model_rows = (
+    historical_totals_model_payload.get("rows") or []
+)
+
+HISTORICAL_TOTALS_MODEL_NAMES = [
+    "40/40/20 + Sagarin",
+    "SP+/Massey 50/50",
+    "SP+",
+    "Massey Total",
+    "Massey Pred Sum",
+    "Massey Dual",
+    "Sagarin",
+    "DRatings",
+]
+
+HISTORICAL_TOTALS_MODEL_SCOPES = [
+    "2021-2025",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+]
+
+HISTORICAL_TOTALS_MODEL_VIEWS = [
+    "all",
+    "3.0",
+]
+
+expected_totals_model_rows = (
+    len(HISTORICAL_TOTALS_MODEL_NAMES)
+    * len(HISTORICAL_TOTALS_MODEL_SCOPES)
+    * len(HISTORICAL_TOTALS_MODEL_VIEWS)
+)
+
+if len(historical_totals_model_rows) != expected_totals_model_rows:
+    raise SystemExit(
+        "STOP: expected "
+        f"{expected_totals_model_rows} historical totals model rows; "
+        f"found {len(historical_totals_model_rows)}"
+    )
+
+historical_totals_model_lookup = {
+    (r["view"], r["scope"], r["model"]): r
+    for r in historical_totals_model_rows
+}
 
 HISTORICAL_MODEL_NAMES = [
     "Five-source equal weight",
@@ -155,6 +238,34 @@ spread_thresholds = [
     5.0,
     6.0,
 ]
+
+totals_thresholds = [
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    3.5,
+    4.0,
+    4.5,
+    5.0,
+    6.0,
+    7.0,
+    8.0,
+    10.0,
+]
+
+missing_totals_thresholds = [
+    x for x in totals_thresholds
+    if x not in totals_validation_by_threshold
+]
+
+if missing_totals_thresholds:
+    raise SystemExit(
+        "STOP: missing validated totals thresholds: "
+        + ", ".join(str(x) for x in missing_totals_thresholds)
+    )
 
 missing_spread_thresholds = [
     x for x in spread_thresholds
@@ -258,6 +369,165 @@ def render_historical_model_rows():
                 )
 
     return "".join(out)
+
+
+def render_historical_totals_model_rows():
+    out = []
+
+    for view in HISTORICAL_TOTALS_MODEL_VIEWS:
+        for scope in HISTORICAL_TOTALS_MODEL_SCOPES:
+            for model in HISTORICAL_TOTALS_MODEL_NAMES:
+                r = historical_totals_model_lookup[
+                    (view, scope, model)
+                ]
+
+                wins = integer(r.get("wins"))
+                losses = integer(r.get("losses"))
+                pushes = integer(r.get("pushes"))
+                record = f"{wins}-{losses}-{pushes}"
+
+                badge_name = r.get("badge")
+                limited = bool(r.get("limited_coverage"))
+
+                row_class = (
+                    " histModelComposite"
+                    if badge_name in ("PRIMARY", "CORE")
+                    else ""
+                )
+
+                badges = []
+
+                if badge_name == "PRIMARY":
+                    badges.append(
+                        '<span class="histBadge histStrong">PRIMARY</span>'
+                    )
+                elif badge_name == "CORE":
+                    badges.append(
+                        '<span class="histBadge histActionable">CORE</span>'
+                    )
+
+                if limited:
+                    badges.append(
+                        '<span class="histBadge">LIMITED HISTORY</span>'
+                    )
+
+                badge_html = (
+                    " " + " ".join(badges)
+                    if badges else ""
+                )
+
+                out.append(
+                    f"""<tr class="histTotalsModelRow{row_class}"
+                        data-hist-totals-model-view="{esc(view)}"
+                        data-hist-totals-model-scope="{esc(scope)}">
+                      <td><b>{esc(model)}</b>{badge_html}</td>
+                      <td>{integer(r.get("games"))}</td>
+                      <td>{record}</td>
+                      <td>{pct(r.get("ou_pct"))}</td>
+                      <td class="{hist_tone(r.get("roi"))}">
+                        {signed_pct(r.get("roi"), 1)}
+                      </td>
+                      <td>{pct(r.get("beat_close_pct"))}</td>
+                      <td class="{hist_tone(r.get("avg_clv"))}">
+                        {signed_num(r.get("avg_clv"), 2)}
+                      </td>
+                      <td>{num(r.get("mae"), 2)}</td>
+                      <td>
+                        {signed_num(r.get("bias"), 2)}
+                      </td>
+                    </tr>"""
+                )
+
+    return "".join(out)
+
+
+def totals_signal_badges(t, r):
+    badges = []
+
+    try:
+        roi = float(r.get("actual_roi"))
+    except Exception:
+        roi = 0.0
+
+    try:
+        ev = float(r.get("ev_pct"))
+    except Exception:
+        ev = 0.0
+
+    signal = str(r.get("signal") or "")
+
+    if signal == "LEAN":
+        badges.append(
+            '<span class="histBadge">LEAN</span>'
+        )
+    elif signal == "BET_SIGNAL":
+        badges.append(
+            '<span class="histBadge histActionable">BET SIGNAL</span>'
+        )
+    elif signal == "ACTIONABLE":
+        badges.append(
+            '<span class="histBadge histActionable">ACTIONABLE</span>'
+        )
+    elif signal == "STRONG":
+        badges.append(
+            '<span class="histBadge histStrong">STRONG</span>'
+        )
+
+    if roi > 0:
+        badges.append(
+            '<span class="histBadge histActionable">BET ROI+</span>'
+        )
+
+    if ev > 0:
+        badges.append(
+            '<span class="histBadge histStrong">BET EV+</span>'
+        )
+
+    return " ".join(badges)
+
+
+def render_totals_validation_rows():
+    rows = []
+
+    for t in totals_thresholds:
+        r = totals_validation_by_threshold[t]
+
+        roi = float(r["actual_roi"])
+        ev = float(r["ev_pct"])
+        clv = float(r["avg_clv_points"])
+
+        cls = (
+            "histCoreRow"
+            if roi > 0 and ev > 0
+            else (
+                "histActionRow"
+                if roi > 0 or ev > 0
+                else ""
+            )
+        )
+
+        roi_cls = hist_tone(roi)
+        ev_cls = hist_tone(ev)
+        clv_cls = hist_tone(clv)
+
+        rows.append(
+            f'<tr class="{cls}">'
+            f'<td><b>{spread_threshold_label(t)}</b> '
+            f'{totals_signal_badges(t, r)}</td>'
+            f'<td>{integer(r.get("games"))}</td>'
+            f'<td>{esc(r.get("record","—"))}</td>'
+            f'<td>{pct(r.get("ou_pct"))}</td>'
+            f'<td class="{roi_cls}">{signed_pct(r.get("actual_roi"),1)}</td>'
+            f'<td>{pct(r.get("beat_close_pct"))}</td>'
+            f'<td>{pct(r.get("won_line_move_pct"))}</td>'
+            f'<td class="histEmphasis {clv_cls}">'
+            f'{signed_num(r.get("avg_clv_points"),2)}</td>'
+            f'<td class="histEmphasis {ev_cls}">'
+            f'{signed_pct(r.get("ev_pct"),2)}</td>'
+            '</tr>'
+        )
+
+    return "".join(rows)
 
 
 def spread_threshold_label(t):
@@ -567,18 +837,53 @@ BETTING_BLOCK = f"""
       <div class="histHead">
         <div>
           <h2>Historical Totals Edge Validation</h2>
-          <small>Reserved for the 2021–2025 totals backtest</small>
+          <small>2021–2025 · 40% SP+ / 40% Massey Dual / 20% Sagarin · Sunday 9 PM ET market</small>
         </div>
-        <small>Next research module</small>
+        <small>Primary totals betting system</small>
       </div>
 
-      <div class="histTotalsPlaceholder">
-        <b>Totals validation pending</b>
-        This card will use the same framework as spreads:
-        edge threshold, sample size, record, O/U win rate, ROI,
-        Beat Closing Line, Avg CLV, and CLV-Implied EV.
-        Historical Massey / DRatings totals acquisition and validation
-        will populate this section.
+      <div class="histTableWrap">
+        <table class="histTable">
+          <thead>
+            <tr>
+              <th>Edge</th>
+              <th>Games</th>
+              <th>Record</th>
+              <th>O/U Win %</th>
+              <th>ROI</th>
+              <th>
+                Beat Closing Line
+                <span class="histHelp"
+                  title="Percentage of wagers whose Sunday 9 PM total finished better than the historical closing total. Same-line closes remain in the denominator but are not counted as beats.">?</span>
+              </th>
+              <th>
+                Won Line Move
+                <span class="histHelp"
+                  title="Among wagers where the closing total differed from the Sunday 9 PM entry total, percentage where the move went in the model-selected direction. Same-line closes are excluded.">?</span>
+              </th>
+              <th>
+                Avg CLV
+                <span class="histHelp"
+                  title="Average total points gained versus the closing market. Positive means the wager beat the eventual closing number.">?</span>
+              </th>
+              <th>
+                CLV-Implied EV
+                <span class="histHelp"
+                  title="Temporary totals-specific estimate using a smooth value of roughly 2.8 percentage points of fair win probability per 1 point of total CLV at a -110 benchmark. This is a v1 approximation and will later be replaced by an empirical NCAAF totals point-value curve.">?</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>{render_totals_validation_rows()}</tbody>
+        </table>
+      </div>
+
+      <div class="histNote">
+        Primary model = 40% SP+ + 40% Massey Dual + 20% Sagarin.
+        Massey Dual = equal weight of Massey's published Total and predicted-score sum.
+        LEAN begins at 2+, BET SIGNAL at 3+, ACTIONABLE at 4+, and STRONG at 5+.
+        BET ROI+ identifies positive realized historical ROI.
+        BET EV+ uses the temporary totals CLV-implied EV estimate and is intentionally separate from realized ROI.
+        Thresholds are cumulative and are not automatic betting rules.
       </div>
     </div>
 
@@ -657,6 +962,130 @@ MODEL_COMPARISON_BLOCK = f"""
     Five-source equal weight = SP+ + FPI + TeamRankings + Sagarin + DRatings.
   </div>
 </section>
+
+<section class="histCard histModelCard" id="historicalTotalsModelPerformance">
+  <div class="histHead">
+    <div>
+      <h2>Historical Totals Model Performance</h2>
+      <small>2021–2025 · Sunday 9 PM ET</small>
+    </div>
+    <small>Composite vs individual totals systems</small>
+  </div>
+
+  <div class="histModelViewControls" id="histTotalsModelViews">
+    <button class="histModelView active"
+      data-hist-totals-model-view="all">All Games</button>
+    <button class="histModelView"
+      data-hist-totals-model-view="3.0">3.0+ Edge</button>
+  </div>
+
+  <div class="histModelControls" id="histTotalsModelYears">
+    <button class="histModelYear active"
+      data-hist-totals-model-year="2021-2025">2021–2025</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2021">2021</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2022">2022</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2023">2023</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2024">2024</button>
+    <button class="histModelYear"
+      data-hist-totals-model-year="2025">2025</button>
+  </div>
+
+  <div class="histTableWrap">
+    <table class="histTable">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Games</th>
+          <th>Record</th>
+          <th>O/U Win %</th>
+          <th>ROI</th>
+          <th>Beat Closing Line</th>
+          <th>Avg CLV</th>
+          <th>
+            MAE
+            <span class="histHelp"
+              title="Mean absolute error between the projected total and actual final total. Lower is better.">?</span>
+          </th>
+          <th>
+            Bias
+            <span class="histHelp"
+              title="Average projected total minus actual final total. Closest to zero is best calibrated; positive means the model projected too many points and negative means too few.">?</span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="historicalTotalsModelRows">
+        {render_historical_totals_model_rows()}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="histModelMeta">
+    PRIMARY = 40% SP+ + 40% Massey Dual + 20% Sagarin.
+    CORE = 50% SP+ + 50% Massey Dual.
+    All Games includes every directional model selection with an executable Sunday 9 PM ET totals market observation.
+    3.0+ Edge includes only games where that model differed from the market by at least 3 points.
+    DRatings is retained for reference but has materially smaller provenance-safe historical coverage.
+  </div>
+</section>
+
+<script>
+(function(){{
+  const root=document.getElementById('historicalTotalsModelPerformance');
+  if(!root)return;
+
+  const rows=[...root.querySelectorAll('.histTotalsModelRow')];
+  const viewButtons=[...root.querySelectorAll('[data-hist-totals-model-view]')];
+  const yearButtons=[...root.querySelectorAll('[data-hist-totals-model-year]')];
+
+  let currentView='all';
+  let currentYear='2021-2025';
+
+  function render(){{
+    rows.forEach(row=>{{
+      const show=
+        row.dataset.histTotalsModelView===currentView &&
+        row.dataset.histTotalsModelScope===currentYear;
+
+      row.style.display=show ? '' : 'none';
+    }});
+
+    viewButtons.forEach(btn=>{{
+      btn.classList.toggle(
+        'active',
+        btn.dataset.histTotalsModelView===currentView
+      );
+    }});
+
+    yearButtons.forEach(btn=>{{
+      btn.classList.toggle(
+        'active',
+        btn.dataset.histTotalsModelYear===currentYear
+      );
+    }});
+  }}
+
+  viewButtons.forEach(btn=>{{
+    btn.addEventListener('click',()=>{{
+      currentView=btn.dataset.histTotalsModelView;
+      render();
+    }});
+  }});
+
+  yearButtons.forEach(btn=>{{
+    btn.addEventListener('click',()=>{{
+      currentYear=btn.dataset.histTotalsModelYear;
+      render();
+    }});
+  }});
+
+  render();
+}})();
+</script>
 
 <script>
 (function(){{
@@ -857,7 +1286,14 @@ checks = [
     ("Betting MAE", ">MAE" in BETTING.read_text() or "MAE" in BETTING.read_text()),
     ("Betting Bias", ">Bias" in BETTING.read_text() or "Bias" in BETTING.read_text()),
     ("Betting 2025 model selector", 'data-hist-model-year="2025"' in BETTING.read_text()),
-    ("Betting totals placeholder", "Historical Totals Edge Validation" in BETTING.read_text()),
+    ("Betting totals edge validation", "Historical Totals Edge Validation" in BETTING.read_text()),
+    ("Betting totals primary model", "40% SP+ / 40% Massey Dual / 20% Sagarin" in BETTING.read_text()),
+    ("Betting totals model comparison", "Historical Totals Model Performance" in BETTING.read_text()),
+    ("Betting totals primary badge", ">PRIMARY<" in BETTING.read_text()),
+    ("Betting totals core badge", ">CORE<" in BETTING.read_text()),
+    ("Betting totals all-games view", 'data-hist-totals-model-view="all"' in BETTING.read_text()),
+    ("Betting totals 3.0 view", 'data-hist-totals-model-view="3.0"' in BETTING.read_text()),
+    ("Betting totals 2025 selector", 'data-hist-totals-model-year="2025"' in BETTING.read_text()),
 ]
 failed=[]
 for label,ok in checks:
