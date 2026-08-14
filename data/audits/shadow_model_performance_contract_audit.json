@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "schema_version": "shadow-model-performance-v1",
+  "output": "data/site/shadow_model_performance.json",
+  "source_paths": [
+    "data/research/historical/shadow/all_games_baseline/shadow_historical_threshold_matrix.csv",
+    "data/research/historical/shadow/all_games_baseline/shadow_all_games_stale_vs_shadow.csv",
+    "data/research/historical/shadow/all_games_baseline/shadow_all_games_audit.json",
+    "data/research/historical/shadow/checkpoint_comparison/shadow_checkpoint_comparison_audit.json",
+    "data/research/historical/shadow/2026_candidate/provisional_2026_spread_shadow_specification.json",
+    "data/research/historical/shadow/2026_candidate/provisional_2026_shadow_research_summary.md",
+    "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_threshold_matrix.csv",
+    "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_all_games_stale_vs_shadow.csv",
+    "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_all_games_audit.json"
+  ],
+  "primary_checkpoint": "SUN_9AM_ET",
+  "spread_primary_n": {
+    "2024": 163,
+    "2025": 307,
+    "POOLED_COMPARABLE": 470
+  },
+  "totals_primary_n": {
+    "2024": 163,
+    "2025": 299,
+    "POOLED_COMPARABLE": 462
+  },
+  "spread_thresholds": [
+    "ALL",
+    "2+",
+    "2.5+",
+    "3+",
+    "3.5+",
+    "4+",
+    "5+"
+  ],
+  "totals_thresholds": [
+    "ALL",
+    "1+",
+    "1.5+",
+    "2+",
+    "2.5+",
+    "3+",
+    "3.5+",
+    "4+",
+    "5+"
+  ],
+  "duplicate_thresholds": 0,
+  "non_finite_metrics": 0,
+  "api_calls": 0,
+  "network_requests": 0,
+  "models_refit": 0,
+  "html_changes": 0
+}

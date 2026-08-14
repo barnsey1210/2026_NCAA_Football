@@ -1,0 +1,1124 @@
+{
+  "schema_version": "shadow-model-performance-v1",
+  "metadata": {
+    "sport": "NCAAF",
+    "built_at": "2026-08-14T02:31:58.901429+00:00",
+    "status": "HISTORICAL_VALIDATION_WITH_PROVISIONAL_2026_METHODOLOGY",
+    "primary_checkpoint": "SUN_9AM_ET",
+    "primary_seasons": [
+      2024,
+      2025
+    ],
+    "checkpoint_note": "The market checkpoint is sampled and is not necessarily the true opener.",
+    "policy_note": "Display labels summarize historical evidence and are not automatic betting rules.",
+    "provenance": [
+      {
+        "role": "spread_thresholds",
+        "path": "data/research/historical/shadow/all_games_baseline/shadow_historical_threshold_matrix.csv"
+      },
+      {
+        "role": "spread_quality",
+        "path": "data/research/historical/shadow/all_games_baseline/shadow_all_games_stale_vs_shadow.csv"
+      },
+      {
+        "role": "spread_audit",
+        "path": "data/research/historical/shadow/all_games_baseline/shadow_all_games_audit.json"
+      },
+      {
+        "role": "checkpoint_audit",
+        "path": "data/research/historical/shadow/checkpoint_comparison/shadow_checkpoint_comparison_audit.json"
+      },
+      {
+        "role": "candidate_specification",
+        "path": "data/research/historical/shadow/2026_candidate/provisional_2026_spread_shadow_specification.json"
+      },
+      {
+        "role": "candidate_summary",
+        "path": "data/research/historical/shadow/2026_candidate/provisional_2026_shadow_research_summary.md"
+      },
+      {
+        "role": "totals_thresholds",
+        "path": "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_threshold_matrix.csv"
+      },
+      {
+        "role": "totals_quality",
+        "path": "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_all_games_stale_vs_shadow.csv"
+      },
+      {
+        "role": "totals_audit",
+        "path": "data/research/historical/shadow/totals_all_games_baseline/shadow_totals_all_games_audit.json"
+      }
+    ]
+  },
+  "spread": {
+    "methodology": {
+      "historical_engine": [
+        "SP+",
+        "Sagarin"
+      ],
+      "provider_update_forecasts": "FROZEN",
+      "description": "Predicts forthcoming provider ratings before official updates.",
+      "market_checkpoint": "SUN_9AM_ET"
+    },
+    "pooled": {
+      "scope": "2024-2025",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 470,
+          "record": {
+            "display": "250-219-1",
+            "wins": 250,
+            "losses": 219,
+            "pushes": 1
+          },
+          "win_pct": 0.5330490405117271,
+          "roi_minus_110": 0.017639077340569864,
+          "average_clv_points": 0.4473404255319149,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.49361702127659574
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 246,
+          "record": {
+            "display": "137-109-0",
+            "wins": 137,
+            "losses": 109,
+            "pushes": 0
+          },
+          "win_pct": 0.556910569105691,
+          "roi_minus_110": 0.06319290465631927,
+          "average_clv_points": 0.8038617886178862,
+          "median_clv_points": 0.625,
+          "positive_clv_pct": 0.5609756097560976
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 204,
+          "record": {
+            "display": "117-87-0",
+            "wins": 117,
+            "losses": 87,
+            "pushes": 0
+          },
+          "win_pct": 0.5735294117647058,
+          "roi_minus_110": 0.09491978609625668,
+          "average_clv_points": 0.8786764705882353,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5735294117647058
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 172,
+          "record": {
+            "display": "108-64-0",
+            "wins": 108,
+            "losses": 64,
+            "pushes": 0
+          },
+          "win_pct": 0.627906976744186,
+          "roi_minus_110": 0.1987315010570824,
+          "average_clv_points": 0.9752906976744186,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5813953488372093
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 142,
+          "record": {
+            "display": "86-56-0",
+            "wins": 86,
+            "losses": 56,
+            "pushes": 0
+          },
+          "win_pct": 0.6056338028169014,
+          "roi_minus_110": 0.15620998719590262,
+          "average_clv_points": 1.068661971830986,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5915492957746479
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 110,
+          "record": {
+            "display": "68-42-0",
+            "wins": 68,
+            "losses": 42,
+            "pushes": 0
+          },
+          "win_pct": 0.6181818181818182,
+          "roi_minus_110": 0.1801652892561983,
+          "average_clv_points": 1.084090909090909,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5818181818181818
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 59,
+          "record": {
+            "display": "34-25-0",
+            "wins": 34,
+            "losses": 25,
+            "pushes": 0
+          },
+          "win_pct": 0.576271186440678,
+          "roi_minus_110": 0.1001540832049306,
+          "average_clv_points": 1.4533898305084745,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.6779661016949152
+        }
+      ]
+    },
+    "2024": {
+      "scope": "2024",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 163,
+          "record": {
+            "display": "93-70-0",
+            "wins": 93,
+            "losses": 70,
+            "pushes": 0
+          },
+          "win_pct": 0.5705521472392638,
+          "roi_minus_110": 0.08923591745677635,
+          "average_clv_points": 0.49079754601226994,
+          "median_clv_points": 0.25,
+          "positive_clv_pct": 0.5153374233128835
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 81,
+          "record": {
+            "display": "50-31-0",
+            "wins": 50,
+            "losses": 31,
+            "pushes": 0
+          },
+          "win_pct": 0.6172839506172839,
+          "roi_minus_110": 0.17845117845117842,
+          "average_clv_points": 0.5370370370370371,
+          "median_clv_points": 0.5,
+          "positive_clv_pct": 0.5432098765432098
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 67,
+          "record": {
+            "display": "44-23-0",
+            "wins": 44,
+            "losses": 23,
+            "pushes": 0
+          },
+          "win_pct": 0.6567164179104478,
+          "roi_minus_110": 0.25373134328358204,
+          "average_clv_points": 0.7574626865671642,
+          "median_clv_points": 0.5,
+          "positive_clv_pct": 0.5671641791044776
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 61,
+          "record": {
+            "display": "41-20-0",
+            "wins": 41,
+            "losses": 20,
+            "pushes": 0
+          },
+          "win_pct": 0.6721311475409836,
+          "roi_minus_110": 0.2831594634873323,
+          "average_clv_points": 0.9180327868852459,
+          "median_clv_points": 0.5,
+          "positive_clv_pct": 0.5901639344262295
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 50,
+          "record": {
+            "display": "35-15-0",
+            "wins": 35,
+            "losses": 15,
+            "pushes": 0
+          },
+          "win_pct": 0.7,
+          "roi_minus_110": 0.3363636363636363,
+          "average_clv_points": 1.06,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.6
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 40,
+          "record": {
+            "display": "26-14-0",
+            "wins": 26,
+            "losses": 14,
+            "pushes": 0
+          },
+          "win_pct": 0.65,
+          "roi_minus_110": 0.24090909090909085,
+          "average_clv_points": 0.975,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.6
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 26,
+          "record": {
+            "display": "16-10-0",
+            "wins": 16,
+            "losses": 10,
+            "pushes": 0
+          },
+          "win_pct": 0.6153846153846154,
+          "roi_minus_110": 0.17482517482517482,
+          "average_clv_points": 1.1538461538461537,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.6153846153846154
+        }
+      ]
+    },
+    "2025": {
+      "scope": "2025",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 307,
+          "record": {
+            "display": "157-149-1",
+            "wins": 157,
+            "losses": 149,
+            "pushes": 1
+          },
+          "win_pct": 0.5130718954248366,
+          "roi_minus_110": -0.020499108734402867,
+          "average_clv_points": 0.4242671009771987,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4820846905537459
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 165,
+          "record": {
+            "display": "87-78-0",
+            "wins": 87,
+            "losses": 78,
+            "pushes": 0
+          },
+          "win_pct": 0.5272727272727272,
+          "roi_minus_110": 0.006611570247933821,
+          "average_clv_points": 0.9348484848484848,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5696969696969697
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 137,
+          "record": {
+            "display": "73-64-0",
+            "wins": 73,
+            "losses": 64,
+            "pushes": 0
+          },
+          "win_pct": 0.5328467153284672,
+          "roi_minus_110": 0.01725282017252816,
+          "average_clv_points": 0.9379562043795621,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5766423357664233
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 111,
+          "record": {
+            "display": "67-44-0",
+            "wins": 67,
+            "losses": 44,
+            "pushes": 0
+          },
+          "win_pct": 0.6036036036036037,
+          "roi_minus_110": 0.1523341523341523,
+          "average_clv_points": 1.0067567567567568,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5765765765765766
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 92,
+          "record": {
+            "display": "51-41-0",
+            "wins": 51,
+            "losses": 41,
+            "pushes": 0
+          },
+          "win_pct": 0.5543478260869565,
+          "roi_minus_110": 0.05830039525691698,
+          "average_clv_points": 1.0733695652173914,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5869565217391305
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 70,
+          "record": {
+            "display": "42-28-0",
+            "wins": 42,
+            "losses": 28,
+            "pushes": 0
+          },
+          "win_pct": 0.6,
+          "roi_minus_110": 0.1454545454545454,
+          "average_clv_points": 1.1464285714285714,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5714285714285714
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 33,
+          "record": {
+            "display": "18-15-0",
+            "wins": 18,
+            "losses": 15,
+            "pushes": 0
+          },
+          "win_pct": 0.5454545454545454,
+          "roi_minus_110": 0.04132231404958677,
+          "average_clv_points": 1.6893939393939394,
+          "median_clv_points": 2.0,
+          "positive_clv_pct": 0.7272727272727273
+        }
+      ]
+    },
+    "stale_vs_shadow": {
+      "2024": {
+        "scope": "2024",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 163,
+          "close_mae": 3.302760736196319,
+          "actual_result_mae": 12.68006134969325,
+          "record": {
+            "display": "82-81-0",
+            "wins": 82,
+            "losses": 81,
+            "pushes": 0
+          },
+          "win_pct": 0.5030674846625767,
+          "roi_minus_110": -0.03959843837144455,
+          "average_clv_points": 0.13803680981595093,
+          "positive_clv_pct": 0.4539877300613497
+        },
+        "shadow": {
+          "sample_size": 163,
+          "close_mae": 2.7679589099829016,
+          "actual_result_mae": 12.216049413496354,
+          "record": {
+            "display": "93-70-0",
+            "wins": 93,
+            "losses": 70,
+            "pushes": 0
+          },
+          "win_pct": 0.5705521472392638,
+          "roi_minus_110": 0.08923591745677635,
+          "average_clv_points": 0.49079754601226994,
+          "positive_clv_pct": 0.5153374233128835
+        },
+        "shadow_closer_to_close_pct": 0.5766871165644172,
+        "shadow_farther_from_close_pct": 0.3987730061349693,
+        "shadow_approximately_unchanged_pct": 0.024539877300613498,
+        "close_mae_improvement_points": 0.5348018262134175,
+        "actual_result_mae_improvement_points": 0.46401193619689707
+      },
+      "2025": {
+        "scope": "2025",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 307,
+          "close_mae": 3.1057817589576544,
+          "actual_result_mae": 12.084576547231269,
+          "record": {
+            "display": "162-144-1",
+            "wins": 162,
+            "losses": 144,
+            "pushes": 1
+          },
+          "win_pct": 0.5294117647058824,
+          "roi_minus_110": 0.010695187165775383,
+          "average_clv_points": 0.4568403908794788,
+          "positive_clv_pct": 0.49185667752442996
+        },
+        "shadow": {
+          "sample_size": 307,
+          "close_mae": 2.6365900503183726,
+          "actual_result_mae": 11.965251730181219,
+          "record": {
+            "display": "157-149-1",
+            "wins": 157,
+            "losses": 149,
+            "pushes": 1
+          },
+          "win_pct": 0.5130718954248366,
+          "roi_minus_110": -0.020499108734402867,
+          "average_clv_points": 0.4242671009771987,
+          "positive_clv_pct": 0.4820846905537459
+        },
+        "shadow_closer_to_close_pct": 0.5732899022801303,
+        "shadow_farther_from_close_pct": 0.3973941368078176,
+        "shadow_approximately_unchanged_pct": 0.029315960912052116,
+        "close_mae_improvement_points": 0.46919170863928183,
+        "actual_result_mae_improvement_points": 0.1193248170500496
+      },
+      "pooled": {
+        "scope": "2024-2025",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 470,
+          "close_mae": 3.1740957446808507,
+          "actual_result_mae": 12.291095744680852,
+          "record": {
+            "display": "244-225-1",
+            "wins": 244,
+            "losses": 225,
+            "pushes": 1
+          },
+          "win_pct": 0.5202558635394456,
+          "roi_minus_110": -0.006784260515603853,
+          "average_clv_points": 0.34627659574468084,
+          "positive_clv_pct": 0.4787234042553192
+        },
+        "shadow": {
+          "sample_size": 470,
+          "close_mae": 2.6821498888828796,
+          "actual_result_mae": 12.052230501203276,
+          "record": {
+            "display": "250-219-1",
+            "wins": 250,
+            "losses": 219,
+            "pushes": 1
+          },
+          "win_pct": 0.5330490405117271,
+          "roi_minus_110": 0.017639077340569864,
+          "average_clv_points": 0.4473404255319149,
+          "positive_clv_pct": 0.49361702127659574
+        },
+        "shadow_closer_to_close_pct": 0.574468085106383,
+        "shadow_farther_from_close_pct": 0.39787234042553193,
+        "shadow_approximately_unchanged_pct": 0.027659574468085105,
+        "close_mae_improvement_points": 0.491945855797971,
+        "actual_result_mae_improvement_points": 0.23886524347757643
+      }
+    }
+  },
+  "totals": {
+    "methodology": {
+      "engine": "SP+ offense/defense Shadow",
+      "provider_update_forecasts": "FROZEN_ENHANCED",
+      "features": [
+        "prior-game closing spread",
+        "prior-game closing total",
+        "actual score",
+        "implied scoring surprise",
+        "PBP/efficiency"
+      ],
+      "market_checkpoint": "SUN_9AM_ET",
+      "status": "WATCH / RESEARCH"
+    },
+    "research_finding": {
+      "descriptive_strongest_region_points": "2.0-2.99",
+      "edge_response": "NON_MONOTONIC",
+      "automatic_betting_rule": "NONE_FROZEN"
+    },
+    "pooled": {
+      "scope": "2024-2025",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 462,
+          "record": {
+            "display": "234-228-0",
+            "wins": 234,
+            "losses": 228,
+            "pushes": 0
+          },
+          "win_pct": 0.5064935064935064,
+          "roi_minus_110": -0.03305785123966944,
+          "average_clv_points": 0.2689393939393939,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.44805194805194803
+        },
+        {
+          "threshold": "1+",
+          "sample_size": 341,
+          "record": {
+            "display": "178-163-0",
+            "wins": 178,
+            "losses": 163,
+            "pushes": 0
+          },
+          "win_pct": 0.5219941348973607,
+          "roi_minus_110": -0.00346574246867505,
+          "average_clv_points": 0.3497067448680352,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.45454545454545453
+        },
+        {
+          "threshold": "1.5+",
+          "sample_size": 286,
+          "record": {
+            "display": "149-137-0",
+            "wins": 149,
+            "losses": 137,
+            "pushes": 0
+          },
+          "win_pct": 0.5209790209790209,
+          "roi_minus_110": -0.005403687221869094,
+          "average_clv_points": 0.36538461538461536,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4405594405594406
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 242,
+          "record": {
+            "display": "132-110-0",
+            "wins": 132,
+            "losses": 110,
+            "pushes": 0
+          },
+          "win_pct": 0.5454545454545454,
+          "roi_minus_110": 0.041322314049586716,
+          "average_clv_points": 0.45661157024793386,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4462809917355372
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 203,
+          "record": {
+            "display": "110-93-0",
+            "wins": 110,
+            "losses": 93,
+            "pushes": 0
+          },
+          "win_pct": 0.541871921182266,
+          "roi_minus_110": 0.0344827586206896,
+          "average_clv_points": 0.46551724137931033,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4482758620689655
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 173,
+          "record": {
+            "display": "91-82-0",
+            "wins": 91,
+            "losses": 82,
+            "pushes": 0
+          },
+          "win_pct": 0.5260115606936416,
+          "roi_minus_110": 0.004203888596952166,
+          "average_clv_points": 0.4190751445086705,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4508670520231214
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 133,
+          "record": {
+            "display": "71-62-0",
+            "wins": 71,
+            "losses": 62,
+            "pushes": 0
+          },
+          "win_pct": 0.5338345864661654,
+          "roi_minus_110": 0.019138755980861222,
+          "average_clv_points": 0.4323308270676692,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.45112781954887216
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 109,
+          "record": {
+            "display": "58-51-0",
+            "wins": 58,
+            "losses": 51,
+            "pushes": 0
+          },
+          "win_pct": 0.5321100917431193,
+          "roi_minus_110": 0.015846538782318585,
+          "average_clv_points": 0.39908256880733944,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.44036697247706424
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 66,
+          "record": {
+            "display": "33-33-0",
+            "wins": 33,
+            "losses": 33,
+            "pushes": 0
+          },
+          "win_pct": 0.5,
+          "roi_minus_110": -0.04545454545454551,
+          "average_clv_points": 0.6212121212121212,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.48484848484848486
+        }
+      ]
+    },
+    "2024": {
+      "scope": "2024",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 163,
+          "record": {
+            "display": "91-72-0",
+            "wins": 91,
+            "losses": 72,
+            "pushes": 0
+          },
+          "win_pct": 0.558282208588957,
+          "roi_minus_110": 0.06581148912437254,
+          "average_clv_points": 0.11349693251533742,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.44171779141104295
+        },
+        {
+          "threshold": "1+",
+          "sample_size": 126,
+          "record": {
+            "display": "67-59-0",
+            "wins": 67,
+            "losses": 59,
+            "pushes": 0
+          },
+          "win_pct": 0.5317460317460317,
+          "roi_minus_110": 0.015151515151515109,
+          "average_clv_points": -0.003968253968253968,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.42063492063492064
+        },
+        {
+          "threshold": "1.5+",
+          "sample_size": 110,
+          "record": {
+            "display": "60-50-0",
+            "wins": 60,
+            "losses": 50,
+            "pushes": 0
+          },
+          "win_pct": 0.5454545454545454,
+          "roi_minus_110": 0.041322314049586716,
+          "average_clv_points": 0.05,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4090909090909091
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 93,
+          "record": {
+            "display": "52-41-0",
+            "wins": 52,
+            "losses": 41,
+            "pushes": 0
+          },
+          "win_pct": 0.5591397849462365,
+          "roi_minus_110": 0.06744868035190614,
+          "average_clv_points": 0.12365591397849462,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.3978494623655914
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 77,
+          "record": {
+            "display": "43-34-0",
+            "wins": 43,
+            "losses": 34,
+            "pushes": 0
+          },
+          "win_pct": 0.5584415584415584,
+          "roi_minus_110": 0.06611570247933878,
+          "average_clv_points": 0.09740259740259741,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4025974025974026
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 71,
+          "record": {
+            "display": "40-31-0",
+            "wins": 40,
+            "losses": 31,
+            "pushes": 0
+          },
+          "win_pct": 0.5633802816901409,
+          "roi_minus_110": 0.07554417413572341,
+          "average_clv_points": 0.04929577464788732,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.39436619718309857
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 53,
+          "record": {
+            "display": "30-23-0",
+            "wins": 30,
+            "losses": 23,
+            "pushes": 0
+          },
+          "win_pct": 0.5660377358490566,
+          "roi_minus_110": 0.08061749571183531,
+          "average_clv_points": -0.1792452830188679,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.3584905660377358
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 48,
+          "record": {
+            "display": "27-21-0",
+            "wins": 27,
+            "losses": 21,
+            "pushes": 0
+          },
+          "win_pct": 0.5625,
+          "roi_minus_110": 0.07386363636363633,
+          "average_clv_points": -0.11458333333333333,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.375
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 31,
+          "record": {
+            "display": "18-13-0",
+            "wins": 18,
+            "losses": 13,
+            "pushes": 0
+          },
+          "win_pct": 0.5806451612903226,
+          "roi_minus_110": 0.10850439882697945,
+          "average_clv_points": 0.03225806451612903,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.3870967741935484
+        }
+      ]
+    },
+    "2025": {
+      "scope": "2025",
+      "checkpoint": "SUN_9AM_ET",
+      "thresholds": [
+        {
+          "threshold": "ALL",
+          "sample_size": 299,
+          "record": {
+            "display": "143-156-0",
+            "wins": 143,
+            "losses": 156,
+            "pushes": 0
+          },
+          "win_pct": 0.4782608695652174,
+          "roi_minus_110": -0.0869565217391305,
+          "average_clv_points": 0.3536789297658863,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.451505016722408
+        },
+        {
+          "threshold": "1+",
+          "sample_size": 215,
+          "record": {
+            "display": "111-104-0",
+            "wins": 111,
+            "losses": 104,
+            "pushes": 0
+          },
+          "win_pct": 0.5162790697674419,
+          "roi_minus_110": -0.014376321353065562,
+          "average_clv_points": 0.5569767441860465,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4744186046511628
+        },
+        {
+          "threshold": "1.5+",
+          "sample_size": 176,
+          "record": {
+            "display": "89-87-0",
+            "wins": 89,
+            "losses": 87,
+            "pushes": 0
+          },
+          "win_pct": 0.5056818181818182,
+          "roi_minus_110": -0.034607438016528935,
+          "average_clv_points": 0.5625,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4602272727272727
+        },
+        {
+          "threshold": "2+",
+          "sample_size": 149,
+          "record": {
+            "display": "80-69-0",
+            "wins": 80,
+            "losses": 69,
+            "pushes": 0
+          },
+          "win_pct": 0.5369127516778524,
+          "roi_minus_110": 0.02501525320317263,
+          "average_clv_points": 0.6644295302013423,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.47651006711409394
+        },
+        {
+          "threshold": "2.5+",
+          "sample_size": 126,
+          "record": {
+            "display": "67-59-0",
+            "wins": 67,
+            "losses": 59,
+            "pushes": 0
+          },
+          "win_pct": 0.5317460317460317,
+          "roi_minus_110": 0.015151515151515109,
+          "average_clv_points": 0.6904761904761905,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.47619047619047616
+        },
+        {
+          "threshold": "3+",
+          "sample_size": 102,
+          "record": {
+            "display": "51-51-0",
+            "wins": 51,
+            "losses": 51,
+            "pushes": 0
+          },
+          "win_pct": 0.5,
+          "roi_minus_110": -0.04545454545454546,
+          "average_clv_points": 0.6764705882352942,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.49019607843137253
+        },
+        {
+          "threshold": "3.5+",
+          "sample_size": 80,
+          "record": {
+            "display": "41-39-0",
+            "wins": 41,
+            "losses": 39,
+            "pushes": 0
+          },
+          "win_pct": 0.5125,
+          "roi_minus_110": -0.021590909090909157,
+          "average_clv_points": 0.8375,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5125
+        },
+        {
+          "threshold": "4+",
+          "sample_size": 61,
+          "record": {
+            "display": "31-30-0",
+            "wins": 31,
+            "losses": 30,
+            "pushes": 0
+          },
+          "win_pct": 0.5081967213114754,
+          "roi_minus_110": -0.029806259314456032,
+          "average_clv_points": 0.8032786885245902,
+          "median_clv_points": 0.0,
+          "positive_clv_pct": 0.4918032786885246
+        },
+        {
+          "threshold": "5+",
+          "sample_size": 35,
+          "record": {
+            "display": "15-20-0",
+            "wins": 15,
+            "losses": 20,
+            "pushes": 0
+          },
+          "win_pct": 0.42857142857142855,
+          "roi_minus_110": -0.18181818181818182,
+          "average_clv_points": 1.1428571428571428,
+          "median_clv_points": 1.0,
+          "positive_clv_pct": 0.5714285714285714
+        }
+      ]
+    },
+    "stale_vs_shadow": {
+      "2024": {
+        "scope": "2024",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 163,
+          "close_mae": 3.819631901840492,
+          "actual_result_mae": 12.082822085889571,
+          "record": {
+            "display": "92-71-0",
+            "wins": 92,
+            "losses": 71,
+            "pushes": 0
+          },
+          "win_pct": 0.5644171779141104,
+          "roi_minus_110": 0.0775237032905744,
+          "average_clv_points": 0.12576687116564417,
+          "positive_clv_pct": 0.44785276073619634
+        },
+        "shadow": {
+          "sample_size": 163,
+          "close_mae": 3.664420763427481,
+          "actual_result_mae": 12.085036826908507,
+          "record": {
+            "display": "91-72-0",
+            "wins": 91,
+            "losses": 72,
+            "pushes": 0
+          },
+          "win_pct": 0.558282208588957,
+          "roi_minus_110": 0.06581148912437254,
+          "average_clv_points": 0.11349693251533742,
+          "positive_clv_pct": 0.44171779141104295
+        },
+        "shadow_closer_to_close_pct": 0.5276073619631901,
+        "shadow_farther_from_close_pct": 0.4171779141104294,
+        "shadow_approximately_unchanged_pct": 0.05521472392638037,
+        "close_mae_improvement_points": 0.15521113841301082,
+        "actual_result_mae_improvement_points": -0.0022147410189354844
+      },
+      "2025": {
+        "scope": "2025",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 299,
+          "close_mae": 2.9655518394648825,
+          "actual_result_mae": 12.123411371237458,
+          "record": {
+            "display": "155-141-3",
+            "wins": 155,
+            "losses": 141,
+            "pushes": 3
+          },
+          "win_pct": 0.5236486486486487,
+          "roi_minus_110": -0.00030712530712537694,
+          "average_clv_points": 0.4707357859531773,
+          "positive_clv_pct": 0.45819397993311034
+        },
+        "shadow": {
+          "sample_size": 299,
+          "close_mae": 2.7045854387223254,
+          "actual_result_mae": 12.010905702024361,
+          "record": {
+            "display": "143-156-0",
+            "wins": 143,
+            "losses": 156,
+            "pushes": 0
+          },
+          "win_pct": 0.4782608695652174,
+          "roi_minus_110": -0.0869565217391305,
+          "average_clv_points": 0.3536789297658863,
+          "positive_clv_pct": 0.451505016722408
+        },
+        "shadow_closer_to_close_pct": 0.5852842809364549,
+        "shadow_farther_from_close_pct": 0.3612040133779264,
+        "shadow_approximately_unchanged_pct": 0.05351170568561873,
+        "close_mae_improvement_points": 0.26096640074255717,
+        "actual_result_mae_improvement_points": 0.11250566921309613
+      },
+      "pooled": {
+        "scope": "2024-2025",
+        "checkpoint": "SUN_9AM_ET",
+        "stale": {
+          "sample_size": 462,
+          "close_mae": 3.2668831168831165,
+          "actual_result_mae": 12.109090909090908,
+          "record": {
+            "display": "247-212-3",
+            "wins": 247,
+            "losses": 212,
+            "pushes": 3
+          },
+          "win_pct": 0.5381263616557734,
+          "roi_minus_110": 0.027332144979203766,
+          "average_clv_points": 0.349025974025974,
+          "positive_clv_pct": 0.45454545454545453
+        },
+        "shadow": {
+          "sample_size": 462,
+          "close_mae": 3.0432286376983866,
+          "actual_result_mae": 12.03706018980816,
+          "record": {
+            "display": "234-228-0",
+            "wins": 234,
+            "losses": 228,
+            "pushes": 0
+          },
+          "win_pct": 0.5064935064935064,
+          "roi_minus_110": -0.03305785123966944,
+          "average_clv_points": 0.2689393939393939,
+          "positive_clv_pct": 0.44805194805194803
+        },
+        "shadow_closer_to_close_pct": 0.564935064935065,
+        "shadow_farther_from_close_pct": 0.38095238095238093,
+        "shadow_approximately_unchanged_pct": 0.05411255411255411,
+        "close_mae_improvement_points": 0.22365447918472992,
+        "actual_result_mae_improvement_points": 0.07203071928274696
+      }
+    }
+  },
+  "live_methodology": {
+    "state_definitions": {
+      "STALE": "Latest officially available provider rating before update.",
+      "SHADOW": "Predicted forthcoming provider rating.",
+      "HYBRID": "Actual newly updated provider values plus Shadow values for providers not yet updated.",
+      "FULL_UPDATED": "All desired current provider ratings released."
+    },
+    "provider_selection_rule": "Use ACTUAL_UPDATED when a verified current post-Saturday provider update exists; otherwise use SHADOW_PREDICTED.",
+    "core_historical_spread_providers": [
+      "SP+",
+      "Sagarin"
+    ],
+    "supplemental_prospective_providers": [
+      "FPI",
+      "TeamRankings"
+    ],
+    "supplemental_providers_gate_output": false,
+    "potential_later_provider": [
+      "DRatings"
+    ],
+    "ensemble_weighting_status": "PROVISIONAL / TO_BE_PROSPECTIVELY_CALIBRATED",
+    "betting_policy_status": "NOT_FINALIZED_REQUIRES_2026_PROSPECTIVE_CALIBRATION"
+  },
+  "status_labels": {
+    "disclaimer": "Presentation metadata only; labels are not automatic betting rules.",
+    "spread": {
+      "ALL": "MODEL",
+      "2+": "WATCH",
+      "2.5+": "LEAN",
+      "3+": "SIGNAL",
+      "3.5+": "SIGNAL",
+      "4+": "ACTIONABLE",
+      "5+": "SMALLER N / STRONG CLV"
+    },
+    "totals": {
+      "ALL": "MODEL",
+      "1+": "RESEARCH",
+      "1.5+": "RESEARCH",
+      "2+": "WATCH",
+      "2.5+": "WATCH",
+      "3+": "RESEARCH",
+      "3.5+": "RESEARCH",
+      "4+": "RESEARCH",
+      "5+": "RESEARCH"
+    }
+  }
+}

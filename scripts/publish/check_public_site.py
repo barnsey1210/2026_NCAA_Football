@@ -125,7 +125,9 @@ def validate(root: Path, out: Path) -> list[str]:
     if betting.is_file():
         betting_text = betting.read_text(errors="ignore")
         for marker in ('data-view="bets">My Bets', 'data-view="model">Model Performance',
-                       'id="modelPerformanceView"'):
+                       'id="modelPerformanceView"', 'data-performance-mode="standard"',
+                       'data-performance-mode="shadow"', 'id="standardModelsPanel"',
+                       'id="shadowModelsPanel"', 'data/site/shadow_model_performance.json'):
             if marker not in betting_text:
                 errors.append(f"Betting Model Performance marker missing: {marker}")
     model_performance = out / "data/site/model_performance_view.json"
@@ -139,6 +141,32 @@ def validate(root: Path, out: Path) -> list[str]:
         else:
             if model_data.get("schema_version") != "model-performance-view-v2":
                 errors.append("Model Performance public artifact schema mismatch")
+
+    shadow_performance = out / "data/site/shadow_model_performance.json"
+    if not shadow_performance.is_file():
+        errors.append("Shadow Model Performance public artifact missing")
+    else:
+        try:
+            shadow_data = json.loads(shadow_performance.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"Shadow Model Performance public artifact malformed: {exc}")
+        else:
+            if shadow_data.get("schema_version") != "shadow-model-performance-v1":
+                errors.append("Shadow Model Performance public artifact schema mismatch")
+            expected = {
+                "spread": {"ALL": 470, "2+": 246, "2.5+": 204, "3+": 172, "3.5+": 142, "4+": 110, "5+": 59},
+                "totals": {"ALL": 462, "1+": 341, "1.5+": 286, "2+": 242, "2.5+": 203, "3+": 173, "3.5+": 133, "4+": 109, "5+": 66},
+            }
+            for market, rows in expected.items():
+                actual = {row.get("threshold"): row.get("sample_size") for row in shadow_data.get(market, {}).get("pooled", {}).get("thresholds", [])}
+                if actual != rows:
+                    errors.append(f"Shadow {market} pooled threshold contract mismatch: {actual}")
+            spread_quality = shadow_data.get("spread", {}).get("stale_vs_shadow", {}).get("pooled", {})
+            totals_quality = shadow_data.get("totals", {}).get("stale_vs_shadow", {}).get("pooled", {})
+            if (spread_quality.get("stale", {}).get("sample_size"), spread_quality.get("shadow", {}).get("sample_size")) != (470, 470):
+                errors.append("Shadow spread quality sample mismatch")
+            if (totals_quality.get("stale", {}).get("sample_size"), totals_quality.get("shadow", {}).get("sample_size")) != (462, 462):
+                errors.append("Shadow totals quality sample mismatch")
 
     health = root / "data/site/page_health_status.json"
     if not health.exists():

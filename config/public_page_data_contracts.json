@@ -28,6 +28,13 @@
       "freshness_states": ["LIVE", "BACKUP_SOURCE", "STALE", "MISSING"]
     },
     "market_history": {"purpose": "historical snapshots only; never overrides current market"},
-    "ratings": {"required_dates": ["source_updated_at", "pulled_at", "status_built_at", "applied_snapshot_date"]}
+    "ratings": {"required_dates": ["source_updated_at", "pulled_at", "status_built_at", "applied_snapshot_date"]},
+    "model_performance": {
+      "standard_artifact": "data/site/model_performance_view.json",
+      "historical_standard_artifacts": ["data/site/historical_model_performance_2021_2025.json", "data/site/historical_totals_model_performance_2021_2025.json"],
+      "shadow_artifact": "data/site/shadow_model_performance.json",
+      "shadow_builder": "scripts/site/build_shadow_model_performance.py",
+      "shadow_policy": "historical statistics and presentation labels remain separate; labels are not automatic betting rules"
+    }
   }
 }

@@ -145,6 +145,7 @@ img[src$="west-virginia.webp"] {
 .histModelMeta{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.45}
 .spreadEvWarning{color:#ffe2a8!important;font-weight:800;letter-spacing:.03em;margin-top:2px}
 @media(max-width:900px){.histGrid,.keyRefGrid{grid-template-columns:1fr}.keyPriceItem{flex:1 1 230px}}
+.shadowModeSwitch{display:flex;gap:7px;margin:10px 0}.shadowModeSwitch button,.shadowYear{border:1px solid #28517d;background:#0a1d38;color:var(--muted);border-radius:999px;padding:7px 12px;font-size:10px;font-weight:900;cursor:pointer}.shadowModeSwitch button.active,.shadowYear.active{color:#fff;background:#1857a7;border-color:#55a2ff}.shadowPanel[hidden]{display:none}.shadowYears{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}.shadowGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.shadowTable{min-width:620px}.shadowBadge{max-width:128px;white-space:normal;text-align:center;line-height:1.2}.shadowQuality{margin-top:10px}.shadowQualityGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}.shadowQualityBlock{border:1px solid #17345c;border-radius:10px;overflow:hidden}.shadowQualityBlock h3{font-size:12px;margin:0;padding:8px 10px;background:#0a1d38}.shadowQualityTable{width:100%;border-collapse:collapse}.shadowQualityTable th,.shadowQualityTable td{padding:6px 8px;border-top:1px solid #17345c;text-align:right;font-size:10px}.shadowQualityTable th:first-child,.shadowQualityTable td:first-child{text-align:left}.shadowCloser{padding:7px 9px;color:#baf8d6;font-size:9px;border-top:1px solid #17345c}.shadowExplainer{margin:10px 0;border:1px solid #28517d;background:#0a1d38;border-radius:11px;padding:8px 11px}.shadowExplainer summary{cursor:pointer;font-size:11px;font-weight:900}.shadowExplainer p{color:var(--muted);font-size:10px;line-height:1.5;margin:8px 0}.shadowLegend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.shadowLegend div{border:1px solid #214469;border-radius:8px;padding:7px}.shadowLegend b{display:block;font-size:9px;color:#fff}.shadowLegend span{display:block;color:var(--muted);font-size:8px;line-height:1.35;margin-top:2px}.shadowUnavailable{border:1px solid #6f592c;background:#2b2414;color:#ffe2a8;border-radius:11px;padding:14px}.shadowDisclaimer{margin:7px 0;color:var(--muted);font-size:9px}.shadowDescriptor{font-size:9px;color:#a9c4e8}.shadowStatus-model{color:#cbe5ff;border:1px solid #356fa8;background:#102b50}.shadowStatus-watch,.shadowStatus-research{color:#ffe2a8;border:1px solid #8a6c31;background:#302711}.shadowStatus-lean,.shadowStatus-signal{color:#cbe5ff;border:1px solid #356fa8;background:#102b50}.shadowStatus-actionable{color:#baf8d6;border:1px solid #2f7d5a;background:#0c2d25}.shadowStatus-smaller-n-strong-clv{color:#d9c9ff;border:1px solid #655096;background:#241d42}@media(max-width:900px){.shadowGrid,.shadowQualityGrid{grid-template-columns:1fr}}@media(max-width:650px){.shadowLegend{grid-template-columns:1fr 1fr}.shadowModeSwitch{position:sticky;top:0;z-index:5;background:#061126;padding:6px 0}}
 </style>
 <!-- HISTORICAL_BETTING_UI_CSS_END -->
 
@@ -152,6 +153,11 @@ img[src$="west-virginia.webp"] {
 
 
 <section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Process scorecard</h2><small>Overall, Powers, and Opener bets</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section><div class="tabs" id="tabs"><button class="active" data-tab="open">All open wagers</button><button data-tab="powers">Powers bets</button><button data-tab="opener">Opener bets</button><button data-tab="drafts">Site-entered drafts</button><button data-tab="all">All records</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger"><thead><tr><th>Category / source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Current market</th><th>Current CLV / EV</th><th>Status</th><th>Game</th></tr></thead><tbody id="rows"><tr><td colspan="10" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Google Sheet rows are treated as James’s wagers regardless of Account. “Site-entered drafts” are bets entered through this site that have not yet been added to the Google Sheet; they remain device-local and are not part of official performance.</p></div><section id="modelPerformanceView" class="modelView" hidden>
+<div class="shadowModeSwitch" id="shadowModeSwitch" role="tablist" aria-label="Model performance type">
+  <button class="active" type="button" role="tab" aria-selected="true" data-performance-mode="standard">Standard Models</button>
+  <button type="button" role="tab" aria-selected="false" data-performance-mode="shadow">Shadow Models</button>
+</div>
+<div id="standardModelsPanel" class="shadowPanel">
 <!-- HISTORICAL_BETTING_SECTION_START -->
 <section class="histSection" id="historicalBettingResearch">
   <div class="histGrid">
@@ -3555,6 +3561,38 @@ img[src$="west-virginia.webp"] {
 <section id="modelMatrixSection" class="card"><div class="cardHead"><h2 id="modelMatrixTitle">Spread model matrix</h2><small id="modelMatrixNote">Rankings begin after 30 settled selections</small></div><div class="modelMatrixWrap"><table class="modelMatrix"><thead><tr><th data-sort="display_name">Model</th><th data-sort="rank">Rank</th><th data-sort="games">Games</th><th data-sort="availability_pct">Availability</th><th>Record</th><th data-sort="win_pct">Win %</th><th data-sort="roi">ROI</th><th data-sort="average_point_clv">Avg point CLV</th><th data-sort="positive_clv_pct">Positive CLV</th><th data-sort="mae">MAE</th><th data-sort="bias">Bias</th><th data-sort="rmse">RMSE</th></tr></thead><tbody id="modelMatrixRows"></tbody></table></div></section>
 <section id="modelSummarySection" class="modelSummaryGrid" hidden></section>
 <section class="card resultsCard"><div class="cardHead"><h2>Model opportunity ledger</h2><small>Read-only; never creates a personal wager</small></div><div class="modelMatrixWrap"><table class="modelMatrix"><thead><tr><th>Week / Game</th><th>Market</th><th>Model</th><th>Prediction</th><th>Opener</th><th>Edge</th><th>Side</th><th>Qualification</th><th>Provenance</th><th>Close</th><th>Point CLV</th><th>Result</th></tr></thead><tbody id="modelLedgerRows"><tr><td colspan="12" class="modelEmpty">No accepted prospective opportunities yet.</td></tr></tbody></table></div></section>
+</div>
+<div id="shadowModelsPanel" class="shadowPanel" hidden>
+  <div id="shadowUnavailable" class="shadowUnavailable" hidden>Shadow performance data unavailable.</div>
+  <div id="shadowModelsContent" hidden>
+    <div class="shadowYears" id="shadowYears" aria-label="Shadow performance season">
+      <button class="shadowYear active" type="button" data-shadow-scope="pooled">2024–2025</button>
+      <button class="shadowYear" type="button" data-shadow-scope="2024">2024</button>
+      <button class="shadowYear" type="button" data-shadow-scope="2025">2025</button>
+    </div>
+    <p class="shadowDisclaimer" id="shadowDisclaimer"></p>
+    <section class="shadowGrid">
+      <article class="histCard">
+        <div class="histHead"><div><h2>Historical Shadow Spread Validation</h2><small>2024–2025 · SP+ + Sagarin Shadow · Sunday 9 AM ET market</small></div><span class="shadowDescriptor">Predicted rating updates vs early market</span></div>
+        <div class="histTableWrap"><table class="histTable shadowTable"><thead><tr><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>ROI</th><th>Avg CLV</th></tr></thead><tbody id="shadowSpreadRows"></tbody></table></div>
+        <div class="histNote">Threshold labels are descriptive research statuses, not automatic betting rules.</div>
+      </article>
+      <article class="histCard">
+        <div class="histHead"><div><h2>Historical Shadow Totals Validation</h2><small>2024–2025 · SP+ offense/defense Shadow · Sunday 9 AM ET market</small></div><span class="shadowDescriptor">Research / monitoring signal</span></div>
+        <div class="histTableWrap"><table class="histTable shadowTable"><thead><tr><th>Edge</th><th>Games</th><th>Record</th><th>O/U Win %</th><th>ROI</th><th>Avg CLV</th></tr></thead><tbody id="shadowTotalsRows"></tbody></table></div>
+        <div class="histNote">Shadow totals improve fair-value accuracy, but historical betting results are non-monotonic and no automatic totals betting rule is frozen.</div>
+      </article>
+    </section>
+    <article class="histCard shadowQuality">
+      <div class="histHead"><div><h2>Stale vs Shadow Model Quality</h2><small>Why Shadow matters independently of betting thresholds</small></div><small id="shadowQualityScope">2024–2025 · Sunday 9 AM ET</small></div>
+      <div class="shadowQualityGrid">
+        <div class="shadowQualityBlock"><h3>Spread</h3><table class="shadowQualityTable"><thead><tr><th>Metric</th><th>Stale</th><th>Shadow</th></tr></thead><tbody id="shadowSpreadQuality"></tbody></table><div class="shadowCloser" id="shadowSpreadCloser"></div></div>
+        <div class="shadowQualityBlock"><h3>Totals</h3><table class="shadowQualityTable"><thead><tr><th>Metric</th><th>Stale</th><th>Shadow</th></tr></thead><tbody id="shadowTotalsQuality"></tbody></table><div class="shadowCloser" id="shadowTotalsCloser"></div></div>
+      </div>
+    </article>
+    <details class="shadowExplainer"><summary>What is Shadow?</summary><p>Shadow estimates how rating systems are likely to update after completed Saturday games, before those new ratings are officially released. As providers update, actual ratings replace predicted Shadow values to create a Hybrid fair value.</p><div class="shadowLegend" id="shadowStateLegend"></div></details>
+  </div>
+</div>
 </section></main><script>
 let DATA=null,GAMES=null,tab='open';const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const num=(x,d=1)=>Number.isFinite(Number(x))?Number(x).toFixed(d):'—';const money=x=>Number.isFinite(Number(x))?'$'+Number(x).toFixed(2):'—';const odds=x=>Number.isFinite(Number(x))?(Number(x)>0?'+':'')+Number(x):'—';const tone=v=>Number(v)>0?'positive':Number(v)<0?'negative':'';
 function tags(r){const t=r.strategy_tags||[];return(t.length?t:['Other']).map(x=>`<span class="tag ${String(x).toLowerCase()}">${esc(x)}</span>`).join('')+`<div class="sub">${esc(r.actor?.source||r.source||'Google Sheet')}</div>`}function bookLogo(name){const k=String(name||'').toLowerCase().replace(/[^a-z]/g,''),map={fanduel:'fanduel',draftkings:'draftkings',mgm:'betmgm',betmgm:'betmgm',caesars:'caesars',caesers:'caesars'},f=map[k];return f?`<img class="book" src="logos/books/${f}.png" alt="${esc(name)}" title="${esc(name)}">`:`<span class="sub">${esc(name||'—')}</span>`}
@@ -3843,6 +3881,72 @@ function renderSummary(){const h=MP.methodology.hfa,core=MP.methodology.spread_c
 function render(){if(!MP)return;const summary=mode==='summary';modelMatrixSection.hidden=summary;modelSummarySection.hidden=!summary;opportunityFilters.hidden=summary;modelTypeFilters.hidden=summary;modelMatrixTitle.textContent=mode==='totals'?'Total model matrix':'Spread model matrix';renderCards();if(summary)renderSummary();else renderMatrix();renderLedger()}
 function bindButtons(){document.querySelectorAll('.viewSwitch button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-model-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.modelTab;render()});document.querySelectorAll('[data-model-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');modelFilter=b.dataset.modelFilter;render()});document.querySelectorAll('[data-opportunity-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-opportunity-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');opportunityFilter=b.dataset.opportunityFilter;render()});document.querySelectorAll('#modelMatrixSection th[data-sort]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.sort)sortDir*=-1;else{sortKey=th.dataset.sort;sortDir=1}renderMatrix()})}
 fetch('data/site/model_performance_view.json').then(r=>r.json()).then(d=>{MP=d;modelPeriods.innerHTML=d.periods.map(p=>`<button class="${p==='All'?'active':''}" data-period="${p}">${p}</button>`).join('');modelPeriods.querySelectorAll('button').forEach(b=>b.onclick=()=>{modelPeriods.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');period=b.dataset.period;renderLedger()});if(d.tracking_started)modelTrackerNotice.innerHTML='<strong>Official prospective tracking is active.</strong> Results include accepted captures only; personal wagers remain separate.';bindButtons();render()}).catch(e=>modelMatrixRows.innerHTML=`<tr><td colspan="12" class="modelEmpty">Unable to load preview data: ${e.message}</td></tr>`);switchView('bets')
+})();
+</script>
+<script id="shadow-model-performance-js">
+(function(){
+  'use strict';
+  let contract=null,scope='pooled';
+  const byId=id=>document.getElementById(id);
+  const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const signed=(value,digits=1,suffix='')=>{const n=Number(value);return Number.isFinite(n)?`${n>0?'+':''}${n.toFixed(digits)}${suffix}`:'—'};
+  const percent=(value,digits=1)=>{const n=Number(value);return Number.isFinite(n)?`${n>0?'+':''}${(n*100).toFixed(digits)}%`:'—'};
+  const unsignedPercent=(value,digits=1)=>{const n=Number(value);return Number.isFinite(n)?`${(n*100).toFixed(digits)}%`:'—'};
+  function valid(data){
+    if(!data||data.schema_version!=='shadow-model-performance-v1')return false;
+    for(const market of ['spread','totals'])for(const key of ['pooled','2024','2025']){
+      if(!Array.isArray(data[market]?.[key]?.thresholds))return false;
+      if(!data[market]?.stale_vs_shadow?.[key])return false;
+    }
+    return Boolean(data.status_labels?.spread&&data.status_labels?.totals&&data.live_methodology?.state_definitions);
+  }
+  function labelClass(label){return 'shadowStatus-'+String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+  function thresholdRows(market){
+    const rows=contract[market][scope].thresholds,labels=contract.status_labels[market];
+    return rows.map(row=>{
+      const label=labels[row.threshold],badge=label?`<span class="histBadge shadowBadge ${labelClass(label)}">${safe(label)}</span>`:'';
+      return `<tr><td><b>${safe(row.threshold)}</b>${badge}</td><td>${Number(row.sample_size).toLocaleString()}</td><td>${safe(row.record.display)}</td><td>${unsignedPercent(row.win_pct)}</td><td class="${Number(row.roi_minus_110)>=0?'histPositive':'histNegative'}">${percent(row.roi_minus_110)}</td><td class="${Number(row.average_clv_points)>=0?'histPositive':'histNegative'}">${signed(row.average_clv_points,3)}</td></tr>`;
+    }).join('');
+  }
+  function qualityRows(market){
+    const q=contract[market].stale_vs_shadow[scope],stale=q.stale,shadow=q.shadow;
+    const rows=market==='spread'?
+      [['Games',stale.sample_size,shadow.sample_size],['Close MAE',stale.close_mae,shadow.close_mae],['Margin MAE',stale.actual_result_mae,shadow.actual_result_mae],['ROI',percent(stale.roi_minus_110,2),percent(shadow.roi_minus_110,2)],['Avg CLV',signed(stale.average_clv_points,3),signed(shadow.average_clv_points,3)]]:
+      [['Games',stale.sample_size,shadow.sample_size],['Closing-total MAE',stale.close_mae,shadow.close_mae],['Actual-total MAE',stale.actual_result_mae,shadow.actual_result_mae],['ROI',percent(stale.roi_minus_110,2),percent(shadow.roi_minus_110,2)],['Avg CLV',signed(stale.average_clv_points,3),signed(shadow.average_clv_points,3)]];
+    return rows.map(row=>`<tr><td>${safe(row[0])}</td><td>${typeof row[1]==='number'&&!Number.isInteger(row[1])?Number(row[1]).toFixed(3):safe(row[1])}</td><td>${typeof row[2]==='number'&&!Number.isInteger(row[2])?Number(row[2]).toFixed(3):safe(row[2])}</td></tr>`).join('');
+  }
+  function render(){
+    if(!contract)return;
+    byId('shadowSpreadRows').innerHTML=thresholdRows('spread');
+    byId('shadowTotalsRows').innerHTML=thresholdRows('totals');
+    byId('shadowSpreadQuality').innerHTML=qualityRows('spread');
+    byId('shadowTotalsQuality').innerHTML=qualityRows('totals');
+    const spreadQuality=contract.spread.stale_vs_shadow[scope],totalsQuality=contract.totals.stale_vs_shadow[scope];
+    byId('shadowSpreadCloser').textContent=`Shadow closer to eventual close: ${unsignedPercent(spreadQuality.shadow_closer_to_close_pct,2)}`;
+    byId('shadowTotalsCloser').textContent=`Shadow closer to eventual close: ${unsignedPercent(totalsQuality.shadow_closer_to_close_pct,2)}`;
+    byId('shadowQualityScope').textContent=`${scope==='pooled'?'2024–2025':scope} · Sunday 9 AM ET`;
+    byId('shadowYears').querySelectorAll('[data-shadow-scope]').forEach(button=>button.classList.toggle('active',button.dataset.shadowScope===scope));
+  }
+  function setMode(mode){
+    const shadow=mode==='shadow';
+    byId('standardModelsPanel').hidden=shadow;
+    byId('shadowModelsPanel').hidden=!shadow;
+    byId('shadowModeSwitch').querySelectorAll('[data-performance-mode]').forEach(button=>{const active=button.dataset.performanceMode===mode;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false')});
+  }
+  function bind(){
+    byId('shadowModeSwitch').querySelectorAll('[data-performance-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.performanceMode)));
+    byId('shadowYears').querySelectorAll('[data-shadow-scope]').forEach(button=>button.addEventListener('click',()=>{scope=button.dataset.shadowScope;render()}));
+    setMode('standard');
+  }
+  bind();
+  fetch('data/site/shadow_model_performance.json').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
+    if(!valid(data))throw new Error('invalid Shadow performance schema');
+    contract=data;
+    byId('shadowDisclaimer').textContent=data.status_labels.disclaimer;
+    byId('shadowStateLegend').innerHTML=Object.entries(data.live_methodology.state_definitions).map(([state,description])=>`<div><b>${safe(state.replace('_',' '))}</b><span>${safe(description)}</span></div>`).join('');
+    byId('shadowModelsContent').hidden=false;
+    render();
+  }).catch(()=>{byId('shadowUnavailable').hidden=false;byId('shadowModelsContent').hidden=true});
 })();
 </script>
 <!-- BETTING_VIEW_SWITCH_REPAIR_START -->

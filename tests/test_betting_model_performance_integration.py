@@ -15,6 +15,9 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         self.assertIn("data/site/betting_activity_view.json", text)
         self.assertIn("data/site/matchups_view.json", text)
         self.assertIn("data/site/model_performance_view.json", text)
+        self.assertIn('data-performance-mode="standard"', text)
+        self.assertIn('data-performance-mode="shadow"', text)
+        self.assertIn("data/site/shadow_model_performance.json", text)
 
     def test_my_bets_contract_markers_remain(self):
         text = (ROOT / "betting_v2.html").read_text()
@@ -46,8 +49,22 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         validator = (ROOT / "scripts/publish/check_public_site.py").read_text()
         self.assertIn("build_model_performance_view.py", builder)
         self.assertIn("model_performance_view.json", publisher)
+        self.assertIn("shadow_model_performance.json", publisher)
         self.assertIn("modelPerformanceView", validator)
         self.assertIn("model_performance_view.json", validator)
+        self.assertIn("shadow_model_performance.json", validator)
+
+    def test_shadow_contract_is_rendered_without_ui_metric_calculation(self):
+        text = (ROOT / "betting_v2.html").read_text()
+        for marker in ("shadowSpreadRows", "shadowTotalsRows", "shadowSpreadQuality",
+                       "shadowTotalsQuality", "shadowStateLegend", "shadowYears"):
+            self.assertIn(marker, text)
+        self.assertIn("row.sample_size", text)
+        self.assertIn("row.record.display", text)
+        self.assertIn("row.roi_minus_110", text)
+        self.assertIn("row.average_clv_points", text)
+        self.assertNotIn("250-219-1", text)
+        self.assertNotIn("234-228-0", text)
 
     def test_runtime_view_contract_fixture(self):
         path = ROOT / "data/site/model_performance_view.json"
