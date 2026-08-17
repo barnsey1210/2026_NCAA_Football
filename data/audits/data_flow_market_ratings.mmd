@@ -1,0 +1,18 @@
+flowchart LR
+SGO[SportsGameOdds] --> ODDSPAYLOAD[odds_screen_v2.json]
+SGO --> HISTORY[matchup_line_history.json]
+ODDSPAYLOAD --> MATCHUPPAYLOAD[matchups_view.json]
+MATCHUPPAYLOAD --> OPENERS[Openers]
+MATCHUPPAYLOAD --> MATCHUPS[Matchups]
+MATCHUPPAYLOAD --> HOME[War Room Home]
+ODDSPAYLOAD --> ODDS[Odds]
+RATINGS[ratings_latest.csv] --> STATUS[ratings_source_status.csv]
+RATINGS --> RATINGSVIEW[ratings_view.json]
+STATUS --> RATINGSVIEW
+RATINGSVIEW --> RATINGSPAGE[Ratings]
+SOURCES[Normalized game projection sources] --> PROJECTIONS[current_game_projection_contract.json]
+PROJECTIONS --> RESOLVER[Strict canonical projection resolver]
+RESOLVER -->|AVAILABLE or explicit UNAVAILABLE| MATCHUPPAYLOAD
+RESOLVER --> SHADOWLINES[saturday_shadow_lines.json]
+PUBLIC[build/public_site] --> MAIN[NCAAF_MAIN_REPO]
+MAIN --> GITHUB[GitHub Pages]

@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "validation_mode": "OFFLINE_NO_NETWORK",
+  "architecture_validation_season": 2025,
+  "historical_results_modified": false,
+  "production_consumers_modified": false,
+  "checks": [
+    {
+      "model_id": "standard_spread_five_source_v1",
+      "season_scope": "2021-2025",
+      "rows": 3843,
+      "max_abs_difference": 7.105427357601002e-15,
+      "passed": true,
+      "source": "reports/five_source_backtest_validated/five_source_game_level.csv"
+    },
+    {
+      "model_id": "standard_total_sp_massey_sagarin_v1",
+      "season_scope": "2021-2025",
+      "rows": 2509,
+      "max_abs_difference": 0.0,
+      "passed": true,
+      "source": "historical SP+, Massey, and repaired Sagarin game-level artifacts",
+      "expected_three_source_overlap": 2509
+    },
+    {
+      "model_id": "shadow_spread_sp_sagarin_v1",
+      "season_scope": "2025 architecture validation",
+      "rows": 394,
+      "max_abs_difference": 7.105427357601002e-15,
+      "passed": true,
+      "source": "data/research/historical/shadow/historical_shadow_v1_premarket_game_predictions_2025.csv"
+    },
+    {
+      "model_id": "shadow_total_enhanced_spplus_od_v1",
+      "season_scope": "2024 exact-state OOS arithmetic plus pooled 2024-2025 performance contract",
+      "rows": 252,
+      "max_abs_difference": 1.4210854715202004e-14,
+      "passed": true,
+      "source": [
+        "data/research/historical/shadow/totals_oos_2024/enhanced_spplus_od_2024_oos_team_predictions.csv",
+        "data/research/historical/shadow/totals_oos_2024/enhanced_spplus_totals_2024_oos_games.csv"
+      ],
+      "performance_contract": {
+        "sample_size": 462,
+        "record": "234-228-0",
+        "win_pct": 0.5064935064935064,
+        "roi_minus_110": -0.03305785123966944,
+        "average_clv_points": 0.2689393939393939
+      }
+    },
+    {
+      "model_id": "missing_component_policy",
+      "rows": 10,
+      "passed": true,
+      "tests": {
+        "standard_spread_missing_SP+_rejected": true,
+        "standard_spread_missing_FPI_rejected": true,
+        "standard_spread_missing_TeamRankings_rejected": true,
+        "standard_spread_missing_Sagarin Rating_rejected": true,
+        "standard_spread_missing_DRatings_rejected": true,
+        "standard_total_missing_SP+_rejected": true,
+        "standard_total_missing_Massey Dual_rejected": true,
+        "standard_total_missing_Sagarin_rejected": true,
+        "massey_dual_missing_rejected": true,
+        "shadow_total_missing_rejected": true
+      }
+    },
+    {
+      "model_id": "contract_structure",
+      "rows": 902,
+      "passed": true,
+      "source": "data/site/current_game_projection_contract.json"
+    },
+    {
+      "model_id": "spread_sign_convention",
+      "rows": 41,
+      "fixture_home_margins": [
+        7.0,
+        -3.5,
+        0.0
+      ],
+      "passed": true,
+      "assertion": "value_home_line == -value_home_margin"
+    }
+  ]
+}

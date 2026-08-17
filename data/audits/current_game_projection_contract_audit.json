@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "schema_version": "current-game-projection-contract-v1",
+  "canonical_games": 902,
+  "unique_game_ids": 902,
+  "model_ids": [
+    "standard_spread_five_source_v1",
+    "standard_total_sp_massey_sagarin_v1",
+    "shadow_spread_sp_sagarin_v1",
+    "shadow_total_enhanced_spplus_od_v1"
+  ],
+  "availability_counts": {
+    "standard_spread_five_source_v1": {
+      "AVAILABLE": 178,
+      "MISSING_COMPONENT": 0,
+      "NOT_YET_ACTIVATED": 0
+    },
+    "standard_total_sp_massey_sagarin_v1": {
+      "AVAILABLE": 0,
+      "MISSING_COMPONENT": 902,
+      "NOT_YET_ACTIVATED": 0
+    },
+    "shadow_spread_sp_sagarin_v1": {
+      "AVAILABLE": 0,
+      "MISSING_COMPONENT": 0,
+      "NOT_YET_ACTIVATED": 902
+    },
+    "shadow_total_enhanced_spplus_od_v1": {
+      "AVAILABLE": 0,
+      "MISSING_COMPONENT": 0,
+      "NOT_YET_ACTIVATED": 902
+    }
+  },
+  "shadow_total_frozen_specification": {
+    "valid": true,
+    "reason": "validated frozen specification",
+    "rows": 38,
+    "targets": [
+      "delta_spplus_defense",
+      "delta_spplus_offense"
+    ],
+    "training_season": 2025,
+    "ridge_alpha": 1.0
+  },
+  "resolver_policy": "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS",
+  "page_consumers_migrated": true,
+  "network_requests": 0
+}

@@ -44,6 +44,7 @@ def main():
       "runtime_matchups":ROOT/"data/site/matchups_view.json",
       "public_matchups":ROOT/"build/public_site/data/site/matchups_view.json",
       "main_matchups":MAIN/"data/site/matchups_view.json",
+      "canonical_game_projections":ROOT/"data/site/current_game_projection_contract.json",
       "history":ROOT/"data/site/matchup_line_history.json",
       "ratings_latest":ROOT/"data/ratings/ratings_latest.csv",
       "ratings_status":ROOT/"data/ratings/ratings_source_status.csv"
@@ -59,6 +60,29 @@ def main():
     latest_date=max((r.get("snapshot_date","") for r in rows(paths["ratings_latest"])),default="")
     status_date=max((r.get("snapshot_date","") for r in rows(paths["ratings_status"])),default="")
     checks.append({"area":"ratings","name":"ratings_status_freshness","status":"PASS" if latest_date==status_date else "STALE_DERIVED_ARTIFACT","ratings_latest":latest_date,"ratings_status":status_date})
+    projections=load(paths["canonical_game_projections"]); projection_games=projections.get("games",[])
+    required_models={"standard_spread_five_source_v1","standard_total_sp_massey_sagarin_v1","shadow_spread_sp_sagarin_v1","shadow_total_enhanced_spplus_od_v1"}
+    projection_ids=[str(x.get("game_id")) for x in projection_games]
+    projection_ok=(
+        projections.get("schema_version")=="current-game-projection-contract-v1"
+        and projections.get("canonical_game_count")==len(projection_games)
+        and len(projection_ids)==len(set(projection_ids))
+        and all(set(x.get("projections",{}))==required_models for x in projection_games)
+    )
+    resolver_ok = (
+        projection_ok
+        and projections.get("policy", {}).get("resolver_policy") == "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS"
+        and all(
+            set(x.get("resolved_projections", {})) == required_models
+            and all(
+                result.get("fallback_used") is False
+                and result.get("selection_status") in {"AVAILABLE", "UNAVAILABLE"}
+                for result in x.get("resolved_projections", {}).values()
+            )
+            for x in projection_games
+        )
+    )
+    checks.append({"area":"projections","name":"canonical_game_projection_contract","status":"PASS" if resolver_ok else "CONTRACT_MISMATCH","games":len(projection_games),"consumer_status":"PRODUCTION_RESOLVER_ACTIVE"})
     hist=load(paths["history"]); mv=load(paths["runtime_matchups"])
     byid={str(x.get("game",{}).get("game_id")):x for x in mv.get("games",[])}
     for gid,points in hist.items():
@@ -86,6 +110,10 @@ RATINGS[ratings_latest.csv] --> STATUS[ratings_source_status.csv]
 RATINGS --> RATINGSVIEW[ratings_view.json]
 STATUS --> RATINGSVIEW
 RATINGSVIEW --> RATINGSPAGE[Ratings]
+SOURCES[Normalized game projection sources] --> PROJECTIONS[current_game_projection_contract.json]
+PROJECTIONS --> RESOLVER[Strict canonical projection resolver]
+RESOLVER -->|AVAILABLE or explicit UNAVAILABLE| MATCHUPPAYLOAD
+RESOLVER --> SHADOWLINES[saturday_shadow_lines.json]
 PUBLIC[build/public_site] --> MAIN[NCAAF_MAIN_REPO]
 MAIN --> GITHUB[GitHub Pages]
 """)

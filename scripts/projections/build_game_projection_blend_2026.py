@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     "total_sources": {
         "SP+": True,
         "DRatings Predictions": True,
-        "Massey Games": False,
+        "Massey Games": True,
         "Sagarin Predictor Prediction": False,
     },
 }
