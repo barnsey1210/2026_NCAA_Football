@@ -486,6 +486,7 @@ def main() -> int:
                         # 3. Canonical projection owners used by the validated
                         #    full daily pipeline. No season/CFP simulations here.
                         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py"],
+                        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
                         [sys.executable, "scripts/projections/build_game_projection_blend_2026.py"],
                         [sys.executable, "scripts/projections/apply_game_projection_blend_to_preseason_db.py"],
 
@@ -496,7 +497,10 @@ def main() -> int:
                         [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
                         [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
+                        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+                        [sys.executable, "scripts/site/build_matchups_view.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
+                        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
                         [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
 
                         # 5. Current Ratings / Odds-facing payloads.
@@ -588,11 +592,13 @@ def main() -> int:
 
                         # 5. Existing frozen production inference.
                         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
+                        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+                        [sys.executable, "scripts/site/build_matchups_view.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
+                        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
 
                         # 6. Rebuild downstream matchup / schedule surfaces.
                         [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
-                        [sys.executable, "scripts/site/build_matchups_view.py"],
 
                         # 7. Settle previously captured model predictions where
                         #    the matchup layer exposes final results.

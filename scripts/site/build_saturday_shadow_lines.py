@@ -4,12 +4,26 @@ from __future__ import annotations
 import json
 import math
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path.home() / "NCAAF_AUTO"
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.projections.projection_resolver import (
+    SHADOW_SPREAD,
+    SHADOW_TOTAL,
+    STANDARD_SPREAD,
+    STANDARD_TOTAL,
+    index_contract,
+    load_contract,
+    resolve_game,
+)
+
 CONFIG = ROOT / "config/market_shadow_production.json"
 INDEX = ROOT / "v1.html"
 MARKET = ROOT / "data/ratings/market_implied_ratings_latest.csv"
@@ -17,6 +31,7 @@ COMPARISON = ROOT / "data/ratings/fundamental_market_rating_comparison.csv"
 POSTGAME = ROOT / "data/site/postgame_shadow_updates.json"
 REPLAY = ROOT / "data/site/postgame_shadow_replay.json"
 COMPONENTS = ROOT / "data/site/saturday_shadow_component_predictions.json"
+PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 OUT_JSON = ROOT / "data/site/saturday_shadow_lines.json"
 OUT_CSV = ROOT / "data/site/saturday_shadow_lines.csv"
 SNAPSHOT = ROOT / "data/history/saturday_shadow_line_snapshots.csv"
@@ -145,16 +160,17 @@ def market_total_baseline(game):
         v = num(game.get(key))
         if v is not None:
             return v, "market_offense_defense_model"
-    if game.get("official_model_total") is not None:
-        return game.get("official_model_total"), "official_fallback"
     return None, "missing"
 
 def main():
-    for p in (CONFIG, INDEX, MARKET):
+    for p in (INDEX, MARKET, PROJECTION_CONTRACT):
         if not p.exists():
             raise SystemExit(f"Missing required input: {p}")
 
-    cfg = json.loads(CONFIG.read_text())
+    cfg = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
+    projection_contract = load_contract(PROJECTION_CONTRACT)
+    projection_index = index_contract(projection_contract)
+    model_definitions = projection_contract.get("model_definitions", {})
     db = read_db()
     games = pick_games(db)
 
@@ -194,8 +210,15 @@ def main():
         ad = spread_delta.get(away, {}).get("raw_delta")
         raw_matchup_spread_delta = -hd + ad if hd is not None and ad is not None else None
         component = components.get(g["game_id"], {})
-        shadow_spread = num(component.get("shadow_spread"))
-        display_ready = component.get("shadow_display_ready") is True
+        shadow_spread_resolution = resolve_game(projection_index, g["game_id"], SHADOW_SPREAD)
+        shadow_total_resolution = resolve_game(projection_index, g["game_id"], SHADOW_TOTAL)
+        standard_spread_resolution = resolve_game(projection_index, g["game_id"], STANDARD_SPREAD)
+        standard_total_resolution = resolve_game(projection_index, g["game_id"], STANDARD_TOTAL)
+        shadow_spread = num(shadow_spread_resolution.get("value_home_line"))
+        display_ready = (
+            shadow_spread_resolution.get("selection_status") == "AVAILABLE"
+            or shadow_total_resolution.get("selection_status") == "AVAILABLE"
+        )
         has_update = component.get("has_genuine_postgame_update") is True
         missing_spread_components = list(component.get("shadow_missing_reasons") or component.get("spread_missing_reasons") or [])
         applied_spread_delta = (
@@ -212,7 +235,7 @@ def main():
             "predicted_sp_plus_component_total": component.get("predicted_sp_plus_component_total"),
             "existing_projected_total": g.get("official_model_total"),
         }
-        shadow_total = num(component.get("shadow_total"))
+        shadow_total = num(shadow_total_resolution.get("value_total"))
         missing_total_components = list(component.get("shadow_missing_reasons") or component.get("total_missing_reasons") or [])
         applied_total_delta = (
             shadow_total - g["official_model_total"]
@@ -220,11 +243,16 @@ def main():
             else None
         )
 
-        if not has_update:
-            spread_status = total_status = "Awaiting completed game"
-        else:
-            spread_status = "Complete" if shadow_spread is not None else "Unavailable — " + ", ".join(missing_spread_components or ["Postgame data incomplete"])
-            total_status = "Complete" if shadow_total is not None else "Unavailable — " + ", ".join(missing_total_components or ["Postgame data incomplete"])
+        spread_status = (
+            "Complete"
+            if shadow_spread_resolution.get("selection_status") == "AVAILABLE"
+            else "Unavailable — " + str(shadow_spread_resolution.get("selection_reason"))
+        )
+        total_status = (
+            "Complete"
+            if shadow_total_resolution.get("selection_status") == "AVAILABLE"
+            else "Unavailable — " + str(shadow_total_resolution.get("selection_reason"))
+        )
 
         opener_spread = g.get("opening_spread")
         opener_total = g.get("opening_total")
@@ -245,7 +273,7 @@ def main():
             "home_raw_postgame_delta": hd,
             "away_raw_postgame_delta": ad,
             "raw_matchup_spread_delta": raw_matchup_spread_delta,
-            "spread_components": {key: num(component.get(key)) for key in cfg["spread_component_weights"]},
+            "spread_components": shadow_spread_resolution.get("component_status", {}),
             "missing_spread_components": missing_spread_components,
             "away_spread_impact": num(component.get("away_spread_impact")),
             "home_spread_impact": num(component.get("home_spread_impact")),
@@ -256,7 +284,7 @@ def main():
             "market_baseline_total": total_base,
             "market_baseline_total_source": total_base_source,
             "raw_total_delta": raw_total_delta,
-            "total_components": total_inputs,
+            "total_components": shadow_total_resolution.get("component_status", {}),
             "missing_total_components": missing_total_components,
             "away_total_impact": num(component.get("away_total_impact")),
             "home_total_impact": num(component.get("home_total_impact")),
@@ -269,7 +297,12 @@ def main():
             "component_source": component_source,
             "spread_projected_market_value_score": num(component.get("spread_projected_market_value_score")),
             "total_projected_market_value_score": num(component.get("total_projected_market_value_score")),
-            "shadow_spread_formula": component.get("shadow_spread_formula"),
+            "shadow_spread_formula": model_definitions.get(SHADOW_SPREAD, {}).get("formula"),
+            "shadow_total_formula": model_definitions.get(SHADOW_TOTAL, {}).get("formula"),
+            "shadow_spread_model_id": SHADOW_SPREAD,
+            "shadow_total_model_id": SHADOW_TOTAL,
+            "shadow_spread_selection": shadow_spread_resolution,
+            "shadow_total_selection": shadow_total_resolution,
             "spread_projection_readiness": component.get("spread_projection_readiness"),
             "market_readiness_state": component.get("market_readiness_state"),
             "market_readiness_reason": component.get("market_readiness_reason"),
@@ -291,8 +324,8 @@ def main():
             "spread_value_label": component.get("spread_value_label", "Unavailable"),
             "total_value_tier": component.get("total_value_tier"),
             "total_value_label": component.get("total_value_label", "Unavailable"),
-            "current_model_spread": g.get("official_model_spread"),
-            "current_model_total": g.get("official_model_total"),
+            "current_model_spread": standard_spread_resolution.get("value_home_line"),
+            "current_model_total": standard_total_resolution.get("value_total"),
             "current_market_spread": g.get("opening_spread"),
             "current_market_total": g.get("opening_total"),
             "predicted_market_rating_spread": num(component.get("predicted_market_rating_spread")),
@@ -319,11 +352,13 @@ def main():
         "schema_version": "saturday-shadow-lines-v2",
         "built_at": built_at,
         "formulas": {
-            "spread": cfg["spread_formula"],
-            "total": cfg["total_formula"],
+            "spread": model_definitions.get(SHADOW_SPREAD, {}).get("formula"),
+            "total": model_definitions.get(SHADOW_TOTAL, {}).get("formula"),
         },
-        "projected_market_value": cfg["projected_market_value"],
-        "primary_goal": cfg["primary_goal"],
+        "projection_source": "data/site/current_game_projection_contract.json",
+        "resolver_policy": "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS",
+        "projected_market_value": cfg.get("projected_market_value"),
+        "primary_goal": cfg.get("primary_goal"),
         "blend_market_into_fundamental": False,
         "games": rows,
     }
@@ -332,13 +367,18 @@ def main():
     OUT_JSON.write_text(json.dumps(payload, indent=2) + "\n")
     pd.DataFrame(rows).to_csv(OUT_CSV, index=False)
 
-    snap = pd.DataFrame(rows)
-    snap["snapshot_timestamp"] = built_at
-    SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
-    if SNAPSHOT.exists():
-        old = pd.read_csv(SNAPSHOT, low_memory=False)
-        snap = pd.concat([old, snap], ignore_index=True)
-    snap.to_csv(SNAPSHOT, index=False)
+    snapshot_written = any(
+        r["spread_status"] == "Complete" or r["total_status"] == "Complete"
+        for r in rows
+    )
+    if snapshot_written:
+        snap = pd.DataFrame(rows)
+        snap["snapshot_timestamp"] = built_at
+        SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
+        if SNAPSHOT.exists():
+            old = pd.read_csv(SNAPSHOT, low_memory=False)
+            snap = pd.concat([old, snap], ignore_index=True)
+        snap.to_csv(SNAPSHOT, index=False)
 
     print(json.dumps({
         "games": len(rows),
@@ -346,10 +386,6 @@ def main():
         "total_complete": sum(str(r["total_status"]).startswith("Complete") for r in rows),
         "current_market_total_baselines": sum(
             r.get("market_baseline_total_source") == "current_market_total"
-            for r in rows
-        ),
-        "official_total_fallbacks": sum(
-            r.get("market_baseline_total_source") == "official_fallback"
             for r in rows
         ),
         "missing_total_baselines": sum(
@@ -360,7 +396,7 @@ def main():
     }, indent=2))
     print("wrote:", OUT_JSON)
     print("wrote:", OUT_CSV)
-    print("wrote:", SNAPSHOT)
+    print("wrote:" if snapshot_written else "snapshot skipped; no available canonical Shadow rows:", SNAPSHOT)
 
 if __name__ == "__main__":
     main()

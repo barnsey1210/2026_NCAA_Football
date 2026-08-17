@@ -22,6 +22,21 @@
     "v1.html": ["legacy_embedded_data"]
   },
   "contracts": {
+    "game_projections": {
+      "artifact": "data/site/current_game_projection_contract.json",
+      "builder": "scripts/projections/build_current_game_projection_contract.py",
+      "resolver": "scripts/projections/projection_resolver.py",
+      "status": "PRODUCTION_RESOLVER_ACTIVE",
+      "required_model_ids": [
+        "standard_spread_five_source_v1",
+        "standard_total_sp_massey_sagarin_v1",
+        "shadow_spread_sp_sagarin_v1",
+        "shadow_total_enhanced_spplus_od_v1"
+      ],
+      "missing_component_policy": "MISSING_COMPONENT_NEVER_RENORMALIZE",
+      "fallback_policy": "NO_SUBSTITUTIONS_UNAVAILABLE_MODELS_REMAIN_UNAVAILABLE",
+      "sign_policy": "explicit_value_home_margin_and_value_home_line"
+    },
     "current_market": {
       "authoritative_source": "accepted SGO quotes with explicit approved backup status",
       "required_fields": ["game_id", "market_timestamp", "source", "freshness_status", "reference_spread", "best_home", "best_away", "reference_total", "best_over", "best_under", "per_book_quotes"],

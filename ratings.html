@@ -174,7 +174,7 @@ td:nth-child(6){
 .war-room-global .war-room-health{justify-self:end!important}
 @media(max-width:1550px){.war-room-global{grid-template-columns:255px minmax(0,1fr) auto!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:36px!important}.war-room-global .war-room-nav a{font-size:13px!important;padding:0 7px!important}}
 @media(max-width:1180px){.war-room-global{grid-template-columns:220px minmax(0,1fr)!important}.war-room-global .war-room-health{display:none!important}.war-room-global .war-room-nav{overflow:auto!important;scrollbar-width:none}.war-room-global .war-room-nav::-webkit-scrollbar{display:none}}
-</style></head><body><main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">BP 25% · SP+ 25% · FPI 25% · TR 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+</style></head><body><main class="shell"><div class="top"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><div class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a></div><div class="war-room-health"><i></i>Data Healthy</div></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">SP+ 25% · FPI 25% · TR 25% · Sagarin 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
 <thead>
 <tr>
   <th data-k="overall_rank">Rank</th>
@@ -186,10 +186,12 @@ td:nth-child(6){
   <th data-k="spplus">SP+</th>
   <th data-k="fpi">FPI</th>
   <th data-k="teamrankings">TR</th>
-  <th data-k="bradpowers">Powers</th>
+  <th class="ratingsTipTarget"
+      data-k="bradpowers"
+      data-tip="Brad Powers rating/rank. Research and reference only; not included in the Site Composite.">Powers</th>
   <th class="ratingsTipTarget"
       data-k="sagarin"
-      data-tip="Sagarin Predictor rating/rank. Reference only until the current 2026 Sagarin source is activated for the Site Composite.">Sagarin</th>
+      data-tip="Sagarin Predictor rating/rank. Included at 25% in the Site Composite.">Sagarin</th>
   <th class="ratingsTipTarget"
       data-k="dratings"
       data-tip="DRatings Donchess Overall rating/rank. Reference only; not included in the Site Composite.">DRatings</th>
@@ -387,8 +389,8 @@ function render(){
       ${sourceCell(x,'spplus')}
       ${sourceCell(x,'fpi')}
       ${sourceCell(x,'teamrankings')}
-      ${sourceCell(x,'bradpowers')}
-      ${sourceCell(x,'sagarin',true)}
+      ${sourceCell(x,'bradpowers',true)}
+      ${sourceCell(x,'sagarin')}
       ${sourceCell(x,'dratings',true)}
       ${sourceCell(x,'massey',true)}
 

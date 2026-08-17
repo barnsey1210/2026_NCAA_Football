@@ -29,6 +29,59 @@ They do not yet enumerate every field, script, or legacy backup file. The read-o
 
 A public page may format canonical data differently, but it may not independently choose a source or silently substitute stale cached values.
 
+## Canonical projection architecture
+
+The Team Rating Engine and Game Projection Engine are separate contracts. Team
+ratings are not substitutes for unavailable scheduled-game projections.
+
+### Team Rating Engine
+
+- SP+: 25%
+- FPI: 25%
+- TeamRankings: 25%
+- Sagarin: 25%
+
+Brad Powers, Massey and DRatings remain reference/research sources and do not
+enter the production team-rating composite.
+
+### Game Projection Engine
+
+- Standard Spread: SP+ 20%, FPI 20%, TeamRankings 20%, Sagarin Rating 20%,
+  DRatings 20%.
+- Standard Total: SP+ 40%, Massey Dual 40%, Sagarin 20%.
+- Shadow Spread: SP+ Shadow 50%, Sagarin Shadow 50%.
+- Shadow Total: enhanced SP+ offense/defense model only.
+
+Every required component must be present. Missing components produce an
+explicit unavailable state. The resolver must not renormalize available
+components or substitute a team-rating estimate, market rating, legacy blend,
+or another provider model.
+
+```mermaid
+flowchart LR
+  subgraph TRE["Team Rating Engine"]
+    TRS["SP+ / FPI / TeamRankings / Sagarin<br/>25% each"] --> TRC["Canonical team rating"]
+  end
+
+  subgraph GPE["Game Projection Engine"]
+    SS["Standard Spread<br/>SP+ / FPI / TR / Sagarin Rating / DRatings<br/>20% each"]
+    ST["Standard Total<br/>SP+ / Massey Dual / Sagarin<br/>40% / 40% / 20%"]
+    SHS["Shadow Spread<br/>SP+ Shadow / Sagarin Shadow<br/>50% / 50%"]
+    SHT["Shadow Total<br/>Enhanced SP+ offense/defense only"]
+    SS --> CONTRACT["Canonical game projection contract"]
+    ST --> CONTRACT
+    SHS --> CONTRACT
+    SHT --> CONTRACT
+  end
+
+  CONTRACT --> RESOLVER["Strict projection resolver"]
+  RESOLVER -->|"AVAILABLE"| ADAPTERS["Shared page data adapters"]
+  RESOLVER -->|"Missing required input"| UNAVAILABLE["Explicit UNAVAILABLE state"]
+  ADAPTERS --> PAGES["Matchups / Openers / Betting / Team / Home / Schedule"]
+  TRC --> SIMS["Hypothetical matchup simulations only"]
+  TRC -. "never a scheduled-game fallback" .-> UNAVAILABLE
+```
+
 ## Market semantics
 
 - **Reference market:** representative current line used for comparison.

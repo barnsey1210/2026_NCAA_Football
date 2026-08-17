@@ -9,12 +9,12 @@ ACTIVE_SOURCES = {
     "SP+": "spplus",
     "FPI": "fpi",
     "TeamRankings": "teamrankings",
-    "Donchess Overall": "dratings",
     "Sagarin Predictor": "sagarin",
 }
 
 REFERENCE_SOURCES = [
     "Brad Powers",
+    "Donchess Overall",
     "KFord",
     "Massey Power",
 ]

@@ -19,8 +19,17 @@ except ModuleNotFoundError:
     # Source repository layout keeps shared configuration under lib/.
     from lib.ncaaf_config import canonical_team, production_model
 
+from scripts.projections.projection_resolver import (
+    STANDARD_SPREAD,
+    STANDARD_TOTAL,
+    index_contract,
+    load_contract,
+    resolve_game,
+)
+
 INDEX = ROOT / "v1.html"
 PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
+PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 OUT = ROOT / "data/site/matchups_view.json"
 AUDIT = ROOT / "data/audits/matchups_view_audit.json"
 
@@ -424,6 +433,10 @@ def compact_angle(row):
 
 def main():
     db, rating_trends, returning_prod, staff_2026 = extract_index_data()
+    if not PROJECTION_CONTRACT.exists():
+        raise SystemExit(f"Missing canonical projection contract: {PROJECTION_CONTRACT}")
+    projection_contract = load_contract(PROJECTION_CONTRACT)
+    projection_index = index_contract(projection_contract)
     teams = db.get("teams", [])
     games = db.get("games", [])
     team_by_name = canonical_map(teams)
@@ -622,8 +635,9 @@ def main():
     upcoming_by_team = defaultdict(list)
     for game in games:
         away, home = canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))
-        model_home = number(game.get("projected_margin_home"))
-        model_home = -model_home if model_home is not None else None
+        spread_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_SPREAD)
+        total_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_TOTAL)
+        model_home = number(spread_resolution.get("value_home_line"))
         market_home = number(game.get("market_spread_home"))
         for team, opponent, site, multiplier in ((away, home, "Away", -1), (home, away, "Home", 1)):
             upcoming_by_team[team].append({
@@ -631,7 +645,7 @@ def main():
                 "opponent": opponent, "site": site, "opponent_ranks": rank_snapshot(opponent),
                 "model_spread": model_home * multiplier if model_home is not None else None,
                 "market_spread": market_home * multiplier if market_home is not None else None,
-                "model_total": number(game.get("projected_total")), "market_total": number(game.get("market_total")),
+                "model_total": number(total_resolution.get("value_total")), "market_total": number(game.get("market_total")),
                 "rank_basis": "current_2026_production",
             })
     for rows in upcoming_by_team.values():
@@ -782,9 +796,9 @@ def main():
                 opening_possession["home_projected_receive_pct"] = number(opening_pair.get("team_a_projected_receive_opening_kick_pct"))
 
         market_spread_home = number(game.get("market_spread_home"))
-        model_home = number(game.get("projected_margin_home"))
-        if model_home is not None:
-            model_home = -model_home
+        spread_resolution = resolve_game(projection_index, game_id, STANDARD_SPREAD)
+        total_resolution = resolve_game(projection_index, game_id, STANDARD_TOTAL)
+        model_home = number(spread_resolution.get("value_home_line"))
         records.append({
             "game": {"game_id": game_id, "cfbd_game_id": clean(game.get("cfbd_game_id")), "week": integer(game.get("week")),
                 "date": clean(game.get("date")), "away_team": away, "home_team": home, "neutral_site": boolish(game.get("neutral_site")),
@@ -794,30 +808,31 @@ def main():
                 "cfbd_last_updated": clean(game.get("cfbd_last_updated"))},
             "teams": {"away": team_view(away, away_row, away_conf, home), "home": team_view(home, home_row, home_conf, away)},
             "model": {
-                "family": clean(game.get("projection_model_family")) or "Game Projection Consensus",
+                "family": "Canonical Game Projection Engine",
                 "home_spread": model_home,
-                "total": number(game.get("projected_total")),
-                "home_win_probability": number(game.get("home_win_prob")),
-                "spread_version": clean(game.get("projection_spread_model_version")),
-                "spread_source_count": integer(game.get("projection_spread_source_count")),
-                "spread_source_max": integer(game.get("projection_spread_source_max")),
-                "spread_coverage": clean(game.get("projection_spread_coverage")),
-                "spread_sources": game.get("projection_spread_sources") or [],
-                "spread_source_label": clean(game.get("projection_spread_source_label")),
-                "total_version": clean(game.get("projection_total_model_version")),
-                "total_source_count": integer(game.get("projection_total_source_count")),
-                "total_source_max": integer(game.get("projection_total_source_max")),
-                "total_coverage": clean(game.get("projection_total_coverage")),
-                "total_sources": [
-                    "SP+" if source == "Site Projection" else ("DRatings" if source == "DRatings Predictions" else source)
-                    for source in (game.get("projection_total_sources") or [])
-                ],
-                "total_source_label": (
-                    (clean(game.get("projection_total_source_label")) or "")
-                    .replace("Site Projection", "SP+")
-                    .replace("DRatings Predictions", "DRatings")
-                    or None
-                ),
+                "total": number(total_resolution.get("value_total")),
+                "home_win_probability": None,
+                "spread_version": STANDARD_SPREAD,
+                "spread_status": spread_resolution.get("selection_status"),
+                "spread_reason": spread_resolution.get("selection_reason"),
+                "spread_source_count": sum(v == "PRESENT" for v in spread_resolution.get("component_status", {}).values()),
+                "spread_source_max": 5,
+                "spread_coverage": None,
+                "spread_sources": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
+                "spread_source_label": "SP+, FPI, TeamRankings, Sagarin Rating, DRatings",
+                "total_version": STANDARD_TOTAL,
+                "total_status": total_resolution.get("selection_status"),
+                "total_reason": total_resolution.get("selection_reason"),
+                "total_source_count": sum(v == "PRESENT" for v in total_resolution.get("component_status", {}).values()),
+                "total_source_max": 3,
+                "total_coverage": None,
+                "total_sources": ["SP+", "Massey Dual", "Sagarin"],
+                "total_source_label": "SP+, Massey Dual, Sagarin",
+                "resolver": {
+                    "policy": "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS",
+                    "spread": spread_resolution,
+                    "total": total_resolution,
+                },
             },
             "market": {"spread": {"home_line": market_spread_home, "price": number(game.get("market_spread_price")), "book": clean(game.get("market_spread_book")), "updated_at": clean(game.get("market_spread_last_update")),
                     "best_home": {"home_line": number(game.get("market_best_home_spread_home")), "price": number(game.get("market_best_home_spread_price")), "book": clean(game.get("market_best_home_spread_book"))},
@@ -896,7 +911,7 @@ def main():
             "CFBDepth normalization exists, but current player-level coverage may be empty outside the active injury-news window.",
             "Market rows are current best fields; a quote-level atomic-offer array should be added before production EV selection.",
         ]}
-    payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "site_composite_model": production_model(), "game_projection_model": db.get("projection_model_metadata") or {}, "rating_freshness": rating_freshness,
+    payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "site_composite_model": production_model(), "game_projection_model": {"source":"data/site/current_game_projection_contract.json","schema_version":projection_contract.get("schema_version"),"resolver_policy":"STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS"}, "rating_freshness": rating_freshness,
         "assets": {"line_history": "data/site/matchup_line_history.json", "betting_activity": "data/site/betting_activity_view.json"},
         "injury_source_status": injury_source_status,
         "audit_summary": coverage,

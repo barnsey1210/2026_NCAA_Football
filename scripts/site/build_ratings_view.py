@@ -26,21 +26,17 @@ CORE_COMPOSITE = {
     "SP+": "spplus",
     "FPI": "fpi",
     "TeamRankings": "teamrankings",
-    "Brad Powers": "bradpowers",
-}
-
-OPTIONAL_COMPOSITE = {
     "Sagarin Predictor": "sagarin",
 }
 
 REFERENCE_ONLY = {
+    "Brad Powers": "bradpowers",
     "Donchess Overall": "dratings",
     "Massey Power": "massey",
 }
 
 DISPLAY_SOURCES = {
     **CORE_COMPOSITE,
-    **OPTIONAL_COMPOSITE,
     **REFERENCE_ONLY,
 }
 
@@ -60,18 +56,8 @@ if ratings_source_status_path.exists():
         if source:
             source_status[source] = row
 
-def truthy(value):
-    return str(value or "").strip().lower() in {"1", "true", "yes", "y"}
-
-
-# Core four remain the production Site Composite.
-# Optional providers enter only when explicitly activated by source status.
+# The production Site Composite is fixed at four equal-weight sources.
 active_composite = dict(CORE_COMPOSITE)
-
-for label, key in OPTIONAL_COMPOSITE.items():
-    status = source_status.get(label, {})
-    if truthy(status.get("active_2026")):
-        active_composite[label] = key
 
 reference_only = dict(REFERENCE_ONLY)
 
@@ -253,10 +239,10 @@ for team, sources in by_team.items():
 
     values = [x["rating"] for x in composite_sources.values()]
 
-    if len(values) < 3:
+    if len(values) != len(active_composite):
         continue
 
-    current = sum(values) / len(values)
+    current = sum(values) / len(active_composite)
 
     item = {
         "team": team,
@@ -469,10 +455,10 @@ payload = {
     "snapshot_date": latest,
     "composite_model": {
         "label": "Site Composite Rating",
-        "method": "equal weight across available active composite sources",
+        "method": "SP+ / FPI / TeamRankings / Sagarin equal weight",
         "eligible_sources": {
             key: label
-            for label, key in {**CORE_COMPOSITE, **OPTIONAL_COMPOSITE}.items()
+            for label, key in CORE_COMPOSITE.items()
         },
         "active_sources": {
             key: label
