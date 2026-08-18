@@ -89,8 +89,6 @@ stage_enabled() {
     # current game markets + ratings + schedule/projections + downstream
     # matchup/Shadow/Odds/site publication. No sims, futures, email or PBP.
     openers:game_market_acquisition|\
-    openers:sgo_backup_pull|\
-    openers:sgo_backup_normalization|\
     openers:game_line_history|\
     openers:ratings_refresh|\
     openers:ratings_normalization|\
@@ -123,8 +121,6 @@ stage_enabled() {
     # same canonical live game-market acquisition/fallback/history path plus
     # downstream Odds/Matchups/site publication. No ratings or simulations.
     market:game_market_acquisition|\
-    market:sgo_backup_pull|\
-    market:sgo_backup_normalization|\
     market:game_line_history|\
     market:matchup_core|\
     market:line_history_assets|\
@@ -238,11 +234,6 @@ STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 CURRENT_STAGE=""
 RUN_FINALIZED=0
 
-# SportsGameOdds is an optional secondary market source.
-# Email eligibility is not tied to SGO health; the canonical current-market
-# contract owns provider priority and fallback selection.
-SGO_BACKUP_PULL_OK=0
-SGO_BACKUP_NORMALIZATION_OK=0
 
 status_stage() {
   local stage_id="$1"
@@ -360,7 +351,7 @@ trap on_exit EXIT
   # STAGE: game_market_acquisition
   if stage_enabled "game_market_acquisition"; then
   stage_start "game_market_acquisition"
-  # Season game lines from CFBD. Used for early spread/total display while SGO is capped.
+  # Season game lines from CFBD. Used for early spread/total display before The Odds API market normalization.
   run_py "pull_cfbd_lines_2026.py" || warn "CFBD season lines pull failed"
   run_py "odds/pull_actionnetwork_ncaaf_game_lines_2026.py" "pull_actionnetwork_ncaaf_game_lines_2026.py" || warn "Action Network game lines pull failed"
   run_py "odds/build_actionnetwork_season_lines_2026.py" "build_actionnetwork_season_lines_2026.py" || warn "Action Network season game lines build failed"
@@ -371,66 +362,20 @@ trap on_exit EXIT
   else
     warn "The Odds API primary live line pull failed; preserving cached/fallback data"
   fi
+  run_py "scripts/markets/build_current_market_contract.py" "build_current_market_contract.py" || warn "Canonical current market contract build failed; retaining last valid artifact"
   stage_pass "game_market_acquisition"
 
-  # SportsGameOdds is an optional secondary source while quota/subscription
   # strategy is evaluated. Failure must not block downstream site/email work.
   else
     profile_skip_stage "game_market_acquisition"
   fi
 
-  # STAGE: sgo_backup_pull
-  if stage_enabled "sgo_backup_pull"; then
-  stage_start "sgo_backup_pull"
-  if run_py "scripts/markets/pull_sgo_ncaaf_game_odds.py"; then
-    SGO_BACKUP_PULL_OK=1
-    stage_pass "sgo_backup_pull"
-  else
-    warn "live SGO pull failed; preserving prior SGO and fallback data"
-    stage_skip "sgo_backup_pull" "optional secondary SportsGameOdds source unavailable; cached/fallback data preserved"
-  fi
-
-  # Normalize only a raw response produced by a successful current run.
-  # SGO is optional; failure does not block canonical market/site/email work.
-  else
-    profile_skip_stage "sgo_backup_pull"
-  fi
-
-  # STAGE: sgo_backup_normalization
-  if stage_enabled "sgo_backup_normalization"; then
-  stage_start "sgo_backup_normalization"
-  if [ "$SGO_BACKUP_PULL_OK" -eq 1 ] && [ -f "data/markets/sgo/sgo_ncaaf_events_raw.json" ]; then
-    if run_py "scripts/markets/build_sgo_daily_canonical.py"; then
-      if run_py "scripts/markets/parse_sgo_ncaaf_game_odds.py"; then
-        SGO_BACKUP_NORMALIZATION_OK=1
-        run_py "scripts/odds/append_sgo_game_book_line_history.py" \
-          || warn "SGO canonical history append failed"
-        stage_pass "sgo_backup_normalization"
-      else
-        warn "SGO compatibility export failed; preserving fallback data"
-        stage_fail "sgo_backup_normalization" "SGO compatibility export failed"
-      fi
-    else
-      warn "canonical SGO normalization failed; preserving fallback data"
-      stage_fail "sgo_backup_normalization" "canonical SGO normalization failed"
-    fi
-  elif [ "$SGO_BACKUP_PULL_OK" -eq 1 ]; then
-    warn "successful SGO pull produced no raw response"
-    stage_fail "sgo_backup_normalization" "successful SGO pull produced no raw response"
-  else
-    stage_skip "sgo_backup_normalization" "SGO pull unavailable; cached accepted/fallback data preserved"
-  fi
-
-
-  # Append today's normalized game lines before site/email rendering.
-  else
-    profile_skip_stage "sgo_backup_normalization"
-  fi
 
   # STAGE: game_line_history
   if stage_enabled "game_line_history"; then
   stage_start "game_line_history"
   run_py "scripts/odds/append_game_line_history.py" "append_game_line_history.py" || warn "game line history append failed"
+  run_py "scripts/odds/append_current_market_book_history.py" "append_current_market_book_history.py" || warn "canonical per-book market history append failed"
   run_py "odds/build_game_line_movement_report.py" "build_game_line_movement_report.py" || warn "game line movement report build failed"
   stage_pass "game_line_history"
 
@@ -573,8 +518,11 @@ PY2
   # STAGE: projections
   if stage_enabled "projections"; then
   stage_start "projections"
+  run_py "scripts/projections/refresh_massey_game_projections_2026.py" "refresh_massey_game_projections_2026.py" || warn "Massey rolling 14-day game projections refresh failed; retaining last-known-good data"
   run_py "scripts/projections/pull_dratings_ncaaf_predictions.py" "pull_dratings_ncaaf_predictions.py" || warn "DRatings NCAAF predictions refresh failed"
   run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || warn "game projection source build failed"
+  run_py "scripts/projections/build_current_game_projection_contract.py" "build_current_game_projection_contract.py" || warn "canonical game projection contract build failed"
+  run_py "scripts/audit/audit_projection_fbs_production_coverage.py" "audit_projection_fbs_production_coverage.py" || warn "FBS production projection coverage audit failed"
   run_py "scripts/projections/build_game_projection_blend_2026.py" "build_game_projection_blend_2026.py" || warn "game projection blend build failed"
   run_py "scripts/projections/apply_game_projection_blend_to_preseason_db.py" "apply_game_projection_blend_to_preseason_db.py" || warn "game projection site overlay failed"
   stage_pass "projections"
@@ -663,6 +611,7 @@ fi
   stage_start "shadow_models"
   python3 scripts/research/build_market_implied_power_ratings.py --production-2026
   run_py "scripts/site/build_ratings_view.py" "build_ratings_view.py"
+  run_py "scripts/site/build_projection_source_status_view.py" "build_projection_source_status_view.py" || warn "projection source status view build failed"
   python3 scripts/postgame/build_shadow_team_game_features_2026.py
   python3 scripts/site/build_saturday_shadow_component_predictions.py
   python3 scripts/site/build_saturday_shadow_lines.py
@@ -697,6 +646,7 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   # STAGE: odds_payloads
   if stage_enabled "odds_payloads"; then
   stage_start "odds_payloads"
+  # Canonical current market was built immediately after acquisition.
   run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || warn "Odds game payload build failed; retaining last valid artifact"
   run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || warn "Odds futures payload build failed; retaining last valid artifact"
   stage_pass "odds_payloads"
@@ -735,10 +685,7 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   if stage_enabled "site_build"; then
   stage_start "site_build"
   python3 scripts/ratings/refresh_ratings_source_status.py
-  python3 scripts/markets/build_current_market_contract.py
-  python3 scripts/site/build_odds_screen_v2.py
-  python3 scripts/markets/apply_current_market_to_odds_screen.py
-  python3 scripts/markets/apply_current_market_to_matchups.py
+  # Odds, Openers, Matchups, and Home consume the canonical current-market contract directly.
   python3 scripts/site/compact_matchups_payload.py
   python3 scripts/audit/audit_current_market_propagation.py
   python3 scripts/site/build_public_site.py

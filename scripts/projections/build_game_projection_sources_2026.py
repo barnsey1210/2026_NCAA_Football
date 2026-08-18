@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from datetime import datetime
-import json, re
+import json, re, sys
 import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from lib.ncaaf_config import canonical_team
 
 PRESEASON_DB = Path("data/snapshots/preseason/preseason_db.json")
 RATINGS = Path("data/ratings/ratings_latest.csv")
@@ -102,7 +108,7 @@ def massey_match_key(x):
     does not use (St, N Dakota, E Michigan, CS Sacramento, etc.).
     Keep this isolated here so other projection sources are not affected.
     """
-    n = norm(x)
+    n = norm(canonical_team(x))
 
     aliases = {
         "san jose st": "san jose state",
@@ -214,6 +220,27 @@ def add_common(row, source, g, spread_home, total, away_score=None, home_score=N
         "source_url": source_url, "pulled_at": row.get("pulled_at", ""), "notes": notes,
     }
 
+def explicit_spplus_total(game):
+    """Return only the authoritative preseason SP+ offense/defense baseline total."""
+    preserved = game.get("projection_overlay_previous_total")
+    if preserved is not None and str(preserved).strip() not in ("", "nan", "None"):
+        try:
+            return float(preserved)
+        except (TypeError, ValueError):
+            pass
+
+    source_label = str(game.get("projection_total_sources") or "").lower()
+    model_version = str(game.get("projection_total_model_version") or "").strip().lower()
+    value = game.get("projected_total")
+
+    if "sp+" in source_label and not model_version:
+        try:
+            if value is not None and str(value).strip() not in ("", "nan", "None"):
+                return float(value)
+        except (TypeError, ValueError):
+            pass
+    return None
+
 def load_rating_game_projections(db):
     rows, audit = [], []
     if not RATINGS.exists():
@@ -242,9 +269,11 @@ def load_rating_game_projections(db):
                 "pulled_at": max(str(home.get("pulled_at") or ""), str(away.get("pulled_at") or "")),
             }
             source_url = home.get("source_url") or away.get("source_url") or ""
-            rows.append(add_common(provenance, source, g, float(hv)-float(av)+hfa, "",
+            explicit_total = explicit_spplus_total(g) if source == "SP+" else ""
+            total_note = " Explicit SP+ offense/defense baseline total." if source == "SP+" and explicit_total is not None else ""
+            rows.append(add_common(provenance, source, g, float(hv)-float(av)+hfa, explicit_total,
                                    source_url=source_url,
-                                   notes=f"{source} team-rating projection: home - away + {hfa:g} HFA."))
+                                   notes=f"{source} team-rating projection: home - away + {hfa:g} HFA.{total_note}"))
     return rows, audit
 
 def load_massey(idx):
@@ -254,13 +283,9 @@ def load_massey(idx):
         return rows, [{"source":"Massey Games","status":"missing","rows":0}]
 
     def team_key(x):
-        # Use the same canonical normalization used by the rest of the
-        # projection pipeline.  Massey abbreviations (St, N Dakota, E
-        # Michigan, etc.) are handled before matching.
         return massey_match_key(x)
 
     canonical_idx = {}
-
     for sg in idx.values():
         key = (
             str(sg.get("date")),
@@ -270,39 +295,96 @@ def load_massey(idx):
         canonical_idx[key] = sg
 
     for _, r in pd.read_csv(MASSEY).iterrows():
+        source_date = str(r.get("game_date"))
+        source_away = team_key(r.get("away_team"))
+        source_home = team_key(r.get("home_team"))
 
-        key = (
-            str(r.get("game_date")),
-            team_key(r.get("away_team")),
-            team_key(r.get("home_team"))
-        )
-
+        key = (source_date, source_away, source_home)
         g = canonical_idx.get(key)
+        match_method = "exact" if g else None
+        reversed_orientation = False
 
         if not g:
-            # allow one-day date mismatch and canonical team matching
+            # Same teams, same orientation, within one day.
             for sg in idx.values():
                 if (
-                    team_key(sg.get("away_team")) == team_key(r.get("away_team"))
-                    and
-                    team_key(sg.get("home_team")) == team_key(r.get("home_team"))
-                    and
-                    abs(
-                        (
-                            pd.to_datetime(sg.get("date")) -
-                            pd.to_datetime(r.get("game_date"))
-                        ).days
-                    ) <= 1
+                    team_key(sg.get("away_team")) == source_away
+                    and team_key(sg.get("home_team")) == source_home
+                ):
+                    try:
+                        day_delta = abs(
+                            (
+                                pd.to_datetime(sg.get("date")) -
+                                pd.to_datetime(r.get("game_date"))
+                            ).days
+                        )
+                    except Exception:
+                        day_delta = 999
+                    if day_delta <= 1:
+                        g = sg
+                        match_method = "date_tolerance"
+                        break
+
+        if not g:
+            # Massey can reverse orientation for neutral-site games.
+            # Accept only exact-date reversals when canonical schedule
+            # explicitly marks the matchup neutral.
+            for sg in idx.values():
+                if not bool(sg.get("neutral_site")):
+                    continue
+                if str(sg.get("date")) != source_date:
+                    continue
+                if (
+                    team_key(sg.get("away_team")) == source_home
+                    and team_key(sg.get("home_team")) == source_away
                 ):
                     g = sg
+                    match_method = "neutral_reversed"
+                    reversed_orientation = True
                     break
-        audit.append({"source":"Massey Games","date":r.get("game_date"),"away":r.get("away_team"),
-                      "home":r.get("home_team"),"matched":bool(g),"game_id":g.get("game_id") if g else ""})
-        if g:
-            rows.append(add_common(r,"Massey Games",g,r.get("projected_spread_home"),r.get("projected_total"),
-                                   r.get("away_projected_points"),r.get("home_projected_points"),
-                                   r.get("home_win_prob"),r.get("source_url","https://masseyratings.com/cf/fbs/games"),
-                                   "Massey rendered games page projection."))
+
+        audit.append({
+            "source": "Massey Games",
+            "date": r.get("game_date"),
+            "away": r.get("away_team"),
+            "home": r.get("home_team"),
+            "matched": bool(g),
+            "game_id": g.get("game_id") if g else "",
+            "match_method": match_method or "unmatched",
+        })
+
+        if not g:
+            continue
+
+        spread_home = r.get("projected_spread_home")
+        away_score = r.get("away_projected_points")
+        home_score = r.get("home_projected_points")
+        home_win_prob = r.get("home_win_prob")
+
+        if reversed_orientation:
+            if pd.notna(spread_home):
+                spread_home = -float(spread_home)
+            away_score, home_score = home_score, away_score
+            if pd.notna(r.get("away_win_prob")):
+                home_win_prob = r.get("away_win_prob")
+            elif pd.notna(home_win_prob):
+                home_win_prob = 1.0 - float(home_win_prob)
+
+        rows.append(
+            add_common(
+                r,
+                "Massey Games",
+                g,
+                spread_home,
+                r.get("projected_total"),
+                away_score,
+                home_score,
+                home_win_prob,
+                r.get("source_url", "https://masseyratings.com/cf/fbs/games"),
+                f"Massey rendered games page projection; match_method={match_method}.",
+            )
+        )
+
     return rows, audit
 
 def load_dratings(idx):

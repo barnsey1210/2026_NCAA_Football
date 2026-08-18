@@ -1218,18 +1218,42 @@ function contextTable(game){ const rows=contextRows(game); const empty=!rows.len
     return `<section class="mwSection mwSpots"><h3>Schedule spots</h3><div class="mwDenseGrid">${side(game.teams.away,away)}${side(game.teams.home,home)}</div></section>`;
   }
   function marketCards(game, history){
-    const allRows=[...(history[game.game.game_id]||[])].sort((a,b)=>{
-      const ak=String(a.snapshot_ts||a.snapshot_date||a.market_spread_last_update||a.market_total_last_update||'');
-      const bk=String(b.snapshot_ts||b.snapshot_date||b.market_spread_last_update||b.market_total_last_update||'');
-      return ak.localeCompare(bk);
-    });
+    const ACTIONABLE_HISTORY_BOOKS=new Set(['DraftKings','FanDuel','BetMGM','Caesars']);
+    const normalizeHistoryBook=v=>{
+      const s=String(v||'').trim().toLowerCase();
+      if(s==='draftkings')return'DraftKings';
+      if(s==='fanduel')return'FanDuel';
+      if(s==='betmgm')return'BetMGM';
+      if(s==='caesars'||s==='williamhill_us'||s==='william hill')return'Caesars';
+      return String(v||'').trim();
+    };
+    const rowBook=row=>normalizeHistoryBook(row.market_spread_book||row.market_total_book||'');
+    const rowQuality=row=>{
+      let q=0;
+      if(finite(row.market_spread_home))q+=2;
+      if(finite(row.market_spread_price))q+=2;
+      if(finite(row.market_total))q+=2;
+      if(finite(row.market_total_over_price))q+=1;
+      if(finite(row.market_total_under_price))q+=1;
+      if(String(row.source||row.snapshot_label||'').toLowerCase()==='the odds api')q+=1;
+      return q;
+    };
+
+    const allRows=[...(history[game.game.game_id]||[])]
+      .filter(row=>ACTIONABLE_HISTORY_BOOKS.has(rowBook(row)))
+      .sort((a,b)=>{
+        const ak=String(a.snapshot_ts||a.snapshot_date||a.market_spread_last_update||a.market_total_last_update||'');
+        const bk=String(b.snapshot_ts||b.snapshot_date||b.market_spread_last_update||b.market_total_last_update||'');
+        return ak.localeCompare(bk);
+      });
 
     const byDate=new Map();
     for(const row of allRows){
       const rawDate=String(row.snapshot_date||row.snapshot_ts||row.market_spread_last_update||row.market_total_last_update||'');
       const dateKey=rawDate.slice(0,10)||rawDate;
       if(!dateKey)continue;
-      byDate.set(dateKey,row);
+      const prior=byDate.get(dateKey);
+      if(!prior||rowQuality(row)>=rowQuality(prior))byDate.set(dateKey,row);
     }
 
     const daily=[...byDate.entries()]
@@ -1283,12 +1307,13 @@ function contextTable(game){ const rows=contextRows(game); const empty=!rows.len
       </div>
       <div class="mwTableWrap">
         <table class="mwTable">
-          <thead><tr><th>Date / Time</th><th>Book</th><th>ATS spread</th><th>Spread price</th><th>Spread move</th><th>O/U total</th><th>Over</th><th>Under</th><th>Total move</th><th>Source</th></tr></thead>
+          <thead><tr><th>Date / Time</th><th>Book</th><th>ATS spread</th><th>Spread price</th><th>Spread move</th><th>O/U total</th><th>Over</th><th>Under</th><th>Total move</th></tr></thead>
           <tbody>${latest.map((x,i)=>{
             const older=latest[i+1]||{};
             const displayDate=String(x.snapshot_date||x.snapshot_ts||x.market_spread_last_update||x.market_total_last_update||'—').slice(0,10);
-            return `<tr><td>${esc(displayDate)}</td><td>${bookLogo(x.market_spread_book||x.market_total_book)||esc(x.market_spread_book||x.market_total_book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${movementText(x.market_spread_home,older.market_spread_home)}</td><td>${num(x.market_total)}</td><td>${price(x.market_total_over_price)}</td><td>${price(x.market_total_under_price)}</td><td>${movementText(x.market_total,older.market_total)}</td><td>${esc(x.snapshot_label||x.source||'Snapshot')}</td></tr>`;
-          }).join('')||'<tr><td colspan="10" class="mwMuted">No line-history snapshots available.</td></tr>'}</tbody>
+            const book=rowBook(x);
+            return `<tr><td>${esc(displayDate)}</td><td>${bookLogo(book)||esc(book||'—')}</td><td>${line(x.market_spread_home)}</td><td>${price(x.market_spread_price)}</td><td>${movementText(x.market_spread_home,older.market_spread_home)}</td><td>${num(x.market_total)}</td><td>${price(x.market_total_over_price)}</td><td>${price(x.market_total_under_price)}</td><td>${movementText(x.market_total,older.market_total)}</td></tr>`;
+          }).join('')||'<tr><td colspan="9" class="mwMuted">No actionable-book line-history snapshots available.</td></tr>'}</tbody>
         </table>
       </div>
     </section>`;

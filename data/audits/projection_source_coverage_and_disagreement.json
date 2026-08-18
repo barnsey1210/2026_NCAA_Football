@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-17T03:25:34.704315+00:00",
-  "status": "PASS_WITH_WARNINGS",
+  "generated_at": "2026-08-18T01:40:21.249640+00:00",
+  "status": "PASS",
   "mode": "OFFLINE_NO_NETWORK_NO_FORMULA_CHANGES",
   "canonical_games": 902,
-  "contract_built_at": "2026-08-17T02:40:10.767994+00:00",
+  "contract_built_at": "2026-08-18T01:40:20.389879+00:00",
   "model_definitions": {
     "standard_spread_five_source_v1": {
       "formula": "(SP+ + FPI + TeamRankings + Sagarin Rating + DRatings) / 5",
@@ -77,22 +77,26 @@
   },
   "model_availability": {
     "standard_spread_five_source_v1": {
-      "AVAILABLE": 41,
-      "MISSING_COMPONENT": 861,
+      "AVAILABLE": 0,
+      "AVAILABLE_DEGRADED": 765,
+      "MISSING_COMPONENT": 137,
       "NOT_YET_ACTIVATED": 0
     },
     "standard_total_sp_massey_sagarin_v1": {
       "AVAILABLE": 0,
-      "MISSING_COMPONENT": 902,
+      "AVAILABLE_DEGRADED": 830,
+      "MISSING_COMPONENT": 72,
       "NOT_YET_ACTIVATED": 0
     },
     "shadow_spread_sp_sagarin_v1": {
       "AVAILABLE": 0,
+      "AVAILABLE_DEGRADED": 0,
       "MISSING_COMPONENT": 0,
       "NOT_YET_ACTIVATED": 902
     },
     "shadow_total_enhanced_spplus_od_v1": {
       "AVAILABLE": 0,
+      "AVAILABLE_DEGRADED": 0,
       "MISSING_COMPONENT": 0,
       "NOT_YET_ACTIVATED": 902
     }
@@ -130,9 +134,9 @@
       "component": "Sagarin Rating",
       "declared_weight": 0.2,
       "weight_type": "blend_weight",
-      "covered_games": 765,
+      "covered_games": 0,
       "canonical_games": 902,
-      "coverage_pct": 84.81152993348115
+      "coverage_pct": 0.0
     },
     {
       "model_id": "standard_spread_five_source_v1",
@@ -148,18 +152,18 @@
       "component": "SP+",
       "declared_weight": 0.4,
       "weight_type": "blend_weight",
-      "covered_games": 0,
+      "covered_games": 765,
       "canonical_games": 902,
-      "coverage_pct": 0.0
+      "coverage_pct": 84.81152993348115
     },
     {
       "model_id": "standard_total_sp_massey_sagarin_v1",
       "component": "Massey Dual",
       "declared_weight": 0.4,
       "weight_type": "blend_weight",
-      "covered_games": 155,
+      "covered_games": 157,
       "canonical_games": 902,
-      "coverage_pct": 17.184035476718403
+      "coverage_pct": 17.405764966740577
     },
     {
       "model_id": "standard_total_sp_massey_sagarin_v1",
@@ -229,49 +233,51 @@
     "games_with_at_least_two_sources": 765,
     "range_all_2plus": {
       "n": 765,
-      "mean": 7.865607843137256,
-      "median": 6.950000000000003,
-      "p25": 4.4,
-      "p75": 10.27999999999999,
-      "p90": 14.124,
-      "max": 25.130000000000006
-    },
-    "complete_five_source_games": 41,
-    "range_complete_five_source": {
-      "n": 41,
-      "mean": 9.748048780487805,
-      "median": 9.909999999999998,
-      "p25": 5.2,
-      "p75": 13.399999999999999,
-      "p90": 14.700000000000003,
+      "mean": 5.056601307189543,
+      "median": 4.199999999999999,
+      "p25": 2.6000000000000014,
+      "p75": 6.500000000000002,
+      "p90": 9.46,
       "max": 22.0
     },
+    "complete_five_source_games": 0,
+    "degraded_available_games": 765,
+    "displayable_games": 765,
+    "range_complete_five_source": {
+      "n": 0,
+      "mean": null,
+      "median": null,
+      "p25": null,
+      "p75": null,
+      "p90": null,
+      "max": null
+    },
     "stddev_complete_five_source": {
-      "n": 41,
-      "mean": 3.4982527007531803,
-      "median": 3.385685159609495,
-      "p25": 1.9426950352538601,
-      "p75": 4.579526613090047,
-      "p90": 5.91698031093564,
-      "max": 7.843431901916405
+      "n": 0,
+      "mean": null,
+      "median": null,
+      "p25": null,
+      "p75": null,
+      "p90": null,
+      "max": null
     }
   },
   "current_2026_massey_integration": {
-    "normalized_rows_with_all_dual_inputs": 155,
-    "contract_rows_with_massey_dual": 155,
+    "normalized_rows_with_all_dual_inputs": 157,
+    "contract_rows_with_massey_dual": 157,
     "maximum_contract_propagation_difference": 0.0,
     "published_vs_point_sum_difference": {
-      "n": 155,
-      "mean": -1.7774193548387096,
+      "n": 157,
+      "mean": -1.7356687898089171,
       "median": -1.5,
       "p25": -3.5,
       "p75": -0.5,
-      "p90": 1.0999999999999943,
+      "p90": 1.5,
       "max": 4.5
     },
     "published_vs_point_sum_absolute_difference": {
-      "n": 155,
-      "mean": 2.42258064516129,
+      "n": 157,
+      "mean": 2.410828025477707,
       "median": 2.5,
       "p25": 0.5,
       "p75": 3.5,
@@ -279,29 +285,30 @@
       "max": 10.5
     },
     "dual_minus_published": {
-      "n": 155,
-      "mean": -0.8887096774193548,
+      "n": 157,
+      "mean": -0.8678343949044586,
       "median": -0.75,
       "p25": -1.75,
       "p75": -0.25,
-      "p90": 0.5499999999999972,
+      "p90": 0.75,
       "max": 2.25
     },
-    "source_url_present": 155,
-    "pulled_at_present": 0,
-    "external_rows": 730,
+    "source_url_present": 157,
+    "pulled_at_present": 157,
+    "external_rows": 799,
     "external_snapshot_dates": [
-      "2026-08-17"
+      "2026-08-17",
+      "2026-08-18"
     ],
     "normalized_snapshot_dates": [
-      "2026-08-16"
+      "2026-08-17"
     ],
-    "provenance_status": "INCOMPLETE_PULL_TIMESTAMP"
+    "provenance_status": "COMPLETE"
   },
   "current_2026_before_after_massey": {
     "before_massey_spplus_sagarin_overlap": 0,
-    "after_massey_strict_three_source_available": 0,
-    "incremental_available_games": 0,
+    "after_massey_strict_three_source_available": 830,
+    "incremental_available_games": 830,
     "disagreement_analysis_status": "NO_COMPARABLE_CURRENT_OVERLAP",
     "reason": "No current game has both explicit SP+ and Sagarin total components; no substitute baseline was created."
   },
@@ -384,11 +391,11 @@
       "model_id": "standard_spread_five_source_v1",
       "source_a": "SP+",
       "source_b": "Sagarin Rating",
-      "overlap_n": 765,
-      "mean_absolute_difference": 5.396784313725491,
-      "median_absolute_difference": 4.229999999999997,
-      "p90_absolute_difference": 11.706,
-      "correlation": 0.8631725532656745
+      "overlap_n": 0,
+      "mean_absolute_difference": null,
+      "median_absolute_difference": null,
+      "p90_absolute_difference": null,
+      "correlation": null
     },
     {
       "scope": "2026_CURRENT",
@@ -417,11 +424,11 @@
       "model_id": "standard_spread_five_source_v1",
       "source_a": "FPI",
       "source_b": "Sagarin Rating",
-      "overlap_n": 765,
-      "mean_absolute_difference": 5.044470588235294,
-      "median_absolute_difference": 3.7099999999999973,
-      "p90_absolute_difference": 11.299999999999999,
-      "correlation": 0.8720239305695204
+      "overlap_n": 0,
+      "mean_absolute_difference": null,
+      "median_absolute_difference": null,
+      "p90_absolute_difference": null,
+      "correlation": null
     },
     {
       "scope": "2026_CURRENT",
@@ -439,11 +446,11 @@
       "model_id": "standard_spread_five_source_v1",
       "source_a": "TeamRankings",
       "source_b": "Sagarin Rating",
-      "overlap_n": 765,
-      "mean_absolute_difference": 4.800653594771242,
-      "median_absolute_difference": 3.929999999999996,
-      "p90_absolute_difference": 10.266,
-      "correlation": 0.8941063188487581
+      "overlap_n": 0,
+      "mean_absolute_difference": null,
+      "median_absolute_difference": null,
+      "p90_absolute_difference": null,
+      "correlation": null
     },
     {
       "scope": "2026_CURRENT",
@@ -461,22 +468,22 @@
       "model_id": "standard_spread_five_source_v1",
       "source_a": "Sagarin Rating",
       "source_b": "DRatings",
-      "overlap_n": 41,
-      "mean_absolute_difference": 6.138536585365853,
-      "median_absolute_difference": 4.779999999999995,
-      "p90_absolute_difference": 12.370000000000005,
-      "correlation": 0.8526538452416312
+      "overlap_n": 0,
+      "mean_absolute_difference": null,
+      "median_absolute_difference": null,
+      "p90_absolute_difference": null,
+      "correlation": null
     },
     {
       "scope": "2026_CURRENT",
       "model_id": "standard_total_sp_massey_sagarin_v1",
       "source_a": "SP+",
       "source_b": "Massey Dual",
-      "overlap_n": 0,
-      "mean_absolute_difference": null,
-      "median_absolute_difference": null,
-      "p90_absolute_difference": null,
-      "correlation": null
+      "overlap_n": 92,
+      "mean_absolute_difference": 2.3581521739130435,
+      "median_absolute_difference": 1.9250000000000007,
+      "p90_absolute_difference": 5.0,
+      "correlation": 0.7582116073908561
     },
     {
       "scope": "2026_CURRENT",

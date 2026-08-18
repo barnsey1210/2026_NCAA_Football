@@ -181,13 +181,17 @@ def main():
     spread_rows = model_game_rows[STANDARD_SPREAD]
     spread_ranges_2plus = [r["provider_range"] for r in spread_rows if r["provider_range"] is not None]
     spread_complete = [r for r in spread_rows if r["availability_status"] == "AVAILABLE"]
+    spread_degraded = [r for r in spread_rows if r["availability_status"] == "AVAILABLE_DEGRADED"]
+    spread_displayable = [r for r in spread_rows if r["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"}]
 
     total_rows = model_game_rows[STANDARD_TOTAL]
     before_massey_current = sum(
         finite(r["values"].get("SP+")) is not None and finite(r["values"].get("Sagarin")) is not None
         for r in total_rows
     )
-    after_massey_current = sum(r["availability_status"] == "AVAILABLE" for r in total_rows)
+    after_massey_current = sum(r["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"} for r in total_rows)
+    total_full_available = sum(r["availability_status"] == "AVAILABLE" for r in total_rows)
+    total_degraded_available = sum(r["availability_status"] == "AVAILABLE_DEGRADED" for r in total_rows)
 
     current_massey = sources[sources["source"].eq("Massey Games")].copy()
     for col in ["total", "away_score", "home_score"]:
@@ -233,7 +237,7 @@ def main():
     model_availability = {
         model_id: {
             status: sum(g["projections"][model_id]["availability_status"] == status for g in games)
-            for status in ("AVAILABLE", "MISSING_COMPONENT", "NOT_YET_ACTIVATED")
+            for status in ("AVAILABLE", "AVAILABLE_DEGRADED", "MISSING_COMPONENT", "NOT_YET_ACTIVATED")
         }
         for model_id in definitions
     }
@@ -255,6 +259,8 @@ def main():
             "games_with_at_least_two_sources": len(spread_ranges_2plus),
             "range_all_2plus": summary(spread_ranges_2plus),
             "complete_five_source_games": len(spread_complete),
+            "degraded_available_games": len(spread_degraded),
+            "displayable_games": len(spread_displayable),
             "range_complete_five_source": summary([r["provider_range"] for r in spread_complete]),
             "stddev_complete_five_source": summary([r["provider_stddev"] for r in spread_complete]),
         },
@@ -379,8 +385,12 @@ Massey Dual is correctly integrated as a 40% required component, but its presenc
     print(json.dumps({
         "status": payload["status"],
         "canonical_games": game_count,
-        "standard_spread_available": model_availability[STANDARD_SPREAD]["AVAILABLE"],
-        "standard_total_available": after_massey_current,
+        "standard_spread_full_available": model_availability[STANDARD_SPREAD]["AVAILABLE"],
+        "standard_spread_degraded_available": model_availability[STANDARD_SPREAD]["AVAILABLE_DEGRADED"],
+        "standard_spread_displayable": (model_availability[STANDARD_SPREAD]["AVAILABLE"] + model_availability[STANDARD_SPREAD]["AVAILABLE_DEGRADED"]),
+        "standard_total_full_available": total_full_available,
+        "standard_total_degraded_available": total_degraded_available,
+        "standard_total_displayable": after_massey_current,
         "massey_dual_contract_rows": current_massey_validation["contract_rows_with_massey_dual"],
         "report": str(OUT_REPORT.relative_to(ROOT)),
     }, indent=2))

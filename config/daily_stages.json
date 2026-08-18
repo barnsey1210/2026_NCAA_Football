@@ -39,35 +39,8 @@
         "odds/build_actionnetwork_season_lines_2026.py",
         "build_season_game_lines_2026.py",
         "pull_theodds_ncaaf_lines_2026.py",
-        "build_theodds_season_lines_2026.py"
-      ]
-    },
-    {
-      "id": "sgo_backup_pull",
-      "name": "SportsGameOdds live pull",
-      "order": 30,
-      "required": false,
-      "external_network": true,
-      "email_dependency": false,
-      "publication_dependency": true,
-      "entrypoint": "daily_market_update.sh#sgo_backup_pull",
-      "scripts": [
-        "scripts/markets/pull_sgo_ncaaf_game_odds.py"
-      ]
-    },
-    {
-      "id": "sgo_backup_normalization",
-      "name": "SportsGameOdds normalization and history",
-      "order": 40,
-      "required": false,
-      "external_network": false,
-      "email_dependency": false,
-      "publication_dependency": true,
-      "entrypoint": "daily_market_update.sh#sgo_backup_normalization",
-      "scripts": [
-        "scripts/markets/build_sgo_daily_canonical.py",
-        "scripts/markets/parse_sgo_ncaaf_game_odds.py",
-        "scripts/odds/append_sgo_game_book_line_history.py"
+        "build_theodds_season_lines_2026.py",
+        "scripts/markets/build_current_market_contract.py"
       ]
     },
     {
@@ -81,6 +54,7 @@
       "entrypoint": "daily_market_update.sh#game_line_history",
       "scripts": [
         "scripts/odds/append_game_line_history.py",
+        "scripts/odds/append_current_market_book_history.py",
         "odds/build_game_line_movement_report.py"
       ]
     },
@@ -181,14 +155,16 @@
       "name": "Projection sources and blend",
       "order": 120,
       "required": false,
-      "external_network": false,
+      "external_network": true,
       "email_dependency": false,
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#projections",
       "scripts": [
+        "scripts/projections/refresh_massey_game_projections_2026.py",
         "scripts/projections/pull_dratings_ncaaf_predictions.py",
         "scripts/projections/build_game_projection_sources_2026.py",
         "scripts/projections/build_current_game_projection_contract.py",
+        "scripts/audit/audit_projection_fbs_production_coverage.py",
         "scripts/projections/build_game_projection_blend_2026.py",
         "scripts/projections/apply_game_projection_blend_to_preseason_db.py"
       ]
@@ -275,6 +251,7 @@
       "scripts": [
         "scripts/research/build_market_implied_power_ratings.py",
         "scripts/site/build_ratings_view.py",
+        "scripts/site/build_projection_source_status_view.py",
         "scripts/postgame/build_shadow_team_game_features_2026.py",
         "scripts/site/build_saturday_shadow_component_predictions.py",
         "scripts/projections/build_current_game_projection_contract.py",
@@ -303,7 +280,7 @@
     },
     {
       "id": "odds_payloads",
-      "name": "Odds V2 payloads",
+      "name": "Odds V2 payloads from canonical current market",
       "order": 170,
       "required": false,
       "external_network": false,
@@ -342,7 +319,10 @@
         "scripts/site/build_war_room_home.py",
         "scripts/site/inject_market_presentation_fixes.py",
         "scripts/site/compact_matchups_payload.py",
-        "scripts/site/apply_shared_war_room_shell.py"
+        "scripts/site/apply_shared_war_room_shell.py",
+        "scripts/ratings/refresh_ratings_source_status.py",
+        "scripts/audit/audit_current_market_propagation.py",
+        "scripts/audit/audit_war_room_home_market_propagation.py"
       ]
     },
     {

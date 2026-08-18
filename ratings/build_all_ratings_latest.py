@@ -93,16 +93,37 @@ def load_sagarin(path):
 
     df = pd.read_csv(path)
 
+    # Production freshness gate: only provider-season 2026 Sagarin ratings
+    # enter ratings_latest. Older provider seasons remain preserved in the
+    # external source artifact for reference/audit.
+    if "season" in df.columns:
+        season_num = pd.to_numeric(df["season"], errors="coerce")
+        active_df = df[season_num.eq(2026)].copy()
+    else:
+        active_df = df.iloc[0:0].copy()
+
+    if active_df.empty:
+        observed_seasons = sorted({
+            int(x) for x in pd.to_numeric(df.get("season"), errors="coerce").dropna().tolist()
+        }) if "season" in df.columns else []
+        return [], {
+            "source": "Sagarin Predictor",
+            "status": "stale_provider_season",
+            "path": str(path),
+            "rows": 0,
+            "observed_seasons": "|".join(map(str, observed_seasons)),
+        }
+
     rows = []
-    for _, r in df.iterrows():
+    for _, r in active_df.iterrows():
         rows.append({
             "snapshot_date": r.get("snapshot_date", datetime.now().date().isoformat()),
             "season": r.get("season", 2026),
             "source": "Sagarin Predictor",
             "team": r.get("team"),
             "raw_team": r.get("raw_team", r.get("team")),
-            "rank": r.get("predictor_rank"),
-            "rating": r.get("predictor_rating"),
+            "rank": r.get("rank"),
+            "rating": r.get("rating"),
             "off_rating": "",
             "def_rating": "",
             "hfa": "",
@@ -110,10 +131,16 @@ def load_sagarin(path):
             "source_url": r.get("source_url", "https://sagarin.com/sports/cfsend.htm"),
             "pulled_at": r.get("pulled_at", now_utc()),
             "source_updated_at": "",
-            "notes": "Default Sagarin source uses predictor_rating and predictor_rank.",
+            "notes": "Production Sagarin source uses the published main Rating column and rank; Predictor/Golden Mean remain diagnostic only.",
         })
 
-    return rows, {"source": "Sagarin Predictor", "status": "ok", "path": str(path), "rows": len(rows)}
+    return rows, {
+        "source": "Sagarin Predictor",
+        "status": "ok",
+        "path": str(path),
+        "rows": len(rows),
+        "provider_season": 2026,
+    }
 
 def load_donchess(path):
     if not path.exists():

@@ -297,14 +297,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             for name in SPREAD_COMPONENTS
         }
         spread_margin = fixed_weight_value(spread_values, spread_weights)
-        spread_resolution = {
-            "mode": "FULL",
-            "available_components": list(spread_values),
-            "missing_components": [],
-            "weights_used": spread_weights,
-        }
-
-        if spread_margin is None:
+        if spread_margin is not None:
+            spread_resolution = {
+                "mode": "FULL",
+                "available_components": list(spread_values),
+                "missing_components": [],
+                "weights_used": spread_weights,
+            }
+            spread_availability = "AVAILABLE"
+        else:
             (
                 degraded_margin,
                 degraded_weights,
@@ -320,14 +321,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     "missing_components": missing_components,
                     "weights_used": degraded_weights,
                 }
-
-        spread_availability = (
-            "AVAILABLE"
-            if spread_resolution["mode"] == "FULL"
-            else "AVAILABLE_DEGRADED"
-            if spread_margin is not None
-            else "MISSING_COMPONENT"
-        )
+                spread_availability = "AVAILABLE_DEGRADED"
+            else:
+                spread_resolution = {
+                    "mode": "UNAVAILABLE",
+                    "available_components": available_components,
+                    "missing_components": missing_components,
+                    "weights_used": {},
+                }
+                spread_availability = "MISSING_COMPONENT"
 
         sp_total = finite(game_sources.get("SP+", {}).get("total"))
         # Never treat a generic or legacy projected_total field as SP+. It may
@@ -342,7 +344,43 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             "Sagarin": finite(game_sources.get("Sagarin Total", {}).get("total")),
         }
         standard_total = fixed_weight_value(total_values, total_weights)
-        total_availability = status(total_values)
+        if standard_total is not None:
+            total_resolution = {
+                "mode": "FULL",
+                "available_components": list(total_values),
+                "missing_components": [],
+                "weights_used": total_weights,
+            }
+            total_availability = "AVAILABLE"
+        else:
+            (
+                degraded_total,
+                degraded_weights,
+                available_components,
+                missing_components,
+            ) = renormalized_weight_value(
+                total_values,
+                total_weights,
+                minimum_components=1,
+            )
+
+            if degraded_total is not None:
+                standard_total = degraded_total
+                total_resolution = {
+                    "mode": "DEGRADED_RENORMALIZED",
+                    "available_components": available_components,
+                    "missing_components": missing_components,
+                    "weights_used": degraded_weights,
+                }
+                total_availability = "AVAILABLE_DEGRADED"
+            else:
+                total_resolution = {
+                    "mode": "UNAVAILABLE",
+                    "available_components": available_components,
+                    "missing_components": missing_components,
+                    "weights_used": {},
+                }
+                total_availability = "MISSING_COMPONENT"
 
         shadow = shadow_rows.get(game_id, {})
         shadow_spread_values = {
@@ -418,7 +456,13 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 freshness_timestamp=latest_timestamp(total_source_rows),
                 source_artifacts=[str(args.sources.relative_to(ROOT)), str(args.games.relative_to(ROOT))],
                 validation_status="HISTORICAL_FORMULA_VALIDATED_2021_2025",
-                extra_status={"Massey Dual formula": "PUBLISHED_TOTAL_PLUS_POINT_SUM_DIVIDED_BY_TWO"},
+                extra_status={
+                    "resolution_mode": total_resolution["mode"],
+                    "available_components": total_resolution["available_components"],
+                    "missing_components": total_resolution["missing_components"],
+                    "weights_used": total_resolution["weights_used"],
+                    "Massey Dual formula": "PUBLISHED_TOTAL_PLUS_POINT_SUM_DIVIDED_BY_TWO",
+                },
             ),
             SHADOW_SPREAD: projection(
                 model_id=SHADOW_SPREAD,

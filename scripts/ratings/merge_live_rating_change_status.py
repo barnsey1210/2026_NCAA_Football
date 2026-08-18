@@ -46,8 +46,44 @@ def main() -> int:
         change = change_data.get(source)
 
         if change:
+            # Preserve richer change-history metadata, but do not allow an
+            # older change-state latest_pull_at to overwrite a newer actual
+            # pull already recorded in ratings_source_status.csv.
+            current_pulled_at = row.get("pulled_at")
+            current_latest_pull_at = row.get("latest_pull_at")
+            change_latest_pull_at = change.get("latest_pull_at")
+
             for column in new_columns:
+                if column == "latest_pull_at":
+                    continue
                 status.at[index, column] = change.get(column)
+
+            candidates = [
+                value
+                for value in (
+                    current_pulled_at,
+                    current_latest_pull_at,
+                    change_latest_pull_at,
+                )
+                if pd.notna(value) and str(value).strip()
+            ]
+
+            if candidates:
+                parsed = pd.to_datetime(candidates, utc=True, errors="coerce")
+                valid = [
+                    (value, ts)
+                    for value, ts in zip(candidates, parsed)
+                    if pd.notna(ts)
+                ]
+                if valid:
+                    status.at[index, "latest_pull_at"] = max(
+                        valid,
+                        key=lambda item: item[1],
+                    )[0]
+                else:
+                    status.at[index, "latest_pull_at"] = max(
+                        str(value) for value in candidates
+                    )
 
         elif source == "Brad Powers":
             # Brad Powers is manually imported. Do not let an automated

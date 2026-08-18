@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 
 MATCHUPS_VIEW = Path("data/site/matchups_view.json")
 OUT = Path("data/history/matchup_line_history_clean.csv")
+BOOK_HISTORY = Path("data/odds/game_book_line_history.csv")
 
 SOURCES = [
     Path("data/odds/game_line_history.csv"),
@@ -228,10 +229,54 @@ def read_source(path, by_pair_date, by_pair):
 
     return pd.DataFrame(rows)
 
+def read_book_history(path, by_pair_date, by_pair):
+    if not path.exists() or path.stat().st_size == 0:
+        return pd.DataFrame()
+    df=pd.read_csv(path,low_memory=False)
+    if df.empty: return pd.DataFrame()
+    actionable={"draftkings":"DraftKings","fanduel":"FanDuel","betmgm":"BetMGM","caesars":"Caesars"}
+    df["_book_norm"]=df["book"].astype(str).str.strip().str.lower()
+    df=df[df["_book_norm"].isin(actionable)].copy()
+    if df.empty: return pd.DataFrame()
+    df["_book"]=df["_book_norm"].map(actionable)
+    df["_snapshot_date"]=df.apply(lambda r:snapshot_date_et(r.get("snapshot_ts"),r.get("source_updated_at"),r.get("book_last_updated"),r.get("ingestion_timestamp")) or clean_date(r.get("date")),axis=1)
+    df["_sort_ts"]=pd.to_datetime(df["source_updated_at"].fillna(df["snapshot_ts"]),errors="coerce",utc=True)
+    rows=[]
+    for (raw_gid,snap_date,book),g in df.groupby(["canonical_game_id","_snapshot_date","_book"],dropna=False):
+        gid=str(raw_gid) if pd.notna(raw_gid) else None
+        first=g.iloc[0]
+        if not gid or gid.lower()=="nan":
+            gid,game_date,away,home,site_week,site_conf=map_game_id(first,by_pair_date,by_pair)
+        else:
+            game_date=clean_date(first.get("date")); away=first.get("away_team"); home=first.get("home_team"); site_week=None; site_conf=None
+        if not gid: continue
+        def latest(market,side):
+            x=g[(g["market"].astype(str).str.lower()==market)&(g["side"].astype(str).str.lower()==side)].sort_values("_sort_ts")
+            return None if x.empty else x.iloc[-1]
+        hs=latest("spread","home"); ov=latest("total","over"); un=latest("total","under"); tr=ov if ov is not None else un
+        ts=[x for x in [hs.get("source_updated_at") if hs is not None else None,ov.get("source_updated_at") if ov is not None else None,un.get("source_updated_at") if un is not None else None] if x]
+        rows.append({"snapshot_date":snap_date,"snapshot_ts":clean_ts(max(ts)) if ts else snap_date,"source_file":str(path),
+        "source":str((hs.get("source") if hs is not None else None) or (tr.get("source") if tr is not None else None) or "Canonical Book History"),
+        "game_id":gid,"game_date":game_date,"week":fnum(site_week),"conference":site_conf,"away_team":away,"home_team":home,
+        "market_spread_home":fnum(hs.get("line")) if hs is not None else None,"market_spread_open_home":None,"market_spread_text":None,
+        "market_spread_price":fnum(hs.get("price")) if hs is not None else None,"market_spread_book":book if hs is not None else None,
+        "market_spread_last_update":clean_ts(hs.get("source_updated_at")) if hs is not None else None,
+        "market_total":fnum(tr.get("line")) if tr is not None else None,"market_total_open":None,"market_total_book":book if tr is not None else None,
+        "market_total_over_price":fnum(ov.get("price")) if ov is not None else None,"market_total_under_price":fnum(un.get("price")) if un is not None else None,
+        "market_total_last_update":clean_ts(tr.get("source_updated_at")) if tr is not None else None,"projected_margin_home":None,"model_spread_home":None,
+        "projected_total":None,"books_available":book})
+    return pd.DataFrame(rows)
+
+
 def main():
     db, by_pair_date, by_pair = load_site_db()
 
     parts = []
+    book_hist = read_book_history(BOOK_HISTORY, by_pair_date, by_pair)
+    if not book_hist.empty:
+        print(BOOK_HISTORY, "rows:", len(book_hist), "games:", book_hist["game_id"].nunique())
+        parts.append(book_hist)
+
     for p in SOURCES:
         got = read_source(p, by_pair_date, by_pair)
         if not got.empty:
@@ -285,6 +330,7 @@ def main():
     }
 
     hist["_priority"] = hist["source"].map(source_priority).fillna(9)
+    hist["_book_level"] = hist["source_file"].astype(str).str.endswith("game_book_line_history.csv").astype(int)
     hist["_has_spread"] = hist["market_spread_home"].notna().astype(int)
     hist["_has_total"] = hist["market_total"].notna().astype(int)
 
@@ -305,13 +351,13 @@ def main():
     hist["_has_price"] = hist.apply(has_price, axis=1)
 
     hist = hist.sort_values(
-        ["game_id", "snapshot_date", "_has_spread", "_has_total", "_has_price", "_priority", "_sort_ts"],
-        ascending=[True, True, False, False, False, True, False]
+        ["game_id", "snapshot_date", "_book_level", "_has_spread", "_has_total", "_has_price", "_priority", "_sort_ts"],
+        ascending=[True, True, False, False, False, False, True, False]
     )
 
     chart = hist.drop_duplicates(subset=["game_id", "snapshot_date"], keep="first").copy()
 
-    chart = chart.drop(columns=[c for c in ["_sort_ts", "_priority", "_has_spread", "_has_total"] if c in chart.columns])
+    chart = chart.drop(columns=[c for c in ["_sort_ts", "_priority", "_book_level", "_has_spread", "_has_total"] if c in chart.columns])
     chart = chart.sort_values(["game_id", "snapshot_date"])
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -19,6 +19,31 @@ from datetime import datetime
 RAW_DIR = Path("data/ratings/external_sources/massey/browser_raw_2026")
 OUT = Path("data/ratings/external_sources/massey_game_projections_2026.csv")
 AUDIT = Path("data/ratings/external_sources/massey_game_projection_parse_audit_2026.csv")
+PROGRESS = Path(
+    "data/research/historical_totals/massey/"
+    "massey_2026_safari_collection_progress.csv"
+)
+
+
+def collection_times():
+    if not PROGRESS.is_file() or PROGRESS.stat().st_size == 0:
+        return {}
+
+    frame = pd.read_csv(PROGRESS, low_memory=False)
+    if frame.empty or "date" not in frame.columns or "collected_at" not in frame.columns:
+        return {}
+
+    if "status" in frame.columns:
+        frame = frame[frame["status"].astype(str).eq("OK")].copy()
+
+    frame = frame.dropna(subset=["date", "collected_at"])
+    if frame.empty:
+        return {}
+
+    frame["date"] = frame["date"].astype(str)
+    frame["collected_at"] = frame["collected_at"].astype(str)
+    frame = frame.sort_values("collected_at").drop_duplicates("date", keep="last")
+    return dict(zip(frame["date"], frame["collected_at"]))
 
 
 DATE_RE = re.compile(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{2}\.\d{2}$")
@@ -32,7 +57,7 @@ def parse_date(year, raw):
     return f"{year}-{int(month):02d}-{int(day):02d}"
 
 
-def parse_file(path):
+def parse_file(path, pulled_at=None):
     rows = []
     audit = []
 
@@ -111,7 +136,12 @@ def parse_file(path):
         total = nums[-1]
 
         rows.append({
-            "snapshot_date": datetime.utcnow().date().isoformat(),
+            "snapshot_date": (
+                str(pulled_at)[:10]
+                if pulled_at
+                else datetime.utcnow().date().isoformat()
+            ),
+            "pulled_at": pulled_at or "",
             "season": 2026,
             "game_date": game_date,
             "away_team": away,
@@ -141,9 +171,16 @@ def parse_file(path):
 def main():
     all_rows = []
     all_audit = []
+    collected = collection_times()
 
     for path in sorted(RAW_DIR.glob("massey_games_*.txt")):
-        rows, audit = parse_file(path)
+        raw_date = path.stem.replace("massey_games_", "")
+        board_date = (
+            f"{raw_date[0:4]}-{raw_date[4:6]}-{raw_date[6:8]}"
+            if len(raw_date) == 8
+            else ""
+        )
+        rows, audit = parse_file(path, pulled_at=collected.get(board_date))
         all_rows.extend(rows)
         all_audit.extend(audit)
 

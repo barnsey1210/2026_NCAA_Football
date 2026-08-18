@@ -209,17 +209,23 @@ def main() -> None:
     available_spreads = [
         row["projections"][engine.STANDARD_SPREAD]
         for row in contract["games"]
-        if row["projections"][engine.STANDARD_SPREAD]["availability_status"] == "AVAILABLE"
+        if row["projections"][engine.STANDARD_SPREAD]["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"}
+    ]
+    sign_rows = [
+        item for item in available_spreads
+        if item.get("value_home_line") is not None
+        and item.get("value_home_margin") is not None
     ]
     sign_pass = all(
         math.isclose(item["value_home_line"], -item["value_home_margin"], abs_tol=1e-12)
-        for item in available_spreads
+        for item in sign_rows
     )
     sign_fixtures = [7.0, -3.5, 0.0]
     sign_pass = sign_pass and all(math.isclose(-margin, 0.0 - margin) for margin in sign_fixtures)
     checks.append({
         "model_id": "spread_sign_convention",
-        "rows": len(available_spreads),
+        "rows": len(sign_rows),
+        "available_rows_seen": len(available_spreads),
         "fixture_home_margins": sign_fixtures,
         "passed": bool(sign_pass),
         "assertion": "value_home_line == -value_home_margin",

@@ -1,11 +1,11 @@
 {
-  "pulled_at": "2026-08-09T15:08:13.980350+00:00",
+  "pulled_at": "2026-08-17T18:32:59.674185+00:00",
   "http_status": 200,
   "x_requests_last": "3",
-  "x_requests_used": "54",
-  "x_requests_remaining": "446",
+  "x_requests_used": "112",
+  "x_requests_remaining": "388",
   "sport": "americanfootball_ncaaf",
-  "bookmakers": [
+  "requested_bookmakers": [
     "pinnacle",
     "novig",
     "prophetx",
@@ -14,17 +14,24 @@
     "fanduel",
     "betmgm",
     "williamhill_us",
-    "fanatics",
-    "hardrockbet_oh"
+    "betrivers",
+    "hardrockbet"
   ],
-  "markets": [
+  "requested_markets": [
     "h2h",
     "spreads",
     "totals"
   ],
-  "events_returned": 126,
-  "normalized_rows": 1570,
-  "raw_archive": "data/odds/theodds_raw_archive/theodds_ncaaf_20260809T150813Z.json",
+  "events_returned": 111,
+  "normalized_rows": 2942,
+  "priority_venues_requested": 10,
+  "priority_venues_returned": 8,
+  "missing_requested_venues": [
+    "Kalshi",
+    "Caesars"
+  ],
+  "raw_archive": "data/odds/theodds_raw_archive/theodds_ncaaf_20260817T183259Z.json",
   "compatibility_raw": "data/odds/theodds_ncaaf_lines_2026_raw.json",
-  "normalized_csv": "data/odds/theodds_ncaaf_lines_2026.csv"
+  "normalized_csv": "data/odds/theodds_ncaaf_lines_2026.csv",
+  "book_coverage_audit": "data/audits/theodds_ncaaf_book_coverage.json"
 }

@@ -38,7 +38,7 @@
       "sign_policy": "explicit_value_home_margin_and_value_home_line"
     },
     "current_market": {
-      "authoritative_source": "accepted SGO quotes with explicit approved backup status",
+      "authoritative_source": "accepted The Odds API quotes with explicit approved backup status",
       "required_fields": ["game_id", "market_timestamp", "source", "freshness_status", "reference_spread", "best_home", "best_away", "reference_total", "best_over", "best_under", "per_book_quotes"],
       "freshness_states": ["LIVE", "BACKUP_SOURCE", "STALE", "MISSING"]
     },

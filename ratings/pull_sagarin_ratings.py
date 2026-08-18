@@ -15,6 +15,11 @@ OUTDIR.mkdir(parents=True, exist_ok=True)
 
 URL = "https://sagarin.com/sports/cfsend.htm"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+PRESEASON_DB = Path("data/snapshots/preseason/preseason_db.json")
+PRED_LATEST = OUTDIR / "sagarin_game_predictions_latest.csv"
+PRED_AUDIT = OUTDIR / "sagarin_game_predictions_parse_audit.csv"
+PRED_OBSERVED = OUTDIR / "sagarin_game_predictions_observed.csv"
+
 
 TEAM_ALIASES = {
     "LOUISIANA-LAFAYETTE": "Louisiana",
@@ -160,7 +165,132 @@ def fetch():
     raw_path.write_text(r.text, encoding="utf-8")
     return r.text
 
-def parse_sagarin_text(html):
+
+def detect_provider_season(html):
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text("\n")
+    m = re.search(r"(?:FINAL\s+)?College Football\s+(\d{4})\s+ratings", text, flags=re.I)
+    return int(m.group(1)) if m else None
+
+
+def norm_team_key(value):
+    return re.sub(r"[^a-z0-9]+", " ", canon_team(value).lower()).strip()
+
+
+def canonical_2026_pair_index():
+    if not PRESEASON_DB.exists():
+        return {}
+    payload = json.loads(PRESEASON_DB.read_text(encoding="utf-8"))
+    out = {}
+    for g in payload.get("games") or []:
+        a = norm_team_key(g.get("away_team"))
+        h = norm_team_key(g.get("home_team"))
+        if a and h:
+            out[(a, h)] = g
+            out[(h, a)] = g
+    return out
+
+
+def parse_sagarin_predictions(html, provider_season):
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text("\n")
+    marker = "Predictions_with_Totals_and_Moneylines"
+    pos = text.rfind(marker)
+    section = text[pos:] if pos >= 0 else text
+
+    row_re = re.compile(
+        r"^\s*(\d{1,4})\s+([A-Za-z]+)\s+(.+?)\s+"
+        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+"
+        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(@)?\s*"
+        r"(.+?)\s+(\d{2,5})\s+(\d{1,3})%\s+"
+        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*$"
+    )
+
+    pair_index = canonical_2026_pair_index()
+    seen = {}
+    parsed = []
+    audits = []
+
+    for raw_line in section.splitlines():
+        raw = re.sub(r"\s+", " ", raw_line).strip()
+        m = row_re.match(raw)
+        if not m:
+            continue
+
+        favorite = canon_team(m.group(3))
+        underdog = canon_team(m.group(10))
+        spreads = [float(m.group(i)) for i in range(4, 9)]
+        fav_key = norm_team_key(favorite)
+        dog_key = norm_team_key(underdog)
+        game = pair_index.get((fav_key, dog_key))
+
+        pair = tuple(sorted((fav_key, dog_key)))
+        n = seen.get(pair, 0)
+        variant = "standard" if n == 0 else "home_away_experimental"
+        seen[pair] = n + 1
+
+        if game:
+            away_team = game.get("away_team")
+            home_team = game.get("home_team")
+            game_date = game.get("date")
+            game_id = game.get("game_id")
+        elif m.group(9):
+            away_team, home_team = favorite, underdog
+            game_date = game_id = ""
+        else:
+            away_team, home_team = favorite, underdog
+            game_date = game_id = ""
+
+        row = {
+            "snapshot_date": datetime.now().date().isoformat(),
+            "season": provider_season,
+            "source": "Sagarin Predictions",
+            "rank": int(m.group(1)),
+            "class": m.group(2),
+            "favorite": favorite,
+            "underdog": underdog,
+            "site_marker": "@" if m.group(9) else "",
+            "away_team": away_team,
+            "home_team": home_team,
+            "game_date": game_date,
+            "game_id": game_id,
+            "projection_variant": variant,
+            "favorite_spread_rating": spreads[0],
+            "favorite_spread_pred": spreads[1],
+            "favorite_spread_golden": spreads[2],
+            "favorite_spread_recent": spreads[3],
+            "favorite_spread_strong": spreads[4],
+            "favorite_rating_spread": spreads[0],
+            "favorite_pred_spread": spreads[1],
+            "favorite_golden_spread": spreads[2],
+            "favorite_recent_spread": spreads[3],
+            "favorite_strong_spread": spreads[4],
+            "moneyline": int(m.group(11)),
+            "favorite_win_prob": float(m.group(12)) / 100.0,
+            "raw_home_points": float(m.group(13)),
+            "raw_away_points": float(m.group(14)),
+            "home_projected_points": None,
+            "away_projected_points": None,
+            "projected_spread_home": None,
+            "projected_total": float(m.group(15)),
+            "source_url": URL + "#Predictions_with_Totals_and_Moneylines",
+            "pulled_at": now_utc(),
+            "notes": "Parsed from same Sagarin HTML pull; production-active only for provider season 2026 and canonical 2026 schedule matches.",
+            "raw_line": raw,
+        }
+        parsed.append(row)
+        audits.append({
+            "status": "parsed",
+            "provider_season": provider_season,
+            "schedule_match_2026": bool(game),
+            "game_id": game_id,
+            "line": raw,
+        })
+
+    return pd.DataFrame(parsed), pd.DataFrame(audits)
+
+
+def parse_sagarin_text(html, provider_season=None):
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n")
 
@@ -223,7 +353,7 @@ def parse_sagarin_text(html):
 
         rows.append({
             "snapshot_date": datetime.now().date().isoformat(),
-            "season": 2026,
+            "season": provider_season,
             "source": "Sagarin",
             "team": team,
             "raw_team": raw_team,
@@ -251,19 +381,44 @@ def parse_sagarin_text(html):
 
 def main():
     html = fetch()
-    out = parse_sagarin_text(html)
+    provider_season = detect_provider_season(html)
+    print("Detected Sagarin provider season:", provider_season)
 
-    # Drop exact duplicate team/rank rows if any.
+    out = parse_sagarin_text(html, provider_season=provider_season)
     if not out.empty:
         out = out.drop_duplicates(subset=["source", "team", "rank"], keep="first")
 
     out_path = OUTDIR / "sagarin_latest.csv"
     out.to_csv(out_path, index=False)
 
+    pred_all, pred_audit = parse_sagarin_predictions(html, provider_season)
+    pred_all.to_csv(PRED_OBSERVED, index=False)
+
+    if pred_audit.empty:
+        pred_audit = pd.DataFrame(columns=[
+            "status", "provider_season", "schedule_match_2026", "game_id", "line"
+        ])
+    pred_audit.to_csv(PRED_AUDIT, index=False)
+
+    if provider_season == 2026 and not pred_all.empty:
+        active = pred_all[pred_all["game_id"].fillna("").astype(str).str.len().gt(0)].copy()
+    else:
+        active = pred_all.iloc[0:0].copy()
+    active.to_csv(PRED_LATEST, index=False)
+
     print("Rows:", len(out))
     print("Wrote:", out_path)
+    print("Prediction rows observed:", len(pred_all))
+    print("Production 2026 prediction rows:", len(active))
+    print("Wrote:", PRED_OBSERVED)
+    print("Wrote:", PRED_LATEST)
+    print("Wrote:", PRED_AUDIT)
+    if provider_season != 2026:
+        print("Sagarin game predictions not activated; provider season is", provider_season)
+
     if len(out):
-        print(out.head(40).to_string(index=False))
+        print(out.head(20).to_string(index=False))
+
 
 if __name__ == "__main__":
     main()

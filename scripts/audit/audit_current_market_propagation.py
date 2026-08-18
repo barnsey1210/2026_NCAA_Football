@@ -52,8 +52,20 @@ def main() -> None:
 
         o = o_by.get(gid)
         if o:
-            if o.get("current_market_status") != c.get("availability_status"):
-                issues.append({"game_id": gid, "consumer": "odds", "field": "current_market_status"})
+            # Odds now consumes the canonical market contract directly.
+            # current_market_status was an adapter-era field and is no longer
+            # required by the consumer schema. If a status field is exposed,
+            # validate it; otherwise quote parity is the authoritative check.
+            consumer_status = o.get("availability_status")
+            if consumer_status is None:
+                consumer_status = o.get("current_market_status")
+            if consumer_status is not None and consumer_status != c.get("availability_status"):
+                issues.append({"game_id": gid, "consumer": "odds", "field": "availability_status", "contract": c.get("availability_status"), "consumer_value": consumer_status})
+
+            if c.get("availability_status") == "MISSING" and o.get("quotes"):
+                stale_displayed += 1
+                issues.append({"game_id": gid, "consumer": "odds", "field": "quotes", "reason": "quotes shown while contract is MISSING"})
+
             for book, markets in c.get("quotes", {}).items():
                 for market, sides in markets.items():
                     for side, q in sides.items():

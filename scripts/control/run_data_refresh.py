@@ -2,8 +2,8 @@
 """Safe orchestration layer for the existing NCAAF refresh pipelines.
 
 Status and previews remain safe by default. Controlled production execution is
-enabled only for SportsGameOdds game odds and the guarded CFBD postgame rebuild.
-Acceptance/publication require mode policy plus explicit confirmation.
+enabled only for The Odds API game odds and the guarded CFBD postgame rebuild.
+Publication requires mode policy plus explicit confirmation.
 """
 from __future__ import annotations
 
@@ -310,14 +310,14 @@ def main() -> int:
                 if provider not in resolved_providers: resolved_providers.append(provider)
     else:
         resolved_providers = []
-    # The reviewed executable odds path is SportsGameOdds, games-only, current
+    # The reviewed executable odds path is The Odds API, games-only, current
     # canonical week. With no confirmation it remains a preview. With explicit
     # confirmation plus acceptance/publication policy it promotes and publishes.
     if args.mode == "odds" and args.execute:
         requested_markets = [x.strip() for x in args.markets.split(",") if x.strip()]
         requested_providers = resolved_providers
-        if args.scope != "games" or args.week != "current" or requested_markets != ["spread","total","moneyline"] or requested_providers != ["sports_game_odds"]:
-            raise SystemExit("Production odds requires scope=games, week=current, markets=spread,total,moneyline, providers=sports_game_odds")
+        if args.scope != "games" or args.week != "current" or requested_markets != ["spread","total","moneyline"] or requested_providers != ["the_odds_api"]:
+            raise SystemExit("Production odds requires scope=games, week=current, markets=spread,total,moneyline, providers=the_odds_api")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
     run: dict[str, Any] = {"schema_version": 1, "run_id": run_id, "trigger_source": args.trigger_source,
         "requester_identity": re.sub(r"[^A-Za-z0-9_.@-]", "_", args.requester)[:80], "requested_mode": args.mode,
@@ -357,23 +357,23 @@ def main() -> int:
                     run["stages"].append({"name":stage_name,"status":"DRY_RUN","timestamp":now(),
                         "commands":spec.get("commands",[]),"providers":spec.get("providers",[])})
                 run["status"] = "NO_CHANGES" if args.test_scenario == "no_change" else ("COMPLETED_WITH_WARNINGS" if run["warnings"] else "COMPLETED")
-            elif args.mode == "odds" and cfg.get("sports_game_odds_preview_enabled", False):
-                if not os.environ.get("SGO_API_KEY"):
-                    run["status"]="FAILED"; run["errors"].append("SGO_API_KEY is not available to the runner")
+            elif args.mode == "odds" and cfg.get("the_odds_api_preview_enabled", False):
+                if not os.environ.get("THE_ODDS_API_KEY"):
+                    run["status"]="FAILED"; run["errors"].append("THE_ODDS_API_KEY is not available to the runner")
                 else:
-                    from sgo_preview_adapter import capture
-                    state.setdefault("sports_game_odds", {}).update({
+                    from theodds_adapter import capture
+                    state.setdefault("the_odds_api", {}).update({
                         "last_attempt_epoch":time.time(),"last_attempt_at":now(),
                         "last_run_id":run_id,"status":"ATTEMPTING"
                     })
                     atomic_json(STATE,state)
                     preview=capture(run_id)
-                    state["sports_game_odds"].update({
+                    state["the_odds_api"].update({
                         "status":"CAPTURE_COMPLETED","last_success_at":now(),
                         "actual_cost":preview.get("actual_api_cost")
                     })
                     atomic_json(STATE,state)
-                    run["providers_called"]=["sports_game_odds"]
+                    run["providers_called"]=["the_odds_api"]
                     run["api"]["calls_consumed"]=preview["external_calls"]
                     run["api"]["estimated_cost"]=preview.get("estimated_api_cost", preview.get("external_calls", 0))
                     run["api"]["actual_cost"]=preview.get("actual_api_cost")
@@ -385,7 +385,7 @@ def main() -> int:
                         and int(preview.get("events_ambiguous", 0) or 0) == 0
                     )
                     run["stages"].append({
-                        "name":"sports_game_odds_capture",
+                        "name":"the_odds_api_capture",
                         "status":"PASSED" if complete else "FAILED",
                         "timestamp":now(),
                         "staging_manifest":f"data/control/staging/{run_id}/manifest.json"
@@ -405,24 +405,24 @@ def main() -> int:
                         run["errors"].append("odds publication policy is disabled")
                     elif not complete:
                         run["status"]="FAILED"
-                        run["errors"].append("SGO coverage validation failed; no acceptance or publication")
+                        run["errors"].append("The Odds API coverage validation failed; no acceptance or publication")
                     else:
                         commands = [
-                            [sys.executable, "scripts/markets/build_sgo_canonical_artifacts.py",
+                            [sys.executable, "build_theodds_season_lines_2026.py",
                              "--observations", f"data/control/staging/{run_id}/quote_observations.csv",
                              "--manifest", f"data/control/staging/{run_id}/manifest.json",
-                             "--raw", f"data/control/raw/sports_game_odds/{run_id}/response.json",
-                             "--quotes-out", "data/markets/sgo/sgo_accepted_quotes.csv",
-                             "--display-out", "data/markets/sgo/sgo_canonical_display_lines.csv",
-                             "--coverage-out", "data/markets/sgo/sgo_canonical_coverage.json",
-                             "--exclusions-out", "data/markets/sgo/sgo_canonical_exclusions.csv"],
-                            [sys.executable, "scripts/control/accept_sgo_staged.py",
+                             "--raw", f"data/control/raw/the_odds_api/{run_id}/response.json",
+                             "--quotes-out", "data/odds/theodds_ncaaf_lines_2026.csv",
+                             "--display-out", "data/odds/theodds_season_game_lines_2026.csv",
+                             "--coverage-out", "data/audits/theodds_ncaaf_current_pull_audit.json",
+                             "--exclusions-out", "data/audits/theodds_exclusions.csv"],
+                            [sys.executable, "scripts/control/accept_theodds_staged.py",
                              "--stage-dir", f"data/control/staging/{run_id}",
-                             "--display", "data/markets/sgo/sgo_canonical_display_lines.csv",
-                             "--coverage", "data/markets/sgo/sgo_canonical_coverage.json"],
+                             "--display", "data/odds/theodds_season_game_lines_2026.csv",
+                             "--coverage", "data/audits/theodds_ncaaf_current_pull_audit.json"],
                             [sys.executable, "scripts/odds/append_game_line_history.py"],
-                            [sys.executable, "scripts/odds/append_sgo_game_book_line_history.py",
-                             "--accepted-quotes", "data/markets/sgo/sgo_accepted_quotes.csv"],
+                            [sys.executable, "scripts/odds/append_game_line_history.py",
+                             "--accepted-quotes", "data/odds/theodds_ncaaf_lines_2026.csv"],
                             [sys.executable, "scripts/odds/build_game_line_movement_report.py"],
                             [sys.executable, "scripts/site/build_matchups_view.py"],
                             [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],

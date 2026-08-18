@@ -767,6 +767,8 @@ function logo(t){return t?.logo_slug?`<img src="logos/${esc(t.logo_slug)}.png" a
 function shadowRow(r){return SHADOW.get(r.game.game_id)||null}
 function shadowEligible(r){const s=shadowRow(r);return !!s&&!s.fcs_excluded&&s.fbs_matchup!==false}
 function shadowReady(r){return shadowRow(r)?.shadow_display_ready===true}
+let MARKET_BY_GAME_ID=new Map(),MARKET_META=null;
+const ACTIONABLE_BOOKS=["DraftKings","FanDuel","BetMGM","Caesars"];
 function activeHomeSpread(r){if(projectionMode==='shadow'){const s=shadowRow(r);return shadowEligible(r)&&shadowReady(r)?s.saturday_shadow_spread:null}return r.model.home_spread}
 function activeTotal(r){if(projectionMode==='shadow'){const s=shadowRow(r);return shadowEligible(r)&&shadowReady(r)?s.saturday_shadow_total:null}return r.model.total}
 function projectionTag(){return projectionMode==='shadow'?'<span class="shadowTag">Shadow</span>':''}
@@ -823,14 +825,88 @@ function shadowMissingLabel(r,field){
   const status=field==='spread'?String(s.spread_status||''):String(s.total_status||'');
   return`<span class="shadowExcluded" title="${esc(status||'Shadow value not available')}">Unavailable</span>`
 }
-function modelSpread(r){const x=activeHomeSpread(r);if(x==null)return shadowMissingLabel(r,'spread');return`${esc(x<0?r.game.home_team:r.game.away_team)} ${line(-Math.abs(x))}${projectionTag()}`}function spreadOffer(r){const m=activeHomeSpread(r),g=r.market.spread;if(m==null||g.home_line==null)return null;const home=m<g.home_line,b=home?g.best_home:g.best_away,q=b?.home_line??g.home_line;return{team:home?r.game.home_team:r.game.away_team,line:home?q:-q,edge:Math.abs(m-q),price:b?.price??g.price,book:b?.book??g.book}}function totalOffer(r){const m=activeTotal(r),g=r.market.total;if(m==null||g.line==null)return null;const over=m>g.line,b=over?g.best_over:g.best_under,q=b?.line??g.line;return{team:over?'Over':'Under',line:q,edge:Math.abs(m-q),price:b?.price??(over?g.over_price:g.under_price),book:b?.book??g.book}}function spreadGapHtml(r,s){if(!s)return'—';const meta=TEAM_META[s.team]||{};return`<span class="gapPick" title="${esc(s.team)}">${logo(meta)}<b>${num(s.edge)}</b></span>`}function totalGapHtml(t){if(!t)return'—';return`<span class="gapPick totalPick"><em>${esc(t.team)}</em><b>${num(t.edge)}</b></span>`}
-function spreadMarket(r){const g=r.market.spread;if(g.home_line==null)return'—';const h=g.best_home||g,a=g.best_away||g;return`<span class="bestStack"><span><b>${esc(r.game.home_team)} ${line(h.home_line??g.home_line)} ${price(h.price??g.price)}</b> <span class="book">${esc(h.book??g.book??'')}</span></span><span><b>${esc(r.game.away_team)} ${line(-(a.home_line??g.home_line))} ${price(a.price??g.price)}</b> <span class="book">${esc(a.book??g.book??'')}</span></span></span>`}function totalMarket(r){const g=r.market.total;if(g.line==null)return'—';const o=g.best_over||g,u=g.best_under||g;return`<span class="bestStack"><span><b>Over ${num(o.line??g.line)} ${price(o.price??g.over_price)}</b> <span class="book">${esc(o.book??g.book??'')}</span></span><span><b>Under ${num(u.line??g.line)} ${price(u.price??g.under_price)}</b> <span class="book">${esc(u.book??g.book??'')}</span></span></span>`}
+function canonicalMarketGame(r){
+  return MARKET_BY_GAME_ID.get(String(r?.game?.game_id||''))||null;
+}
+function quoteBetterForSide(candidate,current,market,side){
+  if(!candidate||candidate.line==null)return false;
+  if(!current)return true;
+  const cl=Number(candidate.line),ol=Number(current.line);
+  if(market==='spread'){
+    if(cl!==ol)return cl>ol;
+  }else if(market==='total'){
+    if(side==='over'&&cl!==ol)return cl<ol;
+    if(side==='under'&&cl!==ol)return cl>ol;
+  }
+  const cp=Number(candidate.price),op=Number(current.price);
+  if(Number.isFinite(cp)&&Number.isFinite(op))return cp>op;
+  return false;
+}
+function actionableBestQuote(r,market,side){
+  const g=canonicalMarketGame(r);
+  if(!g)return null;
+  let best=null;
+  for(const book of ACTIONABLE_BOOKS){
+    const q=g?.quotes?.[book]?.[market]?.[side];
+    if(!q)continue;
+    if(q.freshness_status!=='LIVE'&&q.freshness_status!=='BACKUP_SOURCE')continue;
+    if(quoteBetterForSide(q,best,market,side))best=q;
+  }
+  return best;
+}
+function canonicalBestSpread(r,side){
+  return actionableBestQuote(r,'spread',side);
+}
+function canonicalBestTotal(r,side){
+  return actionableBestQuote(r,'total',side);
+}
+function canonicalReferenceHomeSpread(r){
+  const best=canonicalBestSpread(r,'home');
+  return best?.line!=null?Number(best.line):null;
+}
+function canonicalReferenceTotal(r){
+  const over=canonicalBestTotal(r,'over'),under=canonicalBestTotal(r,'under');
+  const best=over||under;
+  return best?.line!=null?Number(best.line):null;
+}
+function modelSpread(r){const x=activeHomeSpread(r);if(x==null)return shadowMissingLabel(r,'spread');return`${esc(x<0?r.game.home_team:r.game.away_team)} ${line(-Math.abs(x))}${projectionTag()}`}
+function spreadOffer(r){
+  const m=activeHomeSpread(r),ref=canonicalReferenceHomeSpread(r);
+  if(m==null||ref==null)return null;
+  const home=m<ref,b=canonicalBestSpread(r,home?'home':'away');
+  if(!b||b.line==null)return null;
+  const q=Number(b.line),modelSide=home?m:-m;
+  return{team:home?r.game.home_team:r.game.away_team,line:q,edge:Math.abs(modelSide-q),price:b.price,book:b.sportsbook};
+}
+function totalOffer(r){
+  const m=activeTotal(r),ref=canonicalReferenceTotal(r);
+  if(m==null||ref==null)return null;
+  const over=m>ref,b=canonicalBestTotal(r,over?'over':'under');
+  if(!b||b.line==null)return null;
+  const q=Number(b.line);
+  return{team:over?'Over':'Under',line:q,edge:Math.abs(m-q),price:b.price,book:b.sportsbook};
+}
+function spreadGapHtml(r,s){if(!s)return'—';const meta=TEAM_META[s.team]||{};return`<span class="gapPick" title="${esc(s.team)}">${logo(meta)}<b>${num(s.edge)}</b></span>`}
+function totalGapHtml(t){if(!t)return'—';return`<span class="gapPick totalPick"><em>${esc(t.team)}</em><b>${num(t.edge)}</b></span>`}
+function spreadMarket(r){
+  const h=canonicalBestSpread(r,'home'),a=canonicalBestSpread(r,'away');
+  if(!h&&!a)return'—';
+  return`<span class="bestStack"><span><b>${esc(r.game.home_team)} ${h?.line!=null?line(h.line):'—'} ${h?price(h.price):''}</b> <span class="book">${esc(h?.sportsbook||'')}</span></span><span><b>${esc(r.game.away_team)} ${a?.line!=null?line(a.line):'—'} ${a?price(a.price):''}</b> <span class="book">${esc(a?.sportsbook||'')}</span></span></span>`;
+}
+function totalMarket(r){
+  const o=canonicalBestTotal(r,'over'),u=canonicalBestTotal(r,'under');
+  if(!o&&!u)return'—';
+  return`<span class="bestStack"><span><b>Over ${o?.line!=null?num(o.line):'—'} ${o?price(o.price):''}</b> <span class="book">${esc(o?.sportsbook||'')}</span></span><span><b>Under ${u?.line!=null?num(u.line):'—'} ${u?price(u.price):''}</b> <span class="book">${esc(u?.sportsbook||'')}</span></span></span>`;
+}
 function independentAngles(r){return(r.angles||[]).filter(a=>/travel|lookahead|sandwich|back.to.back|b2b|short rest|bye|schedule|returning production|coach|injur|weather/i.test(`${a.signal_type||''} ${a.headline||''} ${a.detail||''}`))}
 function gameTypeOf(r){const a=r.teams.away.overall_rank!=null,h=r.teams.home.overall_rank!=null;return a&&h?'fbs_fbs':a||h?'fbs_fcs':'other'}
 function hasMarket(r){
-  const spread=r?.market?.spread;
-  const total=r?.market?.total;
-  return spread?.home_line!=null||total?.line!=null;
+  return !!(
+    canonicalBestSpread(r,'home')||
+    canonicalBestSpread(r,'away')||
+    canonicalBestTotal(r,'over')||
+    canonicalBestTotal(r,'under')
+  );
 }
 function filtered(){const w=week.value,q=search.value.toLowerCase();return DATA.games.filter(r=>(w==='all'||String(r.game.week)===w)&&(gameType.value==='all'||gameTypeOf(r)===gameType.value)&&(`${r.game.away_team} ${r.game.home_team}`.toLowerCase().includes(q))&&(mode!=='market'||hasMarket(r))&&(mode!=='watch'||decisions[r.game.game_id]==='watch')&&(mode!=='bet'||(bets[r.game.game_id]||[]).length))}
 function sortVal(r){if(sortKey==='away'||sortKey==='home')return r.game[sortKey+'_team'];if(sortKey==='spread')return Math.abs(activeHomeSpread(r)??-999);if(sortKey==='total')return activeTotal(r)??-999;if(sortKey==='spreadEdge')return spreadOffer(r)?.edge??-1;if(sortKey==='totalEdge')return totalOffer(r)?.edge??-1;return`${r.game.date||''}-${String(r.game.week).padStart(2,'0')}`}function shortDate(v){const s=String(v||'').slice(0,10);return/^\d{4}-\d{2}-\d{2}$/.test(s)?`${Number(s.slice(5,7))}/${Number(s.slice(8,10))}`:s||'TBD'}
@@ -1481,12 +1557,13 @@ function renderFreshness(){
     .map(s=>`${s.label} ${s.weight*100}%`)
     .join(' · ');
 }
-function gapTone(v){return v>3?"gapGood":v>=1?"gapMid":"gapBad"}document.querySelectorAll("#gameTypeButtons button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gameTypeButtons button").forEach(x=>x.classList.remove("active"));b.classList.add("active");gameType.value=b.dataset.type;render()});async function init(){const [view,shadow,shadowMeta,scheduleEnrichment]=await Promise.all([
+function gapTone(v){return v>3?"gapGood":v>=1?"gapMid":"gapBad"}document.querySelectorAll("#gameTypeButtons button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gameTypeButtons button").forEach(x=>x.classList.remove("active"));b.classList.add("active");gameType.value=b.dataset.type;render()});async function init(){const [view,marketContract,shadow,shadowMeta,scheduleEnrichment]=await Promise.all([
 fetch('data/site/matchups_view.json?v=20260817T120614Z',{cache:'no-store'}).then(r=>r.json()),
+fetch('data/site/current_market_contract.json?v=20260817T183259Z',{cache:'no-store'}).then(r=>r.json()),
 fetch('data/site/saturday_shadow_lines.json?v=20260817T120614Z',{cache:'no-store'}).then(r=>r.ok?r.json():{games:[]}).catch(()=>({games:[]})),
 fetch('data/site/postgame_shadow_updates.json?v=20260817T120614Z',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
 fetch('data/site/schedule_live_enrichment.json?v=20260817T120614Z',{cache:'no-store'}).then(r=>r.ok?r.json():{games:[]}).catch(()=>({games:[]}))
-]);DATA=view;SHADOW_META=shadowMeta;const shadowRows=Array.isArray(shadow)?shadow:(shadow.games||[]);SHADOW=new Map(shadowRows.map(x=>[x.game_id,x]));const scheduleRows=Array.isArray(scheduleEnrichment)?scheduleEnrichment:(scheduleEnrichment.games||[]);SCHEDULE_ENRICHMENT=new Map(scheduleRows.map(x=>[x.game_id||(x.game||{}).game_id,x]));SHADOW_AVAILABLE=shadowRows.some(x=>x.shadow_display_ready===true);const shadowButton=document.querySelector('#projectionMode [data-projection-mode="shadow"]');if(shadowButton){shadowButton.disabled=false;shadowButton.title=SHADOW_AVAILABLE?'Show live postgame Shadow projections':'Show games awaiting completed-game Shadow updates';const note=document.querySelector('.shadowUnavailableNote');if(note)note.remove()}DATA.games.forEach(r=>{TEAM_META[r.teams.away.team]=r.teams.away;TEAM_META[r.teams.home.team]=r.teams.home});const weeks=[...new Set(DATA.games.map(r=>r.game.week))].sort((a,b)=>a-b);week.innerHTML='<option value="all">All weeks</option>'+weeks.map(x=>`<option value="${x}">Week ${x}</option>`).join('');week.value=String(weeks[0]);renderFreshness();render();const linked=new URLSearchParams(location.search).get('game_id');if(linked&&DATA.games.some(r=>r.game.game_id===linked))openDrawer(linked)}document.querySelectorAll('#projectionMode button').forEach(b=>b.onclick=()=>{
+]);DATA=view;MARKET_META=marketContract;MARKET_BY_GAME_ID=new Map((marketContract.games||[]).map(x=>[String(x.game_id),x]));SHADOW_META=shadowMeta;const shadowRows=Array.isArray(shadow)?shadow:(shadow.games||[]);SHADOW=new Map(shadowRows.map(x=>[x.game_id,x]));const scheduleRows=Array.isArray(scheduleEnrichment)?scheduleEnrichment:(scheduleEnrichment.games||[]);SCHEDULE_ENRICHMENT=new Map(scheduleRows.map(x=>[x.game_id||(x.game||{}).game_id,x]));SHADOW_AVAILABLE=shadowRows.some(x=>x.shadow_display_ready===true);const shadowButton=document.querySelector('#projectionMode [data-projection-mode="shadow"]');if(shadowButton){shadowButton.disabled=false;shadowButton.title=SHADOW_AVAILABLE?'Show live postgame Shadow projections':'Show games awaiting completed-game Shadow updates';const note=document.querySelector('.shadowUnavailableNote');if(note)note.remove()}DATA.games.forEach(r=>{TEAM_META[r.teams.away.team]=r.teams.away;TEAM_META[r.teams.home.team]=r.teams.home});const weeks=[...new Set(DATA.games.map(r=>r.game.week))].sort((a,b)=>a-b);week.innerHTML='<option value="all">All weeks</option>'+weeks.map(x=>`<option value="${x}">Week ${x}</option>`).join('');week.value=String(weeks[0]);renderFreshness();render();const linked=new URLSearchParams(location.search).get('game_id');if(linked&&DATA.games.some(r=>r.game.game_id===linked))openDrawer(linked)}document.querySelectorAll('#projectionMode button').forEach(b=>b.onclick=()=>{
 document.querySelectorAll('#projectionMode button').forEach(x=>x.classList.remove('active'));
 b.classList.add('active');
 projectionMode=b.dataset.projectionMode;
@@ -1494,7 +1571,7 @@ render();
 if(drawer.classList.contains('open')&&current())drawerContent.innerHTML=drawerMarkup(current());
 });
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode;render()});[week,gameType,search].forEach(x=>x.addEventListener('input',render));document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeBet();closeDrawer()}});init().catch(e=>rows.innerHTML=`<tr><td class="empty">Unable to load data: ${esc(e.message)}. Use the local preview URL.</td></tr>`);
-</script><script src="matchup_workspace.js?v=20260728-validatedrp2"></script><script id="postgame-shadow-ui">
+</script><script src="matchup_workspace.js?v=20260817-actionable-history"></script><script id="postgame-shadow-ui">
 fetch('data/site/postgame_shadow_updates.json?v=20260817T120614Z').then(r=>r.json()).then(d=>{const box=document.getElementById('postgameShadow');if(!box)return;const values=[...SHADOW.values()],n=values.reduce((a,x)=>a+Number(x.completed_team_update_count||0),0),games=values.filter(x=>x.shadow_display_ready===true).length,independent=values.filter(x=>x.shadow_display_ready===true&&x.market_readiness_state==='independent_market_ready').length,fallback=values.filter(x=>x.shadow_display_ready===true&&x.shadow_spread_formula==='SP+ Fallback').length;box.querySelector('summary').textContent=n?`Saturday Shadow · ${games} active games · ${n} postgame updates`:`Saturday Shadow · Awaiting completed games · 0 postgame updates`;box.querySelector('.freshnessBody').innerHTML=`<div class="freshnessSource"><b>Active games</b><br>${games}<br><span class="muted">At least one genuine postgame update</span></div><div class="freshnessSource"><b>Market + SP+</b><br>${independent}<br><span class="muted">Target-excluded market support</span></div><div class="freshnessSource"><b>SP+ fallback</b><br>${fallback}<br><span class="muted">Active only after a completed game</span></div><div class="freshnessSource"><b>Safety</b><br>Current Model unchanged<br><span class="muted">Preseason baselines stay internal</span></div>`}).catch(()=>{});
 </script><script id="opener-week-js">const openerWeek=document.getElementById('week'),openerWeekChips=document.getElementById('openerWeekChips');function syncOpenerWeeks(){const opts=[...openerWeek.options].filter(o=>o.value!=='all');if(!opts.length)return;openerWeekChips.innerHTML=opts.map(o=>`<button class="${o.value===openerWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');openerWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{openerWeek.value=b.dataset.week;openerWeek.dispatchEvent(new Event('input',{bubbles:true}));syncOpenerWeeks()})}new MutationObserver(syncOpenerWeeks).observe(openerWeek,{childList:true});openerWeek.addEventListener('input',syncOpenerWeeks);</script>
 

@@ -10,10 +10,9 @@ Priority is applied independently for each:
 
 Source priority:
   1. Fresh The Odds API quote
-  2. Fresh SportsGameOdds accepted quote
-  3. Fresh Action Network quote
-  4. Missing
+  2. Missing
 
+The Odds API is the sole current-game market source for this contract.
 Stale quotes are retained only in the audit counts, never as current values.
 """
 
@@ -33,7 +32,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MATCHUPS = ROOT / "data/site/matchups_view.json"
 THEODDS = ROOT / "data/odds/theodds_ncaaf_lines_2026.csv"
-SGO = ROOT / "data/markets/sgo/sgo_accepted_quotes.csv"
 ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
 OUT = ROOT / "data/site/current_market_contract.json"
 AUDIT = ROOT / "data/audits/current_market_contract_build_audit.json"
@@ -47,10 +45,25 @@ TARGET_BOOKS = (
     "FanDuel",
     "BetMGM",
     "Caesars",
-    "Fanatics",
+    "BetRivers",
     "Hard Rock Bet",
 )
+
+VENUE_TYPES = {
+    "Pinnacle": "sharp_reference",
+    "Novig": "exchange",
+    "ProphetX": "exchange",
+    "Kalshi": "exchange",
+    "DraftKings": "sportsbook",
+    "FanDuel": "sportsbook",
+    "BetMGM": "sportsbook",
+    "Caesars": "sportsbook",
+    "BetRivers": "sportsbook",
+    "Hard Rock Bet": "sportsbook",
+}
+
 REFERENCE_BOOK_PRIORITY = TARGET_BOOKS
+ACTION_FALLBACK_BOOKS = {"DraftKings", "FanDuel", "BetMGM", "Caesars"}
 MAX_AGE_HOURS = float(os.environ.get("NCAAF_CURRENT_MARKET_MAX_AGE_HOURS", "18"))
 
 
@@ -205,6 +218,7 @@ def normalize_book(value: str | None) -> str | None:
         "mgm": "BetMGM",
         "caesars": "Caesars",
         "caesar": "Caesars",
+        "williamhillus": "Caesars",
         "hardrockbet": "Hard Rock Bet",
         "hardrockbetoh": "Hard Rock Bet",
         "hardrock": "Hard Rock Bet",
@@ -212,7 +226,7 @@ def normalize_book(value: str | None) -> str | None:
         "novig": "Novig",
         "prophetx": "ProphetX",
         "kalshi": "Kalshi",
-        "fanatics": "Fanatics",
+        "betrivers": "BetRivers",
         "bovada": "Bovada",
     }
     return aliases.get(text)
@@ -320,12 +334,14 @@ def fresh(timestamp: str | None, now: datetime) -> bool:
     return age is not None and -0.25 <= age <= MAX_AGE_HOURS
 
 
-def quote_record(*, source, game_id, book, market, side, line, price, updated_at, now):
+def quote_record(*, source, game_id, book, market, side, line, price, updated_at, now, venue_type=None):
     age = quote_age_hours(updated_at, now)
     return {
         "source": source,
         "game_id": game_id,
         "sportsbook": book,
+        "venue": book,
+        "venue_type": venue_type or VENUE_TYPES.get(book, "unclassified"),
         "market_type": market,
         "side": side,
         "line": line,
@@ -353,7 +369,7 @@ def best_quote(quotes: dict, market: str, side: str):
     candidates = []
     for book, book_data in quotes.items():
         q = book_data.get(market, {}).get(side)
-        if not q or q.get("freshness_status") not in {"LIVE", "BACKUP_SOURCE"}:
+        if not q or q.get("freshness_status") != "LIVE":
             continue
         line, price = number(q.get("line")), number(q.get("price"))
         if market == "moneyline":
@@ -465,6 +481,7 @@ def main() -> None:
             source="The Odds API", game_id=gid, book=book, market=market, side=side,
             line=number(row.get("point")), price=number(row.get("price")),
             updated_at=row.get("last_update") or row.get("pulled_at"), now=now,
+            venue_type=row.get("venue_type") or VENUE_TYPES.get(book),
         )
         if q["freshness_status"] != "LIVE":
             excluded.append({"source": "The Odds API", "reason": "stale_current_quote", **q})
@@ -473,70 +490,50 @@ def main() -> None:
         candidates[gid][book][market][side] = q
         source_counts["The Odds API"] += 1
 
-    # Secondary: fresh SportsGameOdds accepted quote inventory.
-    # The Odds API remains primary because it is loaded first.
-    # SGO only fills exact game/book/market/side slots not already populated.
-    for row in csv_rows(SGO):
-        gid = str(row.get("canonical_game_id") or "")
-        if gid not in identity:
-            excluded.append({
-                "source": "SportsGameOdds",
-                "reason": "unknown_game_id",
-                "game_id": gid,
-            })
-            continue
+    # The Odds API is the sole current-game market source.
 
-        book = normalize_book(row.get("sportsbook"))
-        market = str(row.get("market_type") or "").lower()
-        side = str(row.get("side") or "").lower()
-        timestamp = row.get("source_updated_at") or row.get("ingestion_timestamp")
+    # ACTION_NETWORK_TARGETED_FALLBACK_START
+    # Fresh Action Network quotes fill only exact missing slots for the four
+    # actionable sportsbooks. They never overwrite a fresh The Odds API quote.
+    action_fallback_counts = Counter()
+    action_rows_seen = 0
+    action_rows_stale = 0
+    action_rows_unmatched = 0
 
-        if not book or market not in {"spread", "total", "moneyline"}:
-            continue
-        if side not in {"away", "home", "over", "under"}:
-            continue
-
-        # Preserve The Odds API as the preferred quote source.
-        if side in candidates[gid][book][market]:
-            continue
-
-        q = quote_record(
-            source="SportsGameOdds",
-            game_id=gid,
-            book=book,
-            market=market,
-            side=side,
-            line=number(row.get("line")),
-            price=number(row.get("price")),
-            updated_at=timestamp,
-            now=now,
-        )
-
-        if q["freshness_status"] != "LIVE" or str(row.get("stale_flag")).lower() in {"true", "1"}:
-            excluded.append({
-                "source": "SportsGameOdds",
-                "reason": "stale_current_quote",
-                **q,
-            })
-            continue
-
-        candidates[gid][book][market][side] = q
-        source_counts["SportsGameOdds"] += 1
-
-
-    # Backup: fresh Action Network only where The Odds API did not provide that exact
-    # game/book/market/side.
     for row in csv_rows(ACTION):
-        # Action Network's `date` is UTC-derived for late-night games. Resolve
-        # the canonical site date from commence_time in America/New_York first,
-        # then fall back to the raw date for older rows without commence_time.
+        action_rows_seen += 1
+        book = normalize_book(row.get("book"))
+        if book not in ACTION_FALLBACK_BOOKS:
+            continue
+
         local_date = site_date_from_timestamp(row.get("commence_time"))
-        keys = [
-            game_key(local_date, row.get("away_team"), row.get("home_team")),
-            game_key(row.get("date"), row.get("away_team"), row.get("home_team")),
+        date_candidates = [
+            local_date,
+            str(row.get("date") or "")[:10],
+            str(row.get("commence_time") or "")[:10],
         ]
-        gid = next((key_to_game_id.get(key) for key in keys if key_to_game_id.get(key)), None)
+
+        if "resolve_game_id" in globals():
+            gid, _method, reversed_orientation = resolve_game_id(
+                date_candidates,
+                row.get("away_team"),
+                row.get("home_team"),
+                identity,
+                key_to_game_id,
+            )
+        else:
+            gid = next(
+                (
+                    key_to_game_id.get(game_key(d, row.get("away_team"), row.get("home_team")))
+                    for d in date_candidates
+                    if d and key_to_game_id.get(game_key(d, row.get("away_team"), row.get("home_team")))
+                ),
+                None,
+            )
+            reversed_orientation = False
+
         if not gid:
+            action_rows_unmatched += 1
             excluded.append({
                 "source": "Action Network",
                 "reason": "unmatched_game_identity",
@@ -546,27 +543,69 @@ def main() -> None:
                 "home_team": row.get("home_team"),
             })
             continue
-        book = normalize_book(row.get("book"))
-        market = str(row.get("market") or "").lower()
-        side = str(row.get("side") or "").lower()
-        timestamp = row.get("pulled_at") or row.get("source_updated_at")
-        if not book or market not in {"spread", "total", "moneyline"}:
+
+        raw_market = str(row.get("market") or "").lower()
+        market = {
+            "h2h": "moneyline",
+            "moneyline": "moneyline",
+            "spread": "spread",
+            "spreads": "spread",
+            "total": "total",
+            "totals": "total",
+        }.get(raw_market)
+        raw_side = str(row.get("side") or "").strip()
+
+        if market in {"spread", "moneyline"}:
+            if raw_side.lower() in {"away", "home"}:
+                provider_side = raw_side.lower()
+            elif normalize_team(raw_side) == normalize_team(row.get("away_team")):
+                provider_side = "away"
+            elif normalize_team(raw_side) == normalize_team(row.get("home_team")):
+                provider_side = "home"
+            else:
+                continue
+            side = (
+                ("home" if provider_side == "away" else "away")
+                if reversed_orientation else provider_side
+            )
+        elif market == "total":
+            side = raw_side.lower()
+        else:
             continue
+
         if side not in {"away", "home", "over", "under"}:
             continue
+
         if side in candidates[gid][book][market]:
             continue
+
+        timestamp = (
+            row.get("source_updated_at")
+            or row.get("book_last_updated")
+            or row.get("pulled_at")
+            or row.get("ingestion_timestamp")
+        )
         q = quote_record(
-            source="Action Network", game_id=gid, book=book, market=market, side=side,
-            line=number(row.get("point")), price=number(row.get("price")),
-            updated_at=timestamp, now=now,
+            source="Action Network",
+            game_id=gid,
+            book=book,
+            market=market,
+            side=side,
+            line=number(row.get("point") if row.get("point") not in (None, "") else row.get("line")),
+            price=number(row.get("price")),
+            updated_at=timestamp,
+            now=now,
         )
         if q["freshness_status"] != "LIVE":
+            action_rows_stale += 1
             excluded.append({"source": "Action Network", "reason": "stale_current_quote", **q})
             continue
+
         q["freshness_status"] = "BACKUP_SOURCE"
         candidates[gid][book][market][side] = q
         source_counts["Action Network"] += 1
+        action_fallback_counts[book] += 1
+    # ACTION_NETWORK_TARGETED_FALLBACK_END
 
     contract_games = []
     stale_current_quotes_displayed = 0
@@ -615,23 +654,42 @@ def main() -> None:
             for q in market_data.values()
             if q.get("source_updated_at")
         ]
-        availability = "LIVE" if any(
-            q.get("source") == "The Odds API"
-            for book_data in quotes.values()
-            for market_data in book_data.values()
-            for q in market_data.values()
-        ) else ("BACKUP_SOURCE" if quotes else "MISSING")
+        availability = "LIVE" if quotes else "MISSING"
         if quotes:
             games_with_any_current += 1
         contract_games.append({
             **meta,
             "availability_status": availability,
-            "availability_reason": None if quotes else "No fresh accepted current quote from an approved provider",
+            "availability_reason": None if quotes else "No fresh The Odds API quote from a configured priority venue",
             "current_market_updated_at": max(timestamps) if timestamps else None,
             "quotes": quotes,
             "reference": reference,
             "best": best,
         })
+
+    venue_coverage = {}
+    for book in TARGET_BOOKS:
+        games_with_quote = 0
+        quote_count = 0
+        market_counts = Counter()
+        for game in contract_games:
+            book_data = game.get("quotes", {}).get(book, {})
+            if book_data:
+                games_with_quote += 1
+            for market, sides in book_data.items():
+                market_counts[market] += 1
+                quote_count += len(sides)
+        venue_coverage[book] = {
+            "venue_type": VENUE_TYPES.get(book, "unclassified"),
+            "games_with_any_quote": games_with_quote,
+            "quote_count": quote_count,
+            "market_game_counts": {
+                "spread": int(market_counts.get("spread", 0)),
+                "total": int(market_counts.get("total", 0)),
+                "moneyline": int(market_counts.get("moneyline", 0)),
+            },
+            "availability_status": "AVAILABLE" if games_with_quote else "UNAVAILABLE",
+        }
 
     payload = {
         "schema_version": "current-market-contract-v1",
@@ -639,7 +697,13 @@ def main() -> None:
         "max_quote_age_hours": MAX_AGE_HOURS,
         "source_priority": ["The Odds API", "Action Network", "MISSING"],
         "stale_data_policy": "Stale quotes are never exposed as current. Historical snapshots remain separate.",
+        "market_source_policy": "theodds-primary-action-fallback-v1",
+        "target_venues": [
+            {"name": book, "venue_type": VENUE_TYPES.get(book, "unclassified")}
+            for book in TARGET_BOOKS
+        ],
         "target_sportsbooks": list(TARGET_BOOKS),
+        "venue_coverage": venue_coverage,
         "games": contract_games,
     }
     audit = {
@@ -651,13 +715,18 @@ def main() -> None:
         "invalid_pairs_excluded": invalid_pairs,
         "stale_current_quotes_displayed": stale_current_quotes_displayed,
         "excluded_count": len(excluded),
+        "action_fallback_quote_counts_by_book": dict(action_fallback_counts),
+        "action_rows_seen": action_rows_seen,
+        "action_rows_stale": action_rows_stale,
+        "action_rows_unmatched": action_rows_unmatched,
         "excluded_sample": excluded[:100],
         "inputs": [
             str(MATCHUPS.relative_to(ROOT)),
             str(THEODDS.relative_to(ROOT)),
-            str(SGO.relative_to(ROOT)),
             str(ACTION.relative_to(ROOT)),
         ],
+        "market_source_policy": "theodds-primary-action-fallback-v1",
+        "venue_coverage": venue_coverage,
         "output": str(OUT.relative_to(ROOT)),
     }
     atomic_json(OUT, payload)

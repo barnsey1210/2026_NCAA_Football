@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Strict selector for canonical scheduled-game projections.
 
-This module owns projection selection, not projection formulas. It never
-renormalizes missing components and never substitutes a team rating, market
-rating, legacy blend, or another model for an unavailable canonical model.
+This module owns projection selection, not projection formulas. Graceful
+degradation, when permitted by a canonical model, is calculated upstream by
+the canonical contract builder. This resolver never substitutes a team rating,
+market rating, legacy blend, or another model.
 """
 from __future__ import annotations
 
@@ -60,6 +61,10 @@ def unavailable(model_id: str, reason: str, projection: dict[str, Any] | None = 
         "component_status": projection.get("component_status", {}),
         "formula_version": projection.get("formula_version"),
         "freshness_timestamp": projection.get("freshness_timestamp"),
+        "resolution_mode": (projection.get("resolution") or {}).get("resolution_mode"),
+        "available_components": (projection.get("resolution") or {}).get("available_components"),
+        "missing_components": (projection.get("resolution") or {}).get("missing_components"),
+        "weights_used": (projection.get("resolution") or {}).get("weights_used"),
     }
 
 
@@ -101,6 +106,10 @@ def resolve_projection(game: dict[str, Any] | None, model_id: str) -> dict[str, 
         "component_status": projection.get("component_status", {}),
         "formula_version": projection.get("formula_version"),
         "freshness_timestamp": projection.get("freshness_timestamp"),
+        "resolution_mode": (projection.get("resolution") or {}).get("resolution_mode"),
+        "available_components": (projection.get("resolution") or {}).get("available_components"),
+        "missing_components": (projection.get("resolution") or {}).get("missing_components"),
+        "weights_used": (projection.get("resolution") or {}).get("weights_used"),
     }
 
 

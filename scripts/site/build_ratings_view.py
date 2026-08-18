@@ -35,6 +35,9 @@ REFERENCE_ONLY = {
     "Massey Power": "massey",
 }
 
+def truthy(value):
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
 DISPLAY_SOURCES = {
     **CORE_COMPOSITE,
     **REFERENCE_ONLY,
@@ -56,8 +59,19 @@ if ratings_source_status_path.exists():
         if source:
             source_status[source] = row
 
-# The production Site Composite is fixed at four equal-weight sources.
-active_composite = dict(CORE_COMPOSITE)
+# The intended Site Composite is fixed at four canonical sources, but
+# production gracefully renormalizes across whichever canonical sources are
+# actually present in the latest ratings snapshot. This mirrors the canonical
+# ratings-master behavior and prevents a stale/missing source (currently
+# Sagarin) from zeroing the Ratings page.
+active_composite = {
+    label: key
+    for label, key in CORE_COMPOSITE.items()
+    if vectors.get((latest, label))
+}
+
+if not active_composite:
+    raise SystemExit("No active canonical rating sources found in latest snapshot")
 
 reference_only = dict(REFERENCE_ONLY)
 
@@ -121,17 +135,26 @@ for label, key in DISPLAY_SOURCES.items():
         "changed_teams_from_prior": tracked_changed,
         "change_status": tracked_change_status,
         "previous_snapshot": previous,
-        "active_2026": (
-            label in CORE_COMPOSITE
-            or truthy(status.get("active_2026"))
-        ),
-        "composite_eligible": label in active_composite,
+        # Current production activity is driven by the actually available
+        # canonical composite sources, not the static intended four-source set.
+        # This keeps SP+/FPI/TeamRankings active during graceful degradation
+        # while leaving stale Sagarin inactive until it returns to production.
+        "active_2026": (label in active_composite) or truthy(status.get("active_2026")),
+        "composite_eligible": label in CORE_COMPOSITE,
         "reference_only": label in REFERENCE_ONLY,
         "display_status": status.get("display_status") or None,
         "production_weight_pct": (
-            float(status["production_weight_pct"])
-            if status.get("production_weight_pct") not in (None, "")
-            else None
+            (100.0 / len(active_composite))
+            if label in active_composite and active_composite
+            else (
+                0.0
+                if label in CORE_COMPOSITE
+                else (
+                    float(status["production_weight_pct"])
+                    if status.get("production_weight_pct") not in (None, "")
+                    else None
+                )
+            )
         ),
     }
 
@@ -455,7 +478,7 @@ payload = {
     "snapshot_date": latest,
     "composite_model": {
         "label": "Site Composite Rating",
-        "method": "SP+ / FPI / TeamRankings / Sagarin equal weight",
+        "method": "SP+ / FPI / TeamRankings / Sagarin equal weight; gracefully renormalized across currently available canonical sources",
         "eligible_sources": {
             key: label
             for label, key in CORE_COMPOSITE.items()

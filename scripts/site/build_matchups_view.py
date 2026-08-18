@@ -554,6 +554,104 @@ def main():
 
     line_history = json.loads((ROOT / "data/site/matchup_line_history.json").read_text()) if (ROOT / "data/site/matchup_line_history.json").exists() else {}
 
+    # Current-market truth comes only from the canonical contract. Historical/opening
+    # line assets remain separate and must never substitute for missing current quotes.
+    current_market_path = ROOT / "data/site/current_market_contract.json"
+    current_market_contract = json.loads(current_market_path.read_text()) if current_market_path.exists() else {"games": [], "built_at": None}
+    current_market_by_game = {str(row.get("game_id")): row for row in current_market_contract.get("games", [])}
+
+    def quote_view(q):
+        if not isinstance(q, dict):
+            return None
+        return {
+            "line": number(q.get("line")),
+            "price": number(q.get("price")),
+            "book": clean(q.get("sportsbook")),
+            "source": clean(q.get("source")),
+            "updated_at": clean(q.get("source_updated_at")),
+            "freshness_status": clean(q.get("freshness_status")),
+        }
+
+    def canonical_market(game_id):
+        current = current_market_by_game.get(str(game_id))
+        if not current:
+            return {
+                "spread": {"home_line": None, "price": None, "book": None, "updated_at": None,
+                           "availability_status": "MISSING", "availability_reason": "No canonical current-market game",
+                           "best_home": None, "best_away": None},
+                "total": {"line": None, "over_price": None, "under_price": None, "book": None, "updated_at": None,
+                          "availability_status": "MISSING", "availability_reason": "No canonical current-market game",
+                          "best_over": None, "best_under": None},
+                "moneyline": {"away": None, "home": None, "away_book": None, "home_book": None,
+                              "updated_at": None, "availability_status": "MISSING"},
+            }
+
+        status = current.get("availability_status") or "MISSING"
+        reason = current.get("availability_reason")
+        if status == "MISSING":
+            return {
+                "spread": {"home_line": None, "price": None, "book": None, "updated_at": None,
+                           "availability_status": status, "availability_reason": reason,
+                           "best_home": None, "best_away": None},
+                "total": {"line": None, "over_price": None, "under_price": None, "book": None, "updated_at": None,
+                          "availability_status": status, "availability_reason": reason,
+                          "best_over": None, "best_under": None},
+                "moneyline": {"away": None, "home": None, "away_book": None, "home_book": None,
+                              "updated_at": None, "availability_status": status},
+            }
+
+        reference = current.get("reference") or {}
+        ref_spread = reference.get("spread") or {}
+        ref_total = reference.get("total") or {}
+        ref_ml = reference.get("moneyline") or {}
+        spread_home = ref_spread.get("home")
+        total_over = ref_total.get("over")
+        total_under = ref_total.get("under")
+        ml_away = ref_ml.get("away")
+        ml_home = ref_ml.get("home")
+        best = current.get("best") or {}
+
+        best_home = quote_view(best.get("home_spread"))
+        best_away_raw = quote_view(best.get("away_spread"))
+        best_away = dict(best_away_raw) if best_away_raw else None
+        if best_home:
+            best_home["home_line"] = best_home.pop("line")
+        if best_away:
+            away_line = best_away.pop("line")
+            best_away["home_line"] = -away_line if away_line is not None else None
+
+        return {
+            "spread": {
+                "home_line": number(spread_home.get("line")) if spread_home else None,
+                "price": number(spread_home.get("price")) if spread_home else None,
+                "book": clean(ref_spread.get("sportsbook")),
+                "updated_at": clean(spread_home.get("source_updated_at")) if spread_home else None,
+                "availability_status": status,
+                "availability_reason": reason,
+                "best_home": best_home,
+                "best_away": best_away,
+            },
+            "total": {
+                "line": number(total_over.get("line")) if total_over else None,
+                "over_price": number(total_over.get("price")) if total_over else None,
+                "under_price": number(total_under.get("price")) if total_under else None,
+                "book": clean(ref_total.get("sportsbook")),
+                "updated_at": clean(total_over.get("source_updated_at")) if total_over else None,
+                "availability_status": status,
+                "availability_reason": reason,
+                "best_over": quote_view(best.get("over")),
+                "best_under": quote_view(best.get("under")),
+            },
+            "moneyline": {
+                "away": number(ml_away.get("price")) if ml_away else None,
+                "home": number(ml_home.get("price")) if ml_home else None,
+                "away_book": clean(ref_ml.get("sportsbook")),
+                "home_book": clean(ref_ml.get("sportsbook")),
+                "updated_at": clean(ml_away.get("source_updated_at")) if ml_away else None,
+                "availability_status": status,
+            },
+        }
+
     injury_status_path = ROOT / "data/injuries/injury_source_status.json"
     if injury_status_path.exists():
         try:
@@ -638,14 +736,15 @@ def main():
         spread_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_SPREAD)
         total_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_TOTAL)
         model_home = number(spread_resolution.get("value_home_line"))
-        market_home = number(game.get("market_spread_home"))
+        current_market = canonical_market(game.get("game_id"))
+        market_home = number(current_market["spread"].get("home_line"))
         for team, opponent, site, multiplier in ((away, home, "Away", -1), (home, away, "Home", 1)):
             upcoming_by_team[team].append({
                 "game_id": str(game.get("game_id")), "date": clean(game.get("date")), "week": integer(game.get("week")),
                 "opponent": opponent, "site": site, "opponent_ranks": rank_snapshot(opponent),
                 "model_spread": model_home * multiplier if model_home is not None else None,
                 "market_spread": market_home * multiplier if market_home is not None else None,
-                "model_total": number(total_resolution.get("value_total")), "market_total": number(game.get("market_total")),
+                "model_total": number(total_resolution.get("value_total")), "market_total": number(current_market["total"].get("line")),
                 "rank_basis": "current_2026_production",
             })
     for rows in upcoming_by_team.values():
@@ -795,7 +894,8 @@ def main():
                 opening_possession["away_projected_receive_pct"] = number(opening_pair.get("team_b_projected_receive_opening_kick_pct"))
                 opening_possession["home_projected_receive_pct"] = number(opening_pair.get("team_a_projected_receive_opening_kick_pct"))
 
-        market_spread_home = number(game.get("market_spread_home"))
+        current_market = canonical_market(game_id)
+        market_spread_home = number(current_market["spread"].get("home_line"))
         spread_resolution = resolve_game(projection_index, game_id, STANDARD_SPREAD)
         total_resolution = resolve_game(projection_index, game_id, STANDARD_TOTAL)
         model_home = number(spread_resolution.get("value_home_line"))
@@ -834,13 +934,9 @@ def main():
                     "total": total_resolution,
                 },
             },
-            "market": {"spread": {"home_line": market_spread_home, "price": number(game.get("market_spread_price")), "book": clean(game.get("market_spread_book")), "updated_at": clean(game.get("market_spread_last_update")),
-                    "best_home": {"home_line": number(game.get("market_best_home_spread_home")), "price": number(game.get("market_best_home_spread_price")), "book": clean(game.get("market_best_home_spread_book"))},
-                    "best_away": {"home_line": number(game.get("market_best_away_spread_home")), "price": number(game.get("market_best_away_spread_price")), "book": clean(game.get("market_best_away_spread_book"))}},
-                "total": {"line": number(game.get("market_total")), "over_price": number(game.get("market_total_over_price")), "under_price": number(game.get("market_total_under_price")), "book": clean(game.get("market_total_book")), "updated_at": clean(game.get("market_total_last_update")),
-                    "best_over": {"line": number(game.get("market_best_over_total")), "price": number(game.get("market_best_over_price")), "book": clean(game.get("market_best_over_book"))},
-                    "best_under": {"line": number(game.get("market_best_under_total")), "price": number(game.get("market_best_under_price")), "book": clean(game.get("market_best_under_book"))}},
-                "moneyline": {"away": number(game.get("market_away_moneyline")), "home": number(game.get("market_home_moneyline")), "away_book": clean(game.get("market_away_moneyline_book")), "home_book": clean(game.get("market_home_moneyline_book"))},
+            "market": {"spread": current_market["spread"],
+                "total": current_market["total"],
+                "moneyline": current_market["moneyline"],
                 "line_history": {"asset_key": game_id, "points": len(history_rows),
                     "first_timestamp": clean(history_rows[0].get("snapshot_date")) if history_rows else None,
                     "last_timestamp": clean(history_rows[-1].get("snapshot_date")) if history_rows else None}},
