@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,6 +16,67 @@ OUT = ROOT / "data/audits/current_market_propagation_audit.json"
 
 def same(a, b):
     return a == b
+
+
+BETTABLE_BOOKS = {
+    "DraftKings",
+    "FanDuel",
+    "BetMGM",
+    "Caesars",
+}
+
+EXCHANGE_BOOKS = {
+    "Novig",
+    "ProphetX",
+    "Kalshi",
+}
+
+
+def number(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def expected_best(quotes, market, side, allowed_books):
+    candidates = []
+
+    for book, book_data in quotes.items():
+        if book not in allowed_books:
+            continue
+
+        q = book_data.get(market, {}).get(side)
+        if not q or q.get("freshness_status") not in {"LIVE", "BACKUP_SOURCE"}:
+            continue
+
+        line = number(q.get("line"))
+        price = number(q.get("price"))
+
+        if market == "moneyline":
+            if price is not None:
+                candidates.append(((price,), q))
+
+        elif line is not None:
+            if market == "spread":
+                score = (
+                    line,
+                    price if price is not None else -100000,
+                )
+            elif side == "over":
+                score = (
+                    -line,
+                    price if price is not None else -100000,
+                )
+            else:
+                score = (
+                    line,
+                    price if price is not None else -100000,
+                )
+
+            candidates.append((score, q))
+
+    return max(candidates, key=lambda item: item[0])[1] if candidates else None
 
 
 def main() -> None:
@@ -29,7 +91,110 @@ def main() -> None:
     issues = []
     stale_displayed = 0
 
+    sportsbook_selection_counts = Counter()
+    exchange_selection_counts = Counter()
+    caesars_source_counts = Counter()
+    caesars_games = set()
+
+    checks = [
+        ("away_spread", "spread", "away"),
+        ("home_spread", "spread", "home"),
+        ("over", "total", "over"),
+        ("under", "total", "under"),
+        ("away_moneyline", "moneyline", "away"),
+        ("home_moneyline", "moneyline", "home"),
+    ]
+
     for gid, c in c_by.items():
+        quotes = c.get("quotes", {})
+
+        # Validate canonical fast-actionable sportsbook and exchange reducers.
+        for field, market, side in checks:
+            actual_book = c.get("best_sportsbook", {}).get(field)
+            expected_book = expected_best(
+                quotes,
+                market,
+                side,
+                BETTABLE_BOOKS,
+            )
+
+            if actual_book != expected_book:
+                issues.append({
+                    "game_id": gid,
+                    "consumer": "contract",
+                    "field": f"best_sportsbook.{field}",
+                    "reason": "selection_mismatch",
+                })
+
+            if actual_book:
+                selected = actual_book.get("sportsbook")
+                sportsbook_selection_counts[selected] += 1
+
+                if selected not in BETTABLE_BOOKS:
+                    issues.append({
+                        "game_id": gid,
+                        "consumer": "contract",
+                        "field": f"best_sportsbook.{field}",
+                        "reason": "invalid_fast_sportsbook",
+                        "sportsbook": selected,
+                    })
+
+                if actual_book.get("freshness_status") not in {"LIVE", "BACKUP_SOURCE"}:
+                    issues.append({
+                        "game_id": gid,
+                        "consumer": "contract",
+                        "field": f"best_sportsbook.{field}",
+                        "reason": "non_live_quote_selected",
+                    })
+
+            actual_exchange = c.get("best_exchange", {}).get(field)
+            expected_exchange = expected_best(
+                quotes,
+                market,
+                side,
+                EXCHANGE_BOOKS,
+            )
+
+            if actual_exchange != expected_exchange:
+                issues.append({
+                    "game_id": gid,
+                    "consumer": "contract",
+                    "field": f"best_exchange.{field}",
+                    "reason": "selection_mismatch",
+                })
+
+            if actual_exchange:
+                selected = actual_exchange.get("sportsbook")
+                exchange_selection_counts[selected] += 1
+
+                if selected not in EXCHANGE_BOOKS:
+                    issues.append({
+                        "game_id": gid,
+                        "consumer": "contract",
+                        "field": f"best_exchange.{field}",
+                        "reason": "invalid_exchange",
+                        "sportsbook": selected,
+                    })
+
+                if actual_exchange.get("freshness_status") not in {"LIVE", "BACKUP_SOURCE"}:
+                    issues.append({
+                        "game_id": gid,
+                        "consumer": "contract",
+                        "field": f"best_exchange.{field}",
+                        "reason": "non_live_quote_selected",
+                    })
+
+        # Caesars is preserved in the canonical quote tree but currently
+        # excluded from fast-actionable sportsbook selection.
+        caesars = quotes.get("Caesars", {})
+        if caesars:
+            caesars_games.add(gid)
+
+        for market_data in caesars.values():
+            for q in market_data.values():
+                caesars_source_counts[q.get("source") or "UNKNOWN"] += 1
+
+        m = m_by.get(gid)
         m = m_by.get(gid)
         if m:
             status = c.get("availability_status")
@@ -80,7 +245,19 @@ def main() -> None:
         "issue_count": len(issues),
         "stale_current_quotes_displayed": stale_displayed,
         "history_compared_to_current": False,
-        "note": "Historical snapshots are intentionally audited separately from current/reference/best-side markets.",
+        "market_groups": contract.get("market_groups", {}),
+        "fast_actionable_sportsbook_selection_counts": dict(
+            sportsbook_selection_counts
+        ),
+        "exchange_selection_counts": dict(exchange_selection_counts),
+        "caesars_games_preserved": len(caesars_games),
+        "caesars_quote_source_counts": dict(caesars_source_counts),
+        "note": (
+            "Historical snapshots are intentionally audited separately from "
+            "current/reference/best-side markets. Caesars quotes may remain "
+            "preserved from Action Network but are excluded from the fast "
+            "actionable sportsbook reducer until a fast-refresh source exists."
+        ),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, indent=2) + "\n")

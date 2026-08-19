@@ -15,19 +15,40 @@ import json
 import os
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from time import perf_counter
 from pathlib import Path
 
 import pandas as pd
 import requests
 
 
-API_KEY = os.environ.get("THE_ODDS_API_KEY")
-if not API_KEY:
-    raise SystemExit("Missing THE_ODDS_API_KEY environment variable.")
+PROFILE = os.environ.get("NCAAF_THEODDS_PROFILE", "daily").strip().lower()
 
-OUT_DIR = Path("data/odds")
-ARCHIVE_DIR = OUT_DIR / "theodds_raw_archive"
-AUDIT_DIR = Path("data/audits")
+if PROFILE == "daily":
+    KEY_ENV = "THE_ODDS_API_KEY"
+    DEFAULT_MARKETS = "h2h,spreads,totals"
+    OUT_DIR = Path("data/odds")
+    ARCHIVE_DIR = OUT_DIR / "theodds_raw_archive"
+    AUDIT_DIR = Path("data/audits")
+    FILE_SUFFIX = ""
+
+elif PROFILE == "command_center":
+    KEY_ENV = "THE_ODDS_API_KEY_FAST"
+    DEFAULT_MARKETS = "spreads,totals"
+    OUT_DIR = Path("data/war_room/odds")
+    ARCHIVE_DIR = OUT_DIR / "raw_archive"
+    AUDIT_DIR = Path("data/war_room/audits")
+    FILE_SUFFIX = "_fast"
+
+else:
+    raise SystemExit(
+        f"Unsupported NCAAF_THEODDS_PROFILE={PROFILE!r}; "
+        "expected daily or command_center."
+    )
+
+API_KEY = os.environ.get(KEY_ENV)
+if not API_KEY:
+    raise SystemExit(f"Missing {KEY_ENV} environment variable.")
 for directory in (OUT_DIR, ARCHIVE_DIR, AUDIT_DIR):
     directory.mkdir(parents=True, exist_ok=True)
 
@@ -57,7 +78,29 @@ BOOK_KEY_ALIASES = {
     "hardrockbet_az": "hardrockbet",
     "hardrockbet_fl": "hardrockbet",
 }
-MARKETS = ["h2h", "spreads", "totals"]
+MARKETS = [
+    x.strip()
+    for x in os.environ.get(
+        "NCAAF_THEODDS_MARKETS",
+        DEFAULT_MARKETS,
+    ).split(",")
+    if x.strip()
+]
+
+ALLOWED_MARKETS = {"h2h", "spreads", "totals"}
+
+unknown_markets = set(MARKETS) - ALLOWED_MARKETS
+if unknown_markets:
+    raise SystemExit(
+        f"Unsupported The Odds API markets: {sorted(unknown_markets)}"
+    )
+
+if PROFILE == "command_center":
+    if set(MARKETS) != {"spreads", "totals"}:
+        raise SystemExit(
+            "Command Center The Odds API profile is restricted to "
+            "spreads,totals only. No API request was made."
+        )
 
 
 def canonical_book_key(value):
@@ -98,12 +141,29 @@ params = {
     "dateFormat": "iso",
 }
 
+request_started_at = datetime.now(timezone.utc)
+request_started_perf = perf_counter()
+
 resp = requests.get(url, params=params, timeout=45)
-now = datetime.now(timezone.utc)
+
+response_received_perf = perf_counter()
+response_received_at = datetime.now(timezone.utc)
+
+http_latency_ms = round(
+    (response_received_perf - request_started_perf) * 1000,
+    1,
+)
+
+now = response_received_at
 pulled_at = now.isoformat()
 
 quota = {
     "pulled_at": pulled_at,
+    "profile": PROFILE,
+    "requested_markets": MARKETS,
+    "request_started_at": request_started_at.isoformat(),
+    "response_received_at": response_received_at.isoformat(),
+    "http_latency_ms": http_latency_ms,
     "http_status": resp.status_code,
     "x_requests_last": resp.headers.get("x-requests-last"),
     "x_requests_used": resp.headers.get("x-requests-used"),
@@ -112,7 +172,7 @@ quota = {
     "requested_bookmakers": BOOKMAKERS,
     "requested_markets": MARKETS,
 }
-quota_path = AUDIT_DIR / "theodds_api_quota_status.json"
+quota_path = AUDIT_DIR / f"theodds_api_quota_status{FILE_SUFFIX}.json"
 quota_path.write_text(json.dumps(quota, indent=2) + "\n", encoding="utf-8")
 
 print("Status:", resp.status_code)
@@ -131,7 +191,7 @@ if not isinstance(data, list):
 
 stamp = now.strftime("%Y%m%dT%H%M%SZ")
 archive_path = ARCHIVE_DIR / f"theodds_ncaaf_{stamp}.json"
-raw_path = OUT_DIR / "theodds_ncaaf_lines_2026_raw.json"
+raw_path = OUT_DIR / f"theodds_ncaaf_lines_2026_raw{FILE_SUFFIX}.json"
 
 archive_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 raw_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
@@ -205,7 +265,7 @@ columns = [
 ]
 df = pd.DataFrame(rows, columns=columns)
 
-csv_path = OUT_DIR / "theodds_ncaaf_lines_2026.csv"
+csv_path = OUT_DIR / f"theodds_ncaaf_lines_2026{FILE_SUFFIX}.csv"
 df.to_csv(csv_path, index=False)
 
 coverage = []
@@ -227,7 +287,7 @@ for configured in PRIORITY_VENUES:
         }
     )
 
-coverage_path = AUDIT_DIR / "theodds_ncaaf_book_coverage.json"
+coverage_path = AUDIT_DIR / f"theodds_ncaaf_book_coverage{FILE_SUFFIX}.json"
 coverage_path.write_text(
     json.dumps(
         {
@@ -269,7 +329,7 @@ audit.update(
         "book_coverage_audit": str(coverage_path),
     }
 )
-audit_path = AUDIT_DIR / "theodds_ncaaf_current_pull_audit.json"
+audit_path = AUDIT_DIR / f"theodds_ncaaf_current_pull_audit{FILE_SUFFIX}.json"
 audit_path.write_text(json.dumps(audit, indent=2) + "\n", encoding="utf-8")
 
 print(f"Wrote {archive_path}: {len(data):,} games")

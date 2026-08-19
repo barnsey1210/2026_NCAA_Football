@@ -19,6 +19,7 @@ Stale quotes are retained only in the audit counts, never as current values.
 from __future__ import annotations
 
 import csv
+import datetime as dt
 import json
 import math
 import os
@@ -64,6 +65,23 @@ VENUE_TYPES = {
 
 REFERENCE_BOOK_PRIORITY = TARGET_BOOKS
 ACTION_FALLBACK_BOOKS = {"DraftKings", "FanDuel", "BetMGM", "Caesars"}
+
+# Canonical execution-market groups.
+# Downstream consumers (Openers, War Room, Matchups, agents) should consume
+# the resolved contract fields rather than independently selecting venues.
+BETTABLE_BOOKS = {
+    "DraftKings",
+    "FanDuel",
+    "BetMGM",
+    "Caesars",
+}
+
+EXCHANGE_BOOKS = {
+    "Novig",
+    "ProphetX",
+    "Kalshi",
+}
+
 MAX_AGE_HOURS = float(os.environ.get("NCAAF_CURRENT_MARKET_MAX_AGE_HOURS", "18"))
 
 
@@ -365,11 +383,13 @@ def pair_is_valid(market: str, sides: dict) -> bool:
     return all(number(sides[s].get("price")) is not None for s in expected)
 
 
-def best_quote(quotes: dict, market: str, side: str):
+def best_quote(quotes: dict, market: str, side: str, allowed_books=None):
     candidates = []
     for book, book_data in quotes.items():
+        if allowed_books is not None and book not in allowed_books:
+            continue
         q = book_data.get(market, {}).get(side)
-        if not q or q.get("freshness_status") != "LIVE":
+        if not q or q.get("freshness_status") not in {"LIVE", "BACKUP_SOURCE"}:
             continue
         line, price = number(q.get("line")), number(q.get("price"))
         if market == "moneyline":
@@ -392,6 +412,7 @@ def reference_pair(quotes: dict, market: str):
         if pair_is_valid(market, sides):
             return {"sportsbook": book, **sides}
     return None
+
 
 
 def main() -> None:
@@ -634,6 +655,25 @@ def main() -> None:
             if book_output:
                 quotes[book] = book_output
 
+        best_sportsbook = {
+            "away_spread": best_quote(quotes, "spread", "away", BETTABLE_BOOKS),
+            "home_spread": best_quote(quotes, "spread", "home", BETTABLE_BOOKS),
+            "over": best_quote(quotes, "total", "over", BETTABLE_BOOKS),
+            "under": best_quote(quotes, "total", "under", BETTABLE_BOOKS),
+            "away_moneyline": best_quote(quotes, "moneyline", "away", BETTABLE_BOOKS),
+            "home_moneyline": best_quote(quotes, "moneyline", "home", BETTABLE_BOOKS),
+        }
+
+        best_exchange = {
+            "away_spread": best_quote(quotes, "spread", "away", EXCHANGE_BOOKS),
+            "home_spread": best_quote(quotes, "spread", "home", EXCHANGE_BOOKS),
+            "over": best_quote(quotes, "total", "over", EXCHANGE_BOOKS),
+            "under": best_quote(quotes, "total", "under", EXCHANGE_BOOKS),
+            "away_moneyline": best_quote(quotes, "moneyline", "away", EXCHANGE_BOOKS),
+            "home_moneyline": best_quote(quotes, "moneyline", "home", EXCHANGE_BOOKS),
+        }
+
+        # Broad-universe best is retained for backward compatibility.
         best = {
             "away_spread": best_quote(quotes, "spread", "away"),
             "home_spread": best_quote(quotes, "spread", "home"),
@@ -664,6 +704,8 @@ def main() -> None:
             "current_market_updated_at": max(timestamps) if timestamps else None,
             "quotes": quotes,
             "reference": reference,
+            "best_sportsbook": best_sportsbook,
+            "best_exchange": best_exchange,
             "best": best,
         })
 
@@ -698,6 +740,22 @@ def main() -> None:
         "source_priority": ["The Odds API", "Action Network", "MISSING"],
         "stale_data_policy": "Stale quotes are never exposed as current. Historical snapshots remain separate.",
         "market_source_policy": "theodds-primary-action-fallback-v1",
+        "market_groups": {
+            "bettable_sportsbooks": [
+                "DraftKings",
+                "FanDuel",
+                "BetMGM",
+                "Caesars",
+            ],
+            "exchanges": [
+                "Novig",
+                "ProphetX",
+                "Kalshi",
+            ],
+            "sharp_reference": [
+                "Pinnacle",
+            ],
+        },
         "target_venues": [
             {"name": book, "venue_type": VENUE_TYPES.get(book, "unclassified")}
             for book in TARGET_BOOKS
