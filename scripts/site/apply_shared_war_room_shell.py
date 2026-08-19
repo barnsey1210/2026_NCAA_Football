@@ -38,9 +38,9 @@ def apply(path:Path)->None:
     target=path.name
     text=path.read_text(errors='ignore')
 
-    # Idempotency: remove health controls left by previous shell passes.
-    # The canonical shell below will add exactly one.
-    if target != 'index.html':
+    # Idempotency: remove duplicate health controls left by previous shell passes.
+    # Odds already owns the canonical global shell, so preserve its health badge.
+    if target != 'index.html' and target != 'odds.html':
         text = re.sub(
             r'<div class="war-room-health"[^>]*>.*?</div>',
             '',
@@ -71,12 +71,20 @@ def apply(path:Path)->None:
                 count=1,
                 flags=re.S,
             )
-            if 'class="war-room-global"' not in text:
-                text=text.replace(
-                    '<header class="odds-controls-header">',
-                    '<header class="war-room-global">'+markup+'</header>\n  <header class="odds-controls-header">',
-                    1,
-                )
+            # Always rebuild odds global shell so stale/manual headers cannot
+            # survive without the canonical health badge.
+            text = re.sub(
+                r'<header class="war-room-global">.*?</header>\s*',
+                '',
+                text,
+                count=1,
+                flags=re.S,
+            )
+            text=text.replace(
+                '<header class="odds-controls-header">',
+                '<header class="war-room-global">'+markup+'</header>\n  <header class="odds-controls-header">',
+                1,
+            )
             if 'shared-war-room-shell-v2' not in text:
                 text=text.replace('</head>',STYLE+'</head>',1)
             path.write_text(text)
