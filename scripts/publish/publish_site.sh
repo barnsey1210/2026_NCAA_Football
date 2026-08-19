@@ -19,6 +19,9 @@ die(){ printf '[canonical-publish] ERROR: %s\n' "$*" >&2; exit 1; }
 [[ -s "$PUBLIC_DIR/data/site/matchups_view.json" ]] || die "missing public matchup payload"
 [[ -s "$PUBLIC_DIR/data/site/model_performance_view.json" ]] || die "missing public model performance payload"
 [[ -s "$PUBLIC_DIR/data/site/shadow_model_performance.json" ]] || die "missing public Shadow model performance payload"
+[[ -s "$PUBLIC_DIR/war-room.html" ]] || die "missing public War Room terminal"
+[[ -s "$PUBLIC_DIR/data/site/war_room_market_matrix.json" ]] || die "missing public War Room market matrix"
+[[ -s "$PUBLIC_DIR/data/site/war_room_health.json" ]] || die "missing public War Room health payload"
 
 # Use the project's established public-site validator when available.
 if [[ -f "$RUNTIME_ROOT/scripts/publish/check_public_site.py" ]]; then
@@ -170,6 +173,9 @@ required = [
     Path("data/site/matchups_view.json"),
     Path("data/site/model_performance_view.json"),
     Path("data/site/shadow_model_performance.json"),
+    Path("war-room.html"),
+    Path("data/site/war_room_market_matrix.json"),
+    Path("data/site/war_room_health.json"),
 ]
 for rel in required:
     src = source / rel

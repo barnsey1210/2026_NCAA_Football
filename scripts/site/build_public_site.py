@@ -138,6 +138,9 @@ def main():
     OUT.mkdir(parents=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/model_tracking/build_model_performance_view.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)
+    # Build the existing War Room terminal through its canonical owner, then
+    # publish it without applying the shared-page transform or changing its UI.
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_war_room_page.py')], check=True)
     for source,target in PAGES.items():
         source_path=ROOT/source
         if not source_path.exists():
@@ -145,6 +148,9 @@ def main():
             # filename while runtime compatibility retains a *_v2 source name.
             source_path=ROOT/target
         (OUT/target).write_text(transform(source_path.read_text(),target))
+    (OUT/'war-room.html').write_text(
+        cache_bust_site_json((ROOT/'war-room.html').read_text())
+    )
     for asset in PAGE_HEALTH_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
     # The approved Conference Logo Schedule is generated from current conference
@@ -168,7 +174,7 @@ def main():
     for name in ('data','logos','helmets'):
         target=ROOT/name
         if target.exists(): (OUT/name).symlink_to(target, target_is_directory=True)
-    print(f'Built {len(PAGES)} non-home pages in {OUT}')
+    print(f'Built {len(PAGES) + 1} non-home pages in {OUT}')
 
 if __name__=='__main__': main()
 

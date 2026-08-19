@@ -15,7 +15,7 @@ EXPECTED_HEALTH = {
 }
 VALID_STATUS = {"green", "yellow", "red", "gray"}
 MODERN = list(EXPECTED_HEALTH.values()) + ["team.html"]
-REQUIRED = MODERN
+REQUIRED = MODERN + ["war-room.html"]
 HEALTH_FIELDS = {
     "page_id", "display_name", "status", "status_label", "summary", "last_success_at",
     "artifact_built_at", "metrics", "warnings", "critical_failures", "unavailable_reasons",
@@ -31,7 +31,16 @@ def validate(root: Path, out: Path) -> list[str]:
         if not path.exists() or path.stat().st_size < minimum:
             errors.append(f"missing or too small: {name}")
             continue
-        if name in MODERN:
+        if name == "war-room.html":
+            text = path.read_text(errors="ignore")
+            for marker in (
+                "data/site/war_room_market_matrix.json",
+                "data/site/war_room_health.json",
+                'id="refreshBtn"',
+            ):
+                if marker not in text:
+                    errors.append(f"War Room terminal marker missing: {marker}")
+        elif name in MODERN:
             text = path.read_text(errors="ignore")
             if name != "index.html":
                 for marker in ('WAR<span>ROOM</span>', 'class="nav war-room-nav"', 'Data Healthy'):
@@ -98,6 +107,30 @@ def validate(root: Path, out: Path) -> list[str]:
         text = js.read_text(errors="ignore")
         if "data/site/page_health_status.json" not in text or "page-health-summary" not in text:
             errors.append("page health JavaScript lacks the canonical payload loader or container marker")
+
+    war_room_artifacts = {
+        "war_room_market_matrix.json": "war-room-market-matrix-v1",
+        "war_room_health.json": "war-room-health-v1",
+    }
+    for filename, expected_schema in war_room_artifacts.items():
+        path = out / "data" / "site" / filename
+        if not path.is_file():
+            errors.append(f"War Room public artifact missing: data/site/{filename}")
+            continue
+        try:
+            payload = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"War Room public artifact malformed ({filename}): {exc}")
+            continue
+        if payload.get("schema_version") != expected_schema:
+            errors.append(
+                f"War Room public artifact schema mismatch ({filename}): "
+                f"{payload.get('schema_version')!r}"
+            )
+        if filename == "war_room_market_matrix.json" and not isinstance(payload.get("games"), list):
+            errors.append("War Room market matrix games must be a list")
+        if filename == "war_room_health.json" and not isinstance(payload.get("fast_market_refresh"), dict):
+            errors.append("War Room health fast_market_refresh must be an object")
 
 
     conferences = out / "conferences.html"
@@ -223,7 +256,7 @@ def main() -> None:
         print("PUBLIC SITE VALIDATION FAILED")
         print("\n".join("- " + error for error in errors))
         raise SystemExit(1)
-    print(f"PUBLIC SITE VALIDATION PASSED: {len(REQUIRED)} pages; shadow artifact isolated; page health complete")
+    print(f"PUBLIC SITE VALIDATION PASSED: {len(REQUIRED)} pages; War Room artifacts present; shadow artifact isolated; page health complete")
 
 
 if __name__ == "__main__":

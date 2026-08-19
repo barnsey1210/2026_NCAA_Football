@@ -315,6 +315,9 @@
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#site_build",
       "scripts": [
+        "scripts/war_room/build_war_room_health.py",
+        "scripts/war_room/build_war_room_market_matrix.py",
+        "scripts/site/build_war_room_page.py",
         "scripts/site/build_public_site.py",
         "scripts/site/build_war_room_home.py",
         "scripts/site/inject_market_presentation_fixes.py",

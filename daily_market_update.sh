@@ -688,6 +688,8 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   # Odds, Openers, Matchups, and Home consume the canonical current-market contract directly.
   python3 scripts/site/compact_matchups_payload.py
   python3 scripts/audit/audit_current_market_propagation.py
+  python3 scripts/war_room/build_war_room_health.py
+  python3 scripts/war_room/build_war_room_market_matrix.py
   python3 scripts/site/build_public_site.py
   python3 scripts/site/build_war_room_home.py
   python3 scripts/site/inject_market_presentation_fixes.py
