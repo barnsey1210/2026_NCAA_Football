@@ -479,6 +479,62 @@ def load_entering_sp_plus():
     return frame
 
 
+def load_entering_sagarin():
+    if not RATINGS_HISTORY.exists():
+        raise SystemExit(f"Missing {RATINGS_HISTORY}")
+
+    frame = pd.read_csv(
+        RATINGS_HISTORY,
+        low_memory=False,
+    )
+
+    frame = frame[
+        pd.to_numeric(
+            frame["season"],
+            errors="coerce",
+        ).eq(2026)
+        & frame["source"]
+        .astype(str)
+        .str.strip()
+        .str.casefold()
+        .eq("sagarin predictor")
+    ].copy()
+
+    frame["_pulled"] = pd.to_datetime(
+        frame["pulled_at"],
+        errors="coerce",
+        utc=True,
+    )
+
+    frame = frame[
+        frame["_pulled"].notna()
+    ].copy()
+
+    return frame
+
+
+def pregame_sagarin(
+    sag: pd.DataFrame,
+    team: str,
+    kickoff,
+):
+    if pd.isna(kickoff):
+        return None
+
+    rows = sag[
+        sag["team"].eq(team)
+        & (sag["_pulled"] < kickoff)
+    ].sort_values(
+        ["_pulled", "snapshot_date"]
+    )
+
+    if rows.empty:
+        return None
+
+    return rows.iloc[-1].to_dict()
+
+
+
 def pregame_sp_plus(
     sp: pd.DataFrame,
     team: str,
@@ -559,6 +615,7 @@ def combine_team_games(
     drives,
     gc,
     sp,
+    sag,
     market_history,
     schedule_by_team,
 ):
@@ -617,6 +674,17 @@ def combine_team_games(
                 kickoff,
             )
 
+            entering_sagarin = pregame_sagarin(
+                sag,
+                team,
+                kickoff,
+            )
+            opp_entering_sagarin = pregame_sagarin(
+                sag,
+                opponent,
+                kickoff,
+            )
+
             next_game = find_next_game(
                 schedule_by_team,
                 team,
@@ -660,6 +728,55 @@ def combine_team_games(
                 points_scored - points_allowed
                 if points_scored is not None
                 and points_allowed is not None
+                else None
+            )
+
+            market_margin_team = (
+                -close_spread
+                if close_spread is not None
+                else None
+            )
+
+            expected_team_points = (
+                (close_total + market_margin_team) / 2.0
+                if close_total is not None
+                and market_margin_team is not None
+                else None
+            )
+
+            expected_opponent_points = (
+                (close_total - market_margin_team) / 2.0
+                if close_total is not None
+                and market_margin_team is not None
+                else None
+            )
+
+            margin_surprise_team = (
+                final_margin - market_margin_team
+                if final_margin is not None
+                and market_margin_team is not None
+                else None
+            )
+
+            scoring_surprise_team = (
+                points_scored - expected_team_points
+                if points_scored is not None
+                and expected_team_points is not None
+                else None
+            )
+
+            total_surprise = (
+                points_scored + points_allowed - close_total
+                if points_scored is not None
+                and points_allowed is not None
+                and close_total is not None
+                else None
+            )
+
+            opponent_scoring_surprise = (
+                points_allowed - expected_opponent_points
+                if points_allowed is not None
+                and expected_opponent_points is not None
                 else None
             )
 
@@ -716,6 +833,16 @@ def combine_team_games(
             if not entering_ratings_available:
                 reasons.append("MISSING_ENTERING_SP_PLUS")
 
+            entering_sagarin_available = (
+                entering_sagarin is not None
+                and finite(entering_sagarin.get("rating")) is not None
+                and opp_entering_sagarin is not None
+                and finite(opp_entering_sagarin.get("rating")) is not None
+            )
+
+            if not entering_sagarin_available:
+                reasons.append("MISSING_ENTERING_SAGARIN")
+
             next_status = (
                 "mapped"
                 if next_game is not None
@@ -730,15 +857,33 @@ def combine_team_games(
                 else None
             )
 
-            no_lookahead = bool(
+            sagarin_snapshot_ts = (
+                entering_sagarin.get("_pulled")
+                if entering_sagarin is not None
+                else None
+            )
+
+            sp_plus_no_lookahead = bool(
                 entering_ratings_available
                 and pd.notna(kickoff)
                 and pd.notna(snapshot_ts)
                 and snapshot_ts < kickoff
             )
 
-            if not no_lookahead:
-                reasons.append("NO_LOOKAHEAD_FAIL")
+            sagarin_no_lookahead = bool(
+                entering_sagarin_available
+                and pd.notna(kickoff)
+                and pd.notna(sagarin_snapshot_ts)
+                and sagarin_snapshot_ts < kickoff
+            )
+
+            no_lookahead = sp_plus_no_lookahead
+
+            if not sp_plus_no_lookahead:
+                reasons.append("SP_PLUS_NO_LOOKAHEAD_FAIL")
+
+            if not sagarin_no_lookahead:
+                reasons.append("SAGARIN_NO_LOOKAHEAD_FAIL")
 
             row = {
                 "season": 2026,
@@ -774,6 +919,21 @@ def combine_team_games(
                     and close_total is not None
                     else None
                 ),
+
+                # Validated historical Shadow feature contract.
+                "expected_team_points": expected_team_points,
+                "expected_opponent_points": expected_opponent_points,
+                "margin_surprise_team": margin_surprise_team,
+                "scoring_surprise_team": scoring_surprise_team,
+                "total_surprise": total_surprise,
+                "opponent_scoring_surprise": opponent_scoring_surprise,
+                "closing_spread_team": close_spread,
+                "favorite": (
+                    int(close_spread < 0)
+                    if close_spread is not None
+                    else None
+                ),
+                "home_flag": int(side == "home"),
 
                 "current_sp_plus_overall": (
                     finite(entering.get("rating"))
@@ -816,9 +976,47 @@ def combine_team_games(
                     else None
                 ),
 
+                "stale_spplus": (
+                    finite(entering.get("rating"))
+                    if entering
+                    else None
+                ),
+                "stale_spplus_offense": (
+                    finite(entering.get("off_rating"))
+                    if entering
+                    else None
+                ),
+                "stale_spplus_defense": (
+                    finite(entering.get("def_rating"))
+                    if entering
+                    else None
+                ),
+
+                "stale_sagarin_predictor": (
+                    finite(entering_sagarin.get("rating"))
+                    if entering_sagarin
+                    else None
+                ),
+                "opponent_sagarin_predictor": (
+                    finite(opp_entering_sagarin.get("rating"))
+                    if opp_entering_sagarin
+                    else None
+                ),
+                "sagarin_snapshot_timestamp": (
+                    entering_sagarin.get("_pulled").isoformat()
+                    if entering_sagarin is not None
+                    and pd.notna(entering_sagarin.get("_pulled"))
+                    else None
+                ),
+
                 "pregame_market_rating": entering_market_rating(
                     market_history,
                     team,
+                    week,
+                ),
+                "opponent_market_power_rating": entering_market_rating(
+                    market_history,
+                    opponent,
                     week,
                 ),
 
@@ -859,6 +1057,9 @@ def combine_team_games(
                 "drive_context_available": drive_available,
                 "game_control_available": game_control_available,
                 "entering_ratings_available": entering_ratings_available,
+                "entering_sagarin_available": entering_sagarin_available,
+                "sp_plus_no_lookahead_pass": sp_plus_no_lookahead,
+                "sagarin_no_lookahead_pass": sagarin_no_lookahead,
                 "next_game_mapping_status": next_status,
                 "no_lookahead_pass": no_lookahead,
                 "missing_reasons": reasons,
@@ -876,6 +1077,21 @@ def combine_team_games(
                     }:
                         continue
                     row[key] = clean(value)
+
+            # Exact names expected by the historically validated
+            # Shadow provider-update regressions.
+            row["success_rate"] = finite(row.get("off_success_rate"))
+            row["ppa"] = finite(row.get("off_ppa"))
+            row["explosiveness"] = finite(row.get("off_explosiveness"))
+            row["def_success_rate_allowed"] = finite(
+                row.get("def_success_allowed")
+            )
+            row["def_ppa_allowed"] = finite(
+                row.get("def_ppa_allowed")
+            )
+            row["def_explosiveness_allowed"] = finite(
+                row.get("def_explosiveness_allowed")
+            )
 
             if d:
                 mapping = {
@@ -1230,6 +1446,7 @@ def main():
         ].map(norm_id)
 
     sp = load_entering_sp_plus()
+    sag = load_entering_sagarin()
     market_history = load_market_history()
 
     schedule_by_team = next_game_map(
@@ -1246,6 +1463,7 @@ def main():
         drives,
         gc,
         sp,
+        sag,
         market_history,
         schedule_by_team,
     )
@@ -1273,18 +1491,76 @@ def main():
         transform_state,
     )
 
-    eligibility = (
+    validated_advanced_columns = [
+        "success_rate",
+        "ppa",
+        "explosiveness",
+        "def_success_rate_allowed",
+        "def_ppa_allowed",
+        "def_explosiveness_allowed",
+    ]
+
+    for col in validated_advanced_columns:
+        if col not in features.columns:
+            features[col] = np.nan
+
+    advanced_ready = features[
+        validated_advanced_columns
+    ].notna().all(axis=1)
+
+    features["validated_shadow_spread_ready"] = (
+        features["results_available"].eq(True)
+        & features["close_available"].eq(True)
+        & features["entering_ratings_available"].eq(True)
+        & features["entering_sagarin_available"].eq(True)
+        & advanced_ready
+        & features["next_game_mapping_status"].eq("mapped")
+        & features["sp_plus_no_lookahead_pass"].eq(True)
+        & features["sagarin_no_lookahead_pass"].eq(True)
+    )
+
+    total_required = [
+        "opponent_market_power_rating",
+        "stale_spplus",
+        "stale_spplus_offense",
+        "stale_spplus_defense",
+    ]
+
+    for col in total_required:
+        if col not in features.columns:
+            features[col] = np.nan
+
+    features["validated_shadow_total_ready"] = (
+        features["results_available"].eq(True)
+        & features["close_available"].eq(True)
+        & features["entering_ratings_available"].eq(True)
+        & advanced_ready
+        & features[total_required].notna().all(axis=1)
+        & features["next_game_mapping_status"].eq("mapped")
+        & features["no_lookahead_pass"].eq(True)
+    )
+
+    # Preserve the former bridge eligibility as audit/research metadata.
+    features["legacy_bridge_ready"] = (
         features["results_available"].eq(True)
         & features["close_available"].eq(True)
         & features["pbp_available"].eq(True)
         & features["drive_context_available"].eq(True)
         & features["game_control_available"].eq(True)
         & features["entering_ratings_available"].eq(True)
-        & features[
-            "next_game_mapping_status"
-        ].eq("mapped")
+        & features["next_game_mapping_status"].eq("mapped")
         & features["no_lookahead_pass"].eq(True)
     )
+
+    # Production output is governed by the historically validated
+    # Shadow model contracts. Drives and Game Control are supplemental
+    # metadata and must not block validated Shadow inference.
+    features["validated_shadow_any_ready"] = (
+        features["validated_shadow_spread_ready"].eq(True)
+        | features["validated_shadow_total_ready"].eq(True)
+    )
+
+    eligibility = features["validated_shadow_any_ready"].eq(True)
 
     eligible = features[
         eligibility
@@ -1330,10 +1606,24 @@ def main():
         ),
         "fixture_only": False,
         "eligibility_rule": (
-            "result + close + PBP + drive context + "
-            "game control + pre-kickoff SP+ + next game "
-            "+ no-lookahead"
+            "validated Shadow production row when "
+            "validated_shadow_spread_ready OR "
+            "validated_shadow_total_ready; "
+            "drive/game-control retained as supplemental metadata"
         ),
+        "validated_model_readiness": {
+            "spread": (
+                "result + close + pre-kickoff SP+ + "
+                "pre-kickoff Sagarin + six advanced efficiency "
+                "features + next-game mapping + no-lookahead"
+            ),
+            "total": (
+                "result + close + pre-kickoff SP+ O/D + "
+                "opponent market-power state + six advanced "
+                "efficiency features + next-game mapping + "
+                "SP+ no-lookahead"
+            ),
+        },
         "transform_provenance": {
             "historical_training_seasons":
                 [2021, 2022, 2023],

@@ -384,14 +384,31 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
 
         shadow = shadow_rows.get(game_id, {})
         shadow_spread_values = {
-            "Shadow SP+": finite(shadow.get("predicted_updated_sp_plus_spread")),
-            "Shadow Sagarin": finite(game_sources.get("Shadow Sagarin", {}).get("spread_home")),
+            "Shadow SP+": finite(
+                shadow.get("predicted_updated_sp_plus_spread")
+            ),
+            "Shadow Sagarin": finite(
+                shadow.get("predicted_updated_sagarin_spread")
+            ),
         }
         # Both inputs are bookmaker home lines. Never substitute Market/SP+ or SP+ fallback.
         shadow_spread_value = fixed_weight_value(shadow_spread_values, shadow_spread_weights)
+        shadow_spread_activated = (
+            int(
+                shadow.get(
+                    "shadow_spread_updated_team_count"
+                )
+                or 0
+            )
+            >= 2
+            and shadow.get(
+                "validated_shadow_spread_inputs_validated"
+            ) is True
+        )
+
         shadow_spread_availability = status(
             shadow_spread_values,
-            activated=bool(shadow.get("has_genuine_postgame_update")),
+            activated=shadow_spread_activated,
         )
 
         shadow_total_values = {
@@ -401,11 +418,19 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             "updated away SP+ defense": finite(shadow.get("away_sp_plus_defense_updated")),
         }
         exact_shadow_inputs = (
-            shadow.get("model_id") == SHADOW_TOTAL
-            or shadow.get("enhanced_spplus_od_v1_inputs_validated") is True
+            shadow.get("shadow_total_model_id") == SHADOW_TOTAL
+            and shadow.get(
+                "enhanced_spplus_od_v1_inputs_validated"
+            ) is True
         )
         shadow_total_activated = bool(
-            shadow.get("has_genuine_postgame_update")
+            int(
+                shadow.get(
+                    "shadow_total_updated_team_count"
+                )
+                or 0
+            )
+            >= 2
             and shadow.get("no_lookahead_pass")
             and shadow_spec["valid"]
             and exact_shadow_inputs
@@ -474,10 +499,16 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 value_home_margin=-shadow_spread_value if shadow_spread_value is not None else None,
                 build_timestamp=built_at,
                 freshness_timestamp=shadow.get("feature_cutoff") or shadow_timestamp,
-                source_artifacts=[str(args.shadow.relative_to(ROOT)), str(args.sources.relative_to(ROOT))],
+                source_artifacts=[
+                    str(args.shadow.relative_to(ROOT))
+                ],
                 validation_status="HISTORICAL_FORMULA_VALIDATED_2024_2025",
                 extra_status={
-                    "activation": "PRESENT" if shadow.get("has_genuine_postgame_update") else "NOT_YET_ACTIVATED",
+                    "activation": (
+                        "PRESENT"
+                        if shadow_spread_activated
+                        else "NOT_YET_ACTIVATED"
+                    ),
                     "forbidden_fallbacks_rejected": "MARKET_SPPLUS_AND_SPPLUS_ONLY",
                 },
             ),

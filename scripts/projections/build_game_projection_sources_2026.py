@@ -22,7 +22,7 @@ RATING_SOURCES = {
     "SP+": "SP+",
     "FPI": "FPI",
     "TeamRankings": "TeamRankings",
-    "Sagarin Rating": "Sagarin Predictor",
+    "Sagarin Rating": "Sagarin Rating",
 }
 
 TEAM_ALIASES = {

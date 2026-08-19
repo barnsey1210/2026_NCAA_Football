@@ -168,6 +168,18 @@ def game_prediction_feed_status(production_game_ids):
             "role": "Supplies projected total + team scores used to build Massey Dual",
             "value_fields": ["total", "away_score", "home_score"],
         },
+        {
+            "source": "Sagarin Game Total",
+            "name": "Sagarin Game Total",
+            "role": "Standard Total Sagarin game-total input",
+            "value_fields": ["total"],
+        },
+        {
+            "source": "Sagarin Game Total",
+            "name": "Sagarin Game Total",
+            "role": "Standard Total Sagarin game-total input",
+            "value_fields": ["total"],
+        },
     ]
 
     out = []
