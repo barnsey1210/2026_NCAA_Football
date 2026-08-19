@@ -133,58 +133,110 @@ def base_rows(df, source, team_col, rating_col, rank_col=None, raw_team_col=None
 
 def load_sagarin(path):
     if not path.exists():
-        return [], {"source": "Sagarin Predictor", "status": "missing", "path": str(path), "rows": 0}
+        return [], {
+            "source": "Sagarin",
+            "status": "missing",
+            "path": str(path),
+            "rows": 0,
+        }
 
     df = pd.read_csv(path)
 
-    # Production freshness gate: only provider-season 2026 Sagarin ratings
-    # enter ratings_latest. Older provider seasons remain preserved in the
-    # external source artifact for reference/audit.
-    if "season" in df.columns:
-        season_num = pd.to_numeric(df["season"], errors="coerce")
-        active_df = df[season_num.eq(2026)].copy()
-    else:
-        active_df = df.iloc[0:0].copy()
-
-    if active_df.empty:
-        observed_seasons = sorted({
-            int(x) for x in pd.to_numeric(df.get("season"), errors="coerce").dropna().tolist()
-        }) if "season" in df.columns else []
+    if df.empty:
         return [], {
-            "source": "Sagarin Predictor",
-            "status": "stale_provider_season",
+            "source": "Sagarin",
+            "status": "empty",
             "path": str(path),
             "rows": 0,
-            "observed_seasons": "|".join(map(str, observed_seasons)),
         }
 
+    # The current Sagarin page may still identify itself as the prior
+    # provider season during preseason. Preserve that provider-season
+    # provenance, but allow the fresh snapshot to serve as the stale
+    # entering state for the 2026 analysis cycle.
+    provider_seasons = sorted({
+        int(x)
+        for x in pd.to_numeric(
+            df.get("season"),
+            errors="coerce",
+        ).dropna().tolist()
+    })
+
     rows = []
-    for _, r in active_df.iterrows():
-        rows.append({
-            "snapshot_date": r.get("snapshot_date", datetime.now().date().isoformat()),
-            "season": r.get("season", 2026),
-            "source": "Sagarin Predictor",
-            "team": r.get("team"),
-            "raw_team": r.get("raw_team", r.get("team")),
-            "rank": r.get("rank"),
-            "rating": r.get("rating"),
+
+    for _, r in df.iterrows():
+        team = r.get("team")
+        if pd.isna(team) or str(team).strip() == "":
+            continue
+
+        provider_season = r.get("season")
+
+        common = {
+            "snapshot_date": r.get(
+                "snapshot_date",
+                datetime.now().date().isoformat(),
+            ),
+            # Canonical analysis season is 2026. Provider-season truth is
+            # preserved explicitly in notes rather than used to discard
+            # a fresh preseason snapshot.
+            "season": 2026,
+            "team": team,
+            "raw_team": r.get("raw_team", team),
             "off_rating": "",
             "def_rating": "",
             "hfa": "",
             "sos": r.get("sos"),
-            "source_url": r.get("source_url", "https://sagarin.com/sports/cfsend.htm"),
+            "source_url": r.get(
+                "source_url",
+                "https://sagarin.com/sports/cfsend.htm",
+            ),
             "pulled_at": r.get("pulled_at", now_utc()),
             "source_updated_at": "",
-            "notes": "Production Sagarin source uses the published main Rating column and rank; Predictor/Golden Mean remain diagnostic only.",
+        }
+
+        # Main Sagarin Rating: authoritative for Ratings composite and
+        # Standard Spread.
+        rows.append({
+            **common,
+            "source": "Sagarin Rating",
+            "rank": r.get("rank"),
+            "rating": r.get("rating"),
+            "notes": (
+                "Sagarin main Rating field. "
+                f"provider_season={provider_season}; "
+                "preseason prior-season snapshot may serve as stale "
+                "entering state until provider publishes 2026 ratings."
+            ),
+        })
+
+        # Predictor variant: authoritative for the historically validated
+        # Shadow Spread provider-update model.
+        rows.append({
+            **common,
+            "source": "Sagarin Predictor",
+            "rank": r.get("predictor_rank"),
+            "rating": r.get("predictor_rating"),
+            "notes": (
+                "Sagarin Predictor field. "
+                f"provider_season={provider_season}; "
+                "used by validated Shadow Spread."
+            ),
         })
 
     return rows, {
-        "source": "Sagarin Predictor",
-        "status": "ok",
+        "source": "Sagarin",
+        "status": "ok_preseason_stale_provider"
+            if 2026 not in provider_seasons
+            else "ok",
         "path": str(path),
         "rows": len(rows),
-        "provider_season": 2026,
+        "provider_seasons": "|".join(
+            map(str, provider_seasons)
+        ),
+        "canonical_variants":
+            "Sagarin Rating|Sagarin Predictor",
     }
+
 
 def load_donchess(path):
     if not path.exists():

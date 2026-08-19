@@ -10,7 +10,7 @@ ACTIVE_SOURCES = {
     "SP+": "spplus",
     "FPI": "fpi",
     "TeamRankings": "teamrankings",
-    "Sagarin Predictor": "sagarin",
+    "Sagarin Rating": "sagarin",
 }
 
 REFERENCE_SOURCES = ["Brad Powers", "Donchess Overall", "KFord", "Massey Power"]
@@ -30,7 +30,7 @@ def main():
         pivot[src] = pd.to_numeric(pivot[src], errors="coerce")
 
     # Use Sagarin main Rating field, preserve raw, zero-center so 0 = average team.
-    sagarin_source = "Sagarin Predictor"
+    sagarin_source = "Sagarin Rating"
     pivot["sagarin_raw"] = pivot[sagarin_source]
     sagarin_mean = pivot[sagarin_source].mean(skipna=True)
     if pd.notna(sagarin_mean):
