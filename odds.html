@@ -89,8 +89,8 @@
   </header>
   <div id="game-view" class="board-wrap">
     <table class="board">
-      <thead><tr><th><button id="sort-matchup" class="sort-head">Matchup <span id="sort-matchup-label"></span></button></th><th><button id="sort-start" class="sort-head">Start <span id="sort-start-label"></span></button></th><th>Open</th><th id="book-header-placeholder"></th></tr></thead>
-      <tbody id="games"><tr><td colspan="${BOOKS.length+3}" class="no-results">Loading current odds…</td></tr></tbody>
+      <thead><tr><th><button id="sort-matchup" class="sort-head">Matchup <span id="sort-matchup-label"></span></button></th><th><button id="sort-start" class="sort-head">Start <span id="sort-start-label"></span></button></th><th>Open</th><th><img class="book-logo" src="logos/books/draftkings.png" alt="DraftKings"></th><th><img class="book-logo" src="logos/books/fanduel.png" alt="FanDuel"></th><th><img class="book-logo" src="logos/books/betmgm.png" alt="BetMGM"></th><th><img class="book-logo" src="logos/books/caesars.png" alt="Caesars"></th></tr></thead>
+      <tbody id="games"><tr><td colspan="7" class="no-results">Loading current odds…</td></tr></tbody>
     </table>
   </div>
   <div id="game-legend" class="legend">Green marks the best comparable current value for that side. Line is compared first, then American price. At least two valid books are required.</div>
@@ -100,38 +100,8 @@
   </section>
 </main>
 <script>
-const BOOKS=[
-'Pinnacle',
-'DraftKings',
-'FanDuel',
-'BetMGM',
-'Caesars',
-'BetRivers',
-'Hard Rock Bet',
-'Novig',
-'ProphetX',
-'Kalshi'
-];
-const BOOK_LOGOS={
-Pinnacle:'logos/books/pinnacle.png',
-DraftKings:'logos/books/draftkings.png',
-FanDuel:'logos/books/fanduel.png',
-BetMGM:'logos/books/betmgm.png',
-BetRivers:'logos/books/betrivers.png',
-'Hard Rock Bet':'logos/books/hardrock.png',
-Novig:'logos/books/novig.png',
-ProphetX:'logos/books/prophetx.png',
-Caesars:'logos/books/caesars.png',
-Kalshi:'logos/books/kalshi.png'
-};
-
-function renderBookHeaders(){
-  const placeholder=document.querySelector('#book-header-placeholder');
-  if(placeholder){
-    placeholder.outerHTML=BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}" onerror="this.src='logos/books/default.png'"></th>`).join('');
-  }
-}
-
+const BOOKS=['DraftKings','FanDuel','BetMGM','Caesars'];
+const BOOK_LOGOS={DraftKings:'logos/books/draftkings.png',FanDuel:'logos/books/fanduel.png',BetMGM:'logos/books/betmgm.png',Caesars:'logos/books/caesars.png'};
 let payload=null, futuresPayload=null, market='spread', expanded=null, selectedWeek='', sortMode='start_asc', activeView='games', futureCategory='national_title';
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>Number.isFinite(Number(v))?Number(v):null;
@@ -162,18 +132,18 @@ function detail(g){
 function gameRows(g,i){
  const sides=sidesFor(g), alt=i%2?' alt':'';
  return `<tr class="game-row${alt}" data-game="${esc(g.game_id)}"><td class="matchup" rowspan="2"><div class="team-line">${logo(g.away_logo,g.away_team)}<span class="team-name">${esc(g.away_team)}</span><span class="expand-mark">${expanded===g.game_id?'▾':'▸'}</span></div><div class="team-line">${logo(g.home_logo,g.home_team)}<span class="team-name">${esc(g.home_team)}</span></div><div class="game-meta">${esc(g.date)} · W${esc(g.week??'—')}</div></td><td class="start" rowspan="2">${esc(startLabel(g.start_time_utc))}</td><td>${quoteText(openerQuote(g,sides[0][0]),market,sides[0][0])}</td>${BOOKS.map(b=>cell(g,b,sides[0][0])).join('')}</tr>
- <tr class="game-row bottom${alt}" data-game="${esc(g.game_id)}"><td>${quoteText(openerQuote(g,sides[1][0]),market,sides[1][0])}</td>${BOOKS.map(b=>cell(g,b,sides[1][0])).join('')}</tr>${expanded===g.game_id?`<tr class="detail-row"><td colspan="${BOOKS.length+3}">${detail(g)}</td></tr>`:''}`;
+ <tr class="game-row bottom${alt}" data-game="${esc(g.game_id)}"><td>${quoteText(openerQuote(g,sides[1][0]),market,sides[1][0])}</td>${BOOKS.map(b=>cell(g,b,sides[1][0])).join('')}</tr>${expanded===g.game_id?`<tr class="detail-row"><td colspan="7">${detail(g)}</td></tr>`:''}`;
 }
 function sorted(data){const out=[...data],desc=sortMode.endsWith('_desc');if(sortMode.startsWith('away_'))out.sort((a,b)=>a.away_team.localeCompare(b.away_team));else if(sortMode.startsWith('home_'))out.sort((a,b)=>a.home_team.localeCompare(b.home_team));else out.sort((a,b)=>new Date(a.start_time_utc||a.date)-new Date(b.start_time_utc||b.date));if(desc)out.reverse();return out;}
 function filtered(){const d=$('#date').value,q=$('#search').value.trim().toLowerCase();return sorted(payload.games.filter(g=>(selectedWeek===''||String(g.week)===selectedWeek)&&(!d||g.date===d)&&(!q||g.away_team.toLowerCase().includes(q)||g.home_team.toLowerCase().includes(q))))}
 function sortLabels(){const map={away_asc:'Away A–Z',away_desc:'Away Z–A',home_asc:'Home A–Z',home_desc:'Home Z–A'};$('#sort-matchup-label').textContent=map[sortMode]||'';$('#sort-start-label').textContent=sortMode==='start_asc'?'↑':sortMode==='start_desc'?'↓':'';}
-function render(){const data=filtered();$('#games').innerHTML=data.length?data.map(gameRows).join(''):'<tr><td colspan="${BOOKS.length+3}" class="no-results">No games match these filters.</td></tr>';$('#datebar').textContent=$('#date').value||`${data.length} games with current odds`;sortLabels();document.querySelectorAll('.game-row').forEach(r=>r.addEventListener('click',e=>{if(e.target.closest('a'))return;expanded=expanded===r.dataset.game?null:r.dataset.game;render()}));}
+function render(){const data=filtered();$('#games').innerHTML=data.length?data.map(gameRows).join(''):'<tr><td colspan="7" class="no-results">No games match these filters.</td></tr>';$('#datebar').textContent=$('#date').value||`${data.length} games with current odds`;sortLabels();document.querySelectorAll('.game-row').forEach(r=>r.addEventListener('click',e=>{if(e.target.closest('a'))return;expanded=expanded===r.dataset.game?null:r.dataset.game;render()}));}
 function initFilters(){const weeks=[...new Set(payload.games.map(g=>g.week).filter(v=>v!=null))].sort((a,b)=>a-b);selectedWeek=String(weeks[0]??'');$('#weeks').innerHTML=`<button class="week-btn${selectedWeek===''?' active':''}" data-week="">All</button>`+weeks.map(v=>`<button class="week-btn${selectedWeek===String(v)?' active':''}" data-week="${v}">W${v}</button>`).join('');$('#weeks').querySelectorAll('.week-btn').forEach(b=>b.addEventListener('click',()=>{selectedWeek=b.dataset.week;expanded=null;$('#weeks').querySelectorAll('.week-btn').forEach(x=>x.classList.toggle('active',x===b));render()}));const dates=[...new Set(payload.games.map(g=>g.date).filter(Boolean))].sort();$('#date').innerHTML='<option value="">All dates</option>'+dates.map(v=>`<option>${v}</option>`).join('');}
 function futureLogo(r){return r.logo?logo(r.logo,r.team):`<span class="team-fallback">${esc((r.team||'?')[0])}</span>`}
 function prob(v){v=num(v);return v===null?'—':`${(v*100).toFixed(1)}%`}
 function futurePrice(v){v=num(v);return v===null?'<span class="empty">—</span>':`<span class="future-price">${american(v)}</span><div class="implied">${prob(v>0?100/(v+100):Math.abs(v)/(Math.abs(v)+100))}</div>`}
 function winQuote(q,side){if(!q)return '<span class="empty">—</span>';const p=side==='over'?q.over_price:q.under_price;if(num(q.number)===null||num(p)===null)return '<span class="empty">—</span>';return `<span class="future-price">${side==='over'?'O':'U'} ${Number(q.number).toFixed(1)} (${american(p)})</span>`}
-function futureBookHead(){return BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}" onerror="this.src='logos/books/default.png'"></th>`).join('')}
+function futureBookHead(){return BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}"></th>`).join('')}
 function futureHeaders(){if(futureCategory==='win_totals')return `<tr><th class="future-head">Team</th><th>Number</th><th>Open</th>${futureBookHead()}<th>Best Over</th><th>Best Under</th></tr>`;return `<tr><th class="future-head">Team</th><th>Open</th>${futureBookHead()}<th>Best</th><th>Model edge</th></tr>`}
 function openCell(r){const o=r.open;if(!o)return '<span class="empty">—</span>';if(futureCategory==='win_totals')return `<div title="${esc(o.note||'')}">${winQuote(o,'over')}<br>${winQuote(o,'under')}<div class="subtext">${esc(o.book||'')} · ${esc(o.observed_at||'')}</div></div>`;return `<div title="${esc(o.note||'')}">${futurePrice(o.price)}<div class="subtext">${esc(o.book||'')} · ${esc(o.observed_at||'')}</div></div>`}
 function futureTeam(r){return `<div class="future-team">${futureLogo(r)}<div><strong>${esc(r.team)}</strong><small>${esc(r.conference||'Independent')}${r.outcome?` · ${esc(r.outcome)}`:''}${r.last_updated?` · updated ${esc(String(r.last_updated).slice(0,10))}`:''}</small></div></div>`}
@@ -190,6 +160,5 @@ $('#sort-start').addEventListener('click',()=>{sortMode=sortMode==='start_asc'?'
 document.querySelectorAll('.view-tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 document.querySelectorAll('.future-cat').forEach(b=>b.addEventListener('click',()=>{futureCategory=b.dataset.category;document.querySelectorAll('.future-cat').forEach(x=>x.classList.toggle('active',x===b));setFutureControls();renderFutures()}));
 ['future-search','future-conference','future-outcome','future-book','future-sort'].forEach(id=>$('#'+id).addEventListener(id==='future-search'?'input':'change',renderFutures));
-renderBookHeaders();
-Promise.all(['data/site/odds_screen_v2.json?v=20260819T181800Z','data/site/odds_futures_v2.json?v=20260819T181800Z'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error(`${url}: ${r.status}`);return r.json()}))).then(([games,futures])=>{payload=games;futuresPayload=futures;initFilters();setFutureControls();switchView('games');render()}).catch(e=>{$('#games').innerHTML=`<tr><td colspan="${BOOKS.length+3}" class="no-results">Unable to load isolated odds payload: ${esc(e.message)}</td></tr>`});
+Promise.all(['data/site/odds_screen_v2.json?v=20260819T133430Z','data/site/odds_futures_v2.json?v=20260819T133430Z'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error(`${url}: ${r.status}`);return r.json()}))).then(([games,futures])=>{payload=games;futuresPayload=futures;initFilters();setFutureControls();switchView('games');render()}).catch(e=>{$('#games').innerHTML=`<tr><td colspan="7" class="no-results">Unable to load isolated odds payload: ${esc(e.message)}</td></tr>`});
 </script></body></html>
