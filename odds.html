@@ -111,20 +111,22 @@ const BOOKS=[
 'ProphetX'
 ];
 const BOOK_LOGOS={
-Pinnacle:'logos/books/default.png',
+Pinnacle:'logos/books/pinnacle.png',
 DraftKings:'logos/books/draftkings.png',
 FanDuel:'logos/books/fanduel.png',
 BetMGM:'logos/books/betmgm.png',
-BetRivers:'logos/books/default.png',
-'Hard Rock Bet':'logos/books/default.png',
-Novig:'logos/books/default.png',
-ProphetX:'logos/books/default.png'
+BetRivers:'logos/books/betrivers.png',
+'Hard Rock Bet':'logos/books/hardrock.png',
+Novig:'logos/books/novig.png',
+ProphetX:'logos/books/prophetx.png',
+Caesars:'logos/books/caesars.png',
+Kalshi:'logos/books/kalshi.png'
 };
 
 function renderBookHeaders(){
   const placeholder=document.querySelector('#book-header-placeholder');
   if(placeholder){
-    placeholder.outerHTML=BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}"></th>`).join('');
+    placeholder.outerHTML=BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}" onerror="this.src='logos/books/default.png'"></th>`).join('');
   }
 }
 
@@ -169,7 +171,7 @@ function futureLogo(r){return r.logo?logo(r.logo,r.team):`<span class="team-fall
 function prob(v){v=num(v);return v===null?'—':`${(v*100).toFixed(1)}%`}
 function futurePrice(v){v=num(v);return v===null?'<span class="empty">—</span>':`<span class="future-price">${american(v)}</span><div class="implied">${prob(v>0?100/(v+100):Math.abs(v)/(Math.abs(v)+100))}</div>`}
 function winQuote(q,side){if(!q)return '<span class="empty">—</span>';const p=side==='over'?q.over_price:q.under_price;if(num(q.number)===null||num(p)===null)return '<span class="empty">—</span>';return `<span class="future-price">${side==='over'?'O':'U'} ${Number(q.number).toFixed(1)} (${american(p)})</span>`}
-function futureBookHead(){return BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}"></th>`).join('')}
+function futureBookHead(){return BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}" onerror="this.src='logos/books/default.png'"></th>`).join('')}
 function futureHeaders(){if(futureCategory==='win_totals')return `<tr><th class="future-head">Team</th><th>Number</th><th>Open</th>${futureBookHead()}<th>Best Over</th><th>Best Under</th></tr>`;return `<tr><th class="future-head">Team</th><th>Open</th>${futureBookHead()}<th>Best</th><th>Model edge</th></tr>`}
 function openCell(r){const o=r.open;if(!o)return '<span class="empty">—</span>';if(futureCategory==='win_totals')return `<div title="${esc(o.note||'')}">${winQuote(o,'over')}<br>${winQuote(o,'under')}<div class="subtext">${esc(o.book||'')} · ${esc(o.observed_at||'')}</div></div>`;return `<div title="${esc(o.note||'')}">${futurePrice(o.price)}<div class="subtext">${esc(o.book||'')} · ${esc(o.observed_at||'')}</div></div>`}
 function futureTeam(r){return `<div class="future-team">${futureLogo(r)}<div><strong>${esc(r.team)}</strong><small>${esc(r.conference||'Independent')}${r.outcome?` · ${esc(r.outcome)}`:''}${r.last_updated?` · updated ${esc(String(r.last_updated).slice(0,10))}`:''}</small></div></div>`}
