@@ -89,7 +89,7 @@
   </header>
   <div id="game-view" class="board-wrap">
     <table class="board">
-      <thead><tr><th><button id="sort-matchup" class="sort-head">Matchup <span id="sort-matchup-label"></span></button></th><th><button id="sort-start" class="sort-head">Start <span id="sort-start-label"></span></button></th><th>Open</th>${BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}"></th>`).join("")}</tr></thead>
+      <thead><tr><th><button id="sort-matchup" class="sort-head">Matchup <span id="sort-matchup-label"></span></button></th><th><button id="sort-start" class="sort-head">Start <span id="sort-start-label"></span></button></th><th>Open</th><th id="book-header-placeholder"></th></tr></thead>
       <tbody id="games"><tr><td colspan="${BOOKS.length+3}" class="no-results">Loading current odds…</td></tr></tbody>
     </table>
   </div>
@@ -120,6 +120,14 @@ BetRivers:'logos/books/default.png',
 Novig:'logos/books/default.png',
 ProphetX:'logos/books/default.png'
 };
+
+function renderBookHeaders(){
+  const placeholder=document.querySelector('#book-header-placeholder');
+  if(placeholder){
+    placeholder.outerHTML=BOOKS.map(b=>`<th><img class="book-logo" src="${BOOK_LOGOS[b]}" alt="${b}"></th>`).join('');
+  }
+}
+
 let payload=null, futuresPayload=null, market='spread', expanded=null, selectedWeek='', sortMode='start_asc', activeView='games', futureCategory='national_title';
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>Number.isFinite(Number(v))?Number(v):null;
@@ -178,5 +186,6 @@ $('#sort-start').addEventListener('click',()=>{sortMode=sortMode==='start_asc'?'
 document.querySelectorAll('.view-tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 document.querySelectorAll('.future-cat').forEach(b=>b.addEventListener('click',()=>{futureCategory=b.dataset.category;document.querySelectorAll('.future-cat').forEach(x=>x.classList.toggle('active',x===b));setFutureControls();renderFutures()}));
 ['future-search','future-conference','future-outcome','future-book','future-sort'].forEach(id=>$('#'+id).addEventListener(id==='future-search'?'input':'change',renderFutures));
+renderBookHeaders();
 Promise.all(['data/site/odds_screen_v2.json?v=20260819T181800Z','data/site/odds_futures_v2.json?v=20260819T181800Z'].map(url=>fetch(url).then(r=>{if(!r.ok)throw Error(`${url}: ${r.status}`);return r.json()}))).then(([games,futures])=>{payload=games;futuresPayload=futures;initFilters();setFutureControls();switchView('games');render()}).catch(e=>{$('#games').innerHTML=`<tr><td colspan="${BOOKS.length+3}" class="no-results">Unable to load isolated odds payload: ${esc(e.message)}</td></tr>`});
 </script></body></html>
