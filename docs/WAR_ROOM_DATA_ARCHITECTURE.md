@@ -9,6 +9,7 @@ This document is the source-of-truth map for how data is expected to move from r
 The diagrams cover every current public page at the **page/domain level**:
 
 - War Room Home (`index.html`)
+- War Room Command Center (`war-room.html`)
 - Ratings
 - Openers
 - Matchups
@@ -28,6 +29,28 @@ They do not yet enumerate every field, script, or legacy backup file. The read-o
 ## Core rule
 
 A public page may format canonical data differently, but it may not independently choose a source or silently substitute stale cached values.
+
+## Standalone Command Center V1
+
+`index.html` remains the War Room Home. The operational Command Center is a
+separate public page, `war-room.html`, built by
+`scripts/site/build_war_room_page.py`.
+
+```mermaid
+flowchart LR
+  H["Existing health and status owners"] --> WH["build_war_room_health.py"]
+  WH --> HJ["war_room_health.json"]
+  P["Canonical projections, market, ratings, schedule, betting"] --> WM["build_war_room_market_matrix.py"]
+  HJ --> WM
+  WM --> MJ["war_room_market_matrix.json"]
+  HJ --> WP["build_war_room_page.py"]
+  MJ --> WP
+  WP --> PAGE["war-room.html"]
+  PAGE --> PUB["Allowlisted public build and publisher"]
+```
+
+The two JSON artifacts are projections over canonical domain owners; they do
+not establish new provider selection, model formulas, or market calculations.
 
 ## Canonical projection architecture
 

@@ -432,7 +432,8 @@ Critical failures should block publication. Warnings may publish but must appear
 
 Domains:
 
-- Home / Command Center
+- Home
+- War Room Command Center (standalone `war-room.html`)
 - Ratings
 - Team dashboards
 - Schedule and results

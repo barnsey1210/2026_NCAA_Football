@@ -7,6 +7,7 @@
   },
   "pages": {
     "index.html": ["current_market", "market_history", "ratings", "schedule", "futures", "betting", "injuries", "coaches", "conference"],
+    "war-room.html": ["war_room_market_matrix", "war_room_health", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting"],
     "ratings.html": ["ratings"],
     "openers.html": ["current_market", "market_history", "ratings", "schedule"],
     "matchups.html": ["current_market", "market_history", "ratings", "schedule", "betting", "injuries", "coaches"],
@@ -22,6 +23,20 @@
     "v1.html": ["legacy_embedded_data"]
   },
   "contracts": {
+    "war_room_health": {
+      "artifact": "data/site/war_room_health.json",
+      "builder": "scripts/war_room/build_war_room_health.py",
+      "schema_version": "war-room-health-v1",
+      "owner": "WAR_ROOM_HEALTH_PROJECTOR",
+      "interactive_refresh": "scripts/war_room/run_fast_market_refresh.py"
+    },
+    "war_room_market_matrix": {
+      "artifact": "data/site/war_room_market_matrix.json",
+      "builder": "scripts/war_room/build_war_room_market_matrix.py",
+      "schema_version": "war-room-market-matrix-v1",
+      "owner": "WAR_ROOM_MARKET_MATRIX_PROJECTOR",
+      "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting"]
+    },
     "game_projections": {
       "artifact": "data/site/current_game_projection_contract.json",
       "builder": "scripts/projections/build_current_game_projection_contract.py",

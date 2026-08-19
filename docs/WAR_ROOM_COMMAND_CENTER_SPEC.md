@@ -1,5 +1,18 @@
 # War Room Command Center Specification
 
+## Implementation status
+
+The production V1 is a standalone page at `war-room.html`, built by
+`scripts/site/build_war_room_page.py`. It does not replace or inject content
+into `index.html`. The page consumes `data/site/war_room_market_matrix.json`
+and `data/site/war_room_health.json`; their owners remain the corresponding
+builders in `scripts/war_room/`.
+
+The canonical site build packages the page and its two JSON contracts. The
+weekend interactive acquisition path remains
+`scripts/war_room/run_fast_market_refresh.py`. Navigation exposure, Cloudflare
+work, and alternate fast endpoints are outside V1 release preparation.
+
 ## Purpose
 
 The War Room Command Center is the operational execution layer for the
