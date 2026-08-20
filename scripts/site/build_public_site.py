@@ -232,23 +232,3 @@ def _sync_openers_v2_public_artifacts():
 
 _openers_sync_atexit.register(_sync_openers_v2_public_artifacts)
 # OPENERS_V2_PUBLIC_SYNC_END
-
-# SCHEDULE_PERSISTENT_PUBLIC_SYNC_START
-import atexit as _schedule_persist_atexit
-import subprocess as _schedule_persist_subprocess
-import sys as _schedule_persist_sys
-from pathlib import Path as _SchedulePersistPath
-
-def _sync_schedule_persistent_public_artifacts():
-    _root = ROOT
-    _script = _root / "scripts/site/build_schedule_persistent.py"
-    if not _script.exists():
-        print(f"schedule persistent builder unavailable; retaining assembled page: {_script}")
-        return
-    _schedule_persist_subprocess.run(
-        [_schedule_persist_sys.executable, str(_script)],
-        check=True,
-    )
-
-_schedule_persist_atexit.register(_sync_schedule_persistent_public_artifacts)
-# SCHEDULE_PERSISTENT_PUBLIC_SYNC_END

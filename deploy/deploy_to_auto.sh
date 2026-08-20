@@ -42,7 +42,7 @@ SOURCE_ROOT="$(cd -- "$SOURCE_ROOT" && pwd -P)"
 
 origin="$(git -C "$SOURCE_ROOT" remote get-url origin 2>/dev/null || true)"
 case "$origin" in
-  "$EXPECTED_REMOTE"|"${EXPECTED_REMOTE%.git}"|git@github.com:barnsey1210/2026_NCAA_Football.git)
+  "$EXPECTED_REMOTE"|"${EXPECTED_REMOTE%.git}"|git@github.com:barnsey1210/2026_NCAA_Football.git|git@github-ncaaf-site:barnsey1210/2026_NCAA_Football.git)
     ;;
   *) die "unexpected origin remote for authoritative repository: ${origin:-missing}" ;;
 esac

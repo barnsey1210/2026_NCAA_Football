@@ -50,8 +50,6 @@ export NCAAF_PROFILE
 CANONICAL_STAGE_ORDER=(
   futures_market_acquisition
   game_market_acquisition
-  sgo_backup_pull
-  sgo_backup_normalization
   game_line_history
   injuries_and_signals
   email_build
