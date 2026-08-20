@@ -176,12 +176,9 @@ def main():
         if target.exists(): (OUT/name).symlink_to(target, target_is_directory=True)
     print(f'Built {len(PAGES) + 1} non-home pages in {OUT}')
 
-if __name__=='__main__': main()
-
 # OPENERS_V2_PUBLIC_SYNC_START
 # Keep the published Openers page aligned with canonical root openers.html and
 # keep the shared matchup workspace synchronized after the public-site build.
-import atexit as _openers_sync_atexit
 import shutil as _openers_sync_shutil
 from pathlib import Path as _OpenersSyncPath
 
@@ -230,5 +227,22 @@ def _sync_openers_v2_public_artifacts():
             )
         _page.write_text(_text)
 
-_openers_sync_atexit.register(_sync_openers_v2_public_artifacts)
 # OPENERS_V2_PUBLIC_SYNC_END
+
+
+def finalize_public_shell():
+    """Build Home and apply the shared shell after every page-specific sync."""
+    subprocess.run(
+        [sys.executable, str(ROOT / 'scripts/site/build_war_room_home.py')],
+        check=True,
+    )
+    subprocess.run(
+        [sys.executable, str(ROOT / 'scripts/site/apply_shared_war_room_shell.py')],
+        check=True,
+    )
+
+
+if __name__ == '__main__':
+    main()
+    _sync_openers_v2_public_artifacts()
+    finalize_public_shell()
