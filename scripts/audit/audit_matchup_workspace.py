@@ -63,8 +63,10 @@ def main():
     require("'Yes':'No'" in JS and "'Watch':'No'" in JS,
             "schedule-spot Yes/No/Watch states missing")
     require(
-        "latest=[...daily].reverse().slice(0,7)" in JS,
-        "line history must reverse daily snapshots newest to oldest and limit display to seven rows",
+        "cutoff.setDate(cutoff.getDate()-7)" in JS
+        and "daily.filter" in JS
+        and ".reverse()" in JS,
+        "line history must use rolling seven-day window and display newest snapshots first",
     )
     require("Opening ATS line:" in JS and "Opening O/U:" in JS,
             "opening ATS/O-U lines missing from line-history header")
@@ -78,8 +80,8 @@ def main():
             "historical RP study context evidence is missing")
     require("Line history — ATS spread and O/U total" in JS,
             "permanently visible ATS/O-U line-history section missing")
-    require("<th>Total move</th><th>Source</th>" in JS,
-            "line-history Source column missing")
+    require("<th>Book</th>" in JS and "<th>Total move</th>" in JS,
+            "line-history sportsbook source or Total move column missing")
     require("advancedTable" not in JS and "mwMissing" not in JS,
             "obsolete advanced-metric notice/renderer still present")
     require(JS.count("new MutationObserver(decorateLinks)") == 1,

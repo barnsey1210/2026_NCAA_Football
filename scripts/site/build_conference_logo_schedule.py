@@ -7,9 +7,13 @@ from datetime import date, datetime
 import html
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.simulations.run_playoff_model_2026 import canonical_win_prob_from_margin
 OUT_DIR = ROOT / "build" / "public_site"
 OUT_FILE = OUT_DIR / "conferences.html"
 
@@ -179,6 +183,11 @@ def game_for_team(row: dict[str, Any], team: str) -> dict[str, Any]:
     team_margin = None
     if home_spread is not None:
         team_margin = -float(home_spread) if is_home else float(home_spread)
+        if home_win_probability is None:
+            # Presentation adapter for the existing canonical probability
+            # contract. This imports the production owner; it does not define
+            # or tune a page-local probability formula.
+            home_win_probability = canonical_win_prob_from_margin(-float(home_spread))
 
     team_win_probability = None
     if home_win_probability is not None:

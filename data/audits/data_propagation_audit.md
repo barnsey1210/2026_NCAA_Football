@@ -16,8 +16,8 @@
 | publishing | public_to_main_odds | PASS |
 | publishing | runtime_to_public_matchups | PASS |
 | publishing | public_to_main_matchups | PASS |
-| ratings | ratings_status_freshness | STALE_DERIVED_ARTIFACT |
+| ratings | ratings_status_freshness | PASS |
 | projections | canonical_game_projection_contract | PASS |
 | market | latest_history_vs_matchups_view | VALUE_MISMATCH |
 
-Market mismatches: 44
+Market mismatches: 43

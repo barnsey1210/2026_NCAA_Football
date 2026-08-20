@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -14,8 +15,19 @@ EXPECTED_HEALTH = {
     "simulations": "simulations.html", "betting": "betting.html",
 }
 VALID_STATUS = {"green", "yellow", "red", "gray"}
-MODERN = list(EXPECTED_HEALTH.values()) + ["team.html"]
+MODERN = list(EXPECTED_HEALTH.values()) + ["team.html", "coaches.html", "sim_lab.html"]
 REQUIRED = MODERN + ["war-room.html"]
+SHARED_SHELL_PAGES = {
+    "index.html", "ratings.html", "matchups.html", "conferences.html", "futures.html",
+    "simulations.html", "sim_lab.html", "betting.html", "odds.html", "openers.html", "war-room.html",
+    "schedule.html", "coaches.html", "playoff.html",
+}
+NAV_ORDER = (
+    "index.html", "ratings.html", "matchups.html", "openers.html", "war-room.html",
+    "odds.html", "schedule.html", "futures.html", "conferences.html", "coaches.html",
+    "playoff.html", "sim_lab.html", "betting.html",
+)
+ACTIVE_PAGE_ALIASES = {"simulations.html": "sim_lab.html"}
 HEALTH_FIELDS = {
     "page_id", "display_name", "status", "status_label", "summary", "last_success_at",
     "artifact_built_at", "metrics", "warnings", "critical_failures", "unavailable_reasons",
@@ -37,6 +49,10 @@ def validate(root: Path, out: Path) -> list[str]:
                 "data/site/war_room_market_matrix.json",
                 "data/site/war_room_health.json",
                 'id="refreshBtn"',
+                'id="acquireBtn"',
+                "RELOAD MARKET",
+                "ACQUIRE MARKET",
+                "fetch('/war-room/acquire'",
             ):
                 if marker not in text:
                     errors.append(f"War Room terminal marker missing: {marker}")
@@ -80,6 +96,7 @@ def validate(root: Path, out: Path) -> list[str]:
                 has_shared_nav = (
                     'class="nav war-room-nav"' in text
                     and 'href="index.html"' in text
+                    and 'href="war-room.html"' in text
                     and 'href="openers.html"' in text
                     and 'href="matchups.html"' in text
                 )
@@ -89,6 +106,28 @@ def validate(root: Path, out: Path) -> list[str]:
                     errors.append(f"prototype link leaked: {name}")
                 if '<link rel="stylesheet" href="page_health.css">' not in text or '<script defer src="page_health.js"></script>' not in text:
                     errors.append(f"page health loader missing: {name}")
+
+        if name in SHARED_SHELL_PAGES:
+            text = path.read_text(errors="ignore")
+            if text.count('class="war-room-global"') != 1:
+                errors.append(f"shared shell owner count is not one: {name}")
+            for marker in ('class="nav war-room-nav"', 'class="war-room-meta"', 'Data Healthy'):
+                if marker not in text:
+                    errors.append(f"canonical shared shell marker missing from {name}: {marker}")
+            active_href = ACTIVE_PAGE_ALIASES.get(name, name)
+            if f'href="{active_href}" class="active"' not in text:
+                errors.append(f"shared shell active page is incorrect: {name}")
+            nav_start = text.find('class="nav war-room-nav"')
+            nav_end = text.find("</nav>", nav_start)
+            nav_text = text[nav_start:nav_end] if nav_start >= 0 and nav_end >= 0 else ""
+            positions = [nav_text.find(f'href="{href}"') for href in NAV_ORDER]
+            if any(position < 0 for position in positions) or positions != sorted(positions):
+                errors.append(f"shared shell navigation order is incorrect: {name}")
+            if text.count("<header") != 1:
+                errors.append(f"public page retains a competing semantic header: {name}")
+            for legacy in ('>NCAAF</', '>NCAAF Edge</', 'class="site-nav"'):
+                if legacy in text:
+                    errors.append(f"legacy header marker remains in {name}: {legacy}")
 
     for retired in ("dashboard.html", "legacy.html", "v1.html"):
         if (out / retired).exists():
@@ -107,6 +146,70 @@ def validate(root: Path, out: Path) -> list[str]:
         text = js.read_text(errors="ignore")
         if "data/site/page_health_status.json" not in text or "page-health-summary" not in text:
             errors.append("page health JavaScript lacks the canonical payload loader or container marker")
+
+    odds_page = out / "odds.html"
+    odds_payload = out / "data" / "site" / "odds_screen_v2.json"
+    expected_books = [
+        "Pinnacle", "Novig", "ProphetX", "Kalshi", "DraftKings",
+        "FanDuel", "BetMGM", "Caesars", "BetRivers", "Hard Rock Bet",
+    ]
+    if odds_page.is_file():
+        odds_text = odds_page.read_text(errors="ignore")
+        if "data/site/odds_screen_v2.json" not in odds_text:
+            errors.append("Odds page does not reference the canonical production.2 payload")
+        for marker in ("GAME_BOOKS=[...(payload.books||[])]", "--odds-book-count", "overflow-x:auto", "payload.built_at"):
+            if marker not in odds_text:
+                errors.append(f"Odds dynamic/responsive venue marker missing: {marker}")
+        if "const BOOKS=['DraftKings','FanDuel','BetMGM','Caesars']" in odds_text:
+            errors.append("Odds page retains the obsolete hardcoded four-book game path")
+    if odds_payload.is_file():
+        try:
+            odds_data = json.loads(odds_payload.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"Odds payload malformed: {exc}")
+        else:
+            if odds_data.get("schema_version") != "odds_screen_v2.production.2":
+                errors.append("Odds payload is not production.2")
+            books = odds_data.get("sportsbooks") or odds_data.get("books") or []
+            if books != expected_books:
+                errors.append(f"Odds payload 10-book contract mismatch: {books!r}")
+
+    openers = out / "openers.html"
+    if openers.is_file():
+        openers_text = openers.read_text(errors="ignore")
+        for marker in (
+            "data/site/current_market_contract.json",
+            "matchup_workspace.js",
+            "cache:'no-store'",
+        ):
+            if marker not in openers_text:
+                errors.append(f"Openers canonical market/history marker missing: {marker}")
+        for script_id in ('id="postgame-shadow-ui"', 'id="opener-week-js"'):
+            if openers_text.count(script_id) != 1:
+                errors.append(f"Openers compatibility script owner count is not one: {script_id}")
+    matchup_workspace = out / "matchup_workspace.js"
+    if not matchup_workspace.is_file() or "data/site/matchup_line_history.json" not in matchup_workspace.read_text(errors="ignore"):
+        errors.append("Openers matchup workspace lacks the canonical line-history payload reference")
+    elif openers.is_file():
+        workspace_text = matchup_workspace.read_text(errors="ignore")
+        for marker in (
+            "Opening ATS line:", "Opening O/U:", "Date / Time", "Spread move", "Total move",
+        ):
+            if marker not in workspace_text:
+                errors.append(f"Openers shared drawer history marker missing: {marker}")
+        if not re.search(r'matchup_workspace\.js\?v=\d{8}T\d{6}Z', openers.read_text(errors="ignore")):
+            errors.append("Openers shared drawer bundle is not build-version cache busted")
+        history_path = out / "data" / "site" / "matchup_line_history.json"
+        try:
+            history_data = json.loads(history_path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"Openers line-history contract malformed: {exc}")
+        else:
+            multi_snapshot_games = sum(
+                isinstance(rows, list) and len(rows) > 1 for rows in history_data.values()
+            ) if isinstance(history_data, dict) else 0
+            if multi_snapshot_games == 0:
+                errors.append("Openers line-history contract has no multi-snapshot games")
 
     war_room_artifacts = {
         "war_room_market_matrix.json": "war-room-market-matrix-v1",
@@ -146,6 +249,10 @@ def validate(root: Path, out: Path) -> list[str]:
             'Rem SOS:',
             'id="healthToggle"',
             'openers.html?game_id=',
+            'rank_tone',
+            'rank-good',
+            'rank-mid',
+            'rank-low',
         ):
             if marker not in conference_text:
                 errors.append(f"Conference Logo Schedule marker missing: {marker}")
@@ -153,6 +260,33 @@ def validate(root: Path, out: Path) -> list[str]:
             errors.append("legacy Conference Workspace shell detected")
         if "matchup.html?game=" in conference_text or "matchup.html?game_id=" in conference_text:
             errors.append("legacy Conference matchup route detected")
+        try:
+            payload_text = conference_text.split('<script id="conference-data" type="application/json">', 1)[1].split("</script>", 1)[0]
+            conference_data = json.loads(payload_text)
+        except (IndexError, json.JSONDecodeError) as exc:
+            errors.append(f"Conference embedded payload malformed: {exc}")
+        else:
+            modeled = [
+                game for conference in conference_data.get("conferences", [])
+                for row in conference.get("rows", [])
+                for game in row.get("cells", [])
+                if game.get("model_margin") is not None
+            ]
+            if modeled and not any(game.get("win_probability") is not None for game in modeled):
+                errors.append("Conference modeled games lack presentation win probabilities")
+
+    ratings = out / "ratings.html"
+    if ratings.is_file():
+        ratings_text = ratings.read_text(errors="ignore")
+        for marker in ("Canonical Composite", "SP+ 25%", "FPI 25%", "TeamRankings 25%", "Sagarin 25%"):
+            if marker not in ratings_text:
+                errors.append(f"Ratings canonical composite marker missing: {marker}")
+        if "BP 25%" in ratings_text:
+            errors.append("Brad Powers leaked into the production Ratings composite badge")
+
+    matchups = out / "matchups.html"
+    if matchups.is_file() and "Loading production model" in matchups.read_text(errors="ignore"):
+        errors.append("Matchups retains the stale production-model loading badge")
 
     betting = out / "betting.html"
     if betting.is_file():

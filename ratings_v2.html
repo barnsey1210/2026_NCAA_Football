@@ -157,7 +157,7 @@ td:nth-child(6){
 }
 </style>
 
-</head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><nav class="nav"><a class="active">Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></nav></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp" id="stamp">BP 25% · SP+ 25% · FPI 25% · TR 25%</div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+</head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><nav class="nav"><a class="active">Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a href="futures_v2.html">Futures</a><a href="conferences_v2.html">Conferences</a><a href="simulations_v2.html">Simulations</a><a href="betting_v2.html">Betting</a></nav></div><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp canonical-composite" id="stamp"><b>Canonical Composite</b><br><span>SP+ 25% · FPI 25% · TeamRankings 25% · Sagarin 25%</span></div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
 <thead>
 <tr>
   <th data-k="overall_rank">Rank</th>
@@ -525,7 +525,6 @@ async function init(){
     .map(x=>`<option>${e(x)}</option>`)
     .join('');
 
-  stamp.textContent+=` · Applied ${ratingView.snapshot_date}`;
 
   const providerCards=Object.values(ratingView.source_meta)
     .map(s=>`<div>

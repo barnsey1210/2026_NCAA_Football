@@ -1,17 +1,17 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-08-20T11:30:00+00:00",
+  "built_at": "2026-08-20T19:50:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
       "display_name": "Dashboard",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "Critical page data is stale beyond the maximum threshold.",
-      "last_success_at": "2026-08-18T03:01:25.358589+00:00",
-      "artifact_built_at": "2026-08-18T03:01:25.358589+00:00",
-      "age_minutes": 3388.6,
-      "age_hours": 56.48,
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-20T14:59:44.986157+00:00",
+      "artifact_built_at": "2026-08-20T14:59:44.986157+00:00",
+      "age_minutes": 290.3,
+      "age_hours": 4.84,
       "metrics": [
         {
           "label": "Slate games",
@@ -45,9 +45,7 @@
         }
       ],
       "warnings": [],
-      "critical_failures": [
-        "Critical page data is stale beyond the maximum threshold."
-      ],
+      "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "index.html",
       "source_artifacts": [
@@ -61,11 +59,11 @@
       "display_name": "Ratings",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Critical page data is aging (83.5 hours old).",
+      "summary": "Critical page data is aging (91.8 hours old).",
       "last_success_at": "2026-08-17T00:00:00+00:00",
-      "artifact_built_at": "2026-08-18T03:01:25.358589+00:00",
-      "age_minutes": 5010.0,
-      "age_hours": 83.5,
+      "artifact_built_at": "2026-08-20T14:59:44.986157+00:00",
+      "age_minutes": 5510.0,
+      "age_hours": 91.83,
       "metrics": [
         {
           "label": "Composite",
@@ -99,7 +97,7 @@
         }
       ],
       "warnings": [
-        "Critical page data is aging (83.5 hours old)."
+        "Critical page data is aging (91.8 hours old)."
       ],
       "critical_failures": [],
       "unavailable_reasons": [
@@ -117,13 +115,13 @@
     {
       "page_id": "openers",
       "display_name": "Openers",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Critical page data is aging (25.5 hours old).",
       "last_success_at": "2026-08-19T18:17:09+00:00",
-      "artifact_built_at": "2026-08-19T18:18:47.082725+00:00",
-      "age_minutes": 1032.9,
-      "age_hours": 17.21,
+      "artifact_built_at": "2026-08-20T17:25:59.711941+00:00",
+      "age_minutes": 1532.8,
+      "age_hours": 25.55,
       "metrics": [
         {
           "label": "Games",
@@ -156,7 +154,9 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "Critical page data is aging (25.5 hours old)."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "openers.html",
@@ -169,13 +169,13 @@
     {
       "page_id": "matchups",
       "display_name": "Matchups",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "Critical page data is stale beyond the maximum threshold.",
-      "last_success_at": "2026-08-18T03:01:25.358589+00:00",
-      "artifact_built_at": "2026-08-18T03:01:25.358589+00:00",
-      "age_minutes": 3388.6,
-      "age_hours": 56.48,
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-20T14:59:44.986157+00:00",
+      "artifact_built_at": "2026-08-20T14:59:44.986157+00:00",
+      "age_minutes": 290.3,
+      "age_hours": 4.84,
       "metrics": [
         {
           "label": "Matchups",
@@ -199,7 +199,7 @@
         },
         {
           "label": "Odds",
-          "value": 113,
+          "value": 111,
           "detail": ""
         },
         {
@@ -209,9 +209,7 @@
         }
       ],
       "warnings": [],
-      "critical_failures": [
-        "Critical page data is stale beyond the maximum threshold."
-      ],
+      "critical_failures": [],
       "unavailable_reasons": [
         "Five Factors are available for 744/902 matchups; remaining games retain core model coverage."
       ],
@@ -224,13 +222,13 @@
     {
       "page_id": "odds",
       "display_name": "Odds",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "Critical page data is aging (25.5 hours old).",
       "last_success_at": "2026-08-19T18:17:09+00:00",
-      "artifact_built_at": "2026-08-19T18:18:47.082725+00:00",
-      "age_minutes": 1032.9,
-      "age_hours": 17.21,
+      "artifact_built_at": "2026-08-20T17:25:59.711941+00:00",
+      "age_minutes": 1532.8,
+      "age_hours": 25.55,
       "metrics": [
         {
           "label": "Games",
@@ -263,7 +261,9 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "Critical page data is aging (25.5 hours old)."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "odds.html",
@@ -278,13 +278,13 @@
     {
       "page_id": "schedule",
       "display_name": "Schedule",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "Critical page data is stale beyond the maximum threshold.",
-      "last_success_at": "2026-08-18T03:01:25.358589+00:00",
-      "artifact_built_at": "2026-08-18T03:01:25.358589+00:00",
-      "age_minutes": 3388.6,
-      "age_hours": 56.48,
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-20T14:59:44.986157+00:00",
+      "artifact_built_at": "2026-08-20T14:59:44.986157+00:00",
+      "age_minutes": 290.3,
+      "age_hours": 4.84,
       "metrics": [
         {
           "label": "Games",
@@ -303,7 +303,7 @@
         },
         {
           "label": "Odds",
-          "value": 113,
+          "value": 111,
           "detail": ""
         },
         {
@@ -318,9 +318,7 @@
         }
       ],
       "warnings": [],
-      "critical_failures": [
-        "Critical page data is stale beyond the maximum threshold."
-      ],
+      "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "schedule.html",
       "source_artifacts": [
@@ -337,8 +335,8 @@
       "summary": "Sportsbook futures are stale or have partial provider coverage.",
       "last_success_at": "2026-08-17T12:05:57.753325+00:00",
       "artifact_built_at": "2026-08-17T12:06:00.158143+00:00",
-      "age_minutes": 4284.0,
-      "age_hours": 71.4,
+      "age_minutes": 4784.0,
+      "age_hours": 79.73,
       "metrics": [
         {
           "label": "Teams",
@@ -394,8 +392,8 @@
       "summary": "Conference simulations or records are aging.",
       "last_success_at": "2026-08-17T12:06:07.653734+00:00",
       "artifact_built_at": "2026-08-17T12:06:07.653734+00:00",
-      "age_minutes": 4283.9,
-      "age_hours": 71.4,
+      "age_minutes": 4783.9,
+      "age_hours": 79.73,
       "metrics": [
         {
           "label": "Conferences",
@@ -431,7 +429,7 @@
       "warnings": [
         "Conference simulations or records are aging.",
         "Conference title market data is stale.",
-        "Critical page data is aging (71.4 hours old)."
+        "Critical page data is aging (79.7 hours old)."
       ],
       "critical_failures": [],
       "unavailable_reasons": [],
@@ -450,8 +448,8 @@
       "summary": "Playoff prices were not updated within 24 hours.",
       "last_success_at": "2026-08-17T12:06:00.158143+00:00",
       "artifact_built_at": "2026-08-17T12:06:00.158143+00:00",
-      "age_minutes": 4284.0,
-      "age_hours": 71.4,
+      "age_minutes": 4784.0,
+      "age_hours": 79.73,
       "metrics": [
         {
           "label": "Simulations",
@@ -496,13 +494,13 @@
     {
       "page_id": "simulations",
       "display_name": "Simulations",
-      "status": "green",
-      "status_label": "Healthy",
+      "status": "yellow",
+      "status_label": "Usable with warnings",
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-08-17T12:06:07.653734+00:00",
       "artifact_built_at": "2026-08-17T12:06:07.653734+00:00",
-      "age_minutes": 4283.9,
-      "age_hours": 71.4,
+      "age_minutes": 4783.9,
+      "age_hours": 79.73,
       "metrics": [
         {
           "label": "Simulations",
@@ -548,13 +546,13 @@
     {
       "page_id": "betting",
       "display_name": "Betting",
-      "status": "red",
-      "status_label": "Action required",
-      "summary": "Critical page data is stale beyond the maximum threshold.",
-      "last_success_at": "2026-08-18T03:01:25.358589+00:00",
-      "artifact_built_at": "2026-08-18T03:01:25.358589+00:00",
-      "age_minutes": 3388.6,
-      "age_hours": 56.48,
+      "status": "green",
+      "status_label": "Healthy",
+      "summary": "Critical data is current and expected coverage checks passed.",
+      "last_success_at": "2026-08-20T14:59:44.986157+00:00",
+      "artifact_built_at": "2026-08-20T14:59:44.986157+00:00",
+      "age_minutes": 290.3,
+      "age_hours": 4.84,
       "metrics": [
         {
           "label": "Games evaluated",
@@ -588,9 +586,7 @@
         }
       ],
       "warnings": [],
-      "critical_failures": [
-        "Critical page data is stale beyond the maximum threshold."
-      ],
+      "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "betting.html",
       "source_artifacts": [

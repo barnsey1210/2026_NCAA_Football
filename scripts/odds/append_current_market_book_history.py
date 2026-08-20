@@ -6,6 +6,7 @@ import pandas as pd
 
 ROOT=Path(__file__).resolve().parents[2]
 CONTRACT=ROOT/"data/site/current_market_contract.json"
+FAST_MATRIX=ROOT/"data/site/war_room_market_matrix.json"
 OUT=ROOT/"data/odds/game_book_line_history.csv"
 
 COLS=["snapshot_ts","source","date","away_team","home_team","game_key","book","market","line","price",
@@ -16,6 +17,40 @@ COLS=["snapshot_ts","source","date","away_team","home_team","game_key","book","m
 def sid(r):
     keys=("canonical_game_id","book","market","side","line","price","source_updated_at","source","available")
     return hashlib.sha256("|".join(str(r.get(k,"")) for k in keys).encode()).hexdigest()
+
+def fast_matrix_rows():
+    """Convert the canonical matched fast matrix into durable quote history."""
+    if not FAST_MATRIX.exists():
+        return []
+    payload=json.loads(FAST_MATRIX.read_text())
+    refresh=payload.get("fast_market_refresh") or {}
+    pulled_at=refresh.get("last_fast_pull_at") or payload.get("built_at")
+    rows=[]
+    for game in payload.get("games",[]):
+        gid=str(game.get("game_id") or "")
+        books=((game.get("market") or {}).get("primary_sportsbooks") or {})
+        for book,markets in books.items():
+            for market,sides in (markets or {}).items():
+                for side,quote in (sides or {}).items():
+                    if market not in {"spread","total"} or not isinstance(quote,dict):
+                        continue
+                    source_updated_at=quote.get("last_update") or pulled_at
+                    row={
+                        "snapshot_ts":quote.get("pulled_at") or pulled_at,
+                        "source":quote.get("source") or refresh.get("source") or "The Odds API",
+                        "date":str(game.get("date") or game.get("kickoff_time") or "")[:10],
+                        "away_team":game.get("away_team"),"home_team":game.get("home_team"),
+                        "game_key":gid,"book":book,"market":market,"line":quote.get("line"),
+                        "price":quote.get("price"),"provider_open_line":"","provider_open_price":"",
+                        "provider_close_line":"","provider_close_price":"",
+                        "book_last_updated":source_updated_at,"available":True,"canonical_game_id":gid,
+                        "side":side,"source_updated_at":source_updated_at,
+                        "ingestion_timestamp":quote.get("pulled_at") or pulled_at,
+                        "paired_market_id":f"{gid}|{book}|{market}|{source_updated_at or pulled_at}",
+                        "neutral_site":game.get("neutral_site"),
+                    }
+                    row["state_id"]=sid(row); rows.append(row)
+    return rows
 
 def main():
     d=json.loads(CONTRACT.read_text())
@@ -37,6 +72,10 @@ def main():
                        "paired_market_id":f"{gid}|{book}|{market}|{q.get('source_updated_at') or built}",
                        "neutral_site":g.get("neutral_site")}
                     r["state_id"]=sid(r); rows.append(r)
+    fast_rows=fast_matrix_rows()
+    rows.extend(fast_rows)
+    if fast_rows:
+        print(f"Canonical fast-matrix quote rows prepared: {len(fast_rows)}")
     new=pd.DataFrame(rows)
     if new.empty:
         print("No fresh canonical current-market quotes to append."); return

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T03:25:34.328296+00:00",
+  "generated_at": "2026-08-20T20:28:58.895067+00:00",
   "status": "WARN",
   "checks": [
     {
@@ -7,70 +7,70 @@
       "name": "runtime_odds",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/odds_screen_v2.json",
-      "sha256": "f246138543a236a0f3d7f26034edc849dcddf6a8355a563025191d39624c63b1"
+      "sha256": "161cf1bbb1033e13868e168b1ba945e43a710be7e2b9d15d9bed0c69ebd814ad"
     },
     {
       "area": "file",
       "name": "public_odds",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/build/public_site/data/site/odds_screen_v2.json",
-      "sha256": "f246138543a236a0f3d7f26034edc849dcddf6a8355a563025191d39624c63b1"
+      "sha256": "161cf1bbb1033e13868e168b1ba945e43a710be7e2b9d15d9bed0c69ebd814ad"
     },
     {
       "area": "file",
       "name": "main_odds",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/odds_screen_v2.json",
-      "sha256": "f246138543a236a0f3d7f26034edc849dcddf6a8355a563025191d39624c63b1"
+      "sha256": "161cf1bbb1033e13868e168b1ba945e43a710be7e2b9d15d9bed0c69ebd814ad"
     },
     {
       "area": "file",
       "name": "runtime_matchups",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/matchups_view.json",
-      "sha256": "a7b21a39671d5e3510154a66a91922c4260efb57118c9dc6c8cb8b71a343091a"
+      "sha256": "fdf99787bf0160212fa0db792f45120e858e0991b1219dce8ab53b9174c2592d"
     },
     {
       "area": "file",
       "name": "public_matchups",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/build/public_site/data/site/matchups_view.json",
-      "sha256": "a7b21a39671d5e3510154a66a91922c4260efb57118c9dc6c8cb8b71a343091a"
+      "sha256": "fdf99787bf0160212fa0db792f45120e858e0991b1219dce8ab53b9174c2592d"
     },
     {
       "area": "file",
       "name": "main_matchups",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/matchups_view.json",
-      "sha256": "a7b21a39671d5e3510154a66a91922c4260efb57118c9dc6c8cb8b71a343091a"
+      "sha256": "fdf99787bf0160212fa0db792f45120e858e0991b1219dce8ab53b9174c2592d"
     },
     {
       "area": "file",
       "name": "canonical_game_projections",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/current_game_projection_contract.json",
-      "sha256": "41f7c1ac2f86aeea1baf0ae265aca263158808663911560b627b80caf6bedb21"
+      "sha256": "6df71c1dd943431bba76314b48528bfe2dec592dfbff7dc0ad5326adff0c3e9f"
     },
     {
       "area": "file",
       "name": "history",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/site/matchup_line_history.json",
-      "sha256": "67233ccb210329c18073e527a5c3ccc51808ad97aff8dd9558a1021296ca5adf"
+      "sha256": "4f0ff89bb98bfb820b029d13dbdb7591e669dd2ece4872705f817b3e7bd72711"
     },
     {
       "area": "file",
       "name": "ratings_latest",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/ratings/ratings_latest.csv",
-      "sha256": "b5f8a5c62bcd2c1c79110eb298fcc103c5249828e4016d83d869e5d9635dbfd4"
+      "sha256": "a6ea71c93f0af891b29e6a01ed970c67e56461b4a6300d5482ff113ddf6530d0"
     },
     {
       "area": "file",
       "name": "ratings_status",
       "status": "PASS",
       "path": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/ratings/ratings_source_status.csv",
-      "sha256": "dd0574e66601e14826e7ecf315a6a591a1f9ad63256f0d5851135496d4055fd6"
+      "sha256": "e191b5d906c11cb6fe1a59dc9a7f59ed19efbb2b382eac3c6fc2ffa56ebb50ce"
     },
     {
       "area": "publishing",
@@ -95,9 +95,9 @@
     {
       "area": "ratings",
       "name": "ratings_status_freshness",
-      "status": "STALE_DERIVED_ARTIFACT",
-      "ratings_latest": "2026-08-04",
-      "ratings_status": "2026-08-01"
+      "status": "PASS",
+      "ratings_latest": "2026-08-18",
+      "ratings_status": "2026-08-18"
     },
     {
       "area": "projections",
@@ -110,7 +110,7 @@
       "area": "market",
       "name": "latest_history_vs_matchups_view",
       "status": "VALUE_MISMATCH",
-      "count": 44
+      "count": 43
     }
   ],
   "market_mismatches": [
@@ -127,28 +127,10 @@
       "matchups_view": 51.0
     },
     {
-      "game_id": "g142",
+      "game_id": "g16",
       "field": "total",
-      "history": 45.5,
-      "matchups_view": 46.5
-    },
-    {
-      "game_id": "g187",
-      "field": "spread",
-      "history": -13.5,
-      "matchups_view": -12.5
-    },
-    {
-      "game_id": "g187",
-      "field": "total",
-      "history": 54.5,
-      "matchups_view": 53.5
-    },
-    {
-      "game_id": "g192",
-      "field": "spread",
-      "history": 13.5,
-      "matchups_view": 14.5
+      "history": 53.5,
+      "matchups_view": 54.5
     },
     {
       "game_id": "g2",
@@ -157,10 +139,28 @@
       "matchups_view": -31.0
     },
     {
+      "game_id": "g2",
+      "field": "total",
+      "history": 53.5,
+      "matchups_view": 53.0
+    },
+    {
+      "game_id": "g22",
+      "field": "spread",
+      "history": 24.5,
+      "matchups_view": 23.5
+    },
+    {
       "game_id": "g24",
       "field": "total",
       "history": 54.5,
       "matchups_view": 54.0
+    },
+    {
+      "game_id": "g3",
+      "field": "spread",
+      "history": -6.5,
+      "matchups_view": -7.0
     },
     {
       "game_id": "g30",
@@ -181,10 +181,16 @@
       "matchups_view": 55.0
     },
     {
+      "game_id": "g35",
+      "field": "total",
+      "history": 53.5,
+      "matchups_view": 54.0
+    },
+    {
       "game_id": "g36",
-      "field": "spread",
-      "history": -3.5,
-      "matchups_view": -4.0
+      "field": "total",
+      "history": 48.5,
+      "matchups_view": 48.0
     },
     {
       "game_id": "g38",
@@ -193,16 +199,10 @@
       "matchups_view": 52.0
     },
     {
-      "game_id": "g401",
+      "game_id": "g4",
       "field": "spread",
-      "history": 3.0,
-      "matchups_view": 2.5
-    },
-    {
-      "game_id": "g401",
-      "field": "total",
-      "history": 51.5,
-      "matchups_view": 49.5
+      "history": -5.5,
+      "matchups_view": -6.0
     },
     {
       "game_id": "g43",
@@ -215,18 +215,6 @@
       "field": "total",
       "history": 50.5,
       "matchups_view": 51.0
-    },
-    {
-      "game_id": "g430",
-      "field": "spread",
-      "history": 6.0,
-      "matchups_view": 6.5
-    },
-    {
-      "game_id": "g430",
-      "field": "total",
-      "history": 48.5,
-      "matchups_view": 47.5
     },
     {
       "game_id": "g44",
@@ -243,14 +231,8 @@
     {
       "game_id": "g46",
       "field": "spread",
-      "history": -30.5,
+      "history": -31.5,
       "matchups_view": -31.0
-    },
-    {
-      "game_id": "g52",
-      "field": "spread",
-      "history": -9.5,
-      "matchups_view": -9.0
     },
     {
       "game_id": "g58",
@@ -265,16 +247,16 @@
       "matchups_view": -5.5
     },
     {
+      "game_id": "g60",
+      "field": "spread",
+      "history": -29.5,
+      "matchups_view": -28.5
+    },
+    {
       "game_id": "g62",
       "field": "spread",
       "history": -23.5,
       "matchups_view": -24.0
-    },
-    {
-      "game_id": "g63",
-      "field": "spread",
-      "history": 2.5,
-      "matchups_view": 3.0
     },
     {
       "game_id": "g63",
@@ -285,20 +267,14 @@
     {
       "game_id": "g64",
       "field": "spread",
-      "history": -12.5,
+      "history": -10.5,
       "matchups_view": -13.0
     },
     {
-      "game_id": "g665",
-      "field": "spread",
-      "history": -6.5,
-      "matchups_view": -5.5
-    },
-    {
-      "game_id": "g665",
+      "game_id": "g64",
       "field": "total",
-      "history": 54.5,
-      "matchups_view": 55.5
+      "history": 48.5,
+      "matchups_view": 49.0
     },
     {
       "game_id": "g68",
@@ -307,10 +283,22 @@
       "matchups_view": -51.0
     },
     {
+      "game_id": "g69",
+      "field": "spread",
+      "history": -41.5,
+      "matchups_view": -40.5
+    },
+    {
       "game_id": "g7",
       "field": "spread",
       "history": -38.5,
       "matchups_view": -38.0
+    },
+    {
+      "game_id": "g7",
+      "field": "total",
+      "history": 60.5,
+      "matchups_view": 59.5
     },
     {
       "game_id": "g71",
@@ -332,6 +320,12 @@
     },
     {
       "game_id": "g88",
+      "field": "spread",
+      "history": -16.5,
+      "matchups_view": -17.0
+    },
+    {
+      "game_id": "g88",
       "field": "total",
       "history": 51.5,
       "matchups_view": 51.0
@@ -347,6 +341,12 @@
       "field": "total",
       "history": 61.5,
       "matchups_view": 61.0
+    },
+    {
+      "game_id": "g90",
+      "field": "spread",
+      "history": -22.5,
+      "matchups_view": -23.5
     },
     {
       "game_id": "g95",
@@ -371,12 +371,6 @@
       "field": "total",
       "history": 55.5,
       "matchups_view": 55.0
-    },
-    {
-      "game_id": "g99",
-      "field": "spread",
-      "history": 1.5,
-      "matchups_view": 2.5
     }
   ]
 }

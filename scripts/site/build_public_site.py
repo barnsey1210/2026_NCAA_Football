@@ -18,15 +18,11 @@ PAGES = {
     "playoff_v2.html":"playoff.html",
     "schedule_v2.html":"schedule.html",
     "odds_v2.html":"odds.html",
+    "coaches.html":"coaches.html",
 }
-LINKS = [('Home','index.html'), ('Ratings','ratings.html'), ('Openers','openers.html'), ('Matchups','matchups.html'),
-         ('ODDS','odds.html'), ('Schedule','schedule.html'), ('Futures','futures.html'), ('Conferences','conferences.html'), ('Playoff','playoff.html'),
-         ('Simulations','simulations.html'), ('Betting','betting.html')]
-CSS = """<style id="production-nav-css">
-.top .brand a,.top .nav a{color:inherit;text-decoration:none}.top .nav a{color:var(--muted);padding:8px 11px;font-weight:800;white-space:nowrap;border-radius:9px}.top .nav a.active{background:#173b72;color:#fff}.top .model{margin-left:auto}
-</style>"""
 PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
 BUILD_VERSION = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+PUBLIC_ALIASES = {"simulations.html": "sim_lab.html"}
 
 
 def cache_bust_site_json(text):
@@ -37,9 +33,14 @@ def cache_bust_site_json(text):
         text,
     )
 
-def nav(target):
-    links=''.join(f'<a href="{href}"'+(' class="active"' if href==target else '')+f'>{label}</a>' for label,href in LINKS)
-    return f'<div class="brand"><a href="index.html">NCAAF</a></div><div class="nav">{links}</div>'
+def cache_bust_public_assets(text):
+    """Version the shared frontend bundle so restored drawer behavior is not cached."""
+    text = cache_bust_site_json(text)
+    return re.sub(
+        r'(matchup_workspace\.js)(?:\?v=[^\'"` )}>]+)?',
+        lambda match: f"{match.group(1)}?v={BUILD_VERSION}",
+        text,
+    )
 
 def transform(text,target):
     for old,new in {
@@ -61,8 +62,6 @@ def transform(text,target):
                     'index.html#team/':'team.html?team='
                     }.items(): text=text.replace(old,new)
     text=text.replace('openers.html?game_id=', 'openers.html?game_id=')
-    text=re.sub(r'<div class="brand">NCAAF</div><(?:div|nav) class="nav">.*?</(?:div|nav)>',nav(target),text,count=1,flags=re.S)
-    text=re.sub(r'<div class="brand">NCAAF Edge</div><nav class="nav">.*?</nav>',nav(target),text,count=1,flags=re.S)
     # Idempotency: canonicalize shared health assets before adding one copy.
     text=re.sub(
         r"<link[^>]+href=[\"']page_health\.css[\"'][^>]*>",
@@ -77,7 +76,6 @@ def transform(text,target):
         flags=re.I,
     )
 
-    text=text.replace('</head>',CSS+'</head>')
     text=text.replace(
         '</head>',
         '<link rel="stylesheet" href="page_health.css">'
@@ -92,6 +90,10 @@ def transform(text,target):
         dash_script="""<script id="dashboard-week-js">const dashboardWeek=document.getElementById('week'),dashboardWeekChips=document.getElementById('dashboardWeekChips');function syncDashboardWeeks(){dashboardWeekChips.innerHTML=[...dashboardWeek.options].map(o=>`<button class="${o.value===dashboardWeek.value?'active':''}" data-week="${o.value}">${o.textContent}</button>`).join('');dashboardWeekChips.querySelectorAll('button').forEach(b=>b.onclick=()=>{dashboardWeek.value=b.dataset.week;dashboardWeek.dispatchEvent(new Event('input',{bubbles:true}));syncDashboardWeeks()})}new MutationObserver(syncDashboardWeeks).observe(dashboardWeek,{childList:true});dashboardWeek.addEventListener('input',syncDashboardWeeks);</script>"""
         text=text.replace('</body>',dash_script+'</body>')
     if target == 'openers.html':
+        # The canonical source contains legacy repeated compatibility inserts.
+        # The public builder owns normalization and emits exactly one instance.
+        text=re.sub(r'<script id="postgame-shadow-ui">.*?</script>', '', text, flags=re.S)
+        text=re.sub(r'<script id="opener-week-js">.*?</script>', '', text, flags=re.S)
         if 'id="openerWeekChips"' not in text:
             text=text.replace('<div class="filters">','<div class="weekChips" id="openerWeekChips"></div><div class="filters">',1)
         text=text.replace('</head>','<style id="opener-week-css">#week{display:none}.weekChips{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.weekChips button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:6px 10px;font-weight:900;cursor:pointer}.weekChips button.active{background:#1857a7;color:#fff}</style></head>')
@@ -113,6 +115,10 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         text=text.replace('</head>','<style>.team{text-decoration:none;color:inherit}</style></head>')
     if target == 'ratings.html':
         text=text.replace('teams=[...m.values()];conf.innerHTML', 'teams=[...m.values()].filter(t=>t.rating!=null&&t.overall_rank!=null);conf.innerHTML')
+        text=text.replace('</head>','<style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style></head>',1)
+    if target == 'simulations.html':
+        text=text.replace('<div class="stamp" id="stamp">Loading model…</div>','')
+        text=text.replace('stamp.textContent=`${P.trials.toLocaleString()} trials · ${P.schema_version}`;','')
     if target == 'odds.html':
         text=text.replace('<title>Odds Screen — Isolated V2 Prototype</title>', '<title>NCAAF Odds</title>')
     if target == 'team.html':
@@ -131,7 +137,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         text=text.replace('</head>','<style id="conference-logo-css">.conferenceBadge{min-width:54px;height:54px}.conferenceBadge img{width:42px;height:42px;object-fit:contain}</style></head>')
         logo_script="""<script id="conference-logo-js">const conferenceLogoObserver=new MutationObserver(()=>{const c=typeof cur==='function'?cur():null,b=document.querySelector('.conferenceBadge');if(c&&b&&!b.querySelector('img'))b.innerHTML=`<img src="logos/conferences/${c.slug}.png" alt="${c.conference} logo">`});conferenceLogoObserver.observe(document.getElementById('conferenceIdentity'),{childList:true,subtree:true});</script>"""
         text=text.replace('</body>',logo_script+'</body>')
-    return cache_bust_site_json(text)
+    return cache_bust_public_assets(text)
 
 def main():
     if OUT.exists(): shutil.rmtree(OUT)
@@ -148,8 +154,10 @@ def main():
             # filename while runtime compatibility retains a *_v2 source name.
             source_path=ROOT/target
         (OUT/target).write_text(transform(source_path.read_text(),target))
+    for source, alias in PUBLIC_ALIASES.items():
+        shutil.copy2(OUT/source, OUT/alias)
     (OUT/'war-room.html').write_text(
-        cache_bust_site_json((ROOT/'war-room.html').read_text())
+        cache_bust_public_assets((ROOT/'war-room.html').read_text())
     )
     for asset in PAGE_HEALTH_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
@@ -169,7 +177,7 @@ def main():
     ):
         src = ROOT / js_name
         dst = OUT / js_name
-        dst.write_text(cache_bust_site_json(src.read_text()))
+        dst.write_text(cache_bust_public_assets(src.read_text()))
     # Local preview assets. Publishing copies these directories independently.
     for name in ('data','logos','helmets'):
         target=ROOT/name
@@ -185,18 +193,17 @@ from pathlib import Path as _OpenersSyncPath
 def _sync_openers_v2_public_artifacts():
     _project_root = ROOT
     _public_root = _project_root / "build" / "public_site"
+    # Openers has already been written once from canonical root openers.html in
+    # PAGES above.  This late compatibility pass owns only the shared renderer;
+    # rewriting Openers here created a second public-page owner.
     _pairs = (
-        (_project_root / "openers.html", _public_root / "openers.html"),
         (_project_root / "matchup_workspace.js", _public_root / "matchup_workspace.js"),
     )
     _public_root.mkdir(parents=True, exist_ok=True)
     for _source, _target in _pairs:
         if not _source.exists():
             raise RuntimeError(f"Required public artifact source is missing: {_source}")
-        if _target.name == "openers.html":
-            _target.write_text(transform(_source.read_text(), "openers.html"))
-        else:
-            _target.write_text(cache_bust_site_json(_source.read_text()))
+        _target.write_text(cache_bust_public_assets(_source.read_text()))
         print(f"synced public artifact: {_source.name} -> {_target}")
     # The canonical Openers and Schedule builders run after the shared page
     # transform. Reapply only the production ODDS nav item they would otherwise

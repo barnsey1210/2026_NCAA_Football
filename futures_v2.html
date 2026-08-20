@@ -199,7 +199,7 @@ async function init(){
  teams.textContent=D.summary.teams;
  markets.textContent=(D.summary.win_markets||0)+(D.summary.title_markets||0)+(D.summary.playoff_markets||0)+(D.summary.national_title_markets||0);
  wagers.textContent=D.summary.open_wagers;
- stamp.textContent=`Simulation + market · ${String(D.built_at).slice(0,10)}`;
+ const pageStamp=document.getElementById('stamp');if(pageStamp)pageStamp.textContent=`Simulation + market · ${String(D.built_at).slice(0,10)}`;
  const cs=[...new Set(D.rows.map(x=>x.conference).filter(Boolean))].sort();
  conf.innerHTML='<option value="all">All conferences</option><option value="g6">G6</option>'+cs.map(x=>`<option>${e(x)}</option>`).join('');
  renderFreshness();

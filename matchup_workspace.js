@@ -1262,7 +1262,12 @@ function contextTable(game){ const rows=contextRows(game); const empty=!rows.len
 
     const firstSpread=daily.find(x=>finite(x.market_spread_home))||{};
     const firstTotal=daily.find(x=>finite(x.market_total))||{};
-    const latest=[...daily].reverse().slice(0,7);
+    const cutoff=new Date();
+    cutoff.setDate(cutoff.getDate()-7);
+    const latest=daily.filter(row=>{
+      const d=new Date(row.snapshot_ts||row.snapshot_date||row.market_spread_last_update||row.market_total_last_update);
+      return !Number.isNaN(d.getTime()) && d>=cutoff;
+    }).reverse();
 
     const capturedText=(row,market)=>{
       const value=market==='spread'

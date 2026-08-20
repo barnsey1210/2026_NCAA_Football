@@ -851,28 +851,9 @@ section{margin-top:8px}
 .lower-grid>.panel{align-self:start}
 </style>
 
-<style id="canonical-war-room-shell-v2">
-.page{width:min(1680px,calc(100vw - 32px))!important;max-width:1680px!important;margin:0 auto!important}
-header{grid-template-columns:290px minmax(0,1fr) auto!important;gap:16px!important}
-header nav{overflow:visible!important;justify-content:flex-start!important}
-header nav a{font-size:14px!important;padding:0 10px!important}
-.header-right{min-width:max-content!important}.round{display:none!important}
-@media(max-width:1500px){header{grid-template-columns:250px minmax(0,1fr) auto!important}header nav a{font-size:13px!important;padding:0 7px!important}.brand strong{font-size:35px!important}}
-@media(max-width:1100px){header{grid-template-columns:210px minmax(0,1fr)!important}.header-right{display:none!important}header nav{overflow:auto!important}}
-</style></head>
+</head>
 <body data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market">
 <div class="page">
-<header>
-  <div class="brand"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></div>
-  <nav>
-    <a class="active" href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a>
-    <a href="openers.html">Openers</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a>
-    <a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a>
-    <a href="playoff.html">Playoff</a><a href="simulations.html">Sim Lab</a><a href="betting.html">Betting</a>
-  </nav>
-  <div class="header-right"><div class="health"><span class="pulse"></span>Data Healthy</div></div>
-</header>
-
 <div class="status">
   <div id="dateText">2026 Season · Week 0</div>
   <div><span class="pulse"></span><span id="oddsText">Odds current</span></div>
@@ -1000,7 +981,7 @@ function logo(t,cls='logo'){
   return `<span class="${cls}">${s?`<img src="${BASE}logos/${esc(s)}.png" alt="">`:''}</span>`;
 }
 
-function syncCanonicalNavigation(tools){
+function syncHomepageRoutes(tools){
   const byTool=Object.fromEntries(tools.map(x=>[x[2],`${BASE}${x[5]}`]));
   const routes={
     Home:`${BASE}index.html`,
@@ -1017,11 +998,6 @@ function syncCanonicalNavigation(tools){
     Betting:byTool['Betting Dashboard'],
     Injuries:byTool['Injury Center']
   };
-
-  document.querySelectorAll('header nav a').forEach(a=>{
-    const label=a.textContent.trim();
-    if(routes[label])a.href=routes[label];
-  });
 
   const panelRouteMap={
     'View all matchups →':routes.Matchups,
@@ -1374,7 +1350,7 @@ async function init(){
     <strong>${x[4]} →</strong>
     <em>Open ${x[2]} →</em>
   </a>`).join('');
-  syncCanonicalNavigation(tools);
+  syncHomepageRoutes(tools);
 
   games.innerHTML=sorted.slice(0,5).map(gameRow).join('')||'<div class="empty"><strong>No current-week games</strong></div>';
 
@@ -1595,7 +1571,7 @@ def main() -> None:
         'href="matchups.html"',
         'href="betting.html"',
         "openers.html?game_id=",
-        "syncCanonicalNavigation(tools)",
+        "syncHomepageRoutes(tools)",
     ]
     rendered = HTML.read_text(encoding="utf-8")
     missing = [item for item in required if item not in rendered]

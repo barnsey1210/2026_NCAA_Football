@@ -121,6 +121,16 @@ button,select{
   border-color:#147a59;
 }
 
+.wr-btn.acquire{
+  color:var(--yellow);
+  border-color:#9b741d;
+}
+
+.wr-btn:disabled{
+  cursor:wait;
+  opacity:.65;
+}
+
 .summary-grid{
   display:grid;
   grid-template-columns:1.1fr 1.25fr 1.25fr .65fr 1fr 1fr;
@@ -620,7 +630,7 @@ tr:hover td{
 <body>
 <div class="wr-shell">
 
-  <header class="wr-top">
+  <div class="wr-top">
     <div class="wr-top-left">
       <div class="wr-title">
         WAR ROOM / <span>MARKET MATRIX</span>
@@ -639,8 +649,12 @@ tr:hover td{
       <button class="wr-btn refresh" id="refreshBtn">
         ↻ RELOAD MARKET
       </button>
+
+      <button class="wr-btn acquire" id="acquireBtn" title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
+        ⚡ ACQUIRE MARKET · 2 CREDITS
+      </button>
     </div>
-  </header>
+  </div>
 
   <section class="summary-grid">
     <div class="summary-box">
@@ -792,8 +806,8 @@ tr:hover td{
   <footer class="footer">
     FAST WAR ROOM · BEST BOOK = DK / FD / MGM / CZR ·
     BEST EXCHANGE = NOVIG / PROPHETX / KALSHI AT -120 OR BETTER ·
-    PINNACLE = SHARP REFERENCE · RELOAD MARKET CURRENTLY RELOADS
-    THE LATEST PUBLISHED FAST SNAPSHOT
+    PINNACLE = SHARP REFERENCE · RELOAD MARKET = 0 CREDITS ·
+    ACQUIRE MARKET = GUARDED SPREADS + TOTALS PULL, EXPECTED 2 CREDITS
   </footer>
 
 </div>
@@ -1882,6 +1896,41 @@ document.getElementById('refreshBtn').addEventListener(
     setTimeout(()=>{
       btn.textContent = old;
     },1500);
+  }
+);
+
+document.getElementById('acquireBtn').addEventListener(
+  'click',
+  async ()=>{
+    const btn = document.getElementById('acquireBtn');
+    if(!window.confirm('Acquire a fresh spreads + totals market snapshot? Expected cost: 2 Odds API credits.')) return;
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⚡ ACQUIRING…';
+    try{
+      const response = await fetch('/war-room/acquire', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        cache:'no-store',
+        credentials:'omit'
+      });
+      const payload = await response.json().catch(()=>({}));
+      if(!response.ok){
+        const detail = payload?.detail?.message || payload?.detail || `HTTP ${response.status}`;
+        throw new Error(String(detail));
+      }
+      await loadData();
+      btn.textContent = '✓ MARKET ACQUIRED';
+    }catch(err){
+      console.error(err);
+      btn.textContent = '⚠ ACQUIRE FAILED';
+      window.alert(`Market acquisition failed: ${err.message}`);
+    }finally{
+      setTimeout(()=>{
+        btn.textContent = old;
+        btn.disabled = false;
+      },2000);
+    }
   }
 );
 

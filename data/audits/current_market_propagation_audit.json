@@ -5,5 +5,32 @@
   "issue_count": 0,
   "stale_current_quotes_displayed": 0,
   "history_compared_to_current": false,
-  "note": "Historical snapshots are intentionally audited separately from current/reference/best-side markets."
+  "market_groups": {
+    "bettable_sportsbooks": [
+      "DraftKings",
+      "FanDuel",
+      "BetMGM",
+      "Caesars"
+    ],
+    "exchanges": [
+      "Novig",
+      "ProphetX",
+      "Kalshi"
+    ],
+    "sharp_reference": [
+      "Pinnacle"
+    ]
+  },
+  "fast_actionable_sportsbook_selection_counts": {
+    "FanDuel": 334,
+    "BetMGM": 70,
+    "DraftKings": 214
+  },
+  "exchange_selection_counts": {
+    "Novig": 258,
+    "ProphetX": 26
+  },
+  "caesars_games_preserved": 0,
+  "caesars_quote_source_counts": {},
+  "note": "Historical snapshots are intentionally audited separately from current/reference/best-side markets. Caesars quotes may remain preserved from Action Network but are excluded from the fast actionable sportsbook reducer until a fast-refresh source exists."
 }

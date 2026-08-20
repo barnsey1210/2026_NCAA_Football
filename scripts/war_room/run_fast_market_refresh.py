@@ -125,8 +125,30 @@ def main():
         )
     )
 
-
-
+    # Preserve the accepted fast state in the canonical historical contract.
+    # These stages are offline and idempotent; they make the latest fast pull
+    # available to Openers without changing current-market selection.
+    stages.append(
+        run_stage(
+            "append_current_market_book_history",
+            [sys.executable, "scripts/odds/append_current_market_book_history.py"],
+            env,
+        )
+    )
+    stages.append(
+        run_stage(
+            "build_matchup_line_history",
+            [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],
+            env,
+        )
+    )
+    stages.append(
+        run_stage(
+            "publish_matchup_line_history_asset",
+            [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
+            env,
+        )
+    )
 
     stages.append(
         run_stage(
