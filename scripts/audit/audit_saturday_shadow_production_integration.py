@@ -120,8 +120,21 @@ def main():
     feature = pd.read_csv(ROOT / "data/research/sp_plus_total_movement/sp_plus_component_features.csv", low_memory=False).iloc[0].to_dict()
     baseline = next(iter(component.latest_sp_plus_rows().values()))
     probe = {"_models": artifact["models"]}
-    component.apply_sp_plus_state(probe, "away", feature, None)
-    component.apply_sp_plus_state(probe, "home", None, baseline)
+    component.apply_validated_shadow_state(
+    probe,
+    "away",
+    feature,
+    None,
+    None,
+)
+
+    component.apply_validated_shadow_state(
+        probe,
+        "home",
+        None,
+        baseline,
+        baseline,
+)
     check("mixed-state fixture", probe["away_component_status"] == "postgame_model_update" and probe["home_component_status"] == "preseason_baseline" and probe["away_movement_estimator_invoked"] is True and probe["home_movement_estimator_invoked"] is False)
 
     fixture_payload = json.loads(FIXTURES.read_text())
