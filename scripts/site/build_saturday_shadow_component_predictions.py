@@ -588,12 +588,12 @@ def main():
         row["spread_impact"] = None
         row["shadow_spread_edge"] = None
         row["spread_value_tier"] = None
-        row["spread_value_label"] = "Canonical resolver"
+        row["spread_value_label"] = "Unavailable"
 
         row["total_impact"] = None
         row["shadow_total_edge"] = None
         row["total_value_tier"] = None
-        row["total_value_label"] = "Canonical resolver"
+        row["total_value_label"] = "Unavailable"
         row["spread_missing_reasons"] = missing
         row["total_missing_reasons"] = [m for m in missing if "offense/defense" in m or "feature row" in m]
         row["shadow_display_ready"] = bool(
