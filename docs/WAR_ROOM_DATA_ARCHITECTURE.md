@@ -52,6 +52,20 @@ flowchart LR
 The two JSON artifacts are projections over canonical domain owners; they do
 not establish new provider selection, model formulas, or market calculations.
 
+### Fast publication bridge
+
+The Command Center fast feed is intentionally separate from the canonical
+daily current-market contract. `run_fast_market_publication.py` runs the fast
+refresh, rebuilds only the standalone page bundle, validates refresh identity
+and freshness, and delegates to the publisher's bounded War Room mode. That
+mode publishes exactly the page and two JSON artifacts. It does not rebuild or
+copy Home, Openers, Odds, Futures, Matchups, or their payloads.
+
+Openers, Odds, and Matchups continue to consume `current_market_contract.json`
+and their page adapters. Futures consumes `futures_view.json`. They therefore
+change only through their canonical daily/profile builds; the fast War Room
+feed must not be silently promoted into those contracts.
+
 ## Canonical projection architecture
 
 The Team Rating Engine and Game Projection Engine are separate contracts. Team

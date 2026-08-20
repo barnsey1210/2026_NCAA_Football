@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "timezone": "America/New_York",
+  "entrypoint": "python3 scripts/war_room/run_fast_market_publication.py --push",
+  "windows": [
+    {"day": "Saturday", "hour": 23, "minute": 0, "label": "SAT_11PM_ET"},
+    {"day": "Sunday", "hour": 9, "minute": 0, "label": "SUN_9AM_ET"},
+    {"day": "Sunday", "hour": 14, "minute": 0, "label": "SUN_2PM_ET"},
+    {"day": "Sunday", "hour": 21, "minute": 0, "label": "SUN_9PM_ET"}
+  ],
+  "policy": {
+    "runtime_workspace": "/Users/jameslindesmith/NCAAF_AUTO",
+    "credential_variable": "THE_ODDS_API_KEY_FAST",
+    "quota_reserve_required": true,
+    "max_publication_age_minutes": 15,
+    "overlap_policy": "single_instance_no_overlap",
+    "scheduler_installation": "machine_local_separate_release_step"
+  }
+}

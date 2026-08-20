@@ -4,13 +4,65 @@ set -euo pipefail
 MODE="${1:---check}"
 RUNTIME_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PUBLIC_DIR="$RUNTIME_ROOT/build/public_site"
+WAR_ROOM_PUBLIC_DIR="$RUNTIME_ROOT/build/war_room_public"
 MAIN_REPO="${NCAAF_MAIN_REPO:-/Users/jameslindesmith/NCAAF_MAIN_REPO}"
 MAX_ODDS_AGE_HOURS="${NCAAF_MAX_ODDS_AGE_HOURS:-18}"
 
 log(){ printf '[canonical-publish] %s\n' "$*"; }
 die(){ printf '[canonical-publish] ERROR: %s\n' "$*" >&2; exit 1; }
 
-[[ "$MODE" == "--check" || "$MODE" == "--push" ]] || die "usage: $0 --check|--push"
+[[ "$MODE" == "--check" || "$MODE" == "--push" || \
+   "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" ]] || \
+  die "usage: $0 --check|--push|--war-room-check|--war-room-push"
+
+if [[ "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" ]]; then
+  [[ -d "$WAR_ROOM_PUBLIC_DIR" ]] || die "missing fast War Room bundle: $WAR_ROOM_PUBLIC_DIR"
+  (
+    cd "$RUNTIME_ROOT"
+    python3 scripts/audit/audit_war_room_fast_publication.py \
+      --bundle "$WAR_ROOM_PUBLIC_DIR"
+  )
+  log "fast War Room bundle validation passed"
+  [[ "$MODE" == "--war-room-push" ]] || exit 0
+
+  [[ -d "$MAIN_REPO/.git" ]] || die "canonical repository not found: $MAIN_REPO"
+  [[ -z "$(git -C "$MAIN_REPO" status --porcelain --untracked-files=no)" ]] || \
+    die "canonical repository has tracked local changes; refusing fast publication"
+  git -C "$MAIN_REPO" fetch origin main
+  git -C "$MAIN_REPO" checkout main
+  git -C "$MAIN_REPO" pull --ff-only origin main
+
+  while IFS= read -r relative; do
+    source="$WAR_ROOM_PUBLIC_DIR/$relative"
+    target="$MAIN_REPO/$relative"
+    [[ -s "$source" ]] || die "missing fast publication artifact: $relative"
+    mkdir -p "$(dirname "$target")"
+    cp -p "$source" "$target"
+  done <<'EOF'
+war-room.html
+data/site/war_room_health.json
+data/site/war_room_market_matrix.json
+EOF
+
+  git -C "$MAIN_REPO" add -- \
+    war-room.html \
+    data/site/war_room_health.json \
+    data/site/war_room_market_matrix.json
+  if git -C "$MAIN_REPO" diff --cached --quiet; then
+    log "no fast War Room changes to commit"
+    exit 0
+  fi
+  STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  git -C "$MAIN_REPO" commit -m "Refresh War Room market ${STAMP}"
+  if ! git -C "$MAIN_REPO" push origin main; then
+    log "remote main moved during fast publication; rebasing once"
+    git -C "$MAIN_REPO" pull --rebase origin main
+    git -C "$MAIN_REPO" push origin main
+  fi
+  log "published fast War Room artifacts at $(git -C "$MAIN_REPO" rev-parse --short HEAD)"
+  exit 0
+fi
+
 [[ -d "$RUNTIME_ROOT/.git" ]] || log "runtime is not the publishing Git repository; using generated public artifacts only"
 [[ -d "$PUBLIC_DIR" ]] || die "missing public build: $PUBLIC_DIR"
 [[ -s "$PUBLIC_DIR/odds.html" ]] || die "missing public Odds page"

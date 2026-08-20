@@ -72,3 +72,11 @@ before publication; checked-in copies are not proof of current market freshness.
 6. Home has no release diff.
 7. Stage and commit only the explicit groups above after reviewing generated
    artifact freshness; never use `git add .`.
+
+## Fast publication bridge
+
+The production fast entrypoint is
+`python3 scripts/war_room/run_fast_market_publication.py --push` in
+`NCAAF_AUTO`. It publishes only `war-room.html`, `war_room_health.json`, and
+`war_room_market_matrix.json`. See
+`docs/WAR_ROOM_FAST_PUBLICATION_RUNBOOK.md` for scheduler and failure policy.

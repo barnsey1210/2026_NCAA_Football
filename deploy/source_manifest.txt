@@ -7,6 +7,7 @@ betting/key_aware_spread_ev.py
 betting_v2.html
 data/site/shadow_model_performance.json
 config/daily_stages.json
+config/war_room_fast_schedule.json
 config/page_health_registry.json
 daily_market_update.sh
 data/model_tracking/config.json
@@ -41,11 +42,10 @@ scripts/audit/audit_canonical_openers_drawer.py
 scripts/audit/audit_canonical_v2_index.py
 scripts/audit/audit_data_propagation.py
 scripts/audit/audit_war_room_home_market_propagation.py
+scripts/audit/audit_war_room_fast_publication.py
 scripts/audit/test_daily_betting_email_regression.py
-scripts/control/accept_sgo_staged.py
 scripts/control/daily_run_status.py
 scripts/control/run_data_refresh.py
-scripts/control/sgo_preview_adapter.py
 scripts/markets/build_current_market_contract.py
 scripts/markets/build_sgo_canonical_artifacts.py
 scripts/markets/build_sgo_daily_canonical.py
@@ -74,6 +74,13 @@ scripts/site/build_shadow_model_performance.py
 scripts/site/build_ratings_view.py
 scripts/site/build_schedule_live_enrichment.py
 scripts/site/build_war_room_home.py
+scripts/site/build_war_room_page.py
+scripts/war_room/analyze_fast_market_latency.py
+scripts/war_room/build_war_room_health.py
+scripts/war_room/build_war_room_market_matrix.py
+scripts/war_room/record_fast_refresh_history.py
+scripts/war_room/run_fast_market_publication.py
+scripts/war_room/run_fast_market_refresh.py
 scripts/site/compact_matchups_payload.py
 scripts/site/inject_market_presentation_fixes.py
 scripts/site/install_openers_betting_angles_header_persistent.py
