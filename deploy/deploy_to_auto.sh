@@ -49,8 +49,11 @@ esac
 
 SOURCE_COMMIT="$(git -C "$SOURCE_ROOT" rev-parse HEAD)"
 SOURCE_BRANCH="$(git -C "$SOURCE_ROOT" symbolic-ref --quiet --short HEAD 2>/dev/null || printf 'DETACHED')"
-if (( ! ALLOW_DIRTY )) && [[ -n "$(git -C "$SOURCE_ROOT" status --porcelain --untracked-files=normal)" ]]; then
-  die "source working tree is not clean; commit/review changes first or use --allow-dirty explicitly"
+if (( ! ALLOW_DIRTY )) && { \
+    ! git -C "$SOURCE_ROOT" diff --quiet || \
+    ! git -C "$SOURCE_ROOT" diff --cached --quiet; \
+}; then
+    die "source working tree has tracked changes; commit/review changes first or use --allow-dirty explicitly"
 fi
 
 [[ "$TARGET" = /* ]] || die "target must be an absolute path"
