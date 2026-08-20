@@ -18,6 +18,44 @@ REQUIRED_RUNTIME_STATIC = {
     "v1.html",
     "data/snapshots/preseason/preseason_db.json",
 }
+SHADOW_STATIC_DEPENDENCIES = {
+    "data/ratings/ratings_preseason_2026.csv":
+        "scripts/war_room/build_war_room_market_matrix.py",
+    "data/fixtures/shadow_activation_cases.json":
+        "scripts/audit/audit_saturday_shadow_production_integration.py",
+    "data/research/shadow_component_bridge_v1/model_artifacts.json":
+        "scripts/audit/audit_saturday_shadow_production_integration.py",
+    "data/research/shadow_component_bridge_v1/parity_report.json":
+        "scripts/audit/audit_saturday_shadow_production_integration.py",
+    "data/research/shadow_validated_models_v1/model_artifacts.json":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/research/sp_plus_total_movement/sp_plus_component_features.csv":
+        "scripts/audit/audit_saturday_shadow_production_integration.py",
+}
+SHADOW_GENERATED_INPUTS = {
+    "data/research/shadow_live_feature_constructor/team_game_features_2026.json":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/ratings/market_implied_target_excluded_2026.json":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/ratings/market_implied_ratings_latest.csv":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/ratings/ratings_latest.csv":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/ratings/fundamental_market_rating_comparison.csv":
+        "scripts/site/build_saturday_shadow_lines.py",
+    "data/site/current_game_projection_contract.json":
+        "scripts/site/build_saturday_shadow_lines.py",
+    "data/site/matchups_view.json":
+        "scripts/site/build_saturday_shadow_component_predictions.py",
+    "data/site/postgame_shadow_replay.json":
+        "scripts/site/build_saturday_shadow_lines.py",
+    "data/site/postgame_shadow_updates.json":
+        "scripts/site/build_saturday_shadow_lines.py",
+    "data/site/saturday_shadow_component_predictions.json":
+        "scripts/site/build_saturday_shadow_lines.py",
+    "data/site/saturday_shadow_lines.json":
+        "scripts/audit/audit_saturday_shadow_production_integration.py",
+}
 
 
 def manifest_paths(path: Path) -> list[str]:
@@ -177,6 +215,37 @@ def main() -> int:
         elif relative not in path_set:
             errors.append(f"public build static dependency missing from manifest: {relative}")
 
+    for relative, owner in sorted(SHADOW_STATIC_DEPENDENCIES.items()):
+        source = ROOT / relative
+        owner_path = ROOT / owner
+        if not source.is_file() or source.is_symlink():
+            errors.append(f"Shadow static dependency is not a regular file: {relative}")
+        elif relative not in path_set:
+            errors.append(f"Shadow static dependency missing from manifest: {relative}")
+        try:
+            owner_text = owner_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"cannot inspect Shadow dependency owner {owner}: {exc}")
+        else:
+            if relative not in owner_text:
+                errors.append(
+                    f"Shadow dependency ownership drift: {relative} is not referenced by {owner}"
+                )
+
+    for relative, owner in sorted(SHADOW_GENERATED_INPUTS.items()):
+        if relative in path_set:
+            errors.append(f"generated Shadow runtime input must not be deployed from MAIN: {relative}")
+        owner_path = ROOT / owner
+        try:
+            owner_text = owner_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"cannot inspect generated Shadow input owner {owner}: {exc}")
+        else:
+            if relative not in owner_text:
+                errors.append(
+                    f"generated Shadow input ownership drift: {relative} is not referenced by {owner}"
+                )
+
     public_builder_text = PUBLIC_BUILDER.read_text(encoding="utf-8")
     if "build_schedule_persistent.py" in public_builder_text:
         errors.append("AUTO-only schedule builder remains executable from public build")
@@ -206,6 +275,8 @@ def main() -> int:
     print(f"daily_registry_scripts={len(registry_paths)}")
     print(f"local_script_imports={len(import_dependencies)}")
     print(f"public_static_dependencies={len(public_static)}")
+    print(f"shadow_static_dependencies={len(SHADOW_STATIC_DEPENDENCIES)}")
+    print(f"shadow_generated_inputs={len(SHADOW_GENERATED_INPUTS)}")
     if args.target:
         print(f"target_parity_files={len(paths)}")
     return 0
