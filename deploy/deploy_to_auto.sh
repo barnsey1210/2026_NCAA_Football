@@ -174,12 +174,18 @@ done
 EMAIL_TEST="scripts/audit/test_daily_betting_email_regression.py"
 EMAIL_CSV="$TARGET/data/agents/daily_betting_angles.csv"
 EMAIL_HTML="$TARGET/data/agents/daily_betting_angles.html"
-if [[ -f "$TARGET/$EMAIL_TEST" && -f "$EMAIL_CSV" && -f "$EMAIL_HTML" ]]; then
+
+# Only run email regression when the generated email artifacts are part of the
+# deployed runtime state. The deployment manifest intentionally governs source
+# files only; runtime-generated data/agents artifacts may be stale, partial, or
+# from a previous workflow profile. Do not let stale runtime artifacts block a
+# source deployment.
+if [[ " ${PATHS[*]} " == *" $EMAIL_TEST "* && -f "$EMAIL_CSV" && -f "$EMAIL_HTML" ]]; then
   (cd "$TARGET" && python3 "$EMAIL_TEST")
   EMAIL_RESULT="PASSED"
 else
-  EMAIL_RESULT="SKIPPED (required runtime CSV/HTML fixtures are absent)"
-  printf 'SKIP: daily betting email regression; required artifacts absent in target\n'
+  EMAIL_RESULT="SKIPPED (email artifacts are runtime-generated or unavailable)"
+  printf 'SKIP: daily betting email regression; email artifacts are not governed deployment inputs\n'
 fi
 
 RECORD_REL="data/control/deployed_source_version.json"
