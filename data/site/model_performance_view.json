@@ -1,6 +1,6 @@
 {
   "schema_version": "model-performance-view-v2",
-  "built_at": "2026-08-18T02:24:35.872630+00:00",
+  "built_at": "2026-08-20T11:30:29.375655+00:00",
   "season": 2026,
   "status": "PRESEASON_NOT_STARTED",
   "tracking_started": false,
@@ -26,7 +26,7 @@
       "model_type": "individual",
       "status": "AVAILABLE",
       "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": true,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -52,7 +52,7 @@
       "model_type": "individual",
       "status": "AVAILABLE",
       "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": true,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -78,7 +78,7 @@
       "model_type": "individual",
       "status": "AVAILABLE",
       "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": true,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -104,7 +104,7 @@
       "model_type": "individual",
       "status": "STALE",
       "tracking_status": "STALE_SOURCE",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": true,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -128,9 +128,9 @@
       "display_name": "Sagarin",
       "market_type": "spread",
       "model_type": "individual",
-      "status": "NOT_YET_RELEASED",
-      "tracking_status": "NOT_ACTIVE_FOR_TRACKING",
-      "latest_source_timestamp": null,
+      "status": "STALE",
+      "tracking_status": "STALE_SOURCE",
+      "latest_source_timestamp": "2026-08-18T00:51:42Z",
       "default_visible": false,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -208,7 +208,7 @@
       "model_type": "individual",
       "status": "STALE",
       "tracking_status": "STALE_SOURCE",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": false,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -418,7 +418,7 @@
       "model_type": "individual",
       "status": "AVAILABLE",
       "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "default_visible": false,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -442,9 +442,9 @@
       "display_name": "Sagarin",
       "market_type": "total",
       "model_type": "individual",
-      "status": "NOT_YET_RELEASED",
-      "tracking_status": "NOT_ACTIVE_FOR_TRACKING",
-      "latest_source_timestamp": null,
+      "status": "STALE",
+      "tracking_status": "STALE_SOURCE",
+      "latest_source_timestamp": "2026-08-18T00:51:42Z",
       "default_visible": false,
       "rank": null,
       "ranking_status": "UNRANKED \u2014 SMALL SAMPLE",
@@ -649,10 +649,46 @@
   "opportunities": [],
   "predictions": [],
   "model_availability": {
+    "FPI": {
+      "status": "AVAILABLE",
+      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
+      "game_projections": false,
+      "team_ratings": true,
+      "spread_available": true,
+      "total_available": false
+    },
+    "SP+": {
+      "status": "AVAILABLE",
+      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
+      "game_projections": false,
+      "team_ratings": true,
+      "spread_available": true,
+      "total_available": false
+    },
+    "Sagarin Rating": {
+      "status": "AVAILABLE",
+      "tracking_status": "TEAM_RATINGS_AVAILABLE",
+      "latest_source_timestamp": "2026-08-18T00:51:42Z",
+      "game_projections": false,
+      "team_ratings": true,
+      "spread_available": true,
+      "total_available": false
+    },
+    "TeamRankings": {
+      "status": "AVAILABLE",
+      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
+      "game_projections": false,
+      "team_ratings": true,
+      "spread_available": true,
+      "total_available": false
+    },
     "Brad Powers": {
       "status": "STALE",
       "tracking_status": "STALE_SOURCE",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "game_projections": false,
       "team_ratings": true,
       "spread_available": false,
@@ -667,19 +703,10 @@
       "spread_available": false,
       "total_available": false
     },
-    "FPI": {
-      "status": "AVAILABLE",
-      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
-      "game_projections": false,
-      "team_ratings": true,
-      "spread_available": true,
-      "total_available": false
-    },
     "KFord": {
       "status": "STALE",
       "tracking_status": "STALE_SOURCE",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+      "latest_source_timestamp": "2026-08-19T03:00:37Z",
       "game_projections": false,
       "team_ratings": true,
       "spread_available": false,
@@ -694,22 +721,22 @@
       "spread_available": false,
       "total_available": false
     },
-    "SP+": {
-      "status": "AVAILABLE",
-      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+    "Sagarin Predictor": {
+      "status": "STALE",
+      "tracking_status": "STALE_SOURCE",
+      "latest_source_timestamp": "2026-08-18T00:51:42Z",
       "game_projections": false,
       "team_ratings": true,
-      "spread_available": true,
+      "spread_available": false,
       "total_available": false
     },
-    "TeamRankings": {
-      "status": "AVAILABLE",
-      "tracking_status": "ACTIVE_FOR_SPREAD_TRACKING",
-      "latest_source_timestamp": "2026-08-18T00:56:01Z",
+    "Sagarin": {
+      "status": "STALE",
+      "tracking_status": "STALE_SOURCE",
+      "latest_source_timestamp": "2026-08-18T00:51:42Z",
       "game_projections": false,
       "team_ratings": true,
-      "spread_available": true,
+      "spread_available": false,
       "total_available": false
     },
     "Massey": {
@@ -779,14 +806,6 @@
     "Closing Market": {
       "status": "BENCHMARK",
       "tracking_status": "MARKET_BENCHMARK"
-    },
-    "Sagarin": {
-      "status": "NOT_YET_RELEASED",
-      "tracking_status": "NOT_ACTIVE_FOR_TRACKING",
-      "game_projections": false,
-      "team_ratings": false,
-      "spread_available": false,
-      "total_available": false
     },
     "DRatings": {
       "status": "NOT_YET_RELEASED",
