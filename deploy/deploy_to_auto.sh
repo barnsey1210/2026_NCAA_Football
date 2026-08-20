@@ -183,7 +183,7 @@ EMAIL_HTML="$TARGET/data/agents/daily_betting_angles.html"
 # files only; runtime-generated data/agents artifacts may be stale, partial, or
 # from a previous workflow profile. Do not let stale runtime artifacts block a
 # source deployment.
-if [[ " ${PATHS[*]} " == *" $EMAIL_TEST "* && -f "$EMAIL_CSV" && -f "$EMAIL_HTML" ]]; then
+if [[ " ${PATHS[*]} " == *" $EMAIL_TEST "* && " ${PATHS[*]} " == *" data/agents/daily_betting_angles.csv "* && " ${PATHS[*]} " == *" data/agents/daily_betting_angles.html "* ]]; then
   (cd "$TARGET" && python3 "$EMAIL_TEST")
   EMAIL_RESULT="PASSED"
 else
