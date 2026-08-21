@@ -23,6 +23,18 @@ PAGES = {
 PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
 BUILD_VERSION = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 PUBLIC_ALIASES = {"simulations.html": "sim_lab.html"}
+ROOT_PUBLICATION_PAGES = (
+    "index.html",
+    "ratings.html",
+    "odds.html",
+    "openers.html",
+    "matchups.html",
+    "futures.html",
+    "betting.html",
+    "schedule.html",
+    "conferences.html",
+    "war-room.html",
+)
 
 
 def cache_bust_site_json(text):
@@ -164,10 +176,6 @@ def main():
     # The approved Conference Logo Schedule is generated from current conference
     # workspace and matchup artifacts after shared page-health assets exist.
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_conference_logo_schedule.py')], check=True)
-    # Keep the canonical Odds publication artifact aligned with odds_v2.html;
-    # daily_market_update.sh publishes this root copy when it is present.
-    shutil.copy2(OUT/'odds.html', ROOT/'odds.html')
-
     for js_name in (
         'playoff_futures_tab.js',
         'dashboard_playoff_edges.js',
@@ -249,7 +257,21 @@ def finalize_public_shell():
     )
 
 
+def sync_root_publication_pages():
+    """Promote the final validated build candidates to GitHub Pages root files."""
+    for name in ROOT_PUBLICATION_PAGES:
+        source = OUT / name
+        target = ROOT / name
+        if not source.is_file():
+            raise RuntimeError(f"Required public build artifact is missing: {source}")
+        shutil.copy2(source, target)
+        if source.read_bytes() != target.read_bytes():
+            raise RuntimeError(f"Root publication parity failed after copy: {name}")
+        print(f"synced root publication artifact: {source} -> {target}")
+
+
 if __name__ == '__main__':
     main()
     _sync_openers_v2_public_artifacts()
     finalize_public_shell()
+    sync_root_publication_pages()
