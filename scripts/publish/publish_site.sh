@@ -83,6 +83,14 @@ if [[ -f "$RUNTIME_ROOT/scripts/publish/check_public_site.py" ]]; then
   )
 fi
 
+# Production artifact parity gate: root GitHub Pages files must match the validated build.
+if ! (
+  cd "$RUNTIME_ROOT"
+  python3 scripts/audit/audit_publication_parity.py
+); then
+  die "publication parity audit failed; blocking publication"
+fi
+
 python3 - "$PUBLIC_DIR/data/site/odds_screen_v2.json" "$MAX_ODDS_AGE_HOURS" <<'PY'
 from datetime import datetime, timezone
 from pathlib import Path
