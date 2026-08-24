@@ -500,8 +500,11 @@ def main() -> None:
         move_cards = build_move_cards(moves, limit=25)
 
     game_line_move_cards = build_game_line_move_cards(game_line_moves, limit=20)
-    if game_line_move_cards:
-        move_cards = move_cards + "\n" + game_line_move_cards
+    if not game_line_move_cards:
+        game_line_move_cards = (
+            '<p class="muted">No qualifying game-line moves matched a current '
+            'actionable edge for this run.</p>'
+        )
     game_cards = build_game_line_cards(angles, limit=18)
     arb_cards = build_arb_cards(arbs_display, limit=15)
 
@@ -636,6 +639,10 @@ def main() -> None:
     <h2>Daily Market Moves</h2>
     <p class="muted">Top win total and conference futures moves from the latest daily report. Cards include the move date and snapshot window.</p>
     {move_cards}
+
+    <h2>Game Line Moves</h2>
+    <p class="muted">Spread and total movement that matches a current actionable best-line edge.</p>
+    {game_line_move_cards}
 
     <h2>Game Line Edges</h2>
     <p class="muted">Top spread and total edges from Market Lab using available market prices. Confirm live prices before betting.</p>

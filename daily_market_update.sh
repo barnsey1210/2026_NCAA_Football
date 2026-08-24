@@ -231,6 +231,7 @@ RUN_ID="daily-$(date -u +%Y%m%dT%H%M%SZ)-$$"
 STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 CURRENT_STAGE=""
 RUN_FINALIZED=0
+EMAIL_REGRESSION_PASSED=1
 
 
 status_stage() {
@@ -433,8 +434,13 @@ PY2
   # STAGE: email_regression
   if stage_enabled "email_regression"; then
   stage_start "email_regression"
-  python3 scripts/audit/test_daily_betting_email_regression.py
-  stage_pass "email_regression"
+  if python3 scripts/audit/test_daily_betting_email_regression.py; then
+    stage_pass "email_regression"
+  else
+    EMAIL_REGRESSION_PASSED=0
+    stage_fail "email_regression" "email artifacts failed regression; email send blocked while independent publication stages continue"
+    echo "WARNING: email regression failed; skipping email delivery and continuing independent production stages"
+  fi
 
   # These legacy HTML injectors target index.html directly and therefore must
   # not run in the V2 daily path. Their production data is supplied by the
@@ -612,7 +618,10 @@ fi
   run_py "scripts/site/build_projection_source_status_view.py" "build_projection_source_status_view.py" || warn "projection source status view build failed"
   python3 scripts/postgame/build_shadow_team_game_features_2026.py
   python3 scripts/site/build_saturday_shadow_component_predictions.py
+  python3 scripts/projections/build_current_game_projection_contract.py
+  python3 scripts/site/build_matchups_view.py
   python3 scripts/site/build_saturday_shadow_lines.py
+  python3 scripts/audit/validate_projection_resolver.py
   python3 scripts/site/build_schedule_live_enrichment.py
   python3 scripts/audit/audit_market_shadow_production_layer.py
   python3 scripts/audit/audit_saturday_shadow_production_integration.py
@@ -657,7 +666,10 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   # STAGE: email_send
   if stage_enabled "email_send"; then
   stage_start "email_send"
-  if [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
+  if [ "$EMAIL_REGRESSION_PASSED" -ne 1 ]; then
+    echo "Email delivery skipped because the email regression gate failed"
+    stage_skip "email_send" "email regression failed"
+  elif [ "${NCAAF_SEND_EMAIL:-1}" = "0" ]; then
     echo "NCAAF_SEND_EMAIL=0: daily email build completed; sending skipped"
     stage_skip "email_send" "disabled by NCAAF_SEND_EMAIL=0"
   elif [ -n "${NCAAF_GMAIL_USER:-}" ] && [ -n "${NCAAF_GMAIL_APP_PASSWORD:-}" ] && [ -n "${NCAAF_EMAIL_TO:-}" ]; then
@@ -706,6 +718,7 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   python3 scripts/audit/audit_canonical_v2_index.py index.html
   python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
   python3 scripts/audit/audit_canonical_openers_drawer.py
+  python3 scripts/audit/audit_war_room_home_market_propagation.py
   python3 scripts/publish/check_public_site.py
   stage_pass "site_validation"
 

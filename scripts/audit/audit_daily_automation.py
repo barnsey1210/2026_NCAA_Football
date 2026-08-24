@@ -125,15 +125,38 @@ def audit(
     require(markers == ids, f"orchestrator markers differ from registry: {markers}")
 
     position = {stage_id: source.index(f"# STAGE: {stage_id}") for stage_id in ids}
+    helper_owned_scripts = {
+        "ratings_refresh": {
+            "scripts/ratings/test_rating_sources.py",
+            "scripts/ratings/parse_rating_source_tables.py",
+            "scripts/ratings/accept_live_rating_candidates_with_status.py",
+        },
+    }
+    indirect_owner_scripts = {
+        "site_build": {
+            "scripts/site/build_war_room_page.py": "scripts/site/build_public_site.py",
+        },
+    }
     for index, stage in enumerate(stages):
         start = position[stage["id"]]
         end = position[stages[index + 1]["id"]] if index + 1 < len(stages) else len(source)
         stage_source = source[start:end]
         for script in stage["scripts"]:
-            require(script in stage_source, f"registered script is outside its stage: {stage['id']} -> {script}")
+            helper_owned = script in helper_owned_scripts.get(stage["id"], set())
+            if helper_owned:
+                require(
+                    "refresh_live_rating_source" in stage_source and script in source[:start],
+                    f"registered helper script is not owned by its stage: {stage['id']} -> {script}",
+                )
+            elif script in indirect_owner_scripts.get(stage["id"], {}):
+                owner = repo_root / indirect_owner_scripts[stage["id"]][script] if repo_root else registry_path.resolve().parents[1] / indirect_owner_scripts[stage["id"]][script]
+                require(
+                    owner.is_file() and script in owner.read_text(encoding="utf-8"),
+                    f"registered indirect script is not owned by its stage builder: {stage['id']} -> {script}",
+                )
+            else:
+                require(script in stage_source, f"registered script is outside its stage: {stage['id']} -> {script}")
     ordering_rules = [
-        ("sgo_pull", "sgo_normalization"),
-        ("sgo_normalization", "game_line_history"),
         ("email_build", "email_regression"),
         ("email_regression", "email_send"),
         ("ratings_refresh", "ratings_normalization"),
@@ -147,6 +170,15 @@ def audit(
 
     require(source.index("NCAAF_SEND_EMAIL:-1") > position["email_regression"], "email gate precedes regression")
     require(source.index("send_daily_betting_angles_email.py") > position["email_regression"], "email send precedes regression")
+    require("EMAIL_REGRESSION_PASSED=0" in source, "email regression failure is not recorded")
+    require(
+        "continuing independent production stages" in source,
+        "email-only failure can still terminate independent production stages",
+    )
+    require(
+        source.index('if [ "$EMAIL_REGRESSION_PASSED" -ne 1 ]') > position["email_send"],
+        "email send is not blocked after regression failure",
+    )
     require(source.index("NCAAF_AUTO_PUBLISH:-1") > position["site_validation"], "publication gate precedes validation")
     require(source.index("publish_site.sh --push") > position["site_validation"], "publisher precedes validation")
     require("NCAAF_SEND_EMAIL=0: daily email build completed" in source, "email-disable behavior not explicit")

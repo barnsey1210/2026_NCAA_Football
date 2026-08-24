@@ -139,6 +139,21 @@ class DailyAutomationAuditTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 self.audit_module.audit(broken, REGISTRY, launcher)
 
+    def test_email_regression_failure_isolated_from_publication_stages(self) -> None:
+        source = ORCHESTRATOR.read_text(encoding="utf-8")
+        regression_start = source.index("# STAGE: email_regression")
+        ratings_start = source.index("# STAGE: ratings_refresh")
+        email_block = source[regression_start:ratings_start]
+        self.assertIn("EMAIL_REGRESSION_PASSED=0", email_block)
+        self.assertIn("continuing independent production stages", email_block)
+        self.assertNotIn("exit 1", email_block)
+
+        email_send_start = source.index("# STAGE: email_send")
+        site_build_start = source.index("# STAGE: site_build")
+        email_send_block = source[email_send_start:site_build_start]
+        self.assertIn('if [ "$EMAIL_REGRESSION_PASSED" -ne 1 ]', email_send_block)
+        self.assertIn('stage_skip "email_send" "email regression failed"', email_send_block)
+
     def test_source_coverage_reports_runtime_only_without_failing(self) -> None:
         stages = [{"scripts": ["tracked.py", "runtime.py", "missing.py"]}]
         with tempfile.TemporaryDirectory() as repo_dir, tempfile.TemporaryDirectory() as runtime_dir:
