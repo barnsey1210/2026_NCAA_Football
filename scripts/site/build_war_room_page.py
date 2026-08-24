@@ -102,6 +102,7 @@ button,select{
 .dot.GREEN{background:var(--green);color:var(--green)}
 .dot.YELLOW{background:var(--yellow);color:var(--yellow)}
 .dot.RED{background:var(--red);color:var(--red)}
+.dot.GRAY{background:var(--muted);color:var(--muted)}
 
 .wr-btn{
   border:1px solid var(--line2);
@@ -206,6 +207,12 @@ button,select{
 .health-status.GREEN{color:var(--green)}
 .health-status.YELLOW{color:var(--yellow)}
 .health-status.RED{color:var(--red)}
+.health-status.GRAY{color:var(--muted)}
+
+.spread-label{
+  font-size:9px;
+  letter-spacing:-.2px;
+}
 
 .command-grid{
   display:grid;
@@ -1191,9 +1198,6 @@ function renderHealth(){
   const ratings =
     HEALTH?.ratings_health?.sources || {};
 
-  const shadow =
-    HEALTH?.shadow_health || {};
-
   const ratingOrder = [
     ['SP+', 'SP+'],
     ['FPI', 'FPI'],
@@ -1229,46 +1233,42 @@ function renderHealth(){
       `;
     }).join('');
 
-    const shadowDetail = [];
+    const weekProjectionHealth =
+      ACTIVE_WEEK === 'ALL'
+        ? null
+        : HEALTH?.projection_health?.by_week?.[String(ACTIVE_WEEK)] || null;
 
-    shadowDetail.push(
-      `${shadow.completed_team_updates ?? 0} upd`
-    );
+    const projectionItems = [
+      ['SPREAD', weekProjectionHealth?.spread],
+      ['TOTAL', weekProjectionHealth?.total],
+      ['SHADOW', weekProjectionHealth?.shadow]
+    ];
 
-    shadowDetail.push(
-      `${shadow.display_ready_games ?? 0} ready`
-    );
+    const projectionHtml = projectionItems.map(([label,h])=>{
+      const state = h || {
+        color:'GRAY',
+        status: ACTIVE_WEEK === 'ALL' ? 'SELECT WEEK' : 'UNAVAILABLE',
+        displayed_games:0
+      };
 
-    const shadowStamp =
-      shadow.shadow_lines_built_at ||
-      shadow.components_generated_at ||
-      shadow.postgame_built_at;
-
-    if(shadowStamp){
-      shadowDetail.push(
-        fmtStatusTimeET(shadowStamp)
-      );
-    }
+      return `
+        <span class="health-book">
+          ${healthDot(state.color)}
+          ${esc(label)}
+          <span class="health-status ${esc(state.color || '')}">
+            ${esc(state.status || 'UNAVAILABLE')}
+          </span>
+          <span class="health-detail">
+            · ${esc(state.displayed_games ?? 0)}g
+          </span>
+        </span>
+      `;
+    }).join('');
 
     ratingsStrip.innerHTML =
       `<span class="health-title">RATINGS / MODEL HEALTH</span>` +
       ratingHtml +
-      `
-        <span class="health-book">
-          ${healthDot(shadow.color)}
-          SHADOW
-          <span class="health-status ${esc(shadow.color || '')}">
-            ${esc(
-              shadow.status === 'WAITING_FOR_COMPLETED_GAMES'
-                ? 'WAITING'
-                : shadow.status || 'UNKNOWN'
-            )}
-          </span>
-          <span class="health-detail">
-            · ${esc(shadowDetail.join(' · '))}
-          </span>
-        </span>
-      `;
+      projectionHtml;
   }
 
   const q = HEALTH?.api_quota || {};
@@ -1465,18 +1465,18 @@ function renderHead(){
         DATE / MATCHUP ${sortArrow('date')}
       </th>
 
-      <th class="model-col">SPR<br>MODEL</th>
-      <th class="shadow-col">SPR<br>SHADOW</th>
+      <th class="model-col"><span class="spread-label">SPREAD</span><br>MODEL</th>
+      <th class="shadow-col"><span class="spread-label">SPREAD</span><br>SHADOW</th>
 
-      <th class="best-col">SPR<br>BEST</th>
-      <th class="exchange-col">SPR<br>EXCH</th>
-      <th class="pinn-col">SPR<br>PINN</th>
+      <th class="best-col"><span class="spread-label">SPREAD</span><br>BEST</th>
+      <th class="exchange-col"><span class="spread-label">SPREAD</span><br>EXCH</th>
+      <th class="pinn-col"><span class="spread-label">SPREAD</span><br>PINN</th>
 
       <th
         class="edge-col sortable"
         onclick="setSort('spread_edge')"
       >
-        SPR<br>EDGE ${sortArrow('spread_edge')}
+        <span class="spread-label">SPREAD</span><br>EDGE ${sortArrow('spread_edge')}
       </th>
 
       <th class="model-col">TOT<br>MODEL</th>
@@ -1864,6 +1864,7 @@ document.getElementById('scopeSelect').addEventListener(
     }
 
     fillWeeks();
+    renderHealth();
     renderMatrix();
   }
 );
@@ -1872,6 +1873,7 @@ document.getElementById('weekSelect').addEventListener(
   'change',
   e=>{
     ACTIVE_WEEK = e.target.value;
+    renderHealth();
     renderMatrix();
   }
 );

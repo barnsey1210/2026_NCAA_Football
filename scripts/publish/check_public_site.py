@@ -232,8 +232,35 @@ def validate(root: Path, out: Path) -> list[str]:
             )
         if filename == "war_room_market_matrix.json" and not isinstance(payload.get("games"), list):
             errors.append("War Room market matrix games must be a list")
-        if filename == "war_room_health.json" and not isinstance(payload.get("fast_market_refresh"), dict):
-            errors.append("War Room health fast_market_refresh must be an object")
+        if filename == "war_room_health.json":
+            if not isinstance(payload.get("fast_market_refresh"), dict):
+                errors.append("War Room health fast_market_refresh must be an object")
+
+            projection_health = payload.get("projection_health")
+            if not isinstance(projection_health, dict):
+                errors.append("War Room projection_health must be an object")
+            else:
+                if projection_health.get("scope") != "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY":
+                    errors.append("War Room projection_health scope must be FBS-vs-FBS latest board")
+
+                by_week = projection_health.get("by_week")
+                if not isinstance(by_week, dict) or not by_week:
+                    errors.append("War Room projection_health.by_week must be a nonempty object")
+                else:
+                    for week, health in by_week.items():
+                        if not isinstance(health, dict):
+                            errors.append(f"War Room Week {week} projection health must be an object")
+                            continue
+                        for market in ("spread", "total", "shadow"):
+                            state = health.get(market)
+                            if not isinstance(state, dict):
+                                errors.append(
+                                    f"War Room Week {week} projection health missing {market}"
+                                )
+                            elif not isinstance(state.get("displayed_games"), int):
+                                errors.append(
+                                    f"War Room Week {week} {market} health missing displayed_games"
+                                )
 
 
     conferences = out / "conferences.html"

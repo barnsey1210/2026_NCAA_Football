@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -13,8 +14,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.markets.build_current_market_contract import (
+    game_key,
+    normalize_team,
+    resolve_game_id,
+    site_date_from_timestamp,
+)
+
 THEODDS = ROOT / "data/war_room/odds/theodds_ncaaf_lines_2026_fast.csv"
 CONTRACT = ROOT / "data/site/current_market_contract.json"
+PROJECTIONS = ROOT / "data/site/current_game_projection_contract.json"
+FBS_UNIVERSE = ROOT / "data/ratings/ratings_preseason_2026.csv"
 OUT = ROOT / "data/site/war_room_health.json"
 
 QUOTA = (
@@ -82,6 +95,11 @@ REFERENCE = (
 WATCHED = (*BETTABLE, *EXCHANGES, *REFERENCE)
 
 GREEN_MARKET_COMPLETENESS = 0.95
+
+STANDARD_SPREAD = "standard_spread_five_source_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
+SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
 
 def parse_ts(value: str | None):
@@ -264,6 +282,216 @@ def load_json(path):
         return json.loads(path.read_text())
     except Exception:
         return {}
+
+
+def load_fbs_team_universe():
+    if not FBS_UNIVERSE.exists():
+        raise SystemExit(
+            f"Missing canonical 2026 FBS universe: {FBS_UNIVERSE}"
+        )
+
+    teams = {
+        normalize_team(row.get("team"))
+        for row in csv_records(FBS_UNIVERSE)
+        if str(row.get("team") or "").strip()
+    }
+
+    if len(teams) < 130:
+        raise SystemExit(
+            f"Unexpected FBS universe size: {len(teams)}"
+        )
+
+    return teams
+
+
+def model_health(games, model_id):
+    counts = Counter(
+        str(
+            game.get("projections", {})
+            .get(model_id, {})
+            .get("availability_status")
+            or "UNAVAILABLE"
+        )
+        for game in games
+    )
+    total = len(games)
+    official = counts.get("AVAILABLE", 0)
+    degraded = counts.get("AVAILABLE_DEGRADED", 0)
+    unavailable = total - official - degraded
+
+    if total == 0 or unavailable > 0:
+        status = "UNAVAILABLE"
+        color = "RED"
+    elif degraded > 0:
+        status = "DEGRADED"
+        color = "YELLOW"
+    else:
+        status = "OFFICIAL"
+        color = "GREEN"
+
+    return {
+        "status": status,
+        "color": color,
+        "displayed_games": total,
+        "official_games": official,
+        "degraded_games": degraded,
+        "unavailable_games": unavailable,
+        "availability_counts": dict(sorted(counts.items())),
+    }
+
+
+def shadow_model_health(games):
+    counts = Counter()
+
+    for game in games:
+        projections = game.get("projections", {})
+        spread_status = str(
+            projections.get(SHADOW_SPREAD, {})
+            .get("availability_status")
+            or "UNAVAILABLE"
+        )
+        total_status = str(
+            projections.get(SHADOW_TOTAL, {})
+            .get("availability_status")
+            or "UNAVAILABLE"
+        )
+        statuses = {spread_status, total_status}
+
+        if statuses == {"AVAILABLE"}:
+            counts["READY"] += 1
+        elif statuses <= {"AVAILABLE", "AVAILABLE_DEGRADED"}:
+            counts["DEGRADED"] += 1
+        elif statuses == {"NOT_YET_ACTIVATED"}:
+            counts["WAITING"] += 1
+        else:
+            counts["UNAVAILABLE"] += 1
+
+    total = len(games)
+
+    if total == 0 or counts.get("UNAVAILABLE", 0) > 0:
+        status = "UNAVAILABLE"
+        color = "RED"
+    elif counts.get("WAITING", 0) == total:
+        status = "WAITING"
+        color = "GRAY"
+    elif counts.get("READY", 0) == total:
+        status = "OFFICIAL"
+        color = "GREEN"
+    else:
+        status = "DEGRADED"
+        color = "YELLOW"
+
+    return {
+        "status": status,
+        "color": color,
+        "displayed_games": total,
+        "ready_games": counts.get("READY", 0),
+        "degraded_games": counts.get("DEGRADED", 0),
+        "waiting_games": counts.get("WAITING", 0),
+        "unavailable_games": counts.get("UNAVAILABLE", 0),
+        "availability_counts": dict(sorted(counts.items())),
+    }
+
+
+def build_projection_health(latest_rows):
+    if not PROJECTIONS.exists():
+        raise SystemExit(
+            f"Missing canonical projection contract: {PROJECTIONS}"
+        )
+
+    payload = load_json(PROJECTIONS)
+    projection_games = payload.get("games", [])
+    fbs_teams = load_fbs_team_universe()
+    identity = {}
+    key_to_game_id = {}
+    projection_by_gid = {}
+
+    for game in projection_games:
+        gid = str(game.get("game_id") or "")
+        if not gid:
+            continue
+
+        projection_by_gid[gid] = game
+        identity[gid] = {
+            "game_id": gid,
+            "date": str(game.get("date") or "")[:10],
+            "week": game.get("week"),
+            "away_team": game.get("away_team"),
+            "home_team": game.get("home_team"),
+        }
+        key_to_game_id[
+            game_key(
+                game.get("date"),
+                game.get("away_team"),
+                game.get("home_team"),
+            )
+        ] = gid
+
+    displayed_game_ids = set()
+    unmatched_provider_game_ids = set()
+
+    for row in latest_rows:
+        gid, _, _ = resolve_game_id(
+            [
+                site_date_from_timestamp(row.get("commence_time")),
+                str(row.get("commence_time") or "")[:10],
+            ],
+            row.get("away_team"),
+            row.get("home_team"),
+            identity,
+            key_to_game_id,
+        )
+
+        if gid:
+            displayed_game_ids.add(gid)
+        else:
+            provider_gid = str(row.get("game_id") or "").strip()
+            if provider_gid:
+                unmatched_provider_game_ids.add(provider_gid)
+
+    weekly_games = defaultdict(list)
+
+    for gid in displayed_game_ids:
+        game = projection_by_gid.get(gid)
+        if not game:
+            continue
+
+        if (
+            normalize_team(game.get("away_team")) not in fbs_teams
+            or normalize_team(game.get("home_team")) not in fbs_teams
+        ):
+            continue
+
+        weekly_games[str(game.get("week"))].append(game)
+
+    by_week = {}
+
+    for week, games in sorted(
+        weekly_games.items(),
+        key=lambda item: int(item[0]),
+    ):
+        by_week[week] = {
+            "week": integer(week),
+            "displayed_fbs_vs_fbs_games": len(games),
+            "spread": model_health(games, STANDARD_SPREAD),
+            "total": model_health(games, STANDARD_TOTAL),
+            "shadow": shadow_model_health(games),
+        }
+
+    return {
+        "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
+        "selection_policy": (
+            "Frontend selects the matching week entry. ALL WEEKS does not "
+            "aggregate season-wide projection health."
+        ),
+        "projection_contract_built_at": payload.get("built_at"),
+        "matched_fast_board_games": len(displayed_game_ids),
+        "unmatched_fast_board_games": len(unmatched_provider_game_ids),
+        "fbs_vs_fbs_games": sum(
+            len(games) for games in weekly_games.values()
+        ),
+        "by_week": by_week,
+    }
 
 
 def build_ratings_health():
@@ -673,6 +901,7 @@ def main():
 
     ratings_health = build_ratings_health()
     shadow_health = build_shadow_health()
+    projection_health = build_projection_health(latest_rows)
 
     books = {}
 
@@ -802,6 +1031,7 @@ def main():
         "api_quota": api_quota,
         "ratings_health": ratings_health,
         "shadow_health": shadow_health,
+        "projection_health": projection_health,
         "market_groups": {
             "bettable_sportsbooks": list(BETTABLE),
             "exchanges": list(EXCHANGES),

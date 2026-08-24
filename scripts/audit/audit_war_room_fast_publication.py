@@ -62,6 +62,33 @@ def main() -> None:
 
     health = payloads.get("war_room_health.json", {})
     matrix = payloads.get("war_room_market_matrix.json", {})
+    projection_health = health.get("projection_health")
+    if not isinstance(projection_health, dict):
+        errors.append("health projection_health must be an object")
+    else:
+        if projection_health.get("scope") != "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY":
+            errors.append("health projection scope is not latest-board FBS-vs-FBS")
+        by_week = projection_health.get("by_week")
+        if not isinstance(by_week, dict) or not by_week:
+            errors.append("health projection_health.by_week must be nonempty")
+        else:
+            for week, health_state in by_week.items():
+                for model in ("spread", "total", "shadow"):
+                    model_state = (
+                        health_state.get(model)
+                        if isinstance(health_state, dict)
+                        else None
+                    )
+                    if not isinstance(model_state, dict):
+                        errors.append(f"Week {week} missing {model} projection health")
+                        continue
+                    if model_state.get("status") not in {
+                        "OFFICIAL",
+                        "DEGRADED",
+                        "WAITING",
+                        "UNAVAILABLE",
+                    }:
+                        errors.append(f"Week {week} has invalid {model} projection status")
     health_refresh = health.get("fast_market_refresh") or {}
     matrix_refresh = matrix.get("fast_market_refresh") or {}
     refresh_ids = {health_refresh.get("refresh_id"), matrix_refresh.get("refresh_id")}
