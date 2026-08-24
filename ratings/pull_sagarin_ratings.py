@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import re
 import json
+import tempfile
 import pandas as pd
 import requests
 import urllib3
@@ -17,8 +18,21 @@ URL = "https://sagarin.com/sports/cfsend.htm"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 PRESEASON_DB = Path("data/snapshots/preseason/preseason_db.json")
 PRED_LATEST = OUTDIR / "sagarin_game_predictions_latest.csv"
+PRED_CANDIDATE = OUTDIR / "sagarin_game_predictions_candidate.csv"
 PRED_AUDIT = OUTDIR / "sagarin_game_predictions_parse_audit.csv"
 PRED_OBSERVED = OUTDIR / "sagarin_game_predictions_observed.csv"
+PRED_STATUS = OUTDIR / "sagarin_game_predictions_status.json"
+
+PREDICTION_REQUIRED_COLUMNS = {
+    "favorite",
+    "underdog",
+    "projection_variant",
+    "favorite_spread_rating",
+    "projected_total",
+    "game_id",
+    "source_url",
+    "pulled_at",
+}
 
 
 TEAM_ALIASES = {
@@ -169,8 +183,15 @@ def fetch():
 def detect_provider_season(html):
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n")
-    m = re.search(r"(?:FINAL\s+)?College Football\s+(\d{4})\s+ratings", text, flags=re.I)
-    return int(m.group(1)) if m else None
+    patterns = (
+        r"(?:FINAL\s+)?College Football\s+(\d{4})\s+(?:STARTING\s+)?ratings",
+        r"(\d{4})\s+College Football\s+(?:STARTING\s+)?ratings",
+    )
+    for pattern in patterns:
+        m = re.search(pattern, text, flags=re.I)
+        if m:
+            return int(m.group(1))
+    return None
 
 
 def norm_team_key(value):
@@ -199,11 +220,12 @@ def parse_sagarin_predictions(html, provider_season):
     section = text[pos:] if pos >= 0 else text
 
     row_re = re.compile(
-        r"^\s*(\d{1,4})\s+([A-Za-z]+)\s+(.+?)\s+"
+        r"^\s*(\d{1,4})\s+(?:(N|C)\s+)?(@\s+)?(.+?)\s+"
         r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+"
-        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(@)?\s*"
+        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(@\s+)?"
         r"(.+?)\s+(\d{2,5})\s+(\d{1,3})%\s+"
-        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*$"
+        r"(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)"
+        r"(?:\s+\d{1,3}%)?\s*$"
     )
 
     pair_index = canonical_2026_pair_index()
@@ -217,9 +239,9 @@ def parse_sagarin_predictions(html, provider_season):
         if not m:
             continue
 
-        favorite = canon_team(m.group(3))
-        underdog = canon_team(m.group(10))
-        spreads = [float(m.group(i)) for i in range(4, 9)]
+        favorite = canon_team(m.group(4))
+        underdog = canon_team(m.group(11))
+        spreads = [float(m.group(i)) for i in range(5, 10)]
         fav_key = norm_team_key(favorite)
         dog_key = norm_team_key(underdog)
         game = pair_index.get((fav_key, dog_key))
@@ -234,7 +256,10 @@ def parse_sagarin_predictions(html, provider_season):
             home_team = game.get("home_team")
             game_date = game.get("date")
             game_id = game.get("game_id")
-        elif m.group(9):
+        elif m.group(3):
+            away_team, home_team = underdog, favorite
+            game_date = game_id = ""
+        elif m.group(10):
             away_team, home_team = favorite, underdog
             game_date = game_id = ""
         else:
@@ -246,10 +271,15 @@ def parse_sagarin_predictions(html, provider_season):
             "season": provider_season,
             "source": "Sagarin Predictions",
             "rank": int(m.group(1)),
-            "class": m.group(2),
+            "class": m.group(2) or "",
             "favorite": favorite,
             "underdog": underdog,
-            "site_marker": "@" if m.group(9) else "",
+            "site_marker": (
+                "favorite_home" if m.group(3)
+                else "underdog_home" if m.group(10)
+                else "neutral" if m.group(2) == "N"
+                else ""
+            ),
             "away_team": away_team,
             "home_team": home_team,
             "game_date": game_date,
@@ -265,14 +295,14 @@ def parse_sagarin_predictions(html, provider_season):
             "favorite_golden_spread": spreads[2],
             "favorite_recent_spread": spreads[3],
             "favorite_strong_spread": spreads[4],
-            "moneyline": int(m.group(11)),
-            "favorite_win_prob": float(m.group(12)) / 100.0,
-            "raw_home_points": float(m.group(13)),
-            "raw_away_points": float(m.group(14)),
+            "moneyline": int(m.group(12)),
+            "favorite_win_prob": float(m.group(13)) / 100.0,
+            "raw_home_points": float(m.group(14)),
+            "raw_away_points": float(m.group(15)),
             "home_projected_points": None,
             "away_projected_points": None,
             "projected_spread_home": None,
-            "projected_total": float(m.group(15)),
+            "projected_total": float(m.group(16)),
             "source_url": URL + "#Predictions_with_Totals_and_Moneylines",
             "pulled_at": now_utc(),
             "notes": "Parsed from same Sagarin HTML pull; production-active only for provider season 2026 and canonical 2026 schedule matches.",
@@ -288,6 +318,95 @@ def parse_sagarin_predictions(html, provider_season):
         })
 
     return pd.DataFrame(parsed), pd.DataFrame(audits)
+
+
+def atomic_csv(frame, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", dir=path.parent, delete=False, encoding="utf-8", newline=""
+    ) as handle:
+        frame.to_csv(handle, index=False)
+        temporary = Path(handle.name)
+    temporary.replace(path)
+
+
+def atomic_json(path, payload):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", dir=path.parent, delete=False, encoding="utf-8"
+    ) as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    temporary.replace(path)
+
+
+def validate_prediction_candidate(frame, provider_season):
+    missing_columns = sorted(PREDICTION_REQUIRED_COLUMNS - set(frame.columns))
+    standard = (
+        frame[frame["projection_variant"].eq("standard")].copy()
+        if not missing_columns and not frame.empty
+        else pd.DataFrame()
+    )
+    active = (
+        standard[standard["game_id"].fillna("").astype(str).str.len().gt(0)].copy()
+        if not standard.empty
+        else pd.DataFrame()
+    )
+    rating_populated = (
+        int(pd.to_numeric(standard["favorite_spread_rating"], errors="coerce").notna().sum())
+        if not standard.empty else 0
+    )
+    total_populated = (
+        int(pd.to_numeric(standard["projected_total"], errors="coerce").notna().sum())
+        if not standard.empty else 0
+    )
+    total_distinct = (
+        int(pd.to_numeric(standard["projected_total"], errors="coerce").dropna().nunique())
+        if not standard.empty else 0
+    )
+    reasons = []
+    if provider_season != 2026:
+        reasons.append(f"provider season is {provider_season!r}, expected 2026")
+    if missing_columns:
+        reasons.append(f"missing required columns: {missing_columns}")
+    if standard.empty:
+        reasons.append("no standard prediction rows parsed")
+    if not standard.empty and rating_populated != len(standard):
+        reasons.append("Rating column is not populated for every standard row")
+    if not standard.empty and total_populated != len(standard):
+        reasons.append("Total column is not populated for every standard row")
+    if len(standard) > 1 and total_distinct < 2:
+        reasons.append("Total column is a blanket/default value without game-level variation")
+    if active.empty:
+        reasons.append("no standard prediction rows matched the canonical 2026 schedule")
+    return {
+        "valid": not reasons,
+        "status": "ACCEPTED" if not reasons else "REJECTED_PRESERVED_LAST_KNOWN_GOOD",
+        "provider_season": provider_season,
+        "parsed_rows": int(len(frame)),
+        "standard_rows": int(len(standard)),
+        "canonical_active_rows": int(len(active)),
+        "rating_rows_populated": rating_populated,
+        "total_rows_populated": total_populated,
+        "distinct_total_values": total_distinct,
+        "missing_columns": missing_columns,
+        "reasons": reasons,
+    }, active
+
+
+def promote_prediction_candidate(frame, provider_season, *, candidate_path=PRED_CANDIDATE,
+                                 latest_path=PRED_LATEST, status_path=PRED_STATUS):
+    validation, active = validate_prediction_candidate(frame, provider_season)
+    atomic_csv(active, candidate_path)
+    validation["checked_at"] = now_utc()
+    validation["candidate_artifact"] = str(candidate_path)
+    validation["accepted_artifact"] = str(latest_path)
+    validation["last_known_good_preserved"] = not validation["valid"] and latest_path.exists()
+    if validation["valid"]:
+        atomic_csv(active, latest_path)
+    atomic_json(status_path, validation)
+    return validation
 
 
 def parse_sagarin_text(html, provider_season=None):
@@ -392,29 +511,35 @@ def main():
     out.to_csv(out_path, index=False)
 
     pred_all, pred_audit = parse_sagarin_predictions(html, provider_season)
-    pred_all.to_csv(PRED_OBSERVED, index=False)
+    atomic_csv(pred_all, PRED_OBSERVED)
 
     if pred_audit.empty:
         pred_audit = pd.DataFrame(columns=[
             "status", "provider_season", "schedule_match_2026", "game_id", "line"
         ])
-    pred_audit.to_csv(PRED_AUDIT, index=False)
-
-    if provider_season == 2026 and not pred_all.empty:
-        active = pred_all[pred_all["game_id"].fillna("").astype(str).str.len().gt(0)].copy()
-    else:
-        active = pred_all.iloc[0:0].copy()
-    active.to_csv(PRED_LATEST, index=False)
+    validation = promote_prediction_candidate(pred_all, provider_season)
+    validation_row = {
+        "status": validation["status"],
+        "provider_season": provider_season,
+        "schedule_match_2026": validation["canonical_active_rows"],
+        "game_id": "",
+        "line": "; ".join(validation["reasons"]) or "candidate accepted",
+    }
+    pred_audit = pd.concat([pred_audit, pd.DataFrame([validation_row])], ignore_index=True)
+    atomic_csv(pred_audit, PRED_AUDIT)
 
     print("Rows:", len(out))
     print("Wrote:", out_path)
     print("Prediction rows observed:", len(pred_all))
-    print("Production 2026 prediction rows:", len(active))
+    print("Production candidate status:", validation["status"])
+    print("Production 2026 prediction rows:", validation["canonical_active_rows"])
     print("Wrote:", PRED_OBSERVED)
     print("Wrote:", PRED_LATEST)
     print("Wrote:", PRED_AUDIT)
-    if provider_season != 2026:
-        print("Sagarin game predictions not activated; provider season is", provider_season)
+    print("Wrote:", PRED_STATUS)
+    if not validation["valid"]:
+        print("Sagarin game prediction candidate rejected:", "; ".join(validation["reasons"]))
+        print("Preserved last-known-good production artifact:", PRED_LATEST)
 
     if len(out):
         print(out.head(20).to_string(index=False))

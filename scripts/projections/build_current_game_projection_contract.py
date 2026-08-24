@@ -29,11 +29,8 @@ from scripts.projections.projection_resolver import (
 DEFAULT_GAMES = ROOT / "data/snapshots/preseason/preseason_db.json"
 DEFAULT_SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
 DEFAULT_SHADOW = ROOT / "data/site/saturday_shadow_component_predictions.json"
-DEFAULT_SHADOW_SPEC = (
-    ROOT
-    / "data/research/historical/shadow/totals_oos_2024/"
-    "enhanced_spplus_od_frozen_model_specification.csv"
-)
+DEFAULT_SHADOW_SPEC_RELATIVE = "data/research/historical/shadow/totals_oos_2024/enhanced_spplus_od_frozen_model_specification.csv"
+DEFAULT_SHADOW_SPEC = ROOT / DEFAULT_SHADOW_SPEC_RELATIVE
 DEFAULT_OUT = ROOT / "data/site/current_game_projection_contract.json"
 DEFAULT_AUDIT = ROOT / "data/audits/current_game_projection_contract_audit.json"
 

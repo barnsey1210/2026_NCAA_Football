@@ -29,8 +29,8 @@ SHADOW_STATIC_DEPENDENCIES = {
         "scripts/audit/audit_saturday_shadow_production_integration.py",
     "data/research/shadow_validated_models_v1/model_artifacts.json":
         "scripts/site/build_saturday_shadow_component_predictions.py",
-    "data/research/sp_plus_total_movement/sp_plus_component_features.csv":
-        "scripts/audit/audit_saturday_shadow_production_integration.py",
+    "data/research/historical/shadow/totals_oos_2024/enhanced_spplus_od_frozen_model_specification.csv":
+        "scripts/projections/build_current_game_projection_contract.py",
 }
 SHADOW_GENERATED_INPUTS = {
     "data/research/shadow_live_feature_constructor/team_game_features_2026.json":

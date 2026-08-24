@@ -74,7 +74,7 @@ def main():
                     and close(row.get(f"{side}_predicted_sp_plus_offense_change"), 0.0)
                     and close(row.get(f"{side}_predicted_sp_plus_defense_change"), 0.0),
                 )
-            elif status == "postgame_model_update":
+            elif status == "postgame_validated_shadow":
                 postgame_sides.append((row, side))
                 check(f"completed team invokes estimator {row['game_id']} {side}", row.get(f"{side}_movement_estimator_invoked") is True)
             stamp = iso(row.get(f"{side}_sp_plus_snapshot_timestamp"))
@@ -117,9 +117,28 @@ def main():
     # In-memory mixed-state contract: one frozen postgame row and one canonical
     # preseason baseline. It never enters a production artifact.
     component = load_component_module()
-    feature = pd.read_csv(ROOT / "data/research/sp_plus_total_movement/sp_plus_component_features.csv", low_memory=False).iloc[0].to_dict()
+    fixture_artifact = json.loads(component.ARTIFACT.read_text())
+    fixture_models = [
+        "shadow_spread_spplus_update_v1",
+        "shadow_spread_sagarin_update_v1",
+        "shadow_total_spplus_offense_update_v1",
+        "shadow_total_spplus_defense_update_v1",
+    ]
+    feature = {}
+    for model_name in fixture_models:
+        model = fixture_artifact["models"][model_name]
+        for feature_name in model["feature_order"]:
+            feature.setdefault(feature_name, model["training_mean"][feature_name])
+    feature.update({
+        "validated_shadow_spread_ready": True,
+        "validated_shadow_total_ready": True,
+        "stale_spplus": feature.get("current_sp_plus_overall"),
+        "stale_sagarin_predictor": feature.get("current_sp_plus_overall"),
+        "stale_spplus_offense": feature.get("current_sp_offense"),
+        "stale_spplus_defense": feature.get("current_sp_defense"),
+    })
     baseline = next(iter(component.latest_sp_plus_rows().values()))
-    probe = {"_models": artifact["models"]}
+    probe = {"_models": fixture_artifact["models"]}
     component.apply_validated_shadow_state(
     probe,
     "away",
@@ -135,7 +154,7 @@ def main():
         baseline,
         baseline,
 )
-    check("mixed-state fixture", probe["away_component_status"] == "postgame_model_update" and probe["home_component_status"] == "preseason_baseline" and probe["away_movement_estimator_invoked"] is True and probe["home_movement_estimator_invoked"] is False)
+    check("mixed-state fixture", probe["away_component_status"] == "postgame_validated_shadow" and probe["home_component_status"] == "preseason_baseline" and probe["away_movement_estimator_invoked"] is True and probe["home_movement_estimator_invoked"] is False)
 
     fixture_payload = json.loads(FIXTURES.read_text())
     check("fixture file isolated", fixture_payload.get("fixture_only") is True and all(x.get("fixture_only") is True for x in fixture_payload.get("cases", [])))
@@ -164,7 +183,7 @@ def main():
         "games": len(rows),
         "internal_baseline_games": sum(r.get("internal_shadow_spread_baseline") is not None or r.get("internal_shadow_total_baseline") is not None for r in rows),
         "displayed_shadow_games": sum(r.get("shadow_display_ready") is True for r in rows),
-        "postgame_updated_games": sum(r.get("away_component_status") == "postgame_model_update" or r.get("home_component_status") == "postgame_model_update" for r in rows),
+        "postgame_updated_games": sum(r.get("away_component_status") == "postgame_validated_shadow" or r.get("home_component_status") == "postgame_validated_shadow" for r in rows),
         "independent_50_50_games": sum(r.get("market_readiness_state") == "independent_market_ready" for r in rows),
         "unavailable_games": sum(r.get("shadow_spread") is None for r in rows),
         "populated_totals": sum(r.get("shadow_total") is not None for r in rows),

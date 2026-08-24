@@ -406,7 +406,27 @@ def load_sagarin(idx):
     rows, audit = [], []
     if not SAGARIN.exists():
         return rows, [{"source":"Sagarin Predictions","status":"missing","rows":0}]
-    df = pd.read_csv(SAGARIN)
+    try:
+        df = pd.read_csv(SAGARIN)
+    except (pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
+        return rows, [{
+            "source": "Sagarin Predictions",
+            "status": "invalid/rejected; no accepted game-prediction artifact",
+            "rows": 0,
+            "detail": type(exc).__name__,
+        }]
+    required = {
+        "favorite", "away_team", "home_team", "projection_variant",
+        "projected_total", "source_url",
+    }
+    missing = sorted(required - set(df.columns))
+    if missing:
+        return rows, [{
+            "source": "Sagarin Predictions",
+            "status": "invalid/rejected; required columns missing",
+            "rows": 0,
+            "detail": ",".join(missing),
+        }]
     if df.empty:
         return rows, [{"source":"Sagarin Predictions","status":"empty/no active games","rows":0}]
     for _, r in df.iterrows():
