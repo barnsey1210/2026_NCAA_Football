@@ -14,7 +14,8 @@ OUT = ROOT / "data/audits/projection_fbs_production_coverage.json"
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
-DISPLAYABLE = {"AVAILABLE", "AVAILABLE_DEGRADED"}
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 
 
 def main():
@@ -33,16 +34,23 @@ def main():
         and g.get("home_team") in fbs
     ]
 
-    def model_summary(model_id):
+    def model_summary(model_id, degraded_model_id):
         statuses = Counter(
             g["projections"][model_id]["availability_status"]
             for g in production_games
         )
 
-        displayable = sum(
+        degraded_statuses = Counter(
+            g["projections"][degraded_model_id]["availability_status"]
+            for g in production_games
+        )
+        operational = sum(
             1
             for g in production_games
-            if g["projections"][model_id]["availability_status"] in DISPLAYABLE
+            if (
+                g["projections"][model_id]["availability_status"] == "AVAILABLE"
+                or g["projections"][degraded_model_id]["availability_status"] == "DEGRADED"
+            )
         )
 
         missing = [
@@ -57,23 +65,27 @@ def main():
                     g["projections"][model_id].get("component_values", {}),
             }
             for g in production_games
-            if g["projections"][model_id]["availability_status"] not in DISPLAYABLE
+            if (
+                g["projections"][model_id]["availability_status"] != "AVAILABLE"
+                and g["projections"][degraded_model_id]["availability_status"] != "DEGRADED"
+            )
         ]
 
         return {
             "games": len(production_games),
             "full_available": statuses.get("AVAILABLE", 0),
-            "degraded_available": statuses.get("AVAILABLE_DEGRADED", 0),
-            "displayable": displayable,
+            "degraded_available": degraded_statuses.get("DEGRADED", 0),
+            "displayable": operational,
             "coverage_pct":
-                100.0 * displayable / len(production_games)
+                100.0 * operational / len(production_games)
                 if production_games else 0.0,
             "status_counts": dict(statuses),
+            "degraded_status_counts": dict(degraded_statuses),
             "missing_games": missing,
         }
 
-    spread = model_summary(STANDARD_SPREAD)
-    total = model_summary(STANDARD_TOTAL)
+    spread = model_summary(STANDARD_SPREAD, DEGRADED_SPREAD)
+    total = model_summary(STANDARD_TOTAL, DEGRADED_TOTAL)
 
     total_source_mix = Counter()
     for g in production_games:

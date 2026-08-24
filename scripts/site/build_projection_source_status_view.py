@@ -17,7 +17,8 @@ OUT = ROOT / "data/site/projection_source_status_view.json"
 
 SPREAD_ID = "standard_spread_five_source_v1"
 TOTAL_ID = "standard_total_sp_massey_sagarin_v1"
-DISPLAYABLE = {"AVAILABLE", "AVAILABLE_DEGRADED"}
+DEGRADED_SPREAD_ID = "standard_spread_degraded_v1"
+DEGRADED_TOTAL_ID = "standard_total_degraded_v1"
 
 SPREAD_COMPONENTS = [
     ("SP+", "SP+"),
@@ -37,12 +38,12 @@ SPREAD_WEIGHTS = {
 TOTAL_COMPONENTS = [
     ("SP+", "SP+"),
     ("Massey Dual", "Massey Dual"),
-    ("Sagarin", "Sagarin Total"),
+    ("Sagarin Total", "Sagarin Total"),
 ]
 TOTAL_WEIGHTS = {
     "SP+": 0.40,
     "Massey Dual": 0.40,
-    "Sagarin": 0.20,
+    "Sagarin Total": 0.20,
 }
 
 
@@ -82,23 +83,45 @@ def source_summary(games, model_id, components):
     return rows
 
 
-def model_summary(games, model_id, components, nominal_weights):
+def model_summary(
+    games,
+    model_id,
+    degraded_model_id,
+    components,
+    nominal_weights,
+):
     keys = [key for key, _ in components]
     statuses = Counter()
     mixes = Counter()
 
     for game in games:
         projection = game.get("projections", {}).get(model_id, {})
+        degraded_projection = game.get("projections", {}).get(
+            degraded_model_id,
+            {},
+        )
         status = projection.get("availability_status") or "UNKNOWN"
         statuses[status] += 1
-        resolution = projection.get("resolution") or {}
+        resolution = (
+            projection.get("resolution")
+            if status == "AVAILABLE"
+            else degraded_projection.get("resolution")
+        ) or {}
         present = set(resolution.get("available_components") or [])
         mix = tuple(key for key in keys if key in present)
-        if status in DISPLAYABLE:
+        if (
+            status == "AVAILABLE"
+            or degraded_projection.get("availability_status") == "DEGRADED"
+        ):
             mixes[mix] += 1
 
     full = statuses.get("AVAILABLE", 0)
-    degraded = statuses.get("AVAILABLE_DEGRADED", 0)
+    degraded = sum(
+        game.get("projections", {})
+        .get(degraded_model_id, {})
+        .get("availability_status") == "DEGRADED"
+        for game in games
+    )
     displayable = full + degraded
 
     if full and degraded:
@@ -113,6 +136,7 @@ def model_summary(games, model_id, components, nominal_weights):
     labels = dict(components)
     return {
         "model_id": model_id,
+        "degraded_model_id": degraded_model_id,
         "production_games": len(games),
         "full_available": full,
         "degraded_available": degraded,
@@ -238,10 +262,18 @@ def main():
         "production_scope": "FBS_VS_FBS",
         "production_games": len(production),
         "standard_spread": model_summary(
-            production, SPREAD_ID, SPREAD_COMPONENTS, SPREAD_WEIGHTS
+            production,
+            SPREAD_ID,
+            DEGRADED_SPREAD_ID,
+            SPREAD_COMPONENTS,
+            SPREAD_WEIGHTS,
         ),
         "standard_total": model_summary(
-            production, TOTAL_ID, TOTAL_COMPONENTS, TOTAL_WEIGHTS
+            production,
+            TOTAL_ID,
+            DEGRADED_TOTAL_ID,
+            TOTAL_COMPONENTS,
+            TOTAL_WEIGHTS,
         ),
         "game_prediction_feeds": game_prediction_feed_status(production_ids),
         "source_library_note": (

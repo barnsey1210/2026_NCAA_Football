@@ -45,11 +45,13 @@
       "required_model_ids": [
         "standard_spread_five_source_v1",
         "standard_total_sp_massey_sagarin_v1",
+        "standard_spread_degraded_v1",
+        "standard_total_degraded_v1",
         "shadow_spread_sp_sagarin_v1",
         "shadow_total_enhanced_spplus_od_v1"
       ],
-      "missing_component_policy": "MISSING_COMPONENT_NEVER_RENORMALIZE",
-      "fallback_policy": "NO_SUBSTITUTIONS_UNAVAILABLE_MODELS_REMAIN_UNAVAILABLE",
+      "missing_component_policy": "OFFICIAL_MODELS_STRICT_SEPARATE_DEGRADED_IDENTITIES",
+      "fallback_policy": "OFFICIAL_RESOLVER_AVAILABLE_ONLY_OPERATIONAL_SELECTOR_MAY_USE_EXPLICIT_DEGRADED_MODEL",
       "sign_policy": "explicit_value_home_margin_and_value_home_line"
     },
     "current_market": {

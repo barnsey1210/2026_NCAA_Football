@@ -61,7 +61,7 @@ def main():
     status_date=max((r.get("snapshot_date","") for r in rows(paths["ratings_status"])),default="")
     checks.append({"area":"ratings","name":"ratings_status_freshness","status":"PASS" if latest_date==status_date else "STALE_DERIVED_ARTIFACT","ratings_latest":latest_date,"ratings_status":status_date})
     projections=load(paths["canonical_game_projections"]); projection_games=projections.get("games",[])
-    required_models={"standard_spread_five_source_v1","standard_total_sp_massey_sagarin_v1","shadow_spread_sp_sagarin_v1","shadow_total_enhanced_spplus_od_v1"}
+    required_models={"standard_spread_five_source_v1","standard_total_sp_massey_sagarin_v1","standard_spread_degraded_v1","standard_total_degraded_v1","shadow_spread_sp_sagarin_v1","shadow_total_enhanced_spplus_od_v1"}
     projection_ids=[str(x.get("game_id")) for x in projection_games]
     projection_ok=(
         projections.get("schema_version")=="current-game-projection-contract-v1"
@@ -79,6 +79,10 @@ def main():
                 and result.get("selection_status") in {"AVAILABLE", "UNAVAILABLE"}
                 for result in x.get("resolved_projections", {}).values()
             )
+            for x in projection_games
+        )
+        and all(
+            set(x.get("operational_projections", {})) == {"spread", "total"}
             for x in projection_games
         )
     )

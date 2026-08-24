@@ -22,6 +22,7 @@ from scripts.projections.projection_resolver import (
     index_contract,
     load_contract,
     resolve_game,
+    resolve_operational_game,
 )
 
 CONFIG = ROOT / "config/market_shadow_production.json"
@@ -212,8 +213,16 @@ def main():
         component = components.get(g["game_id"], {})
         shadow_spread_resolution = resolve_game(projection_index, g["game_id"], SHADOW_SPREAD)
         shadow_total_resolution = resolve_game(projection_index, g["game_id"], SHADOW_TOTAL)
-        standard_spread_resolution = resolve_game(projection_index, g["game_id"], STANDARD_SPREAD)
-        standard_total_resolution = resolve_game(projection_index, g["game_id"], STANDARD_TOTAL)
+        standard_spread_resolution = resolve_operational_game(
+            projection_index,
+            g["game_id"],
+            STANDARD_SPREAD,
+        )
+        standard_total_resolution = resolve_operational_game(
+            projection_index,
+            g["game_id"],
+            STANDARD_TOTAL,
+        )
         shadow_spread = num(shadow_spread_resolution.get("value_home_line"))
         display_ready = (
             shadow_spread_resolution.get("selection_status") == "AVAILABLE"
@@ -325,7 +334,11 @@ def main():
             "total_value_tier": component.get("total_value_tier"),
             "total_value_label": component.get("total_value_label", "Unavailable"),
             "current_model_spread": standard_spread_resolution.get("value_home_line"),
+            "current_model_spread_id": standard_spread_resolution.get("model_id"),
+            "current_model_spread_authority": standard_spread_resolution.get("authority"),
             "current_model_total": standard_total_resolution.get("value_total"),
+            "current_model_total_id": standard_total_resolution.get("model_id"),
+            "current_model_total_authority": standard_total_resolution.get("authority"),
             "current_market_spread": g.get("opening_spread"),
             "current_market_total": g.get("opening_total"),
             "predicted_market_rating_spread": num(component.get("predicted_market_rating_spread")),

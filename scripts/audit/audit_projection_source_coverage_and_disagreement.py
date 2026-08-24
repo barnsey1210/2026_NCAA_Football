@@ -28,6 +28,8 @@ OUT_REPORT = ROOT / "docs/PROJECTION_SOURCE_COVERAGE_AND_DISAGREEMENT_REPORT.md"
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
@@ -133,7 +135,11 @@ def main():
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     games = contract["games"]
     game_count = len(games)
-    definitions = contract["model_definitions"]
+    definitions = {
+        model_id: definition
+        for model_id, definition in contract["model_definitions"].items()
+        if model_id not in {DEGRADED_SPREAD, DEGRADED_TOTAL}
+    }
 
     coverage_rows = []
     model_game_rows = {}
@@ -181,17 +187,28 @@ def main():
     spread_rows = model_game_rows[STANDARD_SPREAD]
     spread_ranges_2plus = [r["provider_range"] for r in spread_rows if r["provider_range"] is not None]
     spread_complete = [r for r in spread_rows if r["availability_status"] == "AVAILABLE"]
-    spread_degraded = [r for r in spread_rows if r["availability_status"] == "AVAILABLE_DEGRADED"]
-    spread_displayable = [r for r in spread_rows if r["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"}]
+    spread_degraded = [
+        g["projections"][DEGRADED_SPREAD]
+        for g in games
+        if g["projections"][DEGRADED_SPREAD]["availability_status"] == "DEGRADED"
+    ]
+    spread_displayable = spread_complete + spread_degraded
 
     total_rows = model_game_rows[STANDARD_TOTAL]
     before_massey_current = sum(
-        finite(r["values"].get("SP+")) is not None and finite(r["values"].get("Sagarin")) is not None
+        finite(r["values"].get("SP+")) is not None and finite(r["values"].get("Sagarin Total")) is not None
         for r in total_rows
     )
-    after_massey_current = sum(r["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"} for r in total_rows)
+    after_massey_current = sum(
+        g["projections"][STANDARD_TOTAL]["availability_status"] == "AVAILABLE"
+        or g["projections"][DEGRADED_TOTAL]["availability_status"] == "DEGRADED"
+        for g in games
+    )
     total_full_available = sum(r["availability_status"] == "AVAILABLE" for r in total_rows)
-    total_degraded_available = sum(r["availability_status"] == "AVAILABLE_DEGRADED" for r in total_rows)
+    total_degraded_available = sum(
+        g["projections"][DEGRADED_TOTAL]["availability_status"] == "DEGRADED"
+        for g in games
+    )
 
     current_massey = sources[sources["source"].eq("Massey Games")].copy()
     for col in ["total", "away_score", "home_score"]:
@@ -237,9 +254,15 @@ def main():
     model_availability = {
         model_id: {
             status: sum(g["projections"][model_id]["availability_status"] == status for g in games)
-            for status in ("AVAILABLE", "AVAILABLE_DEGRADED", "MISSING_COMPONENT", "NOT_YET_ACTIVATED")
+            for status in (
+                "AVAILABLE",
+                "DEGRADED",
+                "MISSING_COMPONENT",
+                "NOT_APPLICABLE",
+                "NOT_YET_ACTIVATED",
+            )
         }
-        for model_id in definitions
+        for model_id in contract["model_definitions"]
     }
 
     payload = {
@@ -267,8 +290,8 @@ def main():
         "current_2026_massey_integration": current_massey_validation,
         "current_2026_before_after_massey": {
             "before_massey_spplus_sagarin_overlap": before_massey_current,
-            "after_massey_strict_three_source_available": after_massey_current,
-            "incremental_available_games": after_massey_current - before_massey_current,
+            "official_strict_three_source_available": total_full_available,
+            "operational_degraded_displayable": after_massey_current,
             "disagreement_analysis_status": "NO_COMPARABLE_CURRENT_OVERLAP",
             "reason": "No current game has both explicit SP+ and Sagarin total components; no substitute baseline was created.",
         },
@@ -299,7 +322,7 @@ def main():
         for r in coverage_rows
     )
     availability_lines = "\n".join(
-        f"| {model_id} | {counts['AVAILABLE']} | {counts['MISSING_COMPONENT']} | {counts['NOT_YET_ACTIVATED']} |"
+        f"| {model_id} | {counts['AVAILABLE']} | {counts['DEGRADED']} | {counts['MISSING_COMPONENT']} | {counts['NOT_YET_ACTIVATED']} |"
         for model_id, counts in model_availability.items()
     )
     spread_pairwise_lines = "\n".join(
@@ -315,10 +338,10 @@ Mode: offline; no UI, model formula, acquisition, or provider changes
 
 - The canonical contract contains {game_count} unique scheduled games.
 - Standard Spread is available for {model_availability[STANDARD_SPREAD]['AVAILABLE']} games.
-- Standard Total is available for {after_massey_current} games.
+- Official Standard Total is available for {total_full_available} games; the separate degraded identity is operational for {total_degraded_available} games.
 - Both live Shadow models remain unavailable.
 - Massey Dual is present in {current_massey_validation['contract_rows_with_massey_dual']} contract rows and propagates with maximum arithmetic difference {fmt(current_massey_validation['maximum_contract_propagation_difference'], 12)}.
-- Current 2026 before/after Standard Total disagreement is **not estimable**: explicit SP+ plus Sagarin total overlap is {before_massey_current}, so no substitute or renormalized production model was created.
+- Current 2026 before/after Standard Total disagreement is **not estimable**: explicit SP+ plus Sagarin total overlap is {before_massey_current}. The official model remains unavailable; renormalized estimates are labeled operational degraded.
 
 ## Canonical source coverage and weights
 
@@ -328,8 +351,8 @@ Mode: offline; no UI, model formula, acquisition, or provider changes
 
 ## Strict model availability
 
-| Model | Available | Missing component | Not yet activated |
-|---|---:|---:|---:|
+| Model | Official available | Degraded | Missing component | Not yet activated |
+|---|---:|---:|---:|---:|
 {availability_lines}
 
 ## Spread disagreement
@@ -364,8 +387,8 @@ The integration arithmetic is valid, but the missing normalized pull timestamps 
 ### Current 2026
 
 - Before-Massey SP+/Sagarin overlap: {before_massey_current}.
-- After-Massey strict three-source availability: {after_massey_current}.
-- Incremental available games: {after_massey_current - before_massey_current}.
+- Official strict three-source availability: {total_full_available}.
+- Separate operational degraded estimates: {total_degraded_available}.
 
 No current disagreement estimate is reported because there is no comparable SP+/Sagarin total cohort. Generic legacy totals were not substituted.
 
@@ -386,8 +409,8 @@ Massey Dual is correctly integrated as a 40% required component, but its presenc
         "status": payload["status"],
         "canonical_games": game_count,
         "standard_spread_full_available": model_availability[STANDARD_SPREAD]["AVAILABLE"],
-        "standard_spread_degraded_available": model_availability[STANDARD_SPREAD]["AVAILABLE_DEGRADED"],
-        "standard_spread_displayable": (model_availability[STANDARD_SPREAD]["AVAILABLE"] + model_availability[STANDARD_SPREAD]["AVAILABLE_DEGRADED"]),
+        "standard_spread_degraded_available": model_availability[DEGRADED_SPREAD]["DEGRADED"],
+        "standard_spread_displayable": (model_availability[STANDARD_SPREAD]["AVAILABLE"] + model_availability[DEGRADED_SPREAD]["DEGRADED"]),
         "standard_total_full_available": total_full_available,
         "standard_total_degraded_available": total_degraded_available,
         "standard_total_displayable": after_massey_current,

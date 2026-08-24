@@ -21,7 +21,10 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.projections.projection_resolver import resolve_projection
+from scripts.projections.projection_resolver import (
+    resolve_operational_projection,
+    resolve_projection,
+)
 
 DEFAULT_GAMES = ROOT / "data/snapshots/preseason/preseason_db.json"
 DEFAULT_SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
@@ -36,6 +39,8 @@ DEFAULT_AUDIT = ROOT / "data/audits/current_game_projection_contract_audit.json"
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
@@ -46,7 +51,7 @@ SPREAD_COMPONENTS = (
     "Sagarin Rating",
     "DRatings",
 )
-TOTAL_COMPONENTS = ("SP+", "Massey Dual", "Sagarin")
+TOTAL_COMPONENTS = ("SP+", "Massey Dual", "Sagarin Total")
 SHADOW_SPREAD_COMPONENTS = ("Shadow SP+", "Shadow Sagarin")
 SHADOW_TOTAL_COMPONENTS = (
     "updated home SP+ offense",
@@ -162,6 +167,12 @@ def projection(
     value_home_line: float | None = None,
     value_total: float | None = None,
     extra_status: dict[str, Any] | None = None,
+    authority: str | None = None,
+    status_label: str | None = None,
+    value: float | None = None,
+    method: str | None = None,
+    degraded_reason: str | None = None,
+    confidence_status: str | None = None,
 ) -> dict[str, Any]:
     statuses: dict[str, Any] = component_status(values)
     resolution = None
@@ -182,7 +193,7 @@ def projection(
             for key, value in extra_status.items()
             if key not in resolution_keys
         })
-    return {
+    result = {
         "model_id": model_id,
         "formula_version": "v1",
         "formula_status": formula_status,
@@ -205,6 +216,26 @@ def projection(
         },
         "validation_status": validation_status,
     }
+    if authority is not None:
+        result["authority"] = authority
+    if status_label is not None:
+        result["status"] = status_label
+    if value is not None:
+        result["value"] = value
+    if method is not None:
+        result["method"] = method
+    if degraded_reason is not None:
+        result["degraded_reason"] = degraded_reason
+    if confidence_status is not None:
+        result["confidence_status"] = confidence_status
+    if extra_status:
+        result["sources_available"] = list(
+            extra_status.get("available_components") or []
+        )
+        result["missing_sources"] = list(
+            extra_status.get("missing_components") or []
+        )
+    return result
 
 
 def atomic_json(path: Path, payload: dict[str, Any]) -> None:
@@ -282,7 +313,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     output_games = []
 
     spread_weights = {name: 0.20 for name in SPREAD_COMPONENTS}
-    total_weights = {"SP+": 0.40, "Massey Dual": 0.40, "Sagarin": 0.20}
+    total_weights = {"SP+": 0.40, "Massey Dual": 0.40, "Sagarin Total": 0.20}
     shadow_spread_weights = {name: 0.50 for name in SHADOW_SPREAD_COMPONENTS}
     shadow_total_weights = {name: 0.50 for name in SHADOW_TOTAL_COMPONENTS}
 
@@ -296,8 +327,11 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             name: finite(game_sources.get(name, {}).get("spread_home"))
             for name in SPREAD_COMPONENTS
         }
-        spread_margin = fixed_weight_value(spread_values, spread_weights)
-        if spread_margin is not None:
+        official_spread_margin = fixed_weight_value(
+            spread_values,
+            spread_weights,
+        )
+        if official_spread_margin is not None:
             spread_resolution = {
                 "mode": "FULL",
                 "available_components": list(spread_values),
@@ -305,6 +339,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 "weights_used": spread_weights,
             }
             spread_availability = "AVAILABLE"
+            degraded_margin = None
+            degraded_weights = {}
+            degraded_spread_resolution = {
+                "mode": "NOT_APPLICABLE_OFFICIAL_AVAILABLE",
+                "available_components": list(spread_values),
+                "missing_components": [],
+                "weights_used": {},
+            }
+            degraded_spread_availability = "NOT_APPLICABLE"
         else:
             (
                 degraded_margin,
@@ -313,23 +356,28 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 missing_components,
             ) = renormalized_weight_value(spread_values, spread_weights)
 
-            if degraded_margin is not None:
-                spread_margin = degraded_margin
-                spread_resolution = {
-                    "mode": "DEGRADED_RENORMALIZED",
-                    "available_components": available_components,
-                    "missing_components": missing_components,
-                    "weights_used": degraded_weights,
-                }
-                spread_availability = "AVAILABLE_DEGRADED"
-            else:
-                spread_resolution = {
-                    "mode": "UNAVAILABLE",
-                    "available_components": available_components,
-                    "missing_components": missing_components,
-                    "weights_used": {},
-                }
-                spread_availability = "MISSING_COMPONENT"
+            spread_resolution = {
+                "mode": "STRICT_REQUIRED_COMPONENTS_MISSING",
+                "available_components": available_components,
+                "missing_components": missing_components,
+                "weights_used": {},
+            }
+            spread_availability = "MISSING_COMPONENT"
+            degraded_spread_resolution = {
+                "mode": (
+                    "DEGRADED_RENORMALIZED"
+                    if degraded_margin is not None
+                    else "UNAVAILABLE"
+                ),
+                "available_components": available_components,
+                "missing_components": missing_components,
+                "weights_used": degraded_weights,
+            }
+            degraded_spread_availability = (
+                "DEGRADED"
+                if degraded_margin is not None
+                else "MISSING_COMPONENT"
+            )
 
         sp_total = finite(game_sources.get("SP+", {}).get("total"))
         # Never treat a generic or legacy projected_total field as SP+. It may
@@ -341,10 +389,13 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         total_values = {
             "SP+": sp_total,
             "Massey Dual": mass_dual,
-            "Sagarin": finite(game_sources.get("Sagarin Total", {}).get("total")),
+            "Sagarin Total": finite(game_sources.get("Sagarin Total", {}).get("total")),
         }
-        standard_total = fixed_weight_value(total_values, total_weights)
-        if standard_total is not None:
+        official_standard_total = fixed_weight_value(
+            total_values,
+            total_weights,
+        )
+        if official_standard_total is not None:
             total_resolution = {
                 "mode": "FULL",
                 "available_components": list(total_values),
@@ -352,6 +403,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 "weights_used": total_weights,
             }
             total_availability = "AVAILABLE"
+            degraded_total = None
+            degraded_weights = {}
+            degraded_total_resolution = {
+                "mode": "NOT_APPLICABLE_OFFICIAL_AVAILABLE",
+                "available_components": list(total_values),
+                "missing_components": [],
+                "weights_used": {},
+            }
+            degraded_total_availability = "NOT_APPLICABLE"
         else:
             (
                 degraded_total,
@@ -364,23 +424,28 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 minimum_components=1,
             )
 
-            if degraded_total is not None:
-                standard_total = degraded_total
-                total_resolution = {
-                    "mode": "DEGRADED_RENORMALIZED",
-                    "available_components": available_components,
-                    "missing_components": missing_components,
-                    "weights_used": degraded_weights,
-                }
-                total_availability = "AVAILABLE_DEGRADED"
-            else:
-                total_resolution = {
-                    "mode": "UNAVAILABLE",
-                    "available_components": available_components,
-                    "missing_components": missing_components,
-                    "weights_used": {},
-                }
-                total_availability = "MISSING_COMPONENT"
+            total_resolution = {
+                "mode": "STRICT_REQUIRED_COMPONENTS_MISSING",
+                "available_components": available_components,
+                "missing_components": missing_components,
+                "weights_used": {},
+            }
+            total_availability = "MISSING_COMPONENT"
+            degraded_total_resolution = {
+                "mode": (
+                    "DEGRADED_RENORMALIZED"
+                    if degraded_total is not None
+                    else "UNAVAILABLE"
+                ),
+                "available_components": available_components,
+                "missing_components": missing_components,
+                "weights_used": degraded_weights,
+            }
+            degraded_total_availability = (
+                "DEGRADED"
+                if degraded_total is not None
+                else "MISSING_COMPONENT"
+            )
 
         shadow = shadow_rows.get(game_id, {})
         shadow_spread_values = {
@@ -457,8 +522,12 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 values=spread_values,
                 weights=spread_weights,
                 availability=spread_availability,
-                value_home_margin=spread_margin,
-                value_home_line=-spread_margin if spread_margin is not None else None,
+                value_home_margin=official_spread_margin,
+                value_home_line=(
+                    -official_spread_margin
+                    if official_spread_margin is not None
+                    else None
+                ),
                 build_timestamp=built_at,
                 freshness_timestamp=latest_timestamp(spread_source_rows),
                 source_artifacts=[str(args.sources.relative_to(ROOT))],
@@ -469,6 +538,57 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     "missing_components": spread_resolution["missing_components"],
                     "weights_used": spread_resolution["weights_used"],
                 },
+                authority=(
+                    "OFFICIAL"
+                    if spread_availability == "AVAILABLE"
+                    else "UNAVAILABLE"
+                ),
+            ),
+            DEGRADED_SPREAD: projection(
+                model_id=DEGRADED_SPREAD,
+                formula_status="OPERATIONAL_DEGRADED",
+                values=spread_values,
+                weights=spread_weights,
+                availability=degraded_spread_availability,
+                value_home_margin=degraded_margin,
+                value_home_line=(
+                    -degraded_margin
+                    if degraded_margin is not None
+                    else None
+                ),
+                value=(
+                    -degraded_margin
+                    if degraded_margin is not None
+                    else None
+                ),
+                build_timestamp=built_at,
+                freshness_timestamp=latest_timestamp(spread_source_rows),
+                source_artifacts=[str(args.sources.relative_to(ROOT))],
+                validation_status="OPERATIONAL_ESTIMATE_FORMULA_PRESERVED",
+                extra_status={
+                    "resolution_mode": degraded_spread_resolution["mode"],
+                    "available_components": degraded_spread_resolution["available_components"],
+                    "missing_components": degraded_spread_resolution["missing_components"],
+                    "weights_used": degraded_spread_resolution["weights_used"],
+                },
+                authority="OPERATIONAL_DEGRADED",
+                status_label=(
+                    "DEGRADED"
+                    if degraded_spread_availability == "DEGRADED"
+                    else "UNAVAILABLE"
+                ),
+                method="RENORMALIZED_AVAILABLE_CANONICAL_WEIGHTS",
+                degraded_reason=(
+                    "Missing required official sources: "
+                    + ", ".join(degraded_spread_resolution["missing_components"])
+                    if degraded_spread_resolution["missing_components"]
+                    else "Official five-source projection is available."
+                ),
+                confidence_status=(
+                    "DEGRADED"
+                    if degraded_spread_availability == "DEGRADED"
+                    else "NOT_APPLICABLE"
+                ),
             ),
             STANDARD_TOTAL: projection(
                 model_id=STANDARD_TOTAL,
@@ -476,7 +596,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 values=total_values,
                 weights=total_weights,
                 availability=total_availability,
-                value_total=standard_total,
+                value_total=official_standard_total,
                 build_timestamp=built_at,
                 freshness_timestamp=latest_timestamp(total_source_rows),
                 source_artifacts=[str(args.sources.relative_to(ROOT)), str(args.games.relative_to(ROOT))],
@@ -488,6 +608,52 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     "weights_used": total_resolution["weights_used"],
                     "Massey Dual formula": "PUBLISHED_TOTAL_PLUS_POINT_SUM_DIVIDED_BY_TWO",
                 },
+                authority=(
+                    "OFFICIAL"
+                    if total_availability == "AVAILABLE"
+                    else "UNAVAILABLE"
+                ),
+            ),
+            DEGRADED_TOTAL: projection(
+                model_id=DEGRADED_TOTAL,
+                formula_status="OPERATIONAL_DEGRADED",
+                values=total_values,
+                weights=total_weights,
+                availability=degraded_total_availability,
+                value_total=degraded_total,
+                value=degraded_total,
+                build_timestamp=built_at,
+                freshness_timestamp=latest_timestamp(total_source_rows),
+                source_artifacts=[
+                    str(args.sources.relative_to(ROOT)),
+                    str(args.games.relative_to(ROOT)),
+                ],
+                validation_status="OPERATIONAL_ESTIMATE_FORMULA_PRESERVED",
+                extra_status={
+                    "resolution_mode": degraded_total_resolution["mode"],
+                    "available_components": degraded_total_resolution["available_components"],
+                    "missing_components": degraded_total_resolution["missing_components"],
+                    "weights_used": degraded_total_resolution["weights_used"],
+                    "Massey Dual formula": "PUBLISHED_TOTAL_PLUS_POINT_SUM_DIVIDED_BY_TWO",
+                },
+                authority="OPERATIONAL_DEGRADED",
+                status_label=(
+                    "DEGRADED"
+                    if degraded_total_availability == "DEGRADED"
+                    else "UNAVAILABLE"
+                ),
+                method="RENORMALIZED_AVAILABLE_CANONICAL_WEIGHTS",
+                degraded_reason=(
+                    "Missing required official sources: "
+                    + ", ".join(degraded_total_resolution["missing_components"])
+                    if degraded_total_resolution["missing_components"]
+                    else "Official three-source projection is available."
+                ),
+                confidence_status=(
+                    "DEGRADED"
+                    if degraded_total_availability == "DEGRADED"
+                    else "NOT_APPLICABLE"
+                ),
             ),
             SHADOW_SPREAD: projection(
                 model_id=SHADOW_SPREAD,
@@ -548,6 +714,16 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             model_id: resolve_projection(output_game, model_id)
             for model_id in projections
         }
+        output_game["operational_projections"] = {
+            "spread": resolve_operational_projection(
+                output_game,
+                STANDARD_SPREAD,
+            ),
+            "total": resolve_operational_projection(
+                output_game,
+                STANDARD_TOTAL,
+            ),
+        }
         output_games.append(output_game)
 
     definitions = {
@@ -561,6 +737,20 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             "massey_dual_formula": "(published total + away predicted points + home predicted points) / 2",
             "required_components": list(TOTAL_COMPONENTS),
             "weights": total_weights,
+        },
+        DEGRADED_SPREAD: {
+            "formula": "Renormalize the available weights from the official five-source spread model",
+            "official_model_id": STANDARD_SPREAD,
+            "required_components": list(SPREAD_COMPONENTS),
+            "nominal_weights": spread_weights,
+            "authority": "OPERATIONAL_DEGRADED_ONLY",
+        },
+        DEGRADED_TOTAL: {
+            "formula": "Renormalize the available weights from the official 40/40/20 total model",
+            "official_model_id": STANDARD_TOTAL,
+            "required_components": list(TOTAL_COMPONENTS),
+            "nominal_weights": total_weights,
+            "authority": "OPERATIONAL_DEGRADED_ONLY",
         },
         SHADOW_SPREAD: {
             "formula": "(Shadow SP+ home fair spread + Shadow Sagarin home fair spread) / 2",
@@ -583,12 +773,16 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         "policy": {
             "historical_betting_studies_are_formula_authority": True,
             "fixed_required_components": True,
-            "missing_source_renormalization": True,
-            "minimum_components_for_degraded_projection": 3,
+            "official_missing_source_renormalization": False,
+            "separate_operational_degraded_models": True,
+            "minimum_components_for_degraded_projection": {
+                DEGRADED_SPREAD: 3,
+                DEGRADED_TOTAL: 1,
+            },
             "page_local_projection_calculation_allowed": False,
             "resolver_policy": "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS",
             "unavailable_models_remain_unavailable": True,
-            "degraded_models_preserve_canonical_identity": True,
+            "degraded_models_preserve_official_formula_inputs_but_use_separate_identity": True,
         },
         "model_definitions": definitions,
         "games": output_games,
@@ -599,7 +793,13 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 game["projections"][model_id]["availability_status"] == state
                 for game in output_games
             )
-            for state in ("AVAILABLE", "MISSING_COMPONENT", "NOT_YET_ACTIVATED")
+            for state in (
+                "AVAILABLE",
+                "DEGRADED",
+                "MISSING_COMPONENT",
+                "NOT_APPLICABLE",
+                "NOT_YET_ACTIVATED",
+            )
         }
         for model_id in definitions
     }

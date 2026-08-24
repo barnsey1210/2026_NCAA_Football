@@ -79,8 +79,8 @@ def main() -> None:
     )
     function_values = totals.apply(
         lambda row: engine.fixed_weight_value(
-            {"SP+": row[sp_col], "Massey Dual": row["massey_dual"], "Sagarin": row[sag_col]},
-            {"SP+": 0.4, "Massey Dual": 0.4, "Sagarin": 0.2},
+            {"SP+": row[sp_col], "Massey Dual": row["massey_dual"], "Sagarin Total": row[sag_col]},
+            {"SP+": 0.4, "Massey Dual": 0.4, "Sagarin Total": 0.2},
         ),
         axis=1,
     )
@@ -163,8 +163,8 @@ def main() -> None:
 
     spread_fixture = {name: float(index + 1) for index, name in enumerate(engine.SPREAD_COMPONENTS)}
     spread_fixture_weights = {name: 0.2 for name in engine.SPREAD_COMPONENTS}
-    total_fixture = {"SP+": 50.0, "Massey Dual": 51.0, "Sagarin": 52.0}
-    total_fixture_weights = {"SP+": 0.4, "Massey Dual": 0.4, "Sagarin": 0.2}
+    total_fixture = {"SP+": 50.0, "Massey Dual": 51.0, "Sagarin Total": 52.0}
+    total_fixture_weights = {"SP+": 0.4, "Massey Dual": 0.4, "Sagarin Total": 0.2}
     missing_tests = {
         **{
             f"standard_spread_missing_{name}_rejected": engine.fixed_weight_value(
@@ -191,7 +191,12 @@ def main() -> None:
     contract_path = ROOT / "data/site/current_game_projection_contract.json"
     contract = json.loads(contract_path.read_text())
     expected_models = {
-        engine.STANDARD_SPREAD, engine.STANDARD_TOTAL, engine.SHADOW_SPREAD, engine.SHADOW_TOTAL
+        engine.STANDARD_SPREAD,
+        engine.STANDARD_TOTAL,
+        engine.DEGRADED_SPREAD,
+        engine.DEGRADED_TOTAL,
+        engine.SHADOW_SPREAD,
+        engine.SHADOW_TOTAL,
     }
     structural = (
         contract["canonical_game_count"] == len(contract["games"])
@@ -209,10 +214,15 @@ def main() -> None:
     available_spreads = [
         row["projections"][engine.STANDARD_SPREAD]
         for row in contract["games"]
-        if row["projections"][engine.STANDARD_SPREAD]["availability_status"] in {"AVAILABLE", "AVAILABLE_DEGRADED"}
+        if row["projections"][engine.STANDARD_SPREAD]["availability_status"] == "AVAILABLE"
+    ]
+    degraded_spreads = [
+        row["projections"][engine.DEGRADED_SPREAD]
+        for row in contract["games"]
+        if row["projections"][engine.DEGRADED_SPREAD]["availability_status"] == "DEGRADED"
     ]
     sign_rows = [
-        item for item in available_spreads
+        item for item in available_spreads + degraded_spreads
         if item.get("value_home_line") is not None
         and item.get("value_home_margin") is not None
     ]
@@ -226,9 +236,21 @@ def main() -> None:
         "model_id": "spread_sign_convention",
         "rows": len(sign_rows),
         "available_rows_seen": len(available_spreads),
+        "degraded_rows_seen": len(degraded_spreads),
         "fixture_home_margins": sign_fixtures,
         "passed": bool(sign_pass),
         "assertion": "value_home_line == -value_home_margin",
+    })
+    checks.append({
+        "model_id": "official_identity_separation",
+        "rows": len(contract["games"]),
+        "passed": all(
+            row["projections"][model_id]["availability_status"]
+            != "AVAILABLE_DEGRADED"
+            for row in contract["games"]
+            for model_id in (engine.STANDARD_SPREAD, engine.STANDARD_TOTAL)
+        ),
+        "assertion": "official Standard models never carry AVAILABLE_DEGRADED",
     })
 
     payload = {
@@ -236,7 +258,7 @@ def main() -> None:
         "validation_mode": "OFFLINE_NO_NETWORK",
         "architecture_validation_season": 2025,
         "historical_results_modified": False,
-        "production_consumers_modified": False,
+        "validation_script_modifies_production_consumers": False,
         "checks": checks,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

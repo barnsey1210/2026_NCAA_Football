@@ -98,6 +98,8 @@ GREEN_MARKET_COMPLETENESS = 0.95
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
@@ -304,19 +306,30 @@ def load_fbs_team_universe():
     return teams
 
 
-def model_health(games, model_id):
-    counts = Counter(
-        str(
-            game.get("projections", {})
-            .get(model_id, {})
-            .get("availability_status")
+def model_health(games, model_id, degraded_model_id):
+    counts = Counter()
+
+    for game in games:
+        projections = game.get("projections", {})
+        official_status = str(
+            projections.get(model_id, {}).get("availability_status")
             or "UNAVAILABLE"
         )
-        for game in games
-    )
+        degraded_status = str(
+            projections.get(degraded_model_id, {}).get("availability_status")
+            or "UNAVAILABLE"
+        )
+
+        if official_status == "AVAILABLE":
+            counts["AVAILABLE"] += 1
+        elif degraded_status == "DEGRADED":
+            counts["DEGRADED"] += 1
+        else:
+            counts["UNAVAILABLE"] += 1
+
     total = len(games)
     official = counts.get("AVAILABLE", 0)
-    degraded = counts.get("AVAILABLE_DEGRADED", 0)
+    degraded = counts.get("DEGRADED", 0)
     unavailable = total - official - degraded
 
     if total == 0 or unavailable > 0:
@@ -473,8 +486,16 @@ def build_projection_health(latest_rows):
         by_week[week] = {
             "week": integer(week),
             "displayed_fbs_vs_fbs_games": len(games),
-            "spread": model_health(games, STANDARD_SPREAD),
-            "total": model_health(games, STANDARD_TOTAL),
+            "spread": model_health(
+                games,
+                STANDARD_SPREAD,
+                DEGRADED_SPREAD,
+            ),
+            "total": model_health(
+                games,
+                STANDARD_TOTAL,
+                DEGRADED_TOTAL,
+            ),
             "shadow": shadow_model_health(games),
         }
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Strict selector for canonical scheduled-game projections.
 
-This module owns projection selection, not projection formulas. Graceful
-degradation, when permitted by a canonical model, is calculated upstream by
-the canonical contract builder. This resolver never substitutes a team rating,
-market rating, legacy blend, or another model.
+This module owns projection selection, not projection formulas. Official
+models are strict: only ``AVAILABLE`` is selectable. Explicit operational
+selectors may choose a separately identified degraded estimate; they never
+relabel that estimate as the official model or substitute another data source.
 """
 from __future__ import annotations
 
@@ -15,14 +15,23 @@ from typing import Any
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
 MODEL_VALUE_FIELDS = {
     STANDARD_SPREAD: ("value_home_margin", "value_home_line"),
     STANDARD_TOTAL: ("value_total",),
+    DEGRADED_SPREAD: ("value_home_margin", "value_home_line"),
+    DEGRADED_TOTAL: ("value_total",),
     SHADOW_SPREAD: ("value_home_margin", "value_home_line"),
     SHADOW_TOTAL: ("value_total",),
+}
+
+DEGRADED_MODEL_BY_OFFICIAL = {
+    STANDARD_SPREAD: DEGRADED_SPREAD,
+    STANDARD_TOTAL: DEGRADED_TOTAL,
 }
 
 
@@ -54,6 +63,7 @@ def unavailable(model_id: str, reason: str, projection: dict[str, Any] | None = 
         "selection_reason": reason,
         "source_type": "CANONICAL_GAME_PROJECTION",
         "fallback_used": False,
+        "authority": projection.get("authority", "UNAVAILABLE"),
         "value_home_margin": None,
         "value_home_line": None,
         "value_total": None,
@@ -78,7 +88,12 @@ def resolve_projection(game: dict[str, Any] | None, model_id: str) -> dict[str, 
     projection = (game.get("projections") or {}).get(model_id)
     if not isinstance(projection, dict):
         return unavailable(model_id, "MODEL_NOT_DEFINED_FOR_GAME")
-    if projection.get("availability_status") not in {"AVAILABLE", "AVAILABLE_DEGRADED"}:
+    required_availability = (
+        "DEGRADED"
+        if model_id in {DEGRADED_SPREAD, DEGRADED_TOTAL}
+        else "AVAILABLE"
+    )
+    if projection.get("availability_status") != required_availability:
         return unavailable(
             model_id,
             f"CANONICAL_MODEL_{projection.get('availability_status') or 'UNAVAILABLE'}",
@@ -93,12 +108,18 @@ def resolve_projection(game: dict[str, Any] | None, model_id: str) -> dict[str, 
         "model_id": model_id,
         "selection_status": "AVAILABLE",
         "selection_reason": (
-            "CANONICAL_MODEL_AVAILABLE"
-            if projection.get("availability_status") == "AVAILABLE"
-            else "CANONICAL_MODEL_AVAILABLE_DEGRADED"
+            "OPERATIONAL_DEGRADED_MODEL_AVAILABLE"
+            if required_availability == "DEGRADED"
+            else "CANONICAL_MODEL_AVAILABLE"
         ),
         "source_type": "CANONICAL_GAME_PROJECTION",
         "fallback_used": False,
+        "authority": projection.get(
+            "authority",
+            "OPERATIONAL_DEGRADED"
+            if required_availability == "DEGRADED"
+            else "OFFICIAL",
+        ),
         "value_home_margin": projection.get("value_home_margin"),
         "value_home_line": projection.get("value_home_line"),
         "value_total": projection.get("value_total"),
@@ -116,3 +137,54 @@ def resolve_projection(game: dict[str, Any] | None, model_id: str) -> dict[str, 
 def resolve_game(index: dict[str, dict[str, Any]], game_id: Any, model_id: str) -> dict[str, Any]:
     normalized_id = str(game_id or "").removesuffix(".0")
     return resolve_projection(index.get(normalized_id), model_id)
+
+
+def resolve_operational_projection(
+    game: dict[str, Any] | None,
+    official_model_id: str,
+) -> dict[str, Any]:
+    """Select strict official first, then its explicit degraded estimate."""
+    if official_model_id not in DEGRADED_MODEL_BY_OFFICIAL:
+        raise ValueError(
+            f"No degraded operational path for model_id: {official_model_id}"
+        )
+
+    official = resolve_projection(game, official_model_id)
+    if official.get("selection_status") == "AVAILABLE":
+        return {
+            **official,
+            "official_model_id": official_model_id,
+            "operational_model_id": official_model_id,
+            "operational_degraded_used": False,
+        }
+
+    degraded_model_id = DEGRADED_MODEL_BY_OFFICIAL[official_model_id]
+    degraded = resolve_projection(game, degraded_model_id)
+    if degraded.get("selection_status") == "AVAILABLE":
+        return {
+            **degraded,
+            "official_model_id": official_model_id,
+            "operational_model_id": degraded_model_id,
+            "operational_degraded_used": True,
+            "official_selection_reason": official.get("selection_reason"),
+        }
+
+    return {
+        **official,
+        "official_model_id": official_model_id,
+        "operational_model_id": None,
+        "operational_degraded_used": False,
+        "degraded_selection_reason": degraded.get("selection_reason"),
+    }
+
+
+def resolve_operational_game(
+    index: dict[str, dict[str, Any]],
+    game_id: Any,
+    official_model_id: str,
+) -> dict[str, Any]:
+    normalized_id = str(game_id or "").removesuffix(".0")
+    return resolve_operational_projection(
+        index.get(normalized_id),
+        official_model_id,
+    )

@@ -13,6 +13,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.projections.projection_resolver import (
+    DEGRADED_SPREAD,
+    DEGRADED_TOTAL,
     SHADOW_SPREAD,
     SHADOW_TOTAL,
     STANDARD_SPREAD,
@@ -20,6 +22,8 @@ from scripts.projections.projection_resolver import (
     index_contract,
     load_contract,
     resolve_game,
+    resolve_operational_game,
+    resolve_operational_projection,
     resolve_projection,
 )
 
@@ -47,8 +51,16 @@ def main():
             "weights": {"SP+": .2, "FPI": .2, "TeamRankings": .2, "Sagarin Rating": .2, "DRatings": .2},
         },
         STANDARD_TOTAL: {
-            "required_components": ["SP+", "Massey Dual", "Sagarin"],
-            "weights": {"SP+": .4, "Massey Dual": .4, "Sagarin": .2},
+            "required_components": ["SP+", "Massey Dual", "Sagarin Total"],
+            "weights": {"SP+": .4, "Massey Dual": .4, "Sagarin Total": .2},
+        },
+        DEGRADED_SPREAD: {
+            "required_components": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
+            "nominal_weights": {"SP+": .2, "FPI": .2, "TeamRankings": .2, "Sagarin Rating": .2, "DRatings": .2},
+        },
+        DEGRADED_TOTAL: {
+            "required_components": ["SP+", "Massey Dual", "Sagarin Total"],
+            "nominal_weights": {"SP+": .4, "Massey Dual": .4, "Sagarin Total": .2},
         },
         SHADOW_SPREAD: {
             "required_components": ["Shadow SP+", "Shadow Sagarin"],
@@ -60,7 +72,8 @@ def main():
         checks.append({
             "check": f"definition:{model_id}",
             "passed": actual.get("required_components") == wanted["required_components"]
-            and actual.get("weights") == wanted["weights"],
+            and actual.get("weights", actual.get("nominal_weights"))
+            == wanted.get("weights", wanted.get("nominal_weights")),
         })
     checks.append({
         "check": "definition:shadow_total_spplus_od_only",
@@ -81,16 +94,40 @@ def main():
         and synthetic["value_home_margin"] is None,
     })
 
-    degraded = resolve_projection({"projections": {STANDARD_SPREAD: {
+    degraded_under_official_id = resolve_projection({"projections": {STANDARD_SPREAD: {
         "availability_status": "AVAILABLE_DEGRADED",
         "value_home_margin": 3.5,
         "value_home_line": -3.5,
         "component_status": {"DRatings": "MISSING"},
     }}}, STANDARD_SPREAD)
     checks.append({
-        "check": "degraded_canonical_projection_remains_available",
+        "check": "official_model_rejects_available_degraded",
+        "passed": degraded_under_official_id["selection_status"] == "UNAVAILABLE"
+        and degraded_under_official_id["value_home_margin"] is None,
+    })
+
+    separated = {
+        "projections": {
+            STANDARD_SPREAD: {
+                "availability_status": "MISSING_COMPONENT",
+                "component_status": {"DRatings": "MISSING"},
+            },
+            DEGRADED_SPREAD: {
+                "availability_status": "DEGRADED",
+                "authority": "OPERATIONAL_DEGRADED",
+                "value_home_margin": 3.5,
+                "value_home_line": -3.5,
+                "component_status": {"DRatings": "MISSING"},
+            },
+        }
+    }
+    degraded = resolve_operational_projection(separated, STANDARD_SPREAD)
+    checks.append({
+        "check": "separate_degraded_operational_path",
         "passed": degraded["selection_status"] == "AVAILABLE"
-        and degraded["fallback_used"] is False
+        and degraded["model_id"] == DEGRADED_SPREAD
+        and degraded["authority"] == "OPERATIONAL_DEGRADED"
+        and degraded["operational_degraded_used"] is True
         and degraded["value_home_margin"] == 3.5,
     })
 
@@ -107,13 +144,23 @@ def main():
             for resolved in game.get("resolved_projections", {}).values()
         ),
     })
+    checks.append({
+        "check": "official_models_never_available_degraded",
+        "passed": all(
+            game.get("projections", {})
+            .get(model_id, {})
+            .get("availability_status") != "AVAILABLE_DEGRADED"
+            for game in contract["games"]
+            for model_id in (STANDARD_SPREAD, STANDARD_TOTAL)
+        ),
+    })
 
     matchups = json.loads(MATCHUPS.read_text(encoding="utf-8"))
     matchup_ok = True
     for row in matchups.get("games", []):
         game_id = row.get("game", {}).get("game_id")
-        spread = resolve_game(index, game_id, STANDARD_SPREAD)
-        total = resolve_game(index, game_id, STANDARD_TOTAL)
+        spread = resolve_operational_game(index, game_id, STANDARD_SPREAD)
+        total = resolve_operational_game(index, game_id, STANDARD_TOTAL)
         model = row.get("model", {})
         matchup_ok &= close(model.get("home_spread"), spread.get("value_home_line"))
         matchup_ok &= close(model.get("total"), total.get("value_total"))

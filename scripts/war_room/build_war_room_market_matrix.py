@@ -86,6 +86,8 @@ PINNACLE = "Pinnacle"
 
 STANDARD_SPREAD = "standard_spread_five_source_v1"
 STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+DEGRADED_SPREAD = "standard_spread_degraded_v1"
+DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
@@ -229,11 +231,16 @@ def best_quote(
     return max(candidates, key=lambda item: item[0])[1]
 
 
+def model_resolution(game, model_id):
+    if model_id == STANDARD_SPREAD:
+        return game.get("operational_projections", {}).get("spread", {})
+    if model_id == STANDARD_TOTAL:
+        return game.get("operational_projections", {}).get("total", {})
+    return game.get("resolved_projections", {}).get(model_id, {})
+
+
 def model_value(game, model_id, field):
-    resolved = game.get("resolved_projections", {}).get(
-        model_id,
-        {},
-    )
+    resolved = model_resolution(game, model_id)
 
     if resolved.get("selection_status") != "AVAILABLE":
         return None
@@ -242,10 +249,16 @@ def model_value(game, model_id, field):
 
 
 def model_summary(game, model_id):
-    r = game.get("resolved_projections", {}).get(model_id, {})
+    r = model_resolution(game, model_id)
 
     return {
-        "model_id": model_id,
+        "model_id": r.get("model_id", model_id),
+        "official_model_id": r.get("official_model_id"),
+        "authority": r.get("authority"),
+        "operational_degraded_used": r.get(
+            "operational_degraded_used",
+            False,
+        ),
         "selection_status": r.get("selection_status"),
         "selection_reason": r.get("selection_reason"),
         "availability_status": r.get("availability_status"),
@@ -368,10 +381,7 @@ def shadow_readiness(component):
 
 
 def projection_is_available(game, model_id):
-    r = game.get("resolved_projections", {}).get(
-        model_id,
-        {},
-    )
+    r = model_resolution(game, model_id)
     return r.get("selection_status") == "AVAILABLE"
 
 
@@ -472,6 +482,14 @@ def authority_resolution(
         standard_model_id,
         field,
     )
+    standard_resolution = model_resolution(
+        game,
+        standard_model_id,
+    )
+    operational_standard_model_id = (
+        standard_resolution.get("model_id")
+        or standard_model_id
+    )
 
     shadow_value = model_value(
         game,
@@ -522,7 +540,9 @@ def authority_resolution(
     ):
         return {
             "source": "STANDARD",
-            "model_id": standard_model_id,
+            "model_id": operational_standard_model_id,
+            "official_model_id": standard_model_id,
+            "projection_authority": standard_resolution.get("authority"),
             "value": standard_value,
             "status": "ACTIVE",
             "maturity": "UPDATED",
@@ -555,6 +575,8 @@ def authority_resolution(
             return {
                 "source": "STANDARD",
                 "model_id": standard_model_id,
+                "official_model_id": standard_model_id,
+                "projection_authority": "HYBRID_REFRESHED_SOURCES",
                 "value": hybrid["value"],
                 "status": "ACTIVE",
                 "maturity": "HYBRID",
@@ -617,7 +639,9 @@ def authority_resolution(
 
         return {
             "source": "STANDARD",
-            "model_id": standard_model_id,
+            "model_id": operational_standard_model_id,
+            "official_model_id": standard_model_id,
+            "projection_authority": standard_resolution.get("authority"),
             "value": standard_value,
             "status": "ACTIVE",
             "maturity": temporal_status,
@@ -834,7 +858,7 @@ TEAM_SOURCE_MAP = {
 GAME_FEED_MAP = {
     "DRatings": "DRatings Predictions",
     "Massey Dual": "Massey Games",
-    "Sagarin": "Sagarin Game Total",
+    "Sagarin Total": "Sagarin Game Total",
 }
 
 
@@ -1919,11 +1943,14 @@ def main():
         "model_policy": {
             "standard_spread_model": STANDARD_SPREAD,
             "standard_total_model": STANDARD_TOTAL,
+            "operational_degraded_spread_model": DEGRADED_SPREAD,
+            "operational_degraded_total_model": DEGRADED_TOTAL,
             "shadow_spread_model": SHADOW_SPREAD,
             "shadow_total_model": SHADOW_TOTAL,
             "source": (
                 "current_game_projection_contract.json "
-                "resolved_projections only"
+                "strict resolved_projections plus explicit "
+                "operational_projections"
             ),
         },
 

@@ -25,6 +25,7 @@ from scripts.projections.projection_resolver import (
     index_contract,
     load_contract,
     resolve_game,
+    resolve_operational_game,
 )
 
 INDEX = ROOT / "v1.html"
@@ -733,8 +734,16 @@ def main():
     upcoming_by_team = defaultdict(list)
     for game in games:
         away, home = canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))
-        spread_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_SPREAD)
-        total_resolution = resolve_game(projection_index, game.get("game_id"), STANDARD_TOTAL)
+        spread_resolution = resolve_operational_game(
+            projection_index,
+            game.get("game_id"),
+            STANDARD_SPREAD,
+        )
+        total_resolution = resolve_operational_game(
+            projection_index,
+            game.get("game_id"),
+            STANDARD_TOTAL,
+        )
         model_home = number(spread_resolution.get("value_home_line"))
         current_market = canonical_market(game.get("game_id"))
         market_home = number(current_market["spread"].get("home_line"))
@@ -896,8 +905,16 @@ def main():
 
         current_market = canonical_market(game_id)
         market_spread_home = number(current_market["spread"].get("home_line"))
-        spread_resolution = resolve_game(projection_index, game_id, STANDARD_SPREAD)
-        total_resolution = resolve_game(projection_index, game_id, STANDARD_TOTAL)
+        spread_resolution = resolve_operational_game(
+            projection_index,
+            game_id,
+            STANDARD_SPREAD,
+        )
+        total_resolution = resolve_operational_game(
+            projection_index,
+            game_id,
+            STANDARD_TOTAL,
+        )
         model_home = number(spread_resolution.get("value_home_line"))
         records.append({
             "game": {"game_id": game_id, "cfbd_game_id": clean(game.get("cfbd_game_id")), "week": integer(game.get("week")),
@@ -912,16 +929,22 @@ def main():
                 "home_spread": model_home,
                 "total": number(total_resolution.get("value_total")),
                 "home_win_probability": None,
-                "spread_version": STANDARD_SPREAD,
-                "spread_status": spread_resolution.get("selection_status"),
+                "spread_version": spread_resolution.get("model_id"),
+                "spread_official_version": STANDARD_SPREAD,
+                "spread_authority": spread_resolution.get("authority"),
+                "spread_status": spread_resolution.get("availability_status"),
+                "spread_selection_status": spread_resolution.get("selection_status"),
                 "spread_reason": spread_resolution.get("selection_reason"),
                 "spread_source_count": sum(v == "PRESENT" for v in spread_resolution.get("component_status", {}).values()),
                 "spread_source_max": 5,
                 "spread_coverage": None,
                 "spread_sources": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
                 "spread_source_label": "SP+, FPI, TeamRankings, Sagarin Rating, DRatings",
-                "total_version": STANDARD_TOTAL,
-                "total_status": total_resolution.get("selection_status"),
+                "total_version": total_resolution.get("model_id"),
+                "total_official_version": STANDARD_TOTAL,
+                "total_authority": total_resolution.get("authority"),
+                "total_status": total_resolution.get("availability_status"),
+                "total_selection_status": total_resolution.get("selection_status"),
                 "total_reason": total_resolution.get("selection_reason"),
                 "total_source_count": sum(v == "PRESENT" for v in total_resolution.get("component_status", {}).values()),
                 "total_source_max": 3,
