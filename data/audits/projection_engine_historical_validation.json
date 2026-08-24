@@ -3,7 +3,7 @@
   "validation_mode": "OFFLINE_NO_NETWORK",
   "architecture_validation_season": 2025,
   "historical_results_modified": false,
-  "production_consumers_modified": false,
+  "validation_script_modifies_production_consumers": false,
   "checks": [
     {
       "model_id": "standard_spread_five_source_v1",
@@ -60,7 +60,7 @@
         "standard_spread_missing_DRatings_rejected": true,
         "standard_total_missing_SP+_rejected": true,
         "standard_total_missing_Massey Dual_rejected": true,
-        "standard_total_missing_Sagarin_rejected": true,
+        "standard_total_missing_Sagarin Total_rejected": true,
         "massey_dual_missing_rejected": true,
         "shadow_total_missing_rejected": true
       }
@@ -74,7 +74,8 @@
     {
       "model_id": "spread_sign_convention",
       "rows": 765,
-      "available_rows_seen": 765,
+      "available_rows_seen": 0,
+      "degraded_rows_seen": 765,
       "fixture_home_margins": [
         7.0,
         -3.5,
@@ -82,6 +83,12 @@
       ],
       "passed": true,
       "assertion": "value_home_line == -value_home_margin"
+    },
+    {
+      "model_id": "official_identity_separation",
+      "rows": 902,
+      "passed": true,
+      "assertion": "official Standard models never carry AVAILABLE_DEGRADED"
     }
   ]
 }

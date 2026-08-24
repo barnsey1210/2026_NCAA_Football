@@ -1,6 +1,6 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-08-24T02:30:51.581611+00:00",
+  "built_at": "2026-08-24T03:07:01.121783+00:00",
   "fast_market_refresh": {
     "refresh_id": "theodds_20260819T213401Z",
     "last_fast_pull_at": "2026-08-19T21:34:01.602628+00:00",
@@ -34,7 +34,7 @@
   },
   "ratings_health": {
     "status": "AVAILABLE",
-    "generated_at": "2026-08-18T02:24:35.510704+00:00",
+    "generated_at": "2026-08-24T03:06:56.572691+00:00",
     "sources": {
       "SP+": {
         "source": "SP+",
@@ -81,7 +81,7 @@
         "status": "WAITING",
         "games_available": 0,
         "spread_state": "MISSING",
-        "total_state": "MISSING",
+        "total_state": null,
         "coverage_pct": 0
       },
       "DR": {
@@ -118,13 +118,13 @@
     "total_model_status": "awaiting_current_season_pbp",
     "postgame_built_at": "2026-08-03T12:02:51.914962+00:00",
     "components_generated_at": "2026-08-19T03:01:33.109134+00:00",
-    "shadow_lines_built_at": "2026-08-18T01:01:00.006798+00:00",
+    "shadow_lines_built_at": "2026-08-24T03:06:59.864679+00:00",
     "activation_policy": "GREEN only after genuine completed-game updates exist and at least one Shadow projection is display-ready. Expected pregame waiting states are YELLOW, not RED."
   },
   "projection_health": {
     "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
     "selection_policy": "Frontend selects the matching week entry. ALL WEEKS does not aggregate season-wide projection health.",
-    "projection_contract_built_at": "2026-08-18T01:40:20.389879+00:00",
+    "projection_contract_built_at": "2026-08-24T03:06:55.507798+00:00",
     "matched_fast_board_games": 111,
     "unmatched_fast_board_games": 0,
     "fbs_vs_fbs_games": 64,
@@ -140,7 +140,7 @@
           "degraded_games": 8,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 8
+            "DEGRADED": 8
           }
         },
         "total": {
@@ -151,7 +151,7 @@
           "degraded_games": 8,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 8
+            "DEGRADED": 8
           }
         },
         "shadow": {
@@ -178,7 +178,7 @@
           "degraded_games": 43,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 43
+            "DEGRADED": 43
           }
         },
         "total": {
@@ -189,7 +189,7 @@
           "degraded_games": 43,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 43
+            "DEGRADED": 43
           }
         },
         "shadow": {
@@ -216,7 +216,7 @@
           "degraded_games": 6,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 6
+            "DEGRADED": 6
           }
         },
         "total": {
@@ -227,7 +227,7 @@
           "degraded_games": 6,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 6
+            "DEGRADED": 6
           }
         },
         "shadow": {
@@ -254,7 +254,7 @@
           "degraded_games": 2,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 2
+            "DEGRADED": 2
           }
         },
         "total": {
@@ -265,7 +265,7 @@
           "degraded_games": 2,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 2
+            "DEGRADED": 2
           }
         },
         "shadow": {
@@ -292,7 +292,7 @@
           "degraded_games": 2,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 2
+            "DEGRADED": 2
           }
         },
         "total": {
@@ -303,7 +303,7 @@
           "degraded_games": 2,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 2
+            "DEGRADED": 2
           }
         },
         "shadow": {
@@ -330,7 +330,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "total": {
@@ -341,7 +341,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "shadow": {
@@ -368,7 +368,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "total": {
@@ -379,7 +379,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "shadow": {
@@ -406,7 +406,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "total": {
@@ -417,7 +417,7 @@
           "degraded_games": 1,
           "unavailable_games": 0,
           "availability_counts": {
-            "AVAILABLE_DEGRADED": 1
+            "DEGRADED": 1
           }
         },
         "shadow": {

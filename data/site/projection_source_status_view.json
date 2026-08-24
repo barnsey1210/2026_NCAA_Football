@@ -1,10 +1,11 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-08-18T02:24:35.510704+00:00",
+  "generated_at": "2026-08-24T03:06:56.572691+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_five_source_v1",
+    "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
     "full_available": 0,
     "degraded_available": 765,
@@ -93,6 +94,7 @@
   },
   "standard_total": {
     "model_id": "standard_total_sp_massey_sagarin_v1",
+    "degraded_model_id": "standard_total_degraded_v1",
     "production_games": 765,
     "full_available": 0,
     "degraded_available": 765,
@@ -102,7 +104,7 @@
     "nominal_weights": {
       "SP+": 0.4,
       "Massey Dual": 0.4,
-      "Sagarin": 0.2
+      "Sagarin Total": 0.2
     },
     "sources": [
       {
@@ -122,7 +124,7 @@
         "state": "PARTIAL"
       },
       {
-        "key": "Sagarin",
+        "key": "Sagarin Total",
         "name": "Sagarin Total",
         "games_available": 0,
         "production_games": 765,
@@ -179,6 +181,32 @@
       "latest_snapshot_date": "2026-08-17",
       "first_game_date": "2026-09-03",
       "last_game_date": "2026-09-12"
+    },
+    {
+      "name": "Sagarin Game Total",
+      "source_key": "Sagarin Game Total",
+      "role": "Standard Total Sagarin game-total input",
+      "games_available": 0,
+      "production_games": 765,
+      "coverage_pct": 0.0,
+      "state": "MISSING",
+      "latest_pulled_at": null,
+      "latest_snapshot_date": null,
+      "first_game_date": null,
+      "last_game_date": null
+    },
+    {
+      "name": "Sagarin Game Total",
+      "source_key": "Sagarin Game Total",
+      "role": "Standard Total Sagarin game-total input",
+      "games_available": 0,
+      "production_games": 765,
+      "coverage_pct": 0.0,
+      "state": "MISSING",
+      "latest_pulled_at": null,
+      "latest_snapshot_date": null,
+      "first_game_date": null,
+      "last_game_date": null
     }
   ],
   "source_library_note": "The cards below are team-rating/reference feeds. Brad Powers, Donchess Overall, Massey Power and Market-Derived are retained for history, research and future model testing. Donchess/DRatings game predictions and Massey game predictions are separate matchup-level feeds and their coverage is shown above."

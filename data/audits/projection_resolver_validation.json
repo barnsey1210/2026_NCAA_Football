@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T01:29:50.509712+00:00",
+  "generated_at": "2026-08-24T03:07:21.354299+00:00",
   "status": "PASS",
   "canonical_games": 902,
   "checks": [
@@ -9,6 +9,14 @@
     },
     {
       "check": "definition:standard_total_sp_massey_sagarin_v1",
+      "passed": true
+    },
+    {
+      "check": "definition:standard_spread_degraded_v1",
+      "passed": true
+    },
+    {
+      "check": "definition:standard_total_degraded_v1",
       "passed": true
     },
     {
@@ -24,11 +32,19 @@
       "passed": true
     },
     {
-      "check": "degraded_canonical_projection_remains_available",
+      "check": "official_model_rejects_available_degraded",
+      "passed": true
+    },
+    {
+      "check": "separate_degraded_operational_path",
       "passed": true
     },
     {
       "check": "all_contract_resolutions_strict",
+      "passed": true
+    },
+    {
+      "check": "official_models_never_available_degraded",
       "passed": true
     },
     {
