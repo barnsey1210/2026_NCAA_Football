@@ -1,6 +1,6 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-08-25T00:48:09.926548+00:00",
+  "built_at": "2026-08-25T12:13:34.197647+00:00",
   "fast_market_refresh": {
     "refresh_id": "theodds_20260820T033051Z",
     "last_fast_pull_at": "2026-08-20T03:30:51.355096+00:00",
@@ -26,24 +26,24 @@
     "estimated_operating_pulls_before_reserve": 4682,
     "calendar_month": "2026-08",
     "reset_at_et": "2026-09-01T00:00:00-04:00",
-    "days_until_reset": 8,
-    "daily_operating_credit_budget": 1170.6,
-    "daily_operating_pull_budget": 585.2,
+    "days_until_reset": 7,
+    "daily_operating_credit_budget": 1337.9,
+    "daily_operating_pull_budget": 668.9,
     "scheduled_refresh_allowed": true,
     "policy": "Command Center quota is budgeted by calendar month. Scheduled fast refreshes protect the configured emergency reserve. Provider response headers are the runtime source of truth for actual usage."
   },
   "ratings_health": {
     "status": "AVAILABLE",
-    "generated_at": "2026-08-25T00:46:55.856097+00:00",
+    "generated_at": "2026-08-25T12:12:31.027206+00:00",
     "sources": {
       "SP+": {
         "source": "SP+",
         "color": "GREEN",
         "status": "CURRENT",
         "teams": 138,
-        "snapshot_date": "2026-08-24",
-        "pulled_at": "2026-08-25T00:15:23Z",
-        "latest_pull_at": "2026-08-25T00:15:23Z",
+        "snapshot_date": "2026-08-25",
+        "pulled_at": "2026-08-25T12:01:07Z",
+        "latest_pull_at": "2026-08-25T12:01:07Z",
         "last_changed_at": "2026-07-31T01:46:59Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -54,9 +54,9 @@
         "color": "GREEN",
         "status": "CURRENT",
         "teams": 136,
-        "snapshot_date": "2026-08-24",
-        "pulled_at": "2026-08-25T00:15:23Z",
-        "latest_pull_at": "2026-08-25T00:15:23Z",
+        "snapshot_date": "2026-08-25",
+        "pulled_at": "2026-08-25T12:01:07Z",
+        "latest_pull_at": "2026-08-25T12:01:07Z",
         "last_changed_at": "2026-08-11T00:53:39Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -67,9 +67,9 @@
         "color": "GREEN",
         "status": "CURRENT",
         "teams": 138,
-        "snapshot_date": "2026-08-24",
-        "pulled_at": "2026-08-25T00:15:23Z",
-        "latest_pull_at": "2026-08-25T00:15:23Z",
+        "snapshot_date": "2026-08-25",
+        "pulled_at": "2026-08-25T12:01:07Z",
+        "latest_pull_at": "2026-08-25T12:01:07Z",
         "last_changed_at": "2026-08-11T00:53:40Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -91,8 +91,8 @@
         "games_available": 39,
         "production_games": 765,
         "coverage_pct": 5.1,
-        "latest_pulled_at": "2026-08-25T00:16:52.851103+00:00",
-        "latest_snapshot_date": "2026-08-24"
+        "latest_pulled_at": "2026-08-25T12:08:02.475621+00:00",
+        "latest_snapshot_date": "2026-08-25"
       },
       "MAS": {
         "source": "Massey Game Predictions",
@@ -102,7 +102,7 @@
         "production_games": 765,
         "coverage_pct": 6.7,
         "latest_pulled_at": "2026-08-25T00:16:42.779936+00:00",
-        "latest_snapshot_date": "2026-08-24"
+        "latest_snapshot_date": "2026-08-25"
       }
     }
   },
@@ -113,18 +113,18 @@
     "completed_team_updates": 0,
     "display_ready_games": 0,
     "displayed_shadow_rows": 0,
-    "component_games": 114,
+    "component_games": 136,
     "spread_model_status": "ready",
     "total_model_status": "awaiting_current_season_pbp",
     "postgame_built_at": "2026-08-03T12:02:51.914962+00:00",
-    "components_generated_at": "2026-08-25T00:46:56.610521+00:00",
-    "shadow_lines_built_at": "2026-08-25T00:47:01.809774+00:00",
+    "components_generated_at": "2026-08-25T12:12:31.672437+00:00",
+    "shadow_lines_built_at": "2026-08-25T12:12:35.682878+00:00",
     "activation_policy": "GREEN only after genuine completed-game updates exist and at least one Shadow projection is display-ready. Expected pregame waiting states are YELLOW, not RED."
   },
   "projection_health": {
     "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
     "selection_policy": "Frontend selects the matching week entry. ALL WEEKS does not aggregate season-wide projection health.",
-    "projection_contract_built_at": "2026-08-25T00:46:56.945423+00:00",
+    "projection_contract_built_at": "2026-08-25T12:12:31.991066+00:00",
     "matched_fast_board_games": 111,
     "unmatched_fast_board_games": 0,
     "fbs_vs_fbs_games": 62,
@@ -467,10 +467,10 @@
       "spread_completeness_pct": 100.0,
       "total_completeness_pct": 100.0,
       "quote_rows": 300,
-      "canonical_current_games": 105,
+      "canonical_current_games": 151,
       "canonical_source_counts": {
         "The Odds API": 416,
-        "Action Network": 144
+        "Action Network": 298
       },
       "quote_age_median_seconds": 11.4,
       "quote_age_p90_seconds": 11.4
@@ -572,7 +572,7 @@
       "quote_rows": 32,
       "canonical_current_games": 8,
       "canonical_source_counts": {
-        "The Odds API": 44
+        "The Odds API": 46
       },
       "quote_age_median_seconds": 12.4,
       "quote_age_p90_seconds": 12.4

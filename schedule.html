@@ -181,7 +181,7 @@ img[src$="west-virginia.webp"] {
 }
 </style>
 
-<style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="shared-war-room-shell-v2">
+<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="shared-war-room-shell-v2">
 :root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
 .war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
 .war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
@@ -190,9 +190,8 @@ img[src$="west-virginia.webp"] {
 @media(max-width:1550px){.war-room-global{grid-template-columns:235px minmax(0,1fr) max-content!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:34px!important}.war-room-global .war-room-nav a{font-size:12px!important;padding:0 7px!important}.war-room-global .war-room-context{display:none!important}}
 @media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
 @media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
-</style><link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html" class="active">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Schedule</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
-<main class="shell"><section class="hero"><div><div class="scheduleNativeTitleRow"><h1>Schedule & Results</h1><!-- SATURDAY_SHADOW_RULES_PANEL_START -->
+</style></head><body>
+<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html" class="active">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Schedule</span><div class="war-room-health"><i></i>Data Healthy</div></div></header><main class="shell"><section class="hero"><div><div class="scheduleNativeTitleRow"><h1>Schedule & Results</h1><!-- SATURDAY_SHADOW_RULES_PANEL_START -->
 <style id="SATURDAY_SHADOW_RULES_PANEL_STYLE">
 .shadowRulesWrap{margin:12px 0 16px}
 .shadowRulesButton{border:1px solid #2e6595;background:#0b2341;color:#eaf3ff;border-radius:9px;padding:9px 13px;font-weight:900;cursor:pointer}
@@ -279,7 +278,7 @@ img[src$="west-virginia.webp"] {
     el.innerHTML=items.map(([k,v])=>`<div class="shadowMetric"><span>${k}</span><b>${v}</b></div>`).join('');
   }
   Promise.all([
-    fetch('data/site/postgame_shadow_updates.json?v=20260825T023640Z').then(r=>r.json()),
+    fetch('data/site/postgame_shadow_updates.json?v=20260825T121335Z').then(r=>r.json()),
     fetch('data/research/shadow_value_confidence/summary.json?v=20260726-value1').then(r=>r.json())
   ])
     .then(([d,value])=>{
@@ -651,7 +650,7 @@ function draw(){
   hydrateScheduleImpactLogosV12();
   initScheduleHeaderTipsV12()
 }
-async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260825T023640Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260825T023640Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch(`data/site/schedule_live_enrichment.json?v=20260825T023640Z)}`,{cache:'no-store'}).then(r=>r.json()).then(x=>{
+async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260825T121335Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260825T121335Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch(`data/site/schedule_live_enrichment.json?v=20260825T121335Z)}`,{cache:'no-store'}).then(r=>r.json()).then(x=>{
   const m=new Map();
   for(const y of (x.games||[])){
     const g=y?.game||y||{};
