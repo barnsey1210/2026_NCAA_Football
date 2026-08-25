@@ -236,12 +236,14 @@ sagarin_ranks = {team: rank for rank, (team, _value) in enumerate(sagarin_ranked
 for team, row in master_by_team.items():
     if row.get("sagarin") in (None, "", "nan"):
         continue
-    by_team.setdefault(team, {}).setdefault("sagarin", {
+    team_sources = by_team.setdefault(team, {})
+    existing_sagarin = team_sources.get("sagarin", {})
+    team_sources["sagarin"] = {
         "rating": float(row["sagarin"]),
         "rank": sagarin_ranks[team],
         "raw_rating": float(row["sagarin_raw"]) if row.get("sagarin_raw") not in (None, "", "nan") else None,
-        "pulled_at": None,
-    })
+        "pulled_at": existing_sagarin.get("pulled_at"),
+    }
 
 
 # Load the latest market-derived ratings.
