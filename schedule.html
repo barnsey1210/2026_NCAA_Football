@@ -278,7 +278,7 @@ img[src$="west-virginia.webp"] {
     el.innerHTML=items.map(([k,v])=>`<div class="shadowMetric"><span>${k}</span><b>${v}</b></div>`).join('');
   }
   Promise.all([
-    fetch('data/site/postgame_shadow_updates.json?v=20260825T121335Z').then(r=>r.json()),
+    fetch('data/site/postgame_shadow_updates.json?v=20260825T200638Z').then(r=>r.json()),
     fetch('data/research/shadow_value_confidence/summary.json?v=20260726-value1').then(r=>r.json())
   ])
     .then(([d,value])=>{
@@ -650,7 +650,7 @@ function draw(){
   hydrateScheduleImpactLogosV12();
   initScheduleHeaderTipsV12()
 }
-async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260825T121335Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260825T121335Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch(`data/site/schedule_live_enrichment.json?v=20260825T121335Z)}`,{cache:'no-store'}).then(r=>r.json()).then(x=>{
+async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260825T200638Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260825T200638Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch(`data/site/schedule_live_enrichment.json?v=20260825T200638Z)}`,{cache:'no-store'}).then(r=>r.json()).then(x=>{
   const m=new Map();
   for(const y of (x.games||[])){
     const g=y?.game||y||{};

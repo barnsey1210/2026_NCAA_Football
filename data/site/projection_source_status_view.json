@@ -1,14 +1,14 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-08-25T12:12:31.027206+00:00",
+  "generated_at": "2026-08-25T20:06:35.203126+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_five_source_v1",
     "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
-    "full_available": 37,
-    "degraded_available": 728,
+    "full_available": 39,
+    "degraded_available": 726,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -31,9 +31,9 @@
       {
         "key": "FPI",
         "name": "FPI",
-        "games_available": 744,
+        "games_available": 746,
         "production_games": 765,
-        "coverage_pct": 97.3,
+        "coverage_pct": 97.5,
         "state": "PARTIAL"
       },
       {
@@ -85,7 +85,7 @@
           "Sagarin Rating",
           "DRatings Game Predictions"
         ],
-        "games": 37,
+        "games": 39,
         "effective_weights": {
           "SP+": 0.2,
           "FPI": 0.2,
@@ -105,21 +105,6 @@
           "SP+": 0.333333,
           "TeamRankings": 0.333333,
           "Sagarin Rating": 0.333333
-        }
-      },
-      {
-        "components": [
-          "SP+",
-          "TeamRankings",
-          "Sagarin Rating",
-          "DRatings Game Predictions"
-        ],
-        "games": 2,
-        "effective_weights": {
-          "SP+": 0.25,
-          "TeamRankings": 0.25,
-          "Sagarin Rating": 0.25,
-          "DRatings Game Predictions": 0.25
         }
       }
     ]
@@ -196,7 +181,7 @@
       "production_games": 765,
       "coverage_pct": 5.1,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-08-25T12:08:02.475621+00:00",
+      "latest_pulled_at": "2026-08-25T20:00:10.297934+00:00",
       "latest_snapshot_date": "2026-08-25",
       "first_game_date": "2026-08-29",
       "last_game_date": "2026-09-07"
@@ -209,23 +194,10 @@
       "production_games": 765,
       "coverage_pct": 6.7,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-08-25T00:16:42.779936+00:00",
+      "latest_pulled_at": "2026-08-25T20:00:20.552820+00:00",
       "latest_snapshot_date": "2026-08-25",
       "first_game_date": "2026-08-29",
       "last_game_date": "2026-09-07"
-    },
-    {
-      "name": "Sagarin Game Total",
-      "source_key": "Sagarin Game Total",
-      "role": "Standard Total Sagarin game-total input",
-      "games_available": 0,
-      "production_games": 765,
-      "coverage_pct": 0.0,
-      "state": "MISSING",
-      "latest_pulled_at": null,
-      "latest_snapshot_date": null,
-      "first_game_date": null,
-      "last_game_date": null
     },
     {
       "name": "Sagarin Game Total",
