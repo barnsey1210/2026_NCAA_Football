@@ -119,6 +119,7 @@ button,select{
   color:var(--yellow);
   border-color:#9b741d;
 }
+.operator-control[hidden]{display:none!important}
 
 .wr-btn:disabled{
   cursor:wait;
@@ -660,8 +661,16 @@ tr:hover td{
         ↻ RELOAD MARKET
       </button>
 
-      <button class="wr-btn acquire" id="acquireBtn" title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
-        ⚡ ACQUIRE MARKET · 2 CREDITS
+      <button class="wr-btn acquire operator-control" id="acquireBtn" hidden title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
+        ⚡ REFRESH MARKET · 2 CREDITS
+      </button>
+
+      <button class="wr-btn operator-control" id="ratingsBtn" hidden>
+        ↻ REFRESH RATINGS
+      </button>
+
+      <button class="wr-btn operator-control" id="postgameBtn" hidden>
+        ↻ REFRESH POSTGAME
       </button>
     </div>
   </div>
@@ -823,8 +832,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T004812Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T004812Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T023640Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T023640Z';
 
 let MATRIX = null;
 let HEALTH = null;
@@ -1904,40 +1913,62 @@ document.getElementById('refreshBtn').addEventListener(
   }
 );
 
+const CONTROL_BASE_URL = null;
+const VERSION_POLL_MS = 60000;
+
+async function requestOperation(path, button, runningLabel){
+  const old = button.textContent;
+  button.disabled = true;
+  button.textContent = runningLabel;
+  try{
+    const response = await fetch(`${CONTROL_BASE_URL}${path}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      cache:'no-store', credentials:'include'
+    });
+    const payload = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(payload?.detail?.message || payload?.detail || `HTTP ${response.status}`);
+    button.textContent = '✓ REQUESTED';
+  }catch(err){
+    console.error(err); button.textContent = '⚠ REQUEST FAILED';
+  }finally{
+    setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
+  }
+}
+
+async function detectOperator(){
+  if(!CONTROL_BASE_URL) return;
+  try{
+    const response = await fetch(`${CONTROL_BASE_URL}/war-room/status`, {cache:'no-store',credentials:'include'});
+    if(!response.ok) return;
+    document.querySelectorAll('.operator-control').forEach(el=>el.hidden=false);
+  }catch(_err){ /* public viewers intentionally retain a read-only page */ }
+}
+
 document.getElementById('acquireBtn').addEventListener(
   'click',
   async ()=>{
     const btn = document.getElementById('acquireBtn');
     if(!window.confirm('Acquire a fresh spreads + totals market snapshot? Expected cost: 2 Odds API credits.')) return;
-    const old = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = '⚡ ACQUIRING…';
-    try{
-      const response = await fetch('/war-room/acquire', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        cache:'no-store',
-        credentials:'omit'
-      });
-      const payload = await response.json().catch(()=>({}));
-      if(!response.ok){
-        const detail = payload?.detail?.message || payload?.detail || `HTTP ${response.status}`;
-        throw new Error(String(detail));
-      }
-      await loadData();
-      btn.textContent = '✓ MARKET ACQUIRED';
-    }catch(err){
-      console.error(err);
-      btn.textContent = '⚠ ACQUIRE FAILED';
-      window.alert(`Market acquisition failed: ${err.message}`);
-    }finally{
-      setTimeout(()=>{
-        btn.textContent = old;
-        btn.disabled = false;
-      },2000);
-    }
+    await requestOperation('/war-room/market', btn, '⚡ REQUESTING MARKET…');
   }
 );
+
+document.getElementById('ratingsBtn').addEventListener('click', e=>requestOperation('/war-room/ratings',e.currentTarget,'↻ REQUESTING RATINGS…'));
+document.getElementById('postgameBtn').addEventListener('click', e=>requestOperation('/war-room/postgame',e.currentTarget,'↻ REQUESTING POSTGAME…'));
+
+let LAST_BUILD_ID = null;
+async function pollPublishedVersion(){
+  try{
+    const response = await fetch(`${HEALTH_URL}?version=${Date.now()}`,{cache:'no-store'});
+    if(!response.ok) return;
+    const health = await response.json();
+    const version = health.built_at || health.generated_at || health.fast_market_refresh?.refresh_id;
+    if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
+    if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
+  }catch(_err){ /* preserve the last valid rendered state */ }
+}
+setInterval(pollPublishedVersion, VERSION_POLL_MS);
+detectOperator();
 
 loadData().catch(err=>{
   console.error(err);
