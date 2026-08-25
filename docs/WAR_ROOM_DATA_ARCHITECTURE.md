@@ -1,5 +1,10 @@
 # War Room Data Architecture
 
+> Repository execution, full-build, fast-path, and publication boundaries are
+> governed by `docs/NCAAF_RUNTIME_UPDATE_ARCHITECTURE.md`. This document owns
+> War Room data contracts; it does not imply that source code present in MAIN
+> is deployed or scheduled in AUTO.
+
 ## Purpose
 
 This document is the source-of-truth map for how data is expected to move from raw providers to canonical domain contracts, page adapters, public artifacts, and GitHub Pages.
@@ -29,6 +34,36 @@ They do not yet enumerate every field, script, or legacy backup file. The read-o
 ## Core rule
 
 A public page may format canonical data differently, but it may not independently choose a source or silently substitute stale cached values.
+
+## Approved production providers and authority boundaries
+
+Detailed provider-service ownership and API budget policy are governed by
+`docs/WAR_ROOM_PROVIDER_SERVICES_AND_API_BUDGETS.md`.
+
+CollegeFootballData (CFBD) **Tier 2 is approved** as a production provider. Do
+not re-evaluate free-tier sufficiency as part of lifecycle implementation.
+CFBD owns source observations for:
+
+- schedule and game-status updates, including evidence used for canonical
+  `GAME_FINAL` detection;
+- postgame plays, drives, havoc, and advanced game statistics; and
+- preserved raw/historical data needed for replay and future research.
+
+CFBD observations must pass the existing canonical identity, result, cache,
+and feature validation layers before downstream use. CFBD does **not** own
+projection authority, ratings authority, market authority, or betting edges.
+Those remain with their canonical domain owners. The Tier 2 API key will be
+wired later through the established protected secret/environment pattern; it
+must never be stored in a data contract or public artifact.
+
+The Odds API operational budget is 20,000 credits per calendar month. A fixed
+2,000-credit emergency reserve is unavailable to normal operations; all
+remaining reconciled credits are available for normal operations subject to
+existing quota, cadence, lock, and validation gates.
+
+The calendar-month period begins at 00:00 UTC on day 1 and ends at 23:59 UTC on
+the final calendar day. The budget is not a football-week, season, or rolling
+30-day budget. CFBD Tier 2 usage is tracked in a separate provider ledger.
 
 ## Standalone Command Center V1
 
@@ -93,6 +128,27 @@ Every required component must be present. Missing components produce an
 explicit unavailable state. The resolver must not renormalize available
 components or substitute a team-rating estimate, market rating, legacy blend,
 or another provider model.
+
+That strictness governs the named Official models. Operational authority is a
+separate selection layer governed by
+`docs/WAR_ROOM_PROJECTION_AUTHORITY.md`: 0-1 accepted provider updates select
+Shadow, the defined intermediate threshold selects a separately identified
+Hybrid value using updated canonical components and renormalized canonical
+weights, and complete provider updates select the strict Official model. A
+Hybrid value must never acquire an Official model ID.
+
+The canonical terminology keeps five dimensions separate: `authority_state`,
+`selection_mode`, `availability_status`, `freshness_status`, and
+`lifecycle_state`. In particular, `HYBRID` is an authority-cycle state produced
+only by accepted provider updates. `OPERATIONAL_DEGRADED` is a selection mode
+for a separately identified renormalized estimate caused by missing
+coverage/input availability; it is not an authority tier. Existing artifacts
+that place `OPERATIONAL_DEGRADED` in an `authority` field retain their current
+runtime behavior but must be interpreted according to that compatibility rule.
+
+The future controller boundary and the relationship among persisted events,
+rebuildable state, authority selection, builders, validation, and publication
+are governed by `docs/WAR_ROOM_LIFECYCLE_OPERATIONAL_MODEL.md`.
 
 ```mermaid
 flowchart LR
