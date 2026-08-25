@@ -844,8 +844,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T141821Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T141821Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T143816Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T143816Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -1929,7 +1929,7 @@ document.getElementById('refreshBtn').addEventListener(
 );
 
 const CONTROL_BASE_URL = "https://control.barnseywr.com";
-const VERSION_POLL_MS = 30000;
+const VERSION_POLL_MS = 2000;
 const CONTROL_ORIGIN = CONTROL_BASE_URL ? new URL(CONTROL_BASE_URL).origin : '';
 const CONTROL_CHANNEL = 'ncaaf-war-room-control-v1';
 const CONTROL_ACTIONS = new Set(['market','ratings','postgame']);

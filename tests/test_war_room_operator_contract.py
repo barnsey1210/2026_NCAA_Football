@@ -145,6 +145,7 @@ class OperatorContractTests(unittest.TestCase):
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
         self.assertIn("LIVE_VERSION_URL", builder)
         self.assertIn("fetchDataPair(LIVE_MATRIX_URL,LIVE_HEALTH_URL)", builder)
+        self.assertIn('POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))', builder)
 
     def test_public_live_read_origin_is_exact(self):
         api.require_public_read_origin(

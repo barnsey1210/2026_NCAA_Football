@@ -8,7 +8,7 @@ OUT = ROOT / "war-room.html"
 CONTROL_CONFIG = ROOT / "config/war_room_control_plane.json"
 control_config = json.loads(CONTROL_CONFIG.read_text()) if CONTROL_CONFIG.exists() else {}
 CONTROL_BASE_URL = control_config.get("control_base_url")
-POLL_SECONDS = max(30, int(control_config.get("browser_version_poll_seconds", 60)))
+POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))
 
 HTML = r'''<!doctype html>
 <html lang="en">
