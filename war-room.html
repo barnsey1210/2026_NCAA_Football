@@ -667,6 +667,10 @@ tr:hover td{
         ↻ RELOAD MARKET
       </button>
 
+      <button class="wr-btn" id="connectOperatorBtn" hidden>
+        🔐 CONNECT OPERATOR
+      </button>
+
       <button class="wr-btn acquire operator-control" id="acquireBtn" disabled title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
         ⚡ REFRESH MARKET · 2 CREDITS
       </button>
@@ -840,8 +844,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T121335Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T121335Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T124012Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T124012Z';
 
 let MATRIX = null;
 let HEALTH = null;
@@ -1923,6 +1927,73 @@ document.getElementById('refreshBtn').addEventListener(
 
 const CONTROL_BASE_URL = "https://control.barnseywr.com";
 const VERSION_POLL_MS = 60000;
+const CONTROL_ORIGIN = CONTROL_BASE_URL ? new URL(CONTROL_BASE_URL).origin : '';
+const CONTROL_CHANNEL = 'ncaaf-war-room-control-v1';
+const CONTROL_ACTIONS = new Map([
+  ['/war-room/market','market'],
+  ['/war-room/ratings','ratings'],
+  ['/war-room/postgame','postgame']
+]);
+const RELAY_REQUESTS = new Map();
+let CONTROL_WINDOW = null;
+let OPERATOR_MODE = null;
+
+function setOperatorControls(enabled){
+  document.querySelectorAll('.operator-control').forEach(el=>el.disabled=!enabled);
+}
+
+function connectOperator(){
+  const status=document.getElementById('operatorStatus');
+  CONTROL_WINDOW=window.open(
+    `${CONTROL_BASE_URL}/war-room/bootstrap`,
+    'ncaaf-war-room-control',
+    'popup=yes,width=520,height=260,resizable=yes,scrollbars=yes'
+  );
+  if(!CONTROL_WINDOW){status.textContent='Operator connection blocked · allow popups and retry';return}
+  status.textContent='Waiting for operator authentication…';
+}
+
+function requestViaRelay(path, button, old){
+  const action=CONTROL_ACTIONS.get(path);
+  if(!action || !CONTROL_WINDOW || CONTROL_WINDOW.closed) throw new Error('Operator session is not connected');
+  const requestId=crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  RELAY_REQUESTS.set(requestId,{button,old});
+  CONTROL_WINDOW.postMessage({channel:CONTROL_CHANNEL,type:'REQUEST',requestId,action},CONTROL_ORIGIN);
+}
+
+addEventListener('message',event=>{
+  if(event.origin!==CONTROL_ORIGIN || event.source!==CONTROL_WINDOW)return;
+  const message=event.data||{};
+  if(message.channel!==CONTROL_CHANNEL)return;
+  const status=document.getElementById('operatorStatus');
+  const connect=document.getElementById('connectOperatorBtn');
+  if(message.type==='READY'){
+    OPERATOR_MODE='relay';
+    setOperatorControls(true);
+    connect.hidden=true;
+    status.textContent='Operator ready';
+    return;
+  }
+  const pending=RELAY_REQUESTS.get(message.requestId);
+  if(!pending)return;
+  if(message.type==='ACK'){
+    pending.button.textContent='✓ REQUESTED';
+    status.textContent=`Task ${message.payload.task_id} · ${message.payload.status || 'REQUESTED'}`;
+  }else if(message.type==='TASK'){
+    status.textContent=operationDetail(message.task||{});
+    const terminal=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
+    if(terminal.has(message.task?.status)){
+      if(message.task.status==='COMPLETED' || message.task.status==='COMPLETED_WITH_WARNINGS')loadData();
+      RELAY_REQUESTS.delete(message.requestId);
+      setTimeout(()=>{pending.button.textContent=pending.old;pending.button.disabled=false},2500);
+    }
+  }else if(message.type==='ERROR'){
+    pending.button.textContent='⚠ REQUEST FAILED';
+    status.textContent=`Request failed · ${message.message}`;
+    RELAY_REQUESTS.delete(message.requestId);
+    setTimeout(()=>{pending.button.textContent=pending.old;pending.button.disabled=false},2500);
+  }
+});
 
 async function requestOperation(path, button, runningLabel){
   const old = button.textContent;
@@ -1930,6 +2001,14 @@ async function requestOperation(path, button, runningLabel){
   button.textContent = runningLabel;
   const status = document.getElementById('operatorStatus');
   status.textContent = 'Submitting authenticated request…';
+  if(OPERATOR_MODE==='relay'){
+    try{requestViaRelay(path,button,old)}catch(err){
+      button.textContent='⚠ REQUEST FAILED';
+      status.textContent=`Request failed · ${err.message}`;
+      setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
+    }
+    return;
+  }
   try{
     const response = await fetch(`${CONTROL_BASE_URL}${path}`, {
       method:'POST',
@@ -1977,17 +2056,25 @@ async function pollOperation(taskId, status){
 
 async function detectOperator(){
   const status=document.getElementById('operatorStatus');
+  const connect=document.getElementById('connectOperatorBtn');
   if(!CONTROL_BASE_URL){status.textContent='Operator authentication unavailable';return}
   try{
     const response = await fetch(`${CONTROL_BASE_URL}/war-room/status`, {cache:'no-store',credentials:'include'});
     if(!response.ok) throw new Error(`HTTP ${response.status}`);
-    document.querySelectorAll('.operator-control').forEach(el=>el.disabled=false);
+    OPERATOR_MODE='direct';
+    setOperatorControls(true);
+    connect.hidden=true;
     status.textContent='Operator ready';
   }catch(err){
-    document.querySelectorAll('.operator-control').forEach(el=>el.disabled=true);
-    status.textContent=`Authentication unavailable · ${err.message}`;
+    OPERATOR_MODE=null;
+    setOperatorControls(false);
+    connect.hidden=false;
+    connect.disabled=false;
+    status.textContent='Authentication unavailable · connect operator session';
   }
 }
+
+document.getElementById('connectOperatorBtn').addEventListener('click',connectOperator);
 
 document.getElementById('acquireBtn').addEventListener(
   'click',

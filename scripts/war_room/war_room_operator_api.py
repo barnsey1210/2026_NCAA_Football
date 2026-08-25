@@ -20,7 +20,7 @@ from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 LATEST = ROOT / "data/control/war_room_services/latest.json"
@@ -177,6 +177,54 @@ def request_action(action: str, requester: str, request: Request) -> JSONRespons
 @app.get("/war-room/status")
 def status(operator: str = Depends(require_access)):
     return {"ok": True, "authenticated": True, "operator": operator, "latest": load_json(LATEST, {"status": "NEVER_RUN"})}
+
+
+@app.get("/war-room/bootstrap", response_class=HTMLResponse)
+def bootstrap(operator: str = Depends(require_access)):
+    target_origin = json.dumps(PUBLIC_ORIGIN)
+    html = f"""<!doctype html>
+<html><head><meta charset=\"utf-8\"><title>War Room Operator</title></head>
+<body><p id=\"state\">Operator session ready. Keep this window open.</p>
+<script>
+const TARGET_ORIGIN={target_origin};
+const CHANNEL='ncaaf-war-room-control-v1';
+const ACTIONS=new Set(['market','ratings','postgame']);
+const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
+function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,...message}},TARGET_ORIGIN)}}
+async function pollTask(taskId,requestId){{
+  for(let attempt=0;attempt<240;attempt++){{
+    const response=await fetch(`/war-room/task/${{encodeURIComponent(taskId)}}`,{{cache:'no-store',credentials:'same-origin'}});
+    const payload=await response.json().catch(()=>({{}}));
+    if(!response.ok)throw new Error(payload?.detail || `Task HTTP ${{response.status}}`);
+    send({{type:'TASK',requestId,task:payload.task}});
+    if(TERMINAL.has(payload.task?.status))return;
+    await new Promise(resolve=>setTimeout(resolve,3000));
+  }}
+  throw new Error(`Task ${{taskId}} status timed out`);
+}}
+addEventListener('message',async event=>{{
+  if(event.origin!==TARGET_ORIGIN || event.source!==window.opener)return;
+  const message=event.data||{{}};
+  if(message.channel!==CHANNEL || message.type!=='REQUEST' || !ACTIONS.has(message.action))return;
+  try{{
+    const response=await fetch(`/war-room/${{message.action}}`,{{method:'POST',cache:'no-store',credentials:'same-origin'}});
+    const payload=await response.json().catch(()=>({{}}));
+    if(response.status!==202 || !payload.task_id)throw new Error(payload?.detail || `HTTP ${{response.status}}`);
+    send({{type:'ACK',requestId:message.requestId,payload}});
+    await pollTask(payload.task_id,message.requestId);
+  }}catch(error){{send({{type:'ERROR',requestId:message.requestId,message:String(error.message||error)}})}}
+}});
+send({{type:'READY'}});
+</script></body></html>"""
+    return HTMLResponse(
+        html,
+        headers={
+            "Cache-Control": "no-store",
+            "Content-Security-Policy": "default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'",
+            "Referrer-Policy": "no-referrer",
+            "X-Frame-Options": "DENY",
+        },
+    )
 
 
 @app.get("/war-room/task/{task_id}")

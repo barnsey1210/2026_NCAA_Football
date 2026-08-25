@@ -54,6 +54,8 @@ def validate(root: Path, out: Path) -> list[str]:
                 "REFRESH MARKET",
                 'id="ratingsBtn"',
                 'id="postgameBtn"',
+                'id="connectOperatorBtn"',
+                "/war-room/bootstrap",
                 "'/war-room/market'",
                 "'/war-room/ratings'",
                 "'/war-room/postgame'",

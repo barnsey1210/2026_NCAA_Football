@@ -89,13 +89,30 @@ class OperatorContractTests(unittest.TestCase):
         }
         self.assertIn("POST", methods_by_path["/war-room/market"])
         self.assertNotIn("GET", methods_by_path["/war-room/market"])
+        self.assertIn("GET", methods_by_path["/war-room/bootstrap"])
         self.assertNotIn("/war-room/acquire", methods_by_path)
+
+    def test_bootstrap_is_exact_origin_allowlisted_and_secret_free(self):
+        response = api.bootstrap("operator@example.invalid")
+        html = response.body.decode()
+        self.assertIn(api.PUBLIC_ORIGIN, html)
+        self.assertIn("event.origin!==TARGET_ORIGIN", html)
+        self.assertIn("event.source!==window.opener", html)
+        self.assertIn("new Set(['market','ratings','postgame'])", html)
+        self.assertIn("method:'POST'", html)
+        self.assertIn("credentials:'same-origin'", html)
+        self.assertNotIn("operator@example.invalid", html)
+        self.assertNotIn("apiKey", html)
+        self.assertNotIn("/war-room/acquire", html)
 
     def test_public_builder_uses_simple_canonical_market_post(self):
         builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
         self.assertIn("requestOperation('/war-room/market'", builder)
         self.assertIn("method:'POST'", builder)
         self.assertIn("credentials:'include'", builder)
+        self.assertIn("/war-room/bootstrap", builder)
+        self.assertIn("event.origin!==CONTROL_ORIGIN", builder)
+        self.assertIn("event.source!==CONTROL_WINDOW", builder)
         self.assertNotIn("fetch('/war-room/acquire'", builder)
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
 
