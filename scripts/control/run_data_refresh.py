@@ -183,6 +183,10 @@ def execute_ratings_service(
         run["status"] = "FAILED"
         return
 
+    # One zero-credit webpage request is made for each requested provider.
+    run["providers_called"] = ["spplus", "fpi", "teamrankings"]
+    run["api"]["calls_consumed"] = 3
+
     changed, statuses = accepted_ratings_changed()
     run["validation_results"]["accepted_rating_changes"] = statuses
     run["change_counts"] = {

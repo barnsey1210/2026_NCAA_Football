@@ -234,7 +234,7 @@ class OperatorContractTests(unittest.TestCase):
 
     def test_mocked_ratings_no_change_and_accepted_change_paths(self):
         def base_run():
-            return {"status":"RUNNING","errors":[],"stages":[],"validation_results":{}}
+            return {"status":"RUNNING","errors":[],"stages":[],"validation_results":{},"providers_called":[],"api":{"calls_consumed":0}}
         cfg={"publication_policy":{"ratings":True,"pregame":False}}
 
         no_change=base_run()
@@ -244,6 +244,8 @@ class OperatorContractTests(unittest.TestCase):
             refresh.execute_ratings_service(no_change,cfg,True)
         self.assertEqual(no_change["status"],"NO_CHANGES")
         self.assertEqual(runner.call_args_list[1].args[1],refresh.ratings_no_change_commands())
+        self.assertEqual(no_change["providers_called"],["spplus","fpi","teamrankings"])
+        self.assertEqual(no_change["api"]["calls_consumed"],3)
 
         changed=base_run()
         with patch.object(refresh,"run_commands",return_value=True) as runner, patch.object(
