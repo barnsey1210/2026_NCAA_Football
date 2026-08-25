@@ -701,10 +701,7 @@ run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.
   python3 scripts/war_room/build_war_room_health.py
   python3 scripts/war_room/build_war_room_market_matrix.py
   python3 scripts/site/build_public_site.py
-  python3 scripts/site/build_war_room_home.py
   python3 scripts/site/inject_market_presentation_fixes.py
-  python3 scripts/site/apply_shared_war_room_shell.py
-  cp matchup_workspace.js build/public_site/matchup_workspace.js
   python3 scripts/audit/audit_war_room_home_market_propagation.py
   stage_pass "site_build"
 
