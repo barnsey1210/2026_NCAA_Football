@@ -937,7 +937,6 @@ def main():
                 "spread_reason": spread_resolution.get("selection_reason"),
                 "spread_source_count": sum(v == "PRESENT" for v in spread_resolution.get("component_status", {}).values()),
                 "spread_source_max": 5,
-                "spread_coverage": None,
                 "spread_sources": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
                 "spread_source_label": "SP+, FPI, TeamRankings, Sagarin Rating, DRatings",
                 "total_version": total_resolution.get("model_id"),
@@ -948,7 +947,6 @@ def main():
                 "total_reason": total_resolution.get("selection_reason"),
                 "total_source_count": sum(v == "PRESENT" for v in total_resolution.get("component_status", {}).values()),
                 "total_source_max": 3,
-                "total_coverage": None,
                 "total_sources": ["SP+", "Massey Dual", "Sagarin"],
                 "total_source_label": "SP+, Massey Dual, Sagarin",
                 "resolver": {
