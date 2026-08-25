@@ -201,7 +201,7 @@ def bootstrap(operator: str = Depends(require_access)):
 <script>
 const TARGET_ORIGIN={target_origin};
 const CHANNEL='ncaaf-war-room-control-v1';
-const ACTIONS=new Set(['market','ratings','postgame']);
+const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame'}});
 const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
 function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,...message}},TARGET_ORIGIN)}}
 async function pollTask(taskId,requestId){{
@@ -218,9 +218,9 @@ async function pollTask(taskId,requestId){{
 addEventListener('message',async event=>{{
   if(event.origin!==TARGET_ORIGIN || event.source!==window.opener)return;
   const message=event.data||{{}};
-  if(message.channel!==CHANNEL || message.type!=='REQUEST' || !ACTIONS.has(message.action))return;
+  if(message.channel!==CHANNEL || message.type!=='REQUEST' || !Object.hasOwn(ACTION_ROUTES,message.action))return;
   try{{
-    const response=await fetch(`/war-room/${{message.action}}`,{{method:'POST',cache:'no-store',credentials:'same-origin'}});
+    const response=await fetch(ACTION_ROUTES[message.action],{{method:'POST',cache:'no-store',credentials:'same-origin'}});
     const payload=await response.json().catch(()=>({{}}));
     if(response.status!==202 || !payload.task_id)throw new Error(payload?.detail || `HTTP ${{response.status}}`);
     send({{type:'ACK',requestId:message.requestId,payload}});

@@ -56,13 +56,14 @@ def validate(root: Path, out: Path) -> list[str]:
                 'id="postgameBtn"',
                 'id="connectOperatorBtn"',
                 "/war-room/bootstrap",
-                "'/war-room/market'",
-                "'/war-room/ratings'",
-                "'/war-room/postgame'",
+                "requestOperation('market'",
+                "CONTROL_WINDOW.postMessage",
                 "pollPublishedVersion",
             ):
                 if marker not in text:
                     errors.append(f"War Room terminal marker missing: {marker}")
+            if "method:'POST'" in text or "method: 'POST'" in text:
+                errors.append("War Room public artifact must not issue operator action POSTs")
         elif name in MODERN:
             text = path.read_text(errors="ignore")
             if name != "index.html":
