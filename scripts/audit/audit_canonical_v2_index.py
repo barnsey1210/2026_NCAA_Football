@@ -17,8 +17,8 @@ def validate(path: Path) -> list[str]:
     required = {
         "locked War Room release marker": "data-war-room-home-release=",
         "War Room brand": "WAR<span>ROOM</span>",
-        "native War Room header": "<header>",
-        "native War Room navigation": "<nav>",
+        "native War Room header": '<header class="war-room-global">',
+        "native War Room navigation": '<nav class="nav war-room-nav">',
         "data-health indicator": "Data Healthy",
         "Top Games lane": "This Week’s Top Games",
         "Viewer’s Guide lane": "Viewer’s Guide",
