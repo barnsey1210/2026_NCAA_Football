@@ -10,13 +10,13 @@ from starlette.requests import Request
 from scripts.war_room import war_room_operator_api as api
 
 
-def request(origin=api.PUBLIC_ORIGIN):
+def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market"):
     value = Request(
         {
             "type": "http",
-            "method": "POST",
-            "path": "/war-room/market",
-            "headers": [(b"origin", origin.encode())],
+            "method": method,
+            "path": path,
+            "headers": [(b"origin", origin.encode())] if origin else [],
             "client": ("127.0.0.1", 12345),
             "scheme": "http",
             "server": ("127.0.0.1", 8787),
@@ -31,7 +31,7 @@ def request(origin=api.PUBLIC_ORIGIN):
 
 class OperatorContractTests(unittest.TestCase):
     def test_exact_origin_and_access_identity_are_required(self):
-        value = request()
+        value = request(api.PUBLIC_ORIGIN, "GET", "/war-room/status")
         operator = api.require_access(
             value,
             origin=api.PUBLIC_ORIGIN,
@@ -43,7 +43,7 @@ class OperatorContractTests(unittest.TestCase):
 
         with self.assertRaises(HTTPException) as raised:
             api.require_access(
-                request("https://foreign.example"),
+                request("https://foreign.example", "GET", "/war-room/status"),
                 origin="https://foreign.example",
                 cf_access_jwt_assertion="fixture-jwt",
                 cf_access_authenticated_user_email="operator@example.invalid",
@@ -52,12 +52,33 @@ class OperatorContractTests(unittest.TestCase):
 
         with self.assertRaises(HTTPException) as raised:
             api.require_access(
-                request(),
+                request(api.PUBLIC_ORIGIN, "GET", "/war-room/status"),
                 origin=api.PUBLIC_ORIGIN,
                 cf_access_jwt_assertion=None,
                 cf_access_authenticated_user_email=None,
             )
         self.assertEqual(raised.exception.status_code, 401)
+
+    def test_action_routes_require_exact_first_party_control_origin(self):
+        value = request(api.CONTROL_ORIGIN)
+        operator = api.require_access(
+            value,
+            origin=api.CONTROL_ORIGIN,
+            cf_access_jwt_assertion="fixture-jwt",
+            cf_access_authenticated_user_email="operator@example.invalid",
+        )
+        self.assertEqual(operator, "operator@example.invalid")
+
+        for rejected_origin in (api.PUBLIC_ORIGIN, "https://foreign.example", None):
+            with self.subTest(origin=rejected_origin):
+                with self.assertRaises(HTTPException) as raised:
+                    api.require_access(
+                        request(rejected_origin),
+                        origin=rejected_origin,
+                        cf_access_jwt_assertion="fixture-jwt",
+                        cf_access_authenticated_user_email="operator@example.invalid",
+                    )
+                self.assertEqual(raised.exception.status_code, 403)
 
     def test_market_acknowledgement_is_202_idempotent_and_persisted(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -66,7 +87,7 @@ class OperatorContractTests(unittest.TestCase):
                 api, "LATEST", root / "latest.json"
             ), patch("scripts.war_room.war_room_operator_api.subprocess.Popen") as popen:
                 popen.return_value.pid = 4321
-                first_request = request()
+                first_request = request(api.CONTROL_ORIGIN)
                 first = api.request_action("market", "operator@example.invalid", first_request)
                 payload = json.loads(first.body)
                 self.assertEqual(first.status_code, 202)
@@ -77,7 +98,7 @@ class OperatorContractTests(unittest.TestCase):
                 self.assertEqual(task["status"], "REQUESTED")
                 self.assertEqual(task["correlation_id"], "fixture-correlation")
 
-                second = api.request_action("market", "operator@example.invalid", request())
+                second = api.request_action("market", "operator@example.invalid", request(api.CONTROL_ORIGIN))
                 self.assertEqual(json.loads(second.body)["task_id"], payload["task_id"])
                 self.assertEqual(popen.call_count, 1)
 

@@ -31,6 +31,14 @@ MATRIX = ROOT / "data/site/war_room_market_matrix.json"
 PUBLIC_ORIGIN = os.environ.get(
     "WAR_ROOM_PUBLIC_ORIGIN", "https://barnsey1210.github.io"
 ).rstrip("/")
+CONTROL_ORIGIN = os.environ.get(
+    "WAR_ROOM_CONTROL_ORIGIN", "https://control.barnseywr.com"
+).rstrip("/")
+ACTION_PATHS = {
+    "/war-room/market",
+    "/war-room/ratings",
+    "/war-room/postgame",
+}
 
 app = FastAPI(title="NCAAF War Room Control Origin", version="1.0.0")
 app.add_middleware(
@@ -84,6 +92,7 @@ async def request_audit(request: Request, call_next):
                 "correlation_id": request.state.correlation_id,
                 "method": request.method,
                 "path": request.url.path,
+                "origin": request.headers.get("origin"),
                 "authenticated_operator": request.state.operator,
                 "response_status": response_status,
                 "task_id": request.state.task_id,
@@ -101,7 +110,11 @@ def require_access(
         raise HTTPException(status_code=403, detail="origin is loopback-only")
     if not cf_access_jwt_assertion or not cf_access_authenticated_user_email:
         raise HTTPException(status_code=401, detail="Cloudflare Access authentication required")
-    if origin and origin.rstrip("/") != PUBLIC_ORIGIN:
+    normalized_origin = origin.rstrip("/") if origin else None
+    if request.method == "POST" and request.url.path in ACTION_PATHS:
+        if normalized_origin != CONTROL_ORIGIN:
+            raise HTTPException(status_code=403, detail="browser origin is not authorized")
+    elif normalized_origin and normalized_origin not in {PUBLIC_ORIGIN, CONTROL_ORIGIN}:
         raise HTTPException(status_code=403, detail="browser origin is not authorized")
     request.state.operator = cf_access_authenticated_user_email
     return cf_access_authenticated_user_email

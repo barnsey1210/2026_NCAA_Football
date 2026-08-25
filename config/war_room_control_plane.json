@@ -2,6 +2,11 @@
   "schema_version": 1,
   "public_origin": "https://barnsey1210.github.io",
   "control_base_url": "https://control.barnseywr.com",
+  "origin_policy": {
+    "public_command_center": "https://barnsey1210.github.io",
+    "protected_action_origin": "https://control.barnseywr.com",
+    "wildcards_allowed": false
+  },
   "origin": {
     "bind_host": "127.0.0.1",
     "port": 8787,
