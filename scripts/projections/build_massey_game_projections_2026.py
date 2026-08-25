@@ -11,6 +11,7 @@ data/ratings/external_sources/massey_game_projections_2026.csv
 """
 
 from pathlib import Path
+import argparse
 import re
 import pandas as pd
 from datetime import datetime
@@ -168,7 +169,25 @@ def parse_file(path, pulled_at=None):
     return rows, audit
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
+    return parser.parse_args()
+
+
+def merge_window(existing, current, start_date, end_date):
+    if existing.empty:
+        return current
+    dates = existing["game_date"].astype(str)
+    preserved = existing[(dates < start_date) | (dates > end_date)].copy()
+    return pd.concat([preserved, current], ignore_index=True).drop_duplicates(
+        subset=["game_date", "away_team", "home_team"], keep="last"
+    )
+
+
 def main():
+    args = parse_args()
     all_rows = []
     all_audit = []
     collected = collection_times()
@@ -180,14 +199,21 @@ def main():
             if len(raw_date) == 8
             else ""
         )
+        if args.start_date and board_date < args.start_date:
+            continue
+        if args.end_date and board_date > args.end_date:
+            continue
         rows, audit = parse_file(path, pulled_at=collected.get(board_date))
         all_rows.extend(rows)
         all_audit.extend(audit)
 
-    pd.DataFrame(all_rows).to_csv(OUT, index=False)
+    current = pd.DataFrame(all_rows)
+    if args.start_date and args.end_date and OUT.exists():
+        current = merge_window(pd.read_csv(OUT), current, args.start_date, args.end_date)
+    current.to_csv(OUT, index=False)
     pd.DataFrame(all_audit).to_csv(AUDIT, index=False)
 
-    print(f"Wrote {OUT}: {len(all_rows)} rows")
+    print(f"Wrote {OUT}: {len(current)} rows")
     print(f"Wrote {AUDIT}: {len(all_audit)} rows")
 
     if all_audit:

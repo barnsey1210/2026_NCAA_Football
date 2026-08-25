@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import argparse
 from datetime import datetime
 import json, re, sys
 import pandas as pd
@@ -456,8 +457,22 @@ def load_sagarin(idx):
                                notes="Validated Sagarin game-total observation; no Predictor/Golden Mean/Recent/Strong Recent rating variant."))
     return rows, audit
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     db = load_db()
+    all_games = list(db.get("games", []))
+    if args.start_date and args.end_date:
+        db["games"] = [
+            game for game in all_games
+            if args.start_date <= str(game.get("date") or "")[:10] <= args.end_date
+        ]
     idx = site_game_index(db)
     all_rows, all_audit = [], []
     rows, audit = load_rating_game_projections(db)
@@ -469,6 +484,14 @@ def main():
     if not out.empty:
         out = out.drop_duplicates(subset=["source","game_id"], keep="last").sort_values(
             ["date","week","away_team","home_team","source"])
+    if args.start_date and args.end_date and OUT.exists():
+        existing = pd.read_csv(OUT, low_memory=False)
+        window_ids = {str(game.get("game_id") or "") for game in db.get("games", [])}
+        preserved = existing[~existing["game_id"].astype(str).isin(window_ids)].copy()
+        out = pd.concat([preserved, out], ignore_index=True)
+        if not out.empty:
+            out = out.drop_duplicates(subset=["source", "game_id"], keep="last").sort_values(
+                ["date", "week", "away_team", "home_team", "source"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT, index=False)
     aud = pd.DataFrame(all_audit)

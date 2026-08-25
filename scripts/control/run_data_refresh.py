@@ -135,26 +135,35 @@ def accepted_ratings_changed() -> tuple[bool, dict[str, str]]:
     return any(value in {"UPDATED", "INITIALIZED"} for value in statuses.values()), statuses
 
 
+def matchup_source_refresh_status() -> tuple[bool, dict[str, Any]]:
+    report = load_json(ROOT / "data/control/ratings_fast_source_refresh.json", {})
+    changed = bool(report.get("changed_providers"))
+    return changed, report
+
+
 def ratings_acquisition_commands() -> list[list[str]]:
     return [
         [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", "spplus,fpi,teamrankings"],
         [sys.executable, "scripts/ratings/parse_rating_source_tables.py"],
         [sys.executable, "scripts/ratings/accept_live_rating_candidates_with_status.py"],
+        [sys.executable, "scripts/ratings/run_fast_standard_source_refresh.py"],
     ]
 
 
-def ratings_change_commands() -> list[list[str]]:
+def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> list[list[str]]:
     """Bounded canonical propagation after at least one accepted panel changes."""
+    window = (matchup_report or {}).get("window") or {}
+    bounds = []
+    if window.get("start") and window.get("end"):
+        bounds = ["--start-date", window["start"], "--end-date", window["end"]]
     return [
         [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
         [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
         [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
         [sys.executable, "ratings/append_ratings_history.py"],
         [sys.executable, "ratings/build_ratings_movement.py"],
-        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py"],
-        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
-        [sys.executable, "scripts/projections/build_game_projection_blend_2026.py"],
-        [sys.executable, "scripts/projections/apply_game_projection_blend_to_preseason_db.py"],
+        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
+        [sys.executable, "scripts/projections/build_current_game_projection_contract.py", *bounds],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
@@ -183,19 +192,25 @@ def execute_ratings_service(
         run["status"] = "FAILED"
         return
 
-    # One zero-credit webpage request is made for each requested provider.
-    run["providers_called"] = ["spplus", "fpi", "teamrankings"]
-    run["api"]["calls_consumed"] = 3
-
-    changed, statuses = accepted_ratings_changed()
+    global_changed, statuses = accepted_ratings_changed()
+    matchup_changed, matchup_report = matchup_source_refresh_status()
+    changed = global_changed or matchup_changed
+    run["providers_called"] = [
+        "spplus", "fpi", "teamrankings", "sagarin", "dratings", "massey"
+    ]
+    # Free webpage activity is distinct from quota-bearing provider credits.
+    run["api"]["calls_consumed"] = 0
+    run["api"]["credits_consumed"] = 0
+    run["api"]["web_provider_contacts"] = len(run["providers_called"])
     run["validation_results"]["accepted_rating_changes"] = statuses
+    run["validation_results"]["matchup_source_refresh"] = matchup_report
     run["change_counts"] = {
         "ratings": sum(
             value in {"UPDATED", "INITIALIZED"} for value in statuses.values()
-        ),
+        ) + len(matchup_report.get("changed_providers") or []),
         "projections": 0,
     }
-    commands = ratings_change_commands() if changed else ratings_no_change_commands()
+    commands = ratings_change_commands(matchup_report) if changed else ratings_no_change_commands()
     if run_commands(run, commands):
         run["change_counts"]["projections"] = 1 if changed else 0
         run["status"] = "COMPLETED" if changed else "NO_CHANGES"

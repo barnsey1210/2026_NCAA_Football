@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+import argparse
 import re
 import json
 import tempfile
@@ -395,16 +396,37 @@ def validate_prediction_candidate(frame, provider_season):
     }, active
 
 
+def merge_prediction_window(existing, current, start_date, end_date):
+    if existing.empty:
+        return current
+    dates = existing["game_date"].fillna("").astype(str)
+    preserved = existing[(dates < start_date) | (dates > end_date)].copy()
+    return pd.concat([preserved, current], ignore_index=True).drop_duplicates(
+        subset=["game_id"], keep="last"
+    )
+
+
 def promote_prediction_candidate(frame, provider_season, *, candidate_path=PRED_CANDIDATE,
-                                 latest_path=PRED_LATEST, status_path=PRED_STATUS):
+                                 latest_path=PRED_LATEST, status_path=PRED_STATUS,
+                                 start_date=None, end_date=None):
     validation, active = validate_prediction_candidate(frame, provider_season)
+    if start_date and end_date and not active.empty:
+        active = active[active["game_date"].astype(str).between(start_date, end_date)].copy()
+        validation["window_start"] = start_date
+        validation["window_end"] = end_date
+        validation["window_rows"] = int(len(active))
     atomic_csv(active, candidate_path)
     validation["checked_at"] = now_utc()
     validation["candidate_artifact"] = str(candidate_path)
     validation["accepted_artifact"] = str(latest_path)
     validation["last_known_good_preserved"] = not validation["valid"] and latest_path.exists()
     if validation["valid"]:
-        atomic_csv(active, latest_path)
+        accepted = active
+        if start_date and end_date and latest_path.exists():
+            accepted = merge_prediction_window(
+                pd.read_csv(latest_path), active, start_date, end_date
+            )
+        atomic_csv(accepted, latest_path)
     atomic_json(status_path, validation)
     return validation
 
@@ -498,7 +520,19 @@ def parse_sagarin_text(html, provider_season=None):
 
     return pd.DataFrame(rows)
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
+    parser.add_argument("--as-of-date", help="Fixture-only clock override")
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+    today = date.fromisoformat(args.as_of_date) if args.as_of_date else date.today()
+    start_date = args.start_date or today.isoformat()
+    end_date = args.end_date or (today + timedelta(days=7)).isoformat()
     html = fetch()
     provider_season = detect_provider_season(html)
     print("Detected Sagarin provider season:", provider_season)
@@ -517,7 +551,9 @@ def main():
         pred_audit = pd.DataFrame(columns=[
             "status", "provider_season", "schedule_match_2026", "game_id", "line"
         ])
-    validation = promote_prediction_candidate(pred_all, provider_season)
+    validation = promote_prediction_candidate(
+        pred_all, provider_season, start_date=start_date, end_date=end_date
+    )
     validation_row = {
         "status": validation["status"],
         "provider_season": provider_season,

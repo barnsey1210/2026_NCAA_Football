@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urljoin
+import argparse
 import json
 import re
 import time
@@ -51,7 +52,7 @@ ALIASES = {
 def norm(x):
     return re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
 
-def load_site_context():
+def load_site_context(start_date=None, end_date=None):
     db = json.loads(DB.read_text())
     teams = set()
     dates = set()
@@ -60,6 +61,10 @@ def load_site_context():
         away = str(g.get("away_team") or "")
         home = str(g.get("home_team") or "")
         date = str(g.get("date") or "")[:10]
+        if date and start_date and date < start_date:
+            continue
+        if date and end_date and date > end_date:
+            continue
         if away:
             teams.add(away)
         if home:
@@ -188,11 +193,35 @@ def parse_page(html, url, site_teams, site_dates, canonical_games):
     next_url = min(candidates, key=lambda x: x[0])[1] if candidates else None
     return rows, page_date, next_url
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
+    parser.add_argument("--as-of-date", help="Fixture-only clock override")
+    return parser.parse_args()
+
+
+def merge_window(existing, current, start_date, end_date):
+    if existing.empty:
+        return current
+    dates = existing["game_date"].astype(str)
+    preserved = existing[(dates < start_date) | (dates > end_date)].copy()
+    return pd.concat([preserved, current], ignore_index=True).drop_duplicates(
+        subset=["game_date", "away_team_raw", "home_team_raw"], keep="last"
+    )
+
+
 def main():
+    args = parse_args()
     if not DB.exists():
         raise SystemExit(f"Missing canonical schedule DB: {DB}")
 
-    site_teams, site_dates, canonical_games = load_site_context()
+    today = date.fromisoformat(args.as_of_date) if args.as_of_date else date.today()
+    start_date = args.start_date or today.isoformat()
+    end_date = args.end_date or (today + timedelta(days=7)).isoformat()
+    if end_date < start_date:
+        raise SystemExit("end date precedes start date")
+    site_teams, site_dates, canonical_games = load_site_context(start_date, end_date)
     max_site_date = max(site_dates) if site_dates else None
 
     session = requests.Session()
@@ -232,7 +261,7 @@ def main():
         if not next_url:
             break
 
-        if page_date and max_site_date and page_date.isoformat() > max_site_date:
+        if page_date and page_date.isoformat() > end_date:
             break
 
         url = next_url
@@ -249,8 +278,12 @@ def main():
         keep="last",
     ).sort_values(["game_date", "away_team", "home_team"])
 
-    if max_site_date:
-        df = df[df["game_date"].astype(str) <= max_site_date].copy()
+    df = df[df["game_date"].astype(str).between(start_date, end_date)].copy()
+    window_rows = len(df)
+    existing = pd.read_csv(OUT) if OUT.exists() else pd.DataFrame()
+    if not existing.empty:
+        df = merge_window(existing, df, start_date, end_date)
+    df = df.sort_values(["game_date", "away_team", "home_team"])
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT, index=False)
@@ -262,6 +295,10 @@ def main():
         "schema_version": "dratings-ncaaf-pull-audit-v2",
         "pulled_at": datetime.now(timezone.utc).isoformat(),
         "navigation_method": "follow_dratings_next_game_date_link",
+        "window_start": start_date,
+        "window_end": end_date,
+        "window_rows": int(window_rows),
+        "window_canonical_games_considered": len(canonical_games),
         "rows": int(len(df)),
         "both_teams_matched": int(both.sum()),
         "canonical_site_games": int(canonical.sum()),

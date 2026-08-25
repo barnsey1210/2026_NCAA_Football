@@ -303,6 +303,11 @@ def validate_shadow_spec(path: Path) -> dict[str, Any]:
 def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     games_payload = json.loads(args.games.read_text(encoding="utf-8"))
     games = games_payload.get("games", [])
+    if args.start_date and args.end_date:
+        games = [
+            game for game in games
+            if args.start_date <= str(game.get("date") or "")[:10] <= args.end_date
+        ]
     sources = load_sources(args.sources)
     shadow_rows, shadow_timestamp = load_shadow(args.shadow)
     shadow_spec = validate_shadow_spec(args.shadow_spec)
@@ -762,6 +767,16 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             "frozen_specification": shadow_spec,
         },
     }
+    if args.start_date and args.end_date and args.output.is_file():
+        previous = json.loads(args.output.read_text(encoding="utf-8"))
+        window_ids = {game["game_id"] for game in output_games}
+        preserved = [
+            game for game in previous.get("games", [])
+            if str(game.get("game_id") or "") not in window_ids
+        ]
+        output_games = preserved + output_games
+        output_games.sort(key=lambda game: (str(game.get("date") or ""), str(game.get("game_id") or "")))
+
     payload = {
         "schema_version": "current-game-projection-contract-v1",
         "built_at": built_at,
@@ -826,6 +841,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--built-at")
+    parser.add_argument("--start-date")
+    parser.add_argument("--end-date")
     return parser.parse_args()
 
 

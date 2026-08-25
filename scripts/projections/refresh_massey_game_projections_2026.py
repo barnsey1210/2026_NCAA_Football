@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import argparse
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -18,8 +19,12 @@ def run(args):
 
 
 def main():
-    start = date.today()
-    end = start + timedelta(days=14)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--as-of-date", help="Fixture-only clock override")
+    parser.add_argument("--days", type=int, default=7)
+    args = parser.parse_args()
+    start = date.fromisoformat(args.as_of_date) if args.as_of_date else date.today()
+    end = start + timedelta(days=args.days)
 
     run([
         sys.executable,
@@ -29,7 +34,7 @@ def main():
         "--force",
     ])
 
-    run([sys.executable, str(BUILDER)])
+    run([sys.executable, str(BUILDER), "--start-date", start.isoformat(), "--end-date", end.isoformat()])
 
     print(
         f"Massey production window refreshed: "
