@@ -26,10 +26,20 @@ LOCKS = CONTROL / "locks"
 TASKS = CONTROL / "tasks"
 LATEST = CONTROL / "latest.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
+REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
 
-COMMANDS = {
-    "market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"],
-    "ratings": [sys.executable, "scripts/control/run_data_refresh.py", "pregame", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
+ACTION_REGISTRY_KEYS = {
+    "market": "MARKET_REFRESH",
+    "ratings": "RATINGS_REFRESH",
+    "postgame": "POSTGAME_REFRESH",
+    "war-room-rebuild": "WAR_ROOM_REBUILD",
+}
+
+# Registry modes select only these reviewed command templates. Registry text can
+# never supply an executable, path, or arbitrary argument.
+MODE_COMMANDS = {
+    "war-room-market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"],
+    "ratings": [sys.executable, "scripts/control/run_data_refresh.py", "ratings", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "postgame": [sys.executable, "scripts/control/run_data_refresh.py", "postgame", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"],
 }
@@ -51,6 +61,16 @@ def atomic_json(path: Path, value) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
     tmp.replace(path)
+
+
+def resolve_command(action: str) -> list[str]:
+    registry = read_json(REGISTRY, {})
+    registry_key = ACTION_REGISTRY_KEYS[action]
+    spec = registry.get("actions", {}).get(registry_key, {})
+    mode = spec.get("controller_mode")
+    if mode not in MODE_COMMANDS:
+        raise RuntimeError(f"unapproved controller mode for {registry_key}: {mode!r}")
+    return list(MODE_COMMANDS[mode])
 
 
 def daily_running() -> bool:
@@ -87,7 +107,7 @@ def acquire(action: str, identity: str) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=[*COMMANDS, "status"])
+    parser.add_argument("action", choices=[*ACTION_REGISTRY_KEYS, "status"])
     parser.add_argument("--trigger", default="manual")
     parser.add_argument("--requester", default="scheduler")
     parser.add_argument("--task-id", default=None)
@@ -121,7 +141,7 @@ def main() -> int:
         requester=args.requester[:120],
         requested_at=task.get("requested_at", utc_now()),
         status="REQUESTED",
-        command_owner=COMMANDS[args.action][1],
+        command_owner=resolve_command(args.action)[1],
     )
     atomic_json(TASKS / f"{identity}.json", task)
     atomic_json(LATEST, task)
@@ -139,7 +159,7 @@ def main() -> int:
         lock = acquire(args.action, identity)
         task.update(status="RUNNING", started_at=utc_now())
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
-        result = subprocess.run(COMMANDS[args.action], cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
+        result = subprocess.run(resolve_command(args.action), cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
         task.update(
             status="COMPLETED" if result.returncode == 0 else "FAILED",
             completed_at=utc_now(),

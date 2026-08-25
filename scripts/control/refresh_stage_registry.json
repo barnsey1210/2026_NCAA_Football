@@ -15,13 +15,13 @@
     "RATINGS_REFRESH": {
       "controller_mode": "ratings",
       "providers": ["spplus", "fpi", "teamrankings", "sagarin", "massey", "dratings"],
-      "owner": "existing ratings acceptance and projection pipelines",
+      "owner": "scripts/control/run_data_refresh.py",
       "bounded_publication": true
     },
     "POSTGAME_REFRESH": {
       "controller_mode": "postgame",
       "provider": "cfbd",
-      "owner": "existing schedule/results/postgame/Shadow pipelines",
+      "owner": "scripts/control/run_data_refresh.py",
       "bounded_publication": true
     },
     "WAR_ROOM_REBUILD": {

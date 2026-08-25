@@ -1,4 +1,7 @@
 import json
+import importlib.util
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -8,6 +11,18 @@ from fastapi import HTTPException
 from starlette.requests import Request
 
 from scripts.war_room import war_room_operator_api as api
+
+REFRESH_SPEC = importlib.util.spec_from_file_location(
+    "run_data_refresh", api.ROOT / "scripts/control/run_data_refresh.py"
+)
+refresh = importlib.util.module_from_spec(REFRESH_SPEC)
+REFRESH_SPEC.loader.exec_module(refresh)
+
+SERVICE_SPEC = importlib.util.spec_from_file_location(
+    "run_war_room_service", api.ROOT / "scripts/control/run_war_room_service.py"
+)
+service = importlib.util.module_from_spec(SERVICE_SPEC)
+SERVICE_SPEC.loader.exec_module(service)
 
 
 def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market"):
@@ -175,9 +190,89 @@ class OperatorContractTests(unittest.TestCase):
     def test_normal_market_service_does_not_push(self):
         dispatcher=(api.ROOT/"scripts/control/run_war_room_service.py").read_text()
         schedule=json.loads((api.ROOT/"config/war_room_fast_schedule.json").read_text())
-        self.assertIn('"market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"]',dispatcher)
+        self.assertIn('"war-room-market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"]',dispatcher)
         self.assertNotIn("--push",schedule["entrypoint"])
         self.assertIn('"war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"]',dispatcher)
+
+    def test_ratings_registry_and_dispatcher_use_bounded_ratings_mode(self):
+        registry=json.loads((api.ROOT/"scripts/control/refresh_stage_registry.json").read_text())
+        self.assertEqual(registry["actions"]["RATINGS_REFRESH"]["controller_mode"],"ratings")
+        command=service.resolve_command("ratings")
+        self.assertEqual(command[1:3],["scripts/control/run_data_refresh.py","ratings"])
+        self.assertNotIn("pregame",command)
+        self.assertEqual(registry["actions"]["RATINGS_REFRESH"]["owner"],command[1])
+
+    def test_registry_cannot_supply_arbitrary_command(self):
+        malicious={"actions":{"RATINGS_REFRESH":{"controller_mode":"../../tmp/arbitrary"}}}
+        with patch.object(service,"read_json",return_value=malicious):
+            with self.assertRaisesRegex(RuntimeError,"unapproved controller mode"):
+                service.resolve_command("ratings")
+
+    def test_ratings_command_sets_are_bounded(self):
+        no_change=" ".join(" ".join(x) for x in refresh.ratings_no_change_commands())
+        changed=" ".join(" ".join(x) for x in refresh.ratings_change_commands())
+        combined=no_change+" "+changed
+        self.assertIn("build_war_room_health.py",no_change)
+        self.assertIn("build_current_game_projection_contract.py",changed)
+        for forbidden in (
+            "daily_market_update.sh","build_public_site.py","publish_site.sh",
+            "run_fast_market_refresh.py","postgame","season_sim","conference","playoff",
+        ):
+            self.assertNotIn(forbidden,combined)
+
+    def test_ratings_change_detection(self):
+        with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"NO_CHANGE"}}}):
+            self.assertFalse(refresh.accepted_ratings_changed()[0])
+        with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"UPDATED"}}}):
+            self.assertTrue(refresh.accepted_ratings_changed()[0])
+
+    def test_ratings_policy_is_separate_from_pregame(self):
+        source=(api.ROOT/"scripts/control/run_data_refresh.py").read_text()
+        function=source[source.index("def execute_ratings_service("):source.index("def deployed_commit(")]
+        self.assertIn('get("ratings", False)',function)
+        self.assertNotIn('get("pregame", False)',function)
+
+    def test_mocked_ratings_no_change_and_accepted_change_paths(self):
+        def base_run():
+            return {"status":"RUNNING","errors":[],"stages":[],"validation_results":{}}
+        cfg={"publication_policy":{"ratings":True,"pregame":False}}
+
+        no_change=base_run()
+        with patch.object(refresh,"run_commands",return_value=True) as runner, patch.object(
+            refresh,"accepted_ratings_changed",return_value=(False,{"SP+":"NO_CHANGE"})
+        ):
+            refresh.execute_ratings_service(no_change,cfg,True)
+        self.assertEqual(no_change["status"],"NO_CHANGES")
+        self.assertEqual(runner.call_args_list[1].args[1],refresh.ratings_no_change_commands())
+
+        changed=base_run()
+        with patch.object(refresh,"run_commands",return_value=True) as runner, patch.object(
+            refresh,"accepted_ratings_changed",return_value=(True,{"SP+":"UPDATED"})
+        ):
+            refresh.execute_ratings_service(changed,cfg,True)
+        self.assertEqual(changed["status"],"COMPLETED")
+        self.assertEqual(runner.call_args_list[1].args[1],refresh.ratings_change_commands())
+        self.assertEqual(changed["change_counts"],{"ratings":1,"projections":1})
+
+    def test_ratings_dispatcher_records_terminal_status_without_provider_execution(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            captured=[]
+            def completed(command,**_kwargs):
+                captured.append(command)
+                return subprocess.CompletedProcess(command,0,"fixture complete","")
+            with patch.object(service,"CONTROL",root), patch.object(service,"LOCKS",root/"locks"), patch.object(
+                service,"TASKS",root/"tasks"
+            ), patch.object(service,"LATEST",root/"latest.json"), patch.object(
+                service,"DAILY_STATUS",root/"daily.json"
+            ), patch.object(service.subprocess,"run",side_effect=completed), patch.object(
+                sys,"argv",["run_war_room_service.py","ratings","--task-id","ratings-fixture-terminal"]
+            ):
+                code=service.main()
+            task=json.loads((root/"tasks/ratings-fixture-terminal.json").read_text())
+            self.assertEqual(code,0)
+            self.assertEqual(task["status"],"COMPLETED")
+            self.assertEqual(captured[0][1:3],["scripts/control/run_data_refresh.py","ratings"])
 
 
 if __name__ == "__main__":

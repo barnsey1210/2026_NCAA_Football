@@ -109,6 +109,96 @@ def shell(command: list[str], timeout: int = 1800) -> dict[str, Any]:
             "output_tail": output}
 
 
+def run_commands(run: dict[str, Any], commands: list[list[str]]) -> bool:
+    """Run a reviewed command list, stopping at the first failure."""
+    for command in commands:
+        result = shell(command)
+        name = Path(command[1]).name if len(command) > 1 else command[0]
+        run["stages"].append({
+            "name": name,
+            "status": "PASSED" if result["returncode"] == 0 else "FAILED",
+            **result,
+        })
+        if result["returncode"] != 0:
+            run["errors"].append(f"{name} failed")
+            return False
+    return True
+
+
+def accepted_ratings_changed() -> tuple[bool, dict[str, str]]:
+    state = load_json(ROOT / "data/ratings/live_rating_change_status.json", {})
+    statuses = {
+        str(name): str(row.get("change_status") or "UNKNOWN")
+        for name, row in (state.get("sources") or {}).items()
+        if isinstance(row, dict)
+    }
+    return any(value in {"UPDATED", "INITIALIZED"} for value in statuses.values()), statuses
+
+
+def ratings_acquisition_commands() -> list[list[str]]:
+    return [
+        [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", "spplus,fpi,teamrankings"],
+        [sys.executable, "scripts/ratings/parse_rating_source_tables.py"],
+        [sys.executable, "scripts/ratings/accept_live_rating_candidates_with_status.py"],
+    ]
+
+
+def ratings_change_commands() -> list[list[str]]:
+    """Bounded canonical propagation after at least one accepted panel changes."""
+    return [
+        [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
+        [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
+        [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
+        [sys.executable, "ratings/append_ratings_history.py"],
+        [sys.executable, "ratings/build_ratings_movement.py"],
+        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py"],
+        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+        [sys.executable, "scripts/projections/build_game_projection_blend_2026.py"],
+        [sys.executable, "scripts/projections/apply_game_projection_blend_to_preseason_db.py"],
+        [sys.executable, "scripts/site/build_matchups_view.py"],
+        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
+        [sys.executable, "scripts/war_room/build_war_room_health.py"],
+        [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
+    ]
+
+
+def ratings_no_change_commands() -> list[list[str]]:
+    return [[sys.executable, "scripts/war_room/build_war_room_health.py"]]
+
+
+def execute_ratings_service(
+    run: dict[str, Any], cfg: dict[str, Any], confirm: bool
+) -> None:
+    """Execute only the bounded Ratings service contract."""
+    service_allowed = cfg.get("publication_policy", {}).get("ratings", False)
+    if not confirm:
+        run["status"] = "BLOCKED_BY_CONFIGURATION"
+        run["errors"].append("ratings requires --confirm-publish")
+        return
+    if not service_allowed:
+        run["status"] = "BLOCKED_BY_CONFIGURATION"
+        run["errors"].append("ratings service policy is disabled")
+        return
+    if not run_commands(run, ratings_acquisition_commands()):
+        run["status"] = "FAILED"
+        return
+
+    changed, statuses = accepted_ratings_changed()
+    run["validation_results"]["accepted_rating_changes"] = statuses
+    run["change_counts"] = {
+        "ratings": sum(
+            value in {"UPDATED", "INITIALIZED"} for value in statuses.values()
+        ),
+        "projections": 0,
+    }
+    commands = ratings_change_commands() if changed else ratings_no_change_commands()
+    if run_commands(run, commands):
+        run["change_counts"]["projections"] = 1 if changed else 0
+        run["status"] = "COMPLETED" if changed else "NO_CHANGES"
+    else:
+        run["status"] = "FAILED"
+
+
 def deployed_commit() -> str | None:
     record = load_json(CONTROL / "deployed_source_version.json", {})
     value = str(record.get("source_commit") or "").strip()
@@ -456,6 +546,9 @@ def main() -> int:
                                 print(pub.get("output_tail", ""), file=sys.stderr)
                         else:
                             run["status"] = "FAILED"
+            elif args.mode == "ratings":
+                execute_ratings_service(run, cfg, args.confirm_publish)
+
             elif args.mode == "pregame":
                 publish_allowed = (
                     cfg.get("automatic_publication_enabled", False)
