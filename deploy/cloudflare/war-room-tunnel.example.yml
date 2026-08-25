@@ -1,0 +1,11 @@
+# Safe template only. The tunnel credential/token remains in NCAAF_AUTO's
+# protected environment and must never be committed.
+tunnel: REPLACE_WITH_TUNNEL_ID
+credentials-file: REPLACE_WITH_PROTECTED_AUTO_CREDENTIAL_PATH
+ingress:
+  - hostname: REPLACE_WITH_CONTROL_HOSTNAME
+    service: http://127.0.0.1:8787
+    originRequest:
+      connectTimeout: 10s
+      noHappyEyeballs: false
+  - service: http_status:404

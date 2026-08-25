@@ -22,6 +22,7 @@ config/market_shadow_production.json
 config/public_page_data_contracts.json
 config/public_publish_manifest.json
 config/war_room_fast_schedule.json
+config/war_room_control_plane.json
 config/page_health_registry.json
 daily_market_update.sh
 data/model_tracking/config.json
@@ -60,6 +61,9 @@ scripts/audit/audit_war_room_fast_publication.py
 scripts/audit/test_daily_betting_email_regression.py
 scripts/control/daily_run_status.py
 scripts/control/run_data_refresh.py
+scripts/control/refresh_controller_config.json
+scripts/control/refresh_stage_registry.json
+scripts/control/run_war_room_service.py
 scripts/markets/build_current_market_contract.py
 scripts/model_tracking/__init__.py
 scripts/model_tracking/build_model_performance_view.py
@@ -99,6 +103,7 @@ scripts/war_room/record_fast_refresh_history.py
 scripts/war_room/run_fast_market_publication.py
 scripts/war_room/run_fast_market_refresh.py
 scripts/war_room/war_room_operator_api.py
+deploy/cloudflare/war-room-tunnel.example.yml
 scripts/site/compact_matchups_payload.py
 scripts/site/inject_market_presentation_fixes.py
 scripts/site/install_openers_betting_angles_header_persistent.py

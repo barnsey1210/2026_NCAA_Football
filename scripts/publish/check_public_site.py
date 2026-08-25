@@ -51,8 +51,13 @@ def validate(root: Path, out: Path) -> list[str]:
                 'id="refreshBtn"',
                 'id="acquireBtn"',
                 "RELOAD MARKET",
-                "ACQUIRE MARKET",
-                "fetch('/war-room/acquire'",
+                "REFRESH MARKET",
+                'id="ratingsBtn"',
+                'id="postgameBtn"',
+                "'/war-room/market'",
+                "'/war-room/ratings'",
+                "'/war-room/postgame'",
+                "pollPublishedVersion",
             ):
                 if marker not in text:
                     errors.append(f"War Room terminal marker missing: {marker}")

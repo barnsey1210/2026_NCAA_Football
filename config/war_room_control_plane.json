@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "public_origin": "https://barnsey1210.github.io",
+  "control_base_url": null,
+  "origin": {
+    "bind_host": "127.0.0.1",
+    "port": 8787,
+    "direct_internet_exposure": false
+  },
+  "authentication": {
+    "owner": "CLOUDFLARE_ACCESS",
+    "required_headers": [
+      "Cf-Access-Jwt-Assertion",
+      "Cf-Access-Authenticated-User-Email"
+    ]
+  },
+  "allowed_routes": {
+    "GET": ["/war-room/status", "/war-room/task/{task_id}"],
+    "POST": ["/war-room/market", "/war-room/ratings", "/war-room/postgame"]
+  },
+  "browser_version_poll_seconds": 60,
+  "activation_status": "CLOUDFLARE_HOSTNAME_REQUIRED"
+}

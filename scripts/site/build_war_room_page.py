@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "war-room.html"
+CONTROL_CONFIG = ROOT / "config/war_room_control_plane.json"
+control_config = json.loads(CONTROL_CONFIG.read_text()) if CONTROL_CONFIG.exists() else {}
+CONTROL_BASE_URL = control_config.get("control_base_url")
+POLL_SECONDS = max(30, int(control_config.get("browser_version_poll_seconds", 60)))
 
 HTML = r'''<!doctype html>
 <html lang="en">
@@ -126,6 +131,7 @@ button,select{
   color:var(--yellow);
   border-color:#9b741d;
 }
+.operator-control[hidden]{display:none!important}
 
 .wr-btn:disabled{
   cursor:wait;
@@ -657,8 +663,16 @@ tr:hover td{
         ↻ RELOAD MARKET
       </button>
 
-      <button class="wr-btn acquire" id="acquireBtn" title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
-        ⚡ ACQUIRE MARKET · 2 CREDITS
+      <button class="wr-btn acquire operator-control" id="acquireBtn" hidden title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
+        ⚡ REFRESH MARKET · 2 CREDITS
+      </button>
+
+      <button class="wr-btn operator-control" id="ratingsBtn" hidden>
+        ↻ REFRESH RATINGS
+      </button>
+
+      <button class="wr-btn operator-control" id="postgameBtn" hidden>
+        ↻ REFRESH POSTGAME
       </button>
     </div>
   </div>
@@ -1901,40 +1915,62 @@ document.getElementById('refreshBtn').addEventListener(
   }
 );
 
+const CONTROL_BASE_URL = __CONTROL_BASE_URL__;
+const VERSION_POLL_MS = __VERSION_POLL_MS__;
+
+async function requestOperation(path, button, runningLabel){
+  const old = button.textContent;
+  button.disabled = true;
+  button.textContent = runningLabel;
+  try{
+    const response = await fetch(`${CONTROL_BASE_URL}${path}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      cache:'no-store', credentials:'include'
+    });
+    const payload = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(payload?.detail?.message || payload?.detail || `HTTP ${response.status}`);
+    button.textContent = '✓ REQUESTED';
+  }catch(err){
+    console.error(err); button.textContent = '⚠ REQUEST FAILED';
+  }finally{
+    setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
+  }
+}
+
+async function detectOperator(){
+  if(!CONTROL_BASE_URL) return;
+  try{
+    const response = await fetch(`${CONTROL_BASE_URL}/war-room/status`, {cache:'no-store',credentials:'include'});
+    if(!response.ok) return;
+    document.querySelectorAll('.operator-control').forEach(el=>el.hidden=false);
+  }catch(_err){ /* public viewers intentionally retain a read-only page */ }
+}
+
 document.getElementById('acquireBtn').addEventListener(
   'click',
   async ()=>{
     const btn = document.getElementById('acquireBtn');
     if(!window.confirm('Acquire a fresh spreads + totals market snapshot? Expected cost: 2 Odds API credits.')) return;
-    const old = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = '⚡ ACQUIRING…';
-    try{
-      const response = await fetch('/war-room/acquire', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        cache:'no-store',
-        credentials:'omit'
-      });
-      const payload = await response.json().catch(()=>({}));
-      if(!response.ok){
-        const detail = payload?.detail?.message || payload?.detail || `HTTP ${response.status}`;
-        throw new Error(String(detail));
-      }
-      await loadData();
-      btn.textContent = '✓ MARKET ACQUIRED';
-    }catch(err){
-      console.error(err);
-      btn.textContent = '⚠ ACQUIRE FAILED';
-      window.alert(`Market acquisition failed: ${err.message}`);
-    }finally{
-      setTimeout(()=>{
-        btn.textContent = old;
-        btn.disabled = false;
-      },2000);
-    }
+    await requestOperation('/war-room/market', btn, '⚡ REQUESTING MARKET…');
   }
 );
+
+document.getElementById('ratingsBtn').addEventListener('click', e=>requestOperation('/war-room/ratings',e.currentTarget,'↻ REQUESTING RATINGS…'));
+document.getElementById('postgameBtn').addEventListener('click', e=>requestOperation('/war-room/postgame',e.currentTarget,'↻ REQUESTING POSTGAME…'));
+
+let LAST_BUILD_ID = null;
+async function pollPublishedVersion(){
+  try{
+    const response = await fetch(`${HEALTH_URL}?version=${Date.now()}`,{cache:'no-store'});
+    if(!response.ok) return;
+    const health = await response.json();
+    const version = health.built_at || health.generated_at || health.fast_market_refresh?.refresh_id;
+    if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
+    if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
+  }catch(_err){ /* preserve the last valid rendered state */ }
+}
+setInterval(pollPublishedVersion, VERSION_POLL_MS);
+detectOperator();
 
 loadData().catch(err=>{
   console.error(err);
@@ -1953,5 +1989,7 @@ loadData().catch(err=>{
 </html>
 '''
 
+HTML = HTML.replace("__CONTROL_BASE_URL__", json.dumps(CONTROL_BASE_URL))
+HTML = HTML.replace("__VERSION_POLL_MS__", str(POLL_SECONDS * 1000))
 OUT.write_text(HTML)
 print("wrote:", OUT)

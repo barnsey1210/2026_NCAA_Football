@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "policy": {
+    "production_pipeline_replacement": false,
+    "browser_supplied_commands_forbidden": true,
+    "domain_owners_remain_authoritative": true
+  },
+  "actions": {
+    "MARKET_REFRESH": {
+      "controller_mode": "war-room-market",
+      "provider": "the_odds_api_fast",
+      "owner": "scripts/war_room/run_fast_market_publication.py",
+      "bounded_publication": true
+    },
+    "RATINGS_REFRESH": {
+      "controller_mode": "ratings",
+      "providers": ["spplus", "fpi", "teamrankings", "sagarin", "massey", "dratings"],
+      "owner": "existing ratings acceptance and projection pipelines",
+      "bounded_publication": true
+    },
+    "POSTGAME_REFRESH": {
+      "controller_mode": "postgame",
+      "provider": "cfbd",
+      "owner": "existing schedule/results/postgame/Shadow pipelines",
+      "bounded_publication": true
+    },
+    "WAR_ROOM_REBUILD": {
+      "controller_mode": "war-room-rebuild",
+      "owner": "existing War Room builders and bounded publisher",
+      "provider_calls": false
+    }
+  },
+  "retired": {
+    "sports_game_odds": "LEGACY_DO_NOT_USE",
+    "sgo_acceptance": "LEGACY_DO_NOT_USE"
+  }
+}
