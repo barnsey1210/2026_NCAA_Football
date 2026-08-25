@@ -832,8 +832,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T023640Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T023640Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T040332Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T040332Z';
 
 let MATRIX = null;
 let HEALTH = null;
@@ -1913,7 +1913,7 @@ document.getElementById('refreshBtn').addEventListener(
   }
 );
 
-const CONTROL_BASE_URL = null;
+const CONTROL_BASE_URL = "https://control.barnseywr.com";
 const VERSION_POLL_MS = 60000;
 
 async function requestOperation(path, button, runningLabel){
