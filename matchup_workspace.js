@@ -1,10 +1,10 @@
 (function () {
   'use strict';
 
-  const DATA_URL = 'data/site/matchups_view.json?v=20260825T200638Z';
+  const DATA_URL = 'data/site/matchups_view.json?v=20260825T202818Z';
   const HISTORY_URL = (
     window.MATCHUP_LINE_HISTORY_URL
-    || `data/site/matchup_line_history.json?v=20260825T200638Z)}`
+    || `data/site/matchup_line_history.json?v=20260825T202818Z)}`
   );
   const DECISION_KEY = 'openers-v2-decisions';
   const BET_KEY = 'ncaaf-game-bets-v1';
