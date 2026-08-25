@@ -164,6 +164,7 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "ratings/build_ratings_movement.py"],
         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py", *bounds],
+        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
@@ -171,8 +172,19 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
     ]
 
 
-def ratings_no_change_commands() -> list[list[str]]:
-    return [[sys.executable, "scripts/war_room/build_war_room_health.py"]]
+def ratings_no_change_commands(
+    matchup_report: dict[str, Any] | None = None,
+) -> list[list[str]]:
+    """Refresh bounded provider observability even when values are unchanged."""
+    window = (matchup_report or {}).get("window") or {}
+    bounds = []
+    if window.get("start") and window.get("end"):
+        bounds = ["--start-date", window["start"], "--end-date", window["end"]]
+    return [
+        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
+        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
+        [sys.executable, "scripts/war_room/build_war_room_health.py"],
+    ]
 
 
 def execute_ratings_service(
@@ -210,7 +222,11 @@ def execute_ratings_service(
         ) + len(matchup_report.get("changed_providers") or []),
         "projections": 0,
     }
-    commands = ratings_change_commands(matchup_report) if changed else ratings_no_change_commands()
+    commands = (
+        ratings_change_commands(matchup_report)
+        if changed
+        else ratings_no_change_commands(matchup_report)
+    )
     if run_commands(run, commands):
         run["change_counts"]["projections"] = 1 if changed else 0
         run["status"] = "COMPLETED" if changed else "NO_CHANGES"

@@ -221,24 +221,25 @@ for r in rows:
     }
 
 # The accepted master owns normalized Sagarin and preserves its raw value.
-# Supply the raw value to the display layer even when the provider snapshot
-# date differs from the latest automated SP+/FPI/TR snapshot date.
+# Display the normalized Sagarin rating/rank consistently with SP+/FPI/TR;
+# retain the provider's raw value only as underlying audit/reference data.
 sagarin_ranked = sorted(
     (
-        (team, float(row["sagarin_raw"]))
+        (team, float(row["sagarin"]))
         for team, row in master_by_team.items()
-        if row.get("sagarin_raw") not in (None, "", "nan")
+        if row.get("sagarin") not in (None, "", "nan")
     ),
     key=lambda item: item[1],
     reverse=True,
 )
 sagarin_ranks = {team: rank for rank, (team, _value) in enumerate(sagarin_ranked, 1)}
 for team, row in master_by_team.items():
-    if row.get("sagarin_raw") in (None, "", "nan"):
+    if row.get("sagarin") in (None, "", "nan"):
         continue
     by_team.setdefault(team, {}).setdefault("sagarin", {
-        "rating": float(row["sagarin_raw"]),
+        "rating": float(row["sagarin"]),
         "rank": sagarin_ranks[team],
+        "raw_rating": float(row["sagarin_raw"]) if row.get("sagarin_raw") not in (None, "", "nan") else None,
         "pulled_at": None,
     })
 

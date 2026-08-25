@@ -1981,7 +1981,9 @@ addEventListener('message',event=>{
   if(message.type==='READY'){
     setOperatorControls(true);
     connect.hidden=true;
-    status.textContent='Operator ready';
+    if(RELAY_REQUESTS.size===0){
+      status.textContent='Operator ready';
+    }
     return;
   }
   const pending=RELAY_REQUESTS.get(message.requestId);

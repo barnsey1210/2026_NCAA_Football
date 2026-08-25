@@ -596,17 +596,20 @@ def build_ratings_health():
         }
 
     # --------------------------------------------------------
-    # Sagarin: currently absent from active team-rating status
-    # and explicitly missing from both production models.
-    # This is WAITING, not a hard feed failure.
+    # Sagarin rating is an active team-rating source.
+    # Sagarin game totals may remain unavailable independently.
     # --------------------------------------------------------
 
+    sag_rating = by_source.get(
+        "Sagarin Rating",
+        {},
+    )
     sag_spread = spread_sources.get(
         "Sagarin Rating",
         {},
     )
     sag_total = total_sources.get(
-        "Sagarin",
+        "Sagarin Total",
         {},
     )
 
@@ -634,6 +637,13 @@ def build_ratings_health():
             number(sag_spread.get("coverage_pct")) or 0,
             number(sag_total.get("coverage_pct")) or 0,
         ),
+        "snapshot_date": sag_rating.get("snapshot_date"),
+        "pulled_at": sag_rating.get("pulled_at"),
+        "latest_pull_at": (
+            sag_rating.get("latest_pull_at")
+            or sag_rating.get("pulled_at")
+        ),
+        "last_changed_at": sag_rating.get("last_changed_at"),
     }
 
     # --------------------------------------------------------
