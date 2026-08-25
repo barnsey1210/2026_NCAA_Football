@@ -119,11 +119,17 @@ button,select{
   color:var(--yellow);
   border-color:#9b741d;
 }
-.operator-control[hidden]{display:none!important}
-
 .wr-btn:disabled{
-  cursor:wait;
+  cursor:not-allowed;
   opacity:.65;
+}
+
+.operator-status{
+  flex-basis:100%;
+  color:var(--muted);
+  font-size:11px;
+  text-align:right;
+  min-height:14px;
 }
 
 .summary-grid{
@@ -661,17 +667,19 @@ tr:hover td{
         ↻ RELOAD MARKET
       </button>
 
-      <button class="wr-btn acquire operator-control" id="acquireBtn" hidden title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
+      <button class="wr-btn acquire operator-control" id="acquireBtn" disabled title="Guarded spreads + totals pull; expected cost 2 Odds API credits">
         ⚡ REFRESH MARKET · 2 CREDITS
       </button>
 
-      <button class="wr-btn operator-control" id="ratingsBtn" hidden>
+      <button class="wr-btn operator-control" id="ratingsBtn" disabled>
         ↻ REFRESH RATINGS
       </button>
 
-      <button class="wr-btn operator-control" id="postgameBtn" hidden>
+      <button class="wr-btn operator-control" id="postgameBtn" disabled>
         ↻ REFRESH POSTGAME
       </button>
+
+      <div class="operator-status" id="operatorStatus">Checking operator authentication…</div>
     </div>
   </div>
 
@@ -832,8 +840,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T040332Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T040332Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260825T045311Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260825T045311Z';
 
 let MATRIX = null;
 let HEALTH = null;
@@ -1920,28 +1928,65 @@ async function requestOperation(path, button, runningLabel){
   const old = button.textContent;
   button.disabled = true;
   button.textContent = runningLabel;
+  const status = document.getElementById('operatorStatus');
+  status.textContent = 'Submitting authenticated request…';
   try{
     const response = await fetch(`${CONTROL_BASE_URL}${path}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST',
       cache:'no-store', credentials:'include'
     });
     const payload = await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(payload?.detail?.message || payload?.detail || `HTTP ${response.status}`);
+    if(response.status !== 202 || !payload.task_id) throw new Error('Missing 202 task acknowledgement');
     button.textContent = '✓ REQUESTED';
+    status.textContent = `Task ${payload.task_id} · ${payload.status || 'REQUESTED'}`;
+    await pollOperation(payload.task_id, status);
   }catch(err){
     console.error(err); button.textContent = '⚠ REQUEST FAILED';
+    status.textContent = `Request failed · ${err.message}`;
   }finally{
     setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
   }
 }
 
+function operationDetail(task){
+  const parts=[`Task ${task.task_id}`,task.status];
+  if(task.credits_consumed != null) parts.push(`${task.credits_consumed} credits`);
+  if(task.provider_result) parts.push(String(task.provider_result));
+  if(task.publication_result) parts.push(String(task.publication_result));
+  if(task.error) parts.push(String(task.error));
+  return parts.filter(Boolean).join(' · ');
+}
+
+async function pollOperation(taskId, status){
+  const terminal=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
+  for(let attempt=0;attempt<240;attempt++){
+    const response=await fetch(`${CONTROL_BASE_URL}/war-room/task/${encodeURIComponent(taskId)}`,{cache:'no-store',credentials:'include'});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(payload?.detail || `Task HTTP ${response.status}`);
+    const task=payload.task || {};
+    status.textContent=operationDetail(task);
+    if(terminal.has(task.status)){
+      if(task.status==='COMPLETED' || task.status==='COMPLETED_WITH_WARNINGS') await loadData();
+      return task;
+    }
+    await new Promise(resolve=>setTimeout(resolve,3000));
+  }
+  throw new Error(`Task ${taskId} status timed out`);
+}
+
 async function detectOperator(){
-  if(!CONTROL_BASE_URL) return;
+  const status=document.getElementById('operatorStatus');
+  if(!CONTROL_BASE_URL){status.textContent='Operator authentication unavailable';return}
   try{
     const response = await fetch(`${CONTROL_BASE_URL}/war-room/status`, {cache:'no-store',credentials:'include'});
-    if(!response.ok) return;
-    document.querySelectorAll('.operator-control').forEach(el=>el.hidden=false);
-  }catch(_err){ /* public viewers intentionally retain a read-only page */ }
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    document.querySelectorAll('.operator-control').forEach(el=>el.disabled=false);
+    status.textContent='Operator ready';
+  }catch(err){
+    document.querySelectorAll('.operator-control').forEach(el=>el.disabled=true);
+    status.textContent=`Authentication unavailable · ${err.message}`;
+  }
 }
 
 document.getElementById('acquireBtn').addEventListener(

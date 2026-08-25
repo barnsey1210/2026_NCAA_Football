@@ -11,15 +11,21 @@ import json
 import os
 import subprocess
 import sys
+import hashlib
+import time
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 LATEST = ROOT / "data/control/war_room_services/latest.json"
 TASKS = ROOT / "data/control/war_room_services/tasks"
+REQUEST_LOG = ROOT / "data/control/war_room_services/requests.jsonl"
 HEALTH = ROOT / "data/site/war_room_health.json"
 MATRIX = ROOT / "data/site/war_room_market_matrix.json"
 PUBLIC_ORIGIN = os.environ.get(
@@ -44,8 +50,50 @@ def load_json(path: Path, default: Any) -> Any:
         return default
 
 
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def atomic_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    temporary.replace(path)
+
+
+def append_request_log(value: dict[str, Any]) -> None:
+    REQUEST_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with REQUEST_LOG.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(value, sort_keys=True) + "\n")
+
+
+@app.middleware("http")
+async def request_audit(request: Request, call_next):
+    request.state.correlation_id = uuid.uuid4().hex
+    request.state.operator = None
+    request.state.task_id = None
+    response_status = 500
+    try:
+        response = await call_next(request)
+        response_status = response.status_code
+        return response
+    finally:
+        append_request_log(
+            {
+                "timestamp": utc_now(),
+                "correlation_id": request.state.correlation_id,
+                "method": request.method,
+                "path": request.url.path,
+                "authenticated_operator": request.state.operator,
+                "response_status": response_status,
+                "task_id": request.state.task_id,
+            }
+        )
+
+
 def require_access(
     request: Request,
+    origin: Optional[str] = Header(default=None),
     cf_access_jwt_assertion: Optional[str] = Header(default=None),
     cf_access_authenticated_user_email: Optional[str] = Header(default=None),
 ) -> str:
@@ -53,29 +101,77 @@ def require_access(
         raise HTTPException(status_code=403, detail="origin is loopback-only")
     if not cf_access_jwt_assertion or not cf_access_authenticated_user_email:
         raise HTTPException(status_code=401, detail="Cloudflare Access authentication required")
+    if origin and origin.rstrip("/") != PUBLIC_ORIGIN:
+        raise HTTPException(status_code=403, detail="browser origin is not authorized")
+    request.state.operator = cf_access_authenticated_user_email
     return cf_access_authenticated_user_email
 
 
-def request_action(action: str, requester: str) -> dict[str, Any]:
-    command = [
-        sys.executable,
-        "scripts/control/run_war_room_service.py",
-        action,
-        "--trigger",
-        "cloudflare-access",
-        "--requester",
-        requester,
-    ]
-    process = subprocess.Popen(
-        command,
-        cwd=ROOT,
-        env=os.environ.copy(),
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
+def request_action(action: str, requester: str, request: Request) -> JSONResponse:
+    bucket = int(time.time() // 60)
+    identity_seed = f"{action}|cloudflare-access|{requester.lower()}|{bucket}".encode()
+    identity = f"{action}-{hashlib.sha256(identity_seed).hexdigest()[:12]}"
+    task_path = TASKS / f"{identity}.json"
+    prior = load_json(task_path, {})
+    known_status = prior.get("status") in {
+        "REQUESTED",
+        "RUNNING",
+        "COMPLETED",
+        "COMPLETED_WITH_WARNINGS",
+        "FAILED",
+        "BLOCKED_BY_OVERLAP",
+        "DEFERRED_BY_DAILY_BACKBONE",
+    }
+    if not known_status:
+        prior = {
+            "schema_version": 1,
+            "task_id": identity,
+            "action": action,
+            "trigger": "cloudflare-access",
+            "requester": requester[:120],
+            "requested_at": utc_now(),
+            "status": "REQUESTED",
+            "correlation_id": request.state.correlation_id,
+            "command_owner": "scripts/war_room/run_fast_market_publication.py"
+            if action == "market"
+            else "scripts/control/run_data_refresh.py",
+        }
+        atomic_json(task_path, prior)
+        atomic_json(LATEST, prior)
+    process = None
+    if not known_status:
+        command = [
+            sys.executable,
+            "scripts/control/run_war_room_service.py",
+            action,
+            "--task-id",
+            identity,
+            "--trigger",
+            "cloudflare-access",
+            "--requester",
+            requester,
+        ]
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            env=os.environ.copy(),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    request.state.task_id = identity
+    return JSONResponse(
+        status_code=202,
+        content={
+            "ok": True,
+            "status": prior.get("status", "REQUESTED"),
+            "action": action,
+            "task_id": identity,
+            "correlation_id": request.state.correlation_id,
+            "dispatcher_pid": process.pid if process else None,
+        },
     )
-    return {"ok": True, "status": "REQUESTED", "action": action, "dispatcher_pid": process.pid}
 
 
 @app.get("/war-room/status")
@@ -93,19 +189,19 @@ def task_status(task_id: str, operator: str = Depends(require_access)):
     return {"ok": True, "operator": operator, "task": task}
 
 
-@app.post("/war-room/market")
-def market(operator: str = Depends(require_access)):
-    return request_action("market", operator)
+@app.post("/war-room/market", status_code=202)
+def market(request: Request, operator: str = Depends(require_access)):
+    return request_action("market", operator, request)
 
 
-@app.post("/war-room/ratings")
-def ratings(operator: str = Depends(require_access)):
-    return request_action("ratings", operator)
+@app.post("/war-room/ratings", status_code=202)
+def ratings(request: Request, operator: str = Depends(require_access)):
+    return request_action("ratings", operator, request)
 
 
-@app.post("/war-room/postgame")
-def postgame(operator: str = Depends(require_access)):
-    return request_action("postgame", operator)
+@app.post("/war-room/postgame", status_code=202)
+def postgame(request: Request, operator: str = Depends(require_access)):
+    return request_action("postgame", operator, request)
 
 
 @app.get("/war-room/state")

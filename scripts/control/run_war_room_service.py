@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -89,27 +90,39 @@ def main() -> int:
     parser.add_argument("action", choices=[*COMMANDS, "status"])
     parser.add_argument("--trigger", default="manual")
     parser.add_argument("--requester", default="scheduler")
+    parser.add_argument("--task-id", default=None)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     if args.action == "status":
         print(json.dumps(read_json(LATEST, {"status": "NEVER_RUN"}), indent=2))
         return 0
 
-    identity = task_id(args.action, args.trigger)
+    identity = args.task_id or task_id(args.action, args.trigger)
+    if not re.fullmatch(r"[a-z][a-z0-9-]{5,63}", identity):
+        parser.error("--task-id must be a safe lowercase task identifier")
     prior = read_json(TASKS / f"{identity}.json", {})
-    if prior.get("status") in {"RUNNING", "COMPLETED", "COMPLETED_WITH_WARNINGS"}:
+    if prior.get("status") in {
+        "RUNNING",
+        "COMPLETED",
+        "COMPLETED_WITH_WARNINGS",
+        "FAILED",
+        "BLOCKED_BY_OVERLAP",
+        "DEFERRED_BY_DAILY_BACKBONE",
+        "DRY_RUN",
+    }:
         print(json.dumps(prior, indent=2))
         return 0
-    task = {
-        "schema_version": 1,
-        "task_id": identity,
-        "action": args.action,
-        "trigger": args.trigger,
-        "requester": args.requester[:120],
-        "requested_at": utc_now(),
-        "status": "REQUESTED",
-        "command_owner": COMMANDS[args.action][1],
-    }
+    task = prior if prior.get("status") == "REQUESTED" else {}
+    task.update(
+        schema_version=1,
+        task_id=identity,
+        action=args.action,
+        trigger=args.trigger,
+        requester=args.requester[:120],
+        requested_at=task.get("requested_at", utc_now()),
+        status="REQUESTED",
+        command_owner=COMMANDS[args.action][1],
+    )
     atomic_json(TASKS / f"{identity}.json", task)
     atomic_json(LATEST, task)
     if daily_running():
