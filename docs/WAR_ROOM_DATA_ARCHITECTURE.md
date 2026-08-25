@@ -101,6 +101,22 @@ and their page adapters. Futures consumes `futures_view.json`. They therefore
 change only through their canonical daily/profile builds; the fast War Room
 feed must not be silently promoted into those contracts.
 
+### Low-latency live Command Center reads
+
+The normal fast Market path writes the runtime-owned health and matrix
+artifacts atomically in AUTO. The loopback operator API exposes only those
+already-public contracts through fixed read-only routes:
+
+- `/war-room/live/version`
+- `/war-room/live/health`
+- `/war-room/live/market-matrix`
+
+The GitHub Pages shell polls the small version route every two seconds and
+reloads health and matrix only when the refresh ID changes. Static GitHub Pages
+copies remain the fallback and archival/public snapshot. Normal fast refreshes
+do not synchronously commit or push; explicit `--push` and the full 8 AM path
+retain repository publication. Operator POST routes remain Access-protected.
+
 ## Canonical projection architecture
 
 The Team Rating Engine and Game Projection Engine are separate contracts. Team

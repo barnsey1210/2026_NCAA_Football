@@ -90,7 +90,10 @@ def main():
     if add.empty:
         print("Canonical per-book market state already present; no rows appended."); return
     out=pd.concat([old[cols],add[cols]],ignore_index=True)
-    OUT.parent.mkdir(parents=True,exist_ok=True); out.to_csv(OUT,index=False)
+    OUT.parent.mkdir(parents=True,exist_ok=True)
+    temporary=OUT.with_suffix(OUT.suffix+".tmp")
+    out.to_csv(temporary,index=False)
+    temporary.replace(OUT)
     print(f"Canonical current-market book rows appended: {len(add)}")
     print(f"Total durable book-history rows: {len(out)}")
 if __name__=="__main__": main()

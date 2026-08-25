@@ -120,6 +120,27 @@ def require_access(
     return cf_access_authenticated_user_email
 
 
+def require_public_read_origin(
+    request: Request,
+    origin: Optional[str] = Header(default=None),
+) -> None:
+    if request.client and request.client.host not in {"127.0.0.1", "::1", "testclient"}:
+        raise HTTPException(status_code=403, detail="origin is loopback-only")
+    if origin and origin.rstrip("/") != PUBLIC_ORIGIN:
+        raise HTTPException(status_code=403, detail="browser origin is not authorized")
+
+
+def public_artifact(path: Path, schema: str) -> dict[str, Any]:
+    payload = load_json(path, None)
+    if not isinstance(payload, dict) or payload.get("schema_version") != schema:
+        raise HTTPException(status_code=503, detail="live artifact unavailable")
+    return payload
+
+
+def live_response(payload: dict[str, Any]) -> JSONResponse:
+    return JSONResponse(payload, headers={"Cache-Control": "no-store"})
+
+
 def request_action(action: str, requester: str, request: Request) -> JSONResponse:
     bucket = int(time.time() // 60)
     identity_seed = f"{action}|cloudflare-access|{requester.lower()}|{bucket}".encode()
@@ -192,6 +213,34 @@ def status(operator: str = Depends(require_access)):
     return {"ok": True, "authenticated": True, "operator": operator, "latest": load_json(LATEST, {"status": "NEVER_RUN"})}
 
 
+@app.get("/war-room/live/version")
+def live_version(_: None = Depends(require_public_read_origin)):
+    health = public_artifact(HEALTH, "war-room-health-v1")
+    matrix = public_artifact(MATRIX, "war-room-market-matrix-v1")
+    health_refresh = health.get("fast_market_refresh") or {}
+    matrix_refresh = matrix.get("fast_market_refresh") or {}
+    refresh_id = health_refresh.get("refresh_id")
+    if not refresh_id or refresh_id != matrix_refresh.get("refresh_id"):
+        raise HTTPException(status_code=503, detail="live artifact versions do not match")
+    return live_response({
+        "schema_version": "war-room-live-version-v1",
+        "refresh_id": refresh_id,
+        "last_fast_pull_at": health_refresh.get("last_fast_pull_at"),
+        "health_built_at": health.get("built_at"),
+        "matrix_built_at": matrix.get("built_at"),
+    })
+
+
+@app.get("/war-room/live/health")
+def live_health(_: None = Depends(require_public_read_origin)):
+    return live_response(public_artifact(HEALTH, "war-room-health-v1"))
+
+
+@app.get("/war-room/live/market-matrix")
+def live_market_matrix(_: None = Depends(require_public_read_origin)):
+    return live_response(public_artifact(MATRIX, "war-room-market-matrix-v1"))
+
+
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)
 def bootstrap(operator: str = Depends(require_access)):
     target_origin = json.dumps(PUBLIC_ORIGIN)
@@ -211,7 +260,7 @@ async function pollTask(taskId,requestId){{
     if(!response.ok)throw new Error(payload?.detail || `Task HTTP ${{response.status}}`);
     send({{type:'TASK',requestId,task:payload.task}});
     if(TERMINAL.has(payload.task?.status))return;
-    await new Promise(resolve=>setTimeout(resolve,3000));
+    await new Promise(resolve=>setTimeout(resolve,500));
   }}
   throw new Error(`Task ${{taskId}} status timed out`);
 }}

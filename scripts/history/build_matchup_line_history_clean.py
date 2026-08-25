@@ -5,6 +5,7 @@ import math
 import pandas as pd
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+import argparse
 
 MATCHUPS_VIEW = Path("data/site/matchups_view.json")
 OUT = Path("data/history/matchup_line_history_clean.csv")
@@ -154,13 +155,28 @@ def map_game_id(row, by_pair_date, by_pair):
         return None, d, away, home, None, None
     return str(g.get("game_id")), clean_date(g.get("date")), g.get("away_team"), g.get("home_team"), g.get("week"), g.get("conference") or g.get("conf")
 
-def read_source(path, by_pair_date, by_pair):
+def read_source(path, by_pair_date, by_pair, affected_ids=None):
     if not path.exists():
         return pd.DataFrame()
 
     df = pd.read_csv(path)
     if df.empty:
         return pd.DataFrame()
+    if affected_ids is not None:
+        if "canonical_game_id" in df.columns:
+            df = df[df["canonical_game_id"].astype(str).isin(affected_ids)].copy()
+        elif {"away_team", "home_team"}.issubset(df.columns):
+            affected_pairs = {
+                pair for pair, game in by_pair.items()
+                if str(game.get("game_id")) in affected_ids
+            }
+            pair_values = zip(
+                df["away_team"].map(norm_team),
+                df["home_team"].map(norm_team),
+            )
+            df = df[[pair in affected_pairs for pair in pair_values]].copy()
+        if df.empty:
+            return pd.DataFrame()
 
     rows = []
     source_name = path.name
@@ -168,6 +184,8 @@ def read_source(path, by_pair_date, by_pair):
     for _, r in df.iterrows():
         gid, game_date, away, home, site_week, site_conf = map_game_id(r, by_pair_date, by_pair)
         if not gid:
+            continue
+        if affected_ids is not None and gid not in affected_ids:
             continue
 
         # Daily chart rows use the ET betting calendar. Prefer a precise
@@ -229,11 +247,19 @@ def read_source(path, by_pair_date, by_pair):
 
     return pd.DataFrame(rows)
 
-def read_book_history(path, by_pair_date, by_pair):
+def read_book_history(path, by_pair_date, by_pair, affected_ids=None, min_snapshot_ts=None):
     if not path.exists() or path.stat().st_size == 0:
         return pd.DataFrame()
     df=pd.read_csv(path,low_memory=False)
     if df.empty: return pd.DataFrame()
+    if affected_ids is not None and "canonical_game_id" in df.columns:
+        df=df[df["canonical_game_id"].astype(str).isin(affected_ids)].copy()
+        if df.empty: return pd.DataFrame()
+    if min_snapshot_ts and "snapshot_ts" in df.columns:
+        cutoff=pd.to_datetime(min_snapshot_ts,utc=True,errors="coerce")
+        snapshots=pd.to_datetime(df["snapshot_ts"],utc=True,errors="coerce")
+        df=df[snapshots >= cutoff-pd.Timedelta(seconds=1)].copy()
+        if df.empty: return pd.DataFrame()
     actionable={"draftkings":"DraftKings","fanduel":"FanDuel","betmgm":"BetMGM","caesars":"Caesars"}
     df["_book_norm"]=df["book"].astype(str).str.strip().str.lower()
     df=df[df["_book_norm"].isin(actionable)].copy()
@@ -250,6 +276,7 @@ def read_book_history(path, by_pair_date, by_pair):
         else:
             game_date=clean_date(first.get("date")); away=first.get("away_team"); home=first.get("home_team"); site_week=None; site_conf=None
         if not gid: continue
+        if affected_ids is not None and gid not in affected_ids: continue
         def latest(market,side):
             x=g[(g["market"].astype(str).str.lower()==market)&(g["side"].astype(str).str.lower()==side)].sort_values("_sort_ts")
             return None if x.empty else x.iloc[-1]
@@ -268,105 +295,105 @@ def read_book_history(path, by_pair_date, by_pair):
     return pd.DataFrame(rows)
 
 
-def main():
-    db, by_pair_date, by_pair = load_site_db()
-
-    parts = []
-    book_hist = read_book_history(BOOK_HISTORY, by_pair_date, by_pair)
-    if not book_hist.empty:
-        print(BOOK_HISTORY, "rows:", len(book_hist), "games:", book_hist["game_id"].nunique())
-        parts.append(book_hist)
-
-    for p in SOURCES:
-        got = read_source(p, by_pair_date, by_pair)
-        if not got.empty:
-            print(p, "rows:", len(got), "games:", got["game_id"].nunique())
-            parts.append(got)
-
+def build_chart(db, parts):
+    """Apply the canonical full-history ranking/dedupe semantics."""
     if not parts:
         raise SystemExit("no source line history found")
-
     hist = pd.concat(parts, ignore_index=True)
 
-    # Fill current model fields from current site DB when source row does not have model fields.
     game_by_id = {str(g.get("game_id")): g for g in db.get("games", [])}
-    for i, r in hist.iterrows():
-        g = game_by_id.get(str(r["game_id"]))
-        if not g:
-            continue
+    game_ids = hist["game_id"].astype(str)
+    margin_defaults = game_ids.map(lambda gid: fnum((game_by_id.get(gid) or {}).get("projected_margin_home")))
+    total_defaults = game_ids.map(lambda gid: fnum((game_by_id.get(gid) or {}).get("projected_total")))
+    margins = pd.to_numeric(hist["projected_margin_home"], errors="coerce").fillna(margin_defaults)
+    totals = pd.to_numeric(hist["projected_total"], errors="coerce").fillna(total_defaults)
+    model_spreads = pd.to_numeric(hist["model_spread_home"], errors="coerce").fillna(-margins)
+    hist["projected_margin_home"] = margins.round(4)
+    hist["model_spread_home"] = model_spreads.round(4)
+    hist["projected_total"] = totals.round(4)
 
-        if pd.isna(hist.at[i, "projected_margin_home"]):
-            hist.at[i, "projected_margin_home"] = fnum(g.get("projected_margin_home"))
-
-        if pd.isna(hist.at[i, "model_spread_home"]):
-            pmh = fnum(hist.at[i, "projected_margin_home"])
-            hist.at[i, "model_spread_home"] = None if pmh is None else round(-pmh, 4)
-
-        if pd.isna(hist.at[i, "projected_total"]):
-            hist.at[i, "projected_total"] = fnum(g.get("projected_total"))
-
-    # Remove duplicate same-day same-game same-source-ish snapshots, keep latest timestamp.
     hist["_sort_ts"] = pd.to_datetime(hist["snapshot_ts"], errors="coerce", utc=True)
     hist = hist.sort_values(["game_id", "snapshot_date", "_sort_ts"])
-    dedupe_cols = [
-        "game_id", "snapshot_date", "source",
-        "market_spread_home", "market_total",
+    hist = hist.drop_duplicates(subset=[
+        "game_id", "snapshot_date", "source", "market_spread_home", "market_total",
         "market_spread_book", "market_total_book"
-    ]
-    hist = hist.drop_duplicates(subset=dedupe_cols, keep="last").copy()
-
-    # Prefer one row per game/date for the chart:
-    # 1) has spread/total
-    # 2) has real prices
-    # 3) SportsGameOdds / Action before CFBD-only rows
-    # 4) latest timestamp
-    source_priority = {
-        "SportsGameOdds": 1,
-        "sgo_ncaaf_game_odds.csv": 1,
-        "Action Network": 2,
-        "actionnetwork_season_game_lines_2026.csv": 2,
-        "CFBD Lines": 3,
-        "The Odds API": 4,
-    }
-
+    ], keep="last").copy()
+    source_priority = {"SportsGameOdds":1,"sgo_ncaaf_game_odds.csv":1,"Action Network":2,
+        "actionnetwork_season_game_lines_2026.csv":2,"CFBD Lines":3,"The Odds API":4}
     hist["_priority"] = hist["source"].map(source_priority).fillna(9)
     hist["_book_level"] = hist["source_file"].astype(str).str.endswith("game_book_line_history.csv").astype(int)
     hist["_has_spread"] = hist["market_spread_home"].notna().astype(int)
     hist["_has_total"] = hist["market_total"].notna().astype(int)
-
     def has_price(row):
-        vals = [
-            row.get("market_spread_price"),
-            row.get("market_total_over_price"),
-            row.get("market_total_under_price"),
-        ]
-        for v in vals:
+        for v in [row.get("market_spread_price"),row.get("market_total_over_price"),row.get("market_total_under_price")]:
             try:
-                if pd.notna(v) and float(v) != 0:
-                    return 1
-            except Exception:
-                pass
+                if pd.notna(v) and float(v) != 0: return 1
+            except Exception: pass
         return 0
-
     hist["_has_price"] = hist.apply(has_price, axis=1)
-
     hist = hist.sort_values(
-        ["game_id", "snapshot_date", "_book_level", "_has_spread", "_has_total", "_has_price", "_priority", "_sort_ts"],
-        ascending=[True, True, False, False, False, False, True, False]
-    )
+        ["game_id","snapshot_date","_book_level","_has_spread","_has_total","_has_price","_priority","_sort_ts"],
+        ascending=[True,True,False,False,False,False,True,False])
+    chart = hist.drop_duplicates(subset=["game_id","snapshot_date"], keep="first").copy()
+    chart = chart.drop(columns=[c for c in ["_sort_ts","_priority","_book_level","_has_spread","_has_total"] if c in chart.columns])
+    return chart.sort_values(["game_id","snapshot_date"])
 
-    chart = hist.drop_duplicates(subset=["game_id", "snapshot_date"], keep="first").copy()
 
-    chart = chart.drop(columns=[c for c in ["_sort_ts", "_priority", "_book_level", "_has_spread", "_has_total"] if c in chart.columns])
-    chart = chart.sort_values(["game_id", "snapshot_date"])
+def affected_fast_context():
+    payload = json.loads(Path("data/site/war_room_market_matrix.json").read_text())
+    ids = {str(g.get("game_id")) for g in payload.get("games", []) if g.get("game_id")}
+    pulled_at = (payload.get("fast_market_refresh") or {}).get("last_fast_pull_at")
+    return ids, pulled_at
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    chart.to_csv(OUT, index=False)
+
+def affected_fast_game_ids():
+    return affected_fast_context()[0]
+
+
+def atomic_csv(frame, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    frame.to_csv(temporary, index=False)
+    temporary.replace(path)
+
+
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--incremental-fast", action="store_true")
+    args=parser.parse_args()
+    db, by_pair_date, by_pair = load_site_db()
+    affected, fast_pulled_at = affected_fast_context() if args.incremental_fast else (None, None)
+
+    parts = []
+    existing = None
+    if affected is not None and OUT.exists():
+        existing = pd.read_csv(OUT, low_memory=False)
+        prior_affected = existing[existing["game_id"].astype(str).isin(affected)].copy()
+        if not prior_affected.empty:
+            parts.append(prior_affected)
+    book_hist = read_book_history(BOOK_HISTORY, by_pair_date, by_pair, affected, fast_pulled_at)
+    if not book_hist.empty:
+        print(BOOK_HISTORY, "rows:", len(book_hist), "games:", book_hist["game_id"].nunique())
+        parts.append(book_hist)
+
+    for p in SOURCES if affected is None else ():
+        got = read_source(p, by_pair_date, by_pair, affected)
+        if not got.empty:
+            print(p, "rows:", len(got), "games:", got["game_id"].nunique())
+            parts.append(got)
+
+    chart = build_chart(db, parts)
+    if affected is not None and existing is not None:
+        unaffected = existing[~existing["game_id"].astype(str).isin(affected)]
+        chart = pd.concat([unaffected, chart], ignore_index=True).sort_values(["game_id","snapshot_date"])
+    atomic_csv(chart, OUT)
 
     print()
     print("wrote:", OUT)
     print("rows:", len(chart))
     print("games:", chart["game_id"].nunique())
+    print("mode:", "incremental-fast" if affected is not None else "full")
+    if affected is not None: print("affected games:", len(affected))
     print("snapshot dates:", chart["snapshot_date"].min(), "to", chart["snapshot_date"].max())
     print("snapshots per game:")
     print(chart.groupby("game_id").size().value_counts().sort_index().to_string())

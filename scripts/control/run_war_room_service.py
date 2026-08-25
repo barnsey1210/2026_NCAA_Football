@@ -28,7 +28,7 @@ LATEST = CONTROL / "latest.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
 
 COMMANDS = {
-    "market": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--push"],
+    "market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"],
     "ratings": [sys.executable, "scripts/control/run_data_refresh.py", "pregame", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "postgame": [sys.executable, "scripts/control/run_data_refresh.py", "postgame", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"],

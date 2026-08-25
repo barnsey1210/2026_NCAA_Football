@@ -138,7 +138,7 @@ def main():
     stages.append(
         run_stage(
             "build_matchup_line_history",
-            [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],
+            [sys.executable, "scripts/history/build_matchup_line_history_clean.py", "--incremental-fast"],
             env,
         )
     )

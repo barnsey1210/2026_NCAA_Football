@@ -848,6 +848,9 @@ tr:hover td{
 <script>
 const MATRIX_URL = 'data/site/war_room_market_matrix.json';
 const HEALTH_URL = 'data/site/war_room_health.json';
+const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
+const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
+const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
 
 let MATRIX = null;
 let HEALTH = null;
@@ -1856,24 +1859,24 @@ function renderMatrix(){
   renderSummary();
 }
 
-async function loadData(){
+async function fetchDataPair(matrixUrl,healthUrl){
   const bust = Date.now();
-
   const [matrixResp, healthResp] = await Promise.all([
-    fetch(`${MATRIX_URL}?v=${bust}`, {cache:'no-store'}),
-    fetch(`${HEALTH_URL}?v=${bust}`, {cache:'no-store'})
+    fetch(`${matrixUrl}?v=${bust}`, {cache:'no-store'}),
+    fetch(`${healthUrl}?v=${bust}`, {cache:'no-store'})
   ]);
+  if(!matrixResp.ok)throw new Error(`Matrix HTTP ${matrixResp.status}`);
+  if(!healthResp.ok)throw new Error(`Health HTTP ${healthResp.status}`);
+  return Promise.all([matrixResp.json(),healthResp.json()]);
+}
 
-  if(!matrixResp.ok){
-    throw new Error(`Matrix HTTP ${matrixResp.status}`);
+async function loadData(){
+  try{
+    [MATRIX,HEALTH]=await fetchDataPair(LIVE_MATRIX_URL,LIVE_HEALTH_URL);
+  }catch(liveError){
+    console.warn('Live War Room data unavailable; using static snapshot',liveError);
+    [MATRIX,HEALTH]=await fetchDataPair(MATRIX_URL,HEALTH_URL);
   }
-
-  if(!healthResp.ok){
-    throw new Error(`Health HTTP ${healthResp.status}`);
-  }
-
-  MATRIX = await matrixResp.json();
-  HEALTH = await healthResp.json();
 
   fillWeeks();
   renderHealth();
@@ -2039,10 +2042,10 @@ document.getElementById('postgameBtn').addEventListener('click', e=>requestOpera
 let LAST_BUILD_ID = null;
 async function pollPublishedVersion(){
   try{
-    const response = await fetch(`${HEALTH_URL}?version=${Date.now()}`,{cache:'no-store'});
+    const response = await fetch(`${LIVE_VERSION_URL}?version=${Date.now()}`,{cache:'no-store'});
     if(!response.ok) return;
-    const health = await response.json();
-    const version = health.built_at || health.generated_at || health.fast_market_refresh?.refresh_id;
+    const live = await response.json();
+    const version = live.refresh_id;
     if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
     if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
   }catch(_err){ /* preserve the last valid rendered state */ }

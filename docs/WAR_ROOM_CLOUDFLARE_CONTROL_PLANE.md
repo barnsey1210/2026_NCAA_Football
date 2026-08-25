@@ -35,6 +35,14 @@ The Access application must:
 - retain the Access JWT and authenticated-email headers to the origin; and
 - permit the public GitHub Pages origin through the origin's exact CORS policy.
 
+The three already-public live-data routes are a narrow exception to operator
+authentication. Configure a more-specific Access application for
+`control.barnseywr.com/war-room/live/*` with a Bypass policy. Cloudflare's
+most-specific application-path rule takes precedence. The FastAPI origin still
+accepts browser reads only from the exact GitHub Pages origin and exposes no
+operator identity, task control, credentials, or filesystem parameter. All
+other `/war-room/*` routes remain under the approved-operator Access policy.
+
 The tunnel ingress must use the final catch-all `http_status:404` rule from
 `deploy/cloudflare/war-room-tunnel.example.yml`. The origin remains bound to
 `127.0.0.1:8787`; no router port-forward is permitted.

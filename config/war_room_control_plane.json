@@ -20,9 +20,14 @@
     ]
   },
   "allowed_routes": {
-    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}"],
+    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}", "/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix"],
     "POST": ["/war-room/market", "/war-room/ratings", "/war-room/postgame"]
   },
-  "browser_version_poll_seconds": 60,
+  "public_live_reads": {
+    "authentication": "CLOUDFLARE_ACCESS_BYPASS_ON_EXACT_PATH_ONLY",
+    "cors_origin": "https://barnsey1210.github.io",
+    "paths": ["/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix"]
+  },
+  "browser_version_poll_seconds": 2,
   "activation_status": "CLOUDFLARE_ACCESS_TUNNEL_PROVISIONED"
 }

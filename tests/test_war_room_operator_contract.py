@@ -111,6 +111,9 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("POST", methods_by_path["/war-room/market"])
         self.assertNotIn("GET", methods_by_path["/war-room/market"])
         self.assertIn("GET", methods_by_path["/war-room/bootstrap"])
+        self.assertIn("GET", methods_by_path["/war-room/live/version"])
+        self.assertIn("GET", methods_by_path["/war-room/live/health"])
+        self.assertIn("GET", methods_by_path["/war-room/live/market-matrix"])
         self.assertNotIn("/war-room/acquire", methods_by_path)
 
     def test_bootstrap_is_exact_origin_allowlisted_and_secret_free(self):
@@ -140,6 +143,40 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("event.source!==CONTROL_WINDOW", builder)
         self.assertNotIn("fetch('/war-room/acquire'", builder)
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
+        self.assertIn("LIVE_VERSION_URL", builder)
+        self.assertIn("fetchDataPair(LIVE_MATRIX_URL,LIVE_HEALTH_URL)", builder)
+
+    def test_public_live_read_origin_is_exact(self):
+        api.require_public_read_origin(
+            request(api.PUBLIC_ORIGIN, "GET", "/war-room/live/version"),
+            origin=api.PUBLIC_ORIGIN,
+        )
+        with self.assertRaises(HTTPException) as raised:
+            api.require_public_read_origin(
+                request("https://foreign.example", "GET", "/war-room/live/version"),
+                origin="https://foreign.example",
+            )
+        self.assertEqual(raised.exception.status_code, 403)
+
+    def test_live_version_advances_without_publication(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            health=root/"health.json"; matrix=root/"matrix.json"
+            def write(refresh_id):
+                health.write_text(json.dumps({"schema_version":"war-room-health-v1","built_at":"2026-08-25T12:00:01Z","fast_market_refresh":{"refresh_id":refresh_id,"last_fast_pull_at":"2026-08-25T12:00:00Z"}}))
+                matrix.write_text(json.dumps({"schema_version":"war-room-market-matrix-v1","built_at":"2026-08-25T12:00:02Z","fast_market_refresh":{"refresh_id":refresh_id,"last_fast_pull_at":"2026-08-25T12:00:00Z"}}))
+            with patch.object(api,"HEALTH",health),patch.object(api,"MATRIX",matrix):
+                write("refresh-one"); first=json.loads(api.live_version().body)
+                write("refresh-two"); second=json.loads(api.live_version().body)
+            self.assertEqual(first["refresh_id"],"refresh-one")
+            self.assertEqual(second["refresh_id"],"refresh-two")
+
+    def test_normal_market_service_does_not_push(self):
+        dispatcher=(api.ROOT/"scripts/control/run_war_room_service.py").read_text()
+        schedule=json.loads((api.ROOT/"config/war_room_fast_schedule.json").read_text())
+        self.assertIn('"market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"]',dispatcher)
+        self.assertNotIn("--push",schedule["entrypoint"])
+        self.assertIn('"war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"]',dispatcher)
 
 
 if __name__ == "__main__":

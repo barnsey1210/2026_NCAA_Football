@@ -306,7 +306,9 @@ def main():
     serialized = json.dumps(payload, separators=(",", ":"))
     asset_version = hashlib.sha256(serialized.encode()).hexdigest()[:12]
     ASSET.parent.mkdir(parents=True, exist_ok=True)
-    ASSET.write_text(serialized + "\n", encoding="utf-8")
+    temporary = ASSET.with_suffix(ASSET.suffix + ".tmp")
+    temporary.write_text(serialized + "\n", encoding="utf-8")
+    temporary.replace(ASSET)
     print("games with line history:", len(payload))
     print("history rows:", sum(len(v) for v in payload.values()))
     print("asset:", ASSET, "version:", asset_version, "bytes:", ASSET.stat().st_size)

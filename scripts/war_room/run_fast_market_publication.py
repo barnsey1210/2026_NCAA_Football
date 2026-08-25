@@ -77,8 +77,10 @@ def main() -> None:
         "--bundle",
         str(BUNDLE),
     )
-    mode = "--war-room-push" if args.push else "--war-room-check"
-    run("bash", "scripts/publish/publish_site.sh", mode)
+    if args.push:
+        run("bash", "scripts/publish/publish_site.sh", "--war-room-push")
+    else:
+        print("LIVE WAR ROOM ARTIFACTS READY; repository publication deferred")
 
 
 if __name__ == "__main__":
