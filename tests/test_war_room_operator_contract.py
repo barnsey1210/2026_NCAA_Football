@@ -25,7 +25,7 @@ service = importlib.util.module_from_spec(SERVICE_SPEC)
 SERVICE_SPEC.loader.exec_module(service)
 
 
-def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market"):
+def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market", query_string=b""):
     value = Request(
         {
             "type": "http",
@@ -35,7 +35,7 @@ def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market"):
             "client": ("127.0.0.1", 12345),
             "scheme": "http",
             "server": ("127.0.0.1", 8787),
-            "query_string": b"",
+            "query_string": query_string,
         }
     )
     value.state.correlation_id = "fixture-correlation"
@@ -132,11 +132,16 @@ class OperatorContractTests(unittest.TestCase):
         self.assertNotIn("/war-room/acquire", methods_by_path)
 
     def test_bootstrap_is_exact_origin_allowlisted_and_secret_free(self):
-        response = api.bootstrap("operator@example.invalid")
+        response = api.bootstrap(
+            request(path="/war-room/bootstrap", query_string=b"channel_nonce=fixture-nonce-123456"),
+            "operator@example.invalid",
+        )
         html = response.body.decode()
         self.assertIn(api.PUBLIC_ORIGIN, html)
         self.assertIn("event.origin!==TARGET_ORIGIN", html)
         self.assertIn("event.source!==window.opener", html)
+        self.assertIn("message.channelNonce!==CHANNEL_NONCE", html)
+        self.assertIn("setInterval(()=>send({type:'READY'}),1000)", html)
         self.assertIn("ACTION_ROUTES=Object.freeze", html)
         self.assertIn("Object.hasOwn(ACTION_ROUTES,message.action)", html)
         self.assertIn("fetch(ACTION_ROUTES[message.action]", html)
@@ -156,6 +161,8 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("/war-room/bootstrap", builder)
         self.assertIn("event.origin!==CONTROL_ORIGIN", builder)
         self.assertIn("event.source!==CONTROL_WINDOW", builder)
+        self.assertIn("sessionStorage.getItem(CONTROL_NONCE_KEY)", builder)
+        self.assertIn("message.channelNonce!==ensureControlNonce()", builder)
         self.assertNotIn("fetch('/war-room/acquire'", builder)
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
         self.assertIn("LIVE_VERSION_URL", builder)

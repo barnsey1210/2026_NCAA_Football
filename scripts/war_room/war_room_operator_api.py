@@ -242,17 +242,22 @@ def live_market_matrix(_: None = Depends(require_public_read_origin)):
 
 
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)
-def bootstrap(operator: str = Depends(require_access)):
+def bootstrap(request: Request, operator: str = Depends(require_access)):
     target_origin = json.dumps(PUBLIC_ORIGIN)
+    channel_nonce = request.query_params.get("channel_nonce", "")
+    if not channel_nonce.replace("-", "").isalnum() or not (16 <= len(channel_nonce) <= 128):
+        raise HTTPException(status_code=400, detail="invalid channel nonce")
+    nonce_json = json.dumps(channel_nonce)
     html = f"""<!doctype html>
 <html><head><meta charset=\"utf-8\"><title>War Room Operator</title></head>
 <body><p id=\"state\">Operator session ready. Keep this window open.</p>
 <script>
 const TARGET_ORIGIN={target_origin};
 const CHANNEL='ncaaf-war-room-control-v1';
+const CHANNEL_NONCE={nonce_json};
 const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame'}});
 const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
-function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,...message}},TARGET_ORIGIN)}}
+function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,channelNonce:CHANNEL_NONCE,...message}},TARGET_ORIGIN)}}
 async function pollTask(taskId,requestId){{
   for(let attempt=0;attempt<240;attempt++){{
     const response=await fetch(`/war-room/task/${{encodeURIComponent(taskId)}}`,{{cache:'no-store',credentials:'same-origin'}});
@@ -267,7 +272,7 @@ async function pollTask(taskId,requestId){{
 addEventListener('message',async event=>{{
   if(event.origin!==TARGET_ORIGIN || event.source!==window.opener)return;
   const message=event.data||{{}};
-  if(message.channel!==CHANNEL || message.type!=='REQUEST' || !Object.hasOwn(ACTION_ROUTES,message.action))return;
+  if(message.channel!==CHANNEL || message.channelNonce!==CHANNEL_NONCE || message.type!=='REQUEST' || !Object.hasOwn(ACTION_ROUTES,message.action))return;
   try{{
     const response=await fetch(ACTION_ROUTES[message.action],{{method:'POST',cache:'no-store',credentials:'same-origin'}});
     const payload=await response.json().catch(()=>({{}}));
@@ -277,6 +282,7 @@ addEventListener('message',async event=>{{
   }}catch(error){{send({{type:'ERROR',requestId:message.requestId,message:String(error.message||error)}})}}
 }});
 send({{type:'READY'}});
+setInterval(()=>send({{type:'READY'}}),1000);
 </script></body></html>"""
     return HTMLResponse(
         html,

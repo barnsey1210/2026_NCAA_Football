@@ -10,12 +10,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 ratings_latest_path = ROOT / "data/ratings/ratings_latest.csv"
+ratings_master_path = ROOT / "data/ratings/ratings_master_latest.csv"
 ratings_history_path = ROOT / "data/ratings/ratings_history.csv"
 market_latest_path = ROOT / "data/ratings/market_implied_ratings_latest.csv"
 market_audit_path = ROOT / "data/research/market_implied_ratings/production_2026_audit.json"
 ratings_source_status_path = ROOT / "data/ratings/ratings_source_status.csv"
 
 rows = list(csv.DictReader(ratings_latest_path.open()))
+master_rows = list(csv.DictReader(ratings_master_path.open()))
+master_by_team = {row["team"]: row for row in master_rows if row.get("team")}
 dates = sorted({r["snapshot_date"] for r in rows if r.get("snapshot_date")})
 if not dates:
     raise SystemExit("No rating snapshot dates found")
@@ -64,10 +67,16 @@ if ratings_source_status_path.exists():
 # actually present in the latest ratings snapshot. This mirrors the canonical
 # ratings-master behavior and prevents a stale/missing source (currently
 # Sagarin) from zeroing the Ratings page.
+master_available = {
+    "SP+": "spplus",
+    "FPI": "fpi",
+    "TeamRankings": "teamrankings",
+    "Sagarin Predictor": "sagarin",
+}
 active_composite = {
     label: key
-    for label, key in CORE_COMPOSITE.items()
-    if vectors.get((latest, label))
+    for label, key in master_available.items()
+    if any(row.get(key) not in (None, "", "nan") for row in master_rows)
 }
 
 if not active_composite:
@@ -211,6 +220,28 @@ for r in rows:
         "pulled_at": r.get("pulled_at"),
     }
 
+# The accepted master owns normalized Sagarin and preserves its raw value.
+# Supply the raw value to the display layer even when the provider snapshot
+# date differs from the latest automated SP+/FPI/TR snapshot date.
+sagarin_ranked = sorted(
+    (
+        (team, float(row["sagarin_raw"]))
+        for team, row in master_by_team.items()
+        if row.get("sagarin_raw") not in (None, "", "nan")
+    ),
+    key=lambda item: item[1],
+    reverse=True,
+)
+sagarin_ranks = {team: rank for rank, (team, _value) in enumerate(sagarin_ranked, 1)}
+for team, row in master_by_team.items():
+    if row.get("sagarin_raw") in (None, "", "nan"):
+        continue
+    by_team.setdefault(team, {}).setdefault("sagarin", {
+        "rating": float(row["sagarin_raw"]),
+        "rank": sagarin_ranks[team],
+        "pulled_at": None,
+    })
+
 
 # Load the latest market-derived ratings.
 market_by_team = {}
@@ -259,6 +290,17 @@ for team, sources in by_team.items():
         for key, value in sources.items()
         if key in composite_keys
     }
+
+    # ratings_latest intentionally retains the provider's raw Sagarin value
+    # for display/audit. The canonical Team Rating Engine consumes the
+    # contemporaneously centered value owned by ratings_master_latest.csv.
+    master = master_by_team.get(team, {})
+    if "sagarin" in composite_sources and master.get("sagarin") not in (None, ""):
+        composite_sources["sagarin"] = {
+            **composite_sources["sagarin"],
+            "rating": float(master["sagarin"]),
+            "raw_rating": composite_sources["sagarin"]["rating"],
+        }
 
     values = [x["rating"] for x in composite_sources.values()]
 
@@ -359,6 +401,7 @@ if preseason_mode:
         writer = csv.DictWriter(
             f,
             fieldnames=["team", "rating", "rank", "snapshot_date"],
+            lineterminator="\n",
         )
         writer.writeheader()
 
@@ -516,12 +559,12 @@ if len(out) < 130:
 # Basic invariants.
 for item in out:
     expected = sum(
-        item["sources"][key]["rating"]
+        item["composite_sources"][key]["rating"]
         for key in active_composite.values()
-        if key in item["sources"]
+        if key in item["composite_sources"]
     ) / len([
         key for key in active_composite.values()
-        if key in item["sources"]
+        if key in item["composite_sources"]
     ])
 
     if abs(item["rating"] - expected) > 1e-9:

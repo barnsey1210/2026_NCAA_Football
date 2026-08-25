@@ -21,7 +21,9 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--as-of-date", help="Fixture-only clock override")
-    parser.add_argument("--days", type=int, default=7)
+    # Full/daily maintenance owns the rolling 14-day horizon. The bounded
+    # Ratings caller explicitly passes --days 7.
+    parser.add_argument("--days", type=int, default=14)
     args = parser.parse_args()
     start = date.fromisoformat(args.as_of_date) if args.as_of_date else date.today()
     end = start + timedelta(days=args.days)

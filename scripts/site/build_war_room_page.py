@@ -1937,6 +1937,16 @@ const CONTROL_CHANNEL = 'ncaaf-war-room-control-v1';
 const CONTROL_ACTIONS = new Set(['market','ratings','postgame']);
 const RELAY_REQUESTS = new Map();
 let CONTROL_WINDOW = null;
+const CONTROL_NONCE_KEY = 'ncaaf-war-room-control-nonce-v1';
+let CONTROL_NONCE = sessionStorage.getItem(CONTROL_NONCE_KEY) || '';
+
+function ensureControlNonce(){
+  if(!CONTROL_NONCE){
+    CONTROL_NONCE=crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessionStorage.setItem(CONTROL_NONCE_KEY,CONTROL_NONCE);
+  }
+  return CONTROL_NONCE;
+}
 
 function setOperatorControls(enabled){
   document.querySelectorAll('.operator-control').forEach(el=>el.disabled=!enabled);
@@ -1945,7 +1955,7 @@ function setOperatorControls(enabled){
 function connectOperator(){
   const status=document.getElementById('operatorStatus');
   CONTROL_WINDOW=window.open(
-    `${CONTROL_BASE_URL}/war-room/bootstrap`,
+    `${CONTROL_BASE_URL}/war-room/bootstrap?channel_nonce=${encodeURIComponent(ensureControlNonce())}`,
     'ncaaf-war-room-control',
     'popup=yes,width=520,height=260,resizable=yes,scrollbars=yes'
   );
@@ -1957,13 +1967,15 @@ function requestViaRelay(action, button, old){
   if(!CONTROL_ACTIONS.has(action) || !CONTROL_WINDOW || CONTROL_WINDOW.closed) throw new Error('Operator session is not connected');
   const requestId=crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
   RELAY_REQUESTS.set(requestId,{button,old});
-  CONTROL_WINDOW.postMessage({channel:CONTROL_CHANNEL,type:'REQUEST',requestId,action},CONTROL_ORIGIN);
+  CONTROL_WINDOW.postMessage({channel:CONTROL_CHANNEL,channelNonce:ensureControlNonce(),type:'REQUEST',requestId,action},CONTROL_ORIGIN);
 }
 
 addEventListener('message',event=>{
-  if(event.origin!==CONTROL_ORIGIN || event.source!==CONTROL_WINDOW)return;
+  if(event.origin!==CONTROL_ORIGIN)return;
   const message=event.data||{};
-  if(message.channel!==CONTROL_CHANNEL)return;
+  if(message.channel!==CONTROL_CHANNEL || message.channelNonce!==ensureControlNonce())return;
+  if(message.type==='READY' && !CONTROL_WINDOW) CONTROL_WINDOW=event.source;
+  if(event.source!==CONTROL_WINDOW)return;
   const status=document.getElementById('operatorStatus');
   const connect=document.getElementById('connectOperatorBtn');
   if(message.type==='READY'){
@@ -2022,7 +2034,11 @@ function detectOperator(){
   setOperatorControls(false);
   connect.hidden=false;
   connect.disabled=false;
-  status.textContent='Connect authenticated operator session';
+  ensureControlNonce();
+  status.textContent='Reconnecting operator session…';
+  setTimeout(()=>{
+    if(!CONTROL_WINDOW){status.textContent='Connect authenticated operator session';connect.hidden=false}
+  },2000);
 }
 
 document.getElementById('connectOperatorBtn').addEventListener('click',connectOperator);

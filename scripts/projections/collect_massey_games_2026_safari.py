@@ -29,25 +29,59 @@ INVENTORY = (
 )
 
 
-def safari_capture(date_str: str, wait_seconds: int = 6) -> str:
+def run_applescript(script: str, timeout: int = 45) -> str:
+    result = subprocess.run(
+        ["osascript", "-e", script], capture_output=True, text=True, timeout=timeout
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip())
+    return result.stdout.strip()
+
+
+def create_safari_worker() -> int:
+    """Create and identify one collector-owned Safari window."""
+    script = '''
+tell application "Safari"
+    set priorIds to id of every window
+    make new document with properties {URL:"about:blank"}
+    repeat with candidate in every window
+        if (id of candidate) is not in priorIds then return id of candidate
+    end repeat
+    error "unable to identify collector-owned Safari window"
+end tell
+'''
+    return int(run_applescript(script))
+
+
+def close_safari_worker(worker_id: int) -> None:
+    """Best-effort cleanup restricted to the collector-owned window ID."""
+    script = f'''
+tell application "Safari"
+    try
+        close window id {int(worker_id)}
+    end try
+end tell
+'''
+    try:
+        run_applescript(script, timeout=15)
+    except Exception as exc:
+        print(f"warning: Safari worker cleanup failed: {exc}")
+
+
+def safari_capture(date_str: str, worker_id: int, wait_seconds: int = 6) -> str:
     url_date = date_str.replace("-", "")
     url = f"https://masseyratings.com/cf/fbs/games?dt={url_date}"
 
     applescript = f'''
 tell application "Safari"
-    activate
-
-    if (count of windows) = 0 then
-        make new document
-    end if
-
-    set URL of current tab of front window to "{url}"
+    set workerWindow to window id {int(worker_id)}
+    set URL of current tab of workerWindow to "{url}"
 
     delay {wait_seconds}
 
     repeat 20 times
         try
-            set rs to do JavaScript "document.readyState" in current tab of front window
+            set rs to do JavaScript "document.readyState" in current tab of workerWindow
             if rs is "complete" then exit repeat
         end try
         delay 1
@@ -55,21 +89,10 @@ tell application "Safari"
 
     delay 2
 
-    return do JavaScript "document.body.innerText" in current tab of front window
+    return do JavaScript "document.body.innerText" in current tab of workerWindow
 end tell
 '''
-
-    result = subprocess.run(
-        ["osascript", "-e", applescript],
-        capture_output=True,
-        text=True,
-        timeout=45,
-    )
-
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip())
-
-    return result.stdout
+    return run_applescript(applescript)
 
 
 def valid_page(text: str) -> bool:
@@ -202,7 +225,9 @@ def main():
 
 
 
-    for n, date_str in enumerate(dates, 1):
+    worker_id = create_safari_worker()
+    try:
+      for n, date_str in enumerate(dates, 1):
 
         key = date_str
 
@@ -235,9 +260,7 @@ def main():
             4,
         ):
             try:
-                text = safari_capture(
-                    date_str
-                )
+                text = safari_capture(date_str, worker_id)
 
                 chars = len(text)
 
@@ -290,9 +313,9 @@ def main():
             progress
         )
 
-        time.sleep(
-            args.sleep
-        )
+        time.sleep(args.sleep)
+    finally:
+        close_safari_worker(worker_id)
 
     print()
     print("=" * 100)
