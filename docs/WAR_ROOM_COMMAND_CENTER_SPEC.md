@@ -66,6 +66,17 @@ The War Room should link outward and avoid duplicating these systems.
 
 Displayed state represents model and market readiness.
 
+Projection authority is defined canonically in
+`docs/WAR_ROOM_PROJECTION_AUTHORITY.md`. Authority is resolved independently
+for spread and total from provider-level accepted version updates. It selects
+the projection value used by the displayed model and edge; team/game freshness
+remains diagnostic and does not increment the authority count.
+
+The complete multi-domain operating cycle, including the first-final cycle
+boundary, lifecycle events, value availability/carry-forward, and future
+controller ownership, is defined in
+`docs/WAR_ROOM_LIFECYCLE_OPERATIONAL_MODEL.md`.
+
 ### STALE
 
 Market exists, but ratings/model inputs are from the prior update cycle.
@@ -77,11 +88,18 @@ New market exists and shadow projections are available.
 ### HYBRID
 
 Some new ratings/models have updated, but not all required inputs are
-complete.
+complete. Hybrid authority uses the updated canonical sources with their
+canonical weights renormalized to 100%. It is a separate authority tier and is
+not the strict Official model identity.
 
 ### UPDATED
 
 All scheduled ratings/models have been refreshed for the upcoming week.
+
+For spread, Shadow applies at 0-1 updated sources, Hybrid at 2-4, and Official
+at 5/5. For total, Shadow applies at 0-1, Hybrid at 2/3, and Official at 3/3.
+Accepted provider-version changes drive these counts globally. Transitions are
+automatic after acceptance and rebuild; no manual approval is required.
 
 Future: LIVE may be added for real-time adjustments beyond normal model
 cycles.

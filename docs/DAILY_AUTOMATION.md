@@ -1,5 +1,9 @@
 # Daily automation architecture and runbook
 
+> The canonical repository/runtime boundary and the relationship between this
+> full daily backbone and bounded fast paths are defined in
+> `docs/NCAAF_RUNTIME_UPDATE_ARCHITECTURE.md`.
+
 _Audited 2026-08-01_
 
 ## Canonical execution path
@@ -61,6 +65,30 @@ The orchestration directly evaluates:
 - `NCAAF_AUTO_PUBLISH` — `0` disables publication only; default preserves current enabled behavior.
 
 Provider scripts consume their own protected API environment variables from the launcher-loaded private environment, including configured credentials for SportsGameOdds, BettingPros, CFBD, The Odds API, and other active providers. Values must never enter logs or `daily_run_status.json`.
+
+### Approved CFBD production role
+
+Canonical service ownership and budget policy are defined in
+`docs/WAR_ROOM_PROVIDER_SERVICES_AND_API_BUDGETS.md`.
+
+CFBD Tier 2 is approved for production. It owns acquisition of schedule/status
+and `GAME_FINAL` evidence, plus postgame plays, drives, havoc, and advanced game
+statistics. Raw and accepted historical responses should be preserved for
+replay and future research. CFBD does not own projection authority, ratings
+authority, market authority, or betting-edge calculations.
+
+The Tier 2 key will be wired later through the existing protected
+secret/environment pattern. No key belongs in this document, the stage
+registry, logs, generated data, or public artifacts. Current scripts already
+cover schedule, lines, plays, drives, and havoc; advanced-game-statistics
+acquisition remains a later wiring task and is not claimed as implemented here.
+
+### The Odds API budget
+
+The locked monthly budget is 20,000 credits with a 2,000-credit emergency
+reserve. The reconciled balance above the reserve is available for normal
+operations, subject to the existing quota, cooldown, overlap, and validation
+gates.
 
 ## Duplicates, legacy references, and known risks
 

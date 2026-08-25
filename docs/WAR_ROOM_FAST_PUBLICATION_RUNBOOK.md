@@ -48,6 +48,24 @@ python3 scripts/war_room/run_fast_market_publication.py --push
 
 The existing daily 8 AM LaunchAgent remains unchanged.
 
+## API budget policy
+
+- Canonical provider-service and budget ownership is defined in
+  `docs/WAR_ROOM_PROVIDER_SERVICES_AND_API_BUDGETS.md`.
+- The Odds API monthly budget is **20,000 credits**.
+- **2,000 credits** are a fixed emergency reserve and are unavailable to
+  normal operations.
+- The reconciled balance above 2,000 is available for normal operations under
+  the existing quota preflight, non-overlap lock, freshness, coverage, and
+  validation gates.
+- Browser reloads of published JSON consume zero provider credits. Only the
+  guarded server-side acquisition path may consume credits.
+- The four operating windows above remain the current schedule contract.
+  Adaptive high-frequency polling described in Shadow Live design material is
+  future work and is not activated by this policy.
+- The budget resets by UTC calendar month: 00:00 UTC on day 1 through the final
+  instant of the final UTC calendar day. It is not a rolling 30-day budget.
+
 ## GitHub workflow change required
 
 The manual refresh workflow is owned by `NCAAF_CONTROL`, not MAIN_REPO. Add a
