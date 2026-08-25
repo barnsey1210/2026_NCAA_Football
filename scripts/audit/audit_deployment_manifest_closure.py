@@ -14,6 +14,9 @@ DEFAULT_MANIFEST = ROOT / "deploy/source_manifest.txt"
 DAILY_REGISTRY = ROOT / "config/daily_stages.json"
 PUBLIC_BUILDER = ROOT / "scripts/site/build_public_site.py"
 DAILY_ENTRYPOINT = ROOT / "daily_market_update.sh"
+PUBLISHER_STATIC_DEPENDENCIES = {
+    "scripts/audit/audit_publication_parity.py": "scripts/publish/publish_site.sh",
+}
 REQUIRED_RUNTIME_STATIC = {
     "v1.html",
     "data/snapshots/preseason/preseason_db.json",
@@ -244,6 +247,23 @@ def main() -> int:
             if relative not in owner_text:
                 errors.append(
                     f"generated Shadow input ownership drift: {relative} is not referenced by {owner}"
+                )
+
+    for relative, owner in sorted(PUBLISHER_STATIC_DEPENDENCIES.items()):
+        source = ROOT / relative
+        owner_path = ROOT / owner
+        if not source.is_file() or source.is_symlink():
+            errors.append(f"publisher dependency is not a regular file: {relative}")
+        elif relative not in path_set:
+            errors.append(f"publisher dependency missing from manifest: {relative}")
+        try:
+            owner_text = owner_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"cannot inspect publisher dependency owner {owner}: {exc}")
+        else:
+            if relative not in owner_text:
+                errors.append(
+                    f"publisher dependency ownership drift: {relative} is not referenced by {owner}"
                 )
 
     public_builder_text = PUBLIC_BUILDER.read_text(encoding="utf-8")
