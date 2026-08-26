@@ -11,6 +11,17 @@ ROOT=Path.home()/"NCAAF_AUTO"
 # from CFBD before projections and site builds.
 PRESEASON_DB=ROOT/"data/snapshots/preseason/preseason_db.json"
 SHADOW=ROOT/"data/site/saturday_shadow_lines.json"
+
+# Explicit bounded inputs for the live Schedule/Postgame surface.
+# Do not recursively scan data/** during an operational Postgame refresh.
+LIVE_ENRICHMENT_SOURCES = (
+    ROOT/"data/canonical/cfbd_schedule_2026.json",
+    ROOT/"data/canonical/game_results_2026.json",
+    ROOT/"data/projections/game_projection_sources_2026.csv",
+    ROOT/"data/weather/game_weather_latest.csv",
+    ROOT/"data/site/war_room_market_matrix.json",
+)
+
 ET=ZoneInfo("America/New_York")
 OUT=ROOT/"data/site/schedule_live_enrichment.json"
 TIME_KEYS=["start_time","start_date","start_datetime","kickoff","kickoff_time","scheduled","date_time","datetime"]
@@ -105,8 +116,8 @@ def main():
       r=canon(raw)
       if r["season"]==2026 and row_key(r): records[row_key(r)]=r
     hits=[]
-    for path in list(ROOT.glob("data/**/*.csv"))+list(ROOT.glob("data/**/*.json")):
-      if path in (OUT,SHADOW) or path.stat().st_size>50000000: continue
+    for path in LIVE_ENRICHMENT_SOURCES:
+      if not path.exists() or path in (OUT,SHADOW): continue
       rows=load_rows(path)
       if not rows or not isinstance(rows[0],dict): continue
       matched=0
