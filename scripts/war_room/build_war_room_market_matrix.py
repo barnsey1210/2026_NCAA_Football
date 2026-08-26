@@ -28,6 +28,10 @@ FAST_QUOTES = (
     / "data/war_room/odds/theodds_ncaaf_lines_2026_fast.csv"
 )
 
+CURRENT_MARKET = (
+    ROOT / "data/site/current_market_contract.json"
+)
+
 PROJECTIONS = (
     ROOT
     / "data/site/current_game_projection_contract.json"
@@ -144,7 +148,163 @@ def quote_payload(row, *, canonical_game_id, market, side):
         "last_update": row.get("last_update"),
         "pulled_at": row.get("pulled_at"),
         "source": row.get("source"),
+        "selection_source": "LATEST_FAST_PULL",
     }
+
+
+def parse_timestamp(value):
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(
+            raw.replace("Z", "+00:00")
+        )
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def current_quote_pair_is_fresh(sides, *, now, max_age_hours):
+    if not sides:
+        return False
+
+    for quote in sides.values():
+        if quote.get("freshness_status") not in {
+            "LIVE",
+            "BACKUP_SOURCE",
+        }:
+            return False
+
+        updated = parse_timestamp(
+            quote.get("source_updated_at")
+        )
+        if updated is None:
+            return False
+
+        age_hours = (
+            now - updated
+        ).total_seconds() / 3600
+        if age_hours < -0.25 or age_hours > max_age_hours:
+            return False
+
+    return True
+
+
+def merge_current_market_fallbacks(
+    quote_inventory,
+    current_payload,
+    participating_books,
+    *,
+    reference_time,
+    eligible_game_ids=None,
+):
+    """Fill exact missing fast slots from the canonical fresh contract.
+
+    The latest fast pull always wins. A fallback is accepted only as a
+    complete, internally valid pair whose source timestamp still satisfies
+    the canonical current-market age limit at the fast-pull timestamp.
+    """
+    accepted = []
+    rejected = []
+    max_age_hours = number(
+        current_payload.get("max_quote_age_hours")
+    )
+    if max_age_hours is None:
+        max_age_hours = 18
+
+    now = parse_timestamp(reference_time) or datetime.now(
+        timezone.utc
+    )
+    eligible = (
+        set(eligible_game_ids)
+        if eligible_game_ids is not None
+        else set(quote_inventory)
+    )
+
+    for game in current_payload.get("games", []):
+        gid = str(game.get("game_id") or "")
+        if not gid or gid not in eligible:
+            continue
+
+        for book, book_data in (
+            game.get("quotes", {}) or {}
+        ).items():
+            if book not in participating_books:
+                continue
+
+            for market in ("spread", "total"):
+                current_sides = dict(
+                    (book_data or {}).get(market, {}) or {}
+                )
+                fast_sides = quote_inventory[gid][book][market]
+
+                if pair_is_valid(market, fast_sides):
+                    continue
+
+                reason = None
+                if not pair_is_valid(market, current_sides):
+                    reason = "INVALID_OR_INCOMPLETE_CURRENT_PAIR"
+                elif not current_quote_pair_is_fresh(
+                    current_sides,
+                    now=now,
+                    max_age_hours=max_age_hours,
+                ):
+                    reason = "STALE_CURRENT_PAIR"
+
+                if reason:
+                    if current_sides:
+                        rejected.append({
+                            "game_id": gid,
+                            "book": book,
+                            "market": market,
+                            "reason": reason,
+                        })
+                    continue
+
+                replacement = {}
+                for side, quote in current_sides.items():
+                    replacement[side] = {
+                        "game_id": gid,
+                        "provider_game_id": None,
+                        "book": book,
+                        "book_key": None,
+                        "venue_type": quote.get("venue_type"),
+                        "market": market,
+                        "side": side,
+                        "line": number(quote.get("line")),
+                        "price": number(quote.get("price")),
+                        "last_update": quote.get(
+                            "source_updated_at"
+                        ),
+                        "pulled_at": current_payload.get("built_at"),
+                        "source": quote.get("source"),
+                        "selection_source": (
+                            "CURRENT_MARKET_CONTRACT_FALLBACK"
+                        ),
+                        "freshness_status": quote.get(
+                            "freshness_status"
+                        ),
+                    }
+
+                quote_inventory[gid][book][market] = replacement
+                accepted.append({
+                    "game_id": gid,
+                    "book": book,
+                    "market": market,
+                    "source": sorted({
+                        str(q.get("source") or "")
+                        for q in current_sides.values()
+                    }),
+                    "source_updated_at": max(
+                        str(q.get("source_updated_at") or "")
+                        for q in current_sides.values()
+                    ),
+                })
+
+    return accepted, rejected
 
 
 def pair_is_valid(market, sides):
@@ -1227,6 +1387,11 @@ def main():
 
     projection_payload = json.loads(PROJECTIONS.read_text())
     health_payload = json.loads(HEALTH.read_text())
+    current_market_payload = (
+        json.loads(CURRENT_MARKET.read_text())
+        if CURRENT_MARKET.exists()
+        else {"games": []}
+    )
 
     shadow_component_payload = (
         json.loads(SHADOW_COMPONENTS.read_text())
@@ -1475,6 +1640,16 @@ def main():
                         "PRICE_WORSE_THAN_MINUS_120"
                     ),
                 })
+
+    current_market_fallbacks, current_market_fallback_rejections = (
+        merge_current_market_fallbacks(
+            quote_inventory,
+            current_market_payload,
+            participating_books,
+            reference_time=last_fast_pull_at,
+            eligible_game_ids=set(quote_inventory),
+        )
+    )
 
     games_out = []
 
@@ -1927,6 +2102,15 @@ def main():
         },
 
         "selection_policy": {
+            "latest_fast_pull_priority": (
+                "Latest accepted fast quote pair always wins."
+            ),
+            "missing_pair_fallback": (
+                "An exact missing or invalid fast pair may be filled only "
+                "from the canonical current-market contract when the pair "
+                "is complete, internally valid, and still satisfies the "
+                "canonical quote-age limit at the fast-pull timestamp."
+            ),
             "bettable_sportsbooks": list(BETTABLE),
             "exchanges": list(EXCHANGES),
             "sharp_reference": PINNACLE,
@@ -1977,6 +2161,12 @@ def main():
             "exchange_quotes_rejected_by_price": len(
                 exchange_price_rejections
             ),
+            "current_market_fallback_pairs": len(
+                current_market_fallbacks
+            ),
+            "current_market_fallback_rejections": len(
+                current_market_fallback_rejections
+            ),
             "state_counts": dict(state_counts),
             "fbs_vs_fbs_games": sum(
                 1
@@ -2000,6 +2190,12 @@ def main():
             ),
             "exchange_price_rejections": (
                 exchange_price_rejections
+            ),
+            "current_market_fallbacks": (
+                current_market_fallbacks
+            ),
+            "current_market_fallback_rejections": (
+                current_market_fallback_rejections
             ),
         },
     }
