@@ -28,6 +28,7 @@ TASKS = ROOT / "data/control/war_room_services/tasks"
 REQUEST_LOG = ROOT / "data/control/war_room_services/requests.jsonl"
 HEALTH = ROOT / "data/site/war_room_health.json"
 MATRIX = ROOT / "data/site/war_room_market_matrix.json"
+SCHEDULE = ROOT / "data/site/schedule_live_enrichment.json"
 PUBLIC_ORIGIN = os.environ.get(
     "WAR_ROOM_PUBLIC_ORIGIN", "https://barnsey1210.github.io"
 ).rstrip("/")
@@ -239,6 +240,11 @@ def live_health(_: None = Depends(require_public_read_origin)):
 @app.get("/war-room/live/market-matrix")
 def live_market_matrix(_: None = Depends(require_public_read_origin)):
     return live_response(public_artifact(MATRIX, "war-room-market-matrix-v1"))
+
+
+@app.get("/war-room/live/schedule")
+def live_schedule(_: None = Depends(require_public_read_origin)):
+    return live_response(public_artifact(SCHEDULE, "schedule-live-enrichment-v2"))
 
 
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)

@@ -43,6 +43,14 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertEqual(run["status"], "COMPLETED")
         self.assertEqual(run["publication"]["status"], "SKIPPED_RUNTIME_ONLY")
 
+    def test_prepared_results_skips_only_schedule_and_results(self):
+        full = CONTROL.postgame_commands()
+        prepared = CONTROL.postgame_commands(skip_schedule=True)
+        self.assertEqual(prepared, full[2:])
+        self.assertEqual(Path(prepared[0][1]).name, "pull_cfbd_postgame_2026.py")
+        dispatcher = (ROOT / "scripts/control/run_war_room_service.py").read_text()
+        self.assertIn('command = [*command, "--postgame-skip-schedule"]', dispatcher)
+
     def test_no_completed_games_makes_zero_rich_calls(self):
         with tempfile.TemporaryDirectory() as temporary, patch.object(
             PULL, "completed_games", return_value=[]

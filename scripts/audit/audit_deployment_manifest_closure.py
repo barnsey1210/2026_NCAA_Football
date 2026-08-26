@@ -35,6 +35,10 @@ SHADOW_STATIC_DEPENDENCIES = {
     "data/research/historical/shadow/totals_oos_2024/enhanced_spplus_od_frozen_model_specification.csv":
         "scripts/projections/build_current_game_projection_contract.py",
 }
+CFBD_WATCHER_STATIC_DEPENDENCIES = {
+    "config/cfbd_final_watcher.json": "scripts/war_room/run_cfbd_final_watcher.py",
+    "data/snapshots/preseason/preseason_db.json": "scripts/war_room/run_cfbd_final_watcher.py",
+}
 SHADOW_GENERATED_INPUTS = {
     "data/research/shadow_live_feature_constructor/team_game_features_2026.json":
         "scripts/site/build_saturday_shadow_component_predictions.py",
@@ -217,6 +221,10 @@ def main() -> int:
             errors.append(f"public build static dependency is not a regular file: {relative}")
         elif relative not in path_set:
             errors.append(f"public build static dependency missing from manifest: {relative}")
+
+    for relative, owner in CFBD_WATCHER_STATIC_DEPENDENCIES.items():
+        if owner in path_set and relative not in path_set:
+            errors.append(f"CFBD watcher dependency missing from manifest: {relative} (owner {owner})")
 
     for relative, owner in sorted(SHADOW_STATIC_DEPENDENCIES.items()):
         source = ROOT / relative

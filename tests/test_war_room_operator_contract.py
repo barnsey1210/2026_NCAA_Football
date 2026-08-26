@@ -194,6 +194,15 @@ class OperatorContractTests(unittest.TestCase):
             self.assertEqual(first["refresh_id"],"refresh-one")
             self.assertEqual(second["refresh_id"],"refresh-two")
 
+    def test_live_schedule_is_safe_normalized_artifact(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            schedule=Path(temporary)/"schedule.json"
+            schedule.write_text(json.dumps({"schema_version":"schedule-live-enrichment-v2","games":[]}))
+            with patch.object(api,"SCHEDULE",schedule):
+                response=api.live_schedule()
+            self.assertEqual(response.headers["cache-control"],"no-store")
+            self.assertEqual(json.loads(response.body)["games"],[])
+
     def test_normal_market_service_does_not_push(self):
         dispatcher=(api.ROOT/"scripts/control/run_war_room_service.py").read_text()
         schedule=json.loads((api.ROOT/"config/war_room_fast_schedule.json").read_text())

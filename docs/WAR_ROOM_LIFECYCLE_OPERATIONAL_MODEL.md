@@ -16,15 +16,15 @@ It does not own projection formulas or projection-authority thresholds. Those re
 
 ### Locked provider decisions
 
-- **CFBD Tier 2 is approved for production.** It supplies schedule/status
-  observations and `GAME_FINAL` evidence; postgame plays, drives, havoc, and
-  advanced game statistics; and preserved historical source data for replay
+- **CFBD Tier 1 is approved for production.** It supplies schedule/status
+  observations and `GAME_FINAL` evidence; completed-game plays, drives, and
+  havoc; and preserved historical source data for replay
   and future research. Free-tier sufficiency is not an open architecture
   question.
 - CFBD remains a source/acquisition owner only. It does not own projection
   authority, ratings authority, market authority, or betting edges.
-- The CFBD credential will be connected later through the established
-  protected secret/environment pattern. This document does not authorize
+- The CFBD credential is loaded only through the established protected
+  secret/environment pattern. This document does not authorize
   credential or workflow changes.
 - **The Odds API budget is 20,000 monthly credits with a fixed 2,000-credit
   emergency reserve.** Credits above that reserve are available for normal
@@ -71,11 +71,11 @@ POSTGAME_READY
 
 | State | Scope | Meaning | Evidence owner |
 |---|---|---|---|
-| `SCHEDULED` | game | Canonical game exists and has not started | Schedule contract using accepted CFBD Tier 2 status |
-| `GAME_ACTIVE` | game | Accepted source says the game is in progress | CFBD Tier 2 schedule/status ingestion |
-| `GAME_FINAL` | game | Final score passed canonical identity/result validation | Canonical results owner using accepted CFBD Tier 2 evidence |
+| `SCHEDULED` | game | Canonical game exists and has not started | Schedule contract using accepted CFBD Tier 1 status |
+| `GAME_ACTIVE` | game | Accepted source says the game is in progress | CFBD Tier 1 schedule/status ingestion |
+| `GAME_FINAL` | game | Final score passed canonical identity/result validation | Canonical results owner using accepted CFBD Tier 1 evidence |
 | `POSTGAME_PROCESSING` | game/week task | Required postgame acquisition/features are running | Lifecycle task/attempt state |
-| `POSTGAME_READY` | game | Required postgame inputs/features passed their audits | Postgame pipeline using CFBD plays, drives, havoc, and advanced game statistics |
+| `POSTGAME_READY` | game | Required postgame inputs/features passed their audits | Postgame pipeline using CFBD plays, drives, and havoc |
 
 A final creates new information. That information affects the completed matchup, both teams, their next scheduled games, Shadow features, forecasts, model settlement, and the next-week preparation cycle.
 
@@ -339,7 +339,7 @@ Events are immutable facts. Every event requires `event_id`, `event_type`, `obse
 
 ```mermaid
 flowchart TD
-  P[Approved providers<br/>including CFBD Tier 2] -->|raw observations| SA[Source Acceptance]
+  P[Approved providers<br/>including CFBD Tier 1] -->|raw observations| SA[Source Acceptance]
   SA -->|validated accepted versions| CC[Canonical Contracts]
   CC -->|persisted facts| EV[(Lifecycle Event Log)]
   EV --> SR[State Reducer]

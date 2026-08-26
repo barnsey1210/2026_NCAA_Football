@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "enabled": false,
+  "timezone": "America/New_York",
+  "poll_interval_minutes": 5,
+  "monthly_call_limit": 5000,
+  "protected_reserve_calls": 500,
+  "monitor_window": {
+    "minutes_before_first_kickoff": 30,
+    "hours_after_last_kickoff": 5
+  },
+  "retry_policy": {
+    "delays_minutes": [5, 10, 30],
+    "max_attempts": 4
+  },
+  "policy": {
+    "schedule_driven_windows": true,
+    "one_scoreboard_call_per_in_window_poll": true,
+    "games_refresh_only_for_new_final_candidate": true,
+    "dispatch_postgame_only_on_new_final": true,
+    "manual_postgame_remains_self_contained": true
+  }
+}

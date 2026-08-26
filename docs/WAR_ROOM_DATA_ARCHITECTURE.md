@@ -40,20 +40,20 @@ A public page may format canonical data differently, but it may not independentl
 Detailed provider-service ownership and API budget policy are governed by
 `docs/WAR_ROOM_PROVIDER_SERVICES_AND_API_BUDGETS.md`.
 
-CollegeFootballData (CFBD) **Tier 2 is approved** as a production provider. Do
+CollegeFootballData (CFBD) **Tier 1 is approved** as a production provider. Do
 not re-evaluate free-tier sufficiency as part of lifecycle implementation.
 CFBD owns source observations for:
 
 - schedule and game-status updates, including evidence used for canonical
   `GAME_FINAL` detection;
-- postgame plays, drives, havoc, and advanced game statistics; and
+- completed-game plays, drives, and havoc; and
 - preserved raw/historical data needed for replay and future research.
 
 CFBD observations must pass the existing canonical identity, result, cache,
 and feature validation layers before downstream use. CFBD does **not** own
 projection authority, ratings authority, market authority, or betting edges.
-Those remain with their canonical domain owners. The Tier 2 API key will be
-wired later through the established protected secret/environment pattern; it
+Those remain with their canonical domain owners. The Tier 1 API key is loaded
+only through the established protected secret/environment pattern; it
 must never be stored in a data contract or public artifact.
 
 The Odds API operational budget is 20,000 credits per calendar month. A fixed
@@ -63,7 +63,7 @@ existing quota, cadence, lock, and validation gates.
 
 The calendar-month period begins at 00:00 UTC on day 1 and ends at 23:59 UTC on
 the final calendar day. The budget is not a football-week, season, or rolling
-30-day budget. CFBD Tier 2 usage is tracked in a separate provider ledger.
+30-day budget. CFBD Tier 1 usage is tracked in a separate provider ledger.
 
 ## Standalone Command Center V1
 

@@ -112,7 +112,15 @@ def main() -> int:
     parser.add_argument("--requester", default="scheduler")
     parser.add_argument("--task-id", default=None)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--prepared-results",
+        action="store_true",
+        help="Postgame only: schedule/results were already refreshed by the final watcher.",
+    )
     args = parser.parse_args()
+
+    if args.prepared_results and args.action != "postgame":
+        parser.error("--prepared-results is valid only for postgame")
     if args.action == "status":
         print(json.dumps(read_json(LATEST, {"status": "NEVER_RUN"}), indent=2))
         return 0
@@ -159,7 +167,10 @@ def main() -> int:
         lock = acquire(args.action, identity)
         task.update(status="RUNNING", started_at=utc_now())
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
-        result = subprocess.run(resolve_command(args.action), cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
+        command = resolve_command(args.action)
+        if args.prepared_results:
+            command = [*command, "--postgame-skip-schedule"]
+        result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
         task.update(
             status="COMPLETED" if result.returncode == 0 else "FAILED",
             completed_at=utc_now(),

@@ -187,9 +187,9 @@ def ratings_no_change_commands(
     ]
 
 
-def postgame_commands() -> list[list[str]]:
+def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
     """Bounded runtime-only Postgame propagation; never publishes the site."""
-    return [
+    commands = [
         [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
         [sys.executable, "scripts/results/build_game_results_2026.py"],
         [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
@@ -206,10 +206,14 @@ def postgame_commands() -> list[list[str]]:
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
     ]
+    return commands[2:] if skip_schedule else commands
 
 
-def execute_postgame_service(run: dict[str, Any]) -> None:
-    if run_commands(run, postgame_commands()):
+def execute_postgame_service(
+    run: dict[str, Any],
+    skip_schedule: bool = False,
+) -> None:
+    if run_commands(run, postgame_commands(skip_schedule=skip_schedule)):
         run["status"] = "COMPLETED"
         run["publication"] = {"status": "SKIPPED_RUNTIME_ONLY"}
     else:
@@ -444,6 +448,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--trigger-source", default="local")
     p.add_argument("--requester", default="local-user")
     p.add_argument("--confirm-publish", action="store_true")
+    p.add_argument(
+        "--postgame-skip-schedule",
+        action="store_true",
+        help="Postgame only: reuse schedule/results already refreshed by final watcher.",
+    )
     p.add_argument("--test-scenario", choices=["", "no_change", "rating_failure", "malformed_rating", "quota_block", "cooldown_block", "overlap"], default="")
     return p.parse_args()
 
@@ -719,7 +728,10 @@ def main() -> int:
                         run["status"] = "FAILED"
 
             elif args.mode == "postgame":
-                execute_postgame_service(run)
+                execute_postgame_service(
+                    run,
+                    skip_schedule=args.postgame_skip_schedule,
+                )
             elif not cfg.get("live_provider_calls_enabled", False) and args.mode != "publish-existing":
                 run["status"] = "BLOCKED_BY_CONFIGURATION"; run["errors"].append("live provider calls are disabled pending activation review")
             elif args.mode == "publish-existing":

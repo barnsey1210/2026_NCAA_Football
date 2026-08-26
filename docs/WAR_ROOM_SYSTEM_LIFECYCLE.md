@@ -21,11 +21,11 @@ The future lifecycle layer must not calculate projections, select providers, red
 
 ## Locked provider and budget policy
 
-CFBD Tier 2 is an approved production provider. Its lifecycle responsibilities
-are schedule/status updates and `GAME_FINAL` evidence; postgame plays, drives,
-havoc, and advanced game statistics; and preservation of historical source
-data for replay and future research. Its credential will be wired later through
-the protected secret/environment pattern. CFBD does not own projection,
+CFBD Tier 1 is an approved production provider. Its lifecycle responsibilities
+are schedule/status updates and `GAME_FINAL` evidence; completed-game plays,
+drives, and havoc; and preservation of historical source data for replay and
+future research. Its credential is loaded only through the protected
+secret/environment pattern. CFBD does not own projection,
 ratings, or market authority and does not calculate betting edges.
 
 The Odds API has a locked 20,000-credit monthly budget. The emergency reserve
@@ -38,11 +38,11 @@ operations under the existing acquisition gates.
 
 | State | Meaning | Existing evidence owner |
 |---|---|---|
-| `SCHEDULED` | Canonical game exists and has not started | Canonical schedule from accepted CFBD Tier 2 observations and preseason game identity |
-| `GAME_ACTIVE` | Source reports an in-progress game | CFBD Tier 2 schedule/status ingestion; not currently persisted as a lifecycle event |
+| `SCHEDULED` | Canonical game exists and has not started | Canonical schedule from accepted CFBD Tier 1 observations and preseason game identity |
+| `GAME_ACTIVE` | Source reports an in-progress game | CFBD Tier 1 schedule/status ingestion; not currently persisted as a lifecycle event |
 | `GAME_FINAL_UNPROCESSED` | Final score is canonical, but required postgame work is incomplete | `game_results_2026.json` plus absence/incompleteness in postgame audits |
 | `POSTGAME_PROCESSING` | Required cache/features are being built for the final | Future controller state; current run-status stages can show work in progress |
-| `POSTGAME_READY` | Results, required raw inputs, and postgame features passed validation | Results, CFBD Tier 2 plays/drives/havoc/advanced-stat inputs, and postgame-feature audits |
+| `POSTGAME_READY` | Results, required raw inputs, and postgame features passed validation | Results, CFBD Tier 1 plays/drives/havoc inputs, and postgame-feature audits |
 | `ARCHIVED` | Final result, close, forecasts, and lifecycle versions are frozen for research | Not implemented as one canonical state |
 
 `GAME_ACTIVE` and exact final-transition time are not yet durable canonical events. The source schedule can express completion, but the system currently discovers it only when a scheduled/manual refresh runs.
@@ -214,7 +214,7 @@ All future lifecycle events should be append-only, immutable, idempotent by `eve
 
 | Component | Owns | Must not own |
 |---|---|---|
-| CFBD Tier 2 acquisition | Schedule/status observations, `GAME_FINAL` evidence, postgame plays/drives/havoc/advanced statistics, historical source preservation | Projection authority, ratings authority, market authority, betting edges, publication |
+| CFBD Tier 1 acquisition | Schedule/status observations, `GAME_FINAL` evidence, completed-game plays/drives/havoc, historical source preservation | Projection authority, ratings authority, market authority, betting edges, publication |
 | Canonical schedule/results ingestion | Canonical game status, validated final scores, result mapping | Shadow readiness, projection authority, publication |
 | Postgame pipeline | CFBD raw-cache validation and postgame feature readiness | Rating releases, formulas, market selection |
 | Ratings pipeline | Candidate validation, accepted panels, source-change facts and timestamps | Game projection formulas or authority |

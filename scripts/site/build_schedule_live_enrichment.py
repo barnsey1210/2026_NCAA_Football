@@ -16,16 +16,17 @@ SHADOW=ROOT/"data/site/saturday_shadow_lines.json"
 # Do not recursively scan data/** during an operational Postgame refresh.
 LIVE_ENRICHMENT_SOURCES = (
     ROOT/"data/canonical/cfbd_schedule_2026.json",
-    ROOT/"data/canonical/game_results_2026.json",
     ROOT/"data/projections/game_projection_sources_2026.csv",
     ROOT/"data/weather/game_weather_latest.csv",
     ROOT/"data/site/war_room_market_matrix.json",
 )
+SCOREBOARD=ROOT/"data/canonical/cfbd_scoreboard_live_2026.json"
+RESULTS=ROOT/"data/canonical/game_results_2026.json"
 
 ET=ZoneInfo("America/New_York")
 OUT=ROOT/"data/site/schedule_live_enrichment.json"
 TIME_KEYS=["start_time","start_date","start_datetime","kickoff","kickoff_time","scheduled","date_time","datetime"]
-ID_KEYS=["game_id","id","event_id","sgo_game_id"]
+ID_KEYS=["game_id","cfbd_game_id","id","event_id","sgo_game_id"]
 HOME_KEYS=["home_team","home","home_name"]
 AWAY_KEYS=["away_team","away","away_name"]
 
@@ -110,6 +111,40 @@ def load_rows(path):
     except Exception: pass
     return []
 
+def apply_scoreboard(records, rows, pulled_at=None):
+    """Apply current mutable scoreboard values over scheduled baselines."""
+    matched=0
+    for raw in rows:
+      k=row_key(raw)
+      if k not in records: continue
+      t=records[k]
+      t.update({
+        "live_status":first(raw,["status","live_status"]),
+        "live_period":first(raw,["period","live_period"]),
+        "live_clock":first(raw,["clock","live_clock"]),
+        "live_home_score":num(first(raw,["home_points","home_score","live_home_score"])),
+        "live_away_score":num(first(raw,["away_points","away_score","live_away_score"])),
+        "scoreboard_pulled_at":raw.get("pulled_at") or pulled_at,
+        "live_score_source":"CFBD /scoreboard",
+      })
+      matched+=1
+    return matched
+
+def apply_canonical_results(records, rows):
+    """Canonical completed results permanently override mutable scoreboard data."""
+    matched=0
+    for raw in rows:
+      k=row_key(raw)
+      if k not in records: continue
+      home=num(first(raw,["home_score","home_points"])); away=num(first(raw,["away_score","away_points"]))
+      if home is None or away is None: continue
+      t=records[k]
+      t.update({"home_score":home,"away_score":away,"status":"FINAL","live_status":"FINAL",
+                "live_home_score":home,"live_away_score":away,"live_period":None,"live_clock":None,
+                "live_score_source":"canonical game_results_2026"})
+      matched+=1
+    return matched
+
 def main():
     records={}
     for raw in canonical_games():
@@ -136,6 +171,13 @@ def main():
           if t.get(field) in (None,"") and val not in (None,""): t[field]=val; changed=True
         if changed: matched+=1
       if matched: hits.append({"source":str(path.relative_to(ROOT)),"matched_rows":matched})
+    if SCOREBOARD.exists():
+      scoreboard_payload=json.loads(SCOREBOARD.read_text(encoding="utf-8"))
+      matched=apply_scoreboard(records,scoreboard_payload.get("games",[]),scoreboard_payload.get("pulled_at"))
+      if matched: hits.append({"source":str(SCOREBOARD.relative_to(ROOT)),"matched_rows":matched})
+    if RESULTS.exists():
+      matched=apply_canonical_results(records,load_rows(RESULTS))
+      if matched: hits.append({"source":str(RESULTS.relative_to(ROOT)),"matched_rows":matched})
     shadow={}
     if SHADOW.exists():
       d=json.loads(SHADOW.read_text())
