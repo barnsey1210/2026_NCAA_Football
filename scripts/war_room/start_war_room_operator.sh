@@ -12,6 +12,18 @@ set -a
 [[ -f "$CONTROL_ENV" ]] && source "$CONTROL_ENV"
 set +a
 
+# Reuse the protected CFBD credential used by the daily workflow.
+# Never persist the secret in Git or the LaunchAgent plist.
+if [[ -z "${CFBD_API_KEY:-}" ]]; then
+  CFBD_API_KEY="$(
+    security find-generic-password \
+      -a "$USER" \
+      -s CFBD_API_KEY \
+      -w 2>/dev/null || true
+  )"
+  export CFBD_API_KEY
+fi
+
 export WAR_ROOM_PUBLIC_ORIGIN="${WAR_ROOM_PUBLIC_ORIGIN:-https://barnsey1210.github.io}"
 cd "$RUNTIME_ROOT"
 exec /usr/bin/python3 -m uvicorn \
