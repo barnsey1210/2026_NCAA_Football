@@ -439,6 +439,13 @@ tr:hover td{
   font-size:9px;
   font-weight:900;
 }
+.shadow-team-state{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.shadow-team-chip{display:inline-flex;align-items:center;gap:2px}
+.shadow-team-chip img{width:20px;height:20px;object-fit:contain}
+.shadow-team-mark{font-size:12px;font-weight:900}
+.shadow-team-mark.ready{color:var(--green)}
+.shadow-team-mark.waiting{color:var(--red)}
+.shadow-state-label{font-size:9px;font-weight:900;letter-spacing:.03em}
 .best-col{width:9%}
 .exchange-col{width:9%}
 .pinn-col{width:6%}
@@ -1632,32 +1639,20 @@ function signalCell(game){
 
 
 
-function shadowDisplay(model, market){
-  if(!model){
-    return `<span class="shadow-wait">WAIT</span>`;
-  }
+function shadowTeamChip(team,ready){
+  const slug=teamLogoSlug(team);
+  return `<span class="shadow-team-chip" title="${esc(team)} · ${ready?'Shadow input ready':'Shadow input not ready'}"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span class="shadow-team-mark ${ready?'ready':'waiting'}">${ready?'✓':'✕'}</span></span>`;
+}
 
-  if(model.selection_status !== 'AVAILABLE'){
-    return `<span class="shadow-wait">WAIT</span>`;
-  }
-
-  const value =
-    market === 'spread'
-      ? model.value_home_line
-      : model.value_total;
-
-  if(
-    value === null ||
-    value === undefined
-  ){
-    return `<span class="shadow-wait">WAIT</span>`;
-  }
-
-  return `
-    <span class="shadow-ready">
-      ${modelDisplay(value, market)}
-    </span>
-  `;
+function shadowDisplay(game, model, market){
+  const readiness=game?.shadow_readiness||{};
+  const awayReady=Boolean(readiness[`away_${market}_shadow_ready`]);
+  const homeReady=Boolean(readiness[`home_${market}_shadow_ready`]);
+  const readyCount=Number(awayReady)+Number(homeReady);
+  const value=market==='spread'?model?.value_home_line:model?.value_total;
+  const available=readyCount===2 && model?.selection_status==='AVAILABLE' && value!==null && value!==undefined;
+  const label=available?modelDisplay(value,market):(readyCount===0?'WAIT':readyCount===1?'PARTIAL':'UNAVAILABLE');
+  return `<span class="shadow-team-state">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}<span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${label}</span></span>`;
 }
 
 function compactQuote(q, market){
@@ -1791,7 +1786,7 @@ function renderMatrix(){
         </td>
 
         <td class="shadow-col">
-          ${shadowDisplay(sprShadow, 'spread')}
+          ${shadowDisplay(game, sprShadow, 'spread')}
         </td>
 
         <td class="best-col">
@@ -1817,7 +1812,7 @@ function renderMatrix(){
         </td>
 
         <td class="shadow-col">
-          ${shadowDisplay(totShadow, 'total')}
+          ${shadowDisplay(game, totShadow, 'total')}
         </td>
 
         <td class="best-col">

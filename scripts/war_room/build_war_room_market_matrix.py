@@ -282,18 +282,21 @@ def shadow_readiness(component):
         )
     )
 
-    spread_count = clean_count(
-        component.get(
-            "shadow_spread_updated_team_count",
-            legacy_count,
-        )
+    spread_flags_present = all(
+        key in component for key in
+        ("away_spread_shadow_ready", "home_spread_shadow_ready")
     )
-
-    total_count = clean_count(
-        component.get(
-            "shadow_total_updated_team_count",
-            legacy_count,
-        )
+    total_flags_present = all(
+        key in component for key in
+        ("away_total_shadow_ready", "home_total_shadow_ready")
+    )
+    spread_count = (
+        sum(bool(component.get(key)) for key in ("away_spread_shadow_ready", "home_spread_shadow_ready"))
+        if spread_flags_present else clean_count(component.get("shadow_spread_updated_team_count", legacy_count))
+    )
+    total_count = (
+        sum(bool(component.get(key)) for key in ("away_total_shadow_ready", "home_total_shadow_ready"))
+        if total_flags_present else clean_count(component.get("shadow_total_updated_team_count", legacy_count))
     )
 
     def state(count):
@@ -335,6 +338,11 @@ def shadow_readiness(component):
 
         "total_status":
             total_status,
+
+        "away_spread_shadow_ready": bool(component.get("away_spread_shadow_ready")),
+        "home_spread_shadow_ready": bool(component.get("home_spread_shadow_ready")),
+        "away_total_shadow_ready": bool(component.get("away_total_shadow_ready")),
+        "home_total_shadow_ready": bool(component.get("home_total_shadow_ready")),
 
         "display_ready": (
             component.get(

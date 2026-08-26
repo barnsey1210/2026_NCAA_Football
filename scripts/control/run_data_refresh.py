@@ -187,6 +187,35 @@ def ratings_no_change_commands(
     ]
 
 
+def postgame_commands() -> list[list[str]]:
+    """Bounded runtime-only Postgame propagation; never publishes the site."""
+    return [
+        [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
+        [sys.executable, "scripts/results/build_game_results_2026.py"],
+        [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
+        [sys.executable, "scripts/postgame/build_postgame_features_2026.py"],
+        [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
+        [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
+        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+        [sys.executable, "scripts/site/build_matchups_view.py"],
+        [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
+        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
+        [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
+        [sys.executable, "scripts/model_tracking/settle_model_tracking.py", "--accept"],
+        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
+        [sys.executable, "scripts/war_room/build_war_room_health.py"],
+        [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
+    ]
+
+
+def execute_postgame_service(run: dict[str, Any]) -> None:
+    if run_commands(run, postgame_commands()):
+        run["status"] = "COMPLETED"
+        run["publication"] = {"status": "SKIPPED_RUNTIME_ONLY"}
+    else:
+        run["status"] = "FAILED"
+
+
 def execute_ratings_service(
     run: dict[str, Any], cfg: dict[str, Any], confirm: bool
 ) -> None:
@@ -690,86 +719,7 @@ def main() -> int:
                         run["status"] = "FAILED"
 
             elif args.mode == "postgame":
-                publish_allowed = (
-                    cfg.get("automatic_publication_enabled", False)
-                    or cfg.get("publication_policy", {}).get("postgame", False)
-                )
-                if not args.confirm_publish:
-                    run["status"]="BLOCKED_BY_CONFIGURATION"
-                    run["errors"].append("postgame requires --confirm-publish")
-                elif not publish_allowed:
-                    run["status"]="BLOCKED_BY_CONFIGURATION"
-                    run["errors"].append("postgame publication policy is disabled")
-                else:
-                    commands = [
-                        # 1. Refresh authoritative game status / final scores.
-                        [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
-                        [sys.executable, "scripts/results/build_game_results_2026.py"],
-
-                        # 2. Acquire richer postgame inputs only when completed
-                        #    games exist. The puller makes zero rich-data calls
-                        #    when there are no completed games.
-                        [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
-
-                        # 3. Build season-to-date completed-game PBP, drive,
-                        #    and Game Control features.
-                        [sys.executable, "scripts/postgame/build_postgame_features_2026.py"],
-
-                        # 4. Build genuine no-lookahead 2026 Shadow feature rows.
-                        [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
-
-                        # 5. Existing frozen production inference.
-                        [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
-                        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
-                        [sys.executable, "scripts/site/build_matchups_view.py"],
-                        [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
-                        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
-
-                        # 6. Rebuild downstream matchup / schedule surfaces.
-                        [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
-
-                        # 7. Settle previously captured model predictions where
-                        #    the matchup layer exposes final results.
-                        [sys.executable,
-                         "scripts/model_tracking/settle_model_tracking.py",
-                         "--accept"],
-                        [sys.executable,
-                         "scripts/model_tracking/build_model_performance_view.py"],
-
-                        # 8. Canonical public-site build order.
-                        [sys.executable, "scripts/site/build_public_site.py"],
-                        [sys.executable, "scripts/site/build_war_room_home.py"],
-                        [sys.executable, "scripts/site/inject_market_presentation_fixes.py"],
-                        [sys.executable, "scripts/site/compact_matchups_payload.py"],
-                        [sys.executable, "scripts/site/apply_shared_war_room_shell.py"],
-                        [sys.executable, "scripts/publish/check_public_site.py"],
-                    ]
-                    failed = False
-                    for command in commands:
-                        result = shell(command)
-                        name = Path(command[1]).name if len(command) > 1 else command[0]
-                        run["stages"].append({"name":name,"status":"PASSED" if result["returncode"]==0 else "FAILED",**result})
-                        if result["returncode"] != 0:
-                            failed = True
-                            run["errors"].append(f"{name} failed")
-                            break
-                    if not failed:
-                        pub = shell(["bash", "scripts/publish/publish_site.sh", "--push"])
-                        run["publication"] = {
-                            "status": "COMPLETED" if pub["returncode"] == 0 else "FAILED",
-                            **pub,
-                        }
-                        run["stages"].append({
-                            "name": "canonical_publish",
-                            "status": "PASSED" if pub["returncode"] == 0 else "FAILED",
-                            **pub,
-                        })
-                        run["status"] = "COMPLETED" if pub["returncode"] == 0 else "FAILED"
-                        if pub["returncode"] != 0:
-                            run["errors"].append("website publication failed")
-                            print(pub.get("output_tail", ""), file=sys.stderr)
-                    else:
-                        run["status"] = "FAILED"
+                execute_postgame_service(run)
             elif not cfg.get("live_provider_calls_enabled", False) and args.mode != "publish-existing":
                 run["status"] = "BLOCKED_BY_CONFIGURATION"; run["errors"].append("live provider calls are disabled pending activation review")
             elif args.mode == "publish-existing":

@@ -411,6 +411,10 @@ def main():
         row[
             "shadow_total_updated_team_count"
         ] = total_update_count
+        row["away_spread_shadow_ready"] = bool(row.get("away_validated_spread_ready"))
+        row["home_spread_shadow_ready"] = bool(row.get("home_validated_spread_ready"))
+        row["away_total_shadow_ready"] = bool(row.get("away_validated_total_ready"))
+        row["home_total_shadow_ready"] = bool(row.get("home_validated_total_ready"))
 
         def shadow_state(count):
             if count <= 0:
