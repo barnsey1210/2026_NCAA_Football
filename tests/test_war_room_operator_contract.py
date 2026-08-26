@@ -197,11 +197,11 @@ class OperatorContractTests(unittest.TestCase):
     def test_live_schedule_is_safe_normalized_artifact(self):
         with tempfile.TemporaryDirectory() as temporary:
             schedule=Path(temporary)/"schedule.json"
-            schedule.write_text(json.dumps({"schema_version":"schedule-live-enrichment-v2","games":[]}))
+            schedule.write_text(json.dumps({"schema_version":"schedule-live-enrichment-v2","games":[{"value":float("nan")}]}))
             with patch.object(api,"SCHEDULE",schedule):
                 response=api.live_schedule()
             self.assertEqual(response.headers["cache-control"],"no-store")
-            self.assertEqual(json.loads(response.body)["games"],[])
+            self.assertIsNone(json.loads(response.body)["games"][0]["value"])
 
     def test_normal_market_service_does_not_push(self):
         dispatcher=(api.ROOT/"scripts/control/run_war_room_service.py").read_text()

@@ -8,6 +8,7 @@ provider credentials from a request.
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -142,6 +143,17 @@ def live_response(payload: dict[str, Any]) -> JSONResponse:
     return JSONResponse(payload, headers={"Cache-Control": "no-store"})
 
 
+def json_safe(value: Any) -> Any:
+    """Normalize non-finite legacy artifact values at the public JSON boundary."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+    return value
+
+
 def request_action(action: str, requester: str, request: Request) -> JSONResponse:
     bucket = int(time.time() // 60)
     identity_seed = f"{action}|cloudflare-access|{requester.lower()}|{bucket}".encode()
@@ -244,7 +256,7 @@ def live_market_matrix(_: None = Depends(require_public_read_origin)):
 
 @app.get("/war-room/live/schedule")
 def live_schedule(_: None = Depends(require_public_read_origin)):
-    return live_response(public_artifact(SCHEDULE, "schedule-live-enrichment-v2"))
+    return live_response(json_safe(public_artifact(SCHEDULE, "schedule-live-enrichment-v2")))
 
 
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)
