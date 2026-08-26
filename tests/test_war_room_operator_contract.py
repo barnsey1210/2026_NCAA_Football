@@ -196,12 +196,28 @@ class OperatorContractTests(unittest.TestCase):
 
     def test_live_schedule_is_safe_normalized_artifact(self):
         with tempfile.TemporaryDirectory() as temporary:
-            schedule=Path(temporary)/"schedule.json"
+            root=Path(temporary); schedule=root/"schedule.json"; scoreboard=root/"scoreboard.json"; watcher=root/"latest.json"
             schedule.write_text(json.dumps({"schema_version":"schedule-live-enrichment-v2","games":[{"value":float("nan")}]}))
-            with patch.object(api,"SCHEDULE",schedule):
+            scoreboard.write_text(json.dumps({"pulled_at":"2026-08-29T16:42:07Z"}))
+            watcher.write_text(json.dumps({"status":"NO_NEW_FINALS","window":{"window_policy":"EXACT_WINDOW"}}))
+            with patch.object(api,"SCHEDULE",schedule),patch.object(api,"SCOREBOARD",scoreboard),patch.object(api,"FINAL_WATCHER_LATEST",watcher):
                 response=api.live_schedule()
+            payload=json.loads(response.body)
             self.assertEqual(response.headers["cache-control"],"no-store")
-            self.assertIsNone(json.loads(response.body)["games"][0]["value"])
+            self.assertIsNone(payload["games"][0]["value"])
+            self.assertEqual(payload["live_data_status"]["window_policy"],"EXACT_WINDOW")
+            self.assertTrue(payload["live_data_status"]["active_game_window"])
+            self.assertEqual(payload["live_data_status"]["scoreboard_pulled_at"],"2026-08-29T16:42:07Z")
+
+    def test_live_schedule_outside_window_is_not_active(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary); schedule=root/"schedule.json"; watcher=root/"latest.json"
+            schedule.write_text(json.dumps({"schema_version":"schedule-live-enrichment-v2","built_at":"2026-08-25T12:00:00Z","games":[]}))
+            watcher.write_text(json.dumps({"status":"OUTSIDE_GAME_WINDOW","window":{"reason":"NO_ACTIVE_CANONICAL_GAME_WINDOW"}}))
+            with patch.object(api,"SCHEDULE",schedule),patch.object(api,"SCOREBOARD",root/"missing-scoreboard.json"),patch.object(api,"FINAL_WATCHER_LATEST",watcher):
+                payload=json.loads(api.live_schedule().body)
+            self.assertFalse(payload["live_data_status"]["active_game_window"])
+            self.assertIsNone(payload["live_data_status"]["scoreboard_pulled_at"])
 
     def test_normal_market_service_does_not_push(self):
         dispatcher=(api.ROOT/"scripts/control/run_war_room_service.py").read_text()

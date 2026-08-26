@@ -82,6 +82,9 @@ def validate(root: Path, out: Path) -> list[str]:
                     "refreshLiveSchedule",
                     "setInterval(refreshLiveSchedule,7500)",
                     "credentials:'omit'",
+                    'id="liveDataStatus"',
+                    "classifyLiveDataStatus",
+                    "Live data · Awaiting game window",
                 ):
                     if marker not in text:
                         errors.append(f"Schedule live-score shell marker missing: {marker}")

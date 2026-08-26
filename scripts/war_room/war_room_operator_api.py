@@ -30,6 +30,8 @@ REQUEST_LOG = ROOT / "data/control/war_room_services/requests.jsonl"
 HEALTH = ROOT / "data/site/war_room_health.json"
 MATRIX = ROOT / "data/site/war_room_market_matrix.json"
 SCHEDULE = ROOT / "data/site/schedule_live_enrichment.json"
+SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
+FINAL_WATCHER_LATEST = ROOT / "data/control/cfbd_final_watcher/latest.json"
 PUBLIC_ORIGIN = os.environ.get(
     "WAR_ROOM_PUBLIC_ORIGIN", "https://barnsey1210.github.io"
 ).rstrip("/")
@@ -256,7 +258,23 @@ def live_market_matrix(_: None = Depends(require_public_read_origin)):
 
 @app.get("/war-room/live/schedule")
 def live_schedule(_: None = Depends(require_public_read_origin)):
-    return live_response(json_safe(public_artifact(SCHEDULE, "schedule-live-enrichment-v2")))
+    schedule = public_artifact(SCHEDULE, "schedule-live-enrichment-v2")
+    watcher = load_json(FINAL_WATCHER_LATEST, {})
+    scoreboard = load_json(SCOREBOARD, {})
+    window = watcher.get("window") if isinstance(watcher.get("window"), dict) else {}
+    window_policy = window.get("window_policy")
+    schedule["live_data_status"] = {
+        "watcher_status": watcher.get("status"),
+        "window_policy": window_policy,
+        "active_game_window": window_policy in {
+            "EXACT_WINDOW",
+            "MIXED_FALLBACK_WINDOW",
+            "BOUNDED_GAME_DAY_FALLBACK",
+        },
+        "scoreboard_pulled_at": scoreboard.get("pulled_at"),
+        "schedule_built_at": schedule.get("built_at"),
+    }
+    return live_response(json_safe(schedule))
 
 
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)

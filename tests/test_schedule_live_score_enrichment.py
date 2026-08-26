@@ -15,5 +15,17 @@ class ScheduleLiveEnrichmentTests(unittest.TestCase):
  def test_schedule_renderer_keeps_live_grading_pending(self):
   source=(Path(__file__).parents[1]/"schedule.html").read_text(); self.assertIn("return{score:liveScore(r),ats:'Pending',ou:'Pending'}",source); self.assertIn("/war-room/live/schedule",source)
   for label in ("'HALF'","'FINAL'","live_period","live_clock"):self.assertIn(label,source)
+ def test_live_data_status_fresh_aging_stale_and_idle(self):
+  source=(Path(__file__).parents[1]/"schedule.html").read_text()
+  self.assertIn("meta.scoreboard_pulled_at||meta.schedule_built_at||payload?.built_at",source)
+  self.assertIn("ageMinutes<10?'fresh':ageMinutes<=20?'aging':'stale'",source)
+  self.assertIn("Live data · Awaiting game window",source)
+  self.assertIn("Live data updated ${display}",source)
+  self.assertIn("timeZone:'America/New_York'",source)
+ def test_live_refresh_updates_status_without_provider_request(self):
+  source=(Path(__file__).parents[1]/"schedule.html").read_text()
+  self.assertIn("updateLiveDataStatus(payload);SH=scheduleMap(payload);draw()",source)
+  self.assertIn("setInterval(refreshLiveSchedule,7500)",source)
+  self.assertNotIn("api.collegefootballdata.com",source)
 
 if __name__=="__main__":unittest.main()
