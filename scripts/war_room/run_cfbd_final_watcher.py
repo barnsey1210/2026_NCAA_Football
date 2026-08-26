@@ -14,8 +14,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
 from zoneinfo import ZoneInfo
-
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
+from scripts.schedule.kickoff_quality import game_kickoff_status, parse_kickoff
+
 CONFIG = ROOT / "config/cfbd_final_watcher.json"
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
@@ -75,17 +77,42 @@ def monitoring_window(games: list[dict[str, Any]], now: datetime, cfg: dict[str,
     now_et = now.astimezone(ET)
     before = int(cfg.get("monitor_window", {}).get("minutes_before_first_kickoff", 30))
     after = float(cfg.get("monitor_window", {}).get("hours_after_last_kickoff", 5))
-    kicks = [parse_dt(g.get("cfbd_start_date") or g.get("start_date") or g.get("kickoff")) for g in games]
-    kicks = [k for k in kicks if k]
-    by_game_date: dict[Any, list[datetime]] = {}
-    for kick in kicks: by_game_date.setdefault(kick.date(), []).append(kick)
-    windows = [(min(day) - timedelta(minutes=before), max(day) + timedelta(hours=after)) for day in by_game_date.values()]
+    by_game_date: dict[Any, dict[str, Any]] = {}
+    for game in games:
+        raw = game.get("cfbd_start_date") or game.get("start_date") or game.get("kickoff")
+        kickoff = parse_kickoff(raw)
+        date_text = str(game.get("date") or (kickoff.date().isoformat() if kickoff else ""))[:10]
+        try: game_date = datetime.fromisoformat(date_text).date()
+        except ValueError: continue
+        bucket = by_game_date.setdefault(game_date, {"verified": [], "unresolved": 0, "games": 0})
+        bucket["games"] += 1
+        if game_kickoff_status(game) == "VERIFIED_KICKOFF" and kickoff:
+            bucket["verified"].append(kickoff)
+        else:
+            bucket["unresolved"] += 1
+    windows = []
+    unresolved_days = []
+    for game_date, bucket in by_game_date.items():
+        verified = bucket["verified"]
+        if not verified:
+            if game_date in {now_et.date(), now_et.date()-timedelta(days=1)}:
+                unresolved_days.append(game_date.isoformat())
+            continue
+        start = min(verified) - timedelta(minutes=before)
+        end = max(verified) + timedelta(hours=after)
+        if bucket["unresolved"]:
+            # Mixed-quality days remain bounded but cover unresolved late games
+            # through 5 AM ET the following day.
+            fallback_end = datetime.combine(game_date + timedelta(days=1), datetime.min.time(), ET) + timedelta(hours=5)
+            end = max(end, fallback_end)
+        windows.append((start, end, game_date, bucket))
     active = [w for w in windows if w[0] <= now_et <= w[1]]
-    detail: dict[str, Any] = {"now_et": now_et.isoformat(), "scheduled_games": len(kicks)}
+    detail: dict[str, Any] = {"now_et": now_et.isoformat(), "scheduled_games": sum(x["games"] for x in by_game_date.values()), "verified_kickoffs": sum(len(x["verified"]) for x in by_game_date.values()), "unresolved_kickoffs": sum(x["unresolved"] for x in by_game_date.values())}
     if not active:
-        detail["reason"] = "NO_ACTIVE_CANONICAL_GAME_WINDOW"
+        detail["reason"] = "GAME_DAY_TIME_UNRESOLVED" if unresolved_days else "NO_ACTIVE_CANONICAL_GAME_WINDOW"
+        if unresolved_days: detail["unresolved_game_dates"] = unresolved_days
         return False, detail
-    detail.update(window_start_et=min(w[0] for w in active).isoformat(), window_end_et=max(w[1] for w in active).isoformat())
+    detail.update(window_start_et=min(w[0] for w in active).isoformat(), window_end_et=max(w[1] for w in active).isoformat(), active_game_dates=sorted({w[2].isoformat() for w in active}), mixed_quality_fallback=any(w[3]["unresolved"] for w in active))
     return True, detail
 
 
@@ -175,7 +202,9 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
     report: dict[str, Any] = {"schema_version": 1, "run_id": run_id, "checked_at": iso(now), "status": "STARTED", "api_calls_this_run": 0, "trigger": trigger}
     if not cfg.get("enabled", False): report["status"] = "DISABLED"; return 0, report
     games = canonical_games(); active, window = monitoring_window(games, now, cfg); report["window"] = window
-    if not active: report["status"] = "OUTSIDE_GAME_WINDOW"; return 0, report
+    if not active:
+        report["status"] = "GAME_DAY_TIME_UNRESOLVED" if window.get("reason") == "GAME_DAY_TIME_UNRESOLVED" else "OUTSIDE_GAME_WINDOW"
+        return 0, report
     key = os.environ.get("CFBD_API_KEY", "").strip()
     if not key: report.update(status="PROVIDER_FAILED", error="CFBD_API_KEY unavailable"); return 2, report
     budget = Budget(cfg, now)

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import json, os
+import json, os, sys
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
 import requests
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
+from scripts.schedule.kickoff_quality import classify_kickoff
 
 YEAR = 2026
 BASE_URL = "https://api.collegefootballdata.com/games"
@@ -58,6 +61,7 @@ def main():
         if local_date == "2026-08-29":
             canonical_week = 0
 
+        kickoff_status = classify_kickoff(start, g.get("startTimeTBD"))
         games.append({
             "cfbd_game_id": g.get("id"),
             "season": g.get("season"),
@@ -67,6 +71,8 @@ def main():
             "date": local_date,
             "start_date": start,
             "start_time_tbd": g.get("startTimeTBD"),
+            "kickoff_status": kickoff_status,
+            "kickoff_time_verified": kickoff_status == "VERIFIED_KICKOFF",
             "completed": g.get("completed"),
             "neutral_site": g.get("neutralSite"),
             "conference_game": g.get("conferenceGame"),
@@ -96,6 +102,10 @@ def main():
         "normalized_rows": len(games),
         "dated_rows": sum(bool(g["date"]) for g in games),
         "tbd_rows": sum(bool(g["start_time_tbd"]) for g in games),
+        "kickoff_quality": {
+            status: sum(g["kickoff_status"] == status for g in games)
+            for status in ("VERIFIED_KICKOFF", "TBD", "DATE_PLACEHOLDER", "MISSING", "UNRESOLVED")
+        },
         "canonical_week_overrides": sum(
             g.get("week") != g.get("provider_week") for g in games
         ),

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, copy, json, re
+import argparse, copy, json, re, sys
 from datetime import datetime, timezone, date
 from pathlib import Path
+MODULE_ROOT = Path(__file__).resolve().parents[2]
+if str(MODULE_ROOT) not in sys.path: sys.path.insert(0, str(MODULE_ROOT))
+from scripts.schedule.kickoff_quality import game_kickoff_status
 
 ROOT = Path.cwd()
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
@@ -50,8 +53,9 @@ def main():
         "cfbd_completed": "completed",
         "cfbd_status": "status",
         "cfbd_last_updated": "cfbd_last_updated",
-        "cfbd_start_date": "start_date",
         "cfbd_start_time_tbd": "start_time_tbd",
+        "cfbd_kickoff_status": "kickoff_status",
+        "cfbd_kickoff_time_verified": "kickoff_time_verified",
     }
 
     for g in out.get("games", []):
@@ -145,7 +149,13 @@ def main():
 
             g["away_team"] = new_away
             g["home_team"] = new_home
+        previously_verified = g.get("cfbd_kickoff_time_verified") is True
+        kickoff_status = game_kickoff_status(cg)
         for db_field, cfbd_field in fields.items():
+            if previously_verified and kickoff_status != "VERIFIED_KICKOFF" and db_field in {
+                "cfbd_start_time_tbd", "cfbd_kickoff_status", "cfbd_kickoff_time_verified"
+            }:
+                continue
             new = cg.get(cfbd_field)
             if new is None:
                 continue
@@ -153,6 +163,17 @@ def main():
             if old != new:
                 rec["field_changes"][db_field] = {"old": old, "new": new}
                 g[db_field] = new
+
+        # A provider date placeholder must never overwrite a previously
+        # verified canonical kickoff. Preserve the raw value only when it is
+        # verified, or when no verified canonical value exists.
+        preserve_verified = previously_verified
+        new_start = cg.get("start_date")
+        if kickoff_status == "VERIFIED_KICKOFF" or not preserve_verified:
+            old = g.get("cfbd_start_date")
+            if old != new_start:
+                rec["field_changes"]["cfbd_start_date"] = {"old": old, "new": new_start}
+                g["cfbd_start_date"] = new_start
 
         if cg.get("cfbd_game_id") is not None and g.get("cfbd_game_id") != cg.get("cfbd_game_id"):
             rec["field_changes"]["cfbd_game_id"] = {"old": g.get("cfbd_game_id"), "new": cg.get("cfbd_game_id")}

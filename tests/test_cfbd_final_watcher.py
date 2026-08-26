@@ -11,7 +11,7 @@ def ok(command): return subprocess.CompletedProcess(command,0,"","")
 class FinalWatcherTests(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory(); self.root=Path(self.temp.name); self.db=self.root/"preseason.json"
-  self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","cfbd_game_id":99,"cfbd_start_date":"2026-08-29T16:00:00Z","date":"2026-08-29","away_team":"Away","home_team":"Home"}]}))
+  self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","cfbd_game_id":99,"cfbd_start_date":"2026-08-29T16:00:00Z","cfbd_start_time_tbd":False,"cfbd_kickoff_status":"VERIFIED_KICKOFF","date":"2026-08-29","away_team":"Away","home_team":"Home"}]}))
   self.patches=[patch.object(watcher,"DB",self.db),patch.object(watcher,"SCOREBOARD",self.root/"scoreboard.json"),patch.object(watcher,"RESULTS",self.root/"results.json"),patch.object(watcher,"STATE_DIR",self.root/"state"),patch.object(watcher,"STATE",self.root/"state/state.json"),patch.dict(os.environ,{"CFBD_API_KEY":"fixture-only"},clear=False)]
   for item in self.patches:item.start()
   self.cfg={"enabled":True,"monthly_call_limit":5000,"protected_reserve_calls":500,"monitor_window":{"minutes_before_first_kickoff":30,"hours_after_last_kickoff":5},"retry_policy":{"delays_minutes":[5,10,30],"max_attempts":4}}
@@ -52,7 +52,16 @@ class FinalWatcherTests(unittest.TestCase):
  def test_budget_reserve_blocks_before_provider(self):
   usage=self.root/"state/usage_2026-08.json"; usage.parent.mkdir(); usage.write_text(json.dumps({"calls_used":4500,"operations":[]})); calls=[]; code,r=self.execute(fetch=lambda *a:calls.append(a),runner=ok); self.assertEqual((code,r["status"],calls),(2,"BUDGET_BLOCKED",[]))
  def test_schedule_windows_cover_weekday_and_cross_midnight(self):
-  games=[{"cfbd_start_date":"2026-10-20T23:00:00Z"},{"cfbd_start_date":"2026-10-21T03:30:00Z"}]; active,detail=watcher.monitoring_window(games,datetime(2026,10,21,5,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertIn("window_end_et",detail)
+  games=[{"date":"2026-10-20","cfbd_start_date":"2026-10-20T23:00:00Z","cfbd_start_time_tbd":False},{"date":"2026-10-20","cfbd_start_date":"2026-10-21T03:30:00Z","cfbd_start_time_tbd":False}]; active,detail=watcher.monitoring_window(games,datetime(2026,10,21,5,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertIn("window_end_et",detail)
   active,_=watcher.monitoring_window(games,datetime(2026,10,22,5,tzinfo=timezone.utc),self.cfg); self.assertFalse(active)
+ def test_placeholder_tbd_and_mixed_day_safety(self):
+  placeholder={"date":"2026-08-29","cfbd_start_date":"2026-08-29T04:00:00Z","cfbd_start_time_tbd":True}
+  active,detail=watcher.monitoring_window([placeholder],datetime(2026,8,29,16,tzinfo=timezone.utc),self.cfg); self.assertFalse(active); self.assertEqual(detail["reason"],"GAME_DAY_TIME_UNRESOLVED")
+  verified={"date":"2026-08-29","cfbd_start_date":"2026-08-29T16:00:00Z","cfbd_start_time_tbd":False}
+  active,detail=watcher.monitoring_window([verified,placeholder],datetime(2026,8,30,8,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertTrue(detail["mixed_quality_fallback"])
+ def test_unresolved_day_checks_before_credential_budget_and_provider(self):
+  self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","date":"2026-08-29","cfbd_start_date":"2026-08-29T04:00:00Z","cfbd_start_time_tbd":True}]})); calls=[]
+  with patch.dict(os.environ,{},clear=True): code,r=self.execute(fetch=lambda *a:calls.append(a),runner=ok)
+  self.assertEqual((code,r["status"],calls),(0,"GAME_DAY_TIME_UNRESOLVED",[])); self.assertFalse((self.root/"state").exists())
 
 if __name__=="__main__":unittest.main()
