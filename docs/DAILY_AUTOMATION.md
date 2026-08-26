@@ -15,6 +15,22 @@ The production path has two layers and only one business-logic entry point:
 
 The LaunchAgent schedules the thin launcher. Neither layer pulls source from Git or deploys code. Source deployment remains the separate manual `deploy/deploy_to_auto.sh` boundary.
 
+## Fast Ratings monitor
+
+`com.jim.ncaaf.fast-ratings` wakes every 1,800 seconds. Its deployed wrapper
+evaluates `America/New_York` locally and dispatches the existing bounded Ratings
+service only from Sunday 00:00 through Monday 12:00, inclusive. All other wakes
+record `OUTSIDE_RATINGS_WINDOW` and make zero provider contacts. The monitor is
+additive: it does not change the 8 AM backbone, and manual Command Center
+Refresh Ratings remains available at any time.
+
+Automatic and manual Ratings requests both enter
+`scripts/control/run_war_room_service.py ratings`. Provider acceptance,
+version-change detection, projection rebuilding, and Hybrid/Official authority
+remain with their existing owners. The shared canonical-writer lock protects
+Ratings from Postgame and other writers; an active daily run produces
+`DEFERRED_BY_DAILY_BACKBONE` for retry at the next scheduler wake.
+
 ## Stage registry and run status
 
 `config/daily_stages.json` is the machine-readable stage registry. It records order, required/optional policy, network usage, and email/publication dependencies without duplicating the business commands from `daily_market_update.sh`.
