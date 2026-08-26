@@ -163,7 +163,9 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "ratings/append_ratings_history.py"],
         [sys.executable, "ratings/build_ratings_movement.py"],
         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
-        [sys.executable, "scripts/projections/build_current_game_projection_contract.py", *bounds],
+        # Acquisition/source refresh remains bounded, but canonical projection
+        # resolution uses every valid game already returned by providers.
+        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
@@ -182,8 +184,12 @@ def ratings_no_change_commands(
         bounds = ["--start-date", window["start"], "--end-date", window["end"]]
     return [
         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
+        # Keep downstream canonical artifacts synchronized even when provider
+        # values are unchanged but reconciliation/parser behavior changed.
+        [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
+        [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
     ]
 
 
