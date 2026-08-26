@@ -56,12 +56,24 @@ class FinalWatcherTests(unittest.TestCase):
   active,_=watcher.monitoring_window(games,datetime(2026,10,22,5,tzinfo=timezone.utc),self.cfg); self.assertFalse(active)
  def test_placeholder_tbd_and_mixed_day_safety(self):
   placeholder={"date":"2026-08-29","cfbd_start_date":"2026-08-29T04:00:00Z","cfbd_start_time_tbd":True}
-  active,detail=watcher.monitoring_window([placeholder],datetime(2026,8,29,16,tzinfo=timezone.utc),self.cfg); self.assertFalse(active); self.assertEqual(detail["reason"],"GAME_DAY_TIME_UNRESOLVED")
+  active,detail=watcher.monitoring_window([placeholder],datetime(2026,8,29,16,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertEqual(detail["window_policy"],"BOUNDED_GAME_DAY_FALLBACK"); self.assertEqual(detail["window_start_et"],"2026-08-29T10:30:00-04:00"); self.assertEqual(detail["window_end_et"],"2026-08-30T02:30:00-04:00")
   verified={"date":"2026-08-29","cfbd_start_date":"2026-08-29T16:00:00Z","cfbd_start_time_tbd":False}
-  active,detail=watcher.monitoring_window([verified,placeholder],datetime(2026,8,30,8,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertTrue(detail["mixed_quality_fallback"])
- def test_unresolved_day_checks_before_credential_budget_and_provider(self):
+  active,detail=watcher.monitoring_window([verified,placeholder],datetime(2026,8,30,6,tzinfo=timezone.utc),self.cfg); self.assertTrue(active); self.assertTrue(detail["mixed_quality_fallback"]); self.assertEqual(detail["window_policy"],"MIXED_FALLBACK_WINDOW"); self.assertEqual(detail["window_end_et"],"2026-08-30T02:30:00-04:00")
+  active,_=watcher.monitoring_window([verified,placeholder],datetime(2026,8,30,7,tzinfo=timezone.utc),self.cfg); self.assertFalse(active)
+ def test_no_game_day_checks_before_credential_budget_and_provider(self):
   self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","date":"2026-08-29","cfbd_start_date":"2026-08-29T04:00:00Z","cfbd_start_time_tbd":True}]})); calls=[]
-  with patch.dict(os.environ,{},clear=True): code,r=self.execute(fetch=lambda *a:calls.append(a),runner=ok)
-  self.assertEqual((code,r["status"],calls),(0,"GAME_DAY_TIME_UNRESOLVED",[])); self.assertFalse((self.root/"state").exists())
+  with patch.dict(os.environ,{},clear=True): code,r=self.execute(now=datetime(2026,8,28,16,tzinfo=timezone.utc),fetch=lambda *a:calls.append(a),runner=ok)
+  self.assertEqual((code,r["status"],calls),(0,"OUTSIDE_GAME_WINDOW",[])); self.assertFalse((self.root/"state").exists())
+ def test_all_unresolved_known_game_day_does_not_suppress_polling(self):
+  self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","cfbd_game_id":99,"date":"2026-08-29","cfbd_start_date":"2026-08-29T04:00:00Z","cfbd_start_time_tbd":True,"away_team":"Away","home_team":"Home"}]})); calls=[]
+  code,r=self.execute(fetch=lambda endpoint,*_:(calls.append(endpoint) or self.score()),runner=ok)
+  self.assertEqual((code,r["status"],calls),(0,"NO_NEW_FINALS",["/scoreboard"])); self.assertEqual(r["window"]["window_policy"],"BOUNDED_GAME_DAY_FALLBACK")
+ def test_week_zero_exact_verified_window_is_unchanged(self):
+  games=[
+   {"date":"2026-08-29","cfbd_start_date":"2026-08-29T16:00:00Z","cfbd_start_time_tbd":False},
+   {"date":"2026-08-29","cfbd_start_date":"2026-08-30T02:00:00Z","cfbd_start_time_tbd":False},
+  ]
+  active,detail=watcher.monitoring_window(games,datetime(2026,8,29,16,tzinfo=timezone.utc),self.cfg)
+  self.assertTrue(active); self.assertEqual(detail["window_policy"],"EXACT_WINDOW"); self.assertEqual(detail["window_start_et"],"2026-08-29T11:30:00-04:00"); self.assertEqual(detail["window_end_et"],"2026-08-30T03:00:00-04:00")
 
 if __name__=="__main__":unittest.main()

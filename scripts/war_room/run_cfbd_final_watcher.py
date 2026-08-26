@@ -91,28 +91,31 @@ def monitoring_window(games: list[dict[str, Any]], now: datetime, cfg: dict[str,
         else:
             bucket["unresolved"] += 1
     windows = []
-    unresolved_days = []
     for game_date, bucket in by_game_date.items():
         verified = bucket["verified"]
+        fallback_start = datetime.combine(game_date, datetime.min.time(), ET) + timedelta(hours=10, minutes=30)
+        fallback_end = datetime.combine(game_date + timedelta(days=1), datetime.min.time(), ET) + timedelta(hours=2, minutes=30)
         if not verified:
-            if game_date in {now_et.date(), now_et.date()-timedelta(days=1)}:
-                unresolved_days.append(game_date.isoformat())
-            continue
-        start = min(verified) - timedelta(minutes=before)
-        end = max(verified) + timedelta(hours=after)
-        if bucket["unresolved"]:
-            # Mixed-quality days remain bounded but cover unresolved late games
-            # through 5 AM ET the following day.
-            fallback_end = datetime.combine(game_date + timedelta(days=1), datetime.min.time(), ET) + timedelta(hours=5)
-            end = max(end, fallback_end)
-        windows.append((start, end, game_date, bucket))
+            start, end, policy = fallback_start, fallback_end, "BOUNDED_GAME_DAY_FALLBACK"
+        else:
+            exact_start = min(verified) - timedelta(minutes=before)
+            exact_end = max(verified) + timedelta(hours=after)
+            if bucket["unresolved"]:
+                # Cover the full bounded game day without allowing placeholder
+                # midnight values to define either edge of the window.
+                start = min(exact_start, fallback_start)
+                end = min(max(exact_end, fallback_end), fallback_end)
+                policy = "MIXED_FALLBACK_WINDOW"
+            else:
+                start, end, policy = exact_start, exact_end, "EXACT_WINDOW"
+        windows.append((start, end, game_date, bucket, policy))
     active = [w for w in windows if w[0] <= now_et <= w[1]]
     detail: dict[str, Any] = {"now_et": now_et.isoformat(), "scheduled_games": sum(x["games"] for x in by_game_date.values()), "verified_kickoffs": sum(len(x["verified"]) for x in by_game_date.values()), "unresolved_kickoffs": sum(x["unresolved"] for x in by_game_date.values())}
     if not active:
-        detail["reason"] = "GAME_DAY_TIME_UNRESOLVED" if unresolved_days else "NO_ACTIVE_CANONICAL_GAME_WINDOW"
-        if unresolved_days: detail["unresolved_game_dates"] = unresolved_days
+        detail["reason"] = "NO_ACTIVE_CANONICAL_GAME_WINDOW"
         return False, detail
-    detail.update(window_start_et=min(w[0] for w in active).isoformat(), window_end_et=max(w[1] for w in active).isoformat(), active_game_dates=sorted({w[2].isoformat() for w in active}), mixed_quality_fallback=any(w[3]["unresolved"] for w in active))
+    policies = sorted({w[4] for w in active})
+    detail.update(window_start_et=min(w[0] for w in active).isoformat(), window_end_et=max(w[1] for w in active).isoformat(), active_game_dates=sorted({w[2].isoformat() for w in active}), window_policy=policies[0] if len(policies) == 1 else policies, mixed_quality_fallback="MIXED_FALLBACK_WINDOW" in policies)
     return True, detail
 
 
@@ -203,7 +206,7 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
     if not cfg.get("enabled", False): report["status"] = "DISABLED"; return 0, report
     games = canonical_games(); active, window = monitoring_window(games, now, cfg); report["window"] = window
     if not active:
-        report["status"] = "GAME_DAY_TIME_UNRESOLVED" if window.get("reason") == "GAME_DAY_TIME_UNRESOLVED" else "OUTSIDE_GAME_WINDOW"
+        report["status"] = "OUTSIDE_GAME_WINDOW"
         return 0, report
     key = os.environ.get("CFBD_API_KEY", "").strip()
     if not key: report.update(status="PROVIDER_FAILED", error="CFBD_API_KEY unavailable"); return 2, report

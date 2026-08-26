@@ -8,8 +8,8 @@
   "monitor_window": {
     "minutes_before_first_kickoff": 30,
     "hours_after_last_kickoff": 5,
-    "mixed_quality_unresolved_day_end_et": "05:00 next day",
-    "all_unresolved_day_policy": "GAME_DAY_TIME_UNRESOLVED_ZERO_CALLS"
+    "mixed_quality_unresolved_day_end_et": "02:30 next day",
+    "all_unresolved_day_policy": "BOUNDED_GAME_DAY_FALLBACK_10:30_TO_02:30_ET"
   },
   "retry_policy": {
     "delays_minutes": [5, 10, 30],
