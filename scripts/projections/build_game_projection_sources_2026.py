@@ -69,6 +69,7 @@ TEAM_ALIASES = {
     "southern mississippi": "southern miss",
     "ul monroe": "ulm",
     "ulm": "ulm",
+    "ulm warhawks": "ulm",
     "ul lafayette": "louisiana",
     "louisiana lafayette": "louisiana",
     "lafayette": "lafayette",
@@ -519,12 +520,20 @@ def main():
             if args.start_date <= str(game.get("date") or "")[:10] <= args.end_date
         ]
     idx = site_game_index(db)
+    full_idx = site_game_index({"games": all_games})
+
     all_rows, all_audit = [], []
     rows, audit = load_rating_game_projections(db)
     all_rows += rows; all_audit += audit
-    for loader in [load_massey, load_sagarin, load_dratings]:
+
+    for loader in [load_massey, load_sagarin]:
         rows, audit = loader(idx)
         all_rows += rows; all_audit += audit
+
+    # DRatings may return valid games beyond the requested build window.
+    # Reconcile returned rows against the full canonical season schedule.
+    rows, audit = load_dratings(full_idx)
+    all_rows += rows; all_audit += audit
     out = pd.DataFrame(all_rows)
     if not out.empty:
         out = out.drop_duplicates(subset=["source","game_id"], keep="last").sort_values(

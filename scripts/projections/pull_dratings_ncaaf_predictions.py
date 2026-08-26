@@ -266,7 +266,10 @@ def main():
     end_date = args.end_date or (today + timedelta(days=7)).isoformat()
     if end_date < start_date:
         raise SystemExit("end date precedes start date")
-    site_teams, site_dates, canonical_games = load_site_context(start_date, end_date)
+    # Keep the requested date window for navigation/control, but use the
+    # full canonical season schedule for team normalization and reconciliation.
+    _, site_dates, _ = load_site_context(start_date, end_date)
+    site_teams, _, canonical_games = load_site_context()
     max_site_date = max(site_dates) if site_dates else None
 
     session = requests.Session()
