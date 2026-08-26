@@ -1,12 +1,15 @@
 {
   "schema_version": 1,
   "timezone": "America/New_York",
-  "entrypoint": "python3 scripts/war_room/run_fast_market_publication.py",
+  "entrypoint": "python3 scripts/war_room/run_fast_market_scheduler.py",
+  "launchagent_wake_seconds": 30,
   "windows": [
-    {"day": "Saturday", "hour": 23, "minute": 0, "label": "SAT_11PM_ET"},
-    {"day": "Sunday", "hour": 9, "minute": 0, "label": "SUN_9AM_ET"},
-    {"day": "Sunday", "hour": 14, "minute": 0, "label": "SUN_2PM_ET"},
-    {"day": "Sunday", "hour": 21, "minute": 0, "label": "SUN_9PM_ET"}
+    {"start": "Monday 00:00", "end": "Saturday 22:00", "label": "ROUTINE_HOURLY", "interval_seconds": 3600},
+    {"start": "Saturday 22:00", "end": "Saturday 23:00", "label": "SATURDAY_RAMP_5M", "interval_seconds": 300},
+    {"start": "Saturday 23:00", "end": "Sunday 02:00", "label": "SATURDAY_OPENER_90S", "interval_seconds": 90},
+    {"start": "Sunday 02:00", "end": "Sunday 08:00", "label": "SUNDAY_OVERNIGHT_5M", "interval_seconds": 300},
+    {"start": "Sunday 08:00", "end": "Sunday 23:00", "label": "SUNDAY_ACTIVE_2M", "interval_seconds": 120},
+    {"start": "Sunday 23:00", "end": "Monday 00:00", "label": "SUNDAY_TRANSITION_HOURLY", "interval_seconds": 3600}
   ],
   "policy": {
     "runtime_workspace": "/Users/jameslindesmith/NCAAF_AUTO",
@@ -14,6 +17,8 @@
     "quota_reserve_required": true,
     "max_publication_age_minutes": 15,
     "overlap_policy": "single_instance_no_overlap",
-    "scheduler_installation": "machine_local_separate_release_step"
+    "routine_recent_refresh_suppression_seconds": 600,
+    "missed_interval_policy": "one_due_dispatch_no_backlog_replay",
+    "scheduler_installation": "machine_local_launchagent"
   }
 }

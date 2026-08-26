@@ -26,6 +26,7 @@ config/war_room_control_plane.json
 config/cfbd_final_watcher.json
 deploy/launchagents/com.jim.ncaaf.cfbd-final-watcher.plist
 deploy/launchagents/com.jim.ncaaf.fast-ratings.plist
+deploy/launchagents/com.jim.ncaaf.fast-market.plist
 config/page_health_registry.json
 daily_market_update.sh
 data/model_tracking/config.json
@@ -110,6 +111,8 @@ scripts/war_room/run_cfbd_final_watcher.py
 scripts/war_room/start_cfbd_final_watcher.sh
 scripts/war_room/run_fast_ratings_scheduler.py
 scripts/war_room/start_fast_ratings_scheduler.sh
+scripts/war_room/run_fast_market_scheduler.py
+scripts/war_room/start_fast_market_scheduler.sh
 scripts/war_room/war_room_operator_api.py
 scripts/war_room/start_war_room_operator.sh
 deploy/cloudflare/war-room-tunnel.example.yml

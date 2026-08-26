@@ -31,6 +31,38 @@ remain with their existing owners. The shared canonical-writer lock protects
 Ratings from Postgame and other writers; an active daily run produces
 `DEFERRED_BY_DAILY_BACKBONE` for retry at the next scheduler wake.
 
+## Fast Market monitor
+
+`com.jim.ncaaf.fast-market` wakes every 30 seconds. The wake itself has no
+provider cost; `run_fast_market_scheduler.py` evaluates the current
+`America/New_York` cadence band and invokes the existing bounded Market service
+only when due:
+
+- Monday 00:00 through Saturday 22:00: hourly (`ROUTINE_HOURLY`);
+- Saturday 22:00 through 23:00: every five minutes (`SATURDAY_RAMP_5M`);
+- Saturday 23:00 through Sunday 02:00: every 90 seconds
+  (`SATURDAY_OPENER_90S`);
+- Sunday 02:00 through 08:00: every five minutes
+  (`SUNDAY_OVERNIGHT_5M`);
+- Sunday 08:00 through 23:00: every two minutes (`SUNDAY_ACTIVE_2M`); and
+- Sunday 23:00 through Monday 00:00: hourly
+  (`SUNDAY_TRANSITION_HOURLY`).
+
+Intervals are start-inclusive and end-exclusive. During `ROUTINE_HOURLY` only,
+a successful manual or daily Market refresh in the preceding ten minutes
+suppresses the redundant scheduled pull and advances the scheduler slot. The
+critical Saturday/Sunday bands do not use that broad suppression. Sleep or
+restart never replays missed intervals: at most one due acquisition runs before
+the cadence resumes from current accepted state.
+
+Automatic and manual requests both enter
+`scripts/control/run_war_room_service.py market` and therefore share the same
+Fast Market acquisition, normalization, quota/reserve governor, writer lock,
+artifact builders, and live-publication behavior. Manual Refresh Market remains
+available at all times and has no quota bypass. The shared writer lock blocks
+collision with the 8 AM backbone, Postgame, Ratings, and other writers; blocked
+scheduled work is reconsidered by a later wake without an unbounded backlog.
+
 ## Stage registry and run status
 
 `config/daily_stages.json` is the machine-readable stage registry. It records order, required/optional policy, network usage, and email/publication dependencies without duplicating the business commands from `daily_market_update.sh`.
