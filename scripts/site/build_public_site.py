@@ -16,7 +16,7 @@ PAGES = {
     "ratings_v2.html":"ratings.html",
     "simulations_v2.html":"simulations.html",
     "playoff_v2.html":"playoff.html",
-    "schedule_v2.html":"schedule.html",
+    "schedule.html":"schedule.html",
     "odds_v2.html":"odds.html",
     "coaches.html":"coaches.html",
 }

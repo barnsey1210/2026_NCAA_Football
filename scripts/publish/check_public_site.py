@@ -76,6 +76,16 @@ def validate(root: Path, out: Path) -> list[str]:
             if 'href="dashboard.html"' in text or '>Dashboard</a>' in text:
                 errors.append(f"retired Dashboard navigation leaked: {name}")
 
+            if name == "schedule.html":
+                for marker in (
+                    "https://control.barnseywr.com/war-room/live/schedule",
+                    "refreshLiveSchedule",
+                    "setInterval(refreshLiveSchedule,7500)",
+                    "credentials:'omit'",
+                ):
+                    if marker not in text:
+                        errors.append(f"Schedule live-score shell marker missing: {marker}")
+
             if name == "index.html":
                 required_home_markers = (
                     'data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market"',
