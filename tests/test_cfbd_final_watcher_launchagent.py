@@ -9,11 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CfbdFinalWatcherLaunchAgentTests(unittest.TestCase):
-    def test_watcher_remains_disabled_by_default(self):
+    def test_watcher_is_production_enabled(self):
         config = json.loads(
             (ROOT / "config/cfbd_final_watcher.json").read_text(encoding="utf-8")
         )
-        self.assertFalse(config["enabled"])
+        self.assertTrue(config["enabled"])
 
     def test_launchagent_is_dumb_five_minute_timer(self):
         with (ROOT / "deploy/launchagents/com.jim.ncaaf.cfbd-final-watcher.plist").open("rb") as handle:
