@@ -101,6 +101,41 @@ def norm(x):
     n = TEAM_ALIASES.get(n, n)
     return n
 
+
+def resolve_dratings_game(idx, game_date, away, home):
+    """Exact date/team first; then unique exact team pair within +/-1 day."""
+    if not game_date or not away or not home:
+        return None
+
+    away_n = norm(away)
+    home_n = norm(home)
+
+    exact = idx.get((str(game_date), away_n, home_n))
+    if exact:
+        return exact
+
+    try:
+        source_date = datetime.strptime(str(game_date), "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+    candidates = []
+    for (canonical_date, canonical_away, canonical_home), game in idx.items():
+        if canonical_away != away_n or canonical_home != home_n:
+            continue
+
+        try:
+            candidate_date = datetime.strptime(
+                str(canonical_date), "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            continue
+
+        if abs((candidate_date - source_date).days) <= 1:
+            candidates.append(game)
+
+    return candidates[0] if len(candidates) == 1 else None
+
 def massey_match_key(x):
     """
     Canonical matching layer for Massey game projections.
@@ -393,7 +428,17 @@ def load_dratings(idx):
     if not DRATINGS.exists():
         return rows, [{"source":"DRatings Predictions","status":"missing/inactive","rows":0}]
     for _, r in pd.read_csv(DRATINGS).iterrows():
-        g = idx.get((str(r.get("game_date")), norm(r.get("away_team")), norm(r.get("home_team"))))
+        source_date = (
+            r.get("canonical_game_date")
+            if "canonical_game_date" in r.index and pd.notna(r.get("canonical_game_date"))
+            else r.get("game_date")
+        )
+        g = resolve_dratings_game(
+            idx,
+            source_date,
+            r.get("away_team"),
+            r.get("home_team"),
+        )
         audit.append({"source":"DRatings Predictions","date":r.get("game_date"),"away":r.get("away_team"),
                       "home":r.get("home_team"),"matched":bool(g),"game_id":g.get("game_id") if g else ""})
         if g:

@@ -52,6 +52,44 @@ ALIASES = {
 def norm(x):
     return re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
 
+
+def resolve_canonical_game_key(game_date, away, home, canonical_games):
+    """Exact date/team first; then unique exact team pair within +/-1 day."""
+    if not game_date or not away or not home:
+        return None
+
+    away_n = norm(away)
+    home_n = norm(home)
+
+    exact = (str(game_date), away_n, home_n)
+    if exact in canonical_games:
+        return exact
+
+    try:
+        source_date = datetime.strptime(str(game_date), "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+    candidates = []
+    for key in canonical_games:
+        canonical_date, canonical_away, canonical_home = key
+
+        if canonical_away != away_n or canonical_home != home_n:
+            continue
+
+        try:
+            candidate_date = datetime.strptime(
+                str(canonical_date), "%Y-%m-%d"
+            ).date()
+        except ValueError:
+            continue
+
+        if abs((candidate_date - source_date).days) <= 1:
+            candidates.append(key)
+
+    return candidates[0] if len(candidates) == 1 else None
+
+
 def load_site_context(start_date=None, end_date=None):
     db = json.loads(DB.read_text())
     teams = set()
@@ -156,11 +194,10 @@ def parse_page(html, url, site_teams, site_dates, canonical_games):
             win_vals = re.findall(r"(\d+(?:\.\d+)?)%", td[2].get_text(" ", strip=True))
             home_win_prob = float(win_vals[1]) / 100.0 if len(win_vals) >= 2 else None
 
-            key = (
-                game_date,
-                norm(away) if away else "",
-                norm(home) if home else "",
+            canonical_key = resolve_canonical_game_key(
+                game_date, away, home, canonical_games
             )
+            canonical_game_date = canonical_key[0] if canonical_key else None
 
             rows.append({
                 "game_date": game_date,
@@ -178,7 +215,15 @@ def parse_page(html, url, site_teams, site_dates, canonical_games):
                 "away_team_matched": bool(away),
                 "home_team_matched": bool(home),
                 "site_schedule_date": bool(game_date in site_dates) if game_date else False,
-                "on_canonical_site_schedule": bool(away and home and key in canonical_games),
+                "canonical_game_date": canonical_game_date,
+                "date_match_method": (
+                    "exact"
+                    if canonical_game_date and canonical_game_date == game_date
+                    else "unique_team_pair_plus_minus_1_day"
+                    if canonical_game_date
+                    else "unmatched"
+                ),
+                "on_canonical_site_schedule": bool(canonical_key),
             })
 
     # Follow the site's forward "Games for ..." link.
