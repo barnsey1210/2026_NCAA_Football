@@ -196,6 +196,31 @@ button,select{
 
 .ratings-health-strip{
   margin-top:0;
+  display:grid;
+  grid-template-columns:max-content minmax(0, 1fr);
+  align-items:start;
+  gap:5px 12px;
+}
+
+.model-health-rows{
+  display:grid;
+  gap:5px;
+  min-width:0;
+}
+
+.model-health-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  flex-wrap:wrap;
+  min-width:0;
+}
+
+.model-health-label{
+  min-width:154px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.3px;
 }
 
 .health-status{
@@ -637,6 +662,14 @@ tr:hover td{
     align-items:flex-start;
     flex-direction:column;
   }
+
+  .ratings-health-strip{
+    grid-template-columns:1fr;
+  }
+
+  .model-health-label{
+    min-width:145px;
+  }
 }
 </style>
 <style id="shared-war-room-shell-v2">
@@ -769,13 +802,13 @@ tr:hover td{
         </div>
 
         <div class="rail-row">
-          <div class="rail-key">ALL FAST</div>
-          <div class="rail-value" id="railAllFast">—</div>
+          <div class="rail-key">SELECTED WEEK</div>
+          <div class="rail-value" id="railSelectedWeek">—</div>
         </div>
 
         <div class="rail-row">
-          <div class="rail-key">FBS UNIVERSE</div>
-          <div class="rail-value" id="railFbsUniverse">—</div>
+          <div class="rail-key">GLOBAL BOARD</div>
+          <div class="rail-value" id="railGlobalBoard">—</div>
         </div>
 
         <div class="rail-row">
@@ -851,8 +884,8 @@ tr:hover td{
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260826T120612Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260826T120612Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260826T151354Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260826T151354Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -1020,41 +1053,135 @@ function fmtStatusTimeET(value){
   ).format(d);
 }
 
-function ratingStatusDetail(h){
-  if(!h) return '';
-
-  const pieces = [];
-
-  if(h.teams){
-    pieces.push(`${h.teams}t`);
-  }
-
-  if(h.games_available !== null &&
-     h.games_available !== undefined){
-    pieces.push(`${h.games_available}g`);
-  }
-
-  const snapshot =
-    h.snapshot_date ||
-    h.latest_snapshot_date;
-
-  if(snapshot){
-    pieces.push(fmtStatusDate(snapshot));
-  }
-
-  const pull =
-    h.latest_pull_at ||
-    h.latest_pulled_at;
-
-  if(pull){
-    pieces.push(fmtStatusTimeET(pull));
-  }
-
-  return pieces.join(' · ');
-}
-
 function healthDot(color){
   return `<span class="dot ${esc(color || 'RED')}"></span>`;
+}
+
+function quoteBundle(game,book){
+  const market = game?.market || {};
+
+  if(book === 'Pinnacle'){
+    return market.pinnacle || null;
+  }
+
+  return market.primary_sportsbooks?.[book] ||
+    market.exchanges?.[book] ||
+    null;
+}
+
+function hasSpreadQuote(bundle){
+  return Boolean(
+    bundle?.spread?.away ||
+    bundle?.spread?.home
+  );
+}
+
+function hasTotalQuote(bundle){
+  return Boolean(
+    bundle?.total?.over ||
+    bundle?.total?.under
+  );
+}
+
+function selectedBookCoverage(book,rows){
+  const coverage = {
+    required:rows.length,
+    games:0,
+    spread:0,
+    total:0
+  };
+
+  rows.forEach(game=>{
+    const bundle = quoteBundle(game,book);
+    const spread = hasSpreadQuote(bundle);
+    const total = hasTotalQuote(bundle);
+
+    if(spread || total) coverage.games += 1;
+    if(spread) coverage.spread += 1;
+    if(total) coverage.total += 1;
+  });
+
+  return coverage;
+}
+
+function coveragePct(value,required){
+  if(!required) return 0;
+  return Math.round((Number(value || 0) / required) * 100);
+}
+
+function sourceCoverage(domain,source,rows){
+  const entries = rows.map(
+    game => game?.standard_freshness?.[domain]?.sources?.[source] || null
+  );
+
+  const available = entries.filter(
+    item => item?.participating === true
+  );
+
+  const pulls = available
+    .map(item => item.pulled_at)
+    .filter(Boolean)
+    .sort();
+  const latestPull = pulls.length
+    ? pulls[pulls.length - 1]
+    : null;
+
+  const states = [...new Set(
+    entries
+      .map(item => item?.state)
+      .filter(Boolean)
+  )];
+
+  return {
+    required:rows.length,
+    available:available.length,
+    missing:rows.length - available.length,
+    latestPull,
+    states
+  };
+}
+
+function coverageStatus(coverage){
+  if(!coverage.required){
+    return {status:'UNAVAILABLE',color:'GRAY'};
+  }
+
+  if(coverage.available === coverage.required){
+    return {status:'CURRENT',color:'GREEN'};
+  }
+
+  if(coverage.available > 0){
+    return {status:'PARTIAL',color:'YELLOW'};
+  }
+
+  return {status:'UNAVAILABLE',color:'RED'};
+}
+
+function sourceHealthTooltip(label,status,coverage,fallback){
+  const updated =
+    coverage.latestPull ||
+    fallback?.latest_pull_at ||
+    fallback?.latest_pulled_at ||
+    fallback?.pulled_at ||
+    null;
+
+  const lines = [
+    label,
+    `Status: ${status.status}`,
+    `Freshness: ${coverage.states.join(', ') || fallback?.status || 'UNKNOWN'}`,
+    `Availability: ${coverage.available}/${coverage.required} selected-week games`,
+    `Missing: ${coverage.missing}`
+  ];
+
+  if(updated){
+    lines.push(`Updated: ${fmtDateTimeET(updated)}`);
+  }
+
+  if(status.status !== 'CURRENT'){
+    lines.push('Reason: Source is not complete for the selected week.');
+  }
+
+  return lines.join('\n');
 }
 
 function edgeClass(edge){
@@ -1199,6 +1326,10 @@ function setSort(key){
 function renderHealth(){
   const books = HEALTH?.books || {};
   const strip = document.getElementById('healthStrip');
+  const rows = currentRows();
+  const projectionRows = ACTIVE_WEEK === 'ALL'
+    ? []
+    : rows.filter(game => game.scope?.fbs_vs_fbs === true);
 
   const ordered = [
     'DraftKings',
@@ -1215,15 +1346,23 @@ function renderHealth(){
     `<span class="health-title">FAST MARKET HEALTH</span>` +
     ordered.map(book=>{
       const h = books[book] || {};
-      const games = h.games_with_any_quote ?? 0;
+      const coverage = selectedBookCoverage(book,rows);
       const age = h.quote_age_median_seconds;
+      const title = [
+        `${book} connectivity: ${h.status || 'UNKNOWN'}`,
+        `Selected scope coverage: ${coverage.games}/${coverage.required}`,
+        `Spread: ${coverage.spread}/${coverage.required}`,
+        `Total: ${coverage.total}/${coverage.required}`,
+        `Global acquisition coverage: ${h.games_with_any_quote ?? 0} games`,
+        age != null ? `Median quote age: ${Math.round(age)} seconds` : null
+      ].filter(Boolean).join('\n');
 
       return `
-        <span class="health-book">
+        <span class="health-book" title="${esc(title)}">
           ${healthDot(h.color)}
           ${esc(BOOK_ABBR[book] || book)}
           <span class="health-detail">
-            ${games}g${age != null ? ` · ${Math.round(age)}s` : ''}
+            ${coverage.games}/${coverage.required}
           </span>
         </span>
       `;
@@ -1232,77 +1371,81 @@ function renderHealth(){
   const ratings =
     HEALTH?.ratings_health?.sources || {};
 
-  const ratingOrder = [
-    ['SP+', 'SP+'],
-    ['FPI', 'FPI'],
-    ['TR', 'TR'],
-    ['SAG', 'SAG'],
-    ['DR', 'DR'],
-    ['MAS', 'MAS']
-  ];
-
   const ratingsStrip =
     document.getElementById('ratingsHealthStrip');
 
   if(ratingsStrip){
-    const ratingHtml = ratingOrder.map(([key,label])=>{
-      const h = ratings[key] || {};
-
-      const detail =
-        ratingStatusDetail(h);
-
-      return `
-        <span class="health-book">
-          ${healthDot(h.color)}
-          ${esc(label)}
-          <span class="health-status ${esc(h.color || '')}">
-            ${esc(h.status || 'UNKNOWN')}
-          </span>
-          ${
-            detail
-              ? `<span class="health-detail"> · ${esc(detail)}</span>`
-              : ''
-          }
-        </span>
-      `;
-    }).join('');
-
     const weekProjectionHealth =
       ACTIVE_WEEK === 'ALL'
         ? null
         : HEALTH?.projection_health?.by_week?.[String(ACTIVE_WEEK)] || null;
 
-    const projectionItems = [
-      ['SPREAD', weekProjectionHealth?.spread],
-      ['TOTAL', weekProjectionHealth?.total],
-      ['SHADOW', weekProjectionHealth?.shadow]
-    ];
+    const sourceItem = (domain,key,label,healthKey) => {
+      const coverage = sourceCoverage(domain,key,projectionRows);
+      const status = coverageStatus(coverage);
+      const fallback = ratings[healthKey] || {};
+      const updated = coverage.latestPull ||
+        fallback.latest_pull_at ||
+        fallback.latest_pulled_at ||
+        fallback.pulled_at ||
+        null;
+      const title = sourceHealthTooltip(
+        label,status,coverage,fallback
+      );
 
-    const projectionHtml = projectionItems.map(([label,h])=>{
-      const state = h || {
+      return `
+        <span class="health-book" title="${esc(title)}">
+          ${healthDot(status.color)}
+          ${esc(label)}
+          ${updated ? `<span class="health-detail">${esc(fmtStatusTimeET(updated))}</span>` : ''}
+        </span>
+      `;
+    };
+
+    const overall = (label,state) => {
+      const resolved = state || {
         color:'GRAY',
-        status: ACTIVE_WEEK === 'ALL' ? 'SELECT WEEK' : 'UNAVAILABLE',
-        displayed_games:0
+        status: ACTIVE_WEEK === 'ALL' ? 'SELECT WEEK' : 'UNAVAILABLE'
       };
 
       return `
-        <span class="health-book">
-          ${healthDot(state.color)}
+        <span class="model-health-label">
+          ${healthDot(resolved.color)}
           ${esc(label)}
-          <span class="health-status ${esc(state.color || '')}">
-            ${esc(state.status || 'UNAVAILABLE')}
-          </span>
-          <span class="health-detail">
-            · ${esc(state.displayed_games ?? 0)}g
+          <span class="health-status ${esc(resolved.color || '')}">
+            ${esc(resolved.status || 'UNAVAILABLE')}
           </span>
         </span>
       `;
-    }).join('');
+    };
 
-    ratingsStrip.innerHTML =
-      `<span class="health-title">RATINGS / MODEL HEALTH</span>` +
-      ratingHtml +
-      projectionHtml;
+    const spreadSources = [
+      sourceItem('spread','SP+','SP+','SP+'),
+      sourceItem('spread','FPI','FPI','FPI'),
+      sourceItem('spread','TeamRankings','TeamRankings','TR'),
+      sourceItem('spread','Sagarin Rating','Sagarin Rating','SAG'),
+      sourceItem('spread','DRatings','DRatings','DR')
+    ].join('');
+
+    const totalSources = [
+      sourceItem('total','SP+','SP+ Total','SP+'),
+      sourceItem('total','Massey Dual','Massey Dual','MAS'),
+      sourceItem('total','Sagarin Total','Sagarin Total','SAG')
+    ].join('');
+
+    ratingsStrip.innerHTML = `
+      <span class="health-title">RATINGS / MODEL HEALTH</span>
+      <div class="model-health-rows">
+        <div class="model-health-row">
+          ${overall('SPREAD',weekProjectionHealth?.spread)}
+          ${spreadSources}
+        </div>
+        <div class="model-health-row">
+          ${overall('TOTAL',weekProjectionHealth?.total)}
+          ${totalSources}
+        </div>
+      </div>
+    `;
   }
 
   const q = HEALTH?.api_quota || {};
@@ -1323,31 +1466,35 @@ function renderHealth(){
     `<span class="${String(q.color || '').toLowerCase()}">` +
     `${esc(q.credits_remaining ?? '—')} left</span>`;
 
-  const green = ordered.filter(
-    b => books[b]?.color === 'GREEN'
+  const covered = ordered.filter(
+    b => selectedBookCoverage(b,rows).games > 0
   ).length;
 
   document.getElementById('summaryBooks').innerHTML =
-    `<span class="green">${green}</span> / ${ordered.length} GREEN`;
+    `<span class="green">${covered}</span> / ${ordered.length} COVERING`;
 
 
   const refresh =
     HEALTH?.fast_market_refresh || {};
 
-  const stateCounts =
-    MATRIX?.summary?.state_counts || {};
-
   document.getElementById('railRefresh').textContent =
     fmtDateTimeET(refresh.last_fast_pull_at);
 
-  document.getElementById('railAllFast').textContent =
-    `${refresh.upcoming_games_in_pull ?? '—'} games`;
+  document.getElementById('railSelectedWeek').textContent =
+    ACTIVE_WEEK === 'ALL'
+      ? 'Select week'
+      : `${rows.length} games`;
 
-  document.getElementById('railFbsUniverse').textContent =
-    `${MATRIX?.summary?.fbs_vs_fbs_games ?? '—'} games`;
+  const globalBoard = refresh.upcoming_games_in_pull ?? '—';
+  const globalBoardEl = document.getElementById('railGlobalBoard');
+  globalBoardEl.textContent = `${globalBoard} games`;
+  globalBoardEl.title = 'Global acquisition universe; not selected-week coverage.';
 
   const bookRailRow = book => {
     const h = books[book] || {};
+    const coverage = selectedBookCoverage(book,rows);
+    const spreadPct = coveragePct(coverage.spread,coverage.required);
+    const totalPct = coveragePct(coverage.total,coverage.required);
 
     return `
       <div class="rail-row">
@@ -1357,10 +1504,10 @@ function renderHealth(){
         </div>
 
         <div class="rail-value">
-          ${esc(h.games_with_any_quote ?? 0)} games
+          ${coverage.games}/${coverage.required} games
           <span class="muted">
-            · S ${esc(h.spread_completeness_pct ?? '—')}%
-            · T ${esc(h.total_completeness_pct ?? '—')}%
+            · S ${spreadPct}%
+            · T ${totalPct}%
           </span>
         </div>
       </div>
