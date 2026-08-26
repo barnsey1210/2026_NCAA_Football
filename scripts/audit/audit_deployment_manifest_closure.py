@@ -38,6 +38,8 @@ SHADOW_STATIC_DEPENDENCIES = {
 CFBD_WATCHER_STATIC_DEPENDENCIES = {
     "config/cfbd_final_watcher.json": "scripts/war_room/run_cfbd_final_watcher.py",
     "data/snapshots/preseason/preseason_db.json": "scripts/war_room/run_cfbd_final_watcher.py",
+    "scripts/war_room/start_cfbd_final_watcher.sh":
+        "deploy/launchagents/com.jim.ncaaf.cfbd-final-watcher.plist",
 }
 SHADOW_GENERATED_INPUTS = {
     "data/research/shadow_live_feature_constructor/team_game_features_2026.json":
