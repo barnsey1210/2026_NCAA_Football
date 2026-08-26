@@ -410,9 +410,14 @@ def model_value(game, model_id, field):
 
 def model_summary(game, model_id):
     r = model_resolution(game, model_id)
+    selected_model_id = r.get("model_id", model_id)
+    projection = (
+        game.get("projections", {})
+        .get(selected_model_id, {})
+    )
 
     return {
-        "model_id": r.get("model_id", model_id),
+        "model_id": selected_model_id,
         "official_model_id": r.get("official_model_id"),
         "authority": r.get("authority"),
         "operational_degraded_used": r.get(
@@ -425,6 +430,12 @@ def model_summary(game, model_id):
         "freshness_timestamp": r.get("freshness_timestamp"),
         "resolution_mode": r.get("resolution_mode"),
         "missing_components": r.get("missing_components"),
+        # Presentation metadata only. These are the canonical
+        # game-level component projections already used by the
+        # projection engine; the War Room never recalculates them.
+        "component_values": projection.get("component_values", {}),
+        "component_status": projection.get("component_status", {}),
+        "weights_used": r.get("weights_used", {}),
     }
 
 
@@ -842,6 +853,7 @@ def authority_resolution(
 
 
 def maturity_state(
+    game,
     component,
     spread_freshness,
     total_freshness,
@@ -864,6 +876,28 @@ def maturity_state(
         spread_temporal,
         total_temporal,
     }
+
+    # The initial Week 0/preseason projection panel is the accepted
+    # season baseline, not a carry-forward from a completed weekly
+    # cycle. Before any completed-game watermark or genuine Shadow
+    # update exists, active Standard authority in both domains is
+    # therefore current for this baseline.
+    initial_baseline = (
+        number(game.get("week")) == 0
+        and spread_temporal == "PRE_GAME"
+        and total_temporal == "PRE_GAME"
+        and spread_freshness.get("watermark_date") is None
+        and total_freshness.get("watermark_date") is None
+        and spread_authority.get("source") == "STANDARD"
+        and spread_authority.get("status") == "ACTIVE"
+        and total_authority.get("source") == "STANDARD"
+        and total_authority.get("status") == "ACTIVE"
+        and readiness["overall_status"] == "WAITING"
+        and readiness["has_genuine_postgame_update"] is False
+    )
+
+    if initial_baseline:
+        return "UPDATED"
 
     # Both betting markets have completed their Standard
     # postgame refresh cycle.
@@ -1944,6 +1978,7 @@ def main():
             "market_release_timestamp": None,
 
             "state": maturity_state(
+                game,
                 shadow_component,
                 spread_freshness,
                 total_freshness,

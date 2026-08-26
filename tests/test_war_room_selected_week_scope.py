@@ -85,6 +85,50 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             self.assertIn(control, self.source)
         self.assertIn("LIVE_VERSION_URL", self.source)
 
+    def test_matrix_decisions_and_component_tooltips_are_presentational(self):
+        for marker in (
+            "spreadDecision(game, sprSide, sprEdge)",
+            "totalDecision(totSide, totEdge)",
+            "SPREAD_COMPONENTS",
+            "TOTAL_COMPONENTS",
+            "model?.component_values",
+        ):
+            self.assertIn(marker, self.source)
+        self.assertNotIn("function calculateProjection", self.source)
+
+    def test_market_quotes_use_logos_and_neutral_text(self):
+        self.assertIn("const BOOK_LOGOS = {", self.source)
+        self.assertIn('src="logos/books/${esc(logo)}.png"', self.source)
+        self.assertIn(".market-best{\n  color:#dce5ed;", self.source)
+        self.assertNotIn(".market-book{", self.source)
+
+    def test_shadow_and_column_groups_are_compact(self):
+        self.assertIn('class="shadow-team-icons"', self.source)
+        self.assertIn(".shadow-team-icons{display:flex;flex-direction:column", self.source)
+        self.assertIn("th.spread-group", self.source)
+        self.assertIn("th.total-group", self.source)
+        self.assertIn("th.context-group", self.source)
+
+    def test_edge_columns_and_model_state_are_emphasized(self):
+        self.assertGreaterEqual(self.source.count("edge-focus"), 5)
+        self.assertIn("MODEL STATE", self.source)
+        for state in ("STALE", "SHADOW", "HYBRID", "UPDATED"):
+            self.assertIn(
+                f'<strong>{state}</strong>',
+                self.source,
+            )
+
+    def test_edge_width_is_reclaimed_from_stacked_shadow(self):
+        self.assertIn(".shadow-col{\n  width:3.4%;", self.source)
+        self.assertIn(".edge-col{\n  width:6.8%;", self.source)
+        self.assertIn("white-space:nowrap;\n  flex-wrap:nowrap;", self.source)
+
+    def test_texas_am_uses_existing_canonical_logo_slug(self):
+        self.assertIn("'Texas A&M':'texas-a-m'", self.source)
+        self.assertIn("if(TEAM_LOGO_SLUGS[team])", self.source)
+        self.assertTrue((ROOT / "logos/texas-a-m.png").is_file())
+        self.assertIn(".decision-edge img,\n.market-book-logo{", self.source)
+
 
 if __name__ == "__main__":
     unittest.main()

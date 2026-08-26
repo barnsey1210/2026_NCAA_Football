@@ -404,6 +404,25 @@ tr:hover td{
   background:#101d29;
 }
 
+th.spread-group{background:#102334}
+td.spread-group{background:rgba(28,68,99,.18)}
+th.total-group{background:#241a35}
+td.total-group{background:rgba(75,45,96,.18)}
+th.context-group{background:#17212b}
+td.context-group{background:rgba(34,48,61,.2)}
+th.edge-focus{
+  border-left:1px solid rgba(235,242,248,.72);
+  border-right:1px solid rgba(235,242,248,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+}
+td.edge-focus{
+  border-left:1px solid rgba(220,230,238,.42);
+  border-right:1px solid rgba(220,230,238,.42);
+}
+tr:hover td.spread-group{background:#153047}
+tr:hover td.total-group{background:#302142}
+tr:hover td.context-group{background:#202d39}
+
 .game-cell{
   min-width:185px;
 }
@@ -422,9 +441,7 @@ tr:hover td{
   font-weight:800;
 }
 
-.quote.best{
-  color:var(--green);
-}
+.quote.best{color:var(--text)}
 
 .quote.none{
   color:#526476;
@@ -450,8 +467,10 @@ tr:hover td{
 .model-col{width:5.2%}
 
 .shadow-col{
-  width:5.2%;
+  width:3.4%;
   text-align:center;
+  padding-left:2px;
+  padding-right:2px;
 }
 
 .shadow-ready{
@@ -464,17 +483,24 @@ tr:hover td{
   font-size:9px;
   font-weight:900;
 }
-.shadow-team-state{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;white-space:nowrap}
+.shadow-team-icons{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
 .shadow-team-chip{display:inline-flex;align-items:center;gap:2px}
-.shadow-team-chip img{width:20px;height:20px;object-fit:contain}
-.shadow-team-mark{font-size:12px;font-weight:900}
+.shadow-team-chip img{width:13px;height:13px;object-fit:contain}
+.shadow-team-mark{font-size:9px;font-weight:900}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
 .shadow-state-label{font-size:9px;font-weight:900;letter-spacing:.03em}
 .best-col{width:9%}
 .exchange-col{width:9%}
 .pinn-col{width:6%}
-.edge-col{width:5%}
+.edge-col{
+  width:6.8%;
+  text-align:center;
+  padding-left:5px;
+  padding-right:5px;
+  box-sizing:border-box;
+}
 .injury-col{width:3.5%;text-align:center}
 .signal-col{width:6%}
 .state-col{width:5%}
@@ -517,25 +543,109 @@ tr:hover td{
 }
 
 .market-best{
-  color:var(--green);
+  color:#dce5ed;
   font-weight:900;
-  line-height:1.15;
-  white-space:normal;
+  display:grid;
+  grid-template-columns:28px minmax(38px,1fr);
+  grid-template-rows:auto auto;
+  column-gap:5px;
+  align-items:center;
+  line-height:1.05;
 }
 
-.market-book{
-  display:block;
-  font-size:9px;
-  color:var(--green);
-  letter-spacing:.3px;
+.market-book-logo{
+  grid-column:1;
+  grid-row:1 / span 2;
+  width:26px;
+  height:26px;
+  object-fit:contain;
 }
 
-.market-price{
-  display:block;
-  margin-top:2px;
+.market-line{
+  grid-column:2;
+  grid-row:1;
+  color:#eef3f7;
   font-size:11px;
   white-space:nowrap;
 }
+
+.market-juice{
+  grid-column:2;
+  grid-row:2;
+  color:#9fb0bf;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.decision-edge{
+  display:inline-flex;
+  width:100%;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  white-space:nowrap;
+  flex-wrap:nowrap;
+}
+.decision-edge img,
+.market-book-logo{
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:4px;
+  padding:2px;
+  filter:drop-shadow(0 0 3px rgba(235,242,248,.2));
+}
+.decision-edge img{width:20px;height:20px;object-fit:contain;flex:0 0 20px}
+.decision-side{font-size:11px;font-weight:900}
+
+.model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
+.model-tooltip-panel{
+  display:none;
+  position:absolute;
+  z-index:20;
+  left:50%;
+  bottom:calc(100% + 7px);
+  transform:translateX(-50%);
+  min-width:190px;
+  padding:7px 8px;
+  border:1px solid #425a70;
+  border-radius:4px;
+  background:#050c13;
+  box-shadow:0 8px 22px rgba(0,0,0,.45);
+  color:#dfe8f0;
+  font-size:10px;
+  font-weight:700;
+  text-align:left;
+}
+.model-tooltip:hover .model-tooltip-panel,
+.model-tooltip:focus-within .model-tooltip-panel{display:block}
+.model-component{display:grid;grid-template-columns:minmax(78px,1fr) auto;gap:10px;padding:1px 0}
+.model-component.missing{color:#718393}
+
+.header-tooltip{position:relative;display:inline-flex;align-items:center;cursor:help}
+.header-tooltip-panel{
+  display:none;
+  position:absolute;
+  z-index:30;
+  right:0;
+  top:calc(100% + 7px);
+  width:240px;
+  padding:7px 8px;
+  border:1px solid #425a70;
+  border-radius:4px;
+  background:#050c13;
+  box-shadow:0 8px 22px rgba(0,0,0,.45);
+  color:#dfe8f0;
+  font-size:9px;
+  font-weight:700;
+  line-height:1.35;
+  text-align:left;
+  text-transform:none;
+  white-space:normal;
+}
+.header-tooltip:hover .header-tooltip-panel,
+.header-tooltip:focus-within .header-tooltip-panel{display:block}
+.state-definition{display:block;margin:2px 0}
+.state-definition strong{color:#fff}
 
 .pinn-quote{
   display:block;
@@ -1648,37 +1758,47 @@ function renderHead(){
         DATE / MATCHUP ${sortArrow('date')}
       </th>
 
-      <th class="model-col"><span class="spread-label">SPREAD</span><br>MODEL</th>
-      <th class="shadow-col"><span class="spread-label">SPREAD</span><br>SHADOW</th>
+      <th class="model-col spread-group"><span class="spread-label">SPREAD</span><br>MODEL</th>
+      <th class="shadow-col spread-group"><span class="spread-label">SPREAD</span><br>SHADOW</th>
 
-      <th class="best-col"><span class="spread-label">SPREAD</span><br>BEST</th>
-      <th class="exchange-col"><span class="spread-label">SPREAD</span><br>EXCH</th>
-      <th class="pinn-col"><span class="spread-label">SPREAD</span><br>PINN</th>
+      <th class="best-col spread-group"><span class="spread-label">SPREAD</span><br>BEST</th>
+      <th class="exchange-col spread-group"><span class="spread-label">SPREAD</span><br>EXCH</th>
+      <th class="pinn-col spread-group"><span class="spread-label">SPREAD</span><br>PINN</th>
 
       <th
-        class="edge-col sortable"
+        class="edge-col spread-group edge-focus sortable"
         onclick="setSort('spread_edge')"
       >
         <span class="spread-label">SPREAD</span><br>EDGE ${sortArrow('spread_edge')}
       </th>
 
-      <th class="model-col">TOT<br>MODEL</th>
-      <th class="shadow-col">TOT<br>SHADOW</th>
+      <th class="model-col total-group">TOT<br>MODEL</th>
+      <th class="shadow-col total-group">TOT<br>SHADOW</th>
 
-      <th class="best-col">TOT<br>BEST</th>
-      <th class="exchange-col">TOT<br>EXCH</th>
-      <th class="pinn-col">TOT<br>PINN</th>
+      <th class="best-col total-group">TOT<br>BEST</th>
+      <th class="exchange-col total-group">TOT<br>EXCH</th>
+      <th class="pinn-col total-group">TOT<br>PINN</th>
 
       <th
-        class="edge-col sortable"
+        class="edge-col total-group edge-focus sortable"
         onclick="setSort('total_edge')"
       >
         TOT<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="injury-col">INJ</th>
-      <th class="signal-col">SIGNALS</th>
-      <th class="state-col">STATE</th>
+      <th class="injury-col context-group">INJ</th>
+      <th class="signal-col context-group">SIGNALS</th>
+      <th class="state-col context-group">
+        <span class="header-tooltip" tabindex="0">
+          MODEL STATE
+          <span class="header-tooltip-panel" role="tooltip">
+            <span class="state-definition"><strong>STALE</strong> · Market exists; Standard inputs are from the prior update cycle.</span>
+            <span class="state-definition"><strong>SHADOW</strong> · New market exists and Shadow projections are available.</span>
+            <span class="state-definition"><strong>HYBRID</strong> · Some weekly Standard inputs updated; the full set is incomplete.</span>
+            <span class="state-definition"><strong>UPDATED</strong> · All scheduled Standard inputs for the week are current.</span>
+          </span>
+        </span>
+      </th>
     </tr>
   `;
 }
@@ -1723,9 +1843,59 @@ function edgeDisplay(value){
   return `▲${n.toFixed(1)}`;
 }
 
+function spreadDecision(game, side, edge){
+  if(!side || !Number.isFinite(Number(edge)) || Number(edge) <= 0){
+    return edgeDisplay(edge);
+  }
+  const team = side === 'away' ? game.away_team : game.home_team;
+  const slug = teamLogoSlug(team);
+  return `<span class="decision-edge" title="Bet ${esc(team)}"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span>${edgeDisplay(edge)}</span></span>`;
+}
+
+function totalDecision(side, edge){
+  if(!side || !Number.isFinite(Number(edge)) || Number(edge) <= 0){
+    return edgeDisplay(edge);
+  }
+  const label = side === 'under' ? 'U' : 'O';
+  return `<span class="decision-edge" title="${side === 'under' ? 'Under' : 'Over'}"><span class="decision-side">${label}</span><span>${edgeDisplay(edge)}</span></span>`;
+}
+
+const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','Sagarin Rating','DRatings'];
+const TOTAL_COMPONENTS = ['SP+','Massey Dual','Sagarin Total'];
+
+function spreadComponentDisplay(value, game){
+  const n = Number(value);
+  if(!Number.isFinite(n)) return '—';
+  if(Math.abs(n) < .05) return 'PK';
+  const team = n > 0 ? game.home_team : game.away_team;
+  return `${esc(team)} -${Math.abs(n).toFixed(1)}`;
+}
+
+function modelTooltip(game, model, market){
+  const components = market === 'spread' ? SPREAD_COMPONENTS : TOTAL_COMPONENTS;
+  const values = model?.component_values || {};
+  const rows = components.map(name=>{
+    const value = values[name];
+    const missing = value === null || value === undefined || value === '' || !Number.isFinite(Number(value));
+    const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
+    const label = name === 'Sagarin Rating' ? 'Sagarin' : name;
+    return `<span class="model-component ${missing?'missing':''}"><span>${esc(label)}</span><span>${shown}</span></span>`;
+  }).join('');
+  const value = market === 'spread' ? model?.value_home_line : model?.value_total;
+  return `<span class="model-tooltip" tabindex="0"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+}
+
+
+const TEAM_LOGO_SLUGS = {
+  'Texas A&M':'texas-a-m'
+};
 
 function teamLogoSlug(team){
   if(!team) return '';
+
+  if(TEAM_LOGO_SLUGS[team]){
+    return TEAM_LOGO_SLUGS[team];
+  }
 
   return String(team)
     .toLowerCase()
@@ -1799,24 +1969,30 @@ function shadowDisplay(game, model, market){
   const value=market==='spread'?model?.value_home_line:model?.value_total;
   const available=readyCount===2 && model?.selection_status==='AVAILABLE' && value!==null && value!==undefined;
   const label=available?modelDisplay(value,market):(readyCount===0?'WAIT':readyCount===1?'PARTIAL':'UNAVAILABLE');
-  return `<span class="shadow-team-state">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}<span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${label}</span></span>`;
+  return `<span class="shadow-team-state"><span class="shadow-team-icons">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}</span><span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${label}</span></span>`;
 }
+
+const BOOK_LOGOS = {
+  DraftKings:'draftkings', FanDuel:'fanduel', BetMGM:'betmgm',
+  Caesars:'caesars', Pinnacle:'pinnacle', Novig:'novig',
+  ProphetX:'prophetx', Kalshi:'kalshi'
+};
 
 function compactQuote(q, market){
   if(!q) return '—';
 
-  const book =
-    BOOK_ABBR[q.book] || q.book || '';
-
-  const quote =
-    market === 'spread'
-      ? quoteText(q)
-      : totalQuoteText(q);
+  const book = q.book || '';
+  const logo = BOOK_LOGOS[book] || 'default';
+  const line = market === 'spread'
+    ? fmtLine(q.line)
+    : `${q.side === 'under' ? 'U' : 'O'}${Number.isFinite(Number(q.line)) ? Number(q.line) : '—'}`;
+  const price = fmtPrice(q.price) || '—';
 
   return `
-    <span class="market-best">
-      <span class="market-book">${esc(book)}</span>
-      <span class="market-price">${quote}</span>
+    <span class="market-best" title="${esc(book)}">
+      <img class="market-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(book)}">
+      <span class="market-line">${line}</span>
+      <span class="market-juice">${price}</span>
     </span>
   `;
 }
@@ -1928,67 +2104,67 @@ function renderMatrix(){
           </div>
         </td>
 
-        <td class="model-col">
-          ${modelDisplay(sprModel, 'spread')}
+        <td class="model-col spread-group">
+          ${modelTooltip(game, game.models?.standard_spread, 'spread')}
         </td>
 
-        <td class="shadow-col">
+        <td class="shadow-col spread-group">
           ${shadowDisplay(game, sprShadow, 'spread')}
         </td>
 
-        <td class="best-col">
+        <td class="best-col spread-group">
           ${compactQuote(sprBest, 'spread')}
         </td>
 
-        <td class="exchange-col">
+        <td class="exchange-col spread-group">
           ${compactQuote(sprEx, 'spread')}
         </td>
 
-        <td class="pinn-col">
+        <td class="pinn-col spread-group">
           ${compactPinn(sprPinn, 'spread')}
         </td>
 
-        <td class="edge-col">
+        <td class="edge-col spread-group edge-focus">
           <span class="edge ${edgeClass(sprEdge)}">
-            ${edgeDisplay(sprEdge)}
+            ${spreadDecision(game, sprSide, sprEdge)}
           </span>
         </td>
 
-        <td class="model-col">
-          ${modelDisplay(totModel, 'total')}
+        <td class="model-col total-group">
+          ${modelTooltip(game, game.models?.standard_total, 'total')}
         </td>
 
-        <td class="shadow-col">
+        <td class="shadow-col total-group">
           ${shadowDisplay(game, totShadow, 'total')}
         </td>
 
-        <td class="best-col">
+        <td class="best-col total-group">
           ${compactQuote(totBest, 'total')}
         </td>
 
-        <td class="exchange-col">
+        <td class="exchange-col total-group">
           ${compactQuote(totEx, 'total')}
         </td>
 
-        <td class="pinn-col">
+        <td class="pinn-col total-group">
           ${compactPinn(totPinn, 'total')}
         </td>
 
-        <td class="edge-col">
+        <td class="edge-col total-group edge-focus">
           <span class="edge ${edgeClass(totEdge)}">
-            ${edgeDisplay(totEdge)}
+            ${totalDecision(totSide, totEdge)}
           </span>
         </td>
 
-        <td class="injury-col">
+        <td class="injury-col context-group">
           <span class="injury-placeholder">—</span>
         </td>
 
-        <td class="signal-col">
+        <td class="signal-col context-group">
           ${signalCell(game)}
         </td>
 
-        <td class="state-col">
+        <td class="state-col context-group">
           <span class="badge ${esc(game.state)}">
             ${esc(game.state)}
           </span>
