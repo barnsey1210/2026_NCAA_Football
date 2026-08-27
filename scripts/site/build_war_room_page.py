@@ -336,7 +336,7 @@ button,select{
 }
 
 .table-wrap{
-  overflow:auto;
+  overflow:visible;
 }
 
 table{
@@ -371,13 +371,13 @@ th{
   font-size:10px;
   text-transform:uppercase;
   font-weight:800;
-  padding:6px 7px;
+  padding:6px 4px;
   white-space:nowrap;
 }
 
 td{
   border-bottom:1px solid #223444;
-  padding:5px 7px;
+  padding:5px 4px;
   vertical-align:middle;
   white-space:nowrap;
 }
@@ -448,29 +448,20 @@ tr:hover td.context-group{background:#202d39}
   font-weight:500;
 }
 
-.book-col{
-  min-width:95px;
-}
-
-.best-col{
-  min-width:115px;
-}
-
 .model-col{
-  min-width:90px;
   font-size:14px;
   font-weight:900;
 }
 
-
-.matchup-col{width:16%}
-.model-col{width:5.2%}
+.matchup-col{width:13.8%}
+.model-col{width:5%}
 
 .shadow-col{
   width:3.4%;
+  font-size:9px;
   text-align:center;
-  padding-left:2px;
-  padding-right:2px;
+  padding-left:1px;
+  padding-right:1px;
 }
 
 .shadow-ready{
@@ -484,26 +475,26 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 .shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;white-space:nowrap}
-.shadow-team-icons{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
-.shadow-team-chip{display:inline-flex;align-items:center;gap:2px}
-.shadow-team-chip img{width:13px;height:13px;object-fit:contain}
-.shadow-team-mark{font-size:9px;font-weight:900}
+.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:1px}
+.shadow-team-chip{display:inline-flex;align-items:center;gap:1px}
+.shadow-team-chip img{width:10px;height:10px;object-fit:contain}
+.shadow-team-mark{font-size:8px;font-weight:900}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
 .shadow-state-label{font-size:9px;font-weight:900;letter-spacing:.03em}
-.best-col{width:9%}
-.exchange-col{width:9%}
-.pinn-col{width:6%}
+.best-col{width:7.2%}
+.exchange-col{width:7.2%}
+.pinn-col{width:5%}
 .edge-col{
-  width:6.8%;
+  width:6.2%;
   text-align:center;
   padding-left:5px;
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{width:3.5%;text-align:center}
-.signal-col{width:6%}
-.state-col{width:5%}
+.injury-col{width:2.5%;text-align:center}
+.signal-col{width:5%}
+.state-col{width:6.7%;text-align:center}
 
 .game-name{
   font-weight:900;
@@ -521,6 +512,15 @@ tr:hover td.context-group{background:#202d39}
   color:#b8c7d5;
   margin-left:5px;
 }
+
+.matchup-kickoff{display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.matchup-team{display:flex;align-items:center;gap:5px;min-width:0;font-size:10px;font-weight:900;line-height:1.2}
+.matchup-team img{width:16px;height:16px;flex:0 0 16px;object-fit:contain;background:rgba(255,255,255,.07);border-radius:3px;padding:1px}
+.matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.neutral-marker{color:var(--yellow);font-size:8px;font-weight:900;letter-spacing:.04em}
+.matchup-sort-head{display:flex;align-items:center;justify-content:space-between;gap:3px}
+.matchup-sort-button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:9px;font-weight:900;padding:0;cursor:pointer;text-transform:uppercase;white-space:nowrap}
+.matchup-sort-button:hover,.matchup-sort-button.active{color:var(--green)}
 
 .game-meta{
   color:var(--muted);
@@ -546,9 +546,9 @@ tr:hover td.context-group{background:#202d39}
   color:#dce5ed;
   font-weight:900;
   display:grid;
-  grid-template-columns:28px minmax(38px,1fr);
+  grid-template-columns:24px minmax(34px,1fr);
   grid-template-rows:auto auto;
-  column-gap:5px;
+  column-gap:3px;
   align-items:center;
   line-height:1.05;
 }
@@ -556,8 +556,8 @@ tr:hover td.context-group{background:#202d39}
 .market-book-logo{
   grid-column:1;
   grid-row:1 / span 2;
-  width:26px;
-  height:26px;
+  width:22px;
+  height:22px;
   object-fit:contain;
 }
 
@@ -600,11 +600,11 @@ tr:hover td.context-group{background:#202d39}
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
 .model-tooltip-panel{
   display:none;
-  position:absolute;
-  z-index:20;
-  left:50%;
-  bottom:calc(100% + 7px);
-  transform:translateX(-50%);
+  position:fixed;
+  z-index:80;
+  left:0;
+  top:0;
+  transform:none;
   min-width:190px;
   padding:7px 8px;
   border:1px solid #425a70;
@@ -616,8 +616,7 @@ tr:hover td.context-group{background:#202d39}
   font-weight:700;
   text-align:left;
 }
-.model-tooltip:hover .model-tooltip-panel,
-.model-tooltip:focus-within .model-tooltip-panel{display:block}
+.model-tooltip.open .model-tooltip-panel{display:block}
 .model-component{display:grid;grid-template-columns:minmax(78px,1fr) auto;gap:10px;padding:1px 0}
 .model-component.missing{color:#718393}
 
@@ -706,10 +705,10 @@ tr:hover td.context-group{background:#202d39}
 .badge{
   display:inline-block;
   border:1px solid var(--line2);
-  padding:3px 7px;
+  padding:3px 4px;
   border-radius:3px;
   font-weight:900;
-  font-size:10px;
+  font-size:9px;
   letter-spacing:.6px;
 }
 
@@ -1183,14 +1182,14 @@ function quoteBundle(game,book){
 
 function hasSpreadQuote(bundle){
   return Boolean(
-    bundle?.spread?.away ||
+    bundle?.spread?.away &&
     bundle?.spread?.home
   );
 }
 
 function hasTotalQuote(bundle){
   return Boolean(
-    bundle?.total?.over ||
+    bundle?.total?.over &&
     bundle?.total?.under
   );
 }
@@ -1200,7 +1199,8 @@ function selectedBookCoverage(book,rows){
     required:rows.length,
     games:0,
     spread:0,
-    total:0
+    total:0,
+    latestQuoteAt:null
   };
 
   rows.forEach(game=>{
@@ -1211,9 +1211,51 @@ function selectedBookCoverage(book,rows){
     if(spread || total) coverage.games += 1;
     if(spread) coverage.spread += 1;
     if(total) coverage.total += 1;
+
+    const acceptedQuotes = [
+      ...(spread ? [bundle.spread.away, bundle.spread.home] : []),
+      ...(total ? [bundle.total.over, bundle.total.under] : [])
+    ];
+
+    acceptedQuotes.forEach(quote=>{
+      const timestamp = quote.last_update || quote.pulled_at;
+      const parsed = timestamp ? new Date(timestamp).getTime() : NaN;
+      const current = coverage.latestQuoteAt
+        ? new Date(coverage.latestQuoteAt).getTime()
+        : NaN;
+      if(Number.isFinite(parsed) && (!Number.isFinite(current) || parsed > current)){
+        coverage.latestQuoteAt = timestamp;
+      }
+    });
   });
 
   return coverage;
+}
+
+function selectedBookStatus(coverage){
+  if(!coverage.required){
+    return {status:'UNAVAILABLE',color:'GRAY'};
+  }
+  if(
+    coverage.games === coverage.required &&
+    coverage.spread === coverage.required &&
+    coverage.total === coverage.required
+  ){
+    return {status:'CURRENT_HEALTHY',color:'GREEN'};
+  }
+  if(coverage.games > 0 && (coverage.spread > 0 || coverage.total > 0)){
+    return {status:'CURRENT_PARTIAL',color:'YELLOW'};
+  }
+  return {status:'UNAVAILABLE',color:'RED'};
+}
+
+function fmtQuoteAge(value){
+  if(!value) return '—';
+  const ageSeconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+  if(!Number.isFinite(ageSeconds)) return '—';
+  if(ageSeconds < 60) return `${ageSeconds}s`;
+  if(ageSeconds < 3600) return `${Math.floor(ageSeconds / 60)}m`;
+  return `${Math.floor(ageSeconds / 3600)}h`;
 }
 
 function coveragePct(value,required){
@@ -1344,6 +1386,11 @@ function currentRows(){
       bv = new Date(b.kickoff_time || 0).getTime();
     }
 
+    else if(SORT_KEY === 'home_team'){
+      av = String(a.home_team || '');
+      bv = String(b.home_team || '');
+    }
+
     else if(SORT_KEY === 'spread_edge'){
       av = numericSortValue(
         a.edges?.spread?.best_edge
@@ -1395,7 +1442,14 @@ function currentRows(){
     if(av === null) av = -999999;
     if(bv === null) bv = -999999;
 
-    if(av !== bv){
+    if(SORT_KEY === 'home_team'){
+      const comparison = av.localeCompare(bv, undefined, {sensitivity:'base'});
+      if(comparison){
+        return SORT_DIR === 'asc' ? comparison : -comparison;
+      }
+    }
+
+    else if(av !== bv){
       return SORT_DIR === 'asc'
         ? av - bv
         : bv - av;
@@ -1426,10 +1480,7 @@ function setSort(key){
   }else{
     SORT_KEY = key;
 
-    SORT_DIR =
-      key === 'date'
-        ? 'asc'
-        : 'desc';
+    SORT_DIR = (key === 'date' || key === 'home_team') ? 'asc' : 'desc';
   }
 
   renderMatrix();
@@ -1459,22 +1510,28 @@ function renderHealth(){
     ordered.map(book=>{
       const h = books[book] || {};
       const coverage = selectedBookCoverage(book,rows);
-      const age = h.quote_age_median_seconds;
+      const selected = selectedBookStatus(coverage);
       const title = [
-        `${book} connectivity: ${h.status || 'UNKNOWN'}`,
-        `Selected scope coverage: ${coverage.games}/${coverage.required}`,
+        `${book} selected-week status: ${selected.status}`,
+        `Selected-week games: ${coverage.games}/${coverage.required}`,
         `Spread: ${coverage.spread}/${coverage.required}`,
         `Total: ${coverage.total}/${coverage.required}`,
+        coverage.latestQuoteAt ? `Latest selected-week quote: ${fmtDateTimeET(coverage.latestQuoteAt)}` : 'Latest selected-week quote: —',
+        coverage.latestQuoteAt ? `Quote age: ${fmtQuoteAge(coverage.latestQuoteAt)}` : null,
+        `Global diagnostic status: ${h.status || 'UNKNOWN'}`,
         `Global acquisition coverage: ${h.games_with_any_quote ?? 0} games`,
-        age != null ? `Median quote age: ${Math.round(age)} seconds` : null
+        h.participated_in_last_fast_pull === false
+          ? 'Provider participation: not seen in latest global pull'
+          : 'Provider participation: seen in latest global pull'
       ].filter(Boolean).join('\n');
 
       return `
         <span class="health-book" title="${esc(title)}">
-          ${healthDot(h.color)}
+          ${healthDot(selected.color)}
           ${esc(BOOK_ABBR[book] || book)}
           <span class="health-detail">
             ${coverage.games}/${coverage.required}
+            ${coverage.latestQuoteAt ? ` · ${esc(fmtStatusTimeET(coverage.latestQuoteAt))}` : ''}
           </span>
         </span>
       `;
@@ -1579,7 +1636,7 @@ function renderHealth(){
     `${esc(q.credits_remaining ?? '—')} left</span>`;
 
   const covered = ordered.filter(
-    b => selectedBookCoverage(b,rows).games > 0
+    b => selectedBookStatus(selectedBookCoverage(b,rows)).color !== 'RED'
   ).length;
 
   document.getElementById('summaryBooks').innerHTML =
@@ -1605,13 +1662,14 @@ function renderHealth(){
   const bookRailRow = book => {
     const h = books[book] || {};
     const coverage = selectedBookCoverage(book,rows);
+    const selected = selectedBookStatus(coverage);
     const spreadPct = coveragePct(coverage.spread,coverage.required);
     const totalPct = coveragePct(coverage.total,coverage.required);
 
     return `
       <div class="rail-row">
         <div class="rail-key">
-          ${healthDot(h.color)}
+          ${healthDot(selected.color)}
           ${esc(BOOK_ABBR[book] || book)}
         </div>
 
@@ -1620,6 +1678,7 @@ function renderHealth(){
           <span class="muted">
             · S ${spreadPct}%
             · T ${totalPct}%
+            ${coverage.latestQuoteAt ? ` · ${esc(fmtStatusTimeET(coverage.latestQuoteAt))}` : ''}
           </span>
         </div>
       </div>
@@ -1751,11 +1810,15 @@ function renderSummary(){
 function renderHead(){
   document.getElementById('matrixHead').innerHTML = `
     <tr>
-      <th
-        class="matchup-col sortable"
-        onclick="setSort('date')"
-      >
-        DATE / MATCHUP ${sortArrow('date')}
+      <th class="matchup-col">
+        <span class="matchup-sort-head">
+          <button class="matchup-sort-button ${SORT_KEY === 'date' ? 'active' : ''}" type="button" onclick="setSort('date')">
+            DATE ${sortArrow('date') || '↕'}
+          </button>
+          <button class="matchup-sort-button ${SORT_KEY === 'home_team' ? 'active' : ''}" type="button" onclick="setSort('home_team')">
+            HOME ${SORT_KEY === 'home_team' ? sortArrow('home_team') : 'A–Z'}
+          </button>
+        </span>
       </th>
 
       <th class="model-col spread-group"><span class="spread-label">SPREAD</span><br>MODEL</th>
@@ -1772,25 +1835,25 @@ function renderHead(){
         <span class="spread-label">SPREAD</span><br>EDGE ${sortArrow('spread_edge')}
       </th>
 
-      <th class="model-col total-group">TOT<br>MODEL</th>
-      <th class="shadow-col total-group">TOT<br>SHADOW</th>
+      <th class="model-col total-group">TOTAL<br>MODEL</th>
+      <th class="shadow-col total-group">TOTAL<br>SHADOW</th>
 
-      <th class="best-col total-group">TOT<br>BEST</th>
-      <th class="exchange-col total-group">TOT<br>EXCH</th>
-      <th class="pinn-col total-group">TOT<br>PINN</th>
+      <th class="best-col total-group">TOTAL<br>BEST</th>
+      <th class="exchange-col total-group">TOTAL<br>EXCH</th>
+      <th class="pinn-col total-group">TOTAL<br>PINN</th>
 
       <th
         class="edge-col total-group edge-focus sortable"
         onclick="setSort('total_edge')"
       >
-        TOT<br>EDGE ${sortArrow('total_edge')}
+        TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
       <th class="injury-col context-group">INJ</th>
       <th class="signal-col context-group">SIGNALS</th>
       <th class="state-col context-group">
         <span class="header-tooltip" tabindex="0">
-          MODEL STATE
+          MODEL<br>STATE
           <span class="header-tooltip-panel" role="tooltip">
             <span class="state-definition"><strong>STALE</strong> · Market exists; Standard inputs are from the prior update cycle.</span>
             <span class="state-definition"><strong>SHADOW</strong> · New market exists and Shadow projections are available.</span>
@@ -1882,7 +1945,37 @@ function modelTooltip(game, model, market){
     return `<span class="model-component ${missing?'missing':''}"><span>${esc(label)}</span><span>${shown}</span></span>`;
   }).join('');
   const value = market === 'spread' ? model?.value_home_line : model?.value_total;
-  return `<span class="model-tooltip" tabindex="0"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  return `<span class="model-tooltip" tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+}
+
+function positionModelTooltip(trigger){
+  const panel = trigger?.querySelector('.model-tooltip-panel');
+  if(!panel) return;
+  trigger.classList.add('open');
+  panel.style.visibility = 'hidden';
+  panel.style.left = '0px';
+  panel.style.top = '0px';
+  const rect = trigger.getBoundingClientRect();
+  const width = panel.offsetWidth;
+  const height = panel.offsetHeight;
+  const gap = 7;
+  const margin = 8;
+  let left = rect.left + (rect.width - width) / 2;
+  left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+  let top = rect.top - height - gap;
+  if(top < margin){
+    top = rect.bottom + gap;
+  }
+  top = Math.max(margin, Math.min(top, window.innerHeight - height - margin));
+  panel.style.left = `${Math.round(left)}px`;
+  panel.style.top = `${Math.round(top)}px`;
+  panel.style.visibility = 'visible';
+}
+
+function closeModelTooltip(trigger){
+  const panel = trigger?.querySelector('.model-tooltip-panel');
+  if(panel) panel.style.visibility = '';
+  trigger?.classList.remove('open');
 }
 
 
@@ -1902,6 +1995,11 @@ function teamLogoSlug(team){
     .replace(/&/g, 'a')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function matchupTeam(team){
+  const slug = teamLogoSlug(team);
+  return `<div class="matchup-team"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span>${esc(team)}</span></div>`;
 }
 
 function signalChip(team, count){
@@ -2082,7 +2180,7 @@ function renderMatrix(){
       <tr class="game-start">
 
         <td class="matchup-col">
-          <div>
+          <div class="matchup-kickoff">
             <span class="game-date">
               ${esc(fmtKickoffDateET(game.kickoff_time))}
             </span>
@@ -2090,18 +2188,10 @@ function renderMatrix(){
             <span class="game-time">
               ${esc(fmtKickoffTimeET(game.kickoff_time))}
             </span>
+            ${game.neutral_site ? '<span class="neutral-marker" title="Neutral site">N</span>' : ''}
           </div>
-
-          <div class="game-name">
-            ${esc(game.away_team)}
-            <span class="muted">@</span>
-            ${esc(game.home_team)}
-          </div>
-
-          <div class="game-meta">
-            W${esc(game.week)}
-            ${game.neutral_site ? ' · NEUTRAL' : ''}
-          </div>
+          ${matchupTeam(game.away_team)}
+          ${matchupTeam(game.home_team)}
         </td>
 
         <td class="model-col spread-group">

@@ -22,9 +22,44 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertNotIn("${games}g${age", self.source)
 
     def test_connectivity_remains_global_but_coverage_is_scoped(self):
-        self.assertIn("${healthDot(h.color)}", self.source)
+        self.assertIn("${healthDot(selected.color)}", self.source)
+        self.assertNotIn("${healthDot(h.color)}", self.source)
         self.assertIn("Global acquisition coverage:", self.source)
-        self.assertIn("Selected scope coverage:", self.source)
+        self.assertIn("Selected-week games:", self.source)
+        self.assertIn("Global diagnostic status:", self.source)
+
+    def test_selected_week_book_status_is_complete_pair_based(self):
+        quote_bundle = re.search(
+            r"function quoteBundle\(game,book\)\{(.*?)\n\}",
+            self.source,
+            re.S,
+        )
+        self.assertIsNotNone(quote_bundle)
+        for marker in (
+            "market.pinnacle",
+            "market.primary_sportsbooks?.[book]",
+            "market.exchanges?.[book]",
+        ):
+            self.assertIn(marker, quote_bundle.group(1))
+        self.assertNotIn("HEALTH", quote_bundle.group(1))
+        self.assertIn("bundle?.spread?.away &&", self.source)
+        self.assertIn("bundle?.total?.over &&", self.source)
+        status = re.search(
+            r"function selectedBookStatus\(coverage\)\{(.*?)\n\}",
+            self.source,
+            re.S,
+        )
+        self.assertIsNotNone(status)
+        body = status.group(1)
+        for marker in (
+            "coverage.games === coverage.required",
+            "coverage.spread === coverage.required",
+            "coverage.total === coverage.required",
+            "CURRENT_HEALTHY",
+            "CURRENT_PARTIAL",
+            "UNAVAILABLE",
+        ):
+            self.assertIn(marker, body)
 
     def test_model_health_has_exact_canonical_rows(self):
         spread = re.search(
@@ -104,14 +139,14 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
 
     def test_shadow_and_column_groups_are_compact(self):
         self.assertIn('class="shadow-team-icons"', self.source)
-        self.assertIn(".shadow-team-icons{display:flex;flex-direction:column", self.source)
+        self.assertIn(".shadow-team-icons{display:flex;flex-direction:row", self.source)
         self.assertIn("th.spread-group", self.source)
         self.assertIn("th.total-group", self.source)
         self.assertIn("th.context-group", self.source)
 
     def test_edge_columns_and_model_state_are_emphasized(self):
         self.assertGreaterEqual(self.source.count("edge-focus"), 5)
-        self.assertIn("MODEL STATE", self.source)
+        self.assertIn("MODEL<br>STATE", self.source)
         for state in ("STALE", "SHADOW", "HYBRID", "UPDATED"):
             self.assertIn(
                 f'<strong>{state}</strong>',
@@ -120,8 +155,61 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
 
     def test_edge_width_is_reclaimed_from_stacked_shadow(self):
         self.assertIn(".shadow-col{\n  width:3.4%;", self.source)
-        self.assertIn(".edge-col{\n  width:6.8%;", self.source)
+        self.assertIn(".edge-col{\n  width:6.2%;", self.source)
         self.assertIn("white-space:nowrap;\n  flex-wrap:nowrap;", self.source)
+
+    def test_matchup_layout_and_explicit_sorts(self):
+        for marker in (
+            'class="matchup-kickoff"',
+            "matchupTeam(game.away_team)",
+            "matchupTeam(game.home_team)",
+            "setSort('date')",
+            "setSort('home_team')",
+            "SORT_KEY === 'home_team'",
+        ):
+            self.assertIn(marker, self.source)
+        render_cell = re.search(
+            r'<td class="matchup-col">(.*?)</td>', self.source, re.S
+        )
+        self.assertIsNotNone(render_cell)
+        self.assertNotIn("W${esc(game.week)}", render_cell.group(1))
+        self.assertNotIn("<span class=\"muted\">@</span>", render_cell.group(1))
+
+    def test_total_headers_are_spelled_out(self):
+        head = re.search(r"function renderHead\(\)\{(.*?)\n\}", self.source, re.S)
+        self.assertIsNotNone(head)
+        for label in ("MODEL", "SHADOW", "BEST", "EXCH", "PINN", "EDGE"):
+            self.assertIn(f"TOTAL<br>{label}", head.group(1))
+        self.assertNotIn("TOT<br>", head.group(1))
+
+    def test_book_health_includes_selected_quote_time_and_age(self):
+        for marker in (
+            "latestQuoteAt",
+            "Latest selected-week quote:",
+            "Quote age:",
+            "fmtQuoteAge(coverage.latestQuoteAt)",
+            "fmtStatusTimeET(coverage.latestQuoteAt)",
+        ):
+            self.assertIn(marker, self.source)
+        self.assertIn(
+            "...(spread ? [bundle.spread.away, bundle.spread.home] : [])",
+            self.source,
+        )
+        self.assertIn(
+            "...(total ? [bundle.total.over, bundle.total.under] : [])",
+            self.source,
+        )
+
+    def test_model_tooltips_are_viewport_positioned(self):
+        for marker in (
+            "function positionModelTooltip(trigger)",
+            "position:fixed;",
+            "window.innerWidth",
+            "window.innerHeight",
+            "rect.bottom + gap",
+            "positionModelTooltip(this)",
+        ):
+            self.assertIn(marker, self.source)
 
     def test_texas_am_uses_existing_canonical_logo_slug(self):
         self.assertIn("'Texas A&M':'texas-a-m'", self.source)
