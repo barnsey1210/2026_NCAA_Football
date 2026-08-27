@@ -171,6 +171,7 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
+        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
     ]
 
 
@@ -190,6 +191,7 @@ def ratings_no_change_commands(
         [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
+        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
     ]
 
 
@@ -211,6 +213,7 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
         [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
+        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
     ]
     return commands[2:] if skip_schedule else commands
 

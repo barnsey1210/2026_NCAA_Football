@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed validation for the three-file fast War Room public bundle."""
+"""Fail-closed validation for the bounded fast War Room public bundle."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED = {
     "war_room_health.json": "war-room-health-v1",
     "war_room_market_matrix.json": "war-room-market-matrix-v1",
+    "war_room_activity.json": "war-room-activity-v1",
 }
 
 
@@ -62,6 +63,7 @@ def main() -> None:
 
     health = payloads.get("war_room_health.json", {})
     matrix = payloads.get("war_room_market_matrix.json", {})
+    activity = payloads.get("war_room_activity.json", {})
     projection_health = health.get("projection_health")
     if not isinstance(projection_health, dict):
         errors.append("health projection_health must be an object")
@@ -94,6 +96,18 @@ def main() -> None:
     refresh_ids = {health_refresh.get("refresh_id"), matrix_refresh.get("refresh_id")}
     if None in refresh_ids or len(refresh_ids) != 1:
         errors.append("health and matrix refresh_id values do not match")
+    elif activity.get("latest_refresh_id") not in refresh_ids:
+        errors.append("activity latest_refresh_id does not match the fast market refresh")
+    if not isinstance(activity.get("events"), list):
+        errors.append("activity events must be a list")
+    else:
+        for row in activity["events"]:
+            if not isinstance(row, dict) or not isinstance(row.get("display_priority"), int):
+                errors.append("activity event missing display_priority")
+                break
+            if not isinstance(row.get("underlying_event_ids"), list):
+                errors.append("activity event missing underlying_event_ids")
+                break
 
     pull_values = {
         health_refresh.get("last_fast_pull_at"),

@@ -129,7 +129,36 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("GET", methods_by_path["/war-room/live/version"])
         self.assertIn("GET", methods_by_path["/war-room/live/health"])
         self.assertIn("GET", methods_by_path["/war-room/live/market-matrix"])
+        self.assertIn("GET", methods_by_path["/war-room/live/activity"])
         self.assertNotIn("/war-room/acquire", methods_by_path)
+
+    def test_game_activity_live_read_is_bounded_to_requested_game(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            index = Path(temporary) / "game-index.json"
+            index.write_text(json.dumps({
+                "schema_version": "war-room-game-activity-index-v1",
+                "built_at": "2026-08-27T12:00:00Z",
+                "latest_refresh_id": "fixture",
+                "games": {
+                    "g1": {
+                        "game_id": "g1", "events": [{"event_id": "one"}], "openers": {},
+                        "prior_games": {
+                            "away": {"game_id": "g0", "events": [{"event_id": "prior-one"}]},
+                            "home": {"game_id": None, "status": "NO_PRIOR_GAME", "events": []},
+                        },
+                    },
+                    "g2": {"game_id": "g2", "events": [{"event_id": "two"}], "openers": {}},
+                },
+            }))
+            with patch.object(api, "GAME_ACTIVITY_INDEX", index):
+                response = api.live_activity(game_id="g1", _=None)
+                payload = json.loads(response.body)
+                self.assertEqual(payload["game_id"], "g1")
+                self.assertEqual(payload["events"], [{"event_id": "one"}])
+                self.assertEqual(payload["prior_games"]["away"]["game_id"], "g0")
+                self.assertEqual(payload["prior_games"]["home"]["status"], "NO_PRIOR_GAME")
+                self.assertNotIn("games", payload)
+                self.assertEqual(response.headers["cache-control"], "no-store")
 
     def test_bootstrap_is_exact_origin_allowlisted_and_secret_free(self):
         response = api.bootstrap(
@@ -166,7 +195,7 @@ class OperatorContractTests(unittest.TestCase):
         self.assertNotIn("fetch('/war-room/acquire'", builder)
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
         self.assertIn("LIVE_VERSION_URL", builder)
-        self.assertIn("fetchDataPair(LIVE_MATRIX_URL,LIVE_HEALTH_URL)", builder)
+        self.assertIn("fetchDataBundle(LIVE_MATRIX_URL,LIVE_HEALTH_URL,LIVE_ACTIVITY_URL)", builder)
         self.assertIn('POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))', builder)
 
     def test_public_live_read_origin_is_exact(self):

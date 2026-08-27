@@ -59,12 +59,13 @@ button,select{
 }
 
 .wr-top{
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
-  min-height:42px;
-  padding:7px 12px;
+  gap:8px;
+  min-height:40px;
+  padding:4px 8px 12px;
   border-bottom:1px solid var(--line);
   background:#060c12;
 }
@@ -83,9 +84,11 @@ button,select{
 .wr-top-right{
   display:flex;
   align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
+  gap:6px;
+  flex-wrap:nowrap;
 }
+.wr-top-left{min-width:0}
+.wr-top-right{margin-left:auto;white-space:nowrap}
 
 .wr-inline-health{
   display:flex;
@@ -114,7 +117,8 @@ button,select{
   background:#0c1722;
   color:var(--text);
   border-radius:4px;
-  padding:7px 10px;
+  padding:5px 7px;
+  font-size:10px;
   cursor:pointer;
 }
 
@@ -137,37 +141,39 @@ button,select{
 }
 
 .operator-status{
-  flex-basis:100%;
+  position:absolute;
+  right:9px;
+  bottom:1px;
   color:var(--muted);
-  font-size:11px;
+  font-size:8px;
   text-align:right;
-  min-height:14px;
+  min-height:9px;
 }
 
 .summary-grid{
   display:grid;
   grid-template-columns:1.1fr 1.25fr 1.25fr .65fr 1fr 1fr;
-  gap:4px;
-  padding:4px;
+  gap:3px;
+  padding:3px 4px 2px;
 }
 
 .summary-box{
-  min-height:47px;
+  min-height:38px;
   border:1px solid var(--line);
   background:var(--panel);
-  padding:6px 8px;
+  padding:4px 7px;
 }
 
 .summary-label{
   color:var(--muted);
-  font-size:11px;
+  font-size:9px;
   text-transform:uppercase;
 }
 
 .summary-value{
-  margin-top:4px;
+  margin-top:2px;
   font-weight:900;
-  font-size:15px;
+  font-size:13px;
 }
 
 .green{color:var(--green)}
@@ -179,20 +185,20 @@ button,select{
 .health-strip{
   display:flex;
   align-items:center;
-  gap:13px;
+  gap:8px;
   flex-wrap:wrap;
-  padding:8px 10px;
-  margin:0 4px 4px;
+  padding:4px 8px;
+  margin:0 4px 2px;
   border:1px solid var(--line);
   background:var(--panel);
 }
 
 .health-title{
   color:var(--muted);
-  font-size:11px;
+  font-size:10px;
   font-weight:900;
   letter-spacing:.7px;
-  margin-right:6px;
+  margin-right:3px;
 }
 
 .health-book{
@@ -203,7 +209,7 @@ button,select{
 .health-detail{
   color:var(--muted);
   font-weight:500;
-  font-size:11px;
+  font-size:10px;
 }
 
 .ratings-health-strip{
@@ -211,26 +217,26 @@ button,select{
   display:grid;
   grid-template-columns:max-content minmax(0, 1fr);
   align-items:start;
-  gap:5px 12px;
+  gap:3px 8px;
 }
 
 .model-health-rows{
   display:grid;
-  gap:5px;
+  gap:3px;
   min-width:0;
 }
 
 .model-health-row{
   display:flex;
   align-items:center;
-  gap:11px;
+  gap:8px;
   flex-wrap:wrap;
   min-width:0;
 }
 
 .model-health-label{
   min-width:154px;
-  font-size:11px;
+  font-size:10px;
   font-weight:900;
   letter-spacing:.3px;
 }
@@ -255,7 +261,8 @@ button,select{
   display:grid;
   grid-template-columns:minmax(0, 1fr) 330px;
   gap:4px;
-  margin:4px;
+  margin:2px 4px;
+  min-height:320px;
 }
 
 .main-panel{
@@ -263,12 +270,20 @@ button,select{
   border:1px solid var(--line);
   background:var(--panel);
   min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
 .right-rail{
   border:1px solid var(--line);
   background:var(--panel);
   min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
 .rail-section{
@@ -280,7 +295,12 @@ button,select{
   font-weight:900;
   letter-spacing:1px;
   border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
 }
+.activity-updated{color:var(--muted);font-size:9px;font-weight:800;letter-spacing:0;white-space:nowrap}
 
 .rail-row{
   display:grid;
@@ -300,9 +320,55 @@ button,select{
   font-weight:800;
 }
 
+.activity-summary{padding:8px 10px;border-bottom:1px solid var(--line);font-size:11px;font-weight:900;line-height:1.45}
+.activity-summary-label{display:block;color:var(--muted);font-size:9px;letter-spacing:.7px}
+.activity-focus{display:none;padding:7px 9px;border-bottom:1px solid var(--line);background:rgba(66,217,255,.055)}
+.activity-focus.active{display:block}
+.activity-focus-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.activity-focus-game{min-width:0;color:var(--cyan);font-size:11px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.activity-clear{border:0;background:transparent;color:var(--muted);font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap}
+.activity-clear:hover{color:var(--cyan)}
+.activity-filters{display:flex;gap:4px;padding:6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.activity-filter{border:1px solid var(--line2);background:#09131d;color:var(--muted);border-radius:10px;padding:3px 7px;font-size:9px;font-weight:900;cursor:pointer}
+.activity-filter.active{border-color:var(--green);color:var(--green)}
+.activity-summary.hidden{display:none}
+.activity-snapshot{display:none;padding:5px 8px;border-bottom:1px solid var(--line);background:rgba(66,217,255,.035);font-size:9px;line-height:1.28}
+.activity-snapshot.active{display:block}
+.snapshot-title{color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.7px;margin-bottom:3px}
+.snapshot-row{display:grid;grid-template-columns:48px minmax(0,1fr);gap:5px;align-items:baseline;margin-top:2px}
+.snapshot-key{color:var(--cyan);font-size:8px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snapshot-value{min-width:0;color:var(--text);font-weight:800;white-space:normal}
+.snapshot-components{display:block;color:#9eafbf;font-size:8px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snapshot-book{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.snapshot-book img{width:13px;height:13px;object-fit:contain;border-radius:3px;padding:1px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}
+.activity-list{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+.activity-row{display:block;width:100%;border:0;border-bottom:1px solid #1c2d3c;background:transparent;color:var(--text);padding:7px 9px;text-align:left;cursor:default}
+.activity-row.game-event{cursor:pointer}
+.activity-row.game-event:hover{background:#101d29}
+.activity-line{display:flex;align-items:center;gap:6px;min-width:0}
+.activity-time{color:var(--muted);font-size:9px;white-space:nowrap}
+.activity-kind{font-size:9px;font-weight:900;color:var(--cyan)}
+.activity-kind.open{color:#42d9ff}.activity-kind.market{color:#ff9c55}.activity-kind.model{color:#79b9ff}.activity-kind.postgame{color:#c6a0ff}.activity-kind.data{color:#ffd166}
+.activity-game{margin-top:2px;font-size:10px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.activity-prior-owner{display:block;margin-top:2px;color:var(--cyan);font-size:8px;font-weight:900;letter-spacing:.45px}
+.activity-detail{margin-top:2px;color:#aebdca;font-size:10px;line-height:1.25;white-space:normal;display:flex;align-items:center;gap:5px;min-width:0}
+.activity-detail-text{min-width:0}
+.activity-book-logos{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto}
+.activity-book-logo{width:18px;height:18px;object-fit:contain;border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:2px;background:rgba(255,255,255,.09)}
+.activity-book-fallback{display:none;color:var(--muted);font-size:8px;font-weight:900}
+.activity-empty{padding:16px 10px;color:var(--muted);font-size:10px}
+.activity-unread{color:var(--yellow);margin-left:5px}
+.activity-flash td{animation:activityFlash 1.8s ease-out}
+@keyframes activityFlash{0%{box-shadow:inset 0 0 0 999px rgba(57,232,154,.25)}100%{box-shadow:none}}
+.game-start.game-selected td{background:rgba(66,153,255,.075);box-shadow:inset 0 1px rgba(66,217,255,.24),inset 0 -1px rgba(66,217,255,.24)}
+.game-start.game-selected td:first-child{box-shadow:inset 3px 0 var(--cyan),inset 0 1px rgba(66,217,255,.24),inset 0 -1px rgba(66,217,255,.24)}
+
 .matrix-scroll{
-  max-height:690px;
-  overflow:auto;
+  flex:1;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 
 .panel-head{
@@ -310,8 +376,8 @@ button,select{
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  height:36px;
-  padding:0 10px;
+  height:31px;
+  padding:0 8px;
   border-bottom:1px solid var(--line);
 }
 
@@ -337,6 +403,11 @@ button,select{
 
 .table-wrap{
   overflow:visible;
+}
+
+.table-wrap.matrix-scroll{
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 
 table{
@@ -371,13 +442,13 @@ th{
   font-size:10px;
   text-transform:uppercase;
   font-weight:800;
-  padding:6px 4px;
+  padding:6px 2px;
   white-space:nowrap;
 }
 
 td{
   border-bottom:1px solid #223444;
-  padding:5px 4px;
+  padding:5px 2px;
   vertical-align:middle;
   white-space:nowrap;
 }
@@ -449,7 +520,7 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .model-col{
-  font-size:14px;
+  font-size:15px;
   font-weight:900;
 }
 
@@ -477,7 +548,7 @@ tr:hover td.context-group{background:#202d39}
 .shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;white-space:nowrap}
 .shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:1px}
 .shadow-team-chip{display:inline-flex;align-items:center;gap:1px}
-.shadow-team-chip img{width:10px;height:10px;object-fit:contain}
+.shadow-team-chip .team-logo-holder{--team-logo-size:15px}
 .shadow-team-mark{font-size:8px;font-weight:900}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
@@ -514,8 +585,8 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .matchup-kickoff{display:flex;align-items:center;gap:5px;margin-bottom:2px}
-.matchup-team{display:flex;align-items:center;gap:5px;min-width:0;font-size:10px;font-weight:900;line-height:1.2}
-.matchup-team img{width:16px;height:16px;flex:0 0 16px;object-fit:contain;background:rgba(255,255,255,.07);border-radius:3px;padding:1px}
+.matchup-team{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;font-weight:900;line-height:1.2}
+.matchup-team .team-logo-holder{--team-logo-size:18px}
 .matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .neutral-marker{color:var(--yellow);font-size:8px;font-weight:900;letter-spacing:.04em}
 .matchup-sort-head{display:flex;align-items:center;justify-content:space-between;gap:3px}
@@ -565,7 +636,7 @@ tr:hover td.context-group{background:#202d39}
   grid-column:2;
   grid-row:1;
   color:#eef3f7;
-  font-size:11px;
+  font-size:12px;
   white-space:nowrap;
 }
 
@@ -580,13 +651,14 @@ tr:hover td.context-group{background:#202d39}
 .decision-edge{
   display:inline-flex;
   width:100%;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:3px;
+  gap:1px;
   white-space:nowrap;
-  flex-wrap:nowrap;
 }
-.decision-edge img,
+.decision-edge-main{display:inline-flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+.decision-team-name{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:#aebdca;font-size:7.5px;font-weight:800;line-height:1.05}
 .market-book-logo{
   background:rgba(255,255,255,.09);
   border:1px solid rgba(255,255,255,.16);
@@ -594,8 +666,34 @@ tr:hover td.context-group{background:#202d39}
   padding:2px;
   filter:drop-shadow(0 0 3px rgba(235,242,248,.2));
 }
-.decision-edge img{width:20px;height:20px;object-fit:contain;flex:0 0 20px}
+.decision-edge .team-logo-holder{--team-logo-size:22px}
 .decision-side{font-size:11px;font-weight:900}
+
+.team-logo-holder{
+  width:var(--team-logo-size,16px);
+  height:var(--team-logo-size,16px);
+  flex:0 0 var(--team-logo-size,16px);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.5px;
+  overflow:hidden;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:4px;
+  box-shadow:inset 0 0 0 1px rgba(7,16,25,.22);
+}
+
+.team-logo-holder img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter:
+    drop-shadow(0 0 1px rgba(255,255,255,.90))
+    drop-shadow(0 0 2px rgba(255,255,255,.38))
+    drop-shadow(0 1px 1px rgba(0,0,0,.78));
+}
 
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
 .model-tooltip-panel{
@@ -648,7 +746,7 @@ tr:hover td.context-group{background:#202d39}
 
 .pinn-quote{
   display:block;
-  font-size:10px;
+  font-size:11px;
   line-height:1.15;
   white-space:normal;
 }
@@ -683,11 +781,7 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 
-.signal-chip img{
-  width:16px;
-  height:16px;
-  object-fit:contain;
-}
+.signal-chip .team-logo-holder{--team-logo-size:18px}
 
 .signal-count{
   color:var(--green);
@@ -759,14 +853,17 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .footer{
-  padding:7px 10px;
+  padding:4px 8px;
   color:var(--muted);
   border-top:1px solid var(--line);
   background:#060c12;
-  font-size:11px;
+  font-size:9px;
 }
 
+@media(min-width:901px){body{overflow:hidden}}
+
 @media(max-width:900px){
+  body{overflow:auto}
   .summary-grid{
     grid-template-columns:repeat(2,1fr);
   }
@@ -778,6 +875,9 @@ tr:hover td.context-group{background:#202d39}
   .right-rail{
     display:none;
   }
+
+  .command-grid{height:auto!important}
+  .matrix-scroll{max-height:70vh;overflow-y:auto}
 
   .wr-top{
     align-items:flex-start;
@@ -871,7 +971,7 @@ tr:hover td.context-group{background:#202d39}
   </section>
 
   <section class="health-strip" id="healthStrip">
-    <span class="health-title">FAST MARKET HEALTH</span>
+    <span class="health-title">MARKET HEALTH</span>
   </section>
 
   <section class="health-strip ratings-health-strip" id="ratingsHealthStrip">
@@ -902,85 +1002,18 @@ tr:hover td.context-group{background:#202d39}
       </div>
     </section>
 
-    <aside class="right-rail">
-
-      <div class="rail-section">
-        <div class="rail-title">LIVE MARKET</div>
-
-        <div class="rail-row">
-          <div class="rail-key">REFRESH</div>
-          <div class="rail-value" id="railRefresh">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">SELECTED WEEK</div>
-          <div class="rail-value" id="railSelectedWeek">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">GLOBAL BOARD</div>
-          <div class="rail-value" id="railGlobalBoard">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">DISPLAYED</div>
-          <div class="rail-value" id="railDisplayed">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">DISPLAY STATE</div>
-          <div class="rail-value" id="railDisplayState">—</div>
-        </div>
+    <aside class="right-rail" aria-label="War Room Activity">
+      <div class="rail-title"><span>WAR ROOM ACTIVITY</span><span class="activity-updated" id="activityUpdated">UPDATED —</span></div>
+      <div class="activity-summary" id="activitySummary">Loading activity…</div>
+      <div class="activity-focus" id="activityFocus"></div>
+      <div class="activity-filters" id="activityFilters">
+        <button class="activity-filter active" data-filter="ALL">ALL</button>
+        <button class="activity-filter" data-filter="MARKET">MARKET</button>
+        <button class="activity-filter" data-filter="MODEL">MODEL</button>
+        <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
       </div>
-
-      <div class="rail-section">
-        <div class="rail-title">BETTABLE BOOKS</div>
-        <div id="railBettable"></div>
-      </div>
-
-      <div class="rail-section">
-        <div class="rail-title">SHARP / EXCHANGE</div>
-        <div id="railReference"></div>
-      </div>
-
-      <div class="rail-section">
-        <div class="rail-title">API / QUOTA</div>
-
-        <div class="rail-row">
-          <div class="rail-key">STATUS</div>
-          <div class="rail-value" id="railQuotaStatus">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">LEFT</div>
-          <div class="rail-value" id="railQuotaLeft">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">PULLS</div>
-          <div class="rail-value" id="railQuotaPulls">—</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">RESET</div>
-          <div class="rail-value" id="railQuotaReset">—</div>
-        </div>
-      </div>
-
-      <div class="rail-section">
-        <div class="rail-title">MOVEMENT STUDY</div>
-
-        <div class="rail-row">
-          <div class="rail-key">MODE</div>
-          <div class="rail-value green">PASSIVE RECORDING</div>
-        </div>
-
-        <div class="rail-row">
-          <div class="rail-key">COST</div>
-          <div class="rail-value">0 extra credits</div>
-        </div>
-      </div>
-
+      <div class="activity-snapshot" id="activitySnapshot"></div>
+      <div class="activity-list" id="activityList"></div>
     </aside>
 
   </section>
@@ -997,12 +1030,20 @@ tr:hover td.context-group{background:#202d39}
 <script>
 const MATRIX_URL = 'data/site/war_room_market_matrix.json';
 const HEALTH_URL = 'data/site/war_room_health.json';
+const ACTIVITY_URL = 'data/site/war_room_activity.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
+const LIVE_ACTIVITY_URL = 'https://control.barnseywr.com/war-room/live/activity';
 
 let MATRIX = null;
 let HEALTH = null;
+let ACTIVITY = null;
+let ACTIVITY_FILTER = 'ALL';
+let SELECTED_GAME_ID = null;
+let SELECTED_GAME_ACTIVITY = null;
+let ACTIVITY_VERSION = null;
+const GAME_ACTIVITY_CACHE = new Map();
 let ACTIVE_MARKET = 'spread';
 let ACTIVE_WEEK = 'AUTO';
 let ACTIVE_SCOPE = 'FBS';
@@ -1506,7 +1547,7 @@ function renderHealth(){
   ];
 
   strip.innerHTML =
-    `<span class="health-title">FAST MARKET HEALTH</span>` +
+    `<span class="health-title">MARKET HEALTH</span>` +
     ordered.map(book=>{
       const h = books[book] || {};
       const coverage = selectedBookCoverage(book,rows);
@@ -1620,14 +1661,10 @@ function renderHealth(){
   const q = HEALTH?.api_quota || {};
 
   document.getElementById('topHealth').innerHTML = `
-    <span>
+    <span title="${esc(HEALTH?.fast_market_refresh?.refresh_id || '')}">
       ${healthDot(q.color)}
       API ${esc(q.status || 'UNKNOWN')}
-    </span>
-    <span>
-      STATE ${esc(
-        HEALTH?.fast_market_refresh?.refresh_id || '—'
-      )}
+      · MARKET ${esc(fmtDateTimeET(HEALTH?.fast_market_refresh?.last_fast_pull_at))}
     </span>
   `;
 
@@ -1643,75 +1680,6 @@ function renderHealth(){
     `<span class="green">${covered}</span> / ${ordered.length} COVERING`;
 
 
-  const refresh =
-    HEALTH?.fast_market_refresh || {};
-
-  document.getElementById('railRefresh').textContent =
-    fmtDateTimeET(refresh.last_fast_pull_at);
-
-  document.getElementById('railSelectedWeek').textContent =
-    ACTIVE_WEEK === 'ALL'
-      ? 'Select week'
-      : `${rows.length} games`;
-
-  const globalBoard = refresh.upcoming_games_in_pull ?? '—';
-  const globalBoardEl = document.getElementById('railGlobalBoard');
-  globalBoardEl.textContent = `${globalBoard} games`;
-  globalBoardEl.title = 'Global acquisition universe; not selected-week coverage.';
-
-  const bookRailRow = book => {
-    const h = books[book] || {};
-    const coverage = selectedBookCoverage(book,rows);
-    const selected = selectedBookStatus(coverage);
-    const spreadPct = coveragePct(coverage.spread,coverage.required);
-    const totalPct = coveragePct(coverage.total,coverage.required);
-
-    return `
-      <div class="rail-row">
-        <div class="rail-key">
-          ${healthDot(selected.color)}
-          ${esc(BOOK_ABBR[book] || book)}
-        </div>
-
-        <div class="rail-value">
-          ${coverage.games}/${coverage.required} games
-          <span class="muted">
-            · S ${spreadPct}%
-            · T ${totalPct}%
-            ${coverage.latestQuoteAt ? ` · ${esc(fmtStatusTimeET(coverage.latestQuoteAt))}` : ''}
-          </span>
-        </div>
-      </div>
-    `;
-  };
-
-  document.getElementById('railBettable').innerHTML =
-    [
-      'DraftKings',
-      'FanDuel',
-      'BetMGM',
-      'Caesars'
-    ].map(bookRailRow).join('');
-
-  document.getElementById('railReference').innerHTML =
-    [
-      'Pinnacle',
-      'Novig',
-      'ProphetX',
-      'Kalshi'
-    ].map(bookRailRow).join('');
-
-  document.getElementById('railQuotaStatus').innerHTML =
-    `${healthDot(q.color)} ${esc(q.status || '—')}`;
-
-  document.getElementById('railQuotaLeft').textContent =
-    `${q.credits_remaining ?? '—'} credits`;
-
-  document.getElementById('railQuotaPulls').textContent =
-    `${q.estimated_fast_pulls_remaining ?? '—'} est.`;
-
-  document.getElementById('railQuotaReset').textContent =
-    `${q.days_until_reset ?? '—'} days`;
 }
 
 function fillWeeks(){
@@ -1780,7 +1748,7 @@ function renderSummary(){
   const totalLean = totalEdges.filter(x=>x>=2 && x<3).length;
 
   document.getElementById('summaryMarkets').innerHTML =
-    `<span class="green">${rows.length}</span> fast games`;
+    `<span class="green">${rows.length}</span> games`;
 
   document.getElementById('summarySpread').innerHTML =
     `<span class="green">ACT ${spreadAction}</span> ` +
@@ -1796,13 +1764,6 @@ function renderSummary(){
   },{});
 
   document.getElementById('summaryState').innerHTML =
-    `<span class="cyan">HYB ${counts.HYBRID || 0}</span> · ` +
-    `<span class="red">ST ${counts.STALE || 0}</span>`;
-
-  document.getElementById('railDisplayed').textContent =
-    `${rows.length} games`;
-
-  document.getElementById('railDisplayState').innerHTML =
     `<span class="cyan">HYB ${counts.HYBRID || 0}</span> · ` +
     `<span class="red">ST ${counts.STALE || 0}</span>`;
 }
@@ -1912,7 +1873,7 @@ function spreadDecision(game, side, edge){
   }
   const team = side === 'away' ? game.away_team : game.home_team;
   const slug = teamLogoSlug(team);
-  return `<span class="decision-edge" title="Bet ${esc(team)}"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span>${edgeDisplay(edge)}</span></span>`;
+  return `<span class="decision-edge" title="Bet ${esc(team)}"><span class="decision-edge-main"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span>${edgeDisplay(edge)}</span></span><span class="decision-team-name" title="${esc(team)}">${esc(team)}</span></span>`;
 }
 
 function totalDecision(side, edge){
@@ -1945,7 +1906,7 @@ function modelTooltip(game, model, market){
     return `<span class="model-component ${missing?'missing':''}"><span>${esc(label)}</span><span>${shown}</span></span>`;
   }).join('');
   const value = market === 'spread' ? model?.value_home_line : model?.value_total;
-  return `<span class="model-tooltip" tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
 
 function positionModelTooltip(trigger){
@@ -1999,7 +1960,7 @@ function teamLogoSlug(team){
 
 function matchupTeam(team){
   const slug = teamLogoSlug(team);
-  return `<div class="matchup-team"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span>${esc(team)}</span></div>`;
+  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span>${esc(team)}</span></div>`;
 }
 
 function signalChip(team, count){
@@ -2016,12 +1977,12 @@ function signalChip(team, count){
       class="signal-chip"
       title="${esc(team)} · ${n} betting signal${n === 1 ? '' : 's'}"
     >
-      <img
+      <span class="team-logo-holder"><img
         class="signal-logo"
         src="logos/${esc(slug)}.png"
         alt="${esc(team)}"
-        onerror="this.style.display='none'"
-      >
+        onerror="this.parentElement.style.display='none'"
+      ></span>
       <span class="signal-count">×${n}</span>
     </span>
   `;
@@ -2056,7 +2017,7 @@ function signalCell(game){
 
 function shadowTeamChip(team,ready){
   const slug=teamLogoSlug(team);
-  return `<span class="shadow-team-chip" title="${esc(team)} · ${ready?'Shadow input ready':'Shadow input not ready'}"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.style.display='none'"><span class="shadow-team-mark ${ready?'ready':'waiting'}">${ready?'✓':'✕'}</span></span>`;
+  return `<span class="shadow-team-chip" title="${esc(team)} · ${ready?'Shadow input ready':'Shadow input not ready'}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="shadow-team-mark ${ready?'ready':'waiting'}">${ready?'✓':'✕'}</span></span>`;
 }
 
 function shadowDisplay(game, model, market){
@@ -2177,7 +2138,7 @@ function renderMatrix(){
       game.models?.shadow_total;
 
     return `
-      <tr class="game-start">
+      <tr class="game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
 
         <td class="matchup-col">
           <div class="matchup-kickoff">
@@ -2264,32 +2225,458 @@ function renderMatrix(){
     `;
   }).join('');
 
+  body.querySelectorAll('tr[data-game-id]').forEach(row=>row.addEventListener('click',event=>{
+    if(event.target.closest('button,a,input,select,summary,[role="button"],[data-no-game-select]')) return;
+    const game=rows.find(item=>String(item.game_id)===String(row.dataset.gameId));
+    if(game) selectActivityGame(game);
+  }));
+
   renderSummary();
 }
 
-async function fetchDataPair(matrixUrl,healthUrl){
+function activityCategory(event){
+  if(event?.prior_context) return 'POSTGAME';
+  if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event?.event_type)) return 'OPEN';
+  if(String(event?.event_type || '').startsWith('MARKET_') || String(event?.event_type || '').startsWith('PINNACLE_')) return 'MARKET';
+  if(['FINAL_POSTED','POSTGAME_REFRESHED'].includes(event?.event_type)) return 'POSTGAME';
+  if(String(event?.event_type || '').startsWith('PROVIDER_')) return 'DATA';
+  return 'MODEL';
+}
+
+function activityTime(value){
+  if(!value) return '—';
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return esc(value);
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    hour:'numeric',minute:'2-digit',second:'2-digit'
+  }).format(d);
+}
+
+function activityMatchup(event){
+  return event.away_team && event.home_team
+    ? `${event.away_team} @ ${event.home_team}`
+    : '';
+}
+
+function activityBooks(event){
+  const books = event?.payload?.books || (event.book ? [event.book] : []);
+  return [...new Set(books.filter(Boolean))];
+}
+
+function activityBookLogos(event){
+  return activityBooks(event).map(book=>{
+    const logo=BOOK_LOGOS[book];
+    const fallback=BOOK_ABBR[book] || book;
+    if(!logo) return `<span class="activity-book-fallback" style="display:inline" title="${esc(book)}">${esc(fallback)}</span>`;
+    return `<span title="${esc(book)}"><img class="activity-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(book)}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="activity-book-fallback">${esc(fallback)}</span></span>`;
+  }).join('');
+}
+
+function activityTitle(event){
+  const p = event.payload || {};
+  const book = p.sportsbook ? `${BOOK_ABBR[p.sportsbook] || p.sportsbook} ` : '';
+  const labels = {
+    MARKET_OPENED:'Market opened', PINNACLE_OPENED:'Pinnacle open',
+    MARKET_MOVE:'Market move', PINNACLE_MOVE:'Pinnacle move', MARKET_FOLLOW:'Market follow',
+    RATINGS_UPDATED:'Ratings update',
+    MODEL_STATE_CHANGED:`${p.domain || 'Model'} state changed`,
+    SHADOW_SPREAD_READY:'Shadow spread ready', SHADOW_TOTAL_READY:'Shadow total ready',
+    FINAL_POSTED:'Final posted', POSTGAME_REFRESHED:'Postgame refreshed',
+    PROVIDER_DEGRADED:`${event.book || 'Provider'} degraded`,
+    PROVIDER_RECOVERED:`${event.book || 'Provider'} recovered`,
+    PROVIDER_UNAVAILABLE:`${event.book || 'Provider'} unavailable`,
+    PRIOR_GAME_STATUS:'Prior game status'
+  };
+  return labels[event.event_type] || String(event.event_type || 'Activity').replaceAll('_',' ');
+}
+
+function activityDetail(event){
+  const p = event.payload || {};
+  if(event.event_type==='PRIOR_GAME_STATUS') return String(event.prior_context?.status || 'WAITING').replaceAll('_',' ');
+  if(['MARKET_MOVE','PINNACLE_MOVE','MARKET_FOLLOW'].includes(event.event_type)){
+    const prefix=event.event_type==='PINNACLE_MOVE'?'Pinnacle ':event.event_type==='MARKET_FOLLOW'?'Market follow ':'';
+    const team=event.market==='spread' && event.home_team ? `${event.home_team} ` : '';
+    const oldValue=event.market==='total'?(event.old_line ?? '—'):fmtLine(event.old_line);
+    const newValue=event.market==='total'?(event.new_line ?? '—'):fmtLine(event.new_line);
+    return `${prefix}${team}${oldValue} → ${newValue}`;
+  }
+  if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event.event_type)){
+    if(event.market==='spread') return `Spread opened ${event.home_team || ''} ${fmtLine(event.new_line)}`;
+    return `Total opened ${event.new_line ?? '—'}`;
+  }
+  if(event.event_type === 'RATINGS_UPDATED') return (p.sources || []).join(' · ');
+  if(event.event_type === 'MODEL_STATE_CHANGED'){
+    if(p.old_state !== p.new_state) return `${p.old_state || '—'} → ${p.new_state || '—'}`;
+    if(p.old_spread_authority !== p.spread_authority) return `Spread ${p.old_spread_authority || '—'} → ${p.spread_authority || '—'}`;
+    return `Total ${p.old_total_authority || '—'} → ${p.total_authority || '—'}`;
+  }
+  if(event.event_type === 'SHADOW_SPREAD_READY') return 'Spread Shadow available';
+  if(event.event_type === 'SHADOW_TOTAL_READY') return 'Total Shadow available';
+  if(event.event_type === 'FINAL_POSTED') return `Final: ${event.home_team || 'Home'} ${p.home_score ?? '—'}, ${event.away_team || 'Away'} ${p.away_score ?? '—'}`;
+  if(String(event.event_type || '').startsWith('PROVIDER_')){
+    const c=p.current || {};
+    return `Week ${event.week ?? '—'} · ${c.games ?? 0}/${c.required ?? 0} games · S ${c.spread ?? 0} · T ${c.total ?? 0}`;
+  }
+  return p.reason || p.market || p.status || '';
+}
+
+function activityRefreshTimestamp(){
+  const refreshes=ACTIVITY?.pipeline_refreshes || {};
+  if(ACTIVITY_FILTER==='MARKET') return refreshes.market || HEALTH?.fast_market_refresh?.last_fast_pull_at;
+  if(ACTIVITY_FILTER==='MODEL') return refreshes.model || HEALTH?.ratings_health?.generated_at;
+  if(ACTIVITY_FILTER==='POSTGAME') return refreshes.postgame;
+  return [refreshes.market,refreshes.model,refreshes.postgame]
+    .filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0] || ACTIVITY?.built_at;
+}
+
+function selectedGame(){
+  return (MATRIX?.games || []).find(game=>String(game.game_id)===String(SELECTED_GAME_ID)) || null;
+}
+
+function fallbackGameActivity(game){
+  const openers=(ACTIVITY?.opening_markets || {})[game.game_id] || {};
+  return {
+    schema_version:'war-room-game-activity-fallback-v1',
+    built_at:ACTIVITY?.built_at,
+    latest_refresh_id:ACTIVITY?.latest_refresh_id,
+    game_id:game.game_id,season:game.season,week:game.week,
+    away_team:game.away_team,home_team:game.home_team,
+    openers,
+    prior_games:((ACTIVITY?.game_contexts || {})[game.game_id] || {}).prior_games || {},
+    events:[...openerEventsFromSummary(game,openers),
+      ...(ACTIVITY?.events || []).filter(event=>
+        String(event.game_id)===String(game.game_id) && !['MARKET_OPENED','PINNACLE_OPENED'].includes(event.event_type)
+      )].sort((a,b)=>new Date(b.observed_at||0)-new Date(a.observed_at||0))
+  };
+}
+
+function openerEventsFromSummary(game,openers){
+  return Object.entries(openers || {}).filter(([,row])=>row).map(([key,row])=>({
+    event_id:`static-opener-${game.game_id}-${key}`,
+    event_type:key.startsWith('pinnacle_')?'PINNACLE_OPENED':'MARKET_OPENED',
+    entity_type:'market_opener',source_system:'canonical_market_history',
+    observed_at:row.observed_at,event_timestamp:row.observed_at,
+    game_id:game.game_id,season:game.season,week:game.week,
+    away_team:game.away_team,home_team:game.home_team,
+    book:row.book,market:row.market,new_line:row.line,new_price:row.price,
+    payload:{opening_book:row.book,opener_key:key,provenance:row.provenance,authority:row.authority},
+    metadata:{opening_book:row.book,opener_key:key,provenance:row.provenance,authority:row.authority}
+  }));
+}
+
+async function fetchGameActivity(game){
+  const cacheKey=`${ACTIVITY_VERSION || ACTIVITY?.built_at || 'static'}|${game.game_id}`;
+  if(GAME_ACTIVITY_CACHE.has(cacheKey)) return GAME_ACTIVITY_CACHE.get(cacheKey);
+  let payload;
+  try{
+    const separator=LIVE_ACTIVITY_URL.includes('?')?'&':'?';
+    const response=await fetch(`${LIVE_ACTIVITY_URL}${separator}game_id=${encodeURIComponent(game.game_id)}&v=${Date.now()}`,{cache:'no-store'});
+    if(!response.ok) throw new Error(`Game Activity HTTP ${response.status}`);
+    payload=await response.json();
+  }catch(_error){
+    payload=fallbackGameActivity(game);
+  }
+  GAME_ACTIVITY_CACHE.set(cacheKey,payload);
+  return payload;
+}
+
+function applySelectedRow(){
+  document.querySelectorAll('tr[data-game-id]').forEach(row=>{
+    row.classList.toggle('game-selected',String(row.dataset.gameId)===String(SELECTED_GAME_ID));
+  });
+}
+
+async function selectActivityGame(game,{toggle=true}={}){
+  if(!game?.game_id) return;
+  if(toggle && String(SELECTED_GAME_ID)===String(game.game_id)){
+    clearActivityGame();
+    return;
+  }
+  SELECTED_GAME_ID=String(game.game_id);
+  SELECTED_GAME_ACTIVITY=null;
+  applySelectedRow();
+  renderActivity();
+  const requested=SELECTED_GAME_ID;
+  const payload=await fetchGameActivity(game);
+  if(requested!==SELECTED_GAME_ID) return;
+  SELECTED_GAME_ACTIVITY=payload;
+  renderActivity();
+}
+
+function clearActivityGame(){
+  SELECTED_GAME_ID=null;
+  SELECTED_GAME_ACTIVITY=null;
+  applySelectedRow();
+  renderActivity();
+}
+
+function reconcileSelectedGame(){
+  if(!SELECTED_GAME_ID) return;
+  if(!currentRows().some(game=>String(game.game_id)===String(SELECTED_GAME_ID))){
+    SELECTED_GAME_ID=null;
+    SELECTED_GAME_ACTIVITY=null;
+  }
+}
+
+function priorContextEvents(){
+  if(!SELECTED_GAME_ID) return [];
+  const gameData=SELECTED_GAME_ACTIVITY || fallbackGameActivity(selectedGame() || {});
+  const seen=new Set();
+  const output=[];
+  for(const role of ['away','home']){
+    const prior=gameData?.prior_games?.[role];
+    const selectedTeam=prior?.selected_team || selectedGame()?.[`${role}_team`];
+    if(!prior || !prior.game_id) continue;
+    const rows=prior.events || [];
+    if(!rows.length) continue;
+    rows.forEach(event=>{
+      if(seen.has(event.event_id)) return;
+      seen.add(event.event_id);
+      output.push({...event,prior_context:{role,selected_team:selectedTeam,status:prior.status}});
+    });
+  }
+  return output;
+}
+
+function visibleActivity(){
+  const gameData=SELECTED_GAME_ID ? (SELECTED_GAME_ACTIVITY || fallbackGameActivity(selectedGame() || {})) : null;
+  const selectedEvents=gameData?.events || [];
+  const priorEvents=priorContextEvents();
+  const selectedHasFinal=selectedEvents.some(event=>event.event_type==='FINAL_POSTED');
+  const genuineSelectedEvents=selectedEvents.filter(event=>event.entity_type!=='market_opener');
+  const source=SELECTED_GAME_ID
+    ? (ACTIVITY_FILTER==='POSTGAME'
+      ? [...selectedEvents.filter(event=>activityCategory(event)==='POSTGAME' || (selectedHasFinal && activityCategory(event)==='MODEL')),...priorEvents]
+      : ACTIVITY_FILTER==='ALL' ? genuineSelectedEvents : selectedEvents)
+    : (ACTIVITY?.events || []);
+  const deduped=new Set();
+  return source.filter(event=>{
+    const identity=`${event.event_id || ''}|${event.prior_context?.selected_team || ''}`;
+    if(deduped.has(identity)) return false;
+    deduped.add(identity);
+    const category = activityCategory(event);
+    if(SELECTED_GAME_ID && event.event_type==='RATINGS_UPDATED') return false;
+    if(ACTIVITY_FILTER === 'MARKET' && !['OPEN','MARKET'].includes(category)) return false;
+    if(ACTIVITY_FILTER === 'MODEL' && category !== 'MODEL') return false;
+    if(ACTIVITY_FILTER === 'POSTGAME' && category !== 'POSTGAME') return false;
+    if(SELECTED_GAME_ID) return event.prior_context || String(event.game_id)===String(SELECTED_GAME_ID);
+    if(ACTIVE_WEEK === 'ALL') return true;
+    return event.week === null || event.week === undefined || String(event.week) === String(ACTIVE_WEEK);
+  });
+}
+
+async function focusActivityGame(event){
+  if(!event.game_id) return;
+  if(event.week !== null && event.week !== undefined && String(event.week) !== String(ACTIVE_WEEK)){
+    const option = [...document.getElementById('weekSelect').options].find(o=>o.value===String(event.week));
+    if(option){ ACTIVE_WEEK=String(event.week); document.getElementById('weekSelect').value=ACTIVE_WEEK; renderHealth(); renderMatrix(); }
+  }
+  const game=(MATRIX?.games || []).find(item=>String(item.game_id)===String(event.game_id));
+  if(game) await selectActivityGame(game,{toggle:false});
+  requestAnimationFrame(()=>{
+    const row = [...document.querySelectorAll('tr[data-game-id]')].find(el=>el.dataset.gameId===String(event.game_id));
+    if(!row) return;
+    const matrix=document.querySelector('.matrix-scroll');
+    if(matrix){
+      matrix.scrollTo({top:Math.max(0,row.offsetTop-(matrix.clientHeight-row.offsetHeight)/2),behavior:'smooth'});
+    }
+    row.classList.add('activity-flash');
+    setTimeout(()=>row.classList.remove('activity-flash'),1800);
+  });
+}
+
+function renderGameFocus(){
+  const focus=document.getElementById('activityFocus');
+  const game=selectedGame();
+  if(!SELECTED_GAME_ID || !game){focus.classList.remove('active');focus.innerHTML='';return}
+  focus.classList.add('active');
+  focus.innerHTML=`<div class="activity-focus-head"><span class="activity-focus-game">${esc(game.away_team)} @ ${esc(game.home_team)}</span><button class="activity-clear" id="activityClear" type="button">× CLEAR</button></div>`;
+  document.getElementById('activityClear').addEventListener('click',clearActivityGame);
+}
+
+function snapshotBook(book){
+  if(!book) return '—';
+  const logo=BOOK_LOGOS[book];
+  const label=BOOK_ABBR[book] || book;
+  return `<span class="snapshot-book" title="${esc(book)}">${logo?`<img src="logos/books/${esc(logo)}.png" alt="${esc(book)}" onerror="this.style.display='none'">`:''}<span>${esc(label)}</span></span>`;
+}
+
+function snapshotAuthority(model){
+  const raw=model?.authority || model?.availability_status || 'UNAVAILABLE';
+  return String(raw).replace('OPERATIONAL_DEGRADED','DEGRADED').replaceAll('_',' ');
+}
+
+function componentText(model,names,market,game){
+  const values=model?.component_values || {};
+  const labels={'TeamRankings':'TR','Sagarin Rating':'SAG','DRatings':'DR','Massey Dual':'MAS','Sagarin Total':'SAG'};
+  return names.map(name=>{
+    const value=values[name];
+    const missing=value===null || value===undefined || !Number.isFinite(Number(value));
+    const shown=missing?'—':market==='spread'?spreadComponentDisplay(value,game):Number(value).toFixed(1);
+    return `${labels[name] || name} ${shown}`;
+  }).join(' · ');
+}
+
+function renderMarketSnapshot(game,gameData){
+  const openers=gameData?.openers || {};
+  const spreadOpen=openers.spread;
+  const totalOpen=openers.total;
+  const spreadCurrent=game?.market?.best_sportsbook?.spread?.home;
+  const totalCurrent=game?.market?.best_sportsbook?.total?.over;
+  const openSpread=spreadOpen?`${esc(game.home_team)} ${fmtLine(spreadOpen.line)} ${snapshotBook(spreadOpen.book)}`:'NOT TRACKED';
+  const openTotal=totalOpen?`${Number(totalOpen.line).toFixed(1)} ${snapshotBook(totalOpen.book)}`:'NOT TRACKED';
+  return `<div class="snapshot-title">MARKET SNAPSHOT</div>
+    <div class="snapshot-row"><span class="snapshot-key">SPREAD</span><span class="snapshot-value" title="${spreadOpen?.observed_at?`Opened ${esc(fmtDateTimeET(spreadOpen.observed_at))}`:'Opening timestamp unavailable'}">OPEN ${openSpread} · CURRENT ${spreadCurrent?`${esc(game.home_team)} ${fmtLine(spreadCurrent.line)}`:'—'}</span></div>
+    <div class="snapshot-row"><span class="snapshot-key">TOTAL</span><span class="snapshot-value" title="${totalOpen?.observed_at?`Opened ${esc(fmtDateTimeET(totalOpen.observed_at))}`:'Opening timestamp unavailable'}">OPEN ${openTotal} · CURRENT ${totalCurrent?Number(totalCurrent.line).toFixed(1):'—'}</span></div>`;
+}
+
+function renderModelSnapshot(game){
+  const spread=game?.models?.standard_spread || {};
+  const total=game?.models?.standard_total || {};
+  return `<div class="snapshot-title">MODEL SNAPSHOT</div>
+    <div class="snapshot-row"><span class="snapshot-key">SPREAD</span><span class="snapshot-value">${modelDisplay(spread.value_home_line,'spread')} · ${esc(snapshotAuthority(spread))}<span class="snapshot-components">${componentText(spread,SPREAD_COMPONENTS,'spread',game)}</span></span></div>
+    <div class="snapshot-row"><span class="snapshot-key">TOTAL</span><span class="snapshot-value">${modelDisplay(total.value_total,'total')} · ${esc(snapshotAuthority(total))}<span class="snapshot-components">${componentText(total,TOTAL_COMPONENTS,'total',game)}</span></span></div>`;
+}
+
+function priorStatusLine(prior){
+  if(!prior?.game_id) return 'NO PRIOR GAME';
+  const finalEvent=(prior.events || []).find(event=>event.event_type==='FINAL_POSTED');
+  const opponent=prior.selected_team===prior.home_team?prior.away_team:prior.home_team;
+  let result='';
+  if(finalEvent){
+    const p=finalEvent.payload || finalEvent.metadata || {};
+    const selectedScore=prior.selected_team===prior.home_team?p.home_score:p.away_score;
+    const opponentScore=prior.selected_team===prior.home_team?p.away_score:p.home_score;
+    if(selectedScore!==null && selectedScore!==undefined && opponentScore!==null && opponentScore!==undefined){
+      const outcome=Number(selectedScore)>Number(opponentScore)?'W':Number(selectedScore)<Number(opponentScore)?'L':'T';
+      result=`${outcome} ${selectedScore}-${opponentScore}`;
+    }
+  }
+  const status=String(prior.status || 'STATUS UNAVAILABLE').replaceAll('_',' ');
+  return `${opponent?`vs ${opponent}`:'OPPONENT UNAVAILABLE'}${result?` · ${result}`:''} · ${status}`;
+}
+
+function currentGameStatus(game,gameData){
+  const finalEvent=(gameData?.events || []).find(event=>event.event_type==='FINAL_POSTED');
+  if(finalEvent){
+    const p=finalEvent.payload || finalEvent.metadata || {};
+    return `FINAL${p.away_score!==undefined && p.home_score!==undefined?` · ${game.away_team} ${p.away_score}, ${game.home_team} ${p.home_score}`:''}`;
+  }
+  const kickoff=new Date(game?.kickoff_time || 0).getTime();
+  if(Number.isFinite(kickoff) && kickoff>Date.now()) return `PREGAME · ${fmtKickoffDateET(game.kickoff_time)} ${fmtKickoffTimeET(game.kickoff_time)} ET`;
+  return 'STATUS UNAVAILABLE';
+}
+
+function renderPostgameSnapshot(game,gameData){
+  const prior=gameData?.prior_games || {};
+  return `<div class="snapshot-title">POSTGAME STATUS</div>
+    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.away_team)} PRIOR">${esc(game.away_team)} PRIOR</span><span class="snapshot-value">${esc(priorStatusLine(prior.away))}</span></div>
+    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.home_team)} PRIOR">${esc(game.home_team)} PRIOR</span><span class="snapshot-value">${esc(priorStatusLine(prior.home))}</span></div>
+    <div class="snapshot-row"><span class="snapshot-key">CURRENT</span><span class="snapshot-value">${esc(game.away_team)} @ ${esc(game.home_team)} · ${esc(currentGameStatus(game,gameData))}</span></div>`;
+}
+
+function renderSelectedSnapshot(){
+  const snapshot=document.getElementById('activitySnapshot');
+  const game=selectedGame();
+  if(!game || !SELECTED_GAME_ID || ACTIVITY_FILTER==='ALL'){
+    snapshot.classList.remove('active');snapshot.innerHTML='';return;
+  }
+  const gameData=SELECTED_GAME_ACTIVITY || fallbackGameActivity(game);
+  snapshot.innerHTML=ACTIVITY_FILTER==='MARKET'
+    ? renderMarketSnapshot(game,gameData)
+    : ACTIVITY_FILTER==='MODEL'
+      ? renderModelSnapshot(game)
+      : renderPostgameSnapshot(game,gameData);
+  snapshot.classList.add('active');
+}
+
+function renderActivity(){
+  const events = visibleActivity();
+  const latestIds = new Set(ACTIVITY?.latest_refresh_event_ids || []);
+  const latestEvents = (ACTIVITY?.events || []).filter(event=>
+    latestIds.has(event.event_id) &&
+    (ACTIVE_WEEK === 'ALL' || event.week === null || event.week === undefined || String(event.week) === String(ACTIVE_WEEK))
+  );
+  const since = {open:0,moves:0,ratings:0,model:0,final:0};
+  latestEvents.forEach(event=>{
+    if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event.event_type)) since.open++;
+    else if(['MARKET_MOVE','PINNACLE_MOVE','MARKET_FOLLOW'].includes(event.event_type)) since.moves++;
+    else if(event.event_type==='RATINGS_UPDATED') since.ratings++;
+    else if(['MODEL_STATE_CHANGED','SHADOW_SPREAD_READY','SHADOW_TOTAL_READY'].includes(event.event_type)) since.model++;
+    else if(['FINAL_POSTED','POSTGAME_REFRESHED'].includes(event.event_type)) since.final++;
+  });
+  const compact = [
+    ['OPEN',since.open],['MOVES',since.moves],['RATINGS',since.ratings],
+    ['MODEL',since.model],['FINAL',since.final]
+  ].filter(([,count])=>Number(count)>0).map(([label,count])=>`${count} ${label}`).join(' · ');
+  const activityRefresh=activityRefreshTimestamp();
+  const updated=document.getElementById('activityUpdated');
+  updated.textContent=`UPDATED ${fmtDateTimeET(activityRefresh)}`;
+  updated.title=`${ACTIVITY_FILTER} pipeline refresh${ACTIVITY?.latest_refresh_id ? ` · ${ACTIVITY.latest_refresh_id}` : ''}`;
+  const summary=document.getElementById('activitySummary');
+  summary.classList.toggle('hidden',Boolean(SELECTED_GAME_ID));
+  summary.innerHTML=`<span class="activity-summary-label">SINCE LAST REFRESH</span>${esc(compact || 'NO MATERIAL CHANGES')}`;
+  renderGameFocus();
+  renderSelectedSnapshot();
+  document.getElementById('activityList').innerHTML = events.length ? events.map((event,index)=>`
+    <button class="activity-row ${event.game_id ? 'game-event' : ''}" data-activity-index="${index}">
+      <span class="activity-line"><time class="activity-time">${esc(activityTime(event.observed_at || event.created_at))}</time><span class="activity-kind ${activityCategory(event).toLowerCase()}">${esc(activityCategory(event))}</span></span>
+      ${event.prior_context ? `<span class="activity-prior-owner">${esc(event.prior_context.selected_team || 'TEAM')} PRIOR GAME · ${esc(String(event.prior_context.status || 'WAITING').replaceAll('_',' '))}</span>` : ''}
+      <span class="activity-game">${esc(activityMatchup(event) || activityTitle(event))}</span>
+      ${activityDetail(event) ? `<span class="activity-detail"><span class="activity-detail-text">${esc(activityDetail(event))}</span><span class="activity-book-logos">${activityBookLogos(event)}</span></span>` : ''}
+    </button>`).join('') : '<div class="activity-empty">No activity for this selection.</div>';
+  document.querySelectorAll('[data-activity-index]').forEach((el)=>el.addEventListener('click',()=>focusActivityGame(events[Number(el.dataset.activityIndex)])));
+}
+
+async function fetchDataBundle(matrixUrl,healthUrl,activityUrl){
   const bust = Date.now();
-  const [matrixResp, healthResp] = await Promise.all([
+  const [matrixResp, healthResp, activityResp] = await Promise.all([
     fetch(`${matrixUrl}?v=${bust}`, {cache:'no-store'}),
-    fetch(`${healthUrl}?v=${bust}`, {cache:'no-store'})
+    fetch(`${healthUrl}?v=${bust}`, {cache:'no-store'}),
+    fetch(`${activityUrl}?v=${bust}`, {cache:'no-store'})
   ]);
   if(!matrixResp.ok)throw new Error(`Matrix HTTP ${matrixResp.status}`);
   if(!healthResp.ok)throw new Error(`Health HTTP ${healthResp.status}`);
-  return Promise.all([matrixResp.json(),healthResp.json()]);
+  if(!activityResp.ok)throw new Error(`Activity HTTP ${activityResp.status}`);
+  return Promise.all([matrixResp.json(),healthResp.json(),activityResp.json()]);
 }
 
 async function loadData(){
+  const priorActivityVersion=ACTIVITY_VERSION;
   try{
-    [MATRIX,HEALTH]=await fetchDataPair(LIVE_MATRIX_URL,LIVE_HEALTH_URL);
+    [MATRIX,HEALTH,ACTIVITY]=await fetchDataBundle(LIVE_MATRIX_URL,LIVE_HEALTH_URL,LIVE_ACTIVITY_URL);
   }catch(liveError){
     console.warn('Live War Room data unavailable; using static snapshot',liveError);
-    [MATRIX,HEALTH]=await fetchDataPair(MATRIX_URL,HEALTH_URL);
+    [MATRIX,HEALTH,ACTIVITY]=await fetchDataBundle(MATRIX_URL,HEALTH_URL,ACTIVITY_URL);
+  }
+
+  ACTIVITY_VERSION=[ACTIVITY?.built_at,ACTIVITY?.latest_refresh_id,ACTIVITY?.public_event_count].join('|');
+  if(priorActivityVersion && priorActivityVersion!==ACTIVITY_VERSION){
+    GAME_ACTIVITY_CACHE.clear();
+    if(SELECTED_GAME_ID){
+      const game=selectedGame();
+      SELECTED_GAME_ACTIVITY=game ? await fetchGameActivity(game) : null;
+    }
   }
 
   fillWeeks();
+  reconcileSelectedGame();
   renderHealth();
   renderMatrix();
+  renderActivity();
+  syncWorkingViewport();
 }
+
+function syncWorkingViewport(){
+  const grid=document.querySelector('.command-grid');
+  if(!grid || window.innerWidth<=900){ if(grid) grid.style.height=''; return; }
+  const footer=document.querySelector('.footer');
+  const available=window.innerHeight-grid.getBoundingClientRect().top-(footer?.offsetHeight || 0)-5;
+  grid.style.height=`${Math.max(280,available)}px`;
+}
+
+window.addEventListener('resize',syncWorkingViewport);
 
 document.getElementById('scopeSelect').addEventListener(
   'change',
@@ -2301,8 +2688,10 @@ document.getElementById('scopeSelect').addEventListener(
     }
 
     fillWeeks();
+    reconcileSelectedGame();
     renderHealth();
     renderMatrix();
+    renderActivity();
   }
 );
 
@@ -2310,10 +2699,18 @@ document.getElementById('weekSelect').addEventListener(
   'change',
   e=>{
     ACTIVE_WEEK = e.target.value;
+    reconcileSelectedGame();
     renderHealth();
     renderMatrix();
+    renderActivity();
   }
 );
+
+document.querySelectorAll('.activity-filter').forEach(button=>button.addEventListener('click',()=>{
+  ACTIVITY_FILTER=button.dataset.filter;
+  document.querySelectorAll('.activity-filter').forEach(b=>b.classList.toggle('active',b===button));
+  renderActivity();
+}));
 
 
 document.getElementById('refreshBtn').addEventListener(
@@ -2471,7 +2868,7 @@ async function pollPublishedVersion(){
     const response = await fetch(`${LIVE_VERSION_URL}?version=${Date.now()}`,{cache:'no-store'});
     if(!response.ok) return;
     const live = await response.json();
-    const version = live.refresh_id;
+    const version = [live.refresh_id,live.activity_built_at,live.activity_event_count].join('|');
     if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
     if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
   }catch(_err){ /* preserve the last valid rendered state */ }

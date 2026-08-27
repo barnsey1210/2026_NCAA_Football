@@ -125,6 +125,17 @@ def main():
         )
     )
 
+    stages.append(
+        run_stage(
+            "war_room_activity",
+            [
+                sys.executable,
+                "scripts/war_room/build_war_room_activity.py",
+            ],
+            env,
+        )
+    )
+
     # Preserve the accepted fast state in the canonical historical contract.
     # These stages are offline and idempotent; they make the latest fast pull
     # available to Openers without changing current-market selection.

@@ -156,7 +156,8 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
     def test_edge_width_is_reclaimed_from_stacked_shadow(self):
         self.assertIn(".shadow-col{\n  width:3.4%;", self.source)
         self.assertIn(".edge-col{\n  width:6.2%;", self.source)
-        self.assertIn("white-space:nowrap;\n  flex-wrap:nowrap;", self.source)
+        self.assertIn(".decision-edge-main{display:inline-flex", self.source)
+        self.assertIn(".decision-team-name{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap", self.source)
 
     def test_matchup_layout_and_explicit_sorts(self):
         for marker in (
@@ -215,7 +216,9 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIn("'Texas A&M':'texas-a-m'", self.source)
         self.assertIn("if(TEAM_LOGO_SLUGS[team])", self.source)
         self.assertTrue((ROOT / "logos/texas-a-m.png").is_file())
-        self.assertIn(".decision-edge img,\n.market-book-logo{", self.source)
+        self.assertIn(".decision-edge .team-logo-holder{--team-logo-size:22px}", self.source)
+        self.assertIn(".market-book-logo{\n  background:rgba(255,255,255,.09)", self.source)
+        self.assertNotIn(".decision-edge img,\n.market-book-logo{", self.source)
 
 
 if __name__ == "__main__":

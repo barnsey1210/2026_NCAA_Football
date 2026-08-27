@@ -42,12 +42,14 @@ if [[ "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" ]]; then
 war-room.html
 data/site/war_room_health.json
 data/site/war_room_market_matrix.json
+data/site/war_room_activity.json
 EOF
 
   git -C "$MAIN_REPO" add -- \
     war-room.html \
     data/site/war_room_health.json \
-    data/site/war_room_market_matrix.json
+    data/site/war_room_market_matrix.json \
+    data/site/war_room_activity.json
   if git -C "$MAIN_REPO" diff --cached --quiet; then
     log "no fast War Room changes to commit"
     exit 0
@@ -74,6 +76,7 @@ fi
 [[ -s "$PUBLIC_DIR/war-room.html" ]] || die "missing public War Room terminal"
 [[ -s "$PUBLIC_DIR/data/site/war_room_market_matrix.json" ]] || die "missing public War Room market matrix"
 [[ -s "$PUBLIC_DIR/data/site/war_room_health.json" ]] || die "missing public War Room health payload"
+[[ -s "$PUBLIC_DIR/data/site/war_room_activity.json" ]] || die "missing public War Room activity payload"
 
 # Use the project's established public-site validator when available.
 if [[ -f "$RUNTIME_ROOT/scripts/publish/check_public_site.py" ]]; then
@@ -236,6 +239,7 @@ required = [
     Path("war-room.html"),
     Path("data/site/war_room_market_matrix.json"),
     Path("data/site/war_room_health.json"),
+    Path("data/site/war_room_activity.json"),
 ]
 for rel in required:
     src = source / rel

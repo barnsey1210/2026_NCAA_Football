@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -29,6 +29,8 @@ TASKS = ROOT / "data/control/war_room_services/tasks"
 REQUEST_LOG = ROOT / "data/control/war_room_services/requests.jsonl"
 HEALTH = ROOT / "data/site/war_room_health.json"
 MATRIX = ROOT / "data/site/war_room_market_matrix.json"
+ACTIVITY = ROOT / "data/site/war_room_activity.json"
+GAME_ACTIVITY_INDEX = ROOT / "data/war_room/history/war_room_game_activity_index.json"
 SCHEDULE = ROOT / "data/site/schedule_live_enrichment.json"
 SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
 FINAL_WATCHER_LATEST = ROOT / "data/control/cfbd_final_watcher/latest.json"
@@ -232,6 +234,7 @@ def status(operator: str = Depends(require_access)):
 def live_version(_: None = Depends(require_public_read_origin)):
     health = public_artifact(HEALTH, "war-room-health-v1")
     matrix = public_artifact(MATRIX, "war-room-market-matrix-v1")
+    activity = public_artifact(ACTIVITY, "war-room-activity-v1")
     health_refresh = health.get("fast_market_refresh") or {}
     matrix_refresh = matrix.get("fast_market_refresh") or {}
     refresh_id = health_refresh.get("refresh_id")
@@ -243,6 +246,8 @@ def live_version(_: None = Depends(require_public_read_origin)):
         "last_fast_pull_at": health_refresh.get("last_fast_pull_at"),
         "health_built_at": health.get("built_at"),
         "matrix_built_at": matrix.get("built_at"),
+        "activity_built_at": activity.get("built_at"),
+        "activity_event_count": activity.get("event_count"),
     })
 
 
@@ -254,6 +259,25 @@ def live_health(_: None = Depends(require_public_read_origin)):
 @app.get("/war-room/live/market-matrix")
 def live_market_matrix(_: None = Depends(require_public_read_origin)):
     return live_response(public_artifact(MATRIX, "war-room-market-matrix-v1"))
+
+
+@app.get("/war-room/live/activity")
+def live_activity(
+    game_id: Optional[str] = Query(default=None, min_length=1, max_length=160),
+    _: None = Depends(require_public_read_origin),
+):
+    if game_id is None:
+        return live_response(public_artifact(ACTIVITY, "war-room-activity-v1"))
+    index = public_artifact(GAME_ACTIVITY_INDEX, "war-room-game-activity-index-v1")
+    game = (index.get("games") or {}).get(game_id)
+    if not isinstance(game, dict):
+        raise HTTPException(status_code=404, detail="game activity not found")
+    return live_response({
+        "schema_version": "war-room-game-activity-v1",
+        "built_at": index.get("built_at"),
+        "latest_refresh_id": index.get("latest_refresh_id"),
+        **game,
+    })
 
 
 @app.get("/war-room/live/schedule")

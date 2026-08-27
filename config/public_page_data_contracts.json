@@ -7,7 +7,7 @@
   },
   "pages": {
     "index.html": ["current_market", "market_history", "ratings", "schedule", "futures", "betting", "injuries", "coaches", "conference"],
-    "war-room.html": ["war_room_market_matrix", "war_room_health", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting"],
+    "war-room.html": ["war_room_market_matrix", "war_room_health", "war_room_activity", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting"],
     "ratings.html": ["ratings"],
     "openers.html": ["current_market", "market_history", "ratings", "schedule"],
     "matchups.html": ["current_market", "market_history", "ratings", "schedule", "betting", "injuries", "coaches"],
@@ -41,6 +41,20 @@
       "live_version_route": "/war-room/live/version",
       "static_fallback": true,
       "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting"]
+    },
+    "war_room_activity": {
+      "artifact": "data/site/war_room_activity.json",
+      "builder": "scripts/war_room/build_war_room_activity.py",
+      "schema_version": "war-room-activity-v1",
+      "owner": "WAR_ROOM_ACTIVITY_PROJECTOR",
+      "live_read_route": "/war-room/live/activity",
+      "static_fallback": true,
+      "history_artifact": "data/war_room/history/war_room_events.jsonl",
+      "game_history_index": "data/war_room/history/war_room_game_activity_index.json",
+      "game_history_schema": "war-room-game-activity-index-v1",
+      "game_history_read_route": "/war-room/live/activity?game_id=<canonical_game_id>",
+      "game_history_policy": "BOUNDED_MEANINGFUL_HISTORY_NOT_RAW_QUOTE_LEDGER",
+      "depends_on": ["war_room_market_matrix", "war_room_health", "ratings", "schedule"]
     },
     "game_projections": {
       "artifact": "data/site/current_game_projection_contract.json",

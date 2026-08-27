@@ -46,6 +46,10 @@ def build_bundle() -> None:
             ROOT / "data/site/war_room_market_matrix.json",
             Path("data/site/war_room_market_matrix.json"),
         ),
+        (
+            ROOT / "data/site/war_room_activity.json",
+            Path("data/site/war_room_activity.json"),
+        ),
     ):
         if not source.is_file():
             raise SystemExit(f"Required fast publication source missing: {source}")
@@ -57,7 +61,7 @@ def main() -> None:
     parser.add_argument(
         "--push",
         action="store_true",
-        help="Commit and push the validated three-file public bundle.",
+        help="Commit and push the validated four-file public bundle.",
     )
     parser.add_argument(
         "--skip-refresh",

@@ -48,6 +48,7 @@ def validate(root: Path, out: Path) -> list[str]:
             for marker in (
                 "data/site/war_room_market_matrix.json",
                 "data/site/war_room_health.json",
+                "data/site/war_room_activity.json",
                 'id="refreshBtn"',
                 'id="acquireBtn"',
                 "RELOAD MARKET",
@@ -59,6 +60,7 @@ def validate(root: Path, out: Path) -> list[str]:
                 "/war-room/live/version",
                 "/war-room/live/health",
                 "/war-room/live/market-matrix",
+                "/war-room/live/activity",
                 "requestOperation('market'",
                 "CONTROL_WINDOW.postMessage",
                 "pollPublishedVersion",
@@ -238,6 +240,7 @@ def validate(root: Path, out: Path) -> list[str]:
     war_room_artifacts = {
         "war_room_market_matrix.json": "war-room-market-matrix-v1",
         "war_room_health.json": "war-room-health-v1",
+        "war_room_activity.json": "war-room-activity-v1",
     }
     for filename, expected_schema in war_room_artifacts.items():
         path = out / "data" / "site" / filename
@@ -266,7 +269,6 @@ def validate(root: Path, out: Path) -> list[str]:
             else:
                 if projection_health.get("scope") != "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY":
                     errors.append("War Room projection_health scope must be FBS-vs-FBS latest board")
-
                 by_week = projection_health.get("by_week")
                 if not isinstance(by_week, dict) or not by_week:
                     errors.append("War Room projection_health.by_week must be a nonempty object")
@@ -285,6 +287,18 @@ def validate(root: Path, out: Path) -> list[str]:
                                 errors.append(
                                     f"War Room Week {week} {market} health missing displayed_games"
                                 )
+        if filename == "war_room_activity.json" and not isinstance(payload.get("events"), list):
+            errors.append("War Room activity events must be a list")
+        if filename == "war_room_activity.json" and not isinstance(payload.get("since_last_refresh"), dict):
+            errors.append("War Room activity since_last_refresh must be an object")
+        if filename == "war_room_activity.json" and isinstance(payload.get("events"), list):
+            for event in payload["events"]:
+                if not isinstance(event, dict) or not isinstance(event.get("display_priority"), int):
+                    errors.append("War Room public activity event missing display_priority")
+                    break
+                if not isinstance(event.get("underlying_event_ids"), list):
+                    errors.append("War Room public activity event missing underlying_event_ids")
+                    break
 
 
     conferences = out / "conferences.html"
