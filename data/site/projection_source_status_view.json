@@ -1,14 +1,14 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-08-26T12:05:46.430204+00:00",
+  "generated_at": "2026-08-27T12:05:49.231286+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_five_source_v1",
     "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
-    "full_available": 39,
-    "degraded_available": 726,
+    "full_available": 51,
+    "degraded_available": 714,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -55,9 +55,9 @@
       {
         "key": "DRatings",
         "name": "DRatings Game Predictions",
-        "games_available": 39,
+        "games_available": 51,
         "production_games": 765,
-        "coverage_pct": 5.1,
+        "coverage_pct": 6.7,
         "state": "PARTIAL"
       }
     ],
@@ -69,7 +69,7 @@
           "TeamRankings",
           "Sagarin Rating"
         ],
-        "games": 726,
+        "games": 714,
         "effective_weights": {
           "SP+": 0.25,
           "FPI": 0.25,
@@ -85,7 +85,7 @@
           "Sagarin Rating",
           "DRatings Game Predictions"
         ],
-        "games": 39,
+        "games": 51,
         "effective_weights": {
           "SP+": 0.2,
           "FPI": 0.2,
@@ -164,12 +164,12 @@
       "name": "DRatings Game Predictions",
       "source_key": "DRatings Predictions",
       "role": "Standard Spread game-prediction input",
-      "games_available": 39,
+      "games_available": 51,
       "production_games": 765,
-      "coverage_pct": 5.1,
+      "coverage_pct": 6.7,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-08-26T12:01:21.579036+00:00",
-      "latest_snapshot_date": "2026-08-26",
+      "latest_pulled_at": "2026-08-27T12:01:19.865854+00:00",
+      "latest_snapshot_date": "2026-08-27",
       "first_game_date": "2026-08-29",
       "last_game_date": "2026-09-07"
     },
@@ -181,8 +181,8 @@
       "production_games": 765,
       "coverage_pct": 6.7,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-08-25T20:25:17.711668+00:00",
-      "latest_snapshot_date": "2026-08-26",
+      "latest_pulled_at": "2026-08-26T16:40:04.648771+00:00",
+      "latest_snapshot_date": "2026-08-27",
       "first_game_date": "2026-08-29",
       "last_game_date": "2026-09-07"
     },
