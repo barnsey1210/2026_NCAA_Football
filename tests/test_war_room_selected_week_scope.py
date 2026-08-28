@@ -154,10 +154,33 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             )
 
     def test_edge_width_is_reclaimed_from_stacked_shadow(self):
-        self.assertIn(".shadow-col{\n  width:3.4%;", self.source)
-        self.assertIn(".edge-col{\n  width:6.2%;", self.source)
+        self.assertIn(".shadow-col{\n  width:7.2%;", self.source)
+        self.assertIn(".edge-col{\n  width:6.5%;", self.source)
         self.assertIn(".decision-edge-main{display:inline-flex", self.source)
         self.assertIn(".decision-team-name{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap", self.source)
+
+    def test_shadow_readability_uses_compact_overlaid_status_marks(self):
+        self.assertIn(".shadow-team-chip{position:relative;display:inline-flex", self.source)
+        self.assertIn(".shadow-team-chip .team-logo-holder{--team-logo-size:23px}", self.source)
+        self.assertIn(".shadow-team-mark{position:absolute;right:-3px;bottom:-4px;font-size:15px", self.source)
+        self.assertIn(".shadow-state-label{font-size:11px", self.source)
+        self.assertIn(".shadow-wait{\n  color:var(--yellow);\n  font-size:11px;", self.source)
+
+    def test_non_matchup_columns_and_nested_groups_are_centered(self):
+        self.assertIn("#matrixHead th:not(.matchup-col),", self.source)
+        self.assertIn("#matrixBody td:not(.matchup-col){\n  text-align:center;", self.source)
+        self.assertIn("width:max-content;\n  max-width:100%;\n  margin-inline:auto;", self.source)
+        self.assertIn("justify-content:center;\n  width:100%;", self.source)
+
+    def test_total_edge_direction_and_value_share_primary_line(self):
+        block = self.source.split("function totalDecision(side, edge){", 1)[1].split(
+            "const SPREAD_COMPONENTS", 1
+        )[0]
+        self.assertIn('class="decision-edge total-decision"', block)
+        self.assertIn('class="decision-edge-main"', block)
+        self.assertIn("Math.abs(Number(edge)) < .05 ? '0' : edgeDisplay(edge)", block)
+        self.assertIn('class="decision-side">${label}</span><span>${value}', block)
+        self.assertNotIn("Number(edge) <= 0", block)
 
     def test_matchup_layout_and_explicit_sorts(self):
         for marker in (
@@ -179,8 +202,9 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
     def test_total_headers_are_spelled_out(self):
         head = re.search(r"function renderHead\(\)\{(.*?)\n\}", self.source, re.S)
         self.assertIsNotNone(head)
-        for label in ("MODEL", "SHADOW", "BEST", "EXCH", "PINN", "EDGE"):
+        for label in ("MODEL", "SHADOW", "BEST", "EXCH", "EDGE"):
             self.assertIn(f"TOTAL<br>{label}", head.group(1))
+        self.assertNotIn("TOTAL<br>OPEN", head.group(1))
         self.assertNotIn("TOT<br>", head.group(1))
 
     def test_book_health_includes_selected_quote_time_and_age(self):

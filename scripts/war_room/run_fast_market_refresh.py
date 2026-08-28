@@ -125,20 +125,11 @@ def main():
         )
     )
 
-    stages.append(
-        run_stage(
-            "war_room_activity",
-            [
-                sys.executable,
-                "scripts/war_room/build_war_room_activity.py",
-            ],
-            env,
-        )
-    )
-
     # Preserve the accepted fast state in the canonical historical contract.
-    # These stages are offline and idempotent; they make the latest fast pull
-    # available to Openers without changing current-market selection.
+    # These stages are offline and idempotent. Canonical line history is
+    # updated before Activity projects opener milestones, while the base
+    # matrix remains the sole resolved-market input to both history and
+    # Activity.
     stages.append(
         run_stage(
             "append_current_market_book_history",
@@ -150,6 +141,29 @@ def main():
         run_stage(
             "build_matchup_line_history",
             [sys.executable, "scripts/history/build_matchup_line_history_clean.py", "--incremental-fast"],
+            env,
+        )
+    )
+    stages.append(
+        run_stage(
+            "war_room_activity",
+            [
+                sys.executable,
+                "scripts/war_room/build_war_room_activity.py",
+            ],
+            env,
+        )
+    )
+    # Re-project the same resolved market after canonical opener history and
+    # durable movement events are current. This does not acquire or select a
+    # second market source; build_war_room_market_matrix.py remains sole owner.
+    stages.append(
+        run_stage(
+            "war_room_market_matrix_enriched",
+            [
+                sys.executable,
+                "scripts/war_room/build_war_room_market_matrix.py",
+            ],
             env,
         )
     )

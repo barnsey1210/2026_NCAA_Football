@@ -22,6 +22,11 @@ from scripts.markets.build_current_market_contract import (
     resolve_game_id,
     site_date_from_timestamp,
 )
+from scripts.war_room.build_war_room_activity import (
+    game_openers,
+    load_pinnacle_openers,
+    read_history,
+)
 
 FAST_QUOTES = (
     ROOT
@@ -72,6 +77,11 @@ BETTING_SIGNALS = (
 )
 
 OUT = ROOT / "data/site/war_room_market_matrix.json"
+MATCHUP_LINE_HISTORY = ROOT / "data/site/matchup_line_history.json"
+BOOK_LINE_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
+ACTIVITY_HISTORY = ROOT / "data/war_room/history/war_room_events.jsonl"
+ACTIVITY_STATE = ROOT / "data/war_room/history/war_room_activity_state.json"
+FAST_REFRESH_HISTORY = ROOT / "data/war_room/audits/fast_market_refresh_history.csv"
 
 BETTABLE = (
     "DraftKings",
@@ -96,6 +106,9 @@ SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
 BEST_EXCHANGE_MIN_PRICE = -120
+MATERIAL_MOVE_THRESHOLD = 0.5
+MOVEMENT_RECENCY_MINUTES = {"very_recent": 15, "recent": 45, "older_recent": 90}
+OPENER_RECENCY_MINUTES = {"new": 30, "recent": 90}
 
 
 def number(value):
@@ -165,6 +178,161 @@ def parse_timestamp(value):
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def load_json(path, default):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return default
+
+
+def spread_move_direction(old_line, new_line):
+    """Describe movement of the displayed spread line, never edge favorability."""
+    old = number(old_line)
+    new = number(new_line)
+    if old is None or new is None:
+        return "NEUTRAL"
+    if old * new < 0:
+        return "NEUTRAL"
+    old_magnitude = abs(old)
+    new_magnitude = abs(new)
+    if new_magnitude > old_magnitude:
+        return "UP"
+    if new_magnitude < old_magnitude:
+        return "DOWN"
+    return "NEUTRAL"
+
+
+def total_move_direction(old_line, new_line):
+    old = number(old_line)
+    new = number(new_line)
+    if old is None or new is None or old == new:
+        return "NEUTRAL"
+    return "UP" if new > old else "DOWN"
+
+
+def load_recent_refresh_ids(path, current_refresh_id, limit=3):
+    ordered = []
+    if current_refresh_id:
+        ordered.append(str(current_refresh_id))
+    try:
+        with path.open(newline="", encoding="utf-8-sig") as handle:
+            rows = list(csv.DictReader(handle))
+        for row in reversed(rows):
+            rid = str(row.get("refresh_id") or "").strip()
+            if rid and rid not in ordered:
+                ordered.append(rid)
+            if len(ordered) >= limit:
+                break
+    except OSError:
+        pass
+    return ordered[:limit]
+
+
+def material_move_index(events):
+    """Return the latest qualifying move for each game/book/market pair."""
+    grouped = {}
+    counts = Counter()
+    for row in events:
+        if row.get("event_type") not in {"SPREAD_MOVED", "TOTAL_MOVED"}:
+            continue
+        old = number(row.get("old_line"))
+        new = number(row.get("new_line"))
+        if old is None or new is None or abs(new - old) < MATERIAL_MOVE_THRESHOLD:
+            continue
+        gid = str(row.get("game_id") or "")
+        book = str(row.get("book") or "")
+        market = str(row.get("market") or "")
+        if not gid or not book or market not in {"spread", "total"}:
+            continue
+        key = (gid, book, market)
+        counts[key] += 1
+        stamp = parse_timestamp(row.get("detected_at")) or datetime.min.replace(tzinfo=timezone.utc)
+        identity = str(row.get("event_id") or "")
+        if key not in grouped or (stamp, identity) > grouped[key][0]:
+            grouped[key] = ((stamp, identity), row)
+    return {
+        key: bounded_move(row, counts[key] - 1)
+        for key, (_, row) in grouped.items()
+    }
+
+
+def bounded_move(row, previous_count=0):
+    market = str(row.get("market") or "")
+    old = number(row.get("old_line"))
+    new = number(row.get("new_line"))
+    direction = (
+        spread_move_direction(old, new)
+        if market == "spread"
+        else total_move_direction(old, new)
+    )
+    return {
+        "event_id": row.get("event_id"),
+        "detected_refresh_id": row.get("refresh_id"),
+        "detected_at": row.get("detected_at"),
+        "quote_timestamp": row.get("observed_at"),
+        "old_line": old,
+        "new_line": new,
+        "book": row.get("book"),
+        "market": market,
+        "side": row.get("side"),
+        "direction": direction,
+        "magnitude_old": abs(old) if old is not None else None,
+        "magnitude_new": abs(new) if new is not None else None,
+        "previous_qualifying_moves": max(0, previous_count),
+    }
+
+
+def move_for_displayed_quote(move_index, game_id, quote, market, side):
+    """Attach a move only when its book is the currently displayed BEST book."""
+    if not isinstance(quote, dict) or not quote.get("book"):
+        return None
+    move = move_index.get((str(game_id), str(quote["book"]), market))
+    if not move:
+        return None
+    result = dict(move)
+    if market == "spread" and side == "away":
+        result["old_line"] = -number(move["old_line"])
+        result["new_line"] = -number(move["new_line"])
+        result["side"] = "away"
+        result["direction"] = spread_move_direction(
+            result["old_line"], result["new_line"]
+        )
+    elif market == "total":
+        result["side"] = side
+    return result
+
+
+def enrich_best_quotes(best_sportsbook, game_id, move_index):
+    enriched = {"spread": {}, "total": {}}
+    for market, sides in best_sportsbook.items():
+        for side, quote in sides.items():
+            if not isinstance(quote, dict):
+                enriched[market][side] = quote
+                continue
+            payload = dict(quote)
+            payload["last_material_move"] = move_for_displayed_quote(
+                move_index, game_id, quote, market, side
+            )
+            enriched[market][side] = payload
+    return enriched
+
+
+def opener_payload(openers, activity_initialized_at):
+    result = {}
+    activated = parse_timestamp(activity_initialized_at)
+    for key, opener in openers.items():
+        if not isinstance(opener, dict):
+            result[key] = None
+            continue
+        row = dict(opener)
+        observed = parse_timestamp(row.get("observed_at"))
+        row["predates_activity_activation"] = (
+            observed < activated if observed and activated else None
+        )
+        result[key] = row
+    return result
 
 
 def current_quote_pair_is_fresh(sides, *, now, max_age_hours):
@@ -1426,6 +1594,10 @@ def main():
         if CURRENT_MARKET.exists()
         else {"games": []}
     )
+    line_history_payload = load_json(MATCHUP_LINE_HISTORY, {})
+    pinnacle_openers = load_pinnacle_openers(BOOK_LINE_HISTORY)
+    activity_state = load_json(ACTIVITY_STATE, {})
+    move_index = material_move_index(read_history(ACTIVITY_HISTORY))
 
     shadow_component_payload = (
         json.loads(SHADOW_COMPONENTS.read_text())
@@ -1741,6 +1913,11 @@ def main():
                 ),
             },
         }
+        best_sportsbook = enrich_best_quotes(
+            best_sportsbook,
+            gid,
+            move_index,
+        )
 
         best_exchange = {
             "spread": {
@@ -2038,6 +2215,14 @@ def main():
                 "exchanges": exchange_books,
                 "best_exchange": best_exchange,
                 "pinnacle": pinnacle,
+                "openers": opener_payload(
+                    game_openers(
+                        line_history_payload,
+                        gid,
+                        pinnacle_openers,
+                    ),
+                    activity_state.get("initialized_at"),
+                ),
             },
 
             "edges": {
@@ -2134,6 +2319,23 @@ def main():
                 "spread",
                 "total",
             ],
+            "recent_completed_refresh_ids": load_recent_refresh_ids(
+                FAST_REFRESH_HISTORY,
+                refresh_id,
+            ),
+        },
+
+        "matrix_alert_policy": {
+            "material_move_threshold_points": MATERIAL_MOVE_THRESHOLD,
+            "movement_recency_minutes": MOVEMENT_RECENCY_MINUTES,
+            "opener_recency_minutes": OPENER_RECENCY_MINUTES,
+            "movement_generation_count": 3,
+            "movement_generation_rule": (
+                "latest refresh is very recent; two immediately preceding "
+                "refresh generations are recent, subject to 90-minute expiry"
+            ),
+            "movement_scope": "CURRENT_BEST_SPORTSBOOK_ONLY_NO_EXCHANGES",
+            "opener_authority": "EARLIEST_ACCEPTED_CANONICAL_LINE_HISTORY",
         },
 
         "selection_policy": {
@@ -2164,6 +2366,10 @@ def main():
             "pinnacle_price_rule": (
                 "Pinnacle is a separate sharp reference and "
                 "is not subject to the Best Exchange filter."
+            ),
+            "pinnacle_matrix_display": (
+                "Pinnacle remains canonical history and Activity context; "
+                "the permanent matrix column displays the general opener."
             ),
         },
 

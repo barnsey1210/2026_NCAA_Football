@@ -40,6 +40,9 @@
       "live_read_route": "/war-room/live/market-matrix",
       "live_version_route": "/war-room/live/version",
       "static_fallback": true,
+      "opener_contract": "market.openers uses earliest accepted canonical matchup line history; Pinnacle opener remains a separate canonical-history diagnostic",
+      "movement_contract": "best_sportsbook quote may expose only its own latest >=0.5-point material move; no exchange markers or price-only moves",
+      "recency_contract": "canonical opener and move timestamps age locally; latest plus two prior completed refresh ids support hybrid movement recency",
       "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting"]
     },
     "war_room_activity": {

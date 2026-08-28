@@ -442,15 +442,20 @@ th{
   font-size:10px;
   text-transform:uppercase;
   font-weight:800;
-  padding:6px 2px;
+  padding:6px 1px;
   white-space:nowrap;
 }
 
 td{
   border-bottom:1px solid #223444;
-  padding:5px 2px;
+  padding:5px 1px;
   vertical-align:middle;
   white-space:nowrap;
+}
+
+#matrixHead th:not(.matchup-col),
+#matrixBody td:not(.matchup-col){
+  text-align:center;
 }
 
 
@@ -524,15 +529,15 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 
-.matchup-col{width:13.8%}
-.model-col{width:5%}
+.matchup-col{width:13.1%}
+.model-col{width:4.8%}
 
 .shadow-col{
-  width:3.4%;
-  font-size:9px;
+  width:7.2%;
+  font-size:10px;
   text-align:center;
-  padding-left:1px;
-  padding-right:1px;
+  padding-left:0;
+  padding-right:0;
 }
 
 .shadow-ready{
@@ -542,30 +547,55 @@ tr:hover td.context-group{background:#202d39}
 
 .shadow-wait{
   color:var(--yellow);
-  font-size:9px;
+  font-size:11px;
   font-weight:900;
 }
-.shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;white-space:nowrap}
-.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:1px}
-.shadow-team-chip{display:inline-flex;align-items:center;gap:1px}
-.shadow-team-chip .team-logo-holder{--team-logo-size:15px}
-.shadow-team-mark{font-size:8px;font-weight:900}
+.shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
+.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px}
+.shadow-team-chip{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.shadow-team-chip .team-logo-holder{--team-logo-size:23px}
+.shadow-team-mark{position:absolute;right:-3px;bottom:-4px;font-size:15px;font-weight:950;line-height:1;text-shadow:0 1px 2px #071019,0 0 2px #071019}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
-.shadow-state-label{font-size:9px;font-weight:900;letter-spacing:.03em}
-.best-col{width:7.2%}
-.exchange-col{width:7.2%}
-.pinn-col{width:5%}
+.shadow-state-label{font-size:11px;font-weight:900;line-height:1.05;letter-spacing:.03em}
+.best-col{width:8.8%}
+.exchange-col{width:8%}
+.open-col{width:5.7%} /* retained for future/mobile opener presentation */
 .edge-col{
-  width:6.2%;
+  width:6.5%;
   text-align:center;
   padding-left:5px;
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{width:2.5%;text-align:center}
+.injury-col{width:1.8%;text-align:center}
 .signal-col{width:5%}
-.state-col{width:6.7%;text-align:center}
+.state-col{width:5.5%;text-align:center}
+
+/* Canonical Priority Market Matrix header typography. Column classes also
+   style body cells, so this late header-only rule prevents those body font
+   sizes from leaking into MODEL, SHADOW, OPEN, or other header labels. */
+.matrix-header-cell,
+.matrix-header-cell .spread-label,
+.matrix-header-cell .header-tooltip,
+.matrix-header-cell .matchup-sort-button{
+  font-family:inherit;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+  line-height:1.12;
+}
+
+.matrix-header-cell{
+  vertical-align:middle;
+  padding-top:6px;
+  padding-bottom:6px;
+}
+
+.matrix-header-cell.edge-focus{
+  font-weight:950;
+}
 
 .game-name{
   font-weight:900;
@@ -622,6 +652,9 @@ tr:hover td.context-group{background:#202d39}
   column-gap:3px;
   align-items:center;
   line-height:1.05;
+  width:max-content;
+  max-width:100%;
+  margin-inline:auto;
 }
 
 .market-book-logo{
@@ -636,7 +669,7 @@ tr:hover td.context-group{background:#202d39}
   grid-column:2;
   grid-row:1;
   color:#eef3f7;
-  font-size:12px;
+  font-size:14px;
   white-space:nowrap;
 }
 
@@ -647,6 +680,23 @@ tr:hover td.context-group{background:#202d39}
   font-size:11px;
   white-space:nowrap;
 }
+
+.open-cell{display:flex;align-items:center;justify-content:center;min-width:0;cursor:help}
+.open-quote{display:grid;grid-template-columns:18px minmax(26px,1fr);grid-template-rows:auto auto auto;column-gap:1px;align-items:center;width:100%;min-width:0;line-height:1.02}
+.open-cell .market-book-logo{grid-column:1;grid-row:1 / span 2;display:block;width:18px;height:18px;padding:1px}
+.open-line{grid-column:2;grid-row:1;font-size:12px;font-weight:900;color:#eef3f7;white-space:nowrap}
+.open-price{grid-column:2;grid-row:2;font-size:10px;font-weight:800;color:#9fb0bf;white-space:nowrap}
+.open-meta{grid-column:1 / span 2;grid-row:3;display:flex;align-items:center;justify-content:center;gap:1px;min-width:0;font-size:8px;font-weight:750;color:#8296a8;white-space:nowrap}
+.open-time{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.open-missing{font-size:8px;font-weight:900;color:#718499;letter-spacing:.02em}
+.recency-marker{display:none;font-size:7.5px;font-weight:900;letter-spacing:.01em;line-height:1.05}
+.recency-marker.open-new{display:inline;color:#e99362}
+.recency-marker.open-recent{display:inline;color:#c7ad58}
+.move-marker{display:none;grid-column:3;grid-row:1 / span 2;align-self:center;justify-self:center;font-size:10px;font-weight:950;cursor:help}
+.move-marker.move-very-recent{display:inline-block;color:#ff6969}
+.move-marker.move-recent{display:inline-block;color:var(--yellow)}
+.move-marker.move-older-recent{display:inline-block;color:#8796a4}
+.market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 10px}
 
 .decision-edge{
   display:inline-flex;
@@ -667,7 +717,7 @@ tr:hover td.context-group{background:#202d39}
   filter:drop-shadow(0 0 3px rgba(235,242,248,.2));
 }
 .decision-edge .team-logo-holder{--team-logo-size:22px}
-.decision-side{font-size:11px;font-weight:900}
+.decision-side{font-size:12px;font-weight:900}
 
 .team-logo-holder{
   width:var(--team-logo-size,16px);
@@ -767,6 +817,8 @@ tr:hover td.context-group{background:#202d39}
   gap:5px;
   flex-wrap:wrap;
   align-items:center;
+  justify-content:center;
+  width:100%;
 }
 
 .signal-chip{
@@ -788,7 +840,7 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .edge{
-  font-size:14px;
+  font-size:15px;
   font-weight:900;
 }
 
@@ -1771,7 +1823,7 @@ function renderSummary(){
 function renderHead(){
   document.getElementById('matrixHead').innerHTML = `
     <tr>
-      <th class="matchup-col">
+      <th class="matrix-header-cell matchup-col">
         <span class="matchup-sort-head">
           <button class="matchup-sort-button ${SORT_KEY === 'date' ? 'active' : ''}" type="button" onclick="setSort('date')">
             DATE ${sortArrow('date') || '↕'}
@@ -1782,37 +1834,33 @@ function renderHead(){
         </span>
       </th>
 
-      <th class="model-col spread-group"><span class="spread-label">SPREAD</span><br>MODEL</th>
-      <th class="shadow-col spread-group"><span class="spread-label">SPREAD</span><br>SHADOW</th>
-
-      <th class="best-col spread-group"><span class="spread-label">SPREAD</span><br>BEST</th>
-      <th class="exchange-col spread-group"><span class="spread-label">SPREAD</span><br>EXCH</th>
-      <th class="pinn-col spread-group"><span class="spread-label">SPREAD</span><br>PINN</th>
+      <th class="matrix-header-cell model-col spread-group"><span class="spread-label">SPREAD</span><br>MODEL</th>
+      <th class="matrix-header-cell shadow-col spread-group"><span class="spread-label">SPREAD</span><br>SHADOW</th>
+      <th class="matrix-header-cell best-col spread-group"><span class="spread-label">SPREAD</span><br>BEST</th>
+      <th class="matrix-header-cell exchange-col spread-group"><span class="spread-label">SPREAD</span><br>EXCH</th>
 
       <th
-        class="edge-col spread-group edge-focus sortable"
+        class="matrix-header-cell edge-col spread-group edge-focus sortable"
         onclick="setSort('spread_edge')"
       >
         <span class="spread-label">SPREAD</span><br>EDGE ${sortArrow('spread_edge')}
       </th>
 
-      <th class="model-col total-group">TOTAL<br>MODEL</th>
-      <th class="shadow-col total-group">TOTAL<br>SHADOW</th>
-
-      <th class="best-col total-group">TOTAL<br>BEST</th>
-      <th class="exchange-col total-group">TOTAL<br>EXCH</th>
-      <th class="pinn-col total-group">TOTAL<br>PINN</th>
+      <th class="matrix-header-cell model-col total-group">TOTAL<br>MODEL</th>
+      <th class="matrix-header-cell shadow-col total-group">TOTAL<br>SHADOW</th>
+      <th class="matrix-header-cell best-col total-group">TOTAL<br>BEST</th>
+      <th class="matrix-header-cell exchange-col total-group">TOTAL<br>EXCH</th>
 
       <th
-        class="edge-col total-group edge-focus sortable"
+        class="matrix-header-cell edge-col total-group edge-focus sortable"
         onclick="setSort('total_edge')"
       >
         TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="injury-col context-group">INJ</th>
-      <th class="signal-col context-group">SIGNALS</th>
-      <th class="state-col context-group">
+      <th class="matrix-header-cell injury-col context-group">INJ</th>
+      <th class="matrix-header-cell signal-col context-group">SIGNALS</th>
+      <th class="matrix-header-cell state-col context-group">
         <span class="header-tooltip" tabindex="0">
           MODEL<br>STATE
           <span class="header-tooltip-panel" role="tooltip">
@@ -1877,11 +1925,12 @@ function spreadDecision(game, side, edge){
 }
 
 function totalDecision(side, edge){
-  if(!side || !Number.isFinite(Number(edge)) || Number(edge) <= 0){
+  if(!side || !Number.isFinite(Number(edge))){
     return edgeDisplay(edge);
   }
   const label = side === 'under' ? 'U' : 'O';
-  return `<span class="decision-edge" title="${side === 'under' ? 'Under' : 'Over'}"><span class="decision-side">${label}</span><span>${edgeDisplay(edge)}</span></span>`;
+  const value = Math.abs(Number(edge)) < .05 ? '0' : edgeDisplay(edge);
+  return `<span class="decision-edge total-decision" title="${side === 'under' ? 'Under' : 'Over'}"><span class="decision-edge-main"><span class="decision-side">${label}</span><span>${value}</span></span></span>`;
 }
 
 const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','Sagarin Rating','DRatings'];
@@ -2037,7 +2086,69 @@ const BOOK_LOGOS = {
   ProphetX:'prophetx', Kalshi:'kalshi'
 };
 
-function compactQuote(q, market){
+function elapsedMinutes(value){
+  const stamp=new Date(value).getTime();
+  return Number.isFinite(stamp) ? Math.max(0,(Date.now()-stamp)/60000) : null;
+}
+
+function ageLabel(value){
+  const minutes=elapsedMinutes(value);
+  if(minutes===null) return 'age unavailable';
+  if(minutes<1) return 'less than 1 minute ago';
+  if(minutes<60) return `${Math.floor(minutes)} minutes ago`;
+  const hours=Math.floor(minutes/60);
+  return `${hours} hour${hours===1?'':'s'} ago`;
+}
+
+function openerRecency(value){
+  const minutes=elapsedMinutes(value);
+  if(minutes===null || minutes>90) return '';
+  return minutes<=30 ? 'open-new' : 'open-recent';
+}
+
+function compactOpenerTimeET(value){
+  if(!value) return '—';
+  const opened=new Date(value);
+  if(Number.isNaN(opened.getTime())) return '—';
+  const dateKey=d=>new Intl.DateTimeFormat('en-CA',{
+    timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(d);
+  if(dateKey(opened)===dateKey(new Date())) return fmtStatusTimeET(value);
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',month:'numeric',day:'numeric',
+    hour:'numeric',minute:'2-digit',hour12:true
+  }).format(opened);
+}
+
+function movementRecency(move){
+  const minutes=elapsedMinutes(move?.detected_at);
+  if(minutes===null || minutes>90) return '';
+  const ids=MATRIX?.fast_market_refresh?.recent_completed_refresh_ids || [];
+  const generation=ids.indexOf(String(move?.detected_refresh_id || ''));
+  if(minutes<=15 || generation===0) return 'move-very-recent';
+  if(minutes<=45 || generation===1 || generation===2) return 'move-recent';
+  return 'move-older-recent';
+}
+
+function moveGlyph(direction){
+  return direction==='UP'?'▲':direction==='DOWN'?'▼':'↔';
+}
+
+function movementTitle(game,move){
+  if(!move) return '';
+  const side=move.side==='away'?game.away_team:move.side==='home'?game.home_team:'';
+  const transition=move.market==='spread'
+    ? `${side ? `${side} ` : ''}${fmtLine(move.old_line)} → ${fmtLine(move.new_line)}`
+    : `${Number(move.old_line)} → ${Number(move.new_line)}`;
+  const magnitude=move.market==='spread'
+    ? `Line moved ${move.direction}: ${move.magnitude_old} → ${move.magnitude_new}`
+    : `Line moved ${move.direction}`;
+  const previous=Number(move.previous_qualifying_moves)>0
+    ? `\nPrevious qualifying moves: ${move.previous_qualifying_moves}`:'';
+  return `${game.away_team} @ ${game.home_team}\n${move.book} ${move.market}\n${transition}\n${magnitude}\nDetected ${fmtDateTimeET(move.detected_at)} · ${ageLabel(move.detected_at)}\nDetected refresh: ${move.detected_refresh_id || 'unavailable'}\nProvider quote time: ${move.quote_timestamp ? fmtDateTimeET(move.quote_timestamp) : 'unavailable'}${previous}`;
+}
+
+function compactQuote(q, market, game){
   if(!q) return '—';
 
   const book = q.book || '';
@@ -2046,29 +2157,53 @@ function compactQuote(q, market){
     ? fmtLine(q.line)
     : `${q.side === 'under' ? 'U' : 'O'}${Number.isFinite(Number(q.line)) ? Number(q.line) : '—'}`;
   const price = fmtPrice(q.price) || '—';
+  const move=q.last_material_move;
+  const moveClass=movementRecency(move);
 
   return `
-    <span class="market-best" title="${esc(book)}">
+    <span class="market-best ${moveClass?'has-move':''}" title="${esc(book)}">
       <img class="market-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(book)}">
       <span class="market-line">${line}</span>
       <span class="market-juice">${price}</span>
+      ${move ? `<span class="move-marker ${moveClass}" data-move-detected-at="${esc(move.detected_at || '')}" data-move-refresh-id="${esc(move.detected_refresh_id || '')}" title="${esc(movementTitle(game,move))}">${moveGlyph(move.direction)}</span>` : ''}
     </span>
   `;
 }
 
-function compactPinn(q, market){
-  if(!q) return '—';
+function compactOpen(game,market){
+  const opener=game.market?.openers?.[market];
+  if(!opener) return '<span class="open-missing">NOT TRACKED</span>';
+  const logo=BOOK_LOGOS[opener.book] || 'default';
+  const line=market==='spread'
+    ? fmtLine(opener.line)
+    : `${Number.isFinite(Number(opener.line)) ? Number(opener.line) : '—'}`;
+  const price=fmtPrice(opener.price) || '—';
+  const recency=openerRecency(opener.observed_at);
+  const label=recency==='open-new'?'NEW':recency==='open-recent'?'RECENT':'';
+  const tooltip=`Opened ${fmtDateTimeET(opener.observed_at)} · ${opener.book || opener.source || 'Unknown source'} · ${line} ${price}`;
+  return `<span class="open-cell" data-opened-at="${esc(opener.observed_at || '')}" title="${esc(tooltip)}"><span class="open-quote"><img class="market-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(opener.book || '')}"><span class="open-line">${line}</span><span class="open-price">${price}</span><span class="open-meta"><span class="open-time">${esc(compactOpenerTimeET(opener.observed_at))}</span><span class="recency-marker ${recency}">${label}</span></span></span></span>`;
+}
 
-  const quote =
-    market === 'spread'
-      ? quoteText(q)
-      : totalQuoteText(q);
-
-  return `
-    <span class="pinn-quote">
-      ${quote}
-    </span>
-  `;
+function updateMatrixRecencyMarkers(){
+  document.querySelectorAll('[data-opened-at]').forEach(cell=>{
+    const marker=cell.querySelector('.recency-marker');
+    if(!marker)return;
+    marker.classList.remove('open-new','open-recent');
+    const state=openerRecency(cell.dataset.openedAt);
+    if(state)marker.classList.add(state);
+    marker.textContent=state==='open-new'?'NEW':state==='open-recent'?'RECENT':'';
+  });
+  document.querySelectorAll('[data-move-detected-at]').forEach(marker=>{
+    const move={detected_at:marker.dataset.moveDetectedAt,detected_refresh_id:marker.dataset.moveRefreshId};
+    marker.classList.remove('move-very-recent','move-recent','move-older-recent');
+    const state=movementRecency(move);
+    if(state)marker.classList.add(state);
+    marker.closest('.market-best')?.classList.toggle('has-move',Boolean(state));
+    marker.title=marker.title.replace(
+      /Detected [^\n]*/,
+      `Detected ${fmtDateTimeET(move.detected_at)} · ${ageLabel(move.detected_at)}`
+    );
+  });
 }
 
 function renderMatrix(){
@@ -2115,16 +2250,6 @@ function renderMatrix(){
         ? game.market?.best_exchange?.total?.[totSide]
         : null;
 
-    const sprPinn =
-      sprSide
-        ? game.market?.pinnacle?.spread?.[sprSide]
-        : null;
-
-    const totPinn =
-      totSide
-        ? game.market?.pinnacle?.total?.[totSide]
-        : null;
-
     const sprModel =
       game.models?.standard_spread?.value_home_line;
 
@@ -2164,15 +2289,11 @@ function renderMatrix(){
         </td>
 
         <td class="best-col spread-group">
-          ${compactQuote(sprBest, 'spread')}
+          ${compactQuote(sprBest, 'spread', game)}
         </td>
 
         <td class="exchange-col spread-group">
-          ${compactQuote(sprEx, 'spread')}
-        </td>
-
-        <td class="pinn-col spread-group">
-          ${compactPinn(sprPinn, 'spread')}
+          ${compactQuote(sprEx, 'spread', game)}
         </td>
 
         <td class="edge-col spread-group edge-focus">
@@ -2190,15 +2311,11 @@ function renderMatrix(){
         </td>
 
         <td class="best-col total-group">
-          ${compactQuote(totBest, 'total')}
+          ${compactQuote(totBest, 'total', game)}
         </td>
 
         <td class="exchange-col total-group">
-          ${compactQuote(totEx, 'total')}
-        </td>
-
-        <td class="pinn-col total-group">
-          ${compactPinn(totPinn, 'total')}
+          ${compactQuote(totEx, 'total', game)}
         </td>
 
         <td class="edge-col total-group edge-focus">
@@ -2874,6 +2991,7 @@ async function pollPublishedVersion(){
   }catch(_err){ /* preserve the last valid rendered state */ }
 }
 setInterval(pollPublishedVersion, VERSION_POLL_MS);
+setInterval(updateMatrixRecencyMarkers, 30000);
 detectOperator();
 
 loadData().catch(err=>{
