@@ -359,6 +359,14 @@ button,select{
   overflow-x:hidden;
 }
 
+.mobile-matrix{
+  display:none;
+}
+
+.mobile-sticky-bar{
+  display:none;
+}
+
 .panel-head{
   display:flex;
   align-items:center;
@@ -606,6 +614,13 @@ tr:hover td.context-group{background:#202d39}
 .matchup-team{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;font-weight:900;line-height:1.2}
 .matchup-team .team-logo-holder{--team-logo-size:18px}
 .matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team-composite-rank{flex:0 0 22px;min-width:22px;text-align:right;font-size:9.5px;font-weight:950;font-variant-numeric:tabular-nums;line-height:1;color:var(--muted);overflow:visible!important}
+.team-composite-rank.rank-tier-1{color:#39e89a}
+.team-composite-rank.rank-tier-2{color:#78e6ad}
+.team-composite-rank.rank-tier-3{color:#f4cd4b}
+.team-composite-rank.rank-tier-4{color:#ff8a5b}
+.team-composite-rank.rank-tier-5{color:#ff4d63}
+.matchup-team-name{min-width:0}
 .neutral-marker{color:var(--yellow);font-size:8px;font-weight:900;letter-spacing:.04em}
 .matchup-sort-head{display:flex;align-items:center;justify-content:space-between;gap:3px}
 .matchup-sort-button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:9px;font-weight:900;padding:0;cursor:pointer;text-transform:uppercase;white-space:nowrap}
@@ -680,11 +695,11 @@ tr:hover td.context-group{background:#202d39}
 .recency-marker{display:none;font-size:7.5px;font-weight:900;letter-spacing:.01em;line-height:1.05}
 .recency-marker.open-new{display:inline;color:#e99362}
 .recency-marker.open-recent{display:inline;color:#c7ad58}
-.move-marker{display:none;grid-column:3;grid-row:1 / span 2;align-self:center;justify-self:center;font-size:10px;font-weight:950;cursor:help}
+.move-marker{display:none;grid-column:3;grid-row:1 / span 2;align-self:center;justify-self:center;font-size:14px;font-weight:950;line-height:1;cursor:help}
 .move-marker.move-very-recent{display:inline-block;color:#ff6969}
 .move-marker.move-recent{display:inline-block;color:var(--yellow)}
 .move-marker.move-older-recent{display:inline-block;color:#8796a4}
-.market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 10px}
+.market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 14px}
 
 .decision-edge{
   display:inline-flex;
@@ -903,7 +918,8 @@ tr:hover td.context-group{background:#202d39}
 @media(min-width:901px){body{overflow:hidden}}
 
 @media(max-width:900px){
-  body{overflow:auto}
+  body{overflow-x:hidden;overflow-y:auto}
+  .wr-shell{width:100%;max-width:100vw;overflow:visible}
   .summary-grid{
     grid-template-columns:repeat(2,1fr);
   }
@@ -912,12 +928,135 @@ tr:hover td.context-group{background:#202d39}
     grid-template-columns:1fr;
   }
 
-  .right-rail{
-    display:none;
-  }
-
   .command-grid{height:auto!important}
-  .matrix-scroll{max-height:70vh;overflow-y:auto}
+  .matrix-scroll{display:none}
+  .mobile-matrix{display:grid;gap:7px;padding:7px;background:#071019}
+
+  .right-rail{display:none}
+  .mobile-activity-slot .right-rail{
+    display:flex;
+    width:100%;
+    min-height:280px;
+    max-height:48vh;
+    margin-top:0;
+    border-left:0;
+    border-top:1px solid var(--line2);
+    background:#08121c;
+  }
+  .mobile-activity-slot{border-top:1px solid rgba(69,217,237,.28)}
+
+  .mobile-sticky-bar{
+    position:sticky;
+    top:0;
+    z-index:30;
+    display:block;
+    min-height:54px;
+    padding:calc(4px + env(safe-area-inset-top,0px)) 7px 5px;
+    border-bottom:1px solid var(--line2);
+    background:rgba(6,12,18,.97);
+    box-shadow:0 4px 12px rgba(0,0,0,.35);
+  }
+  .mobile-sticky-main{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+  .mobile-sticky-title{color:var(--text);font-size:11px;font-weight:950;letter-spacing:.55px;white-space:nowrap}
+  .mobile-sticky-title span{color:var(--green)}
+  .mobile-sticky-health{min-width:0;color:var(--muted);font-size:8px;font-weight:900;text-align:right;white-space:nowrap}
+  .mobile-sticky-controls{display:grid;grid-template-columns:62px minmax(74px,.8fr) minmax(126px,1.35fr) 72px;gap:4px;margin-top:4px}
+  .mobile-control-select,.mobile-controls-toggle{
+    min-width:0;
+    height:25px;
+    border:1px solid var(--line2);
+    border-radius:4px;
+    background:#0c1722;
+    color:var(--text);
+    padding:2px 4px;
+    font-size:9px;
+    font-weight:900;
+  }
+  .mobile-controls-toggle{color:var(--yellow);cursor:pointer}
+
+  .wr-top{padding-bottom:5px}
+  .wr-top-right{display:none;width:100%;margin-left:0;flex-wrap:wrap;padding-top:3px}
+  .wr-top-right.mobile-open{display:flex}
+  .wr-top-right::-webkit-scrollbar{display:none}
+  .operator-status{position:static;width:100%;text-align:left}
+  .wr-inline-health{font-size:10px;gap:5px;flex-wrap:wrap}
+
+  .panel-head{display:none}
+
+  .mobile-game-card{
+    border:1px solid var(--line2);
+    border-radius:6px;
+    background:var(--panel);
+    overflow:hidden;
+  }
+  .mobile-game-card.game-selected{
+    border-color:var(--cyan);
+    box-shadow:0 0 0 1px rgba(69,217,237,.2);
+  }
+  .mobile-activity-slot:empty{display:none}
+  .mobile-game-card.activity-flash{animation:mobileActivityFlash 1.8s ease-out}
+  @keyframes mobileActivityFlash{0%{box-shadow:inset 0 0 0 999px rgba(57,232,154,.22)}100%{box-shadow:none}}
+  .mobile-game-head{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:7px;
+    align-items:center;
+    padding:7px 8px;
+    border-bottom:1px solid var(--line);
+    background:#0a141e;
+  }
+  .mobile-kickoff{display:flex;flex-direction:column;color:var(--muted);font-size:9px;font-weight:900;line-height:1.2}
+  .mobile-matchup{min-width:0}
+  .mobile-matchup .matchup-team{font-size:11px}
+  .mobile-card-state{justify-self:end}
+  .mobile-market-band{padding:6px 7px 7px}
+  .mobile-market-band + .mobile-market-band{border-top:1px solid var(--line)}
+  .mobile-band-title{margin-bottom:5px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.8px}
+  .mobile-band-grid{
+    display:grid;
+    grid-template-columns:.78fr 1fr 1.12fr 1.12fr 1fr;
+    gap:3px;
+    align-items:stretch;
+  }
+  .mobile-metric{
+    min-width:0;
+    min-height:54px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:3px 1px;
+    border:1px solid rgba(51,73,92,.7);
+    border-radius:4px;
+    background:rgba(7,16,25,.5);
+    text-align:center;
+  }
+  .mobile-metric.edge-focus{background:rgba(57,232,154,.045);border-color:rgba(57,232,154,.25)}
+  .mobile-metric-label{color:#8294a6;font-size:7px;font-weight:900;letter-spacing:.35px}
+  .mobile-metric .model-number{font-size:12px}
+  .mobile-metric .market-book-logo{width:20px;height:20px}
+  .mobile-metric .market-line{font-size:12px}
+  .mobile-metric .market-juice{font-size:10px}
+  .mobile-metric .shadow-state-label{font-size:10px}
+  .mobile-metric .shadow-team-mark{font-size:13px}
+  .mobile-metric.edge-focus{overflow:hidden}
+  .mobile-metric .decision-edge{min-width:0;max-width:100%}
+  .mobile-metric .decision-edge-main{max-width:100%;gap:2px}
+  .mobile-metric .decision-edge .team-logo-holder{--team-logo-size:18px}
+  .mobile-metric .decision-team-name{width:100%;max-width:100%;padding:0 2px;box-sizing:border-box}
+  .mobile-game-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:30px;
+    padding:4px 8px;
+    border-top:1px solid var(--line);
+    background:#09131d;
+  }
+  .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
+  .mobile-foot-signals{display:flex;align-items:center;gap:5px;min-width:0}
 
   .wr-top{
     align-items:flex-start;
@@ -988,6 +1127,22 @@ tr:hover td.context-group{background:#202d39}
     </div>
   </div>
 
+  <section class="mobile-sticky-bar" id="mobileStickyBar" aria-label="Mobile War Room controls">
+    <div class="mobile-sticky-main">
+      <span class="mobile-sticky-title">WAR ROOM · <span>MARKET MATRIX</span></span>
+      <span class="mobile-sticky-health" id="mobileStickyHealth">API — · UPDATED —</span>
+    </div>
+    <div class="mobile-sticky-controls">
+      <select class="mobile-control-select" id="mobileScopeSelect" aria-label="Game scope"><option value="FBS">FBS</option><option value="ALL">ALL</option></select>
+      <select class="mobile-control-select" id="mobileWeekSelect" aria-label="Week"></select>
+      <select class="mobile-control-select" id="mobileSortSelect" aria-label="Sort games">
+        <option value="date">DATE</option><option value="home_team">HOME TEAM A-Z</option>
+        <option value="spread_edge">SPREAD EDGE</option><option value="total_edge">TOTAL EDGE</option>
+      </select>
+      <button class="mobile-controls-toggle" id="mobileControlsToggle" type="button" aria-expanded="false">CONTROLS</button>
+    </div>
+  </section>
+
   <section class="summary-grid">
     <div class="summary-box">
       <div class="summary-label">Markets</div>
@@ -1050,6 +1205,8 @@ tr:hover td.context-group{background:#202d39}
           <tbody id="matrixBody"></tbody>
         </table>
       </div>
+
+      <div class="mobile-matrix" id="mobileMatrix" aria-label="Priority Market Matrix mobile view"></div>
     </section>
 
     <aside class="right-rail" aria-label="War Room Activity">
@@ -1078,9 +1235,9 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260828T032430Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260828T032430Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260828T032430Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260828T151723Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260828T151723Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260828T151723Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -1097,8 +1254,11 @@ const GAME_ACTIVITY_CACHE = new Map();
 let ACTIVE_MARKET = 'spread';
 let ACTIVE_WEEK = 'AUTO';
 let ACTIVE_SCOPE = 'FBS';
-let SORT_KEY = 'best_edge';
+const INITIAL_MOBILE_VIEW = window.matchMedia('(max-width:900px)').matches;
+let SORT_KEY = INITIAL_MOBILE_VIEW ? 'spread_edge' : 'best_edge';
 let SORT_DIR = 'desc';
+
+const TEAM_ABBREVIATIONS = {"Abilene Christian": "ACU", "Air Force": "AF", "Akron": "AKR", "Alabama": "ALA", "Alcorn State": "ALCN", "Arizona": "ARIZ", "Arizona State": "ASU", "Arkansas": "ARK", "Arkansas State": "ARST", "Army": "ARMY", "Auburn": "AUB", "Austin Peay": "APSU", "BYU": "BYU", "Ball State": "BALL", "Baylor": "BAY", "Bethune-Cookman": "BCU", "Boise State": "BOIS", "Boston College": "BC", "Bowling Green": "BGSU", "Bryant": "BRY", "Buffalo": "BUF", "California": "CAL", "Central Michigan": "CMU", "Charleston So.": "CHSO", "Charlotte": "CLT", "Cincinnati": "CIN", "Clemson": "CLEM", "Coastal Carolina": "CCU", "Colorado": "COLO", "Colorado State": "CSU", "Delaware": "DEL", "Duke": "DUKE", "Duquesne": "DUQ", "East Carolina": "ECU", "Eastern Illinois": "EIU", "Eastern Kentucky": "EKU", "Eastern Michigan": "EMU", "Florida": "FLA", "Florida Atlantic": "FAU", "Florida International": "FIU", "Florida State": "FSU", "Fordham": "FOR", "Fresno State": "FRES", "Furman": "FUR", "Georgia": "UGA", "Georgia Southern": "GASO", "Georgia State": "GAST", "Georgia Tech": "GT", "Hawaii": "HAW", "Houston": "HOU", "Idaho": "IDHO", "Idaho State": "IDST", "Illinois": "ILL", "Indiana": "IU", "Indiana State": "INST", "Iowa": "IOWA", "Iowa State": "ISU", "Jacksonville State": "JXST", "James Madison": "JMU", "Kansas": "KU", "Kansas State": "KSU", "Kennesaw State": "KENN", "Kent State": "KENT", "Kentucky": "UK", "LSU": "LSU", "Lafayette": "LAF", "Lamar": "LAM", "Liberty": "LIB", "Louisiana": "UL", "Louisiana Tech": "LT", "Louisville": "LOU", "Maine": "ME", "Marshall": "MRSH", "Massachusetts": "MASS", "Memphis": "MEM", "Merrimack": "MRMK", "Miami-OH": "M-OH", "Michigan": "MICH", "Michigan State": "MSU", "Middle Tennessee": "MTSU", "Minnesota": "MINN", "Mississippi State": "MSST", "Missouri": "MIZ", "Missouri State": "MOST", "Morgan State": "MORG", "Murray State": "MUR", "NC State": "NCSU", "Navy": "NAVY", "Nebraska": "NEB", "Nevada": "NEV", "New Hampshire": "UNH", "New Mexico": "UNM", "New Mexico State": "NMSU", "Nicholls": "NICH", "Norfolk State": "NORF", "North Alabama": "UNA", "North Carolina": "UNC", "North Carolina A&T": "NCAT", "North Dakota State": "NDSU", "North Texas": "UNT", "Northern Arizona": "NAU", "Northern Illinois": "NIU", "Northwestern": "NU", "Northwestern State": "NWST", "Notre Dame": "ND", "Ohio": "OHIO", "Ohio State": "OSU", "Oklahoma": "OU", "Oklahoma State": "OKST", "Old Dominion": "ODU", "Ole Miss": "MISS", "Oregon": "ORE", "Oregon State": "ORST", "Penn State": "PSU", "Pittsburgh": "PITT", "Portland State": "PRST", "Purdue": "PUR", "Rhode Island": "URI", "Rice": "RICE", "Rutgers": "RUTG", "SMU": "SMU", "Sacramento State": "SAC", "Sam Houston": "SHSU", "San Diego State": "SDSU", "San Jose State": "SJSU", "South Alabama": "USA", "South Carolina": "SC", "South Dakota State": "SDST", "South Florida": "USF", "Southeast Missouri": "SEMO", "Southern Miss": "USM", "Stanford": "STAN", "Syracuse": "SYR", "TCU": "TCU", "Tarleton State": "TAR", "Temple": "TEM", "Tennessee": "TENN", "Tennessee State": "TNST", "Texas": "TEX", "Texas A&M": "TA&M", "Texas State": "TXST", "Texas Tech": "TTU", "The Citadel": "CIT", "Toledo": "TOL", "Towson": "TOW", "Troy": "TROY", "Tulane": "TULN", "Tulsa": "TLSA", "UAB": "UAB", "UAlbany": "UALB", "UCLA": "UCLA", "UL-Monroe": "ULM", "UNLV": "UNLV", "USC": "USC", "UTEP": "UTEP", "UTSA": "UTSA", "Utah": "UTAH", "Utah State": "USU", "Utah Tech": "UTU", "VMI": "VMI", "Vanderbilt": "VAN", "Virginia": "UVA", "Virginia Tech": "VT", "Wake Forest": "WAKE", "Washington": "WASH", "Washington State": "WSU", "West Georgia": "WGA", "West Virginia": "WVU", "Western Kentucky": "WKU", "Western Michigan": "WMU", "Wisconsin": "WIS", "Wyoming": "WYO", "Youngstown State": "YSU"};
 
 const BOOK_ABBR = {
   DraftKings:'DK',
@@ -1575,6 +1735,7 @@ function setSort(key){
   }
 
   renderMatrix();
+  syncMobileControls();
 }
 
 function renderHealth(){
@@ -1718,6 +1879,11 @@ function renderHealth(){
     </span>
   `;
 
+  const mobileHealth=document.getElementById('mobileStickyHealth');
+  if(mobileHealth){
+    mobileHealth.innerHTML=`${healthDot(q.color)}API ${esc(q.status || 'UNKNOWN')} · UPDATED ${esc(fmtStatusTimeET(HEALTH?.fast_market_refresh?.last_fast_pull_at))}`;
+  }
+
   document.getElementById('summaryQuota').innerHTML =
     `<span class="${String(q.color || '').toLowerCase()}">` +
     `${esc(q.credits_remaining ?? '—')} left</span>`;
@@ -1770,6 +1936,22 @@ function fillWeeks(){
   }
 
   select.value = ACTIVE_WEEK;
+  syncMobileControls();
+}
+
+function syncMobileControls(){
+  const desktopScope=document.getElementById('scopeSelect');
+  const desktopWeek=document.getElementById('weekSelect');
+  const mobileScope=document.getElementById('mobileScopeSelect');
+  const mobileWeek=document.getElementById('mobileWeekSelect');
+  const mobileSort=document.getElementById('mobileSortSelect');
+  if(mobileScope) mobileScope.value=String(ACTIVE_SCOPE);
+  if(mobileWeek && desktopWeek){
+    mobileWeek.innerHTML=desktopWeek.innerHTML;
+    mobileWeek.value=String(ACTIVE_WEEK);
+  }
+  if(mobileSort) mobileSort.value=String(SORT_KEY);
+  if(desktopScope) desktopScope.value=String(ACTIVE_SCOPE);
 }
 
 function getQuote(game, book, market, side){
@@ -1888,38 +2070,27 @@ function modelDisplay(value, market){
     return '—';
   }
 
-  if(market === 'spread'){
-    const rounded = Math.round(n * 10) / 10;
-
-    if(rounded === 0){
-      return 'PK';
-    }
-
-    return rounded > 0
-      ? `+${rounded}`
-      : `${rounded}`;
-  }
-
   return n.toFixed(1);
 }
 
 function edgeDisplay(value){
   const n = Number(value);
 
-  if(!Number.isFinite(n) || n <= 0){
+  if(!Number.isFinite(n) || n < 0){
     return '—';
   }
 
-  return `▲${n.toFixed(1)}`;
+  return Math.abs(n) < .05 ? '0' : n.toFixed(1);
 }
 
-function spreadDecision(game, side, edge){
+function spreadDecision(game, side, edge, useShortName=false){
   if(!side || !Number.isFinite(Number(edge)) || Number(edge) <= 0){
     return edgeDisplay(edge);
   }
   const team = side === 'away' ? game.away_team : game.home_team;
+  const displayTeam = useShortName ? (TEAM_ABBREVIATIONS[team] || team) : team;
   const slug = teamLogoSlug(team);
-  return `<span class="decision-edge" title="Bet ${esc(team)}"><span class="decision-edge-main"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span>${edgeDisplay(edge)}</span></span><span class="decision-team-name" title="${esc(team)}">${esc(team)}</span></span>`;
+  return `<span class="decision-edge" title="Bet ${esc(team)}"><span class="decision-edge-main"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span>${edgeDisplay(edge)}</span></span><span class="decision-team-name" title="${esc(team)}">${esc(displayTeam)}</span></span>`;
 }
 
 function totalDecision(side, edge){
@@ -1927,7 +2098,7 @@ function totalDecision(side, edge){
     return edgeDisplay(edge);
   }
   const label = side === 'under' ? 'U' : 'O';
-  const value = Math.abs(Number(edge)) < .05 ? '0' : edgeDisplay(edge);
+  const value = edgeDisplay(edge);
   return `<span class="decision-edge total-decision" title="${side === 'under' ? 'Under' : 'Over'}"><span class="decision-edge-main"><span class="decision-side">${label}</span><span>${value}</span></span></span>`;
 }
 
@@ -2005,9 +2176,22 @@ function teamLogoSlug(team){
     .replace(/^-+|-+$/g, '');
 }
 
-function matchupTeam(team){
+function compositeRankClass(rank){
+  const value=Number(rank);
+  if(!Number.isInteger(value) || value<1) return '';
+  if(value<=28) return 'rank-tier-1';
+  if(value<=56) return 'rank-tier-2';
+  if(value<=83) return 'rank-tier-3';
+  if(value<=111) return 'rank-tier-4';
+  if(value<=138) return 'rank-tier-5';
+  return '';
+}
+
+function matchupTeam(team,rank){
   const slug = teamLogoSlug(team);
-  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span>${esc(team)}</span></div>`;
+  const value=Number(rank);
+  const valid=Number.isInteger(value) && value>=1 && value<=138;
+  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="team-composite-rank ${compositeRankClass(rank)}" title="Canonical composite rank">${valid?esc(value):'—'}</span><span class="matchup-team-name">${esc(team)}</span></div>`;
 }
 
 function signalChip(team, count){
@@ -2204,6 +2388,83 @@ function updateMatrixRecencyMarkers(){
   });
 }
 
+function mobileMetric(label,content,extraClass=''){
+  return `<div class="mobile-metric ${extraClass}"><span class="mobile-metric-label">${label}</span>${content}</div>`;
+}
+
+function renderMobileMatrix(rows){
+  const mobile=document.getElementById('mobileMatrix');
+  if(!mobile) return;
+  const rail=document.querySelector('.right-rail');
+  const grid=document.querySelector('.command-grid');
+  if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);
+  mobile.innerHTML=rows.map(game=>{
+    const sprSide=game.edges?.spread?.best_side;
+    const totSide=game.edges?.total?.best_side;
+    const sprEdge=sprSide?game.edges?.spread?.best_edge:null;
+    const totEdge=totSide?game.edges?.total?.best_edge:null;
+    const sprBest=sprSide?game.market?.best_sportsbook?.spread?.[sprSide]:null;
+    const totBest=totSide?game.market?.best_sportsbook?.total?.[totSide]:null;
+    const sprEx=sprSide?game.market?.best_exchange?.spread?.[sprSide]:null;
+    const totEx=totSide?game.market?.best_exchange?.total?.[totSide]:null;
+    const sprShadow=game.models?.shadow_spread;
+    const totShadow=game.models?.shadow_total;
+    return `<article class="mobile-game-card game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
+      <div class="mobile-game-head">
+        <div class="mobile-kickoff"><span>${esc(fmtKickoffDateET(game.kickoff_time))}</span><span>${esc(fmtKickoffTimeET(game.kickoff_time))}</span>${game.neutral_site?'<span class="neutral-marker">NEUTRAL</span>':''}</div>
+        <div class="mobile-matchup">${matchupTeam(game.away_team,game.team_composite_rank?.away)}${matchupTeam(game.home_team,game.team_composite_rank?.home)}</div>
+        <div class="mobile-card-state"><span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
+      </div>
+      <div class="mobile-market-band spread-group">
+        <div class="mobile-band-title">SPREAD</div>
+        <div class="mobile-band-grid">
+          ${mobileMetric('EDGE',`<span class="edge ${edgeClass(sprEdge)}">${spreadDecision(game,sprSide,sprEdge,true)}</span>`,'edge-focus')}
+          ${mobileMetric('BEST',compactQuote(sprBest,'spread',game))}
+          ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
+          ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
+          ${mobileMetric('EXCH',compactQuote(sprEx,'spread',game))}
+        </div>
+      </div>
+      <div class="mobile-market-band total-group">
+        <div class="mobile-band-title">TOTAL</div>
+        <div class="mobile-band-grid">
+          ${mobileMetric('EDGE',`<span class="edge ${edgeClass(totEdge)}">${totalDecision(totSide,totEdge)}</span>`,'edge-focus')}
+          ${mobileMetric('BEST',compactQuote(totBest,'total',game))}
+          ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
+          ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
+          ${mobileMetric('EXCH',compactQuote(totEx,'total',game))}
+        </div>
+      </div>
+      <div class="mobile-game-foot"><span class="mobile-foot-label">INJ —</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
+      ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
+    </article>`;
+  }).join('');
+  mobile.querySelectorAll('.mobile-game-card[data-game-id]').forEach(card=>card.addEventListener('click',event=>{
+    if(event.target.closest('button,a,input,select,summary,[role="button"],[data-no-game-select]')) return;
+    const game=rows.find(item=>String(item.game_id)===String(card.dataset.gameId));
+    if(game) selectActivityGame(game);
+  }));
+  placeActivityRail();
+}
+
+function isMobileView(){
+  return window.matchMedia('(max-width:900px)').matches;
+}
+
+function placeActivityRail(){
+  const rail=document.querySelector('.right-rail');
+  const grid=document.querySelector('.command-grid');
+  if(!rail || !grid) return;
+  if(isMobileView() && SELECTED_GAME_ID){
+    const selected=[...document.querySelectorAll('.mobile-game-card[data-game-id]')]
+      .find(card=>String(card.dataset.gameId)===String(SELECTED_GAME_ID));
+    const slot=selected?.querySelector('.mobile-activity-slot');
+    if(slot && rail.parentElement!==slot) slot.appendChild(rail);
+    return;
+  }
+  if(rail.parentElement!==grid) grid.appendChild(rail);
+}
+
 function renderMatrix(){
   renderHead();
 
@@ -2274,8 +2535,8 @@ function renderMatrix(){
             </span>
             ${game.neutral_site ? '<span class="neutral-marker" title="Neutral site">N</span>' : ''}
           </div>
-          ${matchupTeam(game.away_team)}
-          ${matchupTeam(game.home_team)}
+          ${matchupTeam(game.away_team,game.team_composite_rank?.away)}
+          ${matchupTeam(game.home_team,game.team_composite_rank?.home)}
         </td>
 
         <td class="model-col spread-group">
@@ -2346,6 +2607,8 @@ function renderMatrix(){
     if(game) selectActivityGame(game);
   }));
 
+  renderMobileMatrix(rows);
+
   renderSummary();
 }
 
@@ -2364,7 +2627,7 @@ function activityTime(value){
   if(Number.isNaN(d.getTime())) return esc(value);
   return new Intl.DateTimeFormat('en-US',{
     timeZone:'America/New_York',
-    hour:'numeric',minute:'2-digit',second:'2-digit'
+    month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'
   }).format(d);
 }
 
@@ -2497,7 +2760,7 @@ async function fetchGameActivity(game){
 }
 
 function applySelectedRow(){
-  document.querySelectorAll('tr[data-game-id]').forEach(row=>{
+  document.querySelectorAll('tr[data-game-id],.mobile-game-card[data-game-id]').forEach(row=>{
     row.classList.toggle('game-selected',String(row.dataset.gameId)===String(SELECTED_GAME_ID));
   });
 }
@@ -2510,6 +2773,7 @@ async function selectActivityGame(game,{toggle=true}={}){
   }
   SELECTED_GAME_ID=String(game.game_id);
   SELECTED_GAME_ACTIVITY=null;
+  renderMobileMatrix(currentRows());
   applySelectedRow();
   renderActivity();
   const requested=SELECTED_GAME_ID;
@@ -2522,6 +2786,7 @@ async function selectActivityGame(game,{toggle=true}={}){
 function clearActivityGame(){
   SELECTED_GAME_ID=null;
   SELECTED_GAME_ACTIVITY=null;
+  renderMobileMatrix(currentRows());
   applySelectedRow();
   renderActivity();
 }
@@ -2590,11 +2855,16 @@ async function focusActivityGame(event){
   const game=(MATRIX?.games || []).find(item=>String(item.game_id)===String(event.game_id));
   if(game) await selectActivityGame(game,{toggle:false});
   requestAnimationFrame(()=>{
-    const row = [...document.querySelectorAll('tr[data-game-id]')].find(el=>el.dataset.gameId===String(event.game_id));
+    const row = [...document.querySelectorAll('tr[data-game-id],.mobile-game-card[data-game-id]')].find(el=>{
+      if(el.dataset.gameId!==String(event.game_id)) return false;
+      return el.offsetParent!==null;
+    });
     if(!row) return;
     const matrix=document.querySelector('.matrix-scroll');
-    if(matrix){
+    if(matrix && getComputedStyle(matrix).display!=='none'){
       matrix.scrollTo({top:Math.max(0,row.offsetTop-(matrix.clientHeight-row.offsetHeight)/2),behavior:'smooth'});
+    }else{
+      row.scrollIntoView({block:'center',behavior:'smooth'});
     }
     row.classList.add('activity-flash');
     setTimeout(()=>row.classList.remove('activity-flash'),1800);
@@ -2707,6 +2977,7 @@ function renderSelectedSnapshot(){
 }
 
 function renderActivity(){
+  placeActivityRail();
   const events = visibleActivity();
   const latestIds = new Set(ACTIVITY?.latest_refresh_event_ids || []);
   const latestEvents = (ACTIVITY?.events || []).filter(event=>
@@ -2791,7 +3062,10 @@ function syncWorkingViewport(){
   grid.style.height=`${Math.max(280,available)}px`;
 }
 
-window.addEventListener('resize',syncWorkingViewport);
+window.addEventListener('resize',()=>{
+  syncWorkingViewport();
+  placeActivityRail();
+});
 
 document.getElementById('scopeSelect').addEventListener(
   'change',
@@ -2820,6 +3094,38 @@ document.getElementById('weekSelect').addEventListener(
     renderActivity();
   }
 );
+
+document.getElementById('mobileScopeSelect').addEventListener('change',e=>{
+  ACTIVE_SCOPE=e.target.value;
+  if(ACTIVE_WEEK!=='ALL') ACTIVE_WEEK='AUTO';
+  fillWeeks();
+  reconcileSelectedGame();
+  renderHealth();
+  renderMatrix();
+  renderActivity();
+});
+
+document.getElementById('mobileWeekSelect').addEventListener('change',e=>{
+  ACTIVE_WEEK=e.target.value;
+  document.getElementById('weekSelect').value=String(ACTIVE_WEEK);
+  reconcileSelectedGame();
+  renderHealth();
+  renderMatrix();
+  renderActivity();
+});
+
+document.getElementById('mobileSortSelect').addEventListener('change',e=>{
+  SORT_KEY=e.target.value;
+  SORT_DIR=(SORT_KEY==='date' || SORT_KEY==='home_team')?'asc':'desc';
+  renderMatrix();
+  syncMobileControls();
+});
+
+document.getElementById('mobileControlsToggle').addEventListener('click',e=>{
+  const controls=document.querySelector('.wr-top-right');
+  const open=controls?.classList.toggle('mobile-open') || false;
+  e.currentTarget.setAttribute('aria-expanded',String(open));
+});
 
 document.querySelectorAll('.activity-filter').forEach(button=>button.addEventListener('click',()=>{
   ACTIVITY_FILTER=button.dataset.filter;
@@ -3002,6 +3308,8 @@ loadData().catch(err=>{
       </td>
     </tr>
   `;
+  const mobile=document.getElementById('mobileMatrix');
+  if(mobile) mobile.innerHTML=`<div class="red">Could not load War Room data: ${esc(err.message)}</div>`;
 });
 </script>
 

@@ -1,3 +1,6 @@
+import csv
+import json
+import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +30,20 @@ def move(event_id, book, market, old, new, detected, refresh="r3"):
 
 
 class WarRoomMatrixPhase2Test(unittest.TestCase):
+    def test_canonical_composite_rank_source_and_strict_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ratings.json"
+            path.write_text(json.dumps({"teams": [
+                {"team": "Florida State", "overall_rank": 4},
+                {"team": "New Mexico State", "overall_rank": 138},
+                {"team": "Missing", "overall_rank": None},
+            ]}))
+            ranks = matrix.load_team_composite_ranks(path)
+        self.assertEqual(ranks["florida state"], 4)
+        self.assertEqual(ranks["new mexico state"], 138)
+        self.assertNotIn("missing", ranks)
+        self.assertIn('"source": "ratings_view.teams.overall_rank"', (ROOT / "scripts/war_room/build_war_room_market_matrix.py").read_text())
+
     def test_opener_authority_is_earliest_and_missing_is_not_manufactured(self):
         history = {"g1": [
             {"snapshot_ts": "2026-08-27T12:30:00Z", "market_spread_home": -4.5,
@@ -154,6 +171,181 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn(".open-price{grid-column:2;grid-row:2;font-size:10px;font-weight:800", source)
         self.assertIn(".open-meta{grid-column:1 / span 2;grid-row:3;display:flex;align-items:center;justify-content:center;gap:1px;min-width:0;font-size:8px", source)
         self.assertIn(".recency-marker{display:none;font-size:7.5px", source)
+
+    def test_mobile_view_reuses_canonical_rows_without_changing_desktop_matrix(self):
+        source = PAGE.read_text()
+        self.assertIn('id="mobileMatrix"', source)
+        self.assertIn("function renderMobileMatrix(rows)", source)
+        self.assertIn("renderMobileMatrix(rows);", source)
+        self.assertIn(".matrix-scroll{display:none}", source)
+        self.assertIn(".mobile-matrix{display:grid", source)
+        self.assertIn("MODEL',modelTooltip", source)
+        self.assertIn("SHADOW',shadowDisplay", source)
+        self.assertIn("BEST',compactQuote", source)
+        self.assertIn("EXCH',compactQuote", source)
+        self.assertNotIn("mobileOpen", source)
+
+    def test_mobile_activity_remains_available_and_selection_is_shared(self):
+        source = PAGE.read_text()
+        mobile_css = source[source.index("@media(max-width:900px)"):source.index("</style>")]
+        self.assertIn(".right-rail{display:none}", mobile_css)
+        self.assertIn(".mobile-activity-slot .right-rail{", mobile_css)
+        self.assertIn("function placeActivityRail()", source)
+        self.assertIn("slot.appendChild(rail)", source)
+        self.assertIn("if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);", source)
+        self.assertEqual(source.count('class="right-rail"'), 1)
+        self.assertIn("tr[data-game-id],.mobile-game-card[data-game-id]", source)
+        self.assertIn("row.scrollIntoView", source)
+
+    def test_mobile_sticky_context_and_sort_controls_reuse_canonical_state(self):
+        source = PAGE.read_text()
+        for control_id in ("mobileStickyHealth", "mobileScopeSelect", "mobileWeekSelect", "mobileSortSelect", "mobileControlsToggle"):
+            self.assertIn(f'id="{control_id}"', source)
+        for value in ("date", "home_team", "spread_edge", "total_edge"):
+            self.assertIn(f'value="{value}"', source)
+        self.assertIn("SORT_DIR=(SORT_KEY==='date' || SORT_KEY==='home_team')?'asc':'desc'", source)
+        self.assertIn("reconcileSelectedGame();", source)
+        self.assertIn("API ${esc(q.status || 'UNKNOWN')} · UPDATED", source)
+        self.assertNotIn("mobileStickyHealth.innerHTML=`${esc(HEALTH?.fast_market_refresh?.refresh_id", source)
+
+    def test_mobile_defaults_to_spread_edge_without_changing_desktop_default(self):
+        source = PAGE.read_text()
+        self.assertIn(
+            "const INITIAL_MOBILE_VIEW = window.matchMedia('(max-width:900px)').matches;",
+            source,
+        )
+        self.assertIn(
+            "let SORT_KEY = INITIAL_MOBILE_VIEW ? 'spread_edge' : 'best_edge';",
+            source,
+        )
+        self.assertIn("let SORT_DIR = 'desc';", source)
+
+    def test_mobile_spread_edge_uses_canonical_team_abbreviations_only(self):
+        source = PAGE.read_text()
+        self.assertIn('ROOT / "logos/espn_team_lookup.csv"', source)
+        self.assertIn('candidates[0]["abbreviation"]', source)
+        self.assertIn("function spreadDecision(game, side, edge, useShortName=false)", source)
+        self.assertIn("TEAM_ABBREVIATIONS[team] || team", source)
+        self.assertIn("spreadDecision(game,sprSide,sprEdge,true)", source)
+        self.assertIn("spreadDecision(game, sprSide, sprEdge)", source)
+
+        with (ROOT / "logos/espn_team_lookup.csv").open(newline="", encoding="utf-8") as handle:
+            lookup = list(csv.DictReader(handle))
+        for team, abbreviation in {
+            "North Carolina": "UNC",
+            "Florida State": "FSU",
+            "New Mexico State": "NMSU",
+            "Eastern Michigan": "EMU",
+        }.items():
+            self.assertTrue(any(
+                row["displayName"].startswith(f"{team} ")
+                and row["abbreviation"] == abbreviation
+                for row in lookup
+            ))
+
+    def test_composite_rank_renders_in_desktop_and_mobile_matchups(self):
+        source = PAGE.read_text()
+        self.assertIn("function compositeRankClass(rank)", source)
+        for boundary, tier in ((28, 1), (56, 2), (83, 3), (111, 4), (138, 5)):
+            self.assertIn(f"if(value<={boundary}) return 'rank-tier-{tier}';", source)
+            self.assertIn(f".team-composite-rank.rank-tier-{tier}", source)
+        self.assertIn("const valid=Number.isInteger(value) && value>=1 && value<=138;", source)
+        self.assertIn("if(!Number.isInteger(value) || value<1) return '';", source)
+        self.assertIn("if(value<=138) return 'rank-tier-5';\n  return '';", source)
+        self.assertIn('class="team-composite-rank ${compositeRankClass(rank)}"', source)
+        self.assertIn("${valid?esc(value):'—'}", source)
+        self.assertIn("matchupTeam(game.away_team,game.team_composite_rank?.away)", source)
+        self.assertIn("matchupTeam(game.home_team,game.team_composite_rank?.home)", source)
+        self.assertIn("flex:0 0 22px;min-width:22px", source)
+        self.assertIn("font-size:9.5px;font-weight:950", source)
+        home_sort = source.split("function currentRows(){", 1)[1].split("function sortArrow", 1)[0]
+        self.assertIn("av = String(a.home_team || '');", home_sort)
+        self.assertIn("bv = String(b.home_team || '');", home_sort)
+        self.assertNotIn("team_composite_rank", home_sort)
+
+    def test_composite_rank_five_band_boundaries(self):
+        def tier(rank):
+            if not isinstance(rank, int) or rank < 1 or rank > 138:
+                return ""
+            if rank <= 28:
+                return "rank-tier-1"
+            if rank <= 56:
+                return "rank-tier-2"
+            if rank <= 83:
+                return "rank-tier-3"
+            if rank <= 111:
+                return "rank-tier-4"
+            return "rank-tier-5"
+
+        expected = {
+            1: "rank-tier-1", 28: "rank-tier-1",
+            29: "rank-tier-2", 56: "rank-tier-2",
+            57: "rank-tier-3", 83: "rank-tier-3",
+            84: "rank-tier-4", 111: "rank-tier-4",
+            112: "rank-tier-5", 138: "rank-tier-5",
+        }
+        self.assertEqual({rank: tier(rank) for rank in expected}, expected)
+        for missing in (None, 0, -1, 139, 1000):
+            self.assertEqual(tier(missing), "")
+
+    def test_model_and_shadow_values_use_one_decimal_presentation(self):
+        source = PAGE.read_text()
+        block = source[
+            source.index("function modelDisplay"):source.index("function edgeDisplay")
+        ]
+        self.assertIn("return n.toFixed(1);", block)
+        self.assertNotIn("return 'PK';", block)
+        self.assertNotIn("`+${rounded}`", block)
+        self.assertIn("modelDisplay(value,market)", source)
+        self.assertIn("renderModelSnapshot(game)", source)
+
+    def test_edge_glyphs_are_reserved_for_market_movement(self):
+        source = PAGE.read_text()
+        edge_block = source[
+            source.index("function edgeDisplay"):source.index("const SPREAD_COMPONENTS")
+        ]
+        self.assertNotIn("▲", edge_block)
+        self.assertIn("return Math.abs(n) < .05 ? '0' : n.toFixed(1);", edge_block)
+        self.assertIn("return direction==='UP'?'▲':direction==='DOWN'?'▼':'↔';", source)
+
+    def test_activity_uses_compact_et_date_and_time(self):
+        source = PAGE.read_text()
+        block = source[
+            source.index("function activityTime"):source.index("function activityMatchup")
+        ]
+        self.assertIn("timeZone:'America/New_York'", block)
+        self.assertIn("month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'", block)
+
+    def test_movement_markers_are_large_and_mobile_edges_are_contained(self):
+        source = PAGE.read_text()
+        self.assertIn(".move-marker{display:none;grid-column:3;grid-row:1 / span 2;align-self:center;justify-self:center;font-size:14px", source)
+        self.assertIn(".market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 14px}", source)
+        self.assertIn(".mobile-metric.edge-focus{overflow:hidden}", source)
+        self.assertIn(".mobile-metric .decision-edge{min-width:0;max-width:100%}", source)
+        self.assertIn(".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:18px}", source)
+        self.assertIn(".mobile-metric .decision-team-name{width:100%;max-width:100%", source)
+
+    def test_week_zero_dratings_component_coverage_is_eight_of_eight(self):
+        payload = json.loads(
+            (ROOT / "data/site/war_room_market_matrix.json").read_text()
+        )
+        games = [
+            game for game in payload["games"]
+            if game.get("week") == 0
+            and game.get("scope", {}).get("fbs_vs_fbs") is True
+        ]
+        self.assertEqual(len(games), 8)
+        for game in games:
+            source = (
+                game.get("standard_freshness", {}).get("spread", {})
+                .get("sources", {}).get("DRatings", {})
+            )
+            component = (
+                game.get("models", {}).get("standard_spread", {})
+                .get("component_values", {}).get("DRatings")
+            )
+            self.assertIs(source.get("participating"), True, game["game_id"])
+            self.assertIsInstance(component, (int, float), game["game_id"])
 
 
 if __name__ == "__main__":

@@ -85,7 +85,18 @@ def main() -> None:
     data_out = output / "data/site"
     data_out.mkdir(parents=True, exist_ok=True)
 
-    shutil.copy2(ROOT / "war-room.html", output / "war-room.html")
+    preview_html = (ROOT / "war-room.html").read_text()
+    preview_html = preview_html.replace(
+        "const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';",
+        "const LIVE_MATRIX_URL = 'data/site/war_room_market_matrix.json';",
+    ).replace(
+        "const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';",
+        "const LIVE_HEALTH_URL = 'data/site/war_room_health.json';",
+    ).replace(
+        "const LIVE_ACTIVITY_URL = 'https://control.barnseywr.com/war-room/live/activity';",
+        "const LIVE_ACTIVITY_URL = 'data/site/war_room_activity.json';",
+    )
+    (output / "war-room.html").write_text(preview_html)
     for name in ("war_room_health.json", "war_room_activity.json"):
         shutil.copy2(ROOT / "data/site" / name, data_out / name)
     logo_target = output / "logos"

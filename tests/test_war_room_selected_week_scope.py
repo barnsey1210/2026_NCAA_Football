@@ -178,15 +178,16 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         )[0]
         self.assertIn('class="decision-edge total-decision"', block)
         self.assertIn('class="decision-edge-main"', block)
-        self.assertIn("Math.abs(Number(edge)) < .05 ? '0' : edgeDisplay(edge)", block)
+        self.assertIn("const value = edgeDisplay(edge);", block)
+        self.assertNotIn("▲", block)
         self.assertIn('class="decision-side">${label}</span><span>${value}', block)
         self.assertNotIn("Number(edge) <= 0", block)
 
     def test_matchup_layout_and_explicit_sorts(self):
         for marker in (
             'class="matchup-kickoff"',
-            "matchupTeam(game.away_team)",
-            "matchupTeam(game.home_team)",
+            "matchupTeam(game.away_team,game.team_composite_rank?.away)",
+            "matchupTeam(game.home_team,game.team_composite_rank?.home)",
             "setSort('date')",
             "setSort('home_team')",
             "SORT_KEY === 'home_team'",

@@ -43,6 +43,7 @@
       "opener_contract": "market.openers uses earliest accepted canonical matchup line history; Pinnacle opener remains a separate canonical-history diagnostic",
       "movement_contract": "best_sportsbook quote may expose only its own latest >=0.5-point material move; no exchange markers or price-only moves",
       "recency_contract": "canonical opener and move timestamps age locally; latest plus two prior completed refresh ids support hybrid movement recency",
+      "team_composite_rank_contract": "team_composite_rank.away/home copy the accepted ratings_view.teams.overall_rank values; no War Room ranking calculation",
       "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting"]
     },
     "war_room_activity": {

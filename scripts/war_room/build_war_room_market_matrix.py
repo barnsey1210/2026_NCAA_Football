@@ -68,6 +68,8 @@ PROJECTION_SOURCE_STATUS = (
     / "data/site/projection_source_status_view.json"
 )
 
+RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
+
 BETTING_ANGLES = (
     ROOT / "data/signals/game_betting_angles_2026.csv"
 )
@@ -185,6 +187,18 @@ def load_json(path, default):
         return json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         return default
+
+
+def load_team_composite_ranks(path):
+    payload = load_json(path, {})
+    ranks = {}
+    for row in payload.get("teams", []):
+        team = normalize_team(row.get("team"))
+        rank = number(row.get("overall_rank"))
+        if not team or not isinstance(rank, int) or rank < 1:
+            continue
+        ranks[team] = rank
+    return ranks
 
 
 def spread_move_direction(old_line, new_line):
@@ -1636,6 +1650,7 @@ def main():
     )
 
     fbs_teams = load_fbs_team_universe()
+    team_composite_ranks = load_team_composite_ranks(RATINGS_VIEW)
     betting_signal_map = load_team_betting_signals()
 
     projection_games = projection_payload.get("games", [])
@@ -2124,6 +2139,15 @@ def main():
             "kickoff_time": None,
             "away_team": game.get("away_team"),
             "home_team": game.get("home_team"),
+            "team_composite_rank": {
+                "away": team_composite_ranks.get(
+                    normalize_team(game.get("away_team"))
+                ),
+                "home": team_composite_ranks.get(
+                    normalize_team(game.get("home_team"))
+                ),
+                "source": "ratings_view.teams.overall_rank",
+            },
             "neutral_site": game.get("neutral_site"),
             "provider_game_ids": sorted(
                 x
