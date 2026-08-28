@@ -59,6 +59,30 @@ class FastRatingsStandardSourceTests(unittest.TestCase):
             self.assertEqual(set(frame["game_id"]), {"old", "inside", "future"})
             self.assertEqual(int(frame.loc[frame.game_id.eq("inside"), "value"].iloc[0]), 2)
 
+    def test_dratings_preserves_existing_in_window_game_when_provider_omits_it(self):
+        existing = pd.DataFrame([
+            {"game_date":"2026-08-29","away_team_raw":"A","home_team_raw":"B","away_team":"A","home_team":"B","game_id":"omitted","value":1},
+            {"game_date":"2026-08-30","away_team_raw":"C","home_team_raw":"D","away_team":"C","home_team":"D","game_id":"refreshed","value":1},
+        ])
+        current = existing.iloc[[1]].assign(value=2)
+
+        frame = DRATINGS.merge_window(
+            existing,
+            current,
+            "2026-08-28",
+            "2026-09-04",
+        )
+
+        self.assertEqual(set(frame["game_id"]), {"omitted", "refreshed"})
+        self.assertEqual(
+            int(frame.loc[frame.game_id.eq("omitted"), "value"].iloc[0]),
+            1,
+        )
+        self.assertEqual(
+            int(frame.loc[frame.game_id.eq("refreshed"), "value"].iloc[0]),
+            2,
+        )
+
     def test_locked_formulas_remain_literal_in_contract_builder(self):
         source = (ROOT / "scripts/projections/build_current_game_projection_contract.py").read_text()
         self.assertIn('{name: 0.20 for name in SPREAD_COMPONENTS}', source)

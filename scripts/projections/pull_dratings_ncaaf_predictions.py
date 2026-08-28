@@ -249,9 +249,7 @@ def parse_args():
 def merge_window(existing, current, start_date, end_date):
     if existing.empty:
         return current
-    dates = existing["game_date"].astype(str)
-    preserved = existing[(dates < start_date) | (dates > end_date)].copy()
-    return pd.concat([preserved, current], ignore_index=True).drop_duplicates(
+    return pd.concat([existing, current], ignore_index=True).drop_duplicates(
         subset=["game_date", "away_team_raw", "home_team_raw"], keep="last"
     )
 
