@@ -60,6 +60,12 @@ TEAM_ALIASES = {
     "colorado": "Colorado",
     "duke": "Duke",
     "duke blue devils": "Duke",
+    "usc": "USC",
+    "nmst": "New Mexico State",
+    "nmsu": "New Mexico State",
+    "new mexico state": "New Mexico State",
+    "chatanooga": "Chattanooga",
+    "chattanooga": "Chattanooga",
 }
 
 BOOK_ALIASES = {
@@ -176,6 +182,15 @@ def market_edge_vs_bet_breakeven(bet_odds, fair_prob):
 
 
 def categorize_bet(row):
+    resolved = clean_key(row.get("resolved_market_type"))
+
+    if resolved == "moneyline":
+        return "Moneyline"
+    if resolved == "spread":
+        return "Spread"
+    if resolved == "total":
+        return "Game Total"
+
     desc = clean_key(row.get("Bet Description"))
     typ = clean_key(row.get("Bet Type"))
     bet = clean_key(row.get("Bet"))
@@ -386,6 +401,283 @@ def collect_market_rows():
     return win_rows, fut_rows, audit
 
 
+
+def parse_bet_week(row):
+    desc = clean_key(row.get("Bet Description"))
+    m = re.search(r"\bweek\s+(\d+)\b", desc)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def canonical_market_games():
+    """
+    Read the canonical current-market contract.
+
+    Current game-bet CLV/EV consumes this contract rather than independently
+    selecting stale provider CSV rows.
+    """
+    path = ROOT / "data" / "site" / "current_market_contract.json"
+
+    if not path.exists():
+        return [], [{
+            "source": str(path.relative_to(ROOT)),
+            "status": "MISSING",
+        }]
+
+    try:
+        payload = json.loads(path.read_text())
+    except Exception as exc:
+        return [], [{
+            "source": str(path.relative_to(ROOT)),
+            "status": "INVALID",
+            "error": str(exc),
+        }]
+
+    games = payload.get("games") or []
+
+    return games, [{
+        "source": str(path.relative_to(ROOT)),
+        "status": "AVAILABLE",
+        "games": len(games),
+        "market_authority": "Pinnacle",
+    }]
+
+
+def canonical_team_side(game, team):
+    tk = clean_key(normalize_team(team))
+
+    if not tk:
+        return None
+
+    away = normalize_team(game.get("away_team"))
+    home = normalize_team(game.get("home_team"))
+
+    if tk == clean_key(away):
+        return "away"
+
+    if tk == clean_key(home):
+        return "home"
+
+    return None
+
+
+def wager_team_tokens(row):
+    """
+    Extract team tokens for totals such as:
+      USC/NMST Over 59.5
+    """
+    bet = str(row.get("Bet") or "")
+
+    head = re.split(
+        r"\bover\b|\bunder\b",
+        bet,
+        flags=re.I,
+    )[0]
+
+    parts = [
+        x.strip()
+        for x in re.split(
+            r"[/@]|(?:\s+vs\.?\s+)|(?:\s+at\s+)",
+            head,
+            flags=re.I,
+        )
+    ]
+
+    out = []
+
+    for part in parts:
+        if not part:
+            continue
+
+        n = normalize_team(part)
+
+        if clean_key(n):
+            out.append(n)
+
+    return out
+
+
+def resolve_canonical_game(row, games):
+    """
+    Resolve a wager to exactly one canonical game.
+
+    Week + participant identity are required for current weekly bets.
+
+    Team-only matching across the entire schedule is explicitly forbidden.
+    That prior behavior caused the Stanford Week 0 wager to match
+    Miami (FL) at Stanford in Week 1 instead of Hawaii at Stanford in Week 0.
+    """
+    week = parse_bet_week(row)
+
+    team = normalize_team(row.get("team_guess"))
+    bet_type = clean_key(row.get("Bet Type"))
+    bet = clean_key(row.get("Bet"))
+
+    pool = [
+        g for g in games
+        if week is None or parse_num(g.get("week")) == week
+    ]
+
+    is_total = (
+        bet_type in {"total", "game total"}
+        or " over " in f" {bet} "
+        or " under " in f" {bet} "
+    )
+
+    if is_total:
+        tokens = wager_team_tokens(row)
+        token_keys = {
+            clean_key(x)
+            for x in tokens
+            if clean_key(x)
+        }
+
+        matches = []
+
+        for g in pool:
+            participants = {
+                clean_key(normalize_team(g.get("away_team"))),
+                clean_key(normalize_team(g.get("home_team"))),
+            }
+
+            if token_keys and token_keys.issubset(participants):
+                matches.append(g)
+
+        return matches[0] if len(matches) == 1 else None
+
+    tk = clean_key(team)
+
+    if not tk:
+        return None
+
+    matches = []
+
+    for g in pool:
+        participants = {
+            clean_key(normalize_team(g.get("away_team"))),
+            clean_key(normalize_team(g.get("home_team"))),
+        }
+
+        if tk in participants:
+            matches.append(g)
+
+    return matches[0] if len(matches) == 1 else None
+
+
+def resolve_game_market_kind(row, game):
+    """
+    Resolve Spread / Total / Moneyline.
+
+    A Side wager with Bet Line 0 is treated as moneyline only when:
+      - the selected team resolves to the canonical game,
+      - Pinnacle has a moneyline for that side, and
+      - Pinnacle's spread for that side is non-zero.
+
+    This avoids globally converting genuine pick'em spreads to moneylines.
+    """
+    typ = clean_key(row.get("Bet Type"))
+    bet = clean_key(row.get("Bet"))
+    side = clean_key(row.get("side"))
+    line = parse_num(row.get("bet_line"))
+
+    if (
+        typ in {"total", "game total"}
+        or side in {"over", "under"}
+        or "over" in bet
+        or "under" in bet
+    ):
+        return "total"
+
+    team_side = canonical_team_side(
+        game,
+        row.get("team_guess"),
+    )
+
+    pinnacle = (
+        (game.get("quotes") or {})
+        .get("Pinnacle", {})
+    )
+
+    if (
+        typ in {"side", "spread"}
+        and line == 0
+        and team_side
+    ):
+        ml = (
+            pinnacle.get("moneyline", {})
+            .get(team_side)
+        )
+
+        spread = (
+            pinnacle.get("spread", {})
+            .get(team_side)
+        )
+
+        spread_line = parse_num(
+            (spread or {}).get("line")
+        )
+
+        if (
+            ml
+            and spread_line is not None
+            and abs(spread_line) > 0
+        ):
+            return "moneyline"
+
+    if typ in {"side", "spread"}:
+        return "spread"
+
+    return None
+
+
+def pinnacle_pair(game, market_kind, selected_side):
+    """
+    Return the selected and opposite Pinnacle quotes required for a
+    two-sided no-vig probability calculation.
+    """
+    pinnacle = (
+        (game.get("quotes") or {})
+        .get("Pinnacle", {})
+    )
+
+    market = pinnacle.get(market_kind) or {}
+
+    if market_kind == "total":
+        if selected_side not in {"over", "under"}:
+            return None, None
+
+        other_side = (
+            "under"
+            if selected_side == "over"
+            else "over"
+        )
+
+    else:
+        if selected_side not in {"home", "away"}:
+            return None, None
+
+        other_side = (
+            "away"
+            if selected_side == "home"
+            else "home"
+        )
+
+    selected = market.get(selected_side)
+    opposite = market.get(other_side)
+
+    if not selected or not opposite:
+        return None, None
+
+    if (
+        parse_num(selected.get("price")) is None
+        or parse_num(opposite.get("price")) is None
+    ):
+        return None, None
+
+    return selected, opposite
+
+
 def collect_game_line_rows():
     """
     Current game-line market rows for sides/totals.
@@ -532,13 +824,18 @@ for c in [
     "line_clv_current", "price_clv_current_pp", "clv_pct_current",
     "current_no_vig_prob", "line_adjusted_fair_prob",
     "ev_current_dollars", "ev_current_pct",
-    "beat_clv", "clv_category", "market_category", "clv_grade"
+    "beat_clv", "clv_category", "market_category", "clv_grade",
+    "resolved_market_type", "current_market_authority",
+    "current_market_game_id", "current_market_updated_at"
 ]:
     if c not in df.columns:
         df[c] = None
 
 win_rows, fut_rows, audit_rows = collect_market_rows()
 game_rows, game_audit_rows = collect_game_line_rows()
+
+canonical_games, canonical_game_audit = canonical_market_games()
+game_audit_rows.extend(canonical_game_audit)
 
 matched = 0
 
@@ -627,102 +924,285 @@ for idx, row in df.iterrows():
         matched += 1
 
     else:
-        # Game-line spread/total matcher for Week 1 and in-season bets.
-        bet_type = clean_key(row.get("Bet Type"))
-        desc = clean_key(row.get("Bet Description"))
-        is_game_side = "week 1" in desc or bet_type == "side"
-        is_game_total = "week 1" in desc and side in {"Over", "Under"}
+        # Canonical current-game matcher.
+        #
+        # Authority:
+        #   data/site/current_market_contract.json
+        #     -> exact week + participant identity
+        #     -> Pinnacle two-sided market
+        #
+        # Do not silently use stale legacy game-line CSVs here.
+        # If Pinnacle cannot be resolved deterministically, current CLV/EV
+        # remains unavailable rather than publishing a misleading value.
 
-        if is_game_side and bet_line is not None:
-            candidates = [
-                r for r in game_rows
-                if r.get("market") == "spread"
-                and r["team_key"] == team_key
-                and r.get("point") is not None
-            ]
+        game = resolve_canonical_game(
+            row,
+            canonical_games,
+        )
 
-            m = choose_game_line(candidates, book)
-            if not m:
-                df.at[idx, "current_market_note"] = "No current game spread market match"
-                continue
+        if not game:
+            df.at[
+                idx,
+                "current_market_note"
+            ] = "No unique canonical game match"
+            continue
 
-            current_line = m.get("point")
-            current_price = m.get("price")
+        market_kind = resolve_game_market_kind(
+            row,
+            game,
+        )
 
-            # Spread CLV from selected team's perspective:
-            # bet +16.5 vs current +14.5 = +2.0
-            # bet -9.5 vs current -11.5 = +2.0
-            line_clv = None
-            if bet_line is not None and current_line is not None:
-                line_clv = bet_line - current_line
+        df.at[
+            idx,
+            "resolved_market_type"
+        ] = (
+            market_kind.title()
+            if market_kind
+            else None
+        )
 
-            current_prob = american_implied(current_price)
-            fair_prob = line_adjusted_fair_prob(current_prob, line_clv, "spread")
-            price_clv, clv_pct = market_edge_vs_bet_breakeven(bet_price, fair_prob)
-            ev_dollars, ev_pct = ev_from_fair_prob(row.get("stake"), bet_price, fair_prob)
+        df.at[
+            idx,
+            "current_market_game_id"
+        ] = game.get("game_id")
 
-            df.at[idx, "current_market_match"] = True
-            df.at[idx, "current_market_source"] = m.get("source")
-            df.at[idx, "current_market_book"] = m.get("book")
-            df.at[idx, "current_market_line"] = current_line
-            df.at[idx, "current_market_price"] = current_price
-            df.at[idx, "current_market_note"] = f"{m.get('away_team')} at {m.get('home_team')}"
-            df.at[idx, "line_clv_current"] = line_clv
-            df.at[idx, "price_clv_current_pp"] = price_clv
-            df.at[idx, "clv_pct_current"] = clv_pct
-            df.at[idx, "current_no_vig_prob"] = current_prob
-            df.at[idx, "line_adjusted_fair_prob"] = fair_prob
-            df.at[idx, "ev_current_dollars"] = ev_dollars
-            df.at[idx, "ev_current_pct"] = ev_pct
-            df.at[idx, "clv_grade"] = "Positive" if ((clv_pct or 0) > 0) else "Neutral/Negative"
-            matched += 1
+        df.at[
+            idx,
+            "current_market_updated_at"
+        ] = game.get("current_market_updated_at")
 
-        elif is_game_total and bet_line is not None:
-            candidates = [
-                r for r in game_rows
-                if r.get("market") == "total"
-                and clean_key(r.get("team")) == clean_key(side)
-                and r.get("point") is not None
-            ]
+        if market_kind not in {
+            "spread",
+            "total",
+            "moneyline",
+        }:
+            df.at[
+                idx,
+                "current_market_note"
+            ] = "No supported canonical market classification"
+            continue
 
-            m = choose_game_line(candidates, book)
-            if not m:
-                df.at[idx, "current_market_note"] = "No current game total market match"
-                continue
+        if market_kind == "total":
+            selected_side = clean_key(side)
 
-            current_line = m.get("point")
-            current_price = m.get("price")
+            if selected_side not in {
+                "over",
+                "under",
+            }:
+                bet_key = clean_key(
+                    row.get("Bet")
+                )
 
-            if side == "Over":
-                line_clv = current_line - bet_line
-            elif side == "Under":
-                line_clv = bet_line - current_line
-            else:
-                line_clv = None
+                if "over" in bet_key:
+                    selected_side = "over"
 
-            current_prob = american_implied(current_price)
-            fair_prob = line_adjusted_fair_prob(current_prob, line_clv, "game_total")
-            price_clv, clv_pct = market_edge_vs_bet_breakeven(bet_price, fair_prob)
-            ev_dollars, ev_pct = ev_from_fair_prob(row.get("stake"), bet_price, fair_prob)
-
-            df.at[idx, "current_market_match"] = True
-            df.at[idx, "current_market_source"] = m.get("source")
-            df.at[idx, "current_market_book"] = m.get("book")
-            df.at[idx, "current_market_line"] = current_line
-            df.at[idx, "current_market_price"] = current_price
-            df.at[idx, "current_market_note"] = f"{m.get('away_team')} at {m.get('home_team')}"
-            df.at[idx, "line_clv_current"] = line_clv
-            df.at[idx, "price_clv_current_pp"] = price_clv
-            df.at[idx, "clv_pct_current"] = clv_pct
-            df.at[idx, "current_no_vig_prob"] = current_prob
-            df.at[idx, "line_adjusted_fair_prob"] = fair_prob
-            df.at[idx, "ev_current_dollars"] = ev_dollars
-            df.at[idx, "ev_current_pct"] = ev_pct
-            df.at[idx, "clv_grade"] = "Positive" if ((clv_pct or 0) > 0) else "Neutral/Negative"
-            matched += 1
+                elif "under" in bet_key:
+                    selected_side = "under"
 
         else:
-            df.at[idx, "current_market_note"] = "No supported current market matcher"
+            selected_side = canonical_team_side(
+                game,
+                team,
+            )
+
+        selected_quote, opposite_quote = pinnacle_pair(
+            game,
+            market_kind,
+            selected_side,
+        )
+
+        if not selected_quote or not opposite_quote:
+            df.at[
+                idx,
+                "current_market_note"
+            ] = (
+                f"No Pinnacle {market_kind} pair for "
+                f"{game.get('away_team')} at "
+                f"{game.get('home_team')}"
+            )
+            continue
+
+        current_line = parse_num(
+            selected_quote.get("line")
+        )
+
+        current_price = parse_num(
+            selected_quote.get("price")
+        )
+
+        opposite_price = parse_num(
+            opposite_quote.get("price")
+        )
+
+        current_no_vig = no_vig_prob(
+            current_price,
+            opposite_price,
+        )
+
+        line_clv = None
+
+        if market_kind == "spread":
+
+            if (
+                bet_line is None
+                or current_line is None
+            ):
+                df.at[
+                    idx,
+                    "current_market_note"
+                ] = "Spread line unavailable"
+                continue
+
+            # Selected-team perspective:
+            #
+            # ticket +16.5 vs current +14.5 -> +2.0
+            # ticket -6.5  vs current -7.0  -> +0.5
+            line_clv = (
+                bet_line
+                - current_line
+            )
+
+            fair_prob = line_adjusted_fair_prob(
+                current_no_vig,
+                line_clv,
+                "spread",
+            )
+
+        elif market_kind == "total":
+
+            if (
+                bet_line is None
+                or current_line is None
+            ):
+                df.at[
+                    idx,
+                    "current_market_note"
+                ] = "Total line unavailable"
+                continue
+
+            if selected_side == "over":
+                line_clv = (
+                    current_line
+                    - bet_line
+                )
+
+            else:
+                line_clv = (
+                    bet_line
+                    - current_line
+                )
+
+            fair_prob = line_adjusted_fair_prob(
+                current_no_vig,
+                line_clv,
+                "game_total",
+            )
+
+        else:
+            # Moneyline:
+            # no point-line CLV.
+            # Fair probability is the de-vigged Pinnacle ML pair.
+            line_clv = None
+            fair_prob = current_no_vig
+
+        price_clv, clv_pct = (
+            market_edge_vs_bet_breakeven(
+                bet_price,
+                fair_prob,
+            )
+        )
+
+        ev_dollars, ev_pct = (
+            ev_from_fair_prob(
+                row.get("stake"),
+                bet_price,
+                fair_prob,
+            )
+        )
+
+        df.at[
+            idx,
+            "current_market_match"
+        ] = True
+
+        df.at[
+            idx,
+            "current_market_source"
+        ] = selected_quote.get("source")
+
+        df.at[
+            idx,
+            "current_market_book"
+        ] = "Pinnacle"
+
+        df.at[
+            idx,
+            "current_market_authority"
+        ] = "PINNACLE"
+
+        df.at[
+            idx,
+            "current_market_line"
+        ] = current_line
+
+        df.at[
+            idx,
+            "current_market_price"
+        ] = current_price
+
+        df.at[
+            idx,
+            "current_market_note"
+        ] = (
+            f"{game.get('away_team')} at "
+            f"{game.get('home_team')}"
+        )
+
+        df.at[
+            idx,
+            "line_clv_current"
+        ] = line_clv
+
+        df.at[
+            idx,
+            "price_clv_current_pp"
+        ] = price_clv
+
+        df.at[
+            idx,
+            "clv_pct_current"
+        ] = clv_pct
+
+        df.at[
+            idx,
+            "current_no_vig_prob"
+        ] = current_no_vig
+
+        df.at[
+            idx,
+            "line_adjusted_fair_prob"
+        ] = fair_prob
+
+        df.at[
+            idx,
+            "ev_current_dollars"
+        ] = ev_dollars
+
+        df.at[
+            idx,
+            "ev_current_pct"
+        ] = ev_pct
+
+        df.at[
+            idx,
+            "clv_grade"
+        ] = (
+            "Positive"
+            if ((clv_pct or 0) > 0)
+            else "Neutral/Negative"
+        )
+
+        matched += 1
 
 # Summary CLV stats.
 # Per-bet CLV flags and categories.

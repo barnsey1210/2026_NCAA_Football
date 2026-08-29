@@ -62,6 +62,7 @@ CANONICAL_STAGE_ORDER=(
   conference_simulations
   playoff_simulations
   matchup_core
+  betting_ledger
   line_history_assets
   shadow_models
   playoff_futures
@@ -597,6 +598,21 @@ fi
   # Asset-only mode deliberately leaves every canonical V2 HTML file untouched.
   else
     profile_skip_stage "matchup_core"
+  fi
+
+  # STAGE: betting_ledger
+  # The published Google Sheet is the authoritative tracked-wager source.
+  # Existing betting owners retain normalization, grading, CLV, and EV logic.
+  if stage_enabled "betting_ledger"; then
+  stage_start "betting_ledger"
+  run_py "betting/pull_google_sheet_bets.py" "pull_google_sheet_bets.py"
+  run_py "betting/build_betting_dashboard.py" "build_betting_dashboard.py"
+  run_py "betting/enrich_betting_current_clv.py" "enrich_betting_current_clv.py"
+  run_py "betting/freeze_betting_closing_clv.py" "freeze_betting_closing_clv.py"
+  run_py "betting/build_betting_activity_view.py" "build_betting_activity_view.py"
+  stage_pass "betting_ledger"
+  else
+    profile_skip_stage "betting_ledger"
   fi
 
   # STAGE: line_history_assets

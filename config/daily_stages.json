@@ -226,6 +226,23 @@
       ]
     },
     {
+      "id": "betting_ledger",
+      "name": "Authoritative Google Sheet wager ledger",
+      "order": 135,
+      "required": true,
+      "external_network": true,
+      "email_dependency": false,
+      "publication_dependency": true,
+      "entrypoint": "daily_market_update.sh#betting_ledger",
+      "scripts": [
+        "betting/pull_google_sheet_bets.py",
+        "betting/build_betting_dashboard.py",
+        "betting/enrich_betting_current_clv.py",
+        "betting/freeze_betting_closing_clv.py",
+        "betting/build_betting_activity_view.py"
+      ]
+    },
+    {
       "id": "line_history_assets",
       "name": "Normalized line-history assets",
       "order": 140,
