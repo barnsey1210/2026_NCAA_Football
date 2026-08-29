@@ -2320,9 +2320,19 @@ def main():
                     "commence_time"
                 )
 
+    completed_kickoff_by_gid = {
+        str(row.get("game_id")): row.get("start_date")
+        for row in results_payload.get("games", [])
+        if row.get("completed") is True
+        and row.get("game_id") is not None
+        and row.get("start_date")
+    }
+
     for game in games_out:
-        game["kickoff_time"] = commence_by_gid.get(
-            game["game_id"]
+        gid = str(game["game_id"])
+        game["kickoff_time"] = (
+            commence_by_gid.get(gid)
+            or completed_kickoff_by_gid.get(gid)
         )
 
     games_out.sort(
