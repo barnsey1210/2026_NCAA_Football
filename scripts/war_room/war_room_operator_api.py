@@ -248,6 +248,8 @@ def live_version(_: None = Depends(require_public_read_origin)):
         "matrix_built_at": matrix.get("built_at"),
         "activity_built_at": activity.get("built_at"),
         "activity_event_count": activity.get("event_count"),
+        "scoreboard_pulled_at": load_json(SCOREBOARD, {}).get("pulled_at"),
+        "schedule_built_at": load_json(SCHEDULE, {}).get("built_at"),
     })
 
 
@@ -258,7 +260,36 @@ def live_health(_: None = Depends(require_public_read_origin)):
 
 @app.get("/war-room/live/market-matrix")
 def live_market_matrix(_: None = Depends(require_public_read_origin)):
-    return live_response(public_artifact(MATRIX, "war-room-market-matrix-v1"))
+    matrix = public_artifact(MATRIX, "war-room-market-matrix-v1")
+    schedule = public_artifact(SCHEDULE, "schedule-live-enrichment-v2")
+
+    live_by_game = {
+        str(game.get("game_id")): game
+        for game in schedule.get("games", [])
+        if isinstance(game, dict) and game.get("game_id") is not None
+    }
+
+    live_fields = (
+        "live_status",
+        "live_home_score",
+        "live_away_score",
+        "live_period",
+        "live_clock",
+        "scoreboard_pulled_at",
+        "live_score_source",
+    )
+
+    for game in matrix.get("games", []):
+        if not isinstance(game, dict):
+            continue
+        live = live_by_game.get(str(game.get("game_id")))
+        if not live:
+            continue
+        for field in live_fields:
+            if field in live:
+                game[field] = live.get(field)
+
+    return live_response(json_safe(matrix))
 
 
 @app.get("/war-room/live/activity")
