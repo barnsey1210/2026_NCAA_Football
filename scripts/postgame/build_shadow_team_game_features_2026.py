@@ -1438,7 +1438,10 @@ def main():
         low_memory=False,
     )
     drives = pd.read_csv(DRIVES)
-    gc = pd.read_csv(GAME_CONTROL)
+    try:
+        gc = pd.read_csv(GAME_CONTROL)
+    except pd.errors.EmptyDataError:
+        gc = pd.DataFrame(columns=["game_id", "team"])
 
     for frame in (pbp, drives, gc):
         frame["game_id"] = frame[
