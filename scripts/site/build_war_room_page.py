@@ -677,6 +677,8 @@ tr:hover td.context-group{background:#202d39}
 .team-composite-rank.rank-tier-4{color:#ff8a5b}
 .team-composite-rank.rank-tier-5{color:#ff4d63}
 .matchup-team-name{min-width:0}
+.matchup-live-score{margin-left:auto;padding-left:5px;font-size:12px;font-weight:950;color:#eef3f7;font-variant-numeric:tabular-nums}
+.game-live-state{font-size:9px;font-weight:950;color:var(--green);letter-spacing:.03em}
 .neutral-marker{color:var(--yellow);font-size:8px;font-weight:900;letter-spacing:.04em}
 .matchup-sort-head{display:flex;align-items:center;justify-content:space-between;gap:3px}
 .matchup-sort-button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:9px;font-weight:900;padding:0;cursor:pointer;text-transform:uppercase;white-space:nowrap}
@@ -2233,11 +2235,46 @@ function compositeRankClass(rank){
   return '';
 }
 
-function matchupTeam(team,rank){
+function matchupTeam(team,rank,score=null){
   const slug = teamLogoSlug(team);
   const value=Number(rank);
   const valid=Number.isInteger(value) && value>=1 && value<=138;
-  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="team-composite-rank ${compositeRankClass(rank)}" title="Canonical composite rank">${valid?esc(value):'—'}</span><span class="matchup-team-name">${esc(team)}</span></div>`;
+  const scoreHtml=score===null || score===undefined || score==='' ? '' : `<span class="matchup-live-score">${esc(score)}</span>`;
+  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="team-composite-rank ${compositeRankClass(rank)}" title="Canonical composite rank">${valid?esc(value):'—'}</span><span class="matchup-team-name">${esc(team)}</span>${scoreHtml}</div>`;
+}
+
+function liveGameDisplay(game){
+  const status=String(game?.live_status || '').toLowerCase();
+  const hasScores=game?.live_away_score!==null && game?.live_away_score!==undefined &&
+                  game?.live_home_score!==null && game?.live_home_score!==undefined;
+
+  if(status==='in_progress'){
+    const period=Number(game?.live_period);
+    const periodText=Number.isFinite(period) ? `Q${period}` : 'LIVE';
+    const clock=game?.live_clock ? ` · ${game.live_clock}` : '';
+    return {
+      active:true,
+      label:`LIVE · ${periodText}${clock}`,
+      awayScore:hasScores ? game.live_away_score : null,
+      homeScore:hasScores ? game.live_home_score : null
+    };
+  }
+
+  if(status==='final' || status==='completed'){
+    return {
+      active:true,
+      label:'FINAL',
+      awayScore:hasScores ? game.live_away_score : null,
+      homeScore:hasScores ? game.live_home_score : null
+    };
+  }
+
+  return {
+    active:false,
+    label:null,
+    awayScore:null,
+    homeScore:null
+  };
 }
 
 function signalChip(team, count){
@@ -2455,10 +2492,14 @@ function renderMobileMatrix(rows){
     const totEx=totSide?game.market?.best_exchange?.total?.[totSide]:null;
     const sprShadow=game.models?.shadow_spread;
     const totShadow=game.models?.shadow_total;
+    const live=liveGameDisplay(game);
     return `<article class="mobile-game-card game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
       <div class="mobile-game-head">
-        <div class="mobile-kickoff"><span>${esc(fmtKickoffDateET(game.kickoff_time))}</span><span>${esc(fmtKickoffTimeET(game.kickoff_time))}</span>${game.neutral_site?'<span class="neutral-marker">NEUTRAL</span>':''}</div>
-        <div class="mobile-matchup">${matchupTeam(game.away_team,game.team_composite_rank?.away)}${matchupTeam(game.home_team,game.team_composite_rank?.home)}</div>
+        <div class="mobile-kickoff">${live.active
+          ? `<span class="game-live-state">${esc(live.label)}</span>`
+          : `<span>${esc(fmtKickoffDateET(game.kickoff_time))}</span><span>${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
+        }${game.neutral_site?'<span class="neutral-marker">NEUTRAL</span>':''}</div>
+        <div class="mobile-matchup">${matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)}${matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)}</div>
         <div class="mobile-card-state"><span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
       </div>
       <div class="mobile-market-band spread-group">
@@ -2567,22 +2608,22 @@ function renderMatrix(){
     const totShadow =
       game.models?.shadow_total;
 
+    const live=liveGameDisplay(game);
+
     return `
       <tr class="game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
 
         <td class="matchup-col">
           <div class="matchup-kickoff">
-            <span class="game-date">
-              ${esc(fmtKickoffDateET(game.kickoff_time))}
-            </span>
-
-            <span class="game-time">
-              ${esc(fmtKickoffTimeET(game.kickoff_time))}
-            </span>
+            ${live.active
+              ? `<span class="game-live-state">${esc(live.label)}</span>`
+              : `<span class="game-date">${esc(fmtKickoffDateET(game.kickoff_time))}</span>
+                 <span class="game-time">${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
+            }
             ${game.neutral_site ? '<span class="neutral-marker" title="Neutral site">N</span>' : ''}
           </div>
-          ${matchupTeam(game.away_team,game.team_composite_rank?.away)}
-          ${matchupTeam(game.home_team,game.team_composite_rank?.home)}
+          ${matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)}
+          ${matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)}
         </td>
 
         <td class="model-col spread-group">
@@ -3335,7 +3376,7 @@ async function pollPublishedVersion(){
     const response = await fetch(`${LIVE_VERSION_URL}?version=${Date.now()}`,{cache:'no-store'});
     if(!response.ok) return;
     const live = await response.json();
-    const version = [live.refresh_id,live.activity_built_at,live.activity_event_count].join('|');
+    const version = [live.refresh_id,live.activity_built_at,live.activity_event_count,live.scoreboard_pulled_at,live.schedule_built_at].join('|');
     if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
     if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
   }catch(_err){ /* preserve the last valid rendered state */ }
