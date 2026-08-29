@@ -1862,15 +1862,30 @@ def main():
                     ),
                 })
 
+    fast_board_game_ids = set(quote_inventory)
+
     current_market_fallbacks, current_market_fallback_rejections = (
         merge_current_market_fallbacks(
             quote_inventory,
             current_market_payload,
             participating_books,
             reference_time=last_fast_pull_at,
-            eligible_game_ids=set(quote_inventory),
+            eligible_game_ids=fast_board_game_ids,
         )
     )
+
+    # Keep completed games in their War Room week after sportsbooks remove
+    # them from the latest fast board. Market fallback eligibility remains
+    # restricted to games actually present on that fast board.
+    for result in results_payload.get("games", []):
+        if result.get("completed") is not True:
+            continue
+
+        gid = str(result.get("game_id") or "")
+        if not gid or gid not in projection_by_gid:
+            continue
+
+        quote_inventory[gid]
 
     games_out = []
 
