@@ -353,6 +353,14 @@ def current_quote_pair_is_fresh(sides, *, now, max_age_hours):
     if not sides:
         return False
 
+    statuses = {
+        quote.get("freshness_status")
+        for quote in sides.values()
+    }
+
+    if statuses == {"FROZEN_CLOSE"}:
+        return True
+
     for quote in sides.values():
         if quote.get("freshness_status") not in {
             "LIVE",
@@ -408,7 +416,14 @@ def merge_current_market_fallbacks(
 
     for game in current_payload.get("games", []):
         gid = str(game.get("game_id") or "")
-        if not gid or gid not in eligible:
+        if not gid:
+            continue
+
+        is_closing = (
+            game.get("availability_status") == "CLOSING"
+        )
+
+        if gid not in eligible and not is_closing:
             continue
 
         for book, book_data in (
@@ -464,11 +479,17 @@ def merge_current_market_fallbacks(
                         "pulled_at": current_payload.get("built_at"),
                         "source": quote.get("source"),
                         "selection_source": (
-                            "CURRENT_MARKET_CONTRACT_FALLBACK"
+                            "FROZEN_CLOSE"
+                            if quote.get("freshness_status") == "FROZEN_CLOSE"
+                            else "CURRENT_MARKET_CONTRACT_FALLBACK"
                         ),
                         "freshness_status": quote.get(
                             "freshness_status"
                         ),
+                        "market_lifecycle_state": quote.get(
+                            "market_lifecycle_state"
+                        ),
+                        "kickoff_at": quote.get("kickoff_at"),
                     }
 
                 quote_inventory[gid][book][market] = replacement
@@ -1708,10 +1729,12 @@ def main():
     )
 
     provider_ids = defaultdict(set)
+    fast_board_game_ids = set()
 
     unmatched = []
     invalid_rows = []
     exchange_price_rejections = []
+    post_kickoff_fast_quotes = []
 
     with FAST_QUOTES.open(
         newline="",
@@ -1747,6 +1770,35 @@ def main():
                     ),
                     "away_team": row.get("away_team"),
                     "home_team": row.get("home_team"),
+                })
+                continue
+
+            fast_board_game_ids.add(gid)
+
+            quote_updated = parse_timestamp(
+                row.get("last_update")
+                or row.get("pulled_at")
+            )
+            kickoff = parse_timestamp(
+                row.get("commence_time")
+            )
+
+            if (
+                quote_updated is not None
+                and kickoff is not None
+                and quote_updated >= kickoff
+            ):
+                post_kickoff_fast_quotes.append({
+                    "game_id": gid,
+                    "provider_game_id": row.get("game_id"),
+                    "book": row.get("book"),
+                    "market": row.get("market"),
+                    "side": row.get("side"),
+                    "source_updated_at": (
+                        row.get("last_update")
+                        or row.get("pulled_at")
+                    ),
+                    "commence_time": row.get("commence_time"),
                 })
                 continue
 
@@ -1861,8 +1913,6 @@ def main():
                         "PRICE_WORSE_THAN_MINUS_120"
                     ),
                 })
-
-    fast_board_game_ids = set(quote_inventory)
 
     current_market_fallbacks, current_market_fallback_rejections = (
         merge_current_market_fallbacks(
@@ -2524,6 +2574,10 @@ def main():
     print(
         "invalid fast rows:",
         len(invalid_rows),
+    )
+    print(
+        "post-kickoff fast quotes rejected:",
+        len(post_kickoff_fast_quotes),
     )
     print(
         "invalid book pairs:",

@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MATCHUPS = ROOT / "data/site/matchups_view.json"
 THEODDS = ROOT / "data/odds/theodds_ncaaf_lines_2026.csv"
 ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
+BOOK_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
 OUT = ROOT / "data/site/current_market_contract.json"
 AUDIT = ROOT / "data/audits/current_market_contract_build_audit.json"
 
@@ -352,6 +353,12 @@ def fresh(timestamp: str | None, now: datetime) -> bool:
     return age is not None and -0.25 <= age <= MAX_AGE_HOURS
 
 
+def post_kickoff_quote(updated_at, commence_time) -> bool:
+    updated = parse_time(updated_at)
+    kickoff = parse_time(commence_time)
+    return bool(updated and kickoff and updated >= kickoff)
+
+
 def quote_record(*, source, game_id, book, market, side, line, price, updated_at, now, venue_type=None):
     age = quote_age_hours(updated_at, now)
     return {
@@ -415,11 +422,145 @@ def reference_pair(quotes: dict, market: str):
 
 
 
+def load_pregame_close_pairs(path: Path, kickoff_by_gid: dict) -> dict:
+    """Latest complete historical pair strictly before canonical kickoff."""
+    result = defaultdict(lambda: defaultdict(dict))
+
+    if not path.exists() or path.stat().st_size == 0:
+        return result
+
+    grouped = defaultdict(lambda: defaultdict(dict))
+
+    for row in csv_rows(path):
+        gid = str(row.get("canonical_game_id") or "")
+        kickoff = kickoff_by_gid.get(gid)
+
+        if not gid or kickoff is None:
+            continue
+
+        book = normalize_book(row.get("book"))
+        market = str(row.get("market") or "").strip().lower()
+        side = str(row.get("side") or "").strip().lower()
+
+        if (
+            not book
+            or market not in {"spread", "total", "moneyline"}
+            or side not in {"away", "home", "over", "under"}
+        ):
+            continue
+
+        if str(row.get("available") or "").strip().lower() in {
+            "false", "0", "no"
+        }:
+            continue
+
+        updated_at = (
+            row.get("source_updated_at")
+            or row.get("book_last_updated")
+            or row.get("snapshot_ts")
+            or row.get("ingestion_timestamp")
+        )
+
+        updated = parse_time(updated_at)
+
+        if updated is None or updated >= kickoff:
+            continue
+
+        pair_id = (
+            row.get("paired_market_id")
+            or f"{gid}|{book}|{market}|{updated_at}"
+        )
+
+        grouped[(gid, book, market)][pair_id][side] = {
+            "source": row.get("source") or "Canonical Book History",
+            "game_id": gid,
+            "sportsbook": book,
+            "venue": book,
+            "venue_type": VENUE_TYPES.get(book, "unclassified"),
+            "market_type": market,
+            "side": side,
+            "line": number(row.get("line")),
+            "price": number(row.get("price")),
+            "source_updated_at": updated_at,
+            "quote_age_hours": None,
+            "freshness_status": "FROZEN_CLOSE",
+            "market_lifecycle_state": "CLOSING",
+            "kickoff_at": kickoff.isoformat(),
+            "_effective_timestamp": updated,
+        }
+
+    for (gid, book, market), states in grouped.items():
+        valid = []
+
+        for sides in states.values():
+            clean = {
+                side: {
+                    k: v
+                    for k, v in quote.items()
+                    if k != "_effective_timestamp"
+                }
+                for side, quote in sides.items()
+            }
+
+            if not pair_is_valid(market, clean):
+                continue
+
+            effective = max(
+                quote["_effective_timestamp"]
+                for quote in sides.values()
+            )
+
+            valid.append((effective, clean))
+
+        if valid:
+            _, latest = max(valid, key=lambda item: item[0])
+            result[gid][book][market] = latest
+
+    return result
+
+
 def main() -> None:
     if not MATCHUPS.exists():
         raise SystemExit(f"Missing canonical game identity payload: {MATCHUPS}")
 
     now = datetime.now(timezone.utc)
+
+    previous_payload = {}
+    if OUT.exists():
+        try:
+            previous_payload = json.loads(OUT.read_text())
+        except (OSError, json.JSONDecodeError):
+            previous_payload = {}
+
+    previous_by_gid = {
+        str(game.get("game_id")): game
+        for game in previous_payload.get("games", [])
+        if game.get("game_id") is not None
+    }
+
+    kickoff_by_gid = {}
+
+    for gid, previous_game in previous_by_gid.items():
+        previous_kickoff = parse_time(previous_game.get("kickoff_at"))
+
+        if previous_kickoff is None:
+            for book_data in (previous_game.get("quotes", {}) or {}).values():
+                for market_data in (book_data or {}).values():
+                    for quote in (market_data or {}).values():
+                        previous_kickoff = parse_time(quote.get("kickoff_at"))
+                        if previous_kickoff is not None:
+                            break
+                    if previous_kickoff is not None:
+                        break
+                if previous_kickoff is not None:
+                    break
+
+        if previous_kickoff is not None:
+            kickoff_by_gid[gid] = previous_kickoff
+
+    post_kickoff_counts = Counter()
+    frozen_close_quote_count = 0
+
     matchup_payload = json.loads(MATCHUPS.read_text())
     games = matchup_payload.get("games", [])
     identity = {}
@@ -498,10 +639,31 @@ def main() -> None:
         if not book or side not in {"away", "home", "over", "under"}:
             continue
 
+        updated_at = row.get("last_update") or row.get("pulled_at")
+        commence_time = row.get("commence_time")
+        kickoff = parse_time(commence_time)
+
+        if kickoff is not None:
+            kickoff_by_gid[gid] = kickoff
+
+        if post_kickoff_quote(updated_at, commence_time):
+            post_kickoff_counts["The Odds API"] += 1
+            excluded.append({
+                "source": "The Odds API",
+                "reason": "post_kickoff_quote",
+                "game_id": gid,
+                "sportsbook": book,
+                "market_type": market,
+                "side": side,
+                "source_updated_at": updated_at,
+                "commence_time": commence_time,
+            })
+            continue
+
         q = quote_record(
             source="The Odds API", game_id=gid, book=book, market=market, side=side,
             line=number(row.get("point")), price=number(row.get("price")),
-            updated_at=row.get("last_update") or row.get("pulled_at"), now=now,
+            updated_at=updated_at, now=now,
             venue_type=row.get("venue_type") or VENUE_TYPES.get(book),
         )
         if q["freshness_status"] != "LIVE":
@@ -606,6 +768,26 @@ def main() -> None:
             or row.get("pulled_at")
             or row.get("ingestion_timestamp")
         )
+        commence_time = row.get("commence_time")
+        kickoff = parse_time(commence_time)
+
+        if kickoff is not None and gid not in kickoff_by_gid:
+            kickoff_by_gid[gid] = kickoff
+
+        if post_kickoff_quote(timestamp, commence_time):
+            post_kickoff_counts["Action Network"] += 1
+            excluded.append({
+                "source": "Action Network",
+                "reason": "post_kickoff_quote",
+                "game_id": gid,
+                "sportsbook": book,
+                "market_type": market,
+                "side": side,
+                "source_updated_at": timestamp,
+                "commence_time": commence_time,
+            })
+            continue
+
         q = quote_record(
             source="Action Network",
             game_id=gid,
@@ -627,6 +809,29 @@ def main() -> None:
         source_counts["Action Network"] += 1
         action_fallback_counts[book] += 1
     # ACTION_NETWORK_TARGETED_FALLBACK_END
+
+    # Once kickoff passes, closing state comes from durable market history.
+    # Only complete quote pairs observed strictly before kickoff are eligible.
+    historical_close = load_pregame_close_pairs(
+        BOOK_HISTORY,
+        kickoff_by_gid,
+    )
+
+    for gid, kickoff in kickoff_by_gid.items():
+        if now < kickoff:
+            continue
+
+        for book in TARGET_BOOKS:
+            for market in ("spread", "total", "moneyline"):
+                historical_sides = dict(
+                    historical_close[gid][book].get(market, {}) or {}
+                )
+
+                if not pair_is_valid(market, historical_sides):
+                    continue
+
+                candidates[gid][book][market] = historical_sides
+                frozen_close_quote_count += len(historical_sides)
 
     contract_games = []
     stale_current_quotes_displayed = 0
@@ -694,13 +899,37 @@ def main() -> None:
             for q in market_data.values()
             if q.get("source_updated_at")
         ]
-        availability = "LIVE" if quotes else "MISSING"
+        quote_statuses = {
+            q.get("freshness_status")
+            for book_data in quotes.values()
+            for market_data in book_data.values()
+            for q in market_data.values()
+        }
+
+        if quotes and quote_statuses == {"FROZEN_CLOSE"}:
+            availability = "CLOSING"
+        elif quotes:
+            availability = "LIVE"
+        else:
+            availability = "MISSING"
+
         if quotes:
             games_with_any_current += 1
         contract_games.append({
             **meta,
+            "kickoff_at": (
+                kickoff_by_gid[gid].isoformat()
+                if gid in kickoff_by_gid
+                else None
+            ),
             "availability_status": availability,
-            "availability_reason": None if quotes else "No fresh The Odds API quote from a configured priority venue",
+            "availability_reason": (
+                "Pregame market frozen at kickoff"
+                if availability == "CLOSING"
+                else None
+                if quotes
+                else "No fresh The Odds API quote from a configured priority venue"
+            ),
             "current_market_updated_at": max(timestamps) if timestamps else None,
             "quotes": quotes,
             "reference": reference,
@@ -773,6 +1002,8 @@ def main() -> None:
         "invalid_pairs_excluded": invalid_pairs,
         "stale_current_quotes_displayed": stale_current_quotes_displayed,
         "excluded_count": len(excluded),
+        "post_kickoff_quotes_excluded_by_source": dict(post_kickoff_counts),
+        "frozen_close_quote_count": frozen_close_quote_count,
         "action_fallback_quote_counts_by_book": dict(action_fallback_counts),
         "action_rows_seen": action_rows_seen,
         "action_rows_stale": action_rows_stale,
