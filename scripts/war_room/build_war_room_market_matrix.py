@@ -1874,15 +1874,18 @@ def main():
         )
     )
 
-    # Keep completed games in their War Room week after sportsbooks remove
-    # them from the latest fast board. Market fallback eligibility remains
-    # restricted to games actually present on that fast board.
-    for result in results_payload.get("games", []):
-        if result.get("completed") is not True:
+    # Every canonical FBS-vs-FBS game belongs in the War Room matrix,
+    # even before a sportsbook posts a market. Market fallback eligibility
+    # remains restricted to games actually present on the fast board.
+    for game in projection_games:
+        gid = str(game.get("game_id") or "")
+        if not gid:
             continue
 
-        gid = str(result.get("game_id") or "")
-        if not gid or gid not in projection_by_gid:
+        away = normalize_team(game.get("away_team"))
+        home = normalize_team(game.get("home_team"))
+
+        if away not in fbs_teams or home not in fbs_teams:
             continue
 
         quote_inventory[gid]
@@ -2512,7 +2515,7 @@ def main():
     )
     print(
         "fast market games matched:",
-        len(games_out),
+        len(fast_board_game_ids),
     )
     print(
         "unmatched fast rows:",
