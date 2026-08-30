@@ -1,7 +1,1694 @@
 {
-  "built_at": "2026-08-30T16:55:18.785472Z",
-  "event_count": 5039,
+  "built_at": "2026-08-30T22:12:00.755697Z",
+  "event_count": 6118,
   "events": [
+    {
+      "away_team": "Miami-FL",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T220631Z",
+      "created_at": "2026-08-30T22:06:40.842267Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T22:06:40.842267Z",
+      "display_priority": 80,
+      "entity_id": "g22|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_db6ea1527df251371d267fb5",
+      "event_timestamp": "2026-08-30T22:05:43Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g22",
+      "home_team": "Stanford",
+      "idempotency_key": "TOTAL_MOVED|g22|FanDuel|total|b4a2de9260289bf2215f4aeb82bf03c4cc4a630445e8623dba33aea7e5d4813f|e2197b9e51ad4cfd83264e7d4356cc7d1012df992bcfc33f07b9329a037f56ef",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars",
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 47.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T22:05:43Z",
+      "old_line": 48.5,
+      "old_price": -105,
+      "payload": {
+        "books": [
+          "Caesars",
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T220631Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_867669852f2d38ce7185447d",
+        "wre_50a00894908f11850ec29a4c"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Mercyhurst",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T215919Z",
+      "created_at": "2026-08-30T21:59:28.825872Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:59:28.825872Z",
+      "display_priority": 80,
+      "entity_id": "g65|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_dc042b535329af910656606b",
+      "event_timestamp": "2026-08-30T21:58:55Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g65",
+      "home_team": "New Mexico State",
+      "idempotency_key": "SPREAD_MOVED|g65|FanDuel|spread|6e4564a7bfb662b0750ce1b8518bb55c8650de3d1a379ee4e470d30d355ed97b|892fda05cc74ea70c9edf1a832b6d72e32c5860938817fafc6615571afb89b53",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -28.5,
+      "new_price": -106,
+      "observed_at": "2026-08-30T21:58:55Z",
+      "old_line": -29.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T215919Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_3a6802e338f3cfe40ee613e4"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "North Carolina A&T",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T215919Z",
+      "created_at": "2026-08-30T21:59:28.825872Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:59:28.825872Z",
+      "display_priority": 80,
+      "entity_id": "g20|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_96c35bdf72e6186cd5332d3d",
+      "event_timestamp": "2026-08-30T21:58:55Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g20",
+      "home_team": "Georgia State",
+      "idempotency_key": "TOTAL_MOVED|g20|FanDuel|total|7e0ab119424400637c822ebb76b5faa6c2e9307036dc5c18999a3bccff7196ee|2e3db47b30977b1fd2fe8a92d8fcdb15f947ea46faa4dec7af9f81c6ead5e847",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 63.5,
+      "new_price": -105,
+      "observed_at": "2026-08-30T21:58:55Z",
+      "old_line": 64.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T215919Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_4580e4eb0644a8f460933d53"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Tarleton State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T215919Z",
+      "created_at": "2026-08-30T21:59:28.825872Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:59:28.825872Z",
+      "display_priority": 80,
+      "entity_id": "g32|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_31534151ca1cd771c58cd715",
+      "event_timestamp": "2026-08-30T21:58:55Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g32",
+      "home_team": "Bowling Green",
+      "idempotency_key": "TOTAL_MOVED|g32|FanDuel|total|8ee6f3d06c25b2b49b1f883a7a4adad580446eea89bac5e6b8fb554fec5cf259|ba063fcd299a52e37b05e693fa9282b111b95d09759758f5fba8ccc8b9eae71d",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 47.5,
+      "new_price": -115,
+      "observed_at": "2026-08-30T21:58:55Z",
+      "old_line": 46.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T215919Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_60e0e5305fb11d4e6d59245e"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T215201Z",
+      "created_at": "2026-08-30T21:52:12.715344Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:52:12.715344Z",
+      "display_priority": 40,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_3473bd2bccedc14bffbaa9ae",
+      "event_timestamp": "2026-08-30T21:52:12.715344Z",
+      "event_type": "PROVIDER_RECOVERED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_RECOVERED|W1|ProphetX|YELLOW|GREEN|theodds_20260830T215201Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T21:52:12.715344Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "refresh_id": "theodds_20260830T215201Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_31aa400e2c1e347434eb87ca"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Portland State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T214716Z",
+      "created_at": "2026-08-30T21:47:25.802321Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:47:25.802321Z",
+      "display_priority": 80,
+      "entity_id": "g77|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_2f1ffbd8722bc4da7c21b149",
+      "event_timestamp": "2026-08-30T21:47:06Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g77",
+      "home_team": "San Diego State",
+      "idempotency_key": "TOTAL_MOVED|g77|FanDuel|total|f9de7f0a56d151679b1699a7fa923ba997cf685b1bb3d3d64965ce92ce999c62|8eef17cf2920e0fb7d3eb29ef9156038495691f279c841e9f9aa85f2ccd874fb",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 59.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:47:06Z",
+      "old_line": 58.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T214716Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_a1e36a53f193168b36926831"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Portland State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T214716Z",
+      "created_at": "2026-08-30T21:47:25.802321Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:47:25.802321Z",
+      "display_priority": 80,
+      "entity_id": "g77|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_233f3decc27df1dd2da8f8f2",
+      "event_timestamp": "2026-08-30T21:47:06Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g77",
+      "home_team": "San Diego State",
+      "idempotency_key": "SPREAD_MOVED|g77|FanDuel|spread|d6b338bb258b3ab8f30143641d291a9467bec81c0f3361269d74a15a0229e537|3ab03b4e3505bcc85d42c5f5f4dfe68e9a962dad44fd91d5fb4df4e11f8f683c",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -39.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:47:06Z",
+      "old_line": -41.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T214716Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_d96e5ab45411eb992b04b8c4"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Tarleton State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T214228Z",
+      "created_at": "2026-08-30T21:42:38.404049Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:42:38.404049Z",
+      "display_priority": 80,
+      "entity_id": "g32|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_f78ef635f8db7a2f9d5d9b59",
+      "event_timestamp": "2026-08-30T21:42:21Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g32",
+      "home_team": "Bowling Green",
+      "idempotency_key": "TOTAL_MOVED|g32|FanDuel|total|7657ba0e681953f61366659e858d1c628ff9843d00eb7f4b8939c61f5702720e|7dfc6e200e7c7ee5dc3f6b52344d8ecdfe16e1e6b48261e5e195509aec638f15",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 46.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:42:21Z",
+      "old_line": 45.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T214228Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_781b779b74550172e707276b"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "North Carolina A&T",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T214228Z",
+      "created_at": "2026-08-30T21:42:38.404049Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:42:38.404049Z",
+      "display_priority": 80,
+      "entity_id": "g20|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_48104c53551d6b5d803ae2de",
+      "event_timestamp": "2026-08-30T21:42:21Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g20",
+      "home_team": "Georgia State",
+      "idempotency_key": "TOTAL_MOVED|g20|FanDuel|total|229747ca01c8ee120ce7c8c2948203f0ce490ec99a9b365b3621d48f77a83bf3|a4db88e8a7600dfc58cf8236a5bb35eaae7567e5e8ceb664cac83baa6a206897",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 64.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:42:21Z",
+      "old_line": 65.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T214228Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_3190a79e2f1d18c0f86a6a33"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Portland State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T213427Z",
+      "created_at": "2026-08-30T21:34:37.622436Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:34:37.622436Z",
+      "display_priority": 80,
+      "entity_id": "g77|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_86308ff79c0f470215cc9b18",
+      "event_timestamp": "2026-08-30T21:34:04Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g77",
+      "home_team": "San Diego State",
+      "idempotency_key": "SPREAD_MOVED|g77|FanDuel|spread|487072a09fd7d139c9fa112a611872f93c6e29a75ec2bfb867219ec2ae01577b|28c04e8207481a2394db3b5bea5b4e51afc1859bef8411f8c9306fbece57899e",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -41.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:34:04Z",
+      "old_line": -40.5,
+      "old_price": -115,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T213427Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_42a665d54d7d5dc9adc02f08"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Portland State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T213427Z",
+      "created_at": "2026-08-30T21:34:37.622436Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:34:37.622436Z",
+      "display_priority": 80,
+      "entity_id": "g77|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_6cbcc132e3034bea9edfda36",
+      "event_timestamp": "2026-08-30T21:34:04Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g77",
+      "home_team": "San Diego State",
+      "idempotency_key": "TOTAL_MOVED|g77|FanDuel|total|8e5f1e1bbdcc607b72d3516c46aede45b2ce8a405864ef7dd6151b8e3db5de14|ba13f8612650c3d6c71bbb5722837a9ca0886e6a8ae4689811b1fa5b2050c71c",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 57.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T21:34:04Z",
+      "old_line": 58.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T213427Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_dbbb45d62786a4064fde5389"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T212934Z",
+      "created_at": "2026-08-30T21:29:48.323302Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:29:48.323302Z",
+      "display_priority": 41,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_982e4e09efb391293367d2ed",
+      "event_timestamp": "2026-08-30T21:29:48.323302Z",
+      "event_type": "PROVIDER_DEGRADED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_DEGRADED|W1|ProphetX|GREEN|YELLOW|theodds_20260830T212934Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T21:29:48.323302Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "refresh_id": "theodds_20260830T212934Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_02ea0ed4982930d28e43d272"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T212222Z",
+      "created_at": "2026-08-30T21:22:32.701112Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:22:32.701112Z",
+      "display_priority": 40,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_bb0e947069c5d0bf4e5dac9f",
+      "event_timestamp": "2026-08-30T21:22:32.701112Z",
+      "event_type": "PROVIDER_RECOVERED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_RECOVERED|W1|ProphetX|YELLOW|GREEN|theodds_20260830T212222Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T21:22:32.701112Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "refresh_id": "theodds_20260830T212222Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_d9872f050125c48cc902b8cc"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Western Michigan",
+      "book": "Caesars",
+      "correlation_id": "theodds_20260830T211958Z",
+      "created_at": "2026-08-30T21:20:09.450379Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:20:09.450379Z",
+      "display_priority": 80,
+      "entity_id": "g57|Caesars|total",
+      "entity_type": "market",
+      "event_id": "wrp_9434256935ee7d5fa6c00581",
+      "event_timestamp": "2026-08-30T21:19:16Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g57",
+      "home_team": "Michigan",
+      "idempotency_key": "TOTAL_MOVED|g57|Caesars|total|4ed90a15e1b1b847f0b4ae43cee9213c91ed2d83cf9ce1297a2c9287ce9bf7d6|82e7d7a690be3434b4270f86057ae24f5f9dd5640b64a6f8e5d9a2ce08971fef",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 48,
+      "new_price": -113,
+      "observed_at": "2026-08-30T21:19:16Z",
+      "old_line": 47.5,
+      "old_price": -117,
+      "payload": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T211958Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_ae48516149e516e5da6085d1"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Western Michigan",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T211511Z",
+      "created_at": "2026-08-30T21:15:21.237426Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:15:21.237426Z",
+      "display_priority": 80,
+      "entity_id": "g57|DraftKings|total",
+      "entity_type": "market",
+      "event_id": "wrp_db187bec49e1e58c63e13956",
+      "event_timestamp": "2026-08-30T21:14:57Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g57",
+      "home_team": "Michigan",
+      "idempotency_key": "TOTAL_MOVED|g57|DraftKings|total|ee733b5217da680144a513bc7c5d19c93422774b9dbd0b72401b4c73ddd61448|849f5881db39a59c580744def9f60eb946d6fc02668f4d44b39fb26056d43137",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 48.5,
+      "new_price": -102,
+      "observed_at": "2026-08-30T21:14:57Z",
+      "old_line": 47.5,
+      "old_price": -115,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T211511Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_1bc53c74b65f428b4e2ae7c8"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T210758Z",
+      "created_at": "2026-08-30T21:08:08.968027Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:08:08.968027Z",
+      "display_priority": 41,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_c9d89675e7b384e90f15a086",
+      "event_timestamp": "2026-08-30T21:08:08.968027Z",
+      "event_type": "PROVIDER_DEGRADED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_DEGRADED|W1|ProphetX|GREEN|YELLOW|theodds_20260830T210758Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T21:08:08.968027Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "refresh_id": "theodds_20260830T210758Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_9cce08d5185b14da28170e19"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Miami-FL",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T210312Z",
+      "created_at": "2026-08-30T21:03:22.402873Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:03:22.402873Z",
+      "display_priority": 80,
+      "entity_id": "g22|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_4e25c8dff839377525fb1605",
+      "event_timestamp": "2026-08-30T21:02:46Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g22",
+      "home_team": "Stanford",
+      "idempotency_key": "SPREAD_MOVED|g22|FanDuel|spread|e296c63f978fe08368a88e75fad3ca641dfe305b8419b2d99b9ff3b9dc9d228d|b38b9e9d5d1d0d7385533774acc284d59ee60879db07dabb5d3068e8a08a5a77",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 24.5,
+      "new_price": -114,
+      "observed_at": "2026-08-30T21:02:46Z",
+      "old_line": 23.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T210312Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_3c1ae94ad86489599dad2202"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Tennessee State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T203146Z",
+      "created_at": "2026-08-30T20:31:57.816014Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T20:31:57.816014Z",
+      "display_priority": 80,
+      "entity_id": "g40|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_9e23f080ab23d54fa2d37200",
+      "event_timestamp": "2026-08-30T20:31:32Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g40",
+      "home_team": "Georgia",
+      "idempotency_key": "SPREAD_MOVED|g40|FanDuel|spread|a91e39dd080895d72bdb9735218779ef3df19f37694d6c9f5b91f0fc2cf46453|cb9ce2e60de7678f49a0f15c33ac16bf4873f97cf1cb8ccc907497e86d77654a",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -47.5,
+      "new_price": -105,
+      "observed_at": "2026-08-30T20:31:32Z",
+      "old_line": -45.5,
+      "old_price": -115,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T203146Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_d3b64c9446c5e5d8ab39372f"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Tennessee State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T203146Z",
+      "created_at": "2026-08-30T20:31:57.816014Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T20:31:57.816014Z",
+      "display_priority": 80,
+      "entity_id": "g40|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_662c9148a7fc2bf6b77d34b5",
+      "event_timestamp": "2026-08-30T20:31:32Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g40",
+      "home_team": "Georgia",
+      "idempotency_key": "TOTAL_MOVED|g40|FanDuel|total|a8b1ac486e3f17eaefc7c13e43eeed14b00ccab2ba6e39f2f97f6616266a3cf7|f47ddeacdf2b84cd17249d9175605e5fcfb054ab45321ae8a0535925e67fbb91",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 56.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T20:31:32Z",
+      "old_line": 55.5,
+      "old_price": -105,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T203146Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_b8ce353f431e31fb47fb6516"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Miami-FL",
+      "book": "Caesars",
+      "correlation_id": "theodds_20260830T203146Z",
+      "created_at": "2026-08-30T20:31:57.816014Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T20:31:57.816014Z",
+      "display_priority": 80,
+      "entity_id": "g22|Caesars|total",
+      "entity_type": "market",
+      "event_id": "wrp_a4cf67c3a6a6931102d674f4",
+      "event_timestamp": "2026-08-30T20:29:03Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g22",
+      "home_team": "Stanford",
+      "idempotency_key": "TOTAL_MOVED|g22|Caesars|total|43d0210a88e7b28302be48d42e549fab1cf20f18731b471a3dda2d43af054ce0|32673be22ed62e30712a9fe2f7cf738b4b6b9fdb1c8c0424fa4e4bd8c4b5a18a",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 48,
+      "new_price": -109,
+      "observed_at": "2026-08-30T20:29:03Z",
+      "old_line": 48.5,
+      "old_price": -103,
+      "payload": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T203146Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_505ce4a2f7b3201cde5703d9"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Baylor",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T201424Z",
+      "created_at": "2026-08-30T20:14:34.929788Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T20:14:34.929788Z",
+      "display_priority": 80,
+      "entity_id": "g30|DraftKings|total",
+      "entity_type": "market",
+      "event_id": "wrp_b7644fbeee27419182f7ac37",
+      "event_timestamp": "2026-08-30T20:13:42Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g30",
+      "home_team": "Auburn",
+      "idempotency_key": "TOTAL_MOVED|g30|DraftKings|total|ca912c91ad4fa2b41f8dab7bd13eb44fe9859550738854ec434fca41678f1252|a923ea2d861a95488e087841e2fc4638dfd4aa8cb7e89b8c93160b8fb034c7ee",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 58.5,
+      "new_price": -118,
+      "observed_at": "2026-08-30T20:13:42Z",
+      "old_line": 59.5,
+      "old_price": -102,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T201424Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_2e75974236a87f249fed778d"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "SMU",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20260830T195559Z",
+      "created_at": "2026-08-30T19:56:11.191216Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T19:56:11.191216Z",
+      "display_priority": 80,
+      "entity_id": "g99|BetMGM|spread",
+      "entity_type": "market",
+      "event_id": "wrp_284337dd99e0ff1292eb1d8d",
+      "event_timestamp": "2026-08-30T19:55:54Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g99",
+      "home_team": "Florida State",
+      "idempotency_key": "SPREAD_MOVED|g99|BetMGM|spread|fe12b8c36a292940bcb8cd5c1a103af5edcaa15ab364f00d22b0ddc95670a740|18258c09951892719fb35d2e889ecc2ca5b9484366610b80d6fb2d8297a817af",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 3,
+      "new_price": -110,
+      "observed_at": "2026-08-30T19:55:54Z",
+      "old_line": 2.5,
+      "old_price": -102,
+      "payload": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T195559Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_185d71b1b05773b49fdcc8b9"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Texas State",
+      "book": "Caesars",
+      "correlation_id": "theodds_20260830T193653Z",
+      "created_at": "2026-08-30T19:37:04.419528Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T19:37:04.419528Z",
+      "display_priority": 80,
+      "entity_id": "g85|Caesars|total",
+      "entity_type": "market",
+      "event_id": "wrp_31d7697f34e5329a4cd2497b",
+      "event_timestamp": "2026-08-30T19:34:59Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g85",
+      "home_team": "Texas",
+      "idempotency_key": "TOTAL_MOVED|g85|Caesars|total|fafb42e9d3761acbacc471fbc506395e0ca5aa38e0304243853bbc8cc6a9c0e6|ecf763682e9b08ac5bff5bc9ae53bf055a1b4317dd9ea2f2bc7b3a866f170c18",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 59.5,
+      "new_price": -117,
+      "observed_at": "2026-08-30T19:34:59Z",
+      "old_line": 60,
+      "old_price": -113,
+      "payload": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T193653Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_51866387087d00ffa49ba623"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Utah Tech",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T192712Z",
+      "created_at": "2026-08-30T19:27:22.669567Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T19:27:22.669567Z",
+      "display_priority": 80,
+      "entity_id": "g31|DraftKings|spread",
+      "entity_type": "market",
+      "event_id": "wrp_612780f799d944c2650d3d64",
+      "event_timestamp": "2026-08-30T19:26:02Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g31",
+      "home_team": "BYU",
+      "idempotency_key": "SPREAD_MOVED|g31|DraftKings|spread|9e116efff1df1c87f99b481b6e13d49bc0604c9b42a8d3e2da3b2c2a5795f37f|a080b040181e0f75888f9a4619893cf98eded379206ec893b1190dc1f481976e",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -50.5,
+      "new_price": -115,
+      "observed_at": "2026-08-30T19:26:02Z",
+      "old_line": -49.5,
+      "old_price": -108,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T192712Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_1c24eccab2340be14b5598b5"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "VMI",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T191959Z",
+      "created_at": "2026-08-30T19:20:10.496712Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T19:20:10.496712Z",
+      "display_priority": 80,
+      "entity_id": "g94|DraftKings|spread",
+      "entity_type": "market",
+      "event_id": "wrp_a5b65889c905385cd7036503",
+      "event_timestamp": "2026-08-30T19:19:44Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g94",
+      "home_team": "Virginia Tech",
+      "idempotency_key": "SPREAD_MOVED|g94|DraftKings|spread|7e07592aa9fe7ebafa9785925189b97adb7d8b153b4b59f214a89dd26da61347|d7e9cf1a6d689a215f59bf53742a66472715f3964eb31244159ba6de24c98e89",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -51.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T19:19:44Z",
+      "old_line": -50.5,
+      "old_price": -115,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T191959Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_dd439dd2fcfdc7794da9dd96"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T190500Z",
+      "created_at": "2026-08-30T19:05:10.648254Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T19:05:10.648254Z",
+      "display_priority": 40,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_55e10d97b41f5b0429ebb192",
+      "event_timestamp": "2026-08-30T19:05:10.648254Z",
+      "event_type": "PROVIDER_RECOVERED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_RECOVERED|W1|ProphetX|YELLOW|GREEN|theodds_20260830T190500Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T19:05:10.648254Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        }
+      },
+      "refresh_id": "theodds_20260830T190500Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_d9280c5e262dfb6230cdbe34"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": null,
+      "book": "ProphetX",
+      "correlation_id": "theodds_20260830T182708Z",
+      "created_at": "2026-08-30T18:27:18.769954Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T18:27:18.769954Z",
+      "display_priority": 41,
+      "entity_id": "W1|ProphetX",
+      "entity_type": "provider_panel",
+      "event_id": "wrp_166fd8ae3617a63dc2979444",
+      "event_timestamp": "2026-08-30T18:27:18.769954Z",
+      "event_type": "PROVIDER_DEGRADED",
+      "event_version": 1,
+      "game_id": null,
+      "home_team": null,
+      "idempotency_key": "PROVIDER_DEGRADED|W1|ProphetX|GREEN|YELLOW|theodds_20260830T182708Z",
+      "market": null,
+      "metadata": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-08-30T18:27:18.769954Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "current": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "YELLOW",
+          "total": 42
+        },
+        "previous": {
+          "games": 43,
+          "required": 43,
+          "spread": 43,
+          "status": "GREEN",
+          "total": 43
+        }
+      },
+      "refresh_id": "theodds_20260830T182708Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": null,
+      "source_system": "war_room_selected_week_health",
+      "underlying_event_ids": [
+        "wre_fc51cbe1a417849842c6fdda"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Oklahoma State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T174517Z",
+      "created_at": "2026-08-30T17:45:28.699834Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:45:28.699834Z",
+      "display_priority": 80,
+      "entity_id": "g89|FanDuel|spread",
+      "entity_type": "market",
+      "event_id": "wrp_ceb129b52ab4998bd4faacbd",
+      "event_timestamp": "2026-08-30T17:45:07Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g89",
+      "home_team": "Tulsa",
+      "idempotency_key": "SPREAD_MOVED|g89|FanDuel|spread|4ac15cf7d35fcd01fd3c892fd0e96457e042f855c68216deba242eb713304a13|ed94bca87bfb3e28f45eb053a25800a57ebb7bcfffd448090e6b81a6821543e9",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 13.5,
+      "new_price": -102,
+      "observed_at": "2026-08-30T17:45:07Z",
+      "old_line": 14.5,
+      "old_price": -122,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T174517Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_a555039e2f931bc08aef8f21"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Arkansas State",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T173532Z",
+      "created_at": "2026-08-30T17:35:45.751044Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:35:45.751044Z",
+      "display_priority": 80,
+      "entity_id": "g56|DraftKings|spread",
+      "entity_type": "market",
+      "event_id": "wrp_78637d963b6d0ae07f661135",
+      "event_timestamp": "2026-08-30T17:35:13Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g56",
+      "home_team": "Memphis",
+      "idempotency_key": "SPREAD_MOVED|g56|DraftKings|spread|87a5d8232731789855c4348443759f35d6b2625254bf5dce3ad584c3630f0687|6eb0e6d90b958a1ad8c97ecb1911fa2ba371b5e85a38117ae6d42570a2adc69f",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -9.5,
+      "new_price": -115,
+      "observed_at": "2026-08-30T17:35:13Z",
+      "old_line": -8.5,
+      "old_price": -112,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T173532Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_c43cf2749500826b776b5077"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Wyoming",
+      "book": "Pinnacle",
+      "correlation_id": "theodds_20260830T172819Z",
+      "created_at": "2026-08-30T17:28:29.518744Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:28:29.518744Z",
+      "display_priority": 82,
+      "entity_id": "g36|Pinnacle|spread",
+      "entity_type": "market",
+      "event_id": "wrp_c6dec68c3fa49fbc186dbda1",
+      "event_timestamp": "2026-08-30T17:27:58Z",
+      "event_type": "PINNACLE_MOVE",
+      "event_version": 1,
+      "game_id": "g36",
+      "home_team": "Colorado State",
+      "idempotency_key": "SPREAD_MOVED|g36|Pinnacle|spread|e1bcf4a4acc5866a330a01f91805d795732149e8bfbb6a98e8ee0fa53690cbd4|45515d68188a57656735f1a43879e71627fc6f1cf7d81322090fec43835f6458",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -3,
+      "new_price": -115,
+      "observed_at": "2026-08-30T17:27:58Z",
+      "old_line": -3.5,
+      "old_price": -102,
+      "payload": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T172819Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_81cebf3c2b21bb0e1fc2d1ce"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Alcorn State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T172101Z",
+      "created_at": "2026-08-30T17:21:12.236310Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:21:12.236310Z",
+      "display_priority": 80,
+      "entity_id": "g81|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_eedeeb83441ef55ba7bc2e67",
+      "event_timestamp": "2026-08-30T17:20:44Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g81",
+      "home_team": "Southern Miss",
+      "idempotency_key": "TOTAL_MOVED|g81|FanDuel|total|dd36525cc77cccdc8bc3457882d4376d49c98991fa0873fcee977b9c48d21239|c23f046d0c447507d89a9a5df63bb1a2a100f652bf9c96aaae34863fce588a46",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 51.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T17:20:44Z",
+      "old_line": 52.5,
+      "old_price": -112,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T172101Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_4b467f65ebacd29ae9932345"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Wyoming",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20260830T171609Z",
+      "created_at": "2026-08-30T17:16:21.122356Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:16:21.122356Z",
+      "display_priority": 80,
+      "entity_id": "g36|DraftKings|spread",
+      "entity_type": "market",
+      "event_id": "wrp_fe7c5fcd85bc8a66ae95ef7c",
+      "event_timestamp": "2026-08-30T17:16:04Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g36",
+      "home_team": "Colorado State",
+      "idempotency_key": "SPREAD_MOVED|g36|DraftKings|spread|4c78046763350a798de74606b4d11569f56fcfd15d7b9eca8f3c17ecdb6c1366|90a6c9d00aa019b2ac95b3f114c9bcf6b90302df26c856b5e8e158f8bec438c0",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -3,
+      "new_price": -118,
+      "observed_at": "2026-08-30T17:16:04Z",
+      "old_line": -3.5,
+      "old_price": 100,
+      "payload": {
+        "books": [
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T171609Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_7517b7afc3c74d11e772bd86"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Arkansas State",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20260830T171609Z",
+      "created_at": "2026-08-30T17:16:21.122356Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:16:21.122356Z",
+      "display_priority": 80,
+      "entity_id": "g56|BetMGM|total",
+      "entity_type": "market",
+      "event_id": "wrp_02d750fe7c79b95b26f0fa71",
+      "event_timestamp": "2026-08-30T17:15:07Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g56",
+      "home_team": "Memphis",
+      "idempotency_key": "TOTAL_MOVED|g56|BetMGM|total|1285b4f9c0da4fe14449bdb60e599a8cfd42a434dd44b359dc29be17e70f2a18|26934ef7a4a8e097b3998ea38ff2168c90871d5dea9fd0425984fe5ba836e1d4",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 53.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T17:15:07Z",
+      "old_line": 54.5,
+      "old_price": -105,
+      "payload": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T171609Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_7cff7c9f21f82c58f99ae51c"
+      ],
+      "week": 1
+    },
+    {
+      "away_team": "Missouri State",
+      "book": "Caesars",
+      "correlation_id": "theodds_20260830T170918Z",
+      "created_at": "2026-08-30T17:09:32.882304Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T17:09:32.882304Z",
+      "display_priority": 80,
+      "entity_id": "g86|Caesars|total",
+      "entity_type": "market",
+      "event_id": "wrp_89a7ca5f32dfe7b1b8474b03",
+      "event_timestamp": "2026-08-30T17:07:46Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g86",
+      "home_team": "Texas A&M",
+      "idempotency_key": "TOTAL_MOVED|g86|Caesars|total|043cf3e50c3630e6ed7c05ae24538969fdf1cac662b72131ed9d5a4e62f3c2ec|0ecd7134926b1aac1c1e72331a812038ee6ccd3ea205941ff4b87b1976cb50fd",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 53.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T17:07:46Z",
+      "old_line": 53,
+      "old_price": -115,
+      "payload": {
+        "books": [
+          "Caesars"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20260830T170918Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_3b4a548ca5971cc29a658564"
+      ],
+      "week": 1
+    },
     {
       "away_team": "Liberty",
       "book": null,
@@ -5610,6 +7297,52 @@
       "week": 0
     },
     {
+      "away_team": "Portland State",
+      "book": "FanDuel",
+      "correlation_id": "theodds_20260830T214452Z",
+      "created_at": "2026-08-30T21:45:03.127948Z",
+      "cycle_id": "2026_WK1_PREP",
+      "detected_at": "2026-08-30T21:45:03.127948Z",
+      "display_priority": 80,
+      "entity_id": "g77|FanDuel|total",
+      "entity_type": "market",
+      "event_id": "wrp_e6bb307d543b9b64e9df96fa",
+      "event_timestamp": "2026-08-30T12:01:18Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g77",
+      "home_team": "San Diego State",
+      "idempotency_key": "TOTAL_MOVED|g77|FanDuel|total|81fb502d342e7f74bbb7b8f1a4722a2a098fe8803eccd7cf40198bf0641636f9|f9de7f0a56d151679b1699a7fa923ba997cf685b1bb3d3d64965ce92ce999c62",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "CURRENT_MARKET_CONTRACT_FALLBACK"
+      },
+      "new_line": 58.5,
+      "new_price": -110,
+      "observed_at": "2026-08-30T12:01:18Z",
+      "old_line": 57.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "FanDuel"
+        ],
+        "selection_source": "CURRENT_MARKET_CONTRACT_FALLBACK"
+      },
+      "refresh_id": "theodds_20260830T214452Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_0f28a15f3320903f13b802c9"
+      ],
+      "week": 1
+    },
+    {
       "away_team": null,
       "book": null,
       "correlation_id": "theodds_20260830T113930Z",
@@ -8712,1969 +10445,11 @@
         "wre_91d5b467bd9b9acb67bd60ee"
       ],
       "week": 9
-    },
-    {
-      "away_team": "Arkansas State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK3_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g246",
-      "entity_type": "game",
-      "event_id": "wrp_e050a7697099345882ab0e2a",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g246",
-      "home_team": "TCU",
-      "idempotency_key": "MODEL_STATE_CHANGED|g246|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_dbabd0006ba91cdb40f80c90"
-      ],
-      "week": 3
-    },
-    {
-      "away_team": "California",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK11_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g748",
-      "entity_type": "game",
-      "event_id": "wrp_de0df1de7ad57ef2387b43ae",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g748",
-      "home_team": "Virginia",
-      "idempotency_key": "MODEL_STATE_CHANGED|g748|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_b471022ec8cc596c8d90f780"
-      ],
-      "week": 11
-    },
-    {
-      "away_team": "Hawaii",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK10_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g680",
-      "entity_type": "game",
-      "event_id": "wrp_dc53b086691a6d0d7b316746",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g680",
-      "home_team": "UTEP",
-      "idempotency_key": "MODEL_STATE_CHANGED|g680|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_2c0c32731ca302c9cb732d9b"
-      ],
-      "week": 10
-    },
-    {
-      "away_team": "Arkansas State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK1_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g56",
-      "entity_type": "game",
-      "event_id": "wrp_d9b0731f22af5b7783aefdd5",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g56",
-      "home_team": "Memphis",
-      "idempotency_key": "MODEL_STATE_CHANGED|g56|b5ac16e4e0f531871caedd99c02827f344435033b4c7bf40c8d54a19fc819481|6e18d3dc1c8d6b05f01ea87787e5949a12a0f0320f176fe171f5792e11dc8c19",
-      "market": null,
-      "metadata": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_2171442177f60bbbbad6f799"
-      ],
-      "week": 1
-    },
-    {
-      "away_team": "Stanford",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK12_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g772",
-      "entity_type": "game",
-      "event_id": "wrp_d8ad3399e099eac83dfbbc87",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g772",
-      "home_team": "California",
-      "idempotency_key": "MODEL_STATE_CHANGED|g772|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_c43fe48f39ce729cfa2e2bfb"
-      ],
-      "week": 12
-    },
-    {
-      "away_team": "Hawaii",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK0_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g4",
-      "entity_type": "game",
-      "event_id": "wrp_d5b309f5791dd7469cf69363",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g4",
-      "home_team": "Stanford",
-      "idempotency_key": "MODEL_STATE_CHANGED|g4|b5ac16e4e0f531871caedd99c02827f344435033b4c7bf40c8d54a19fc819481|ed434425fa468227a6aeac3cc0a32a15b31d432508a78f21a26b63f867a0763b",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_7033373fa9cde856246aacc7"
-      ],
-      "week": 0
-    },
-    {
-      "away_team": "Fordham",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK1_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g66",
-      "entity_type": "game",
-      "event_id": "wrp_d5568f67bd5383e83c2bb2e6",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g66",
-      "home_team": "North Dakota State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g66|51ca71efcc8b3605ddcb0f4c3d2b7c1012717654088d2bfabf8d8de97859d300|dbca394bab16a79743a968e82cf6d7d68cb497fb7a3fc27979b2bc0e62b87255",
-      "market": null,
-      "metadata": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": null,
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": null,
-        "spread_model_id": null,
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": null,
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": null,
-        "spread_model_id": null,
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_178bf5f4a05dc48d5540da63"
-      ],
-      "week": 1
-    },
-    {
-      "away_team": null,
-      "book": "DraftKings",
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK2_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 42,
-      "entity_id": "W2|DraftKings",
-      "entity_type": "provider_panel",
-      "event_id": "wrp_d4831b0af4686eecb2c1e078",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "PROVIDER_UNAVAILABLE",
-      "event_version": 1,
-      "game_id": null,
-      "home_team": null,
-      "idempotency_key": "PROVIDER_UNAVAILABLE|W2|DraftKings|YELLOW|RED|theodds_20260830T060516Z",
-      "market": null,
-      "metadata": {
-        "current": {
-          "games": 0,
-          "required": 49,
-          "spread": 0,
-          "status": "RED",
-          "total": 0
-        },
-        "previous": {
-          "games": 6,
-          "required": 49,
-          "spread": 5,
-          "status": "YELLOW",
-          "total": 6
-        }
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "current": {
-          "games": 0,
-          "required": 49,
-          "spread": 0,
-          "status": "RED",
-          "total": 0
-        },
-        "previous": {
-          "games": 6,
-          "required": 49,
-          "spread": 5,
-          "status": "YELLOW",
-          "total": 6
-        }
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "war_room_selected_week_health",
-      "underlying_event_ids": [
-        "wre_80f2fe3b8a1e60b08772a1a4"
-      ],
-      "week": 2
-    },
-    {
-      "away_team": "Miami-FL",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK9_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g599",
-      "entity_type": "game",
-      "event_id": "wrp_d2e20b98010f8cef227854cb",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g599",
-      "home_team": "North Carolina",
-      "idempotency_key": "MODEL_STATE_CHANGED|g599|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_38558699c95d597e37b715b7"
-      ],
-      "week": 9
-    },
-    {
-      "away_team": "Oregon",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK4_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g321",
-      "entity_type": "game",
-      "event_id": "wrp_d160b509586de7b0b54df7ff",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g321",
-      "home_team": "USC",
-      "idempotency_key": "MODEL_STATE_CHANGED|g321|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_8f7d05aff41447878975f04b"
-      ],
-      "week": 4
-    },
-    {
-      "away_team": "North Dakota State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK11_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g709",
-      "entity_type": "game",
-      "event_id": "wrp_d082251b4ec4b85d72c5386f",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g709",
-      "home_team": "Hawaii",
-      "idempotency_key": "MODEL_STATE_CHANGED|g709|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_d61413ad51809967aa2458e4"
-      ],
-      "week": 11
-    },
-    {
-      "away_team": "UNLV",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK4_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g264",
-      "entity_type": "game",
-      "event_id": "wrp_d025cff08e502d0ae5e9740f",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g264",
-      "home_team": "Akron",
-      "idempotency_key": "MODEL_STATE_CHANGED|g264|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_59c40dae436330ebf94827d6"
-      ],
-      "week": 4
-    },
-    {
-      "away_team": "Georgia Southern",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK3_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g211",
-      "entity_type": "game",
-      "event_id": "wrp_cf1579f56df55863c6ff7df7",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g211",
-      "home_team": "Jacksonville State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g211|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_34b9afa7c5c091e0dd8d1a46"
-      ],
-      "week": 3
-    },
-    {
-      "away_team": "Central Michigan",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK10_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g625",
-      "entity_type": "game",
-      "event_id": "wrp_ccb291e42759b88ad3379b26",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g625",
-      "home_team": "Eastern Michigan",
-      "idempotency_key": "MODEL_STATE_CHANGED|g625|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_734455c8a5f3165314397f4d"
-      ],
-      "week": 10
-    },
-    {
-      "away_team": "North Carolina",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK7_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g468",
-      "entity_type": "game",
-      "event_id": "wrp_caf745969513c0d7a77d2ac2",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g468",
-      "home_team": "Duke",
-      "idempotency_key": "MODEL_STATE_CHANGED|g468|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_36d93cceffe0c02cdf510347"
-      ],
-      "week": 7
-    },
-    {
-      "away_team": "New Mexico",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK7_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g471",
-      "entity_type": "game",
-      "event_id": "wrp_ca2a37d7ac43af375fcf3fc9",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g471",
-      "home_team": "Hawaii",
-      "idempotency_key": "MODEL_STATE_CHANGED|g471|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_df4a7fea667a84e0df98a723"
-      ],
-      "week": 7
-    },
-    {
-      "away_team": "Middle Tennessee",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK4_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g288",
-      "entity_type": "game",
-      "event_id": "wrp_c8247eaf74064ce0064104d8",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g288",
-      "home_team": "Jacksonville State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g288|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_a584e6fdf207caa3ddc76d97"
-      ],
-      "week": 4
-    },
-    {
-      "away_team": "Louisville",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g370",
-      "entity_type": "game",
-      "event_id": "wrp_c534e89feaca2571dec756ae",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g370",
-      "home_team": "NC State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g370|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_9fc9829ee42a5fbf449d6f37"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "New Mexico State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK13_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g862",
-      "entity_type": "game",
-      "event_id": "wrp_c3342d375d0f86ba34afd227",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g862",
-      "home_team": "Middle Tennessee",
-      "idempotency_key": "MODEL_STATE_CHANGED|g862|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_39f8f9706a553415147f9754"
-      ],
-      "week": 13
-    },
-    {
-      "away_team": "Eastern Michigan",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK6_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g400",
-      "entity_type": "game",
-      "event_id": "wrp_c25218ccd2f0f23ac0b8f737",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g400",
-      "home_team": "Akron",
-      "idempotency_key": "MODEL_STATE_CHANGED|g400|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_8fe7eb741e9126e48fe5cc5b"
-      ],
-      "week": 6
-    },
-    {
-      "away_team": "Eastern Michigan",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g365",
-      "entity_type": "game",
-      "event_id": "wrp_c15a7f1c83925f1c8c79157b",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g365",
-      "home_team": "Massachusetts",
-      "idempotency_key": "MODEL_STATE_CHANGED|g365|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_0b8428ee325a65a70f64c4ab"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Sacramento State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK6_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g406",
-      "entity_type": "game",
-      "event_id": "wrp_bb4fe2cbdc47c49691de9217",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g406",
-      "home_team": "Bowling Green",
-      "idempotency_key": "MODEL_STATE_CHANGED|g406|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_02a17135794fa3d62e040e78"
-      ],
-      "week": 6
-    },
-    {
-      "away_team": "New Mexico State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK2_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g127",
-      "entity_type": "game",
-      "event_id": "wrp_bac2acc16e509527d8047fb9",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g127",
-      "home_team": "Hawaii",
-      "idempotency_key": "MODEL_STATE_CHANGED|g127|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_c6d4846e4556027e82cba06d"
-      ],
-      "week": 2
-    },
-    {
-      "away_team": "USC",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK3_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g237",
-      "entity_type": "game",
-      "event_id": "wrp_ba0d5d9f8be6744491062eff",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g237",
-      "home_team": "Rutgers",
-      "idempotency_key": "MODEL_STATE_CHANGED|g237|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_561b1f27fba298a5b2483cb0"
-      ],
-      "week": 3
-    },
-    {
-      "away_team": "San Jose State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g354",
-      "entity_type": "game",
-      "event_id": "wrp_b91bc618e0f2ab2aff3e5fd2",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g354",
-      "home_team": "Hawaii",
-      "idempotency_key": "MODEL_STATE_CHANGED|g354|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_2d86056dd5ce7c0036e01942"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Army",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK9_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g595",
-      "entity_type": "game",
-      "event_id": "wrp_b7d846a9fd0bb21550c35da8",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g595",
-      "home_team": "Memphis",
-      "idempotency_key": "MODEL_STATE_CHANGED|g595|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_b6a4be6a5c6911003f302940"
-      ],
-      "week": 9
-    },
-    {
-      "away_team": "Florida State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK3_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g189",
-      "entity_type": "game",
-      "event_id": "wrp_b798eb54810db2786ac53b9d",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g189",
-      "home_team": "Alabama",
-      "idempotency_key": "MODEL_STATE_CHANGED|g189|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_73b2fb8c36f7aa200e4d70bd"
-      ],
-      "week": 3
-    },
-    {
-      "away_team": "Syracuse",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK11_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g723",
-      "entity_type": "game",
-      "event_id": "wrp_b7435003ba14d94f2113769b",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g723",
-      "home_team": "NC State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g723|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_3c8e1bef027bd5ab93c96229"
-      ],
-      "week": 11
-    },
-    {
-      "away_team": "Fresno State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK1_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g90",
-      "entity_type": "game",
-      "event_id": "wrp_b66cec7c1c978050c0f24fd7",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g90",
-      "home_team": "USC",
-      "idempotency_key": "MODEL_STATE_CHANGED|g90|b5ac16e4e0f531871caedd99c02827f344435033b4c7bf40c8d54a19fc819481|6e18d3dc1c8d6b05f01ea87787e5949a12a0f0320f176fe171f5792e11dc8c19",
-      "market": null,
-      "metadata": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": "OFFICIAL",
-        "spread_model_id": "standard_spread_five_source_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_79a79580741655f7f81c6926"
-      ],
-      "week": 1
-    },
-    {
-      "away_team": "Syracuse",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK6_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g445",
-      "entity_type": "game",
-      "event_id": "wrp_b4d728b197c4c3aed8d8ec58",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g445",
-      "home_team": "Virginia",
-      "idempotency_key": "MODEL_STATE_CHANGED|g445|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_fda9f5a6bb4f4755b3968ce4"
-      ],
-      "week": 6
-    },
-    {
-      "away_team": "Jacksonville State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK2_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g154",
-      "entity_type": "game",
-      "event_id": "wrp_b3cdd5be1037d954a89adb14",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g154",
-      "home_team": "Ohio",
-      "idempotency_key": "MODEL_STATE_CHANGED|g154|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_14e8a2d018c7e4abba31dd67"
-      ],
-      "week": 2
-    },
-    {
-      "away_team": null,
-      "book": "BetMGM",
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK1_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 41,
-      "entity_id": "W1|BetMGM",
-      "entity_type": "provider_panel",
-      "event_id": "wrp_b2efe0292f8586ce43709964",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "PROVIDER_DEGRADED",
-      "event_version": 1,
-      "game_id": null,
-      "home_team": null,
-      "idempotency_key": "PROVIDER_DEGRADED|W1|BetMGM|GREEN|YELLOW|theodds_20260830T060516Z",
-      "market": null,
-      "metadata": {
-        "current": {
-          "games": 42,
-          "required": 43,
-          "spread": 42,
-          "status": "YELLOW",
-          "total": 42
-        },
-        "previous": {
-          "games": 43,
-          "required": 43,
-          "spread": 43,
-          "status": "GREEN",
-          "total": 43
-        }
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "current": {
-          "games": 42,
-          "required": 43,
-          "spread": 42,
-          "status": "YELLOW",
-          "total": 42
-        },
-        "previous": {
-          "games": 43,
-          "required": 43,
-          "spread": 43,
-          "status": "GREEN",
-          "total": 43
-        }
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "war_room_selected_week_health",
-      "underlying_event_ids": [
-        "wre_b7b1638c4ce68e1ad6cac93e"
-      ],
-      "week": 1
-    },
-    {
-      "away_team": "New Mexico State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK11_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g722",
-      "entity_type": "game",
-      "event_id": "wrp_b2aec1c43efde7451bfe3240",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g722",
-      "home_team": "Missouri State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g722|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_e4329bad555913486cfc55b3"
-      ],
-      "week": 11
-    },
-    {
-      "away_team": "San Jose State",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK1_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g19",
-      "entity_type": "game",
-      "event_id": "wrp_b000a872cf41467ce5c19763",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g19",
-      "home_team": "Eastern Michigan",
-      "idempotency_key": "MODEL_STATE_CHANGED|g19|b5ac16e4e0f531871caedd99c02827f344435033b4c7bf40c8d54a19fc819481|dfadb8aa3e14d8b73df7c61ed081c5f993b7f6e9d10cedb90851f27344c63d6e",
-      "market": null,
-      "metadata": {
-        "new_state": "SHADOW",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": null,
-        "spread_model_id": "shadow_spread_sp_sagarin_v1",
-        "total_authority": null,
-        "total_model_id": "shadow_total_enhanced_spplus_od_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "SHADOW",
-        "old_spread_authority": "OFFICIAL",
-        "old_state": "HYBRID",
-        "old_total_authority": "HYBRID_REFRESHED_SOURCES",
-        "spread_authority": null,
-        "spread_model_id": "shadow_spread_sp_sagarin_v1",
-        "total_authority": null,
-        "total_model_id": "shadow_total_enhanced_spplus_od_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_64ff00afd8a8f717071b9250"
-      ],
-      "week": 1
-    },
-    {
-      "away_team": "Nevada",
-      "book": null,
-      "correlation_id": "theodds_20260830T060516Z",
-      "created_at": "2026-08-30T06:05:25.501334Z",
-      "cycle_id": "2026_WK7_PREP",
-      "detected_at": "2026-08-30T06:05:25.501334Z",
-      "display_priority": 70,
-      "entity_id": "g483",
-      "entity_type": "game",
-      "event_id": "wrp_af7572d03e1d4cfd92d5e9ce",
-      "event_timestamp": "2026-08-30T06:05:25.501334Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g483",
-      "home_team": "North Dakota State",
-      "idempotency_key": "MODEL_STATE_CHANGED|g483|5fe3c92361680e35826097d43dfee03637d4864b19e2706b6deeee884a42a8ce|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779",
-      "market": null,
-      "metadata": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-08-30T06:05:25.501334Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "STALE",
-        "old_spread_authority": "HYBRID_REFRESHED_SOURCES",
-        "old_state": "HYBRID",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20260830T060516Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_906ebfb279919af416181274"
-      ],
-      "week": 7
     }
   ],
-  "latest_refresh_event_ids": [
-    "wrp_f5a7f28f429ab8856725814c",
-    "wrp_f41d5a3a6e43212bff09288f",
-    "wrp_e84eacb75ce0149eccda593c",
-    "wrp_d6bd8861ce6a0473c1dd4a88",
-    "wrp_d5b927a79b9835bedc441c12",
-    "wrp_d38139c131a55546051dba9a",
-    "wrp_d2d630d3e15d050addbbfa90",
-    "wrp_cbca3fb8ed907f80b5351ed2",
-    "wrp_c4bfec8b51861bcff7732017",
-    "wrp_bd3d23292d3a80960dc5b9b2",
-    "wrp_bd32482e7ef7c00ede5d48ab",
-    "wrp_bb6e4f780bbd758dced6015a",
-    "wrp_b80bea386f8a5a91d4f690a3",
-    "wrp_ae7af3a01b7bfc35270f8bbb",
-    "wrp_a8096ddc3c5627ba88ecaa0c",
-    "wrp_990a6969a389935edc30e298",
-    "wrp_98fa0b3d62aafe2c663d1287",
-    "wrp_930df8b5aa56692a0360b943",
-    "wrp_92ceb896507b780a61495abd",
-    "wrp_9247cf141d80b3f3d0344110",
-    "wrp_8b2206cbe4a7cca58cea8bdf",
-    "wrp_7b862b354605da7823b4d992",
-    "wrp_74b26a836d933830c88e2f46",
-    "wrp_744358f318ed57f3c357d547",
-    "wrp_693fd8f1b73128d10b754ff5",
-    "wrp_59e92e7d83c655bb9ba3e585",
-    "wrp_56b0980641e1656112db576f",
-    "wrp_5392cdaadf129682046f34d9",
-    "wrp_51e8c3bdea684265ddf4c965",
-    "wrp_420c6517ce5b65e158991f85",
-    "wrp_39ccf59346c057228ef7e8cf",
-    "wrp_39750cab8a4303ed0b8ec8eb",
-    "wrp_3748e650b7507789b9871663",
-    "wrp_3322dbfeb0a3aa67b1507dbf",
-    "wrp_32d20976e7b3e18326b6f664",
-    "wrp_249942617a7e47f0f5e5a989",
-    "wrp_22df4741eab1d9f09daaa750",
-    "wrp_1febca48e4c1fcc2bb232be5",
-    "wrp_1fcad759b48de8b75e5bdd18",
-    "wrp_158f6879c0b2911320c5ebde",
-    "wrp_1527006e6316e9cdc333625f",
-    "wrp_10174d0fdbda9e6dad0a23bd",
-    "wrp_092885a2616719a6b0177879"
-  ],
-  "latest_refresh_id": "theodds_20260830T165505Z",
-  "new_event_count": 43,
+  "latest_refresh_event_ids": [],
+  "latest_refresh_id": "theodds_20260830T221150Z",
+  "new_event_count": 0,
   "opening_markets": {
     "g1": {
       "pinnacle_spread": {
@@ -15568,15 +15343,15 @@
     }
   },
   "pipeline_refreshes": {
-    "market": "2026-08-30T16:55:05.244351+00:00",
-    "model": "2026-08-30T16:25:24.930152+00:00",
+    "market": "2026-08-30T22:11:50.778418+00:00",
+    "model": "2026-08-30T22:11:06.322150+00:00",
     "postgame": "2026-08-03T12:02:51.914962+00:00"
   },
-  "public_event_count": 950,
+  "public_event_count": 985,
   "schema_version": "war-room-activity-v1",
   "since_last_refresh": {
     "final": 0,
-    "model": 43,
+    "model": 0,
     "moves": 0,
     "open": 0,
     "ratings": 0
