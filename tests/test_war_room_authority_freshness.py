@@ -84,6 +84,118 @@ class AuthorityFreshnessTests(unittest.TestCase):
         self.assertEqual(result["updated_sources"], 1)
         self.assertEqual(result["temporal_status"], "STALE")
         self.assertEqual(result["authority_stage"], "BELOW_HYBRID_THRESHOLD")
+        self.assertTrue(result["sources"]["SP+"]["accepted_update"])
+
+    def test_source_update_is_independent_of_pregame_game_state(self):
+        result = self.module.model_freshness(
+            self.game(self.module.STANDARD_SPREAD, ["TeamRankings"]),
+            self.module.STANDARD_SPREAD,
+            {"watermark_date": None},
+            {"TeamRankings": self.changed()},
+            {},
+        )
+        source = result["sources"]["TeamRankings"]
+        self.assertEqual(source["state"], "PRE_GAME")
+        self.assertTrue(source["accepted_update"])
+        self.assertEqual(result["updated_sources"], 0)
+        self.assertEqual(result["temporal_status"], "PRE_GAME")
+
+    def test_no_change_source_is_not_an_accepted_update(self):
+        unchanged = self.freshness(
+            self.module.STANDARD_SPREAD,
+            ["SP+"],
+            {"SP+": self.unchanged()},
+        )
+        self.assertFalse(unchanged["sources"]["SP+"]["accepted_update"])
+
+    def test_incomplete_change_evidence_fails_closed(self):
+        for metadata in (
+            {
+                "snapshot_date": "2026-08-30",
+                "change_status": "UPDATED",
+                "last_changed_at": None,
+                "comparison_available": True,
+            },
+            {
+                "snapshot_date": "2026-08-30",
+                "change_status": "UPDATED",
+                "last_changed_at": "2026-08-30T05:00:00Z",
+                "comparison_available": False,
+            },
+        ):
+            with self.subTest(metadata=metadata):
+                result = self.freshness(
+                    self.module.STANDARD_SPREAD,
+                    ["TeamRankings"],
+                    {"TeamRankings": metadata},
+                )
+                self.assertFalse(
+                    result["sources"]["TeamRankings"]["accepted_update"]
+                )
+
+    def test_current_week_one_source_health_fixture(self):
+        unchanged = self.unchanged()
+        unverified = {
+            "snapshot_date": "2026-08-30",
+            "comparison_available": False,
+        }
+        spread = {
+            "SP+": unchanged,
+            "FPI": unchanged,
+            "TeamRankings": self.changed(),
+            "Sagarin Rating": unverified,
+            "DRatings": unverified,
+        }
+        total = {
+            "SP+": unchanged,
+            "Massey Dual": unverified,
+            "Sagarin Total": None,
+        }
+
+        def color(metadata):
+            if metadata is None:
+                return "RED"
+            if self.module.has_accepted_source_update(metadata):
+                return "GREEN"
+            return "YELLOW"
+
+        self.assertEqual(
+            {source: color(metadata) for source, metadata in spread.items()},
+            {
+                "SP+": "YELLOW",
+                "FPI": "YELLOW",
+                "TeamRankings": "GREEN",
+                "Sagarin Rating": "YELLOW",
+                "DRatings": "YELLOW",
+            },
+        )
+        self.assertEqual(
+            {source: color(metadata) for source, metadata in total.items()},
+            {
+                "SP+": "YELLOW",
+                "Massey Dual": "YELLOW",
+                "Sagarin Total": "RED",
+            },
+        )
+
+    def test_unavailable_component_remains_nonparticipating(self):
+        game = {
+            "resolved_projections": {
+                self.module.STANDARD_SPREAD: {
+                    "selection_status": "UNAVAILABLE",
+                    "component_status": {"SP+": "MISSING"},
+                }
+            }
+        }
+        result = self.module.model_freshness(
+            game,
+            self.module.STANDARD_SPREAD,
+            {"watermark_date": None},
+            {"SP+": self.changed()},
+            {},
+        )
+        self.assertFalse(result["sources"]["SP+"]["participating"])
+        self.assertEqual(result["participating_sources"], 0)
 
     def test_two_accepted_changes_activate_hybrid(self):
         result = self.freshness(

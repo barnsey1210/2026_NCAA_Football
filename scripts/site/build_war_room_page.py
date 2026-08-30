@@ -1591,7 +1591,7 @@ function sourceCoverage(domain,source,rows){
   );
 
   const updated = available.filter(
-    item => item?.state === 'UPDATED'
+    item => item?.accepted_update === true
   );
 
   const acceptedUpdates = available
@@ -2217,7 +2217,7 @@ function modelTooltip(game, model, market){
     const freshnessRow = freshness[name] || {};
     const freshnessClass = missing || freshnessRow.participating !== true
       ? 'missing'
-      : freshnessRow.state === 'UPDATED'
+      : freshnessRow.accepted_update === true
         ? 'updated'
         : 'available';
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);

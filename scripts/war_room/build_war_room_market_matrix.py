@@ -1335,6 +1335,14 @@ def source_date_state(
     return "STALE"
 
 
+def has_accepted_source_update(meta):
+    return bool(
+        str(meta.get("change_status") or "").strip().upper() == "UPDATED"
+        and meta.get("comparison_available") is True
+        and iso_date(meta.get("last_changed_at"))
+    )
+
+
 def load_team_source_snapshots(
     path,
     change_status_path=LIVE_RATING_CHANGE_STATUS,
@@ -1513,6 +1521,10 @@ def model_freshness(
             "change_status": meta.get("change_status"),
             "last_changed_at": meta.get("last_changed_at"),
             "comparison_available": meta.get("comparison_available"),
+            # Provider/source health is distinct from the per-game state
+            # above. A PRE_GAME game can still consume a panel whose owning
+            # pipeline has accepted a proven changed version.
+            "accepted_update": has_accepted_source_update(meta),
         }
 
     participating_states = [

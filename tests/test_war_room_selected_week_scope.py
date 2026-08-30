@@ -115,7 +115,8 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         )
         self.assertIsNotNone(coverage)
         self.assertIsNotNone(status)
-        self.assertIn("item?.state === 'UPDATED'", coverage.group(1))
+        self.assertIn("item?.accepted_update === true", coverage.group(1))
+        self.assertNotIn("item?.state === 'UPDATED'", coverage.group(1))
         self.assertIn("item.last_changed_at", coverage.group(1))
         self.assertNotIn("item.pulled_at", coverage.group(1))
         self.assertIn("coverage.updated === coverage.required", status.group(1))
@@ -127,7 +128,8 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             "function positionModelTooltip", 1
         )[0]
         self.assertIn("game?.standard_freshness?.[market]?.sources", block)
-        self.assertIn("freshnessRow.state === 'UPDATED'", block)
+        self.assertIn("freshnessRow.accepted_update === true", block)
+        self.assertNotIn("freshnessRow.state === 'UPDATED'", block)
         self.assertIn("freshnessRow.participating !== true", block)
         self.assertIn("'available'", block)
         self.assertIn("'missing'", block)
