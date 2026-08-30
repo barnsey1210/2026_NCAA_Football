@@ -591,16 +591,34 @@ def entering_market_rating(
     market: pd.DataFrame,
     team: str,
     week: int,
+    inference_time=None,
 ):
     if market.empty:
         return None
 
+    accepted = market.get("accepted_for_shadow", False)
+    if not isinstance(accepted, pd.Series):
+        accepted = pd.Series(False, index=market.index)
+    accepted = accepted.astype(str).str.lower().isin({"true", "1"})
+    state_kind = market.get("state_kind", pd.Series(None, index=market.index))
+    state_cutoff = pd.to_datetime(
+        market.get("state_cutoff", market.get("snapshot_timestamp")),
+        errors="coerce",
+        utc=True,
+    )
+    inference = pd.to_datetime(inference_time, errors="coerce", utc=True)
+    cutoff_ok = state_cutoff.notna()
+    if pd.notna(inference):
+        cutoff_ok &= state_cutoff.le(inference)
     rows = market[
         market["team"].eq(team)
-        & (market["through_week"] < week)
-    ].sort_values(
-        ["through_week", "snapshot_timestamp"]
-    )
+        & market["through_week"].eq(week)
+        & accepted
+        & state_kind.eq("COMPLETED_WEEK_FROZEN_CLOSES")
+        & cutoff_ok
+    ].copy()
+    rows["_state_cutoff"] = state_cutoff.loc[rows.index]
+    rows = rows.sort_values(["_state_cutoff", "snapshot_timestamp"])
 
     if rows.empty:
         return None
@@ -628,7 +646,9 @@ def combine_team_games(
     sag,
     market_history,
     schedule_by_team,
+    inference_time=None,
 ):
+    inference_time = inference_time or now_iso()
     pbp_idx = {
         (
             norm_id(r.game_id),
@@ -895,6 +915,24 @@ def combine_team_games(
             if not sagarin_no_lookahead:
                 reasons.append("SAGARIN_NO_LOOKAHEAD_FAIL")
 
+            pregame_market_rating = entering_market_rating(
+                market_history,
+                team,
+                week,
+                inference_time,
+            )
+            opponent_market_power_rating = entering_market_rating(
+                market_history,
+                opponent,
+                week,
+                inference_time,
+            )
+            if (
+                pregame_market_rating is None
+                or opponent_market_power_rating is None
+            ):
+                reasons.append("MISSING_EXACT_COMPLETED_WEEK_MARKET_STATE")
+
             row = {
                 "season": 2026,
                 "week": week,
@@ -1019,16 +1057,8 @@ def combine_team_games(
                     else None
                 ),
 
-                "pregame_market_rating": entering_market_rating(
-                    market_history,
-                    team,
-                    week,
-                ),
-                "opponent_market_power_rating": entering_market_rating(
-                    market_history,
-                    opponent,
-                    week,
-                ),
+                "pregame_market_rating": pregame_market_rating,
+                "opponent_market_power_rating": opponent_market_power_rating,
 
                 "next_game_id": (
                     next_game["game_id"]

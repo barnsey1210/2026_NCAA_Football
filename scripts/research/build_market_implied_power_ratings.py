@@ -18,6 +18,7 @@ OUT = ROOT / "data/research/market_implied_ratings"
 RATINGS_OUT = ROOT / "data/ratings/market_implied_ratings_history.csv"
 LATEST_OUT = ROOT / "data/ratings/market_implied_ratings_latest.csv"
 MATCHUPS_2026 = ROOT / "data/site/matchups_view.json"
+RESULTS_2026 = ROOT / "data/canonical/game_results_2026.json"
 TARGET_OUT = ROOT / "data/ratings/market_implied_target_excluded_2026.json"
 PRODUCTION_AUDIT = ROOT / "data/research/market_implied_ratings/production_2026_audit.json"
 
@@ -159,7 +160,14 @@ def load_2026_board():
     """
     if not MATCHUPS_2026.exists():
         raise SystemExit(f"Missing canonical 2026 matchup market payload: {MATCHUPS_2026}")
+    if not RESULTS_2026.exists():
+        raise SystemExit(f"Missing canonical 2026 results payload: {RESULTS_2026}")
     payload = json.loads(MATCHUPS_2026.read_text(encoding="utf-8"))
+    results_payload = json.loads(RESULTS_2026.read_text(encoding="utf-8"))
+    completed_results = {
+        norm_id(item.get("game_id")): item
+        for item in results_payload.get("games", [])
+    }
     rows = []
     rejected_completed = []
     for item in payload.get("games", []):
@@ -170,25 +178,41 @@ def load_2026_board():
         line = spread.get("home_line")
         if line is None:
             continue
-        completed = bool(game.get("completed")) or str(game.get("status") or "").lower() in {"final", "completed", "complete"}
-        # Upcoming games use the existing canonical selected current line. A
-        # completed game must expose an explicit canonical close; current market
-        # state is never relabeled as a close.
+        game_id = norm_id(game.get("game_id"))
+        result = completed_results.get(game_id)
+        completed = result is not None
+        kickoff = (
+            (result or {}).get("start_date")
+            or game.get("kickoff")
+            or game.get("start_date")
+        )
+        # Completion identity belongs to the canonical results contract. The
+        # line remains the canonical selected Matchups line and is accepted as
+        # a close only when that contract explicitly froze it at kickoff.
         if completed:
-            close = game.get("closing_home_spread") or game.get("closing_spread_home")
-            if close is None:
-                rejected_completed.append(norm_id(game.get("game_id")))
+            availability = str(spread.get("availability_status") or "").upper()
+            reason = str(spread.get("availability_reason") or "")
+            line_ts = pd.to_datetime(spread.get("updated_at"), errors="coerce", utc=True)
+            kickoff_ts = pd.to_datetime(kickoff, errors="coerce", utc=True)
+            rejection = None
+            if availability != "CLOSING" or "frozen at kickoff" not in reason.lower():
+                rejection = "NOT_CANONICAL_FROZEN_CLOSE"
+            elif pd.isna(line_ts) or pd.isna(kickoff_ts):
+                rejection = "MISSING_CLOSE_OR_KICKOFF_TIMESTAMP"
+            elif line_ts >= kickoff_ts:
+                rejection = "POST_KICKOFF_CLOSE_TIMESTAMP"
+            if rejection:
+                rejected_completed.append({"game_id": game_id, "reason": rejection})
                 continue
-            line = close
-            line_kind = "completed_canonical_close"
+            line_kind = "completed_frozen_close"
         else:
             line_kind = "upcoming_canonical_current"
         rows.append({
             "season": 2026,
             "week": int(game.get("week") or 0),
-            "game_id": norm_id(game.get("game_id")),
+            "game_id": game_id,
             "date": game.get("date"),
-            "kickoff": game.get("kickoff") or game.get("start_date"),
+            "kickoff": kickoff,
             "away_team": game.get("away_team"),
             "home_team": game.get("home_team"),
             "neutral_site": bool(game.get("neutral_site")),
@@ -196,6 +220,8 @@ def load_2026_board():
             "line_kind": line_kind,
             "line_book": spread.get("book"),
             "line_timestamp": spread.get("updated_at"),
+            "completed": completed,
+            "selection_source": "FROZEN_CLOSE" if completed else "CURRENT_MARKET_CONTRACT",
         })
     frame = pd.DataFrame(rows)
     if frame.empty:
@@ -203,8 +229,56 @@ def load_2026_board():
     frame = frame.drop_duplicates("game_id", keep="last")
     return frame, rejected_completed
 
-def solve_2026(games, params, generated_at):
-    snapshot_week = int(games.week.max())
+
+def completed_week_games(games, through_week, inference_time):
+    """Return accepted, pre-kickoff closes available through one week."""
+    cutoff = pd.to_datetime(inference_time, errors="coerce", utc=True)
+    work = games.copy()
+    work["_line_ts"] = pd.to_datetime(work["line_timestamp"], errors="coerce", utc=True)
+    work["_kickoff_ts"] = pd.to_datetime(work["kickoff"], errors="coerce", utc=True)
+    eligible = work[
+        work["completed"].eq(True)
+        & work["week"].le(int(through_week))
+        & work["line_kind"].eq("completed_frozen_close")
+        & work["selection_source"].eq("FROZEN_CLOSE")
+        & work["_line_ts"].notna()
+        & work["_kickoff_ts"].notna()
+        & work["_line_ts"].lt(work["_kickoff_ts"])
+        & work["_line_ts"].le(cutoff)
+    ].copy()
+    return eligible.drop(columns=["_line_ts", "_kickoff_ts"])
+
+
+def completed_week_state(games, through_week, params, generated_at):
+    source = completed_week_games(games, through_week, generated_at)
+    if source.empty:
+        return pd.DataFrame(), source, None
+    state, _, state_cutoff = solve_2026(
+        source, params, generated_at, snapshot_week=int(through_week)
+    )
+    evidence = source.sort_values("game_id").apply(
+        lambda row: {
+            "game_id": row["game_id"],
+            "week": int(row["week"]),
+            "home_line": float(row["closing_home_spread"]),
+            "line_timestamp": row["line_timestamp"],
+        },
+        axis=1,
+    ).tolist()
+    state_version = hashlib.sha256(
+        json.dumps(evidence, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    state["state_kind"] = "COMPLETED_WEEK_FROZEN_CLOSES"
+    state["accepted_for_shadow"] = True
+    state["state_version"] = state_version
+    state["state_cutoff"] = state_cutoff
+    state["max_source_week"] = int(source.week.max())
+    state["source_game_ids"] = json.dumps(sorted(source.game_id.tolist()))
+    state["source_line_authority"] = "FROZEN_CLOSE"
+    return state, source, state_version
+
+def solve_2026(games, params, generated_at, snapshot_week=None):
+    snapshot_week = int(games.week.max()) if snapshot_week is None else int(snapshot_week)
     ratings, meta, source_games = fit_ratings(
         games, snapshot_week, params["lookback_weeks"], params["half_life_weeks"], params["ridge_alpha"]
     )
@@ -213,7 +287,10 @@ def solve_2026(games, params, generated_at):
     ranks = {team: i for i, team in enumerate(order, 1)}
     cutoff_values = pd.to_datetime(games.line_timestamp, errors="coerce", utc=True)
     board_cutoff = cutoff_values.max().isoformat() if cutoff_values.notna().any() else generated_at
-    source_hash = sha256(MATCHUPS_2026)
+    source_hash = json.dumps({
+        "matchups_view_sha256": sha256(MATCHUPS_2026),
+        "game_results_sha256": sha256(RESULTS_2026),
+    }, sort_keys=True)
     rows = []
     for team in order:
         cid = components.get(team)
@@ -526,20 +603,70 @@ def production_2026_main():
     latest, _, board_cutoff = solve_2026(games, params, generated_at)
     targets = target_excluded_solves(games, params, latest, generated_at)
 
+    completed_weeks = sorted(
+        int(week)
+        for week in games.loc[games.completed.eq(True), "week"].dropna().unique()
+    )
+    completed_states = []
+    completed_state_audit = []
+    for through_week in completed_weeks:
+        state, source_games, state_version = completed_week_state(
+            games, through_week, params, generated_at
+        )
+        if state.empty:
+            continue
+        completed_states.append(state)
+        completed_state_audit.append({
+            "through_week": through_week,
+            "state_version": state_version,
+            "teams": int(len(state)),
+            "games_included": sorted(source_games.game_id.tolist()),
+            "games_excluded": sorted(set(games.game_id) - set(source_games.game_id)),
+            "state_cutoff": state.iloc[0]["state_cutoff"],
+            "max_source_week": int(source_games.week.max()),
+        })
+    completed_history = (
+        pd.concat(completed_states, ignore_index=True)
+        if completed_states else pd.DataFrame()
+    )
+
     if RATINGS_OUT.exists():
         history = pd.read_csv(RATINGS_OUT, low_memory=False)
-        history = history[pd.to_numeric(history.get("season"), errors="coerce") != 2026].copy()
-        for col in latest.columns:
-            if col not in history.columns:
-                history[col] = None
-        for col in history.columns:
-            if col not in latest.columns:
-                latest[col] = None
-        combined = pd.concat([history, latest[history.columns]], ignore_index=True)
+        season_2026 = pd.to_numeric(history.get("season"), errors="coerce").eq(2026)
+        if "state_kind" not in history:
+            history["state_kind"] = None
+        if "accepted_for_shadow" not in history:
+            history["accepted_for_shadow"] = False
+        legacy = season_2026 & history["state_kind"].isna()
+        history.loc[legacy, "state_kind"] = "LEGACY_ALL_BOARD_CURRENT"
+        history.loc[legacy, "accepted_for_shadow"] = False
     else:
-        combined = latest.copy()
+        history = pd.DataFrame()
 
-    # Historical rows are retained byte-for-data; only the current 2026 slice is replaced.
+    frames = [history]
+    if not completed_history.empty:
+        if "state_version" in history:
+            existing_versions = set(history["state_version"].dropna().astype(str))
+            completed_history = completed_history[
+                ~completed_history["state_version"].astype(str).isin(existing_versions)
+            ].copy()
+        frames.append(completed_history)
+    all_columns = []
+    for frame in frames:
+        for col in frame.columns:
+            if col not in all_columns:
+                all_columns.append(col)
+    aligned = []
+    for frame in frames:
+        copy = frame.copy()
+        for col in all_columns:
+            if col not in copy:
+                copy[col] = None
+        aligned.append(copy[all_columns])
+    combined = pd.concat(aligned, ignore_index=True) if aligned else pd.DataFrame()
+
+    # Historical and prior 2026 evidence are durable. Exact completed-week
+    # states append once per source-evidence version.
     atomic_csv(combined, RATINGS_OUT)
     atomic_csv(latest, LATEST_OUT)
     atomic_text(TARGET_OUT, json.dumps({
@@ -556,7 +683,7 @@ def production_2026_main():
         "generated_at": generated_at,
         "canonical_current_line_source": "data/site/matchups_view.json market.spread.home_line",
         "line_selection_owner": "existing odds builders and scripts/site/build_matchups_view.py; exactly one selected home-perspective spread per canonical game_id",
-        "completed_close_policy": "only an explicit canonical closing_home_spread/closing_spread_home is eligible; current state is never relabeled as close",
+        "completed_close_policy": "canonical results establish completion; only Matchups selections explicitly marked CLOSING and frozen at kickoff with a pre-kickoff timestamp enter completed-week states",
         "rejected_completed_games_without_explicit_close": rejected_completed,
         "solver": "existing weighted ridge least squares, sum-to-zero constraint, HFA 2.5; neutral HFA 0 in target fair spread",
         "selected_parameters": params,
@@ -565,6 +692,7 @@ def production_2026_main():
         "component_size_distribution": latest.component_size.value_counts().sort_index().to_dict(),
         "readiness_distribution": states,
         "historical_rows_preserved": int(len(combined) - len(latest)),
+        "completed_week_states": completed_state_audit,
     }
     atomic_text(PRODUCTION_AUDIT, json.dumps(audit, indent=2) + "\n")
     print(json.dumps(audit, indent=2))
