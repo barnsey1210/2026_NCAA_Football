@@ -832,6 +832,8 @@ tr:hover td.context-group{background:#202d39}
 }
 .model-tooltip.open .model-tooltip-panel{display:block}
 .model-component{display:grid;grid-template-columns:minmax(78px,1fr) auto;gap:10px;padding:1px 0}
+.model-component.updated{color:var(--green)}
+.model-component.available{color:#a8b6c3}
 .model-component.missing{color:#718393}
 
 .header-tooltip{position:relative;display:inline-flex;align-items:center;cursor:help}
@@ -1576,12 +1578,16 @@ function sourceCoverage(domain,source,rows){
     item => item?.participating === true
   );
 
-  const pulls = available
-    .map(item => item.pulled_at)
+  const updated = available.filter(
+    item => item?.state === 'UPDATED'
+  );
+
+  const acceptedUpdates = available
+    .map(item => item.last_changed_at)
     .filter(Boolean)
     .sort();
-  const latestPull = pulls.length
-    ? pulls[pulls.length - 1]
+  const lastChangedAt = acceptedUpdates.length
+    ? acceptedUpdates[acceptedUpdates.length - 1]
     : null;
 
   const states = [...new Set(
@@ -1593,8 +1599,9 @@ function sourceCoverage(domain,source,rows){
   return {
     required:rows.length,
     available:available.length,
+    updated:updated.length,
     missing:rows.length - available.length,
-    latestPull,
+    lastChangedAt,
     states
   };
 }
@@ -1604,12 +1611,15 @@ function coverageStatus(coverage){
     return {status:'UNAVAILABLE',color:'GRAY'};
   }
 
-  if(coverage.available === coverage.required){
-    return {status:'CURRENT',color:'GREEN'};
+  if(
+    coverage.available === coverage.required &&
+    coverage.updated === coverage.required
+  ){
+    return {status:'UPDATED',color:'GREEN'};
   }
 
   if(coverage.available > 0){
-    return {status:'PARTIAL',color:'YELLOW'};
+    return {status:'AVAILABLE',color:'YELLOW'};
   }
 
   return {status:'UNAVAILABLE',color:'RED'};
@@ -1617,26 +1627,29 @@ function coverageStatus(coverage){
 
 function sourceHealthTooltip(label,status,coverage,fallback){
   const updated =
-    coverage.latestPull ||
-    fallback?.latest_pull_at ||
-    fallback?.latest_pulled_at ||
-    fallback?.pulled_at ||
+    coverage.lastChangedAt ||
+    fallback?.last_changed_at ||
     null;
 
   const lines = [
     label,
     `Status: ${status.status}`,
     `Freshness: ${coverage.states.join(', ') || fallback?.status || 'UNKNOWN'}`,
+    `Accepted updates: ${coverage.updated}/${coverage.required} selected-week games`,
     `Availability: ${coverage.available}/${coverage.required} selected-week games`,
     `Missing: ${coverage.missing}`
   ];
 
   if(updated){
-    lines.push(`Updated: ${fmtDateTimeET(updated)}`);
+    lines.push(`Last accepted update: ${fmtDateTimeET(updated)}`);
+  } else {
+    lines.push('Last accepted update: UNVERIFIED');
   }
 
-  if(status.status !== 'CURRENT'){
-    lines.push('Reason: Source is not complete for the selected week.');
+  if(status.status === 'AVAILABLE'){
+    lines.push('Reason: Available, but no accepted changed-version evidence applies to every selected-week game.');
+  } else if(status.status === 'UNAVAILABLE'){
+    lines.push('Reason: Source is unavailable for the selected week.');
   }
 
   return lines.join('\n');
@@ -1867,10 +1880,8 @@ function renderHealth(){
       const coverage = sourceCoverage(domain,key,projectionRows);
       const status = coverageStatus(coverage);
       const fallback = ratings[healthKey] || {};
-      const updated = coverage.latestPull ||
-        fallback.latest_pull_at ||
-        fallback.latest_pulled_at ||
-        fallback.pulled_at ||
+      const updated = coverage.lastChangedAt ||
+        fallback.last_changed_at ||
         null;
       const title = sourceHealthTooltip(
         label,status,coverage,fallback
@@ -2187,12 +2198,19 @@ function spreadFavoriteLogo(game,value){
 function modelTooltip(game, model, market){
   const components = market === 'spread' ? SPREAD_COMPONENTS : TOTAL_COMPONENTS;
   const values = model?.component_values || {};
+  const freshness = game?.standard_freshness?.[market]?.sources || {};
   const rows = components.map(name=>{
     const value = values[name];
     const missing = value === null || value === undefined || value === '' || !Number.isFinite(Number(value));
+    const freshnessRow = freshness[name] || {};
+    const freshnessClass = missing || freshnessRow.participating !== true
+      ? 'missing'
+      : freshnessRow.state === 'UPDATED'
+        ? 'updated'
+        : 'available';
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
     const label = name === 'Sagarin Rating' ? 'Sagarin' : name;
-    return `<span class="model-component ${missing?'missing':''}"><span>${esc(label)}</span><span>${shown}</span></span>`;
+    return `<span class="model-component ${freshnessClass}"><span>${esc(label)}</span><span>${shown}</span></span>`;
   }).join('');
   const value = market === 'spread' ? model?.value_home_line : model?.value_total;
   const shown=market==='spread'

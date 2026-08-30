@@ -95,11 +95,42 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
     def test_tooltips_include_selected_week_diagnostics(self):
         for marker in (
             "Freshness:",
+            "Accepted updates:",
             "Availability:",
             "Missing:",
-            "Source is not complete for the selected week.",
+            "Last accepted update:",
         ):
             self.assertIn(marker, self.source)
+
+    def test_rating_health_distinguishes_update_from_availability(self):
+        coverage = re.search(
+            r"function sourceCoverage\(domain,source,rows\)\{(.*?)\n\}",
+            self.source,
+            re.S,
+        )
+        status = re.search(
+            r"function coverageStatus\(coverage\)\{(.*?)\n\}",
+            self.source,
+            re.S,
+        )
+        self.assertIsNotNone(coverage)
+        self.assertIsNotNone(status)
+        self.assertIn("item?.state === 'UPDATED'", coverage.group(1))
+        self.assertIn("item.last_changed_at", coverage.group(1))
+        self.assertNotIn("item.pulled_at", coverage.group(1))
+        self.assertIn("coverage.updated === coverage.required", status.group(1))
+        self.assertIn("status:'UPDATED',color:'GREEN'", status.group(1))
+        self.assertIn("status:'AVAILABLE',color:'YELLOW'", status.group(1))
+
+    def test_model_tooltip_consumes_backend_freshness(self):
+        block = self.source.split("function modelTooltip(game, model, market){", 1)[1].split(
+            "function positionModelTooltip", 1
+        )[0]
+        self.assertIn("game?.standard_freshness?.[market]?.sources", block)
+        self.assertIn("freshnessRow.state === 'UPDATED'", block)
+        self.assertIn("freshnessRow.participating !== true", block)
+        self.assertIn("'available'", block)
+        self.assertIn("'missing'", block)
 
     def test_week_change_is_view_only(self):
         handler = re.search(
