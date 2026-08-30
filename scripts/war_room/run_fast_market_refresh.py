@@ -125,25 +125,9 @@ def main():
         )
     )
 
-    # Preserve the accepted fast state in the canonical historical contract.
-    # These stages are offline and idempotent. Canonical line history is
-    # updated before Activity projects opener milestones, while the base
-    # matrix remains the sole resolved-market input to both history and
-    # Activity.
-    stages.append(
-        run_stage(
-            "append_current_market_book_history",
-            [sys.executable, "scripts/odds/append_current_market_book_history.py"],
-            env,
-        )
-    )
-    stages.append(
-        run_stage(
-            "build_matchup_line_history",
-            [sys.executable, "scripts/history/build_matchup_line_history_clean.py", "--incremental-fast"],
-            env,
-        )
-    )
+    # Activity consumes the newly resolved matrix directly. Durable per-book
+    # and matchup-line-history maintenance remains in the canonical daily
+    # pipeline and must not delay live fast-market availability.
     stages.append(
         run_stage(
             "war_room_activity",
@@ -154,27 +138,17 @@ def main():
             env,
         )
     )
-    # Re-project the same resolved market after canonical opener history and
-    # durable movement events are current. This does not acquire or select a
-    # second market source; build_war_room_market_matrix.py remains sole owner.
     stages.append(
         run_stage(
-            "war_room_market_matrix_enriched",
+            "war_room_market_activity_enrichment",
             [
                 sys.executable,
                 "scripts/war_room/build_war_room_market_matrix.py",
+                "--activity-enrichment-only",
             ],
             env,
         )
     )
-    stages.append(
-        run_stage(
-            "publish_matchup_line_history_asset",
-            [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
-            env,
-        )
-    )
-
     stages.append(
         run_stage(
             "refresh_history",
@@ -198,6 +172,12 @@ def main():
         "started_at": started_at.isoformat(),
         "finished_at": finished_at.isoformat(),
         "total_duration_ms": total_ms,
+        "critical_path_duration_ms": total_ms,
+        "deferred_to_daily_maintenance": [
+            "append_current_market_book_history",
+            "build_matchup_line_history_clean",
+            "inject_matchup_line_history_asset",
+        ],
         "stages": stages,
     }
 

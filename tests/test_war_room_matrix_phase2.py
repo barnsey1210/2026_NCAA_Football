@@ -121,6 +121,39 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         shown = matrix.move_for_displayed_quote(indexed, "g1", dk_away, "spread", "away")
         self.assertEqual((shown["old_line"], shown["new_line"], shown["direction"]), (4.5, 5, "UP"))
 
+    def test_activity_enrichment_updates_only_activity_owned_market_metadata(self):
+        payload = {"games": [{
+            "game_id": "g1",
+            "market": {
+                "first_available": {"spread": None, "total": None},
+                "best_sportsbook": {
+                    "spread": {
+                        "home": {"book": "DraftKings", "line": -5, "side": "home"},
+                        "away": None,
+                    },
+                    "total": {"over": None, "under": None},
+                },
+            },
+            "edges": {"spread": 2.5},
+        }]}
+        state = {"first_market_availability": {
+            "g1|spread": {"detected_at": "2026-08-27T12:00:00Z"},
+        }}
+        enriched = matrix.enrich_activity_metadata(payload, state, [
+            move("dk", "DraftKings", "spread", -4.5, -5, "2026-08-27T12:05:00Z"),
+        ])
+        game = enriched["games"][0]
+        self.assertEqual(game["edges"], {"spread": 2.5})
+        self.assertEqual(
+            game["market"]["first_available"]["spread"]["detected_at"],
+            "2026-08-27T12:00:00Z",
+        )
+        self.assertEqual(
+            game["market"]["best_sportsbook"]["spread"]["home"]
+            ["last_material_move"]["event_id"],
+            "dk",
+        )
+
     def test_direction_semantics_include_identity_flip(self):
         self.assertEqual(matrix.spread_move_direction(-4.5, -5), "UP")
         self.assertEqual(matrix.spread_move_direction(5, 4.5), "DOWN")
@@ -161,17 +194,23 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn("setInterval(updateMatrixRecencyMarkers, 30000)", source)
         self.assertIn("minutes>90", source)
 
-    def test_fast_refresh_orders_history_activity_and_final_projection(self):
+    def test_fast_refresh_builds_matrix_once_and_defers_history_maintenance(self):
         source = (ROOT / "scripts/war_room/run_fast_market_refresh.py").read_text()
-        base = source.index('"war_room_market_matrix"')
-        append = source.index('"append_current_market_book_history"')
-        line_history = source.index('"build_matchup_line_history"')
-        activity = source.index('"war_room_activity"')
-        enriched = source.index('"war_room_market_matrix_enriched"')
-        self.assertLess(base, append)
-        self.assertLess(append, line_history)
-        self.assertLess(line_history, activity)
-        self.assertLess(activity, enriched)
+        self.assertEqual(source.count('"war_room_market_matrix"'), 1)
+        self.assertNotIn('"war_room_market_matrix_enriched"', source)
+        self.assertNotIn('run_stage(\n            "append_current_market_book_history"', source)
+        self.assertNotIn('run_stage(\n            "build_matchup_line_history"', source)
+        self.assertIn('"deferred_to_daily_maintenance"', source)
+        self.assertIn('"war_room_market_activity_enrichment"', source)
+        self.assertIn('"--activity-enrichment-only"', source)
+        self.assertLess(
+            source.index('"war_room_market_matrix"'),
+            source.index('"war_room_activity"'),
+        )
+        self.assertLess(
+            source.index('"war_room_activity"'),
+            source.index('"war_room_market_activity_enrichment"'),
+        )
 
     def test_matrix_summary_keeps_display_and_fast_board_universes_separate(self):
         counts = matrix.market_universe_counts(

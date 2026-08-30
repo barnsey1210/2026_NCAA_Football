@@ -178,6 +178,34 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertEqual(run["status"], "COMPLETED")
         self.assertEqual(run["publication"]["status"], "SKIPPED_RUNTIME_ONLY")
 
+    def test_postgame_waits_for_writer_without_bypassing_overlap_lock(self):
+        calls = []
+        lock = object()
+
+        def acquire(action, identity):
+            calls.append((action, identity))
+            if len(calls) == 1:
+                raise RuntimeError("overlap blocked by running task market-auto-test")
+            return lock
+
+        waiting = []
+        dispatcher = load(
+            "postgame_dispatcher_priority",
+            "scripts/control/run_war_room_service.py",
+        )
+        with patch.object(dispatcher, "acquire", side_effect=acquire):
+            result = dispatcher.acquire_with_priority(
+                "postgame",
+                "postgame-test",
+                timeout_seconds=5,
+                poll_seconds=0.01,
+                waiting=waiting.append,
+                sleeper=lambda _: None,
+            )
+        self.assertIs(result, lock)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(waiting, ["overlap blocked by running task market-auto-test"])
+
     def test_prepared_results_skips_only_schedule_and_results(self):
         full = CONTROL.postgame_commands()
         prepared = CONTROL.postgame_commands(skip_schedule=True)

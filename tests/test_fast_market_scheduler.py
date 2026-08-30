@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import importlib.util
 import json
+import os
 import plistlib
 import subprocess
 import tempfile
@@ -26,7 +27,8 @@ class FastMarketSchedulerTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, 0 if task_status == "COMPLETED" else 2,
                                                json.dumps(task), "")
         code, report, updated = SCHEDULER.execute(
-            now=now, state=state or {}, market_success_at=success, runner=runner
+            now=now, state=state or {}, market_success_at=success, runner=runner,
+            postgame_pending=lambda: False,
         )
         return code, report, updated, calls
 
@@ -103,6 +105,36 @@ class FastMarketSchedulerTests(unittest.TestCase):
                 _, report, updated, calls = self.run_at(now, task_status=status)
                 self.assertEqual((report["status"], len(calls)), (status, 1))
                 self.assertNotIn("last_due_handled_at", updated)
+
+    def test_scheduled_market_defers_while_postgame_has_priority(self):
+        now = datetime(2026, 9, 6, 10, 0, tzinfo=ET)
+        code, report, updated = SCHEDULER.execute(
+            now=now,
+            state={},
+            market_success_at=None,
+            runner=lambda command: self.fail(f"Market dispatched unexpectedly: {command}"),
+            postgame_pending=lambda: True,
+        )
+        self.assertEqual((code, report["status"]), (0, "DEFERRED_BY_POSTGAME"))
+        self.assertEqual(report["deferred_reason"], "Postgame is pending or running")
+        self.assertNotIn("last_due_handled_at", updated)
+
+    def test_postgame_priority_requires_a_live_dispatcher(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp)
+            path = tasks / "postgame.json"
+            path.write_text(json.dumps({
+                "action": "postgame",
+                "status": "WAITING_FOR_CANONICAL_WRITER",
+                "dispatcher_pid": os.getpid(),
+            }))
+            self.assertTrue(SCHEDULER.postgame_priority_pending(tasks))
+            path.write_text(json.dumps({
+                "action": "postgame",
+                "status": "WAITING_FOR_CANONICAL_WRITER",
+                "dispatcher_pid": 99999999,
+            }))
+            self.assertFalse(SCHEDULER.postgame_priority_pending(tasks))
 
     def test_quota_block_is_owned_by_existing_market_service(self):
         now = datetime(2026, 8, 31, 14, 0, tzinfo=ET)

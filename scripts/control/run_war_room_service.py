@@ -27,6 +27,8 @@ TASKS = CONTROL / "tasks"
 LATEST = CONTROL / "latest.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
 REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
+POSTGAME_LOCK_WAIT_SECONDS = 180
+POSTGAME_LOCK_POLL_SECONDS = 1.0
 
 ACTION_REGISTRY_KEYS = {
     "market": "MARKET_REFRESH",
@@ -105,6 +107,30 @@ def acquire(action: str, identity: str) -> Path:
     return global_lock
 
 
+def acquire_with_priority(
+    action: str,
+    identity: str,
+    *,
+    timeout_seconds: float = POSTGAME_LOCK_WAIT_SECONDS,
+    poll_seconds: float = POSTGAME_LOCK_POLL_SECONDS,
+    waiting=None,
+    sleeper=time.sleep,
+) -> Path:
+    """Let Postgame wait safely while future scheduled Market cycles defer."""
+    if action != "postgame":
+        return acquire(action, identity)
+    deadline = time.monotonic() + max(0.0, timeout_seconds)
+    while True:
+        try:
+            return acquire(action, identity)
+        except RuntimeError as exc:
+            if time.monotonic() >= deadline:
+                raise
+            if waiting is not None:
+                waiting(str(exc))
+            sleeper(max(0.01, poll_seconds))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=[*ACTION_REGISTRY_KEYS, "status"])
@@ -130,6 +156,7 @@ def main() -> int:
         parser.error("--task-id must be a safe lowercase task identifier")
     prior = read_json(TASKS / f"{identity}.json", {})
     if prior.get("status") in {
+        "WAITING_FOR_CANONICAL_WRITER",
         "RUNNING",
         "COMPLETED",
         "COMPLETED_WITH_WARNINGS",
@@ -149,6 +176,7 @@ def main() -> int:
         requester=args.requester[:120],
         requested_at=task.get("requested_at", utc_now()),
         status="REQUESTED",
+        dispatcher_pid=os.getpid(),
         command_owner=resolve_command(args.action)[1],
     )
     atomic_json(TASKS / f"{identity}.json", task)
@@ -164,7 +192,20 @@ def main() -> int:
 
     lock = None
     try:
-        lock = acquire(args.action, identity)
+        def record_waiting(reason: str) -> None:
+            task.update(
+                status="WAITING_FOR_CANONICAL_WRITER",
+                waiting_since=task.get("waiting_since", utc_now()),
+                waiting_reason=reason,
+            )
+            atomic_json(TASKS / f"{identity}.json", task)
+            atomic_json(LATEST, task)
+
+        lock = acquire_with_priority(
+            args.action,
+            identity,
+            waiting=record_waiting,
+        )
         task.update(status="RUNNING", started_at=utc_now())
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         command = resolve_command(args.action)

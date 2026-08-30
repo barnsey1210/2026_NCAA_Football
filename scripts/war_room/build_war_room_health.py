@@ -442,18 +442,27 @@ def build_projection_health(latest_rows):
 
     displayed_game_ids = set()
     unmatched_provider_game_ids = set()
+    resolution_cache = {}
 
     for row in latest_rows:
-        gid, _, _ = resolve_game_id(
-            [
-                site_date_from_timestamp(row.get("commence_time")),
-                str(row.get("commence_time") or "")[:10],
-            ],
-            row.get("away_team"),
-            row.get("home_team"),
-            identity,
-            key_to_game_id,
+        resolution_key = (
+            str(row.get("game_id") or ""),
+            str(row.get("commence_time") or ""),
+            str(row.get("away_team") or ""),
+            str(row.get("home_team") or ""),
         )
+        if resolution_key not in resolution_cache:
+            resolution_cache[resolution_key] = resolve_game_id(
+                [
+                    site_date_from_timestamp(row.get("commence_time")),
+                    str(row.get("commence_time") or "")[:10],
+                ],
+                row.get("away_team"),
+                row.get("home_team"),
+                identity,
+                key_to_game_id,
+            )
+        gid, _, _ = resolution_cache[resolution_key]
 
         if gid:
             displayed_game_ids.add(gid)

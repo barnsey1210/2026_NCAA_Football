@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -20,8 +21,10 @@ STATE = STATE_DIR / "state.json"
 RUNS = STATE_DIR / "runs.jsonl"
 HEALTH = ROOT / "data/site/war_room_health.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
+SERVICE_TASKS = ROOT / "data/control/war_room_services/tasks"
 ET = ZoneInfo("America/New_York")
 ROUTINE_SUPPRESSION_SECONDS = 600
+POSTGAME_PRIORITY_STATUSES = {"REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "RUNNING"}
 
 
 def utc_now() -> datetime:
@@ -99,9 +102,31 @@ def child_task(stdout: str) -> dict[str, Any]:
         return {}
 
 
+def postgame_priority_pending(tasks_dir: Path = SERVICE_TASKS) -> bool:
+    """Return true only for a live Postgame dispatcher requesting the writer."""
+    try:
+        paths = tasks_dir.glob("*.json")
+    except OSError:
+        return False
+    for path in paths:
+        task = read_json(path, {})
+        if task.get("action") != "postgame" or task.get("status") not in POSTGAME_PRIORITY_STATUSES:
+            continue
+        pid = task.get("dispatcher_pid")
+        if not isinstance(pid, int):
+            continue
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            continue
+    return False
+
+
 def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime | None,
             trigger: str = "market-scheduler",
-            runner: Callable[[list[str]], subprocess.CompletedProcess[str]] = run_command
+            runner: Callable[[list[str]], subprocess.CompletedProcess[str]] = run_command,
+            postgame_pending: Callable[[], bool] = postgame_priority_pending,
             ) -> tuple[int, dict[str, Any], dict[str, Any]]:
     started = time.monotonic()
     now_utc = now.astimezone(timezone.utc)
@@ -125,6 +150,16 @@ def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime
     new_state = dict(state)
     if not due:
         report["duration_seconds"] = round(time.monotonic() - started, 3)
+        return 0, report, new_state
+
+    if postgame_pending():
+        new_state.update(schema_version=1, last_status="DEFERRED_BY_POSTGAME")
+        report.update(
+            status="DEFERRED_BY_POSTGAME",
+            deferred_reason="Postgame is pending or running",
+            next_due_at=iso(now_utc),
+            duration_seconds=round(time.monotonic() - started, 3),
+        )
         return 0, report, new_state
 
     if (band == "ROUTINE_HOURLY" and market_success_at
@@ -165,7 +200,7 @@ def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime
                   duration_seconds=round(time.monotonic() - started, 3))
     code = 0 if status in {"COMPLETED", "COMPLETED_WITH_WARNINGS",
                            "DEFERRED_BY_DAILY_BACKBONE", "BLOCKED_BY_OVERLAP",
-                           "BLOCKED_BY_QUOTA"} else 2
+                           "BLOCKED_BY_QUOTA", "DEFERRED_BY_POSTGAME"} else 2
     return code, report, new_state
 
 

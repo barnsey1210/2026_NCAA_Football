@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import sys
@@ -331,6 +332,40 @@ def enrich_best_quotes(best_sportsbook, game_id, move_index):
             )
             enriched[market][side] = payload
     return enriched
+
+
+def enrich_activity_metadata(payload, activity_state, activity_events):
+    """Refresh Activity-owned display metadata without rebuilding the market."""
+    first_market_state = activity_state.get("first_market_availability") or {}
+    move_index = material_move_index(activity_events)
+    for game in payload.get("games", []):
+        gid = str(game.get("game_id") or "")
+        market = game.get("market")
+        if not gid or not isinstance(market, dict):
+            continue
+        market["first_available"] = {
+            name: first_market_state.get(f"{gid}|{name}")
+            for name in ("spread", "total")
+        }
+        best = market.get("best_sportsbook")
+        if isinstance(best, dict):
+            market["best_sportsbook"] = enrich_best_quotes(best, gid, move_index)
+    return payload
+
+
+def enrich_activity_output():
+    if not OUT.exists():
+        raise SystemExit(f"Missing War Room matrix: {OUT}")
+    payload = load_json(OUT, {})
+    enrich_activity_metadata(
+        payload,
+        load_json(ACTIVITY_STATE, {}),
+        read_history(ACTIVITY_HISTORY),
+    )
+    OUT.write_text(json.dumps(payload, indent=2) + "\n")
+    print("WAR ROOM MARKET ACTIVITY ENRICHMENT")
+    print("games:", len(payload.get("games", [])))
+    print("wrote:", OUT)
 
 
 def opener_payload(openers, activity_initialized_at):
@@ -1658,6 +1693,17 @@ def market_universe_counts(games_out, fast_board_game_ids):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--activity-enrichment-only",
+        action="store_true",
+        help="Refresh Activity-derived matrix metadata without resolving quotes",
+    )
+    args = parser.parse_args()
+    if args.activity_enrichment_only:
+        enrich_activity_output()
+        return
+
     if not FAST_QUOTES.exists():
         raise SystemExit(f"Missing fast quotes: {FAST_QUOTES}")
 
@@ -1783,6 +1829,8 @@ def main():
     invalid_rows = []
     exchange_price_rejections = []
     post_kickoff_fast_quotes = []
+    resolution_cache = {}
+    commence_by_gid = {}
 
     with FAST_QUOTES.open(
         newline="",
@@ -1800,15 +1848,23 @@ def main():
                 str(row.get("commence_time") or "")[:10],
             ]
 
-            gid, match_method, reversed_orientation = (
-                resolve_game_id(
+            resolution_key = (
+                str(row.get("game_id") or ""),
+                str(row.get("commence_time") or ""),
+                str(row.get("away_team") or ""),
+                str(row.get("home_team") or ""),
+            )
+            if resolution_key not in resolution_cache:
+                resolution_cache[resolution_key] = resolve_game_id(
                     date_candidates,
                     row.get("away_team"),
                     row.get("home_team"),
                     identity,
                     key_to_game_id,
                 )
-            )
+            gid, match_method, reversed_orientation = resolution_cache[
+                resolution_key
+            ]
 
             if not gid:
                 unmatched.append({
@@ -1822,6 +1878,8 @@ def main():
                 continue
 
             fast_board_game_ids.add(gid)
+            if gid not in commence_by_gid:
+                commence_by_gid[gid] = row.get("commence_time")
 
             quote_updated = parse_timestamp(
                 row.get("last_update")
@@ -2392,38 +2450,6 @@ def main():
                 "status": "SOURCE_NOT_CONFIGURED",
             },
         })
-
-    # Fix kickoff from the fast rows after game construction.
-    commence_by_gid = {}
-
-    with FAST_QUOTES.open(
-        newline="",
-        encoding="utf-8-sig",
-    ) as f:
-        reader = csv.DictReader(f)
-
-        for row in reader:
-            local_date = site_date_from_timestamp(
-                row.get("commence_time")
-            )
-
-            gid, _, _ = resolve_game_id(
-                [
-                    local_date,
-                    str(
-                        row.get("commence_time") or ""
-                    )[:10],
-                ],
-                row.get("away_team"),
-                row.get("home_team"),
-                identity,
-                key_to_game_id,
-            )
-
-            if gid and gid not in commence_by_gid:
-                commence_by_gid[gid] = row.get(
-                    "commence_time"
-                )
 
     completed_kickoff_by_gid = {
         str(row.get("game_id")): row.get("start_date")
