@@ -1650,6 +1650,13 @@ def load_fbs_team_universe():
     return teams
 
 
+def market_universe_counts(games_out, fast_board_game_ids):
+    return {
+        "matrix_games": len(games_out),
+        "fast_market_games_matched": len(fast_board_game_ids),
+    }
+
+
 def main():
     if not FAST_QUOTES.exists():
         raise SystemExit(f"Missing fast quotes: {FAST_QUOTES}")
@@ -2538,8 +2545,9 @@ def main():
             "canonical_projection_games": len(
                 projection_games
             ),
-            "fast_market_games_matched": len(
-                games_out
+            **market_universe_counts(
+                games_out,
+                fast_board_game_ids,
             ),
             "unmatched_fast_rows": len(unmatched),
             "invalid_fast_rows": len(invalid_rows),

@@ -173,6 +173,14 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertLess(line_history, activity)
         self.assertLess(activity, enriched)
 
+    def test_matrix_summary_keeps_display_and_fast_board_universes_separate(self):
+        counts = matrix.market_universe_counts(
+            [{"game_id": "g1"}, {"game_id": "g2"}],
+            {"g1"},
+        )
+        self.assertEqual(counts["matrix_games"], 2)
+        self.assertEqual(counts["fast_market_games_matched"], 1)
+
     def test_matrix_headers_share_one_canonical_typography_contract(self):
         source = PAGE.read_text()
         head = source.split("function renderHead(){", 1)[1].split(
