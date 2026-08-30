@@ -27,7 +27,14 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         commands = CONTROL.postgame_commands()
         names = [Path(command[1]).name for command in commands]
         self.assertEqual(names[0], "pull_cfbd_schedule_2026.py")
-        self.assertEqual(names[-2:], ["build_war_room_health.py", "build_war_room_market_matrix.py"])
+        self.assertEqual(
+            names[-3:],
+            [
+                "build_war_room_health.py",
+                "build_war_room_market_matrix.py",
+                "build_war_room_activity.py",
+            ],
+        )
         joined = " ".join(" ".join(command) for command in commands)
         for forbidden in (
             "build_public_site.py", "build_war_room_home.py", "publish_site.sh",
@@ -61,6 +68,102 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             audit = json.loads((Path(temporary) / "audit.json").read_text())
         self.assertEqual(audit["status"], "NO_COMPLETED_GAMES")
         self.assertEqual(audit["api_calls_this_run"], 0)
+
+    def test_week_cache_refreshes_when_new_final_is_missing(self):
+        completed = {"401761599", "401761602"}
+        first_final_only = [
+            {"gameId": 401761599, "playType": "Rush"},
+        ]
+        self.assertFalse(
+            PULL.cache_covers_completed_games(
+                first_final_only,
+                completed,
+            )
+        )
+        self.assertEqual(
+            PULL.row_game_ids(first_final_only),
+            {"401761599"},
+        )
+
+    def test_week_cache_is_reused_after_all_finals_are_present(self):
+        completed = {"401761599", "401761602"}
+        complete = [
+            {"gameId": 401761599},
+            {"game_id": "401761602"},
+        ]
+        self.assertTrue(
+            PULL.cache_covers_completed_games(
+                complete,
+                completed,
+            )
+        )
+
+    def test_main_refreshes_incomplete_endpoint_caches_without_force(self):
+        completed = [
+            {"week": 0, "cfbd_game_id": 401761599},
+            {"week": 0, "cfbd_game_id": 401761602},
+        ]
+
+        class FixtureClient:
+            instance = None
+
+            def __init__(self, key, max_calls):
+                self.calls = 0
+                self.requested = []
+                FixtureClient.instance = self
+
+            def get(self, endpoint, params):
+                self.calls += 1
+                self.requested.append(endpoint)
+                return [
+                    {"gameId": 401761599},
+                    {"gameId": 401761602},
+                ]
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            week_dir = root / "week_00"
+            for name, endpoint in (
+                ("plays", "/plays"),
+                ("drives", "/drives"),
+                ("havoc", "/stats/game/havoc"),
+            ):
+                PULL.write_gzip(
+                    week_dir / f"{name}.json.gz",
+                    endpoint,
+                    {"year": 2026, "week": 0},
+                    [{"gameId": 401761599}],
+                )
+
+            with patch.object(
+                PULL, "completed_games", return_value=completed
+            ), patch.object(
+                PULL, "ROOT", root
+            ), patch.object(
+                PULL, "OUT_ROOT", root
+            ), patch.object(
+                PULL, "AUDIT", root / "audit.json"
+            ), patch.object(
+                PULL, "require_key", return_value="fixture-only"
+            ), patch.object(
+                PULL, "CFBDClient", FixtureClient
+            ), patch.object(
+                sys, "argv", ["pull_cfbd_postgame_2026.py", "--week", "0"]
+            ):
+                PULL.main()
+
+            audit = json.loads((root / "audit.json").read_text())
+
+        self.assertEqual(audit["api_calls_this_run"], 3)
+        self.assertEqual(audit["status"], "READY")
+        self.assertEqual(
+            FixtureClient.instance.requested,
+            ["/plays", "/drives", "/stats/game/havoc"],
+        )
+        self.assertTrue(all(
+            row["source"] == "api_incomplete_cache_refresh"
+            for row in audit["files"].values()
+        ))
 
     def test_unlv_hawaii_domain_readiness_progression(self):
         matchup = {"away_team": "UNLV", "home_team": "Hawaii"}

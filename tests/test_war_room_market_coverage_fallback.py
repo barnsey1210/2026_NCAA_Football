@@ -3,8 +3,15 @@
 
 from collections import defaultdict
 from datetime import datetime, timezone
+import csv
+import tempfile
+from pathlib import Path
 import unittest
 
+from scripts.markets.build_current_market_contract import (
+    load_pregame_close_pairs,
+    post_kickoff_quote,
+)
 from scripts.war_room.build_war_room_market_matrix import (
     merge_current_market_fallbacks,
 )
@@ -139,6 +146,67 @@ class WarRoomMarketCoverageFallbackTests(unittest.TestCase):
         self.assertEqual(accepted, [])
         self.assertEqual(rejected, [])
         self.assertNotIn("g1", quotes)
+
+    def test_frozen_close_remains_eligible_after_normal_freshness_window(self):
+        quotes = inventory()
+        frozen = {
+            "away": {
+                **quote("away", 3.5, "2026-08-29T15:59:00Z"),
+                "freshness_status": "FROZEN_CLOSE",
+            },
+            "home": {
+                **quote("home", -3.5, "2026-08-29T15:59:00Z"),
+                "freshness_status": "FROZEN_CLOSE",
+            },
+        }
+        contract = payload(frozen)
+        contract["games"][0]["availability_status"] = "CLOSING"
+        accepted, rejected = merge_current_market_fallbacks(
+            quotes,
+            contract,
+            {"BetMGM"},
+            reference_time="2026-09-02T16:00:00Z",
+            eligible_game_ids=set(),
+        )
+        self.assertEqual(len(accepted), 1)
+        self.assertEqual(rejected, [])
+        self.assertTrue(all(
+            item["selection_source"] == "FROZEN_CLOSE"
+            for item in quotes["g1"]["BetMGM"]["spread"].values()
+        ))
+
+    def test_close_history_excludes_post_kickoff_pair(self):
+        headers = [
+            "canonical_game_id", "book", "market", "side", "line",
+            "price", "source_updated_at", "paired_market_id", "available",
+        ]
+        rows = [
+            ["g1", "BetMGM", "spread", "away", "3.5", "-110", "2026-08-29T15:59:00Z", "pregame", "true"],
+            ["g1", "BetMGM", "spread", "home", "-3.5", "-110", "2026-08-29T15:59:00Z", "pregame", "true"],
+            ["g1", "BetMGM", "spread", "away", "10.5", "-110", "2026-08-29T16:01:00Z", "live", "true"],
+            ["g1", "BetMGM", "spread", "home", "-10.5", "-110", "2026-08-29T16:01:00Z", "live", "true"],
+        ]
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "history.csv"
+            with path.open("w", newline="") as handle:
+                writer = csv.writer(handle)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            pairs = load_pregame_close_pairs(
+                path,
+                {"g1": datetime(2026, 8, 29, 16, tzinfo=timezone.utc)},
+            )
+        selected = pairs["g1"]["BetMGM"]["spread"]
+        self.assertEqual(selected["away"]["line"], 3.5)
+        self.assertEqual(selected["home"]["line"], -3.5)
+        self.assertTrue(all(
+            item["freshness_status"] == "FROZEN_CLOSE"
+            for item in selected.values()
+        ))
+        self.assertTrue(post_kickoff_quote(
+            "2026-08-29T16:01:00Z",
+            "2026-08-29T16:00:00Z",
+        ))
 
 
 if __name__ == "__main__":

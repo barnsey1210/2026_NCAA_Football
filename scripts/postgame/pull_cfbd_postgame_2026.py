@@ -172,6 +172,26 @@ def resolve_week(rows: list[dict], requested: int | None) -> int | None:
     return max(weeks) if weeks else None
 
 
+def row_game_ids(rows: list[dict]) -> set[str]:
+    """Return canonical CFBD game IDs represented by an endpoint payload."""
+    game_ids = set()
+    for row in rows:
+        value = row.get("gameId")
+        if value is None:
+            value = row.get("game_id")
+        if value is not None:
+            game_ids.add(str(value))
+    return game_ids
+
+
+def cache_covers_completed_games(
+    rows: list[dict],
+    completed_game_ids: set[str],
+) -> bool:
+    """A weekly cache is reusable only after it covers every known final."""
+    return completed_game_ids.issubset(row_game_ids(rows))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -219,6 +239,11 @@ def main() -> None:
         row for row in completed
         if str(row.get("week")) == str(week)
     ]
+    game_ids = {
+        str(row.get("cfbd_game_id"))
+        for row in completed_week_games
+        if row.get("cfbd_game_id") is not None
+    }
 
     week_dir = OUT_ROOT / f"week_{week:02d}"
     specs = [
@@ -284,12 +309,24 @@ def main() -> None:
     file_audit = {}
     for name, endpoint, params, path in specs:
         refreshed = False
+        cache_missing_game_ids = []
 
         if path.exists() and not args.force:
             payload = read_gzip(path)
             rows = payload.get("data", [])
-            fetched_at = payload.get("fetched_at")
-            source = "cache"
+            cache_missing_game_ids = sorted(
+                game_ids - row_game_ids(rows)
+            )
+            if cache_covers_completed_games(rows, game_ids):
+                fetched_at = payload.get("fetched_at")
+                source = "cache"
+            else:
+                rows = client.get(endpoint, params)
+                write_gzip(path, endpoint, params, rows)
+                payload = read_gzip(path)
+                fetched_at = payload.get("fetched_at")
+                source = "api_incomplete_cache_refresh"
+                refreshed = True
         else:
             rows = client.get(endpoint, params)
             write_gzip(path, endpoint, params, rows)
@@ -304,20 +341,16 @@ def main() -> None:
             "source": source,
             "refreshed": refreshed,
             "fetched_at": fetched_at,
+            "completed_game_ids_missing_from_prior_cache": (
+                cache_missing_game_ids
+            ),
+            "completed_game_ids_missing_after_read": sorted(
+                game_ids - row_game_ids(rows)
+            ),
         }
 
-    game_ids = {
-        str(row.get("cfbd_game_id"))
-        for row in completed_week_games
-        if row.get("cfbd_game_id") is not None
-    }
-
     plays_payload = read_gzip(week_dir / "plays.json.gz")
-    play_game_ids = {
-        str(row.get("gameId"))
-        for row in plays_payload.get("data", [])
-        if row.get("gameId") is not None
-    }
+    play_game_ids = row_game_ids(plays_payload.get("data", []))
 
     completed_with_pbp = sorted(game_ids & play_game_ids)
     completed_missing_pbp = sorted(game_ids - play_game_ids)
