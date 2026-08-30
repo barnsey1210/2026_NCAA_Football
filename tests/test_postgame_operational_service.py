@@ -98,6 +98,14 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         commands = CONTROL.postgame_commands()
         names = [Path(command[1]).name for command in commands]
         self.assertEqual(names[0], "pull_cfbd_schedule_2026.py")
+        self.assertLess(
+            names.index("build_market_implied_power_ratings.py"),
+            names.index("build_shadow_team_game_features_2026.py"),
+        )
+        market_command = commands[
+            names.index("build_market_implied_power_ratings.py")
+        ]
+        self.assertIn("--production-2026", market_command)
         self.assertEqual(
             names[-3:],
             [
