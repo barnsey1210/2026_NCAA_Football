@@ -98,10 +98,55 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             )
         )
 
+    def test_provider_week_translation_uses_schedule_owned_mapping(self):
+        known_game_ids = {
+            401856766,
+            401858202,
+            401864494,
+            401864577,
+            401866408,
+        }
+        opening_week = [
+            {"week": 0, "provider_week": 1, "cfbd_game_id": game_id}
+            for game_id in known_game_ids
+        ]
+        provider_week_one_plays = [
+            {"gameId": game_id, "playType": "fixture"}
+            for game_id in known_game_ids
+        ]
+        later_week = [
+            {"week": 2, "provider_week": 2, "cfbd_game_id": 401000001},
+        ]
+        week_one = [
+            {"week": 1, "provider_week": 1, "cfbd_game_id": 401000000},
+        ]
+        self.assertEqual(PULL.resolve_provider_week(opening_week, 0), 1)
+        self.assertTrue(PULL.cache_covers_completed_games(
+            provider_week_one_plays,
+            {str(game_id) for game_id in known_game_ids},
+        ))
+        self.assertEqual(PULL.resolve_provider_week(week_one, 1), 1)
+        self.assertEqual(PULL.resolve_provider_week(later_week, 2), 2)
+
+    def test_provider_week_translation_rejects_missing_or_ambiguous_mapping(self):
+        with self.assertRaisesRegex(RuntimeError, "Missing CFBD provider_week"):
+            PULL.resolve_provider_week(
+                [{"week": 0, "cfbd_game_id": 401864494}],
+                0,
+            )
+        with self.assertRaisesRegex(RuntimeError, "Ambiguous CFBD provider_week"):
+            PULL.resolve_provider_week(
+                [
+                    {"week": 0, "provider_week": 1, "cfbd_game_id": 1},
+                    {"week": 0, "provider_week": 2, "cfbd_game_id": 2},
+                ],
+                0,
+            )
+
     def test_main_refreshes_incomplete_endpoint_caches_without_force(self):
         completed = [
-            {"week": 0, "cfbd_game_id": 401761599},
-            {"week": 0, "cfbd_game_id": 401761602},
+            {"week": 0, "provider_week": 1, "cfbd_game_id": 401761599},
+            {"week": 0, "provider_week": 1, "cfbd_game_id": 401761602},
         ]
 
         class FixtureClient:
@@ -114,7 +159,7 @@ class PostgameOperationalServiceTests(unittest.TestCase):
 
             def get(self, endpoint, params):
                 self.calls += 1
-                self.requested.append(endpoint)
+                self.requested.append((endpoint, dict(params)))
                 return [
                     {"gameId": 401761599},
                     {"gameId": 401761602},
@@ -157,9 +202,17 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertEqual(audit["api_calls_this_run"], 3)
         self.assertEqual(audit["status"], "READY")
         self.assertEqual(
-            FixtureClient.instance.requested,
+            [endpoint for endpoint, _ in FixtureClient.instance.requested],
             ["/plays", "/drives", "/stats/game/havoc"],
         )
+        self.assertTrue(all(
+            params["week"] == 1
+            for _, params in FixtureClient.instance.requested
+        ))
+        for row in audit["files"].values():
+            self.assertEqual(row["completed_game_ids_missing_after_read"], [])
+        self.assertEqual(audit["week"], 0)
+        self.assertEqual(audit["provider_week"], 1)
         self.assertTrue(all(
             row["source"] == "api_incomplete_cache_refresh"
             for row in audit["files"].values()

@@ -172,6 +172,44 @@ def resolve_week(rows: list[dict], requested: int | None) -> int | None:
     return max(weeks) if weeks else None
 
 
+def resolve_provider_week(
+    rows: list[dict],
+    internal_week: int,
+) -> int:
+    """Resolve the accepted CFBD week for one canonical internal week.
+
+    The schedule normalizer owns provider-to-canonical week translation and
+    preserves both values. Postgame keeps the canonical week for local cache
+    identity while using the preserved provider week for CFBD requests.
+    """
+    provider_weeks = set()
+    missing = []
+    for row in rows:
+        value = row.get("provider_week")
+        if value in (None, ""):
+            missing.append(str(row.get("cfbd_game_id") or row.get("game_id")))
+            continue
+        try:
+            provider_weeks.add(int(value))
+        except (TypeError, ValueError):
+            raise RuntimeError(
+                f"Invalid CFBD provider_week for internal week {internal_week}: "
+                f"{value!r}"
+            )
+
+    if missing:
+        raise RuntimeError(
+            f"Missing CFBD provider_week for internal week {internal_week}: "
+            f"{', '.join(missing)}"
+        )
+    if len(provider_weeks) != 1:
+        raise RuntimeError(
+            f"Ambiguous CFBD provider_week for internal week {internal_week}: "
+            f"{sorted(provider_weeks)}"
+        )
+    return next(iter(provider_weeks))
+
+
 def row_game_ids(rows: list[dict]) -> set[str]:
     """Return canonical CFBD game IDs represented by an endpoint payload."""
     game_ids = set()
@@ -239,6 +277,7 @@ def main() -> None:
         row for row in completed
         if str(row.get("week")) == str(week)
     ]
+    provider_week = resolve_provider_week(completed_week_games, week)
     game_ids = {
         str(row.get("cfbd_game_id"))
         for row in completed_week_games
@@ -252,7 +291,7 @@ def main() -> None:
             "/plays",
             {
                 "year": YEAR,
-                "week": week,
+                "week": provider_week,
                 "seasonType": "regular",
             },
             week_dir / "plays.json.gz",
@@ -262,7 +301,7 @@ def main() -> None:
             "/drives",
             {
                 "year": YEAR,
-                "week": week,
+                "week": provider_week,
                 "seasonType": "regular",
             },
             week_dir / "drives.json.gz",
@@ -272,7 +311,7 @@ def main() -> None:
             "/stats/game/havoc",
             {
                 "year": YEAR,
-                "week": week,
+                "week": provider_week,
                 "seasonType": "regular",
             },
             week_dir / "havoc.json.gz",
@@ -286,6 +325,7 @@ def main() -> None:
             "season": YEAR,
             "status": "STATUS_ONLY",
             "week": week,
+            "provider_week": provider_week,
             "completed_games": len(completed),
             "completed_games_in_week": len(completed_week_games),
             "api_calls_this_run": 0,
@@ -367,6 +407,7 @@ def main() -> None:
         "season": YEAR,
         "status": status,
         "week": week,
+        "provider_week": provider_week,
         "completed_games": len(completed),
         "completed_games_in_week": len(completed_week_games),
         "completed_game_ids": sorted(game_ids),

@@ -194,6 +194,7 @@ def main() -> None:
             "game_id": str(sg.get("game_id") or ""),
             "cfbd_game_id": cid,
             "week": clean_int(cg.get("week")),
+            "provider_week": clean_int(cg.get("provider_week")),
             "date": cg.get("date"),
             "start_date": cg.get("start_date"),
             "away_team": sg.get("away_team") or away,
