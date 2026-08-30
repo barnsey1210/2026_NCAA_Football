@@ -10,6 +10,8 @@ import sys
 
 import pandas as pd
 
+from scripts.ratings.freshness_evidence import resolve_team_accepted_update
+
 
 ROOT = Path(".")
 RATINGS = ROOT / "data/ratings"
@@ -112,6 +114,10 @@ def compare_source(
     checked_at: str,
 ) -> dict:
     candidate = normalized_frame(candidate_path, value_columns)
+    prior_accepted_update = (
+        prior.get("latest_accepted_update_at")
+        or resolve_team_accepted_update(ROOT.resolve(), name, prior)
+    )
 
     if not accepted_path.exists():
         return {
@@ -122,6 +128,8 @@ def compare_source(
             "teams_changed": int(candidate["team"].nunique()),
             "changed_fields": int(candidate["team"].nunique() * len(value_columns)),
             "comparison_available": False,
+            "latest_check_status": "INITIALIZED",
+            "latest_accepted_update_at": None,
             "teams": int(candidate["team"].nunique()),
             "value_columns": value_columns,
         }
@@ -158,23 +166,28 @@ def compare_source(
     if changed:
         last_changed_at = checked_at
         status = "UPDATED"
+        latest_accepted_update_at = checked_at
     elif prior_last_changed:
         last_changed_at = prior_last_changed
         status = "NO_CHANGE"
+        latest_accepted_update_at = prior_accepted_update
     else:
         # First tracked comparison. This establishes the accepted file as
         # the initial baseline without falsely claiming a newly observed move.
         last_changed_at = baseline_timestamp
         status = "BASELINE_ESTABLISHED"
+        latest_accepted_update_at = prior_accepted_update
 
     return {
         "source": name,
         "change_status": status,
+        "latest_check_status": status,
         "latest_pull_at": checked_at,
         "last_changed_at": last_changed_at,
         "teams_changed": teams_changed,
         "changed_fields": changed_fields,
         "comparison_available": True,
+        "latest_accepted_update_at": latest_accepted_update_at,
         "teams": int(candidate["team"].nunique()),
         "value_columns": value_columns,
     }

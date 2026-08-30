@@ -117,7 +117,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIsNotNone(status)
         self.assertIn("item?.accepted_update === true", coverage.group(1))
         self.assertNotIn("item?.state === 'UPDATED'", coverage.group(1))
-        self.assertIn("item.last_changed_at", coverage.group(1))
+        self.assertIn("item.latest_accepted_update_at", coverage.group(1))
         self.assertNotIn("item.pulled_at", coverage.group(1))
         self.assertIn("coverage.updated === coverage.required", status.group(1))
         self.assertIn("status:'UPDATED',color:'GREEN'", status.group(1))

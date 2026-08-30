@@ -39,7 +39,10 @@ class AuthorityFreshnessTests(unittest.TestCase):
         return self.module.model_freshness(
             self.game(model_id, components),
             model_id,
-            {"watermark_date": "2026-08-29"},
+            {
+                "watermark_date": "2026-08-29",
+                "week_cutoff_at": "2026-08-30T05:49:23Z",
+            },
             team_meta or {},
             feed_meta or {},
         )
@@ -50,6 +53,7 @@ class AuthorityFreshnessTests(unittest.TestCase):
             "snapshot_date": "2026-08-30",
             "change_status": "UPDATED",
             "last_changed_at": f"{date}T05:00:00Z",
+            "latest_accepted_update_at": f"{date}T06:00:00Z",
             "comparison_available": True,
         }
 
@@ -59,6 +63,7 @@ class AuthorityFreshnessTests(unittest.TestCase):
             "snapshot_date": "2026-08-30",
             "change_status": "NO_CHANGE",
             "last_changed_at": "2026-08-25T05:00:00Z",
+            "latest_accepted_update_at": "2026-08-25T05:00:00Z",
             "comparison_available": True,
         }
 
@@ -90,23 +95,73 @@ class AuthorityFreshnessTests(unittest.TestCase):
         result = self.module.model_freshness(
             self.game(self.module.STANDARD_SPREAD, ["TeamRankings"]),
             self.module.STANDARD_SPREAD,
-            {"watermark_date": None},
+            {
+                "watermark_date": None,
+                "week_cutoff_at": "2026-08-30T05:49:23Z",
+            },
             {"TeamRankings": self.changed()},
             {},
         )
         source = result["sources"]["TeamRankings"]
         self.assertEqual(source["state"], "PRE_GAME")
         self.assertTrue(source["accepted_update"])
-        self.assertEqual(result["updated_sources"], 0)
-        self.assertEqual(result["temporal_status"], "PRE_GAME")
+        self.assertEqual(result["updated_sources"], 1)
+        self.assertEqual(result["temporal_status"], "UPDATED")
 
-    def test_no_change_source_is_not_an_accepted_update(self):
+    def test_no_change_source_before_cutoff_is_not_an_accepted_update(self):
         unchanged = self.freshness(
             self.module.STANDARD_SPREAD,
             ["SP+"],
             {"SP+": self.unchanged()},
         )
         self.assertFalse(unchanged["sources"]["SP+"]["accepted_update"])
+
+    def test_later_no_change_preserves_qualifying_accepted_update(self):
+        metadata = self.changed()
+        metadata["change_status"] = "NO_CHANGE"
+        metadata["latest_check_status"] = "NO_CHANGE"
+        result = self.freshness(
+            self.module.STANDARD_SPREAD,
+            ["TeamRankings"],
+            {"TeamRankings": metadata},
+        )
+        self.assertTrue(result["sources"]["TeamRankings"]["accepted_update"])
+        self.assertEqual(
+            result["sources"]["TeamRankings"]["latest_check_status"],
+            "NO_CHANGE",
+        )
+
+    def test_sagarin_rating_can_consume_projection_owner_evidence(self):
+        import json
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            status = root / "status.csv"
+            status.write_text(
+                "source,snapshot_date,pulled_at,comparison_available\n"
+                "Sagarin Rating,2026-09-06,2026-09-06T13:00:00Z,False\n"
+            )
+            team_change = root / "team.json"
+            team_change.write_text('{"sources":{}}')
+            projection_change = root / "projection.json"
+            projection_change.write_text(json.dumps({"sources": {
+                "Sagarin Rating": {
+                    "latest_check_status": "NO_CHANGE",
+                    "latest_accepted_update_at": "2026-09-06T12:00:00Z",
+                    "comparison_available": True,
+                }
+            }}))
+            loaded = self.module.load_team_source_snapshots(
+                status,
+                team_change,
+                projection_change,
+            )
+            self.assertEqual(
+                loaded["Sagarin Rating"]["latest_accepted_update_at"],
+                "2026-09-06T12:00:00Z",
+            )
 
     def test_incomplete_change_evidence_fails_closed(self):
         for metadata in (
@@ -115,12 +170,14 @@ class AuthorityFreshnessTests(unittest.TestCase):
                 "change_status": "UPDATED",
                 "last_changed_at": None,
                 "comparison_available": True,
+                "latest_accepted_update_at": None,
             },
             {
                 "snapshot_date": "2026-08-30",
                 "change_status": "UPDATED",
                 "last_changed_at": "2026-08-30T05:00:00Z",
                 "comparison_available": False,
+                "latest_accepted_update_at": None,
             },
         ):
             with self.subTest(metadata=metadata):
@@ -133,29 +190,45 @@ class AuthorityFreshnessTests(unittest.TestCase):
                     result["sources"]["TeamRankings"]["accepted_update"]
                 )
 
-    def test_current_week_one_source_health_fixture(self):
+    def test_current_week_source_health_fixture(self):
         unchanged = self.unchanged()
+        fpi = self.changed()
+        fpi["latest_accepted_update_at"] = "2026-08-30T09:19:23Z"
+        teamrankings = self.changed()
+        teamrankings.update(
+            change_status="NO_CHANGE",
+            latest_check_status="NO_CHANGE",
+            latest_accepted_update_at="2026-08-30T13:58:54Z",
+        )
+        dratings = self.changed()
+        dratings["latest_accepted_update_at"] = "2026-08-30T16:25:53Z"
+        massey = self.changed()
+        massey["latest_accepted_update_at"] = "2026-08-30T14:01:02Z"
         unverified = {
             "snapshot_date": "2026-08-30",
             "comparison_available": False,
+            "latest_accepted_update_at": None,
         }
         spread = {
             "SP+": unchanged,
-            "FPI": unchanged,
-            "TeamRankings": self.changed(),
+            "FPI": fpi,
+            "TeamRankings": teamrankings,
             "Sagarin Rating": unverified,
-            "DRatings": unverified,
+            "DRatings": dratings,
         }
         total = {
             "SP+": unchanged,
-            "Massey Dual": unverified,
+            "Massey Dual": massey,
             "Sagarin Total": None,
         }
 
         def color(metadata):
             if metadata is None:
                 return "RED"
-            if self.module.has_accepted_source_update(metadata):
+            if self.module.has_accepted_source_update(
+                metadata,
+                "2026-08-30T05:49:23Z",
+            ):
                 return "GREEN"
             return "YELLOW"
 
@@ -163,17 +236,17 @@ class AuthorityFreshnessTests(unittest.TestCase):
             {source: color(metadata) for source, metadata in spread.items()},
             {
                 "SP+": "YELLOW",
-                "FPI": "YELLOW",
+                "FPI": "GREEN",
                 "TeamRankings": "GREEN",
                 "Sagarin Rating": "YELLOW",
-                "DRatings": "YELLOW",
+                "DRatings": "GREEN",
             },
         )
         self.assertEqual(
             {source: color(metadata) for source, metadata in total.items()},
             {
                 "SP+": "YELLOW",
-                "Massey Dual": "YELLOW",
+                "Massey Dual": "GREEN",
                 "Sagarin Total": "RED",
             },
         )
@@ -210,6 +283,44 @@ class AuthorityFreshnessTests(unittest.TestCase):
         self.assertEqual(result["updated_sources"], 2)
         self.assertEqual(result["temporal_status"], "HYBRID")
         self.assertEqual(result["authority_stage"], "HYBRID_AUTHORITY")
+
+    def test_three_accepted_spread_sources_use_normal_hybrid(self):
+        result = self.freshness(
+            self.module.STANDARD_SPREAD,
+            ["SP+", "FPI", "TeamRankings", "DRatings"],
+            {
+                "SP+": self.unchanged(),
+                "FPI": self.changed(),
+                "TeamRankings": self.changed(),
+            },
+            {"DRatings Predictions": self.changed()},
+        )
+        self.assertEqual(result["updated_sources"], 3)
+        self.assertEqual(result["temporal_status"], "HYBRID")
+        self.assertEqual(result["authority_stage"], "HYBRID_AUTHORITY")
+
+    def test_hybrid_blend_uses_accepted_evidence_not_per_game_state(self):
+        game = self.game(self.module.STANDARD_SPREAD, ["FPI", "TeamRankings"])
+        game["projections"] = {
+            self.module.STANDARD_SPREAD: {
+                "component_values": {"FPI": 4.0, "TeamRankings": 2.0},
+                "weights": {"FPI": 0.2, "TeamRankings": 0.2},
+            }
+        }
+        freshness = {
+            "sources": {
+                "FPI": {"state": "STALE", "accepted_update": True},
+                "TeamRankings": {"state": "PRE_GAME", "accepted_update": True},
+            }
+        }
+        hybrid = self.module.refreshed_standard_value(
+            game,
+            freshness,
+            self.module.STANDARD_SPREAD,
+            "value_home_line",
+        )
+        self.assertEqual(hybrid["components"], ["FPI", "TeamRankings"])
+        self.assertAlmostEqual(hybrid["value"], -3.0)
 
     def test_spread_and_total_transition_independently(self):
         spread = self.freshness(

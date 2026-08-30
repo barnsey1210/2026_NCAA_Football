@@ -23,6 +23,11 @@ from scripts.markets.build_current_market_contract import (
     resolve_game_id,
     site_date_from_timestamp,
 )
+from scripts.ratings.freshness_evidence import (
+    accepted_after_cutoff,
+    completed_week_cutoffs,
+    resolve_team_accepted_update,
+)
 from scripts.war_room.build_war_room_activity import (
     game_openers,
     load_pinnacle_openers,
@@ -58,6 +63,9 @@ GAME_RESULTS = (
     ROOT
     / "data/canonical/game_results_2026.json"
 )
+FINAL_WATCHER_STATE = (
+    ROOT / "data/control/cfbd_final_watcher/state.json"
+)
 
 RATINGS_SOURCE_STATUS = (
     ROOT
@@ -67,6 +75,9 @@ RATINGS_SOURCE_STATUS = (
 LIVE_RATING_CHANGE_STATUS = (
     ROOT
     / "data/ratings/live_rating_change_status.json"
+)
+LIVE_PROJECTION_CHANGE_STATUS = (
+    ROOT / "data/ratings/live_projection_change_status.json"
 )
 
 PROJECTION_SOURCE_STATUS = (
@@ -907,7 +918,7 @@ def refreshed_standard_value(
     updated = {}
 
     for component, meta in source_states.items():
-        if meta.get("state") != "UPDATED":
+        if meta.get("accepted_update") is not True:
             continue
 
         value = number(
@@ -1335,17 +1346,14 @@ def source_date_state(
     return "STALE"
 
 
-def has_accepted_source_update(meta):
-    return bool(
-        str(meta.get("change_status") or "").strip().upper() == "UPDATED"
-        and meta.get("comparison_available") is True
-        and iso_date(meta.get("last_changed_at"))
-    )
+def has_accepted_source_update(meta, cutoff_at=None):
+    return accepted_after_cutoff(meta, cutoff_at)
 
 
 def load_team_source_snapshots(
     path,
     change_status_path=LIVE_RATING_CHANGE_STATUS,
+    projection_change_status_path=LIVE_PROJECTION_CHANGE_STATUS,
 ):
     out = {}
 
@@ -1361,6 +1369,18 @@ def load_team_source_snapshots(
         except (OSError, json.JSONDecodeError):
             change_sources = {}
 
+    projection_change_sources = {}
+    if projection_change_status_path.exists():
+        try:
+            projection_change_payload = json.loads(
+                projection_change_status_path.read_text()
+            )
+            projection_change_sources = (
+                projection_change_payload.get("sources") or {}
+            )
+        except (OSError, json.JSONDecodeError):
+            projection_change_sources = {}
+
     if not path.exists():
         return out
 
@@ -1374,12 +1394,16 @@ def load_team_source_snapshots(
                 continue
 
             accepted_change = change_sources.get(source, {})
+            projection_change = projection_change_sources.get(source, {})
 
             def row_or_change(field):
                 value = row.get(field)
                 if value not in (None, ""):
                     return value
-                return accepted_change.get(field)
+                value = accepted_change.get(field)
+                if value not in (None, ""):
+                    return value
+                return projection_change.get(field)
 
             out[source] = {
                 "snapshot_date": iso_date(
@@ -1398,6 +1422,13 @@ def load_team_source_snapshots(
                 ),
                 "comparison_available": bool_value(
                     row_or_change("comparison_available")
+                ),
+                "latest_check_status": row_or_change(
+                    "latest_check_status"
+                ) or row_or_change("change_status"),
+                "latest_accepted_update_at": (
+                    row_or_change("latest_accepted_update_at")
+                    or resolve_team_accepted_update(ROOT, source, accepted_change)
                 ),
             }
 
@@ -1429,6 +1460,10 @@ def load_game_feed_snapshots(payload):
             "last_changed_at": row.get("last_changed_at"),
             "comparison_available": bool_value(
                 row.get("comparison_available")
+            ),
+            "latest_check_status": row.get("latest_check_status"),
+            "latest_accepted_update_at": row.get(
+                "latest_accepted_update_at"
             ),
         }
 
@@ -1466,6 +1501,7 @@ def model_freshness(
     )
 
     watermark_date = watermark.get("watermark_date")
+    week_cutoff_at = watermark.get("week_cutoff_at")
 
     nominal = []
     participating = []
@@ -1509,6 +1545,10 @@ def model_freshness(
                 comparison_available=meta.get("comparison_available"),
             )
 
+        accepted_update = has_accepted_source_update(
+            meta,
+            week_cutoff_at,
+        )
         sources[component] = {
             "source_key": source_key,
             "participating": present,
@@ -1521,10 +1561,14 @@ def model_freshness(
             "change_status": meta.get("change_status"),
             "last_changed_at": meta.get("last_changed_at"),
             "comparison_available": meta.get("comparison_available"),
+            "latest_check_status": meta.get("latest_check_status"),
+            "latest_accepted_update_at": meta.get(
+                "latest_accepted_update_at"
+            ),
             # Provider/source health is distinct from the per-game state
             # above. A PRE_GAME game can still consume a panel whose owning
             # pipeline has accepted a proven changed version.
-            "accepted_update": has_accepted_source_update(meta),
+            "accepted_update": accepted_update,
         }
 
     participating_states = [
@@ -1533,15 +1577,15 @@ def model_freshness(
     ]
 
     updated_count = sum(
-        state == "UPDATED"
-        for state in participating_states
+        sources[source]["accepted_update"]
+        for source in participating
     )
 
     participating_count = len(participating)
 
     nominal_count = len(nominal)
 
-    if watermark_date is None:
+    if week_cutoff_at is None:
         temporal_status = "PRE_GAME"
     elif participating_count == 0:
         temporal_status = "UNAVAILABLE"
@@ -1567,6 +1611,7 @@ def model_freshness(
 
     return {
         "watermark_date": watermark_date,
+        "week_cutoff_at": week_cutoff_at,
         "temporal_status": temporal_status,
         "model_quality": model_quality,
         "participating_sources": participating_count,
@@ -1865,6 +1910,10 @@ def main():
 
     completed_by_team = latest_completed_by_team(
         results_payload
+    )
+    week_cutoffs = completed_week_cutoffs(
+        results_payload,
+        load_json(FINAL_WATCHER_STATE, {}),
     )
 
     team_source_snapshots = load_team_source_snapshots(
@@ -2306,6 +2355,17 @@ def main():
         freshness_watermark = game_freshness_watermark(
             game,
             completed_by_team,
+        )
+        try:
+            target_week = int(game.get("week"))
+        except (TypeError, ValueError):
+            target_week = None
+        cutoff = week_cutoffs.get(target_week) if target_week is not None else None
+        freshness_watermark["week_cutoff_at"] = (
+            cutoff.get("final_completion_at") if cutoff else None
+        )
+        freshness_watermark["week_cutoff_game_id"] = (
+            cutoff.get("game_id") if cutoff else None
         )
 
         spread_freshness = model_freshness(

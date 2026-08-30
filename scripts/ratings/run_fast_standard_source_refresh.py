@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE = ROOT / "data/snapshots/preseason/preseason_db.json"
 REPORT = ROOT / "data/control/ratings_fast_source_refresh.json"
+CHANGE_STATE = ROOT / "data/ratings/live_projection_change_status.json"
 OUTPUTS = {
     "sagarin_rating": ROOT / "data/ratings/external_sources/sagarin_latest.csv",
     "sagarin": ROOT / "data/ratings/external_sources/sagarin_game_predictions_latest.csv",
@@ -138,6 +139,41 @@ def main():
             break
     after = {name: digest(path) for name, path in OUTPUTS.items()}
     changed_components = [name for name in OUTPUTS if before[name] != after[name]]
+    previous_state = {}
+    if CHANGE_STATE.exists():
+        try:
+            previous_state = json.loads(CHANGE_STATE.read_text())
+        except (OSError, ValueError, TypeError):
+            previous_state = {}
+    source_names = {
+        "sagarin_rating": "Sagarin Rating",
+        "dratings": "DRatings Predictions",
+        "massey": "Massey Games",
+        "sagarin": "Sagarin Game Total",
+    }
+    prior_sources = previous_state.get("sources") or {}
+    next_sources = dict(prior_sources)
+    checked_at = utc_now()
+    for component, source in source_names.items():
+        stage = next((row for row in stages if row.get("provider") == component.split("_", 1)[0]), None)
+        if not stage or stage.get("status") != "PASSED":
+            continue
+        changed = component in changed_components
+        prior = prior_sources.get(source) or {}
+        next_sources[source] = {
+            "source": source,
+            "latest_check_status": "UPDATED" if changed else "NO_CHANGE",
+            "latest_check_at": checked_at,
+            "latest_accepted_update_at": checked_at if changed else prior.get("latest_accepted_update_at"),
+            "comparison_available": before.get(component) is not None,
+            "previous_fingerprint": before.get(component),
+            "accepted_fingerprint": after.get(component),
+        }
+    atomic_json(CHANGE_STATE, {
+        "schema_version": 1,
+        "updated_at": checked_at,
+        "sources": next_sources,
+    })
     coverage = {
         provider: provider_coverage(OUTPUTS[provider], games)
         for provider in ("sagarin", "dratings", "massey")

@@ -35,6 +35,8 @@ def main() -> int:
         "teams_changed",
         "changed_fields",
         "comparison_available",
+        "latest_check_status",
+        "latest_accepted_update_at",
     ]
 
     for column in new_columns:

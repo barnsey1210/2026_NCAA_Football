@@ -9,11 +9,14 @@ from pathlib import Path
 
 import pandas as pd
 
+from scripts.ratings.freshness_evidence import recover_projection_accepted_updates
+
 ROOT = Path(__file__).resolve().parents[2]
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
 OUT = ROOT / "data/site/projection_source_status_view.json"
+PROJECTION_CHANGE_STATE = ROOT / "data/ratings/live_projection_change_status.json"
 
 SPREAD_ID = "standard_spread_five_source_v1"
 TOTAL_ID = "standard_total_sp_massey_sagarin_v1"
@@ -201,6 +204,13 @@ def game_prediction_feed_status(production_game_ids):
         ]
 
     out = []
+    change_sources = {}
+    if PROJECTION_CHANGE_STATE.exists():
+        try:
+            change_sources = json.loads(PROJECTION_CHANGE_STATE.read_text()).get("sources") or {}
+        except (OSError, ValueError, TypeError):
+            change_sources = {}
+    recovered = recover_projection_accepted_updates(ROOT)
     total = len(production_game_ids)
 
     for spec in specs:
@@ -213,6 +223,8 @@ def game_prediction_feed_status(production_game_ids):
         n = len(matched_ids)
         state = "FULL" if total and n == total else "PARTIAL" if n else "MISSING"
 
+        change = change_sources.get(spec["source"]) or {}
+        accepted_update_at = change.get("latest_accepted_update_at") or recovered.get(spec["source"])
         out.append({
             "name": spec["name"],
             "source_key": spec["source"],
@@ -223,6 +235,9 @@ def game_prediction_feed_status(production_game_ids):
             "state": state,
             "latest_pulled_at": latest_nonblank(rows.get("pulled_at", pd.Series(dtype=str))),
             "latest_snapshot_date": latest_nonblank(rows.get("snapshot_date", pd.Series(dtype=str))),
+            "latest_check_status": change.get("latest_check_status"),
+            "latest_accepted_update_at": accepted_update_at,
+            "comparison_available": bool(change.get("comparison_available") or accepted_update_at),
             "first_game_date": latest_nonblank(
                 pd.Series([rows["date"].dropna().astype(str).min()]) if "date" in rows and not rows.empty else pd.Series(dtype=str)
             ),

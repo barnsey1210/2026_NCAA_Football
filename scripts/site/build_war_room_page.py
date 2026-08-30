@@ -1595,7 +1595,7 @@ function sourceCoverage(domain,source,rows){
   );
 
   const acceptedUpdates = available
-    .map(item => item.last_changed_at)
+    .map(item => item.latest_accepted_update_at)
     .filter(Boolean)
     .sort();
   const lastChangedAt = acceptedUpdates.length
@@ -1640,7 +1640,7 @@ function coverageStatus(coverage){
 function sourceHealthTooltip(label,status,coverage,fallback){
   const updated =
     coverage.lastChangedAt ||
-    fallback?.last_changed_at ||
+    fallback?.latest_accepted_update_at ||
     null;
 
   const lines = [
