@@ -38,8 +38,20 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             "San Jose State",
         )
         self.assertEqual(
+            TEAM_IDENTITY.canonical_team_name("Hawai'i"),
+            "Hawaii",
+        )
+        self.assertEqual(
+            TEAM_IDENTITY.canonical_team_key("Hawai'i"),
+            TEAM_IDENTITY.canonical_team_key("Hawaii"),
+        )
+        self.assertEqual(
             TEAM_IDENTITY.canonical_team_name("Eastern Michigan"),
             "Eastern Michigan",
+        )
+        self.assertEqual(
+            TEAM_IDENTITY.canonical_team_name("Stanford"),
+            "Stanford",
         )
         self.assertNotEqual(
             TEAM_IDENTITY.canonical_team_key("Miami (OH)"),
@@ -76,6 +88,43 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertEqual(sjsu["off_plays"], 1)
         self.assertEqual(sjsu["off_ppa"], 0.4)
         self.assertEqual(sjsu["def_ppa_allowed"], -0.1)
+
+    def test_postgame_pbp_matches_hawaii_provider_label_and_preserves_stanford(self):
+        results = [{
+            "game_id": "g4",
+            "cfbd_game_id": 401858201,
+            "home_team": "Stanford",
+            "away_team": "Hawaii",
+        }]
+        plays = [
+            {
+                "gameId": 401858201,
+                "offense": "Hawai'i",
+                "defense": "Stanford",
+                "playType": "Rush",
+                "ppa": 0.3,
+                "period": 1,
+            },
+            {
+                "gameId": 401858201,
+                "offense": "Stanford",
+                "defense": "Hawai'i",
+                "playType": "Pass Reception",
+                "ppa": -0.2,
+                "period": 1,
+            },
+        ]
+
+        rows = FEATURES.build_pbp_rows(0, results, plays, [])
+        hawaii = next(row for row in rows if row["team"] == "Hawaii")
+        stanford = next(row for row in rows if row["team"] == "Stanford")
+
+        self.assertEqual(hawaii["off_plays"], 1)
+        self.assertEqual(hawaii["off_ppa"], 0.3)
+        self.assertEqual(hawaii["def_ppa_allowed"], -0.2)
+        self.assertEqual(stanford["off_plays"], 1)
+        self.assertEqual(stanford["off_ppa"], -0.2)
+        self.assertEqual(stanford["def_ppa_allowed"], 0.3)
 
     def test_shadow_clean_preserves_ordered_multi_value_data(self):
         value = {
