@@ -186,8 +186,8 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
     def test_matchup_layout_and_explicit_sorts(self):
         for marker in (
             'class="matchup-kickoff"',
-            "matchupTeam(game.away_team,game.team_composite_rank?.away)",
-            "matchupTeam(game.home_team,game.team_composite_rank?.home)",
+            "matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)",
+            "matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)",
             "setSort('date')",
             "setSort('home_team')",
             "SORT_KEY === 'home_team'",

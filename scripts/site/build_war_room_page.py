@@ -610,6 +610,10 @@ tr:hover td.context-group{background:#202d39}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
 .shadow-state-label{font-size:11px;font-weight:900;line-height:1.05;letter-spacing:.03em}
+.shadow-value-line{display:inline-flex;align-items:center;justify-content:center;gap:3px}
+.shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:17px}
+.projection-value{display:inline-flex;align-items:center;justify-content:center;gap:3px}
+.shadow-tooltip-panel{min-width:220px;white-space:nowrap}
 .best-col{width:8.8%}
 .exchange-col{width:8%}
 .open-col{width:5.7%} /* retained for future/mobile opener presentation */
@@ -676,8 +680,8 @@ tr:hover td.context-group{background:#202d39}
 .team-composite-rank.rank-tier-3{color:#f4cd4b}
 .team-composite-rank.rank-tier-4{color:#ff8a5b}
 .team-composite-rank.rank-tier-5{color:#ff4d63}
-.matchup-team-name{min-width:0}
-.matchup-live-score{margin-left:auto;padding-left:5px;font-size:12px;font-weight:950;color:#eef3f7;font-variant-numeric:tabular-nums}
+.matchup-team-name{flex:1 1 auto;min-width:0}
+.matchup-live-score{flex:0 0 28px;width:28px;margin-left:auto;padding-left:4px;text-align:right;overflow:visible!important;font-size:12px;font-weight:950;color:#eef3f7;font-variant-numeric:tabular-nums}
 .game-live-state{font-size:9px;font-weight:950;color:var(--green);letter-spacing:.03em}
 .neutral-marker{color:var(--yellow);font-size:8px;font-weight:900;letter-spacing:.04em}
 .matchup-sort-head{display:flex;align-items:center;justify-content:space-between;gap:3px}
@@ -758,6 +762,7 @@ tr:hover td.context-group{background:#202d39}
 .move-marker.move-recent{display:inline-block;color:var(--yellow)}
 .move-marker.move-older-recent{display:inline-block;color:#8796a4}
 .market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 14px}
+.market-best.market-first-new{border-radius:5px;background:rgba(66,217,255,.14);box-shadow:0 0 0 1px rgba(66,217,255,.46),0 0 10px rgba(66,217,255,.16)}
 
 .decision-edge{
   display:inline-flex;
@@ -1658,6 +1663,10 @@ function numericSortValue(v){
   return Number.isFinite(n) ? n : null;
 }
 
+function normalizedModelState(value){
+  return String(value || 'UNAVAILABLE').trim().toUpperCase().replace(/[\s-]+/g,'_');
+}
+
 function currentRows(){
   if(!MATRIX) return [];
 
@@ -1710,6 +1719,11 @@ function currentRows(){
       );
     }
 
+    else if(SORT_KEY === 'model_state'){
+      av = normalizedModelState(a.state);
+      bv = normalizedModelState(b.state);
+    }
+
     else{
       const aSpread = numericSortValue(
         a.edges?.spread?.best_edge
@@ -1741,7 +1755,7 @@ function currentRows(){
     if(av === null) av = -999999;
     if(bv === null) bv = -999999;
 
-    if(SORT_KEY === 'home_team'){
+    if(SORT_KEY === 'home_team' || SORT_KEY === 'model_state'){
       const comparison = av.localeCompare(bv, undefined, {sensitivity:'base'});
       if(comparison){
         return SORT_DIR === 'asc' ? comparison : -comparison;
@@ -1779,7 +1793,7 @@ function setSort(key){
   }else{
     SORT_KEY = key;
 
-    SORT_DIR = (key === 'date' || key === 'home_team') ? 'asc' : 'desc';
+    SORT_DIR = (key === 'date' || key === 'home_team' || key === 'model_state') ? 'asc' : 'desc';
   }
 
   renderMatrix();
@@ -2088,7 +2102,7 @@ function renderHead(){
 
       <th class="matrix-header-cell injury-col context-group">INJ</th>
       <th class="matrix-header-cell signal-col context-group">SIGNALS</th>
-      <th class="matrix-header-cell state-col context-group">
+      <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
           MODEL<br>STATE
           <span class="header-tooltip-panel" role="tooltip">
@@ -2098,6 +2112,7 @@ function renderHead(){
             <span class="state-definition"><strong>UPDATED</strong> · All scheduled Standard inputs for the week are current.</span>
           </span>
         </span>
+        ${sortArrow('model_state')}
       </th>
     </tr>
   `;
@@ -2161,6 +2176,14 @@ function spreadComponentDisplay(value, game){
   return `${esc(team)} -${Math.abs(n).toFixed(1)}`;
 }
 
+function spreadFavoriteLogo(game,value){
+  const n=Number(value);
+  if(!Number.isFinite(n) || Math.abs(n)<.05) return '';
+  const team=n<0?game.home_team:game.away_team;
+  const slug=teamLogoSlug(team);
+  return `<span class="team-logo-holder" title="${esc(team)} projected favorite"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
+}
+
 function modelTooltip(game, model, market){
   const components = market === 'spread' ? SPREAD_COMPONENTS : TOTAL_COMPONENTS;
   const values = model?.component_values || {};
@@ -2172,7 +2195,10 @@ function modelTooltip(game, model, market){
     return `<span class="model-component ${missing?'missing':''}"><span>${esc(label)}</span><span>${shown}</span></span>`;
   }).join('');
   const value = market === 'spread' ? model?.value_home_line : model?.value_total;
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span>${modelDisplay(value,market)}</span><span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  const shown=market==='spread'
+    ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
+    : `<span>${modelDisplay(value,market)}</span>`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
 
 function positionModelTooltip(trigger){
@@ -2240,7 +2266,7 @@ function matchupTeam(team,rank,score=null){
   const value=Number(rank);
   const valid=Number.isInteger(value) && value>=1 && value<=138;
   const scoreHtml=score===null || score===undefined || score==='' ? '' : `<span class="matchup-live-score">${esc(score)}</span>`;
-  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="team-composite-rank ${compositeRankClass(rank)}" title="Canonical composite rank">${valid?esc(value):'—'}</span><span class="matchup-team-name">${esc(team)}</span>${scoreHtml}</div>`;
+  return `<div class="matchup-team"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="team-composite-rank ${compositeRankClass(rank)}" title="Canonical composite rank">${valid?esc(value):'—'}</span><span class="matchup-team-name" title="${esc(team)}">${esc(team)}</span>${scoreHtml}</div>`;
 }
 
 function liveGameDisplay(game){
@@ -2334,6 +2360,33 @@ function shadowTeamChip(team,ready){
   return `<span class="shadow-team-chip" title="${esc(team)} · ${ready?'Shadow input ready':'Shadow input not ready'}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="shadow-team-mark ${ready?'ready':'waiting'}">${ready?'✓':'✕'}</span></span>`;
 }
 
+function signedImpact(value){
+  if(value===null || value===undefined || value==='') return '—';
+  const n=Number(value);
+  return Number.isFinite(n)?`${n>=0?'+':''}${n.toFixed(2)}`:'—';
+}
+
+function shadowTooltipText(game,market,readyCount){
+  const readiness=game?.shadow_readiness||{};
+  const contributions=readiness.team_contributions||{};
+  const teamText=(side)=>{
+    const team=side==='away'?game.away_team:game.home_team;
+    const short=TEAM_ABBREVIATIONS[team]||team;
+    const row=contributions?.[side]?.[market]||{};
+    return `${short} ${signedImpact(row.net_impact)} ${market}`;
+  };
+  if(readyCount===2) return `${teamText('away')} · ${teamText('home')}`;
+  if(readyCount===1){
+    const readySide=readiness[`away_${market}_shadow_ready`]?'away':'home';
+    const pendingSide=readySide==='away'?'home':'away';
+    const pendingTeam=pendingSide==='away'?game.away_team:game.home_team;
+    return `${teamText(readySide)} · ${(TEAM_ABBREVIATIONS[pendingTeam]||pendingTeam)} pending`;
+  }
+  const reasons=market==='spread'?readiness.spread_missing_reasons:readiness.total_missing_reasons;
+  const reason=(reasons||[])[0]||readiness.market_readiness_reason||readiness.activation_reason||'no prior game';
+  return `0/2 ready · ${String(reason).replace(/^validated\s+/i,'').replace(/\s+inputs unavailable$/i,' unavailable')}`;
+}
+
 function shadowDisplay(game, model, market){
   const readiness=game?.shadow_readiness||{};
   const awayReady=Boolean(readiness[`away_${market}_shadow_ready`]);
@@ -2342,7 +2395,11 @@ function shadowDisplay(game, model, market){
   const value=market==='spread'?model?.value_home_line:model?.value_total;
   const available=readyCount===2 && model?.selection_status==='AVAILABLE' && value!==null && value!==undefined;
   const label=available?modelDisplay(value,market):(readyCount===0?'WAIT':readyCount===1?'PARTIAL':'UNAVAILABLE');
-  return `<span class="shadow-team-state"><span class="shadow-team-icons">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}</span><span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${label}</span></span>`;
+  const valueMarkup=available && market==='spread'
+    ? `<span class="shadow-value-line">${spreadFavoriteLogo(game,value)}<span>${label}</span></span>`
+    : label;
+  const tooltip=shadowTooltipText(game,market,readyCount);
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span class="shadow-team-state"><span class="shadow-team-icons">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}</span><span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${valueMarkup}</span></span><span class="model-tooltip-panel shadow-tooltip-panel" role="tooltip">${esc(tooltip)}</span></span>`;
 }
 
 const BOOK_LOGOS = {
@@ -2413,7 +2470,7 @@ function movementTitle(game,move){
   return `${game.away_team} @ ${game.home_team}\n${move.book} ${move.market}\n${transition}\n${magnitude}\nDetected ${fmtDateTimeET(move.detected_at)} · ${ageLabel(move.detected_at)}\nDetected refresh: ${move.detected_refresh_id || 'unavailable'}\nProvider quote time: ${move.quote_timestamp ? fmtDateTimeET(move.quote_timestamp) : 'unavailable'}${previous}`;
 }
 
-function compactQuote(q, market, game){
+function compactQuote(q, market, game, highlightFirst=false){
   if(!q) return '—';
 
   const book = q.book || '';
@@ -2424,15 +2481,23 @@ function compactQuote(q, market, game){
   const price = fmtPrice(q.price) || '—';
   const move=q.last_material_move;
   const moveClass=movementRecency(move);
+  const first=highlightFirst?game?.market?.first_available?.[market]:null;
+  const firstClass=firstMarketRecency(first);
 
   return `
-    <span class="market-best ${moveClass?'has-move':''}" title="${esc(book)}">
+    <span class="market-best ${moveClass?'has-move':''} ${firstClass}" data-first-market-available-at="${esc(first?.first_market_available_at||'')}" data-first-market-baseline="${first?.baseline===true?'true':'false'}" title="${esc(book)}">
       <img class="market-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(book)}">
       <span class="market-line">${line}</span>
       <span class="market-juice">${price}</span>
       ${move ? `<span class="move-marker ${moveClass}" data-move-detected-at="${esc(move.detected_at || '')}" data-move-refresh-id="${esc(move.detected_refresh_id || '')}" title="${esc(movementTitle(game,move))}">${moveGlyph(move.direction)}</span>` : ''}
     </span>
   `;
+}
+
+function firstMarketRecency(first){
+  if(!first || first.baseline===true) return '';
+  const minutes=elapsedMinutes(first.first_market_available_at);
+  return minutes!==null && minutes<=60?'market-first-new':'';
 }
 
 function compactOpen(game,market){
@@ -2468,6 +2533,13 @@ function updateMatrixRecencyMarkers(){
       /Detected [^\n]*/,
       `Detected ${fmtDateTimeET(move.detected_at)} · ${ageLabel(move.detected_at)}`
     );
+  });
+  document.querySelectorAll('[data-first-market-available-at]').forEach(quote=>{
+    const first={
+      first_market_available_at:quote.dataset.firstMarketAvailableAt,
+      baseline:quote.dataset.firstMarketBaseline==='true'
+    };
+    quote.classList.toggle('market-first-new',firstMarketRecency(first)==='market-first-new');
   });
 }
 
@@ -2506,7 +2578,7 @@ function renderMobileMatrix(rows){
         <div class="mobile-band-title">SPREAD</div>
         <div class="mobile-band-grid">
           ${mobileMetric('EDGE',`<span class="edge ${edgeClass(sprEdge)}">${spreadDecision(game,sprSide,sprEdge,true)}</span>`,'edge-focus')}
-          ${mobileMetric('BEST',compactQuote(sprBest,'spread',game))}
+          ${mobileMetric('BEST',compactQuote(sprBest,'spread',game,true))}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
           ${mobileMetric('EXCH',compactQuote(sprEx,'spread',game))}
@@ -2516,7 +2588,7 @@ function renderMobileMatrix(rows){
         <div class="mobile-band-title">TOTAL</div>
         <div class="mobile-band-grid">
           ${mobileMetric('EDGE',`<span class="edge ${edgeClass(totEdge)}">${totalDecision(totSide,totEdge)}</span>`,'edge-focus')}
-          ${mobileMetric('BEST',compactQuote(totBest,'total',game))}
+          ${mobileMetric('BEST',compactQuote(totBest,'total',game,true))}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           ${mobileMetric('EXCH',compactQuote(totEx,'total',game))}
@@ -2635,7 +2707,7 @@ function renderMatrix(){
         </td>
 
         <td class="best-col spread-group">
-          ${compactQuote(sprBest, 'spread', game)}
+          ${compactQuote(sprBest, 'spread', game, true)}
         </td>
 
         <td class="exchange-col spread-group">
@@ -2657,7 +2729,7 @@ function renderMatrix(){
         </td>
 
         <td class="best-col total-group">
-          ${compactQuote(totBest, 'total', game)}
+          ${compactQuote(totBest, 'total', game, true)}
         </td>
 
         <td class="exchange-col total-group">
@@ -2742,7 +2814,7 @@ function activityTitle(event){
   const p = event.payload || {};
   const book = p.sportsbook ? `${BOOK_ABBR[p.sportsbook] || p.sportsbook} ` : '';
   const labels = {
-    MARKET_OPENED:'Market opened', PINNACLE_OPENED:'Pinnacle open',
+    MARKET_OPENED:`${String(event.market || 'Market').toUpperCase()} market opened`, PINNACLE_OPENED:'Pinnacle open',
     MARKET_MOVE:'Market move', PINNACLE_MOVE:'Pinnacle move', MARKET_FOLLOW:'Market follow',
     RATINGS_UPDATED:'Ratings update',
     MODEL_STATE_CHANGED:`${p.domain || 'Model'} state changed`,
@@ -2767,8 +2839,13 @@ function activityDetail(event){
     return `${prefix}${team}${oldValue} → ${newValue}`;
   }
   if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event.event_type)){
-    if(event.market==='spread') return `Spread opened ${event.home_team || ''} ${fmtLine(event.new_line)}`;
-    return `Total opened ${event.new_line ?? '—'}`;
+    if(event.market==='spread'){
+      const n=Number(event.new_line);
+      if(!Number.isFinite(n) || Math.abs(n)<.05) return 'SPREAD MARKET OPENED · PK';
+      const favorite=n<0?event.home_team:event.away_team;
+      return `SPREAD MARKET OPENED · ${favorite || 'Favorite'} -${Math.abs(n)}`;
+    }
+    return `TOTAL MARKET OPENED · ${event.new_line ?? '—'}`;
   }
   if(event.event_type === 'RATINGS_UPDATED') return (p.sources || []).join(' · ');
   if(event.event_type === 'MODEL_STATE_CHANGED'){

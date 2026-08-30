@@ -30,6 +30,43 @@ def move(event_id, book, market, old, new, detected, refresh="r3"):
 
 
 class WarRoomMatrixPhase2Test(unittest.TestCase):
+    def test_shadow_readiness_copies_validated_tooltip_metadata(self):
+        ready = matrix.shadow_readiness({
+            "away_spread_shadow_ready": True, "home_spread_shadow_ready": True,
+            "away_total_shadow_ready": True, "home_total_shadow_ready": True,
+            "away_predicted_sp_plus_change": 0.02883061665205832,
+            "away_predicted_sagarin_change": 1.8304119127513174,
+            "home_predicted_sp_plus_change": 0.6189419327747037,
+            "home_predicted_sagarin_change": 0.34978730946048686,
+            "away_predicted_sp_plus_offense_change": 1.599047473500665,
+            "away_predicted_sp_plus_defense_change": 0.7664458435598123,
+            "home_predicted_sp_plus_offense_change": 0.9708464420920678,
+            "home_predicted_sp_plus_defense_change": -1.1339951829639203,
+            "home_component_reason": "pending postgame",
+            "spread_missing_reasons": ["home pending postgame"],
+        })
+        self.assertEqual(ready["spread_status"], "READY")
+        self.assertEqual(ready["total_status"], "READY")
+        self.assertAlmostEqual(ready["team_contributions"]["away"]["spread"]["net_impact"], 0.9296212647)
+        self.assertAlmostEqual(ready["team_contributions"]["away"]["total"]["net_impact"], 1.1827466585)
+        self.assertAlmostEqual(ready["team_contributions"]["home"]["spread"]["net_impact"], 0.4843646211)
+        self.assertAlmostEqual(ready["team_contributions"]["home"]["total"]["net_impact"], -0.0815743704)
+        self.assertEqual(ready["spread_missing_reasons"], ["home pending postgame"])
+
+    def test_projection_favorite_sort_highlight_and_score_slots_are_presentational(self):
+        source = PAGE.read_text()
+        self.assertIn("const team=n<0?game.home_team:game.away_team;", source)
+        self.assertIn("Math.abs(n)<.05) return '';", source)
+        self.assertIn("spreadFavoriteLogo(game,value)", source)
+        self.assertIn("`${short} ${signedImpact(row.net_impact)} ${market}`", source)
+        self.assertNotIn("SP+ ${signedImpact(row.sp_plus_change)}", source)
+        self.assertIn("setSort('model_state')", source)
+        self.assertIn("normalizedModelState(a.state)", source)
+        self.assertIn("firstMarketRecency(first)", source)
+        self.assertIn("minutes!==null && minutes<=60?'market-first-new':''", source)
+        self.assertIn("flex:0 0 28px;width:28px", source)
+        self.assertIn('class="matchup-team-name" title="${esc(team)}"', source)
+
     def test_canonical_composite_rank_source_and_strict_values(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "ratings.json"
@@ -118,7 +155,7 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertNotIn('class="open-col total-group"', rows)
         self.assertNotIn("SPREAD</span><br>PINN", source)
         self.assertNotIn("TOTAL<br>PINN", source)
-        self.assertIn("compactQuote(sprBest, 'spread', game)", source)
+        self.assertIn("compactQuote(sprBest, 'spread', game, true)", source)
         self.assertIn("compactQuote(sprEx, 'spread', game)", source)
         self.assertIn("const move=q.last_material_move", source)
         self.assertIn("setInterval(updateMatrixRecencyMarkers, 30000)", source)
@@ -254,8 +291,8 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn("if(value<=138) return 'rank-tier-5';\n  return '';", source)
         self.assertIn('class="team-composite-rank ${compositeRankClass(rank)}"', source)
         self.assertIn("${valid?esc(value):'—'}", source)
-        self.assertIn("matchupTeam(game.away_team,game.team_composite_rank?.away)", source)
-        self.assertIn("matchupTeam(game.home_team,game.team_composite_rank?.home)", source)
+        self.assertIn("matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)", source)
+        self.assertIn("matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)", source)
         self.assertIn("flex:0 0 22px;min-width:22px", source)
         self.assertIn("font-size:9.5px;font-weight:950", source)
         home_sort = source.split("function currentRows(){", 1)[1].split("function sortArrow", 1)[0]

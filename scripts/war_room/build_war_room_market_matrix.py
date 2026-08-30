@@ -680,6 +680,12 @@ def shadow_readiness(component):
             return "PARTIAL"
         return "WAITING"
 
+    def net_impact(*fields):
+        values = [number(component.get(field)) for field in fields]
+        if any(value is None for value in values):
+            return None
+        return sum(values) / len(values)
+
     spread_status = state(spread_count)
     total_status = state(total_count)
 
@@ -759,6 +765,40 @@ def shadow_readiness(component):
                 "market_readiness_reason"
             )
         ),
+
+        # Presentation-only metadata copied from the validated Shadow
+        # component artifact. The browser does not recalculate model impacts.
+        "team_contributions": {
+            side: {
+                "spread": {
+                    "sp_plus_change": component.get(f"{side}_predicted_sp_plus_change"),
+                    "sagarin_change": component.get(f"{side}_predicted_sagarin_change"),
+                    "net_impact": net_impact(
+                        f"{side}_predicted_sp_plus_change",
+                        f"{side}_predicted_sagarin_change",
+                    ),
+                    # Team-perspective sign: a positive accepted rating update
+                    # moves the 50/50 next-game spread toward that team. The
+                    # home-line orientation is applied only when the two team
+                    # contributions are combined by the projection engine.
+                    "net_impact_formula": "0.5 * SP+ change + 0.5 * Sagarin change",
+                },
+                "total": {
+                    "offense_change": component.get(f"{side}_predicted_sp_plus_offense_change"),
+                    "defense_change": component.get(f"{side}_predicted_sp_plus_defense_change"),
+                    "net_impact": net_impact(
+                        f"{side}_predicted_sp_plus_offense_change",
+                        f"{side}_predicted_sp_plus_defense_change",
+                    ),
+                    "net_impact_formula": "0.5 * offense change + 0.5 * defense change",
+                },
+                "component_status": component.get(f"{side}_component_status"),
+                "component_reason": component.get(f"{side}_component_reason"),
+            }
+            for side in ("away", "home")
+        },
+        "spread_missing_reasons": component.get("spread_missing_reasons") or [],
+        "total_missing_reasons": component.get("total_missing_reasons") or [],
     }
 
 
@@ -1632,6 +1672,7 @@ def main():
     line_history_payload = load_json(MATCHUP_LINE_HISTORY, {})
     pinnacle_openers = load_pinnacle_openers(BOOK_LINE_HISTORY)
     activity_state = load_json(ACTIVITY_STATE, {})
+    first_market_state = activity_state.get("first_market_availability") or {}
     move_index = material_move_index(read_history(ACTIVITY_HISTORY))
 
     shadow_component_payload = (
@@ -2315,6 +2356,10 @@ def main():
                     ),
                     activity_state.get("initialized_at"),
                 ),
+                "first_available": {
+                    market: first_market_state.get(f"{gid}|{market}")
+                    for market in ("spread", "total")
+                },
             },
 
             "edges": {

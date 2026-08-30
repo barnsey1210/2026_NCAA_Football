@@ -287,8 +287,16 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
         f"{row.get('game_id')}|{row.get('market')}" for row in (previous.get("markets") or {}).values()
     })
     games_meta = current.get("games_meta", {})
+    newly_opened_game_markets: set[str] = set()
 
-    for key, new in current.get("markets", {}).items():
+    current_markets = current.get("markets", {})
+    for key, new in sorted(
+        current_markets.items(),
+        key=lambda item: (
+            normalized_timestamp(item[1].get("quote_timestamp"), detected_at),
+            item[0],
+        ),
+    ):
         old = (previous.get("markets") or {}).get(key)
         common = dict(
             observed_at=normalized_timestamp(new.get("quote_timestamp"), detected_at),
@@ -301,7 +309,14 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
         )
         if old is None:
             game_market_key = f"{new.get('game_id')}|{new.get('market')}"
-            event_type = "MARKET_OPENED" if game_market_key not in previously_opened_game_markets else "BOOK_MARKET_ADDED"
+            first_game_market = (
+                game_market_key not in previously_opened_game_markets
+                and game_market_key not in newly_opened_game_markets
+            )
+            event_type = "MARKET_OPENED" if first_game_market else "BOOK_MARKET_ADDED"
+            newly_opened_game_markets.add(game_market_key)
+            if first_game_market:
+                common["observed_at"] = detected_at
             out.append(event(event_type=event_type, metadata={"selection_source": new.get("selection_source")},
                              identity_parts=(new.get("pair_fingerprint"),), **common))
         elif old.get("line") != new.get("line"):
@@ -409,6 +424,43 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
                 identity_parts=(old.get("status"), new.get("status"), refresh_id),
             ))
     return out
+
+
+def first_market_availability(previous: dict[str, Any], current: dict[str, Any], detected_at: str) -> dict[str, Any]:
+    """Persist first accepted game/market availability without replaying startup inventory."""
+
+    established = dict(previous.get("first_market_availability") or {})
+    initializing = not bool(previous)
+    prior_game_markets = set(previous.get("opened_game_market_keys") or [])
+    candidates: dict[str, list[dict[str, Any]]] = {}
+    for row in (current.get("markets") or {}).values():
+        key = f"{row.get('game_id')}|{row.get('market')}"
+        candidates.setdefault(key, []).append(row)
+
+    for key, rows in candidates.items():
+        if key in established:
+            continue
+        first = sorted(
+            rows,
+            key=lambda row: (
+                normalized_timestamp(row.get("quote_timestamp"), detected_at),
+                str(row.get("book") or ""),
+            ),
+        )[0]
+        established[key] = {
+            "first_market_available_at": detected_at,
+            "detected_at": detected_at,
+            "first_quote_timestamp": first.get("quote_timestamp"),
+            # A state file created before this field existed already proves
+            # those game/markets were established inventory, not new alerts.
+            "baseline": initializing or key in prior_game_markets,
+            "book": first.get("book"),
+            "line": first.get("line"),
+            "price": first.get("price"),
+            "side": first.get("side"),
+            "selection_source": first.get("selection_source"),
+        }
+    return established
 
 
 def public_summary(events: list[dict[str, Any]]) -> dict[str, int]:
@@ -805,6 +857,9 @@ def main() -> None:
         current["opened_market_keys"] = sorted(set(previous.get("opened_market_keys", [])) | set(current["markets"]))
         current["opened_game_market_keys"] = sorted(
             set(previous.get("opened_game_market_keys", [])) | set(current["opened_game_market_keys"])
+        )
+        current["first_market_availability"] = first_market_availability(
+            previous, current, detected_at
         )
         current["initialized_at"] = previous.get("initialized_at") or detected_at
         current["updated_at"] = detected_at

@@ -47,6 +47,41 @@ def matrix(spread=-3.0, spread_price=-110, include_total=True):
 
 
 class WarRoomActivityTest(unittest.TestCase):
+    def test_first_market_is_one_event_per_domain_and_persists_across_reloads(self):
+        health = {"ratings_health": {"sources": {}}}
+        empty = matrix(include_total=False)
+        empty["games"][0]["market"]["primary_sportsbooks"] = {}
+        before = activity.current_snapshot(empty, health, {}, {})
+        opened_matrix = matrix()
+        opened_matrix["games"][0]["market"]["primary_sportsbooks"]["FanDuel"] = {
+            "spread": pair(-3.0), "total": total_pair(52.5)
+        }
+        after = activity.current_snapshot(opened_matrix, health, {}, {})
+        events = activity.detect(before, after, "2026-08-27T12:02:00Z")
+        opened = [row for row in events if row["event_type"] == "MARKET_OPENED"]
+        self.assertEqual([row["market"] for row in opened], ["spread", "total"])
+        self.assertEqual(activity.detect(after, after, "2026-08-27T12:03:00Z"), [])
+
+        first = activity.first_market_availability(before, after, "2026-08-27T12:02:00Z")
+        persisted = activity.first_market_availability(
+            {**after, "first_market_availability": first}, after, "2026-08-27T12:03:00Z"
+        )
+        self.assertEqual(first, persisted)
+        self.assertFalse(first["2026-1-a-b|spread"]["baseline"])
+        self.assertFalse(first["2026-1-a-b|total"]["baseline"])
+
+    def test_startup_inventory_and_legacy_state_are_baselined(self):
+        health = {"ratings_health": {"sources": {}}}
+        current = activity.current_snapshot(matrix(), health, {}, {})
+        startup = activity.first_market_availability({}, current, "2026-08-27T12:02:00Z")
+        self.assertTrue(all(row["baseline"] for row in startup.values()))
+        legacy = {
+            "opened_game_market_keys": current["opened_game_market_keys"],
+            "markets": current["markets"],
+        }
+        migrated = activity.first_market_availability(legacy, current, "2026-08-27T12:02:00Z")
+        self.assertTrue(all(row["baseline"] for row in migrated.values()))
+
     def test_line_change_is_event_but_price_only_change_is_not(self):
         health = {"ratings_health": {"sources": {}}}
         before = activity.current_snapshot(matrix(), health, {}, {})
@@ -318,7 +353,7 @@ class WarRoomActivityTest(unittest.TestCase):
         self.assertIn(".team-logo-holder{", source)
         self.assertIn("background:rgba(255,255,255,.08)", source)
         self.assertIn("drop-shadow(0 0 1px rgba(255,255,255,.90))", source)
-        self.assertEqual(source.count('class="team-logo-holder"'), 4)
+        self.assertGreaterEqual(source.count('class="team-logo-holder"'), 4)
         self.assertNotIn(".market-book-logo .team-logo-holder", source)
         self.assertIn('id="activitySnapshot"', source)
         self.assertIn("renderMarketSnapshot", source)
