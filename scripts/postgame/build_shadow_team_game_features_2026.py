@@ -175,11 +175,21 @@ def atomic_text(path: Path, text: str) -> None:
 def clean(value: Any):
     if value is None:
         return None
+    if isinstance(value, dict):
+        return {
+            str(key): clean(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (pd.Series, np.ndarray)):
+        return [clean(item) for item in value.tolist()]
+    if isinstance(value, (list, tuple)):
+        return [clean(item) for item in value]
     if isinstance(value, (float, np.floating)):
         return float(value) if math.isfinite(float(value)) else None
     if isinstance(value, (np.integer,)):
         return int(value)
-    if pd.isna(value):
+    missing = pd.isna(value)
+    if isinstance(missing, (bool, np.bool_)) and missing:
         return None
     return value.item() if hasattr(value, "item") else value
 

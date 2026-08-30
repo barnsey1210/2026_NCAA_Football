@@ -6,6 +6,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import numpy as np
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,9 +23,77 @@ def load(name, relative):
 CONTROL = load("postgame_control", "scripts/control/run_data_refresh.py")
 MATRIX = load("postgame_matrix", "scripts/war_room/build_war_room_market_matrix.py")
 PULL = load("postgame_pull", "scripts/postgame/pull_cfbd_postgame_2026.py")
+FEATURES = load("postgame_features", "scripts/postgame/build_postgame_features_2026.py")
+SHADOW_FEATURES = load(
+    "shadow_team_features",
+    "scripts/postgame/build_shadow_team_game_features_2026.py",
+)
+TEAM_IDENTITY = load("postgame_team_identity", "scripts/site/team_identity.py")
 
 
 class PostgameOperationalServiceTests(unittest.TestCase):
+    def test_canonical_team_identity_folds_diacritics_without_fuzzy_matching(self):
+        self.assertEqual(
+            TEAM_IDENTITY.canonical_team_name("San Jos\u00e9 State"),
+            "San Jose State",
+        )
+        self.assertEqual(
+            TEAM_IDENTITY.canonical_team_name("Eastern Michigan"),
+            "Eastern Michigan",
+        )
+        self.assertNotEqual(
+            TEAM_IDENTITY.canonical_team_key("Miami (OH)"),
+            TEAM_IDENTITY.canonical_team_key("Miami (FL)"),
+        )
+
+    def test_postgame_pbp_matches_accented_provider_team_to_canonical_team(self):
+        results = [{
+            "game_id": "g7",
+            "cfbd_game_id": 401864494,
+            "home_team": "USC",
+            "away_team": "San Jose State",
+        }]
+        plays = [
+            {
+                "gameId": 401864494,
+                "offense": "San Jos\u00e9 State",
+                "defense": "USC",
+                "playType": "Rush",
+                "ppa": 0.4,
+                "period": 1,
+            },
+            {
+                "gameId": 401864494,
+                "offense": "USC",
+                "defense": "San Jos\u00e9 State",
+                "playType": "Pass Reception",
+                "ppa": -0.1,
+                "period": 1,
+            },
+        ]
+        rows = FEATURES.build_pbp_rows(0, results, plays, [])
+        sjsu = next(row for row in rows if row["team"] == "San Jose State")
+        self.assertEqual(sjsu["off_plays"], 1)
+        self.assertEqual(sjsu["off_ppa"], 0.4)
+        self.assertEqual(sjsu["def_ppa_allowed"], -0.1)
+
+    def test_shadow_clean_preserves_ordered_multi_value_data(self):
+        value = {
+            "array": np.array([1.0, np.nan, 3.0]),
+            "series": pd.Series([np.int64(4), "x"]),
+            "tuple": (True, np.float64(2.5)),
+            "list": [None, {"nested": np.int64(7)}],
+        }
+        self.assertEqual(
+            SHADOW_FEATURES.clean(value),
+            {
+                "array": [1.0, None, 3.0],
+                "series": [4, "x"],
+                "tuple": [True, 2.5],
+                "list": [None, {"nested": 7}],
+            },
+        )
+
     def test_command_path_is_runtime_only_and_ordered(self):
         commands = CONTROL.postgame_commands()
         names = [Path(command[1]).name for command in commands]

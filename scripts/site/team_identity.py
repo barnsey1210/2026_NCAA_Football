@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,9 @@ LOGO_DIR = ROOT / "logos"
 
 
 def _norm(value: Any) -> str:
-    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
 @lru_cache(maxsize=1)
@@ -93,6 +96,12 @@ def canonical_team(value: Any) -> dict | None:
 def canonical_team_name(value: Any) -> str | None:
     row = canonical_team(value)
     return str(row["team"]) if row else None
+
+
+def canonical_team_key(value: Any) -> str:
+    """Return a deterministic alias-aware identity key for team matching."""
+    canonical = canonical_team_name(value)
+    return _norm(canonical if canonical is not None else value)
 
 
 def canonical_team_slug(value: Any) -> str | None:

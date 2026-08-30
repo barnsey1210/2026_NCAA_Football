@@ -6,6 +6,7 @@ import csv
 import gzip
 import json
 import math
+import sys
 import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -14,6 +15,10 @@ from typing import Any, Optional
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.site.team_identity import canonical_team_key
 
 RESULTS = ROOT / "data/canonical/game_results_2026.json"
 POSTGAME_ROOT = ROOT / "data/canonical/postgame/2026"
@@ -204,8 +209,8 @@ def build_pbp_rows(week, results, plays, havoc):
 
     for p in plays:
         gid = str(p.get("gameId") or "")
-        off = str(p.get("offense") or "")
-        deff = str(p.get("defense") or "")
+        off = canonical_team_key(p.get("offense"))
+        deff = canonical_team_key(p.get("defense"))
 
         if gid and off:
             offense[(gid, off)].append(p)
@@ -215,7 +220,7 @@ def build_pbp_rows(week, results, plays, havoc):
     havoc_map = {}
     for h in havoc:
         gid = str(h.get("gameId") or "")
-        team = str(h.get("team") or "")
+        team = canonical_team_key(h.get("team"))
         if gid and team:
             havoc_map[(gid, team)] = h
 
@@ -226,8 +231,9 @@ def build_pbp_rows(week, results, plays, havoc):
             (r["home_team"], r["away_team"]),
             (r["away_team"], r["home_team"]),
         ):
-            op = [p for p in offense.get((gid, team), []) if competitive_play(p)]
-            dp = [p for p in defense.get((gid, team), []) if competitive_play(p)]
+            team_key = canonical_team_key(team)
+            op = [p for p in offense.get((gid, team_key), []) if competitive_play(p)]
+            dp = [p for p in defense.get((gid, team_key), []) if competitive_play(p)]
 
             row = {
                 "season": 2026,
@@ -239,7 +245,7 @@ def build_pbp_rows(week, results, plays, havoc):
             }
             row.update(summarize_offense(op))
             row.update(summarize_defense(dp))
-            row["def_havoc_rate"] = havoc_value(havoc_map.get((gid, team)))
+            row["def_havoc_rate"] = havoc_value(havoc_map.get((gid, team_key)))
             rows.append(row)
 
     return rows
@@ -286,10 +292,14 @@ def build_drive_rows(week, results, plays, drives):
         if not result or not competitive_drive(d):
             continue
 
-        offense = str(d.get("offense") or "")
-        defense = str(d.get("defense") or "")
+        offense = canonical_team_key(d.get("offense"))
+        defense = canonical_team_key(d.get("defense"))
 
-        if offense not in (result["home_team"], result["away_team"]):
+        result_team_keys = {
+            canonical_team_key(result["home_team"]),
+            canonical_team_key(result["away_team"]),
+        }
+        if offense not in result_team_keys:
             continue
 
         start_ytg = finite(d.get("startYardsToGoal"))
@@ -338,8 +348,8 @@ def build_drive_rows(week, results, plays, drives):
             (r["home_team"], r["away_team"]),
             (r["away_team"], r["home_team"]),
         ):
-            own = offense_rows.get((gid, team), {})
-            opponent = offense_rows.get((gid, opp), {})
+            own = offense_rows.get((gid, canonical_team_key(team)), {})
+            opponent = offense_rows.get((gid, canonical_team_key(opp)), {})
 
             rows.append({
                 "season": 2026,
@@ -375,9 +385,9 @@ def remaining_seconds(play):
 
 
 def play_scores(play):
-    home = play.get("home")
-    away = play.get("away")
-    offense = play.get("offense")
+    home = canonical_team_key(play.get("home"))
+    away = canonical_team_key(play.get("away"))
+    offense = canonical_team_key(play.get("offense"))
 
     offense_score = finite(play.get("offenseScore")) or 0
     defense_score = finite(play.get("defenseScore")) or 0
@@ -390,9 +400,9 @@ def play_scores(play):
 
 
 def home_win_probability(play, seconds_left):
-    home = play.get("home")
-    away = play.get("away")
-    offense = play.get("offense")
+    home = canonical_team_key(play.get("home"))
+    away = canonical_team_key(play.get("away"))
+    offense = canonical_team_key(play.get("offense"))
 
     home_score, away_score = play_scores(play)
 
