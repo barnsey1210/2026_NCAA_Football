@@ -29,6 +29,23 @@ class RatingsWeekFreshnessTests(unittest.TestCase):
         self.assertNotIn("ModuleNotFoundError", result.stderr)
         self.assertIn("--sources", result.stdout)
 
+    def test_projection_status_builder_loads_helper_when_executed_directly(self):
+        root = Path(__file__).resolve().parents[1]
+        script = root / "scripts/site/build_projection_source_status_view.py"
+        code = (
+            "import runpy; "
+            f"runpy.run_path({str(script)!r}, run_name='not_main')"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("ModuleNotFoundError", result.stderr)
+
     def test_ratings_owner_persists_accepted_update_across_no_change(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)

@@ -3,15 +3,19 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
-from scripts.ratings.freshness_evidence import recover_projection_accepted_updates
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.ratings.freshness_evidence import recover_projection_accepted_updates
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
