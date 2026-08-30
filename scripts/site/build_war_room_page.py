@@ -880,6 +880,16 @@ tr:hover td.context-group{background:#202d39}
   color:var(--muted);
 }
 
+.injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
+.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:19px;height:18px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
+.injury-team .team-logo-holder{--team-logo-size:16px}
+.injury-rank{position:absolute;right:-2px;bottom:-1px;min-width:11px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
+.injury-rank.injury-tier-1{color:#39e89a}
+.injury-rank.injury-tier-2{color:#a9df6a}
+.injury-rank.injury-tier-3{color:#f4cd4b}
+.injury-rank.injury-tier-4{color:#f28c45}
+.injury-rank.injury-tier-5{color:#ff626f}
+
 .signal-stack{
   display:flex;
   gap:5px;
@@ -1121,6 +1131,8 @@ tr:hover td.context-group{background:#202d39}
     background:#09131d;
   }
   .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
+  .mobile-foot-injury{display:flex;align-items:center;gap:5px;min-width:0}
+  .mobile-foot-injury .injury-stack{flex-direction:row;gap:5px}
   .mobile-foot-signals{display:flex;align-items:center;gap:5px;min-width:0}
 
   .wr-top{
@@ -2279,6 +2291,45 @@ function compositeRankClass(rank){
   return '';
 }
 
+function injuryRankClass(rank){
+  const value=Number(rank);
+  if(!Number.isInteger(value) || value<1 || value>138) return '';
+  if(value<=28) return 'injury-tier-1';
+  if(value<=56) return 'injury-tier-2';
+  if(value<=83) return 'injury-tier-3';
+  if(value<=111) return 'injury-tier-4';
+  return 'injury-tier-5';
+}
+
+function injuryTeam(team,row,source){
+  if(!row || !Number.isInteger(Number(row.injury_impact_rank))){
+    return `<span class="injury-team" title="${esc(team)} · injury impact unavailable"><span class="injury-placeholder">—</span></span>`;
+  }
+  const rank=Number(row.injury_impact_rank);
+  const slug=teamLogoSlug(team);
+  const updated=row.source_updated_at
+    ? fmtDateTimeET(row.source_updated_at)
+    : 'source update time unverified';
+  const title=[
+    team,
+    `Injury Impact Rank: ${rank}/138`,
+    `Impact Score: ${row.injury_impact_score ?? '—'}`,
+    `Impact Injuries: ${row.injury_number ?? '—'}`,
+    `New Injuries: ${row.injury_new ?? '—'}`,
+    `Updated: ${updated}`,
+    source?.pulled_at ? `Pulled: ${fmtDateTimeET(source.pulled_at)}` : null
+  ].filter(Boolean).join('\n');
+  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span></span>`;
+}
+
+function injuryCell(game){
+  const injury=game.injury_rank || {};
+  if(!injury.away && !injury.home){
+    return '<span class="injury-placeholder">—</span>';
+  }
+  return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
+}
+
 function matchupTeam(team,rank,score=null){
   const slug = teamLogoSlug(team);
   const value=Number(rank);
@@ -2612,7 +2663,7 @@ function renderMobileMatrix(rows){
           ${mobileMetric('EXCH',compactQuote(totEx,'total',game))}
         </div>
       </div>
-      <div class="mobile-game-foot"><span class="mobile-foot-label">INJ —</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
+      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJ</span>${injuryCell(game)}</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
     </article>`;
   }).join('');
@@ -2761,7 +2812,7 @@ function renderMatrix(){
         </td>
 
         <td class="injury-col context-group">
-          <span class="injury-placeholder">—</span>
+          ${injuryCell(game)}
         </td>
 
         <td class="signal-col context-group">

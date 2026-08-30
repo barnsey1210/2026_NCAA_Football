@@ -35,6 +35,7 @@ config/page_health_registry.json
 daily_market_update.sh
 data/model_tracking/config.json
 data/model_tracking/schema.json
+data/canonical/cfbdepth_team_injury_impact_current.json
 data/site/cfbdepth_rankings_2026.json
 data/site/cfbdepth_teams_2026.json
 data/site/ncaaf_spread_half_point_values_2021_2025.json
@@ -98,6 +99,7 @@ scripts/schedule/pull_cfbd_schedule_2026.py
 scripts/site/apply_shared_war_room_shell.py
 scripts/site/augment_team_advanced_profiles_drives.py
 scripts/site/build_conference_logo_schedule.py
+scripts/injuries/pull_cfbdepth_team_injury_impact.py
 scripts/site/build_matchups_view.py
 scripts/site/build_page_health_status.py
 scripts/site/build_public_site.py

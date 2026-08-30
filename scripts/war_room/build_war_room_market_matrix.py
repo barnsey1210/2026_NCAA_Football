@@ -7,7 +7,7 @@ import csv
 import json
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -75,6 +75,10 @@ PROJECTION_SOURCE_STATUS = (
 )
 
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
+CFBDEPTH_INJURY_IMPACT = (
+    ROOT / "data/canonical/cfbdepth_team_injury_impact_current.json"
+)
+INJURY_MAX_AGE = timedelta(hours=6)
 
 BETTING_ANGLES = (
     ROOT / "data/signals/game_betting_angles_2026.csv"
@@ -205,6 +209,33 @@ def load_team_composite_ranks(path):
             continue
         ranks[team] = rank
     return ranks
+
+
+def load_team_injury_impact(path, now=None):
+    payload = load_json(path, {})
+    pulled_at = parse_timestamp(payload.get("pulled_at"))
+    reference = now or datetime.now(timezone.utc)
+    source_status = str(payload.get("status") or "UNAVAILABLE")
+    fresh = bool(
+        pulled_at
+        and reference - pulled_at <= INJURY_MAX_AGE
+        and source_status.startswith("AVAILABLE")
+    )
+    rows = {}
+    if fresh:
+        for row in payload.get("teams", []):
+            team = normalize_team(row.get("team"))
+            rank = number(row.get("injury_impact_rank"))
+            if not team or not isinstance(rank, int) or not 1 <= rank <= 138:
+                continue
+            rows[team] = row
+    return rows, {
+        "status": source_status if fresh else "STALE" if pulled_at else "UNAVAILABLE",
+        "source": payload.get("source") or "CFBDepth Injury Impact Report",
+        "source_updated_at": payload.get("source_updated_at"),
+        "pulled_at": payload.get("pulled_at"),
+        "team_count": len(rows),
+    }
 
 
 def spread_move_direction(old_line, new_line):
@@ -1840,6 +1871,9 @@ def main():
 
     fbs_teams = load_fbs_team_universe()
     team_composite_ranks = load_team_composite_ranks(RATINGS_VIEW)
+    team_injury_impact, injury_source = load_team_injury_impact(
+        CFBDEPTH_INJURY_IMPACT
+    )
     betting_signal_map = load_team_betting_signals()
 
     projection_games = projection_payload.get("games", [])
@@ -2519,9 +2553,13 @@ def main():
             ),
 
             "injury_rank": {
-                "away": None,
-                "home": None,
-                "status": "SOURCE_NOT_CONFIGURED",
+                "away": team_injury_impact.get(
+                    normalize_team(game.get("away_team"))
+                ),
+                "home": team_injury_impact.get(
+                    normalize_team(game.get("home_team"))
+                ),
+                **injury_source,
             },
         })
 

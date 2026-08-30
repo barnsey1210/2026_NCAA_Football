@@ -132,6 +132,13 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIn("'available'", block)
         self.assertIn("'missing'", block)
 
+    def test_injury_rank_tiers_and_two_team_rendering(self):
+        for boundary in (28, 56, 83, 111, 138):
+            self.assertIn(f"value<={boundary}", self.source)
+        self.assertIn("injuryTeam(game.away_team,injury.away,injury)", self.source)
+        self.assertIn("injuryTeam(game.home_team,injury.home,injury)", self.source)
+        self.assertIn("Injury Impact Rank: ${rank}/138", self.source)
+
     def test_week_change_is_view_only(self):
         handler = re.search(
             r"weekSelect'\)\.addEventListener\((.*?)\n\);",

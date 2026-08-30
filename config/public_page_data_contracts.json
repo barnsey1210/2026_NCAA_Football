@@ -7,7 +7,7 @@
   },
   "pages": {
     "index.html": ["current_market", "market_history", "ratings", "schedule", "futures", "betting", "injuries", "coaches", "conference"],
-    "war-room.html": ["war_room_market_matrix", "war_room_health", "war_room_activity", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting"],
+    "war-room.html": ["war_room_market_matrix", "war_room_health", "war_room_activity", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting", "injury_impact"],
     "ratings.html": ["ratings"],
     "openers.html": ["current_market", "market_history", "ratings", "schedule"],
     "matchups.html": ["current_market", "market_history", "ratings", "schedule", "betting", "injuries", "coaches"],
@@ -46,7 +46,16 @@
       "shadow_tooltip_contract": "shadow_readiness.team_contributions exposes direct 50/50 team-level net decompositions of validated Spread and Total component updates plus readiness reasons; the browser only formats them",
       "recency_contract": "canonical opener and move timestamps age locally; latest plus two prior completed refresh ids support hybrid movement recency",
       "team_composite_rank_contract": "team_composite_rank.away/home copy the accepted ratings_view.teams.overall_rank values; no War Room ranking calculation",
-      "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting"]
+      "injury_impact_contract": "injury_rank.away/home copy deterministic ascending CFBDepth Injury Impact ranks from the normalized canonical artifact; stale or missing inputs fail closed",
+      "depends_on": ["war_room_health", "game_projections", "current_market", "ratings", "schedule", "betting", "injury_impact"]
+    },
+    "injury_impact": {
+      "artifact": "data/canonical/cfbdepth_team_injury_impact_current.json",
+      "builder": "scripts/injuries/pull_cfbdepth_team_injury_impact.py",
+      "schema_version": "cfbdepth-team-injury-impact-v1",
+      "owner": "INJURY_SOURCE_NORMALIZER",
+      "source": "official public CFBDepth Injury Impact Report CSV export",
+      "freshness_policy": "source_updated_at is never inferred from pulled_at; matrix ranks fail closed after six hours without a successful acquisition"
     },
     "war_room_activity": {
       "artifact": "data/site/war_room_activity.json",

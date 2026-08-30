@@ -63,15 +63,16 @@
       "name": "Betting signals (injury source isolated)",
       "order": 60,
       "required": true,
-      "external_network": false,
+      "external_network": true,
       "email_dependency": true,
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#injuries_and_signals",
       "scripts": [
+        "scripts/injuries/pull_cfbdepth_team_injury_impact.py",
         "agents/build_daily_betting_angles.py",
         "agents/append_daily_game_line_edges.py"
       ],
-      "notes": "Legacy CFBDepth injury acquisition disabled pending redesigned Data Hub integration."
+      "notes": "Official public CFBDepth Injury Impact CSV is normalized upstream; legacy HTML/article scrapers remain disabled."
     },
     {
       "id": "email_build",

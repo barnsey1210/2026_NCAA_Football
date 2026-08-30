@@ -388,9 +388,9 @@ trap on_exit EXIT
   # STAGE: injuries_and_signals
   if stage_enabled "injuries_and_signals"; then
   stage_start "injuries_and_signals"
-  echo "Skipping legacy CFBDepth injury pull; redesigned source not configured."
+  run_py "scripts/injuries/pull_cfbdepth_team_injury_impact.py" "pull_cfbdepth_team_injury_impact.py" || warn "CFBDepth Injury Impact refresh unavailable; War Room will fail closed when stale"
   echo "Skipping legacy CFBDepth article pull; redesigned source not configured."
-  echo "Skipping legacy injury alert build; canonical injury source not configured."
+  echo "Skipping legacy injury alert build; aggregate CFBDepth impact does not replace player-level alerts."
   run_py "agents/build_daily_betting_angles.py" "build_daily_betting_angles.py"
   run_py "agents/append_daily_game_line_edges.py" "append_daily_game_line_edges.py" || warn "game line email edges append failed"
   stage_pass "injuries_and_signals"
