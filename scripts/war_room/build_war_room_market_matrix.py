@@ -64,6 +64,11 @@ RATINGS_SOURCE_STATUS = (
     / "data/ratings/ratings_source_status.csv"
 )
 
+LIVE_RATING_CHANGE_STATUS = (
+    ROOT
+    / "data/ratings/live_rating_change_status.json"
+)
+
 PROJECTION_SOURCE_STATUS = (
     ROOT
     / "data/site/projection_source_status_view.json"
@@ -1265,22 +1270,57 @@ def game_freshness_watermark(game, completed_by_team):
     }
 
 
-def source_date_state(snapshot_date, watermark_date):
+def source_date_state(
+    snapshot_date,
+    watermark_date,
+    *,
+    change_status=None,
+    last_changed_at=None,
+    comparison_available=None,
+):
     if not watermark_date:
         return "PRE_GAME"
 
     if not snapshot_date:
         return "UNKNOWN"
 
-    return (
-        "UPDATED"
-        if snapshot_date > watermark_date
-        else "STALE"
+    # A later observation/pull date proves availability, not a changed
+    # provider state. Authority freshness requires explicit accepted change
+    # evidence from the owning source pipeline and a change timestamp after
+    # the applicable completed-game watermark. Missing evidence fails closed.
+    accepted_change = (
+        str(change_status or "").strip().upper() == "UPDATED"
+        and comparison_available is True
     )
+    changed_date = iso_date(last_changed_at)
+
+    if (
+        accepted_change
+        and changed_date
+        and changed_date > watermark_date
+    ):
+        return "UPDATED"
+
+    return "STALE"
 
 
-def load_team_source_snapshots(path):
+def load_team_source_snapshots(
+    path,
+    change_status_path=LIVE_RATING_CHANGE_STATUS,
+):
     out = {}
+
+    change_sources = {}
+    if change_status_path.exists():
+        try:
+            change_payload = json.loads(
+                change_status_path.read_text()
+            )
+            change_sources = (
+                change_payload.get("sources") or {}
+            )
+        except (OSError, json.JSONDecodeError):
+            change_sources = {}
 
     if not path.exists():
         return out
@@ -1294,6 +1334,14 @@ def load_team_source_snapshots(path):
             if not source:
                 continue
 
+            accepted_change = change_sources.get(source, {})
+
+            def row_or_change(field):
+                value = row.get(field)
+                if value not in (None, ""):
+                    return value
+                return accepted_change.get(field)
+
             out[source] = {
                 "snapshot_date": iso_date(
                     row.get("snapshot_date")
@@ -1301,6 +1349,17 @@ def load_team_source_snapshots(path):
                 "pulled_at": row.get("pulled_at"),
                 "latest_pull_at": row.get("latest_pull_at"),
                 "display_status": row.get("display_status"),
+                "change_status": row_or_change("change_status"),
+                "last_changed_at": row_or_change("last_changed_at"),
+                "teams_changed": number(
+                    row_or_change("teams_changed")
+                ),
+                "changed_fields": number(
+                    row_or_change("changed_fields")
+                ),
+                "comparison_available": bool_value(
+                    row_or_change("comparison_available")
+                ),
             }
 
     return out
@@ -1323,6 +1382,15 @@ def load_game_feed_snapshots(payload):
             ),
             "pulled_at": row.get("latest_pulled_at"),
             "state": row.get("state"),
+            # Game-feed pulls do not count as authority updates unless their
+            # owning pipeline supplies explicit accepted version-change
+            # evidence. Current DRatings/Massey status rows omit these fields
+            # and therefore correctly fail closed while remaining available.
+            "change_status": row.get("change_status"),
+            "last_changed_at": row.get("last_changed_at"),
+            "comparison_available": bool_value(
+                row.get("comparison_available")
+            ),
         }
 
     return out
@@ -1397,6 +1465,9 @@ def model_freshness(
             state = source_date_state(
                 snapshot_date,
                 watermark_date,
+                change_status=meta.get("change_status"),
+                last_changed_at=meta.get("last_changed_at"),
+                comparison_available=meta.get("comparison_available"),
             )
 
         sources[component] = {
@@ -1408,6 +1479,9 @@ def model_freshness(
                 meta.get("pulled_at")
                 or meta.get("latest_pull_at")
             ),
+            "change_status": meta.get("change_status"),
+            "last_changed_at": meta.get("last_changed_at"),
+            "comparison_available": meta.get("comparison_available"),
         }
 
     participating_states = [
@@ -1433,7 +1507,7 @@ def model_freshness(
         and updated_count == nominal_count
     ):
         temporal_status = "UPDATED"
-    elif updated_count > 0:
+    elif updated_count >= 2:
         temporal_status = "HYBRID"
     else:
         temporal_status = "STALE"
