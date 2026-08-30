@@ -10,10 +10,16 @@ import sys
 
 import pandas as pd
 
+ROOT = Path(__file__).resolve().parents[2]
+
+# Allow direct execution from scripts/ratings while reusing the shared
+# repository-owned freshness helper.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts.ratings.freshness_evidence import resolve_team_accepted_update
 
 
-ROOT = Path(".")
 RATINGS = ROOT / "data/ratings"
 STATE = RATINGS / "live_rating_change_status.json"
 ACCEPT_SCRIPT = ROOT / "scripts/ratings/accept_live_rating_candidates.py"

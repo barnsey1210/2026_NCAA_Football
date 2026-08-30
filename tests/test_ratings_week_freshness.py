@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import subprocess
+import sys
 import unittest
 import tempfile
 from pathlib import Path
@@ -13,6 +15,20 @@ from scripts.ratings.accept_live_rating_candidates_with_status import compare_so
 
 
 class RatingsWeekFreshnessTests(unittest.TestCase):
+    def test_status_acceptor_loads_helper_when_executed_directly(self):
+        root = Path(__file__).resolve().parents[1]
+        script = root / "scripts/ratings/accept_live_rating_candidates_with_status.py"
+        result = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("ModuleNotFoundError", result.stderr)
+        self.assertIn("--sources", result.stdout)
+
     def test_ratings_owner_persists_accepted_update_across_no_change(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
