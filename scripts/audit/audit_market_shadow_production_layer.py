@@ -8,15 +8,6 @@ cfg = json.loads((ROOT / "config/market_shadow_production.json").read_text())
 data = json.loads((ROOT / "data/site/saturday_shadow_lines.json").read_text())
 ratings = pd.read_csv(ROOT / "data/ratings/fundamental_market_rating_comparison.csv", low_memory=False)
 
-assert cfg["spread_component_weights"] == {
-    "predicted_market_rating_spread": 0.5,
-    "predicted_updated_sp_plus_spread": 0.5,
-}
-assert cfg["total_component_weights"] == {
-    "predicted_sp_plus_component_total": 0.6,
-    "existing_projected_total": 0.4,
-}
-assert cfg["total_bias_correction"] == -1.1573
 assert cfg["projected_market_value"]["terminology"] == "PROJECTED MARKET VALUE"
 assert cfg["projected_market_value"]["spread"]["mode"] == "neutral_only"
 assert cfg["projected_market_value"]["total"]["mode"] == "three_tier"
@@ -26,20 +17,37 @@ assert "games" in data
 
 for r in data["games"]:
     spread_components = r.get("spread_components") or {}
-    readiness = r.get("market_readiness_state")
-    if r.get("shadow_display_ready") and readiness == "independent_market_ready" and all(spread_components.get(key) is not None for key in cfg["spread_component_weights"]):
-        expected = sum(cfg["spread_component_weights"][key] * spread_components[key] for key in cfg["spread_component_weights"])
-        assert abs(expected - r["saturday_shadow_spread"]) < 1e-8
-    elif r.get("saturday_shadow_spread") is not None:
-        expected = spread_components.get("predicted_updated_sp_plus_spread")
-        assert expected is not None and abs(expected - r["saturday_shadow_spread"]) < 1e-8
-        assert r.get("shadow_spread_formula") == "SP+ Fallback"
+    spread_selection = r.get("shadow_spread_selection") or {}
+
+    if r.get("saturday_shadow_spread") is not None:
+        assert spread_selection.get("model_id") == "shadow_spread_sp_sagarin_v1"
+        assert spread_selection.get("selection_status") == "AVAILABLE"
+        assert spread_selection.get("availability_status") == "AVAILABLE"
+        assert spread_selection.get("source_type") == "CANONICAL_GAME_PROJECTION"
+        assert spread_selection.get("fallback_used") is False
+        assert spread_selection.get("value_home_line") is not None
+        assert abs(spread_selection["value_home_line"] - r["saturday_shadow_spread"]) < 1e-8
+        assert spread_components.get("Shadow SP+") == "PRESENT"
+        assert spread_components.get("Shadow Sagarin") == "PRESENT"
+        assert spread_components.get("forbidden_fallbacks_rejected") == "MARKET_SPPLUS_AND_SPPLUS_ONLY"
     total_components = r.get("total_components") or {}
-    if r.get("shadow_display_ready") and all(total_components.get(key) is not None for key in cfg["total_component_weights"]):
-        expected = sum(cfg["total_component_weights"][key] * total_components[key] for key in cfg["total_component_weights"]) + cfg["total_bias_correction"]
-        assert abs(expected - r["saturday_shadow_total"]) < 1e-8
-    elif r.get("saturday_shadow_total") is not None:
-        raise AssertionError("total rendered without every approved component")
+    total_selection = r.get("shadow_total_selection") or {}
+
+    if r.get("saturday_shadow_total") is not None:
+        assert total_selection.get("model_id") == "shadow_total_enhanced_spplus_od_v1"
+        assert total_selection.get("selection_status") == "AVAILABLE"
+        assert total_selection.get("availability_status") == "AVAILABLE"
+        assert total_selection.get("source_type") == "CANONICAL_GAME_PROJECTION"
+        assert total_selection.get("fallback_used") is False
+        assert total_selection.get("value_total") is not None
+        assert abs(total_selection["value_total"] - r["saturday_shadow_total"]) < 1e-8
+        assert total_components.get("updated home SP+ offense") == "PRESENT"
+        assert total_components.get("updated away SP+ offense") == "PRESENT"
+        assert total_components.get("updated home SP+ defense") == "PRESENT"
+        assert total_components.get("updated away SP+ defense") == "PRESENT"
+        assert total_components.get("frozen_model_specification") == "PRESENT"
+        assert total_components.get("exact_live_input_identity") == "PRESENT"
+        assert total_components.get("current_60_40_bridge_rejected") == "YES"
     if not r.get("has_genuine_postgame_update"):
         assert r.get("saturday_shadow_spread") is None
         assert r.get("saturday_shadow_total") is None
@@ -51,5 +59,3 @@ for r in data["games"]:
 print("PASS: market shadow production layer")
 print("ratings rows:", len(ratings))
 print("shadow games:", len(data["games"]))
-print("spread weights:", cfg["spread_component_weights"])
-print("total weights:", cfg["total_component_weights"], "bias", cfg["total_bias_correction"])

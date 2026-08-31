@@ -88,15 +88,23 @@ def main():
             hfa = 0.0 if row.get("neutral_site") else 2.5
             expected = -(row["home_sp_plus_updated"] - row["away_sp_plus_updated"] + hfa)
             check(f"HFA once {row['game_id']}", close(expected, row["predicted_updated_sp_plus_spread"]))
-        if row.get("internal_shadow_total_baseline") is not None:
-            expected = .60 * row["predicted_sp_plus_component_total"] + .40 * row["existing_projected_total"] - 1.1573
-            check(f"total correction once {row['game_id']}", close(expected, row["internal_shadow_total_baseline"]))
-        if row.get("market_readiness_state") == "independent_market_ready" and row.get("shadow_display_ready"):
-            check(f"target excluded {row['game_id']}", row.get("target_game_excluded") is True)
-            expected = .5 * row["predicted_market_rating_spread"] + .5 * row["predicted_updated_sp_plus_spread"]
-            check(f"50/50 arithmetic {row['game_id']}", close(expected, row["shadow_spread"]))
-        elif row.get("shadow_display_ready") and row.get("shadow_spread") is not None:
-            check(f"SP+ fallback {row['game_id']}", close(row["shadow_spread"], row["predicted_updated_sp_plus_spread"]) and row.get("shadow_spread_formula") == "SP+ Fallback")
+        check(
+            f"legacy 60/40 total bridge disabled {row['game_id']}",
+            row.get("internal_shadow_total_baseline") is None
+            and row.get("raw_60_40_total") is None
+            and row.get("total_bias_correction") is None,
+        )
+        # Component builder supplies provider fair-spread inputs only.
+        # The canonical game-projection contract owns the final Shadow spread.
+        check(
+            f"component layer does not author final shadow spread {row['game_id']}",
+            row.get("shadow_spread") is None,
+        )
+        check(
+            f"current Shadow spread formula {row['game_id']}",
+            row.get("shadow_spread_formula")
+            == "(Shadow SP+ fair spread + Shadow Sagarin fair spread) / 2",
+        )
         if row.get("completed_team_update_count") == 0:
             check(
                 f"preseason gate {row['game_id']}",
