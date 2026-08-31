@@ -410,6 +410,7 @@ def canonical(s):
         "Smu": "SMU", "Tcu": "TCU", "Unlv": "UNLV", "Utep": "UTEP",
         "Uab": "UAB", "Utsa": "UTSA", "Ucf": "Central Florida", "Usf": "South Florida",
         "Fau": "Florida Atlantic", "Fiu": "Florida International", "Nc State": "NC State",
+        "J Ville St": "Jacksonville State", "Nc St": "NC State", "Wvu": "West Virginia",
     }
     return fixes.get(out, out)
 
@@ -453,9 +454,13 @@ def parse_spplus():
     out = pd.DataFrame()
     out["team_raw"] = df["team"]
     out["team"] = out["team_raw"].map(canonical)
-    out["spplus"] = pd.to_numeric(df["sp"], errors="coerce")
-    out["spplus_off"] = df["off_sp"].astype(str).str.extract(r"([-+]?\d+(?:\.\d+)?)")[0].astype(float)
-    out["spplus_def"] = df["def_sp"].astype(str).str.extract(r"([-+]?\d+(?:\.\d+)?)")[0].astype(float)
+    sp_col = "sp" if "sp" in df.columns else "sp_rk"
+    off_col = "off_sp" if "off_sp" in df.columns else "off"
+    def_col = "def_sp" if "def_sp" in df.columns else "def"
+
+    out["spplus"] = pd.to_numeric(df[sp_col], errors="coerce")
+    out["spplus_off"] = df[off_col].astype(str).str.extract(r"([-+]?\d+(?:\.\d+)?)")[0].astype(float)
+    out["spplus_def"] = df[def_col].astype(str).str.extract(r"([-+]?\d+(?:\.\d+)?)")[0].astype(float)
     out = out[["team", "spplus", "spplus_off", "spplus_def", "team_raw"]].sort_values("team")
     out.to_csv(OUT / "spplus_2026_candidate.csv", index=False)
     return out

@@ -16,7 +16,7 @@ URLS = {
     "teamrankings": "https://www.teamrankings.com/college-football/ranking/predictive-by-other",
     "kford": "https://kfordratings.com/power",
     "fpi": "https://www.espn.com/college-football/fpi",
-    "spplus": "https://www.espn.com/college-football/story/_/id/48306284/2026-college-football-sp+-rankings-138-fbs-teams",
+    "spplus": "https://www.espn.com/college-football/story/_/id/49593338/final-preseason-college-football-sp+-rankings-takeaways-2026",
     "bradpowers": "https://nebula.wsimg.com/884a927043bff9994159619ba0ba890c?AccessKeyId=F4E5462B12CB60B63AD2&disposition=0&alloworigin=1",
 }
 
