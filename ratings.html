@@ -167,8 +167,7 @@ td:nth-child(6){
 @media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
 @media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
 </style></head><body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Ratings</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
-<main class="shell"><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp canonical-composite" id="stamp"><b>Canonical Composite</b><br><span>SP+ 25% · FPI 25% · TeamRankings 25% · Sagarin 25%</span></div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Ratings</span><div class="war-room-health"><i></i>Data Healthy</div></div></header><main class="shell"><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp canonical-composite" id="stamp"><b>Canonical Composite</b><br><span>SP+ 25% · FPI 25% · TeamRankings 25% · Sagarin 25%</span></div></section><div class="fresh" id="freshness"></div><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
 <thead>
 <tr>
   <th data-k="overall_rank">Rank</th>
@@ -503,8 +502,8 @@ function initRatingsTips(){
 
 async function init(){
   const [matchups,ratingView]=await Promise.all([
-    fetch('data/site/matchups_view.json?v=20260829T210222Z').then(x=>x.json()),
-    fetch('data/site/ratings_view.json?v=20260829T210222Z').then(x=>x.json())
+    fetch('data/site/matchups_view.json?v=20260831T024104Z').then(x=>x.json()),
+    fetch('data/site/ratings_view.json?v=20260831T024104Z').then(x=>x.json())
   ]);
 
   const meta=new Map();
