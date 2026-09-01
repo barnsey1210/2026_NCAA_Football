@@ -547,15 +547,15 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 .shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
-.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px}
+.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px}
 .shadow-team-chip{position:relative;display:inline-flex;align-items:center;justify-content:center}
-.shadow-team-chip .team-logo-holder{--team-logo-size:23px}
+.shadow-team-chip .team-logo-holder{--team-logo-size:26px}
 .shadow-team-mark{position:absolute;right:-3px;bottom:-4px;font-size:15px;font-weight:950;line-height:1;text-shadow:0 1px 2px #071019,0 0 2px #071019}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
 .shadow-state-label{font-size:11px;font-weight:900;line-height:1.05;letter-spacing:.03em}
 .shadow-value-line{display:inline-flex;align-items:center;justify-content:center;gap:3px}
-.shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:17px}
+.shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}
 .projection-value{display:inline-flex;align-items:center;justify-content:center;gap:3px}
 .shadow-tooltip-panel{min-width:220px;white-space:nowrap}
 .best-col{width:8.8%}
@@ -616,7 +616,7 @@ tr:hover td.context-group{background:#202d39}
 
 .matchup-kickoff{display:flex;align-items:center;gap:5px;margin-bottom:2px}
 .matchup-team{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;font-weight:900;line-height:1.2}
-.matchup-team .team-logo-holder{--team-logo-size:18px}
+.matchup-team .team-logo-holder{--team-logo-size:30px}
 .matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-composite-rank{flex:0 0 22px;min-width:22px;text-align:right;font-size:9.5px;font-weight:950;font-variant-numeric:tabular-nums;line-height:1;color:var(--muted);overflow:visible!important}
 .team-composite-rank.rank-tier-1{color:#39e89a}
@@ -726,7 +726,7 @@ tr:hover td.context-group{background:#202d39}
   padding:2px;
   filter:drop-shadow(0 0 3px rgba(235,242,248,.2));
 }
-.decision-edge .team-logo-holder{--team-logo-size:22px}
+.decision-edge .team-logo-holder{--team-logo-size:28px}
 .decision-side{font-size:12px;font-weight:900}
 
 .team-logo-holder{
@@ -736,12 +736,11 @@ tr:hover td.context-group{background:#202d39}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:1.5px;
+  padding:2px;
   overflow:hidden;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:4px;
-  box-shadow:inset 0 0 0 1px rgba(7,16,25,.22);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:6px;
 }
 
 .team-logo-holder img{
@@ -749,10 +748,7 @@ tr:hover td.context-group{background:#202d39}
   width:100%;
   height:100%;
   object-fit:contain;
-  filter:
-    drop-shadow(0 0 1px rgba(255,255,255,.90))
-    drop-shadow(0 0 2px rgba(255,255,255,.38))
-    drop-shadow(0 1px 1px rgba(0,0,0,.78));
+  image-rendering:auto;
 }
 
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
@@ -825,8 +821,8 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
-.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:19px;height:18px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
-.injury-team .team-logo-holder{--team-logo-size:16px}
+.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
+.injury-team .team-logo-holder{--team-logo-size:26px}
 .injury-rank{position:absolute;right:-2px;bottom:-1px;min-width:11px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
 .injury-rank.injury-tier-1{color:#39e89a}
 .injury-rank.injury-tier-2{color:#a9df6a}
@@ -855,7 +851,7 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 
-.signal-chip .team-logo-holder{--team-logo-size:18px}
+.signal-chip .team-logo-holder{--team-logo-size:26px}
 
 .signal-count{
   color:var(--green);
@@ -1062,7 +1058,7 @@ tr:hover td.context-group{background:#202d39}
   .mobile-metric.edge-focus{overflow:hidden}
   .mobile-metric .decision-edge{min-width:0;max-width:100%}
   .mobile-metric .decision-edge-main{max-width:100%;gap:2px}
-  .mobile-metric .decision-edge .team-logo-holder{--team-logo-size:18px}
+  .mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}
   .mobile-metric .decision-team-name{width:100%;max-width:100%;padding:0 2px;box-sizing:border-box}
   .mobile-game-foot{
     display:flex;
@@ -1093,19 +1089,9 @@ tr:hover td.context-group{background:#202d39}
   }
 }
 </style>
-<style id="shared-war-room-shell-v2">
-:root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
-.war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
-.war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
-.war-room-global .war-room-nav{display:flex!important;align-items:stretch!important;gap:0!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;height:82px!important;scrollbar-width:none!important}.war-room-global .war-room-nav::-webkit-scrollbar{display:none!important}.war-room-global .war-room-nav a{display:flex!important;align-items:center!important;padding:0 10px!important;color:#becada!important;font-size:14px!important;font-weight:900!important;white-space:nowrap!important;text-decoration:none!important;position:relative!important}.war-room-global .war-room-nav a.active{color:var(--wr-gold)!important}.war-room-global .war-room-nav a.active:after{content:"";position:absolute;left:9px;right:9px;bottom:0;height:4px;background:var(--wr-gold);border-radius:4px}
-.war-room-global .war-room-meta{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;min-width:max-content!important}.war-room-global .war-room-context{color:#8fa7c5!important;font-size:10px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important}.war-room-global .war-room-health{margin:0!important;white-space:nowrap!important}
-@media(max-width:1550px){.war-room-global{grid-template-columns:235px minmax(0,1fr) max-content!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:34px!important}.war-room-global .war-room-nav a{font-size:12px!important;padding:0 7px!important}.war-room-global .war-room-context{display:none!important}}
-@media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
-@media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
-</style></head>
+</head>
 
 <body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html" class="active">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Command Center</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
 <div class="wr-shell">
 
   <div class="wr-top">
@@ -1256,9 +1242,9 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260901T022023Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260901T022023Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260901T022023Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json';
+const HEALTH_URL = 'data/site/war_room_health.json';
+const ACTIVITY_URL = 'data/site/war_room_activity.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
