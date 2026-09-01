@@ -502,8 +502,8 @@ function initRatingsTips(){
 
 async function init(){
   const [matchups,ratingView]=await Promise.all([
-    fetch('data/site/matchups_view.json?v=20260831T024104Z').then(x=>x.json()),
-    fetch('data/site/ratings_view.json?v=20260831T024104Z').then(x=>x.json())
+    fetch('data/site/matchups_view.json?v=20260901T022023Z').then(x=>x.json()),
+    fetch('data/site/ratings_view.json?v=20260901T022023Z').then(x=>x.json())
   ]);
 
   const meta=new Map();
