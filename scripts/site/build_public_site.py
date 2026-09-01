@@ -11,7 +11,7 @@ PAGES = {
     "matchups.html":"matchups.html",
     "matchup.html":"matchup.html",
     "futures_v2.html":"futures.html",
-    "betting_v2.html":"betting.html",
+    "betting.html":"betting.html",
     "team_v2.html":"team.html",
     "ratings_v2.html":"ratings.html",
     "simulations_v2.html":"simulations.html",
@@ -157,11 +157,12 @@ def main():
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_historical_betting_analytics.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_historical_betting_explorer.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/model_tracking/build_model_performance_view.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_matchups_view.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_war_room_page.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/audit/audit_betting_analytics_propagation.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)
     # Build the existing War Room terminal through its canonical owner, then
     # publish it without applying the shared-page transform or changing its UI.
-    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_war_room_page.py')], check=True)
     for source,target in PAGES.items():
         source_path=ROOT/source
         if not source_path.exists():
