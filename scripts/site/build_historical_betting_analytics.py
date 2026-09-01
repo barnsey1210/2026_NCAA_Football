@@ -19,6 +19,12 @@ def normalize(rows,model_id,market,legacy=False):
   out.append({'model_id':model_id,'model_version':'v1','market_type':market,'checkpoint':r['checkpoint'],'threshold':float(r['threshold']),'n':n,'record':r['record'],'win_pct':r.get('win_pct'),'roi':r.get('roi'),'beat_close_pct':r.get('beat_close_pct'),'won_line_move_pct':r.get('won_line_move_pct'),'avg_clv':r.get('avg_clv'),'median_clv':r.get('median_clv'),'positive_clv_pct':r.get('positive_clv_pct'),'clv_implied_ev':r.get('clv_implied_ev'),'avg_edge':r.get('avg_edge'),'median_edge':r.get('median_edge'),'sample_strength':strength,'sample_classification':r.get('sample_classification') or ('LEGACY_COMMON_SAMPLE' if legacy else 'RETROSPECTIVE_TIMING_UNVERIFIED')})
  return out
 def main():
+ required=[EARLY/'spread_checkpoint_results.csv',EARLY/'spread_common_sample_comparison.csv',EARLY/'spread_edge_decay_summary.csv',EARLY/'total_checkpoint_results.csv',COMP/'spread_threshold_checkpoint_summary.csv',TOTAL]
+ if not all(p.exists() for p in required):
+  if OUT.exists() and json.loads(OUT.read_text()).get('schema_version')=='historical-betting-analytics-v2':
+   print(f'Preserved reviewed {OUT}: research-only inputs are not installed in this release workspace')
+   return
+  raise SystemExit('canonical historical betting analytics inputs are missing')
  s=pd.read_csv(EARLY/'spread_checkpoint_results.csv');s=s[s.model_id.eq('spread_4src_25_25_25_25_v1')];spread=normalize(records(s),'standard_spread_4src_equal_v1','spread')
  old=pd.read_csv(COMP/'spread_threshold_checkpoint_summary.csv');old=old[(old.model.eq('Five-source equal weight'))&(old.season_scope.eq('POOLED'))&(old.week_scope.eq('ALL'))];old=old.rename(columns={'games':'n','ats_pct':'win_pct','beat_closing_line_pct':'beat_close_pct'})
  spread+=normalize(records(old),'standard_spread_5src_legacy_v1','spread',True)
