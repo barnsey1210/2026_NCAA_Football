@@ -74,17 +74,17 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         )
         self.assertIsNotNone(spread)
         self.assertIsNotNone(total)
-        self.assertEqual(spread.group(1).count("sourceItem("), 5)
+        self.assertEqual(spread.group(1).count("sourceItem("), 4)
         self.assertEqual(total.group(1).count("sourceItem("), 3)
         for label in (
             "'SP+'",
             "'FPI'",
             "'TeamRankings'",
-            "'Sagarin Rating'",
+            "'DRatings'",
             "'DRatings'",
         ):
             self.assertIn(label, spread.group(1))
-        for label in ("'SP+ Total'", "'Massey Dual'", "'Sagarin Total'"):
+        for label in ("'SP+ Total'", "'Massey Dual'", "'DRatings Total'"):
             self.assertIn(label, total.group(1))
 
     def test_default_health_omits_raw_universe_counts(self):

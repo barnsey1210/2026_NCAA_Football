@@ -169,6 +169,8 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
+        [sys.executable, "scripts/model_tracking/v2/capture_current_contracts.py", "--accept"],
+        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
         [sys.executable, "scripts/war_room/build_war_room_activity.py"],
@@ -189,6 +191,8 @@ def ratings_no_change_commands(
         # values are unchanged but reconciliation/parser behavior changed.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         [sys.executable, "scripts/site/build_projection_source_status_view.py"],
+        [sys.executable, "scripts/model_tracking/v2/capture_current_contracts.py", "--accept"],
+        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
         [sys.executable, "scripts/war_room/build_war_room_activity.py"],
@@ -211,6 +215,7 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
         [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
         [sys.executable, "scripts/model_tracking/settle_model_tracking.py", "--accept"],
+        [sys.executable, "scripts/model_tracking/v2/settle_accepted_observations.py", "--accept"],
         [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
@@ -689,7 +694,11 @@ def main() -> int:
                         # 6. Freeze the refreshed pregame model state.
                         [sys.executable, "scripts/model_tracking/capture_model_tracking.py",
                          "--accept"],
+                        [sys.executable, "scripts/model_tracking/v2/capture_current_contracts.py",
+                         "--accept"],
                         [sys.executable, "scripts/model_tracking/settle_model_tracking.py",
+                         "--accept"],
+                        [sys.executable, "scripts/model_tracking/v2/settle_accepted_observations.py",
                          "--accept"],
                         [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
 

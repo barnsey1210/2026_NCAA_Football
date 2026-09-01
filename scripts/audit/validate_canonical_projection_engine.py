@@ -37,7 +37,7 @@ def main() -> None:
     complete = spread.dropna(subset=spread_cols + ["five_source_prediction"])
     spread_diff = maximum_difference(complete[spread_cols].mean(axis=1), complete["five_source_prediction"])
     checks.append({
-        "model_id": engine.STANDARD_SPREAD,
+        "model_id": engine.LEGACY_SPREAD,
         "season_scope": "2021-2025",
         "rows": int(len(complete)),
         "max_abs_difference": spread_diff,
@@ -86,7 +86,7 @@ def main() -> None:
     )
     total_diff = maximum_difference(totals["canonical"], function_values)
     checks.append({
-        "model_id": engine.STANDARD_TOTAL,
+        "model_id": engine.LEGACY_TOTAL,
         "season_scope": "2021-2025",
         "rows": int(len(totals)),
         "max_abs_difference": total_diff,
@@ -162,9 +162,9 @@ def main() -> None:
     })
 
     spread_fixture = {name: float(index + 1) for index, name in enumerate(engine.SPREAD_COMPONENTS)}
-    spread_fixture_weights = {name: 0.2 for name in engine.SPREAD_COMPONENTS}
-    total_fixture = {"SP+": 50.0, "Massey Dual": 51.0, "Sagarin Total": 52.0}
-    total_fixture_weights = {"SP+": 0.4, "Massey Dual": 0.4, "Sagarin Total": 0.2}
+    spread_fixture_weights = {name: 0.25 for name in engine.SPREAD_COMPONENTS}
+    total_fixture = {"SP+": 50.0, "Massey Dual": 51.0, "DRatings Total": 52.0}
+    total_fixture_weights = {"SP+": 0.4, "Massey Dual": 0.4, "DRatings Total": 0.2}
     missing_tests = {
         **{
             f"standard_spread_missing_{name}_rejected": engine.fixed_weight_value(
@@ -193,6 +193,9 @@ def main() -> None:
     expected_models = {
         engine.STANDARD_SPREAD,
         engine.STANDARD_TOTAL,
+        engine.LEGACY_SPREAD,
+        engine.LEGACY_TOTAL,
+        engine.TOTAL_CHALLENGER,
         engine.DEGRADED_SPREAD,
         engine.DEGRADED_TOTAL,
         engine.SHADOW_SPREAD,
@@ -251,6 +254,23 @@ def main() -> None:
             for model_id in (engine.STANDARD_SPREAD, engine.STANDARD_TOTAL)
         ),
         "assertion": "official Standard models never carry AVAILABLE_DEGRADED",
+    })
+    definitions = contract["model_definitions"]
+    candidate_formula_pass = (
+        definitions[engine.STANDARD_SPREAD]["weights"]
+        == {"SP+": 0.25, "FPI": 0.25, "TeamRankings": 0.25, "DRatings": 0.25}
+        and definitions[engine.STANDARD_TOTAL]["weights"]
+        == {"SP+": 0.4, "Massey Dual": 0.4, "DRatings Total": 0.2}
+        and definitions[engine.TOTAL_CHALLENGER]["weights"]
+        == {"SP+": 0.5, "Massey Dual": 0.5}
+        and definitions[engine.STANDARD_TOTAL]["dratings_total_field"]
+        == "DRatings Predictions.total"
+    )
+    checks.append({
+        "model_id": "active_standard_identity",
+        "rows": 3,
+        "passed": candidate_formula_pass,
+        "assertion": "exact active Standard weights and DRatings total field mapping",
     })
 
     payload = {

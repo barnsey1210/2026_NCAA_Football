@@ -121,8 +121,8 @@ EXCHANGES = (
 
 PINNACLE = "Pinnacle"
 
-STANDARD_SPREAD = "standard_spread_five_source_v1"
-STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+STANDARD_SPREAD = "standard_spread_4src_equal_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_dratings_v1"
 DEGRADED_SPREAD = "standard_spread_degraded_v1"
 DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
@@ -1479,6 +1479,7 @@ TEAM_SOURCE_MAP = {
 
 GAME_FEED_MAP = {
     "DRatings": "DRatings Predictions",
+    "DRatings Total": "DRatings Predictions",
     "Massey Dual": "Massey Games",
     "Sagarin Total": "Sagarin Game Total",
 }

@@ -362,6 +362,9 @@ def validate(root: Path, out: Path) -> list[str]:
                        'id="shadowModelsPanel"', 'data/site/shadow_model_performance.json'):
             if marker not in betting_text:
                 errors.append(f"Betting Model Performance marker missing: {marker}")
+        for marker in ('historicalDecayPanel', 'decayMetric', 'betting_analytics.js'):
+            if marker not in betting_text:
+                errors.append(f"Betting historical analytics marker missing: {marker}")
     model_performance = out / "data/site/model_performance_view.json"
     if not model_performance.is_file():
         errors.append("Model Performance public artifact missing")
@@ -371,8 +374,22 @@ def validate(root: Path, out: Path) -> list[str]:
         except (json.JSONDecodeError, OSError) as exc:
             errors.append(f"Model Performance public artifact malformed: {exc}")
         else:
-            if model_data.get("schema_version") != "model-performance-view-v2":
+            if model_data.get("schema_version") != "model-performance-view-v3":
                 errors.append("Model Performance public artifact schema mismatch")
+    historical_analytics = out / "data/site/historical_betting_analytics_v2.json"
+    if not historical_analytics.is_file():
+        errors.append("Historical Betting analytics public artifact missing")
+    else:
+        try:
+            historical_data = json.loads(historical_analytics.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"Historical Betting analytics artifact malformed: {exc}")
+        else:
+            if historical_data.get("schema_version") != "historical-betting-analytics-v2":
+                errors.append("Historical Betting analytics schema mismatch")
+            default = historical_data.get("default_selection", {}).get("spread", {})
+            if default != {"model_id": "standard_spread_4src_equal_v1", "checkpoint": "SUN_9AM_ET", "threshold": 3.0}:
+                errors.append(f"Historical Spread default mismatch: {default}")
 
     shadow_performance = out / "data/site/shadow_model_performance.json"
     if not shadow_performance.is_file():

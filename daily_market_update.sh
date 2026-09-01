@@ -650,6 +650,18 @@ fi
     profile_skip_stage "shadow_models"
   fi
 
+  # STAGE: model_tracking_v2
+  # This runs only after canonical projection/model and market acceptance.
+  if stage_enabled "model_tracking_v2"; then
+  stage_start "model_tracking_v2"
+  run_py "scripts/model_tracking/v2/capture_current_contracts.py" "capture_current_contracts.py" --accept
+  run_py "scripts/model_tracking/v2/settle_accepted_observations.py" "settle_accepted_observations.py" --accept
+  run_py "scripts/model_tracking/build_model_performance_view.py" "build_model_performance_view.py"
+  stage_pass "model_tracking_v2"
+  else
+    profile_skip_stage "model_tracking_v2"
+  fi
+
   # STAGE: playoff_futures
   if stage_enabled "playoff_futures"; then
   stage_start "playoff_futures"

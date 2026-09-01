@@ -71,8 +71,8 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         if not path.exists():
             self.skipTest("generated runtime view is not versioned in the source worktree")
         data = json.loads(path.read_text())
-        self.assertEqual(data["methodology"]["hfa"]["non_neutral"], 2.6)
-        self.assertEqual(data["methodology"]["hfa"]["neutral"], 0.0)
+        self.assertEqual(data["schema_version"], "model-performance-view-v3")
+        self.assertEqual(data["methodology"]["source"], "immutable-model-tracking-v2")
         self.assertEqual(data["ranking_minimum"], 30)
 
 

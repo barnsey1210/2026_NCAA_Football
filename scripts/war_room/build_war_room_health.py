@@ -96,8 +96,8 @@ WATCHED = (*BETTABLE, *EXCHANGES, *REFERENCE)
 
 GREEN_MARKET_COMPLETENESS = 0.95
 
-STANDARD_SPREAD = "standard_spread_five_source_v1"
-STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+STANDARD_SPREAD = "standard_spread_4src_equal_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_dratings_v1"
 DEGRADED_SPREAD = "standard_spread_degraded_v1"
 DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"

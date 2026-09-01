@@ -85,8 +85,8 @@ class FastRatingsStandardSourceTests(unittest.TestCase):
 
     def test_locked_formulas_remain_literal_in_contract_builder(self):
         source = (ROOT / "scripts/projections/build_current_game_projection_contract.py").read_text()
-        self.assertIn('{name: 0.20 for name in SPREAD_COMPONENTS}', source)
-        self.assertIn('{"SP+": 0.40, "Massey Dual": 0.40, "Sagarin Total": 0.20}', source)
+        self.assertIn('{name: 0.25 for name in SPREAD_COMPONENTS}', source)
+        self.assertIn('{"SP+": 0.40, "Massey Dual": 0.40, "DRatings Total": 0.20}', source)
 
     def test_team_rating_engine_uses_centered_sagarin_and_equal_weights(self):
         source = (ROOT / "ratings/build_active_2026_ratings_master.py").read_text()

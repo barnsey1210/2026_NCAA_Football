@@ -133,7 +133,7 @@ The page-facing War Room maturity label remains a projection/market-readiness su
   canonical projection authority is `SHADOW` when its complete value exists.
 - `SHADOW_PARTIAL`: diagnostic partial Shadow evidence; not full Shadow authority.
 - `SHADOW`: a complete Shadow model is authoritative below the Standard transition threshold.
-- `HYBRID`: the accepted provider-level update count has reached 2-4 of 5
+- `HYBRID`: the accepted provider-level Spread update count has reached 2-3 of 4
   spread sources or 2 of 3 total sources.
 - `UPDATED`: display maturity corresponding to `OFFICIAL` authority, reached at
   5/5 spread or 3/3 total provider updates.

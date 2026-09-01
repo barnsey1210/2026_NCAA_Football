@@ -26,8 +26,8 @@ OUT_PAIRWISE = ROOT / "data/audits/projection_source_pairwise_disagreement.csv"
 OUT_GAMES = ROOT / "data/audits/projection_disagreement_game_level.csv"
 OUT_REPORT = ROOT / "docs/PROJECTION_SOURCE_COVERAGE_AND_DISAGREEMENT_REPORT.md"
 
-STANDARD_SPREAD = "standard_spread_five_source_v1"
-STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+STANDARD_SPREAD = "standard_spread_4src_equal_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_dratings_v1"
 DEGRADED_SPREAD = "standard_spread_degraded_v1"
 DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
@@ -196,7 +196,7 @@ def main():
 
     total_rows = model_game_rows[STANDARD_TOTAL]
     before_massey_current = sum(
-        finite(r["values"].get("SP+")) is not None and finite(r["values"].get("Sagarin Total")) is not None
+        finite(r["values"].get("SP+")) is not None and finite(r["values"].get("DRatings Total")) is not None
         for r in total_rows
     )
     after_massey_current = sum(

@@ -22,8 +22,8 @@ SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
 OUT = ROOT / "data/site/projection_source_status_view.json"
 PROJECTION_CHANGE_STATE = ROOT / "data/ratings/live_projection_change_status.json"
 
-SPREAD_ID = "standard_spread_five_source_v1"
-TOTAL_ID = "standard_total_sp_massey_sagarin_v1"
+SPREAD_ID = "standard_spread_4src_equal_v1"
+TOTAL_ID = "standard_total_sp_massey_dratings_v1"
 DEGRADED_SPREAD_ID = "standard_spread_degraded_v1"
 DEGRADED_TOTAL_ID = "standard_total_degraded_v1"
 
@@ -31,26 +31,24 @@ SPREAD_COMPONENTS = [
     ("SP+", "SP+"),
     ("FPI", "FPI"),
     ("TeamRankings", "TeamRankings"),
-    ("Sagarin Rating", "Sagarin Rating"),
     ("DRatings", "DRatings Game Predictions"),
 ]
 SPREAD_WEIGHTS = {
-    "SP+": 0.20,
-    "FPI": 0.20,
-    "TeamRankings": 0.20,
-    "Sagarin Rating": 0.20,
-    "DRatings": 0.20,
+    "SP+": 0.25,
+    "FPI": 0.25,
+    "TeamRankings": 0.25,
+    "DRatings": 0.25,
 }
 
 TOTAL_COMPONENTS = [
     ("SP+", "SP+"),
     ("Massey Dual", "Massey Dual"),
-    ("Sagarin Total", "Sagarin Total"),
+    ("DRatings Total", "DRatings Total"),
 ]
 TOTAL_WEIGHTS = {
     "SP+": 0.40,
     "Massey Dual": 0.40,
-    "Sagarin Total": 0.20,
+    "DRatings Total": 0.20,
 }
 
 

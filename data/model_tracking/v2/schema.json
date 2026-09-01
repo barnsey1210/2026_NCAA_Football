@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "immutable-model-tracking-v2",
+  "append_only": true,
+  "identity": "sha256 of dataset name plus immutable natural-key fields",
+  "datasets": {
+    "prediction_observations.jsonl": ["observation_id", "season", "week", "canonical_game_id", "away_team", "home_team", "kickoff_at", "model_id", "model_version", "market_type", "observed_at", "model_calculated_at", "source_updated_at", "source_snapshot_timestamps", "projection", "component_values", "component_weights", "component_availability", "missing_components", "lifecycle_state", "source_artifacts", "contract_id", "formula_version", "availability_status", "provenance_flags"],
+    "market_observations.jsonl": ["observation_id", "canonical_game_id", "market_type", "sportsbook", "side", "observed_at", "source_updated_at", "line", "price", "source", "freshness_status", "kickoff_at"],
+    "decision_observations.jsonl": ["decision_id", "prediction_observation_id", "market_observation_id", "canonical_game_id", "market_type", "checkpoint", "bet_side", "edge", "market_provenance", "created_at"],
+    "settlements.jsonl": ["settlement_id", "canonical_game_id", "status", "final_home_score", "final_away_score", "completed_at", "source"],
+    "scores.jsonl": ["score_id", "prediction_observation_id", "market_observation_id", "decision_id", "settlement_id", "closing_line", "closing_price", "result", "profit", "clv", "median_clv", "positive_clv", "beat_close", "won_line_move", "absolute_error", "signed_error", "squared_error", "clv_implied_ev", "scoring_version"],
+    "corrections.jsonl": ["correction_id", "dataset", "superseded_id", "replacement_id", "reason", "created_at"]
+  },
+  "rules": [
+    "Never update or delete an accepted JSONL row.",
+    "Corrections append a replacement row and a correction pointer.",
+    "Capture source and observation timestamps independently.",
+    "Unavailable projections remain explicit records; no inferred formula substitution.",
+    "Tracking registration does not confer production authority."
+  ]
+}

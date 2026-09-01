@@ -282,6 +282,21 @@
       ]
     },
     {
+      "id": "model_tracking_v2",
+      "name": "Immutable prospective model and market tracking",
+      "order": 155,
+      "required": true,
+      "external_network": false,
+      "email_dependency": false,
+      "publication_dependency": true,
+      "entrypoint": "daily_market_update.sh#model_tracking_v2",
+      "scripts": [
+        "scripts/model_tracking/v2/capture_current_contracts.py",
+        "scripts/model_tracking/v2/settle_accepted_observations.py",
+        "scripts/model_tracking/build_model_performance_view.py"
+      ]
+    },
+    {
       "id": "playoff_futures",
       "name": "Playoff futures and Futures V2",
       "order": 160,

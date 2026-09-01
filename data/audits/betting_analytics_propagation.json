@@ -1,0 +1,85 @@
+{
+  "schema_version": "standard-authority-propagation-audit-v2",
+  "generated_at": "2026-09-01T00:49:32.069443+00:00",
+  "status": "PASS",
+  "checks": {
+    "active_spread_identity": true,
+    "active_total_identity": true,
+    "challenger_identity": true,
+    "operational_authority": true,
+    "strict_no_official_renormalization": true,
+    "spread_health_sources": true,
+    "total_health_sources": true,
+    "war_room_components": true,
+    "war_room_contract": true,
+    "matchups_contract": true,
+    "openers_shared_contract": true,
+    "public_authority_contract": true,
+    "legacy_registered": true,
+    "challenger_registered": true,
+    "authority_separate_from_registration": true,
+    "shadow_ids_unchanged": true,
+    "spread_default": true,
+    "historical_total_not_mislabeled": true,
+    "spread_canonical_cell": true,
+    "total_canonical_cell": true,
+    "no_weekday_total_fabrication": true,
+    "mode_separation": true,
+    "page_markers": true,
+    "central_contract": true,
+    "performance_v3": true
+  },
+  "consumer_propagation_matrix": {
+    "canonical_projection_resolver": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "war_room_command_center": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "openers": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "matchups": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "betting_2026_performance": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "model_health_status": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "immutable_2026_tracking": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "public_site_contracts": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "documentation": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "standard_total_sp_massey_dratings_v1",
+      "status": "PASS"
+    },
+    "betting_historical_analytics": {
+      "spread_active_model": "standard_spread_4src_equal_v1",
+      "total_active_model": "total_sp50_massey50_v1",
+      "status": "PASS",
+      "note": "historical Total validation remains the 50/50 study"
+    }
+  }
+}

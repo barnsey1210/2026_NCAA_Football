@@ -133,7 +133,7 @@ CANDIDATE_OBSERVED
       +----> ACCEPTED_CHANGED
 ```
 
-`SP+`, `FPI`, `TeamRankings`, `Sagarin Rating`, `DRatings`, `SP+ Total`, `Massey Dual`, and `Sagarin Total` participate only in the authority domains defined for them.
+`SP+`, `FPI`, `TeamRankings`, `DRatings`, `SP+ Total`, `Massey Dual`, and `DRatings Total` participate only in the active Standard authority domains defined for them. Sagarin remains available to legacy and Shadow identities.
 
 A provider counts as updated within a preparation cycle only after:
 
@@ -211,17 +211,17 @@ not record a lifecycle transition.
 
 | Accepted updated sources in cycle | Authority |
 |---:|---|
-| 0-1 of SP+, FPI, TeamRankings, Sagarin Rating, DRatings | `SHADOW` |
-| 2-4 of 5 | `HYBRID` |
-| 5 of 5 | `OFFICIAL` |
+| 0-1 of SP+, FPI, TeamRankings, DRatings | `SHADOW` |
+| 2-3 of 4 | `HYBRID` |
+| 4 of 4 | `OFFICIAL` |
 
-Hybrid Spread uses only the updated canonical spread components, with their equal 20% canonical weights renormalized to 100%. It is not the strict Official five-source model identity.
+Hybrid Spread uses only the updated canonical spread components, with their equal 25% canonical weights renormalized to 100%. It is not the strict Official four-source model identity.
 
 ### Total
 
 | Accepted updated sources in cycle | Authority |
 |---:|---|
-| 0-1 of SP+ Total, Massey Dual, Sagarin Total | `SHADOW` |
+| 0-1 of SP+ Total, Massey Dual, DRatings Total | `SHADOW` |
 | 2 of 3 | `HYBRID` |
 | 3 of 3 | `OFFICIAL` |
 
@@ -232,8 +232,8 @@ Hybrid Total uses only the updated total components, with canonical 40%/40%/20% 
 ```mermaid
 stateDiagram-v2
   [*] --> SHADOW
-  SHADOW --> HYBRID: spread 2/5 or total 2/3 accepted updates
-  HYBRID --> OFFICIAL: spread 5/5 or total 3/3 accepted updates
+  SHADOW --> HYBRID: spread 2/4 or total 2/3 accepted updates
+  HYBRID --> OFFICIAL: spread 4/4 or total 3/3 accepted updates
 ```
 
 Transitions are automatic after source acceptance and authority rebuild. They do not require manual approval. Shadow remains persisted and available for comparison after it loses active authority.

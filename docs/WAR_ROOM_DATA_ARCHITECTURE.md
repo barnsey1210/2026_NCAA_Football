@@ -134,11 +134,21 @@ enter the production team-rating composite.
 
 ### Game Projection Engine
 
-- Standard Spread: SP+ 20%, FPI 20%, TeamRankings 20%, Sagarin Rating 20%,
-  DRatings 20%.
-- Standard Total: SP+ 40%, Massey Dual 40%, Sagarin 20%.
+- Active Standard Spread `standard_spread_4src_equal_v1`: SP+, FPI,
+  TeamRankings, and DRatings at 25% each.
+- Active Standard Total `standard_total_sp_massey_dratings_v1`: SP+ Total 40%,
+  Massey Dual 40%, and DRatings Total 20%.
 - Shadow Spread: SP+ Shadow 50%, Sagarin Shadow 50%.
 - Shadow Total: enhanced SP+ offense/defense model only.
+
+- Prospective Total challenger `total_sp50_massey50_v1`: 50% SP+ Total and
+  50% Massey Dual.
+- Legacy comparison identities remain registered as
+  `standard_spread_5src_legacy_v1` and
+  `standard_total_40_40_20_sagarin_legacy_v1`.
+
+These strict named projections are tracked without fallback or renormalization.
+MAIN authority is switched; deployment into AUTO remains pending review.
 
 Every required component must be present. Missing components produce an
 explicit unavailable state. The resolver must not renormalize available
@@ -173,8 +183,8 @@ flowchart LR
   end
 
   subgraph GPE["Game Projection Engine"]
-    SS["Standard Spread<br/>SP+ / FPI / TR / Sagarin Rating / DRatings<br/>20% each"]
-    ST["Standard Total<br/>SP+ / Massey Dual / Sagarin<br/>40% / 40% / 20%"]
+    SS["Standard Spread<br/>SP+ / FPI / TR / DRatings<br/>25% each"]
+    ST["Standard Total<br/>SP+ Total / Massey Dual / DRatings Total<br/>40% / 40% / 20%"]
     SHS["Shadow Spread<br/>SP+ Shadow / Sagarin Shadow<br/>50% / 50%"]
     SHT["Shadow Total<br/>Enhanced SP+ offense/defense only"]
     SS --> CONTRACT["Canonical game projection contract"]

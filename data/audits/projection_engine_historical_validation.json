@@ -6,7 +6,7 @@
   "validation_script_modifies_production_consumers": false,
   "checks": [
     {
-      "model_id": "standard_spread_five_source_v1",
+      "model_id": "standard_spread_5src_legacy_v1",
       "season_scope": "2021-2025",
       "rows": 3843,
       "max_abs_difference": 7.105427357601002e-15,
@@ -14,7 +14,7 @@
       "source": "reports/five_source_backtest_validated/five_source_game_level.csv"
     },
     {
-      "model_id": "standard_total_sp_massey_sagarin_v1",
+      "model_id": "standard_total_40_40_20_sagarin_legacy_v1",
       "season_scope": "2021-2025",
       "rows": 2509,
       "max_abs_difference": 0.0,
@@ -50,17 +50,16 @@
     },
     {
       "model_id": "missing_component_policy",
-      "rows": 10,
+      "rows": 9,
       "passed": true,
       "tests": {
         "standard_spread_missing_SP+_rejected": true,
         "standard_spread_missing_FPI_rejected": true,
         "standard_spread_missing_TeamRankings_rejected": true,
-        "standard_spread_missing_Sagarin Rating_rejected": true,
         "standard_spread_missing_DRatings_rejected": true,
         "standard_total_missing_SP+_rejected": true,
         "standard_total_missing_Massey Dual_rejected": true,
-        "standard_total_missing_Sagarin Total_rejected": true,
+        "standard_total_missing_DRatings Total_rejected": true,
         "massey_dual_missing_rejected": true,
         "shadow_total_missing_rejected": true
       }
@@ -74,8 +73,8 @@
     {
       "model_id": "spread_sign_convention",
       "rows": 765,
-      "available_rows_seen": 0,
-      "degraded_rows_seen": 765,
+      "available_rows_seen": 41,
+      "degraded_rows_seen": 724,
       "fixture_home_margins": [
         7.0,
         -3.5,
@@ -89,6 +88,12 @@
       "rows": 902,
       "passed": true,
       "assertion": "official Standard models never carry AVAILABLE_DEGRADED"
+    },
+    {
+      "model_id": "active_standard_identity",
+      "rows": 3,
+      "passed": true,
+      "assertion": "exact active Standard weights and DRatings total field mapping"
     }
   ]
 }

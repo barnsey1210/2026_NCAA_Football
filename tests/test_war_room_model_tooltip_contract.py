@@ -62,7 +62,7 @@ class WarRoomModelTooltipContractTests(unittest.TestCase):
                 "total": {
                     "model_id": module.DEGRADED_TOTAL,
                     "selection_status": "AVAILABLE",
-                    "missing_components": ["Sagarin Total"],
+                    "missing_components": ["DRatings Total"],
                 }
             },
             "projections": {
@@ -70,17 +70,17 @@ class WarRoomModelTooltipContractTests(unittest.TestCase):
                     "component_values": {
                         "SP+": 51.4,
                         "Massey Dual": 48.8,
-                        "Sagarin Total": None,
+                        "DRatings Total": None,
                     },
-                    "component_status": {"Sagarin Total": "MISSING"},
+                    "component_status": {"DRatings Total": "MISSING"},
                 }
             },
         }
 
         summary = module.model_summary(game, module.STANDARD_TOTAL)
 
-        self.assertIsNone(summary["component_values"]["Sagarin Total"])
-        self.assertEqual(summary["missing_components"], ["Sagarin Total"])
+        self.assertIsNone(summary["component_values"]["DRatings Total"])
+        self.assertEqual(summary["missing_components"], ["DRatings Total"])
 
 
 class WarRoomMaturityStateTests(unittest.TestCase):

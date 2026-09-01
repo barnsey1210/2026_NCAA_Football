@@ -1,0 +1,22 @@
+{
+  "schema_version": "model-registry-v2",
+  "status": "MAIN_AUTHORITY_SWITCHED_RUNTIME_DEPLOYMENT_PENDING",
+  "models": [
+    {"model_id":"sp_plus_spread","model_version":"v1","market_type":"spread","role":"individual"},
+    {"model_id":"fpi_spread","model_version":"v1","market_type":"spread","role":"individual"},
+    {"model_id":"teamrankings_spread","model_version":"v1","market_type":"spread","role":"individual"},
+    {"model_id":"sagarin_spread","model_version":"v1","market_type":"spread","role":"individual"},
+    {"model_id":"dratings_spread","model_version":"v1","market_type":"spread","role":"individual"},
+    {"model_id":"standard_spread_5src_legacy_v1","model_version":"v1","market_type":"spread","role":"legacy_comparison","weights":{"SP+":0.2,"FPI":0.2,"TeamRankings":0.2,"Sagarin Rating":0.2,"DRatings":0.2}},
+    {"model_id":"standard_spread_4src_equal_v1","model_version":"v1","market_type":"spread","role":"active_standard_authority","weights":{"SP+":0.25,"FPI":0.25,"TeamRankings":0.25,"DRatings":0.25}},
+    {"model_id":"shadow_spread_sp_sagarin_v1","model_version":"v1","market_type":"spread","role":"shadow_production_unchanged"},
+    {"model_id":"sp_plus_total","model_version":"v1","market_type":"total","role":"individual"},
+    {"model_id":"massey_dual_total","model_version":"v1","market_type":"total","role":"individual"},
+    {"model_id":"sagarin_total","model_version":"v1","market_type":"total","role":"individual"},
+    {"model_id":"dratings_total","model_version":"v1","market_type":"total","role":"individual"},
+    {"model_id":"standard_total_40_40_20_sagarin_legacy_v1","model_version":"v1","market_type":"total","role":"legacy_comparison","weights":{"SP+":0.4,"Massey Dual":0.4,"Sagarin Total":0.2}},
+    {"model_id":"standard_total_sp_massey_dratings_v1","model_version":"v1","market_type":"total","role":"active_standard_authority","weights":{"SP+":0.4,"Massey Dual":0.4,"DRatings Total":0.2}},
+    {"model_id":"total_sp50_massey50_v1","model_version":"v1","market_type":"total","role":"prospective_challenger","weights":{"SP+":0.5,"Massey Dual":0.5}},
+    {"model_id":"shadow_total_enhanced_spplus_od_v1","model_version":"v1","market_type":"total","role":"shadow_production_unchanged"}
+  ]
+}

@@ -154,7 +154,9 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
 def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_historical_betting_analytics.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/model_tracking/build_model_performance_view.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/audit/audit_betting_analytics_propagation.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)
     # Build the existing War Room terminal through its canonical owner, then
     # publish it without applying the shared-page transform or changing its UI.
@@ -182,6 +184,7 @@ def main():
         'coach_cards.js',
         'team_coach_card.js',
         'matchup_workspace.js',
+        'betting_analytics.js',
     ):
         src = ROOT / js_name
         dst = OUT / js_name

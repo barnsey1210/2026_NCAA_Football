@@ -17,7 +17,7 @@
     "conferences.html": ["conference", "ratings", "futures", "schedule", "betting"],
     "playoff.html": ["futures", "ratings", "schedule"],
     "simulations.html": ["ratings", "schedule", "futures"],
-    "betting.html": ["betting", "current_market", "market_history", "model_performance"],
+    "betting.html": ["betting", "current_market", "market_history", "historical_betting_analytics", "model_performance"],
     "team.html": ["ratings", "schedule", "current_market", "injuries", "coaches"],
     "coaches.html": ["coaches", "schedule", "current_market"],
     "v1.html": ["legacy_embedded_data"]
@@ -76,11 +76,20 @@
       "builder": "scripts/projections/build_current_game_projection_contract.py",
       "resolver": "scripts/projections/projection_resolver.py",
       "status": "PRODUCTION_RESOLVER_ACTIVE",
+      "active_standard_authority": {
+        "spread_model_id": "standard_spread_4src_equal_v1",
+        "spread_sources": ["SP+", "FPI", "TeamRankings", "DRatings"],
+        "total_model_id": "standard_total_sp_massey_dratings_v1",
+        "total_sources": ["SP+", "Massey Dual", "DRatings Total"]
+      },
       "required_model_ids": [
-        "standard_spread_five_source_v1",
-        "standard_total_sp_massey_sagarin_v1",
         "standard_spread_degraded_v1",
         "standard_total_degraded_v1",
+        "standard_spread_5src_legacy_v1",
+        "standard_spread_4src_equal_v1",
+        "standard_total_40_40_20_sagarin_legacy_v1",
+        "standard_total_sp_massey_dratings_v1",
+        "total_sp50_massey50_v1",
         "shadow_spread_sp_sagarin_v1",
         "shadow_total_enhanced_spplus_od_v1"
       ],
@@ -101,6 +110,18 @@
       "shadow_artifact": "data/site/shadow_model_performance.json",
       "shadow_builder": "scripts/site/build_shadow_model_performance.py",
       "shadow_policy": "historical statistics and presentation labels remain separate; labels are not automatic betting rules"
+    },
+    "historical_betting_analytics": {
+      "artifact": "data/site/historical_betting_analytics_v2.json",
+      "builder": "scripts/site/build_historical_betting_analytics.py",
+      "schema_version": "historical-betting-analytics-v2",
+      "owner": "HISTORICAL_BETTING_ANALYTICS_PROJECTOR",
+      "primary_spread_model_id": "standard_spread_4src_equal_v1",
+      "legacy_spread_model_id": "standard_spread_5src_legacy_v1",
+      "primary_total_historical_model_id": "total_sp50_massey50_v1",
+      "legacy_total_model_id": "standard_total_40_40_20_sagarin_legacy_v1",
+      "modes": ["INDEPENDENT_CHECKPOINT_PERFORMANCE", "MATCHED_SIGNAL_DECAY"],
+      "missing_checkpoint_policy": "OMIT_OR_EXPLICITLY_UNAVAILABLE_NEVER_INTERPOLATE"
     }
   }
 }

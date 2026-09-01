@@ -82,7 +82,7 @@ be renormalized, but no provider-update transition is implied.
 The same numeric weights can therefore have different provenance. For example,
 SP+ Total plus Massey Dual may be 50% / 50% in both cases:
 
-- it is `selection_mode = OPERATIONAL_DEGRADED` when Sagarin Total is simply
+- it is `selection_mode = OPERATIONAL_DEGRADED` when DRatings Total is simply
   unavailable for coverage/input reasons; and
 - it is `authority_state = HYBRID` only when SP+ Total and Massey Dual are
   accepted updates inside the current authority cycle and the authority owner
@@ -121,21 +121,24 @@ Required spread providers and canonical weights:
 
 | Source | Canonical weight |
 |---|---:|
-| SP+ | 20% |
-| FPI | 20% |
-| TeamRankings | 20% |
-| Sagarin Rating | 20% |
-| DRatings game prediction | 20% |
+| SP+ | 25% |
+| FPI | 25% |
+| TeamRankings | 25% |
+| DRatings game prediction | 25% |
 
 | Updated provider count | Authority tier | Selected model behavior |
 |---:|---|---|
-| 0-1 of 5 | `SHADOW` | Select complete canonical Shadow Spread |
-| 2-4 of 5 | `HYBRID` | Select the updated canonical spread components, with their canonical weights renormalized to 100% |
-| 5 of 5 | `OFFICIAL` | Select complete official Standard Spread |
+| 0-1 of 4 | `SHADOW` | Select complete canonical Shadow Spread |
+| 2-3 of 4 | `HYBRID` | Select the updated canonical spread components, with their canonical weights renormalized to 100% |
+| 4 of 4 | `OFFICIAL` | Select complete official Standard Spread |
 
 The Hybrid spread calculation is `RENORMALIZED_AVAILABLE_CANONICAL_WEIGHTS`, where “available” in this authority context means **accepted and updated in the current authority cycle**. It does not include stale providers merely because their prior values exist.
 
-Because the five canonical spread weights are equal, two updated sources receive 50% each, three receive one-third each, and four receive 25% each. This is a distinct authority-selection tier; it does not rename the partial value as `standard_spread_five_source_v1` or change that official model's strict five-source definition.
+Because the four canonical spread weights are equal, two updated sources
+receive 50% each and three receive one-third each. This is a distinct
+authority-selection tier; it does not rename the partial value as
+`standard_spread_4src_equal_v1` or change that official model's strict
+four-source definition.
 
 ## Total authority
 
@@ -145,7 +148,7 @@ Required total providers and canonical weights:
 |---|---:|
 | SP+ Total | 40% |
 | Massey Dual | 40% |
-| Sagarin Total | 20% |
+| DRatings Total | 20% |
 
 | Updated provider count | Authority tier | Selected model behavior |
 |---:|---|---|
@@ -156,10 +159,12 @@ Required total providers and canonical weights:
 Hybrid total uses the original canonical weights, renormalized over the updated sources. Examples:
 
 - SP+ Total + Massey Dual: 50% / 50%.
-- SP+ Total + Sagarin Total: 66.667% / 33.333%.
-- Massey Dual + Sagarin Total: 66.667% / 33.333%.
+- SP+ Total + DRatings Total: 66.667% / 33.333%.
+- Massey Dual + DRatings Total: 66.667% / 33.333%.
 
-This is not a new provider formula. It is the named Hybrid authority selection rule. It must never be emitted under the strict official `standard_total_sp_massey_sagarin_v1` identity.
+This is not a new provider formula. It is the named Hybrid authority selection
+rule. It must never be emitted under the strict official
+`standard_total_sp_massey_dratings_v1` identity.
 
 ## Availability versus authority threshold
 

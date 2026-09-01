@@ -1929,14 +1929,13 @@ function renderHealth(){
       sourceItem('spread','SP+','SP+','SP+'),
       sourceItem('spread','FPI','FPI','FPI'),
       sourceItem('spread','TeamRankings','TeamRankings','TR'),
-      sourceItem('spread','Sagarin Rating','Sagarin Rating','SAG'),
       sourceItem('spread','DRatings','DRatings','DR')
     ].join('');
 
     const totalSources = [
       sourceItem('total','SP+','SP+ Total','SP+'),
       sourceItem('total','Massey Dual','Massey Dual','MAS'),
-      sourceItem('total','Sagarin Total','Sagarin Total','SAG')
+      sourceItem('total','DRatings Total','DRatings Total','DR')
     ].join('');
 
     ratingsStrip.innerHTML = `
@@ -2188,8 +2187,9 @@ function totalDecision(side, edge){
   return `<span class="decision-edge total-decision" title="${side === 'under' ? 'Under' : 'Over'}"><span class="decision-edge-main"><span class="decision-side">${label}</span><span>${value}</span></span></span>`;
 }
 
-const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','Sagarin Rating','DRatings'];
-const TOTAL_COMPONENTS = ['SP+','Massey Dual','Sagarin Total'];
+const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','DRatings'];
+const TOTAL_COMPONENTS = ['SP+','Massey Dual','DRatings Total'];
+const STANDARD_COMPONENT_WEIGHTS = {spread:{'SP+':25,'FPI':25,'TeamRankings':25,'DRatings':25},total:{'SP+':40,'Massey Dual':40,'DRatings Total':20}};
 
 function spreadComponentDisplay(value, game){
   const n = Number(value);
@@ -2221,8 +2221,10 @@ function modelTooltip(game, model, market){
         ? 'updated'
         : 'available';
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
-    const label = name === 'Sagarin Rating' ? 'Sagarin' : name;
-    return `<span class="model-component ${freshnessClass}"><span>${esc(label)}</span><span>${shown}</span></span>`;
+    const label = market === 'total' && name === 'SP+' ? 'SP+ Total' : name;
+    const timestamp = freshnessRow.snapshot_date || freshnessRow.pulled_at || model?.freshness_timestamp || '';
+    const weight = STANDARD_COMPONENT_WEIGHTS[market]?.[name];
+    return `<span class="model-component ${freshnessClass}" title="${timestamp ? `Source timestamp ${esc(timestamp)}` : 'Source timestamp unavailable'}"><span>${esc(label)} · ${weight}%</span><span>${shown}</span></span>`;
   }).join('');
   const value = market === 'spread' ? model?.value_home_line : model?.value_total;
   const shown=market==='spread'
@@ -3127,7 +3129,7 @@ function snapshotAuthority(model){
 
 function componentText(model,names,market,game){
   const values=model?.component_values || {};
-  const labels={'TeamRankings':'TR','Sagarin Rating':'SAG','DRatings':'DR','Massey Dual':'MAS','Sagarin Total':'SAG'};
+  const labels={'TeamRankings':'TR','Sagarin Rating':'SAG','DRatings':'DR','DRatings Total':'DR','Massey Dual':'MAS','Sagarin Total':'SAG'};
   return names.map(name=>{
     const value=values[name];
     const missing=value===null || value===undefined || !Number.isFinite(Number(value));

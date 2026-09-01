@@ -13,12 +13,15 @@ from pathlib import Path
 from typing import Any
 
 
-STANDARD_SPREAD = "standard_spread_five_source_v1"
-STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+STANDARD_SPREAD = "standard_spread_4src_equal_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_dratings_v1"
 DEGRADED_SPREAD = "standard_spread_degraded_v1"
 DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
+LEGACY_SPREAD = "standard_spread_5src_legacy_v1"
+LEGACY_TOTAL = "standard_total_40_40_20_sagarin_legacy_v1"
+TOTAL_CHALLENGER = "total_sp50_massey50_v1"
 
 MODEL_VALUE_FIELDS = {
     STANDARD_SPREAD: ("value_home_margin", "value_home_line"),
@@ -27,6 +30,9 @@ MODEL_VALUE_FIELDS = {
     DEGRADED_TOTAL: ("value_total",),
     SHADOW_SPREAD: ("value_home_margin", "value_home_line"),
     SHADOW_TOTAL: ("value_total",),
+    LEGACY_SPREAD: ("value_home_margin", "value_home_line"),
+    LEGACY_TOTAL: ("value_total",),
+    TOTAL_CHALLENGER: ("value_total",),
 }
 
 DEGRADED_MODEL_BY_OFFICIAL = {

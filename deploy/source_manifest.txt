@@ -77,6 +77,14 @@ scripts/control/run_war_room_service.py
 scripts/markets/build_current_market_contract.py
 scripts/model_tracking/__init__.py
 scripts/model_tracking/build_model_performance_view.py
+scripts/model_tracking/v2/immutable_tracking.py
+scripts/model_tracking/v2/capture_current_contracts.py
+scripts/model_tracking/v2/settle_accepted_observations.py
+data/model_tracking/v2/schema.json
+data/model_tracking/v2/model_registry.json
+scripts/site/build_historical_betting_analytics.py
+scripts/audit/audit_betting_analytics_propagation.py
+betting_analytics.js
 scripts/model_tracking/capture_model_tracking.py
 scripts/model_tracking/model_tracking.py
 scripts/model_tracking/settle_model_tracking.py
@@ -129,6 +137,7 @@ scripts/site/compact_matchups_payload.py
 scripts/site/inject_market_presentation_fixes.py
 scripts/site/install_openers_betting_angles_header_persistent.py
 tests/test_betting_model_performance_integration.py
+tests/test_betting_analytics_v2.py
 tests/test_model_tracking_phase1.py
 ratings_v2.html
 rerun_conference_sims_2026.py

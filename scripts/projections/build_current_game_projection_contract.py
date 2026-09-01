@@ -34,8 +34,11 @@ DEFAULT_SHADOW_SPEC = ROOT / DEFAULT_SHADOW_SPEC_RELATIVE
 DEFAULT_OUT = ROOT / "data/site/current_game_projection_contract.json"
 DEFAULT_AUDIT = ROOT / "data/audits/current_game_projection_contract_audit.json"
 
-STANDARD_SPREAD = "standard_spread_five_source_v1"
-STANDARD_TOTAL = "standard_total_sp_massey_sagarin_v1"
+STANDARD_SPREAD = "standard_spread_4src_equal_v1"
+STANDARD_TOTAL = "standard_total_sp_massey_dratings_v1"
+LEGACY_SPREAD = "standard_spread_5src_legacy_v1"
+LEGACY_TOTAL = "standard_total_40_40_20_sagarin_legacy_v1"
+TOTAL_CHALLENGER = "total_sp50_massey50_v1"
 DEGRADED_SPREAD = "standard_spread_degraded_v1"
 DEGRADED_TOTAL = "standard_total_degraded_v1"
 SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
@@ -45,10 +48,12 @@ SPREAD_COMPONENTS = (
     "SP+",
     "FPI",
     "TeamRankings",
-    "Sagarin Rating",
     "DRatings",
 )
-TOTAL_COMPONENTS = ("SP+", "Massey Dual", "Sagarin Total")
+TOTAL_COMPONENTS = ("SP+", "Massey Dual", "DRatings Total")
+LEGACY_SPREAD_COMPONENTS = ("SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings")
+LEGACY_TOTAL_COMPONENTS = ("SP+", "Massey Dual", "Sagarin Total")
+TWO_SOURCE_TOTAL_COMPONENTS = ("SP+", "Massey Dual")
 SHADOW_SPREAD_COMPONENTS = ("Shadow SP+", "Shadow Sagarin")
 SHADOW_TOTAL_COMPONENTS = (
     "updated home SP+ offense",
@@ -314,8 +319,11 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     built_at = args.built_at or datetime.now(timezone.utc).isoformat()
     output_games = []
 
-    spread_weights = {name: 0.20 for name in SPREAD_COMPONENTS}
-    total_weights = {"SP+": 0.40, "Massey Dual": 0.40, "Sagarin Total": 0.20}
+    spread_weights = {name: 0.25 for name in SPREAD_COMPONENTS}
+    legacy_spread_weights = {name: 0.20 for name in LEGACY_SPREAD_COMPONENTS}
+    total_weights = {"SP+": 0.40, "Massey Dual": 0.40, "DRatings Total": 0.20}
+    legacy_total_weights = {"SP+": 0.40, "Massey Dual": 0.40, "Sagarin Total": 0.20}
+    two_source_total_weights = {"SP+": 0.50, "Massey Dual": 0.50}
     shadow_spread_weights = {name: 0.50 for name in SHADOW_SPREAD_COMPONENTS}
     shadow_total_weights = {name: 0.50 for name in SHADOW_TOTAL_COMPONENTS}
 
@@ -323,7 +331,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         game_id = str(game.get("game_id") or "").removesuffix(".0")
         game_sources = sources.get(game_id, {})
         spread_source_rows = [game_sources[name] for name in SPREAD_COMPONENTS if name in game_sources]
-        total_source_rows = [game_sources[name] for name in ("SP+", "Massey", "Sagarin Total") if name in game_sources]
+        total_source_rows = [game_sources[name] for name in ("SP+", "Massey", "DRatings") if name in game_sources]
 
         spread_values = {
             name: finite(game_sources.get(name, {}).get("spread_home"))
@@ -333,6 +341,11 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             spread_values,
             spread_weights,
         )
+        legacy_spread_values = {
+            name: finite(game_sources.get(name, {}).get("spread_home"))
+            for name in LEGACY_SPREAD_COMPONENTS
+        }
+        legacy_spread_margin = fixed_weight_value(legacy_spread_values, legacy_spread_weights)
         if official_spread_margin is not None:
             spread_resolution = {
                 "mode": "FULL",
@@ -388,11 +401,22 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         mass_dual = massey_dual(
             massey.get("total"), massey.get("away_score"), massey.get("home_score")
         )
-        total_values = {
+        legacy_total_values = {
             "SP+": sp_total,
             "Massey Dual": mass_dual,
             "Sagarin Total": finite(game_sources.get("Sagarin Total", {}).get("total")),
         }
+        total_values = {
+            "SP+": sp_total,
+            "Massey Dual": mass_dual,
+            "DRatings Total": finite(game_sources.get("DRatings", {}).get("total")),
+        }
+        two_source_total_values = {
+            "SP+": sp_total,
+            "Massey Dual": mass_dual,
+        }
+        legacy_standard_total = fixed_weight_value(legacy_total_values, legacy_total_weights)
+        two_source_total = fixed_weight_value(two_source_total_values, two_source_total_weights)
         official_standard_total = fixed_weight_value(
             total_values,
             total_weights,
@@ -546,6 +570,20 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     else "UNAVAILABLE"
                 ),
             ),
+            LEGACY_SPREAD: projection(
+                model_id=LEGACY_SPREAD,
+                formula_status="LEGACY_HISTORICAL_REFERENCE",
+                values=legacy_spread_values,
+                weights=legacy_spread_weights,
+                availability=status(legacy_spread_values),
+                value_home_margin=legacy_spread_margin,
+                value_home_line=-legacy_spread_margin if legacy_spread_margin is not None else None,
+                build_timestamp=built_at,
+                freshness_timestamp=latest_timestamp(spread_source_rows),
+                source_artifacts=[str(args.sources.relative_to(ROOT))],
+                validation_status="HISTORICAL_FORMULA_VALIDATED_2021_2025",
+                authority="LEGACY_COMPARISON",
+            ),
             DEGRADED_SPREAD: projection(
                 model_id=DEGRADED_SPREAD,
                 formula_status="OPERATIONAL_DEGRADED",
@@ -584,7 +622,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     "Missing required official sources: "
                     + ", ".join(degraded_spread_resolution["missing_components"])
                     if degraded_spread_resolution["missing_components"]
-                    else "Official five-source projection is available."
+                    else "Official four-source projection is available."
                 ),
                 confidence_status=(
                     "DEGRADED"
@@ -594,7 +632,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             ),
             STANDARD_TOTAL: projection(
                 model_id=STANDARD_TOTAL,
-                formula_status="PRODUCTION_VALIDATED",
+                formula_status="PRODUCTION_AUTHORITY_APPROVED",
                 values=total_values,
                 weights=total_weights,
                 availability=total_availability,
@@ -602,7 +640,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 build_timestamp=built_at,
                 freshness_timestamp=latest_timestamp(total_source_rows),
                 source_artifacts=[str(args.sources.relative_to(ROOT)), str(args.games.relative_to(ROOT))],
-                validation_status="HISTORICAL_FORMULA_VALIDATED_2021_2025",
+                validation_status="PROSPECTIVE_2026_BASELINE_LIMITED_HISTORICAL_DRATINGS_TOTAL_PROVENANCE",
                 extra_status={
                     "resolution_mode": total_resolution["mode"],
                     "available_components": total_resolution["available_components"],
@@ -615,6 +653,33 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                     if total_availability == "AVAILABLE"
                     else "UNAVAILABLE"
                 ),
+            ),
+            LEGACY_TOTAL: projection(
+                model_id=LEGACY_TOTAL,
+                formula_status="LEGACY_HISTORICAL_REFERENCE",
+                values=legacy_total_values,
+                weights=legacy_total_weights,
+                availability=status(legacy_total_values),
+                value_total=legacy_standard_total,
+                build_timestamp=built_at,
+                freshness_timestamp=latest_timestamp(total_source_rows),
+                source_artifacts=[str(args.sources.relative_to(ROOT)), str(args.games.relative_to(ROOT))],
+                validation_status="HISTORICAL_FORMULA_VALIDATED_2021_2025",
+                authority="LEGACY_COMPARISON",
+            ),
+            TOTAL_CHALLENGER: projection(
+                model_id=TOTAL_CHALLENGER,
+                formula_status="PROSPECTIVE_CHALLENGER",
+                values=two_source_total_values,
+                weights=two_source_total_weights,
+                availability=status(two_source_total_values),
+                value_total=two_source_total,
+                build_timestamp=built_at,
+                freshness_timestamp=latest_timestamp([game_sources[name] for name in ("SP+", "Massey") if name in game_sources]),
+                source_artifacts=[str(args.sources.relative_to(ROOT)), str(args.games.relative_to(ROOT))],
+                validation_status="EARLY_WINDOW_RESEARCH_VALIDATED_2021_2025_PROSPECTIVE_TRACKING",
+                authority="TRACKED_CHALLENGER",
+                extra_status={"Massey Dual formula": "PUBLISHED_TOTAL_PLUS_POINT_SUM_DIVIDED_BY_TWO"},
             ),
             DEGRADED_TOTAL: projection(
                 model_id=DEGRADED_TOTAL,
@@ -702,6 +767,19 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                 },
             ),
         }
+        timestamp_source = {
+            "SP+": "SP+", "FPI": "FPI", "TeamRankings": "TeamRankings",
+            "Sagarin Rating": "Sagarin Rating", "Sagarin Total": "Sagarin Total",
+            "DRatings": "DRatings", "DRatings Total": "DRatings",
+            "Massey Dual": "Massey",
+        }
+        for item in projections.values():
+            item["component_source_timestamps"] = {
+                component: game_sources.get(timestamp_source.get(component, ""), {}).get("pulled_at")
+                for component in item.get("required_components", [])
+                if component in timestamp_source
+            }
+            item["contract_build_id"] = built_at
         output_game = {
             "game_id": game_id,
             "season": game.get("season", games_payload.get("meta", {}).get("season", 2026)),
@@ -730,18 +808,39 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
 
     definitions = {
         STANDARD_SPREAD: {
-            "formula": "(SP+ + FPI + TeamRankings + Sagarin Rating + DRatings) / 5",
+            "formula": "(SP+ + FPI + TeamRankings + DRatings) / 4",
             "required_components": list(SPREAD_COMPONENTS),
             "weights": spread_weights,
+            "role": "ACTIVE_STANDARD_AUTHORITY",
+        },
+        LEGACY_SPREAD: {
+            "formula": "(SP+ + FPI + TeamRankings + Sagarin Rating + DRatings) / 5",
+            "required_components": list(LEGACY_SPREAD_COMPONENTS),
+            "weights": legacy_spread_weights,
+            "role": "LEGACY_COMPARISON",
         },
         STANDARD_TOTAL: {
-            "formula": "0.40 * SP+ + 0.40 * Massey Dual + 0.20 * Sagarin",
+            "formula": "0.40 * SP+ + 0.40 * Massey Dual + 0.20 * DRatings Total",
             "massey_dual_formula": "(published total + away predicted points + home predicted points) / 2",
             "required_components": list(TOTAL_COMPONENTS),
             "weights": total_weights,
+            "role": "ACTIVE_STANDARD_AUTHORITY",
+            "dratings_total_field": "DRatings Predictions.total",
+        },
+        LEGACY_TOTAL: {
+            "formula": "0.40 * SP+ + 0.40 * Massey Dual + 0.20 * Sagarin Total",
+            "required_components": list(LEGACY_TOTAL_COMPONENTS),
+            "weights": legacy_total_weights,
+            "role": "LEGACY_COMPARISON",
+        },
+        TOTAL_CHALLENGER: {
+            "formula": "0.50 * SP+ + 0.50 * Massey Dual",
+            "required_components": list(TWO_SOURCE_TOTAL_COMPONENTS),
+            "weights": two_source_total_weights,
+            "role": "PROSPECTIVE_CHALLENGER",
         },
         DEGRADED_SPREAD: {
-            "formula": "Renormalize the available weights from the official five-source spread model",
+            "formula": "Renormalize the available weights from the official four-source spread model",
             "official_model_id": STANDARD_SPREAD,
             "required_components": list(SPREAD_COMPONENTS),
             "nominal_weights": spread_weights,
@@ -793,6 +892,12 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             },
             "page_local_projection_calculation_allowed": False,
             "resolver_policy": "STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS",
+            "active_standard_authority": {
+                "spread_model_id": STANDARD_SPREAD,
+                "spread_sources": list(SPREAD_COMPONENTS),
+                "total_model_id": STANDARD_TOTAL,
+                "total_sources": list(TOTAL_COMPONENTS),
+            },
             "unavailable_models_remain_unavailable": True,
             "degraded_models_preserve_official_formula_inputs_but_use_separate_identity": True,
         },
