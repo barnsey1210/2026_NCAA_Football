@@ -406,7 +406,7 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn(".market-best.has-move{grid-template-columns:22px minmax(30px,1fr) 14px}", source)
         self.assertIn(".mobile-metric.edge-focus{overflow:hidden}", source)
         self.assertIn(".mobile-metric .decision-edge{min-width:0;max-width:100%}", source)
-        self.assertIn(".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:18px}", source)
+        self.assertIn(".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}", source)
         self.assertIn(".mobile-metric .decision-team-name{width:100%;max-width:100%", source)
 
     def test_week_zero_dratings_component_coverage_is_eight_of_eight(self):

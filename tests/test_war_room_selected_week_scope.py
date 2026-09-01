@@ -201,10 +201,26 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
 
     def test_shadow_readability_uses_compact_overlaid_status_marks(self):
         self.assertIn(".shadow-team-chip{position:relative;display:inline-flex", self.source)
-        self.assertIn(".shadow-team-chip .team-logo-holder{--team-logo-size:23px}", self.source)
+        self.assertIn(".shadow-team-chip .team-logo-holder{--team-logo-size:26px}", self.source)
         self.assertIn(".shadow-team-mark{position:absolute;right:-3px;bottom:-4px;font-size:15px", self.source)
         self.assertIn(".shadow-state-label{font-size:11px", self.source)
         self.assertIn(".shadow-wait{\n  color:var(--yellow);\n  font-size:11px;", self.source)
+
+    def test_all_matrix_team_logos_use_sharp_bounded_holders(self):
+        for rule in (
+            ".matchup-team .team-logo-holder{--team-logo-size:30px}",
+            ".shadow-team-chip .team-logo-holder{--team-logo-size:26px}",
+            ".shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}",
+            ".decision-edge .team-logo-holder{--team-logo-size:28px}",
+            ".injury-team .team-logo-holder{--team-logo-size:26px}",
+            ".signal-chip .team-logo-holder{--team-logo-size:26px}",
+            ".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}",
+        ):
+            self.assertIn(rule, self.source)
+        self.assertIn("padding:2px;", self.source)
+        self.assertIn("border-radius:6px;", self.source)
+        self.assertIn("image-rendering:auto;", self.source)
+        self.assertNotIn("drop-shadow(0 0 1px rgba(255,255,255,.90))", self.source)
 
     def test_non_matchup_columns_and_nested_groups_are_centered(self):
         self.assertIn("#matrixHead th:not(.matchup-col),", self.source)
@@ -281,7 +297,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIn("'Texas A&M':'texas-a-m'", self.source)
         self.assertIn("if(TEAM_LOGO_SLUGS[team])", self.source)
         self.assertTrue((ROOT / "logos/texas-a-m.png").is_file())
-        self.assertIn(".decision-edge .team-logo-holder{--team-logo-size:22px}", self.source)
+        self.assertIn(".decision-edge .team-logo-holder{--team-logo-size:28px}", self.source)
         self.assertIn(".market-book-logo{\n  background:rgba(255,255,255,.09)", self.source)
         self.assertNotIn(".decision-edge img,\n.market-book-logo{", self.source)
 

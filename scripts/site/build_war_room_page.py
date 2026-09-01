@@ -603,15 +603,15 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 .shadow-team-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
-.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px}
+.shadow-team-icons{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px}
 .shadow-team-chip{position:relative;display:inline-flex;align-items:center;justify-content:center}
-.shadow-team-chip .team-logo-holder{--team-logo-size:23px}
+.shadow-team-chip .team-logo-holder{--team-logo-size:26px}
 .shadow-team-mark{position:absolute;right:-3px;bottom:-4px;font-size:15px;font-weight:950;line-height:1;text-shadow:0 1px 2px #071019,0 0 2px #071019}
 .shadow-team-mark.ready{color:var(--green)}
 .shadow-team-mark.waiting{color:var(--red)}
 .shadow-state-label{font-size:11px;font-weight:900;line-height:1.05;letter-spacing:.03em}
 .shadow-value-line{display:inline-flex;align-items:center;justify-content:center;gap:3px}
-.shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:17px}
+.shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}
 .projection-value{display:inline-flex;align-items:center;justify-content:center;gap:3px}
 .shadow-tooltip-panel{min-width:220px;white-space:nowrap}
 .best-col{width:8.8%}
@@ -672,7 +672,7 @@ tr:hover td.context-group{background:#202d39}
 
 .matchup-kickoff{display:flex;align-items:center;gap:5px;margin-bottom:2px}
 .matchup-team{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;font-weight:900;line-height:1.2}
-.matchup-team .team-logo-holder{--team-logo-size:18px}
+.matchup-team .team-logo-holder{--team-logo-size:30px}
 .matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-composite-rank{flex:0 0 22px;min-width:22px;text-align:right;font-size:9.5px;font-weight:950;font-variant-numeric:tabular-nums;line-height:1;color:var(--muted);overflow:visible!important}
 .team-composite-rank.rank-tier-1{color:#39e89a}
@@ -782,7 +782,7 @@ tr:hover td.context-group{background:#202d39}
   padding:2px;
   filter:drop-shadow(0 0 3px rgba(235,242,248,.2));
 }
-.decision-edge .team-logo-holder{--team-logo-size:22px}
+.decision-edge .team-logo-holder{--team-logo-size:28px}
 .decision-side{font-size:12px;font-weight:900}
 
 .team-logo-holder{
@@ -792,12 +792,11 @@ tr:hover td.context-group{background:#202d39}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:1.5px;
+  padding:2px;
   overflow:hidden;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:4px;
-  box-shadow:inset 0 0 0 1px rgba(7,16,25,.22);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:6px;
 }
 
 .team-logo-holder img{
@@ -805,10 +804,7 @@ tr:hover td.context-group{background:#202d39}
   width:100%;
   height:100%;
   object-fit:contain;
-  filter:
-    drop-shadow(0 0 1px rgba(255,255,255,.90))
-    drop-shadow(0 0 2px rgba(255,255,255,.38))
-    drop-shadow(0 1px 1px rgba(0,0,0,.78));
+  image-rendering:auto;
 }
 
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
@@ -881,8 +877,8 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
-.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:19px;height:18px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
-.injury-team .team-logo-holder{--team-logo-size:16px}
+.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
+.injury-team .team-logo-holder{--team-logo-size:26px}
 .injury-rank{position:absolute;right:-2px;bottom:-1px;min-width:11px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
 .injury-rank.injury-tier-1{color:#39e89a}
 .injury-rank.injury-tier-2{color:#a9df6a}
@@ -911,7 +907,7 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 
-.signal-chip .team-logo-holder{--team-logo-size:18px}
+.signal-chip .team-logo-holder{--team-logo-size:26px}
 
 .signal-count{
   color:var(--green);
@@ -1118,7 +1114,7 @@ tr:hover td.context-group{background:#202d39}
   .mobile-metric.edge-focus{overflow:hidden}
   .mobile-metric .decision-edge{min-width:0;max-width:100%}
   .mobile-metric .decision-edge-main{max-width:100%;gap:2px}
-  .mobile-metric .decision-edge .team-logo-holder{--team-logo-size:18px}
+  .mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}
   .mobile-metric .decision-team-name{width:100%;max-width:100%;padding:0 2px;box-sizing:border-box}
   .mobile-game-foot{
     display:flex;
