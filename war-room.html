@@ -930,6 +930,16 @@ tr:hover td.context-group{background:#202d39}
   font-size:9px;
 }
 
+/* Narrow-desktop spread projection: stack favorite logo above value
+   so the projection cannot bleed into SPREAD SHADOW. */
+@media(min-width:901px) and (max-width:1500px){
+  .projection-value{
+    flex-direction:column;
+    gap:1px;
+    line-height:1.05;
+  }
+}
+
 @media(min-width:901px){body{overflow:hidden}}
 
 @media(max-width:900px){
