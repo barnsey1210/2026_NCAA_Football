@@ -155,6 +155,7 @@ def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_historical_betting_analytics.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT/'scripts/site/build_historical_betting_explorer.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/model_tracking/build_model_performance_view.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/audit/audit_betting_analytics_propagation.py')], check=True)
     subprocess.run([sys.executable, str(ROOT/'scripts/site/build_page_health_status.py')], check=True)

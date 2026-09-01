@@ -73,6 +73,7 @@ fi
 [[ -s "$PUBLIC_DIR/data/site/matchups_view.json" ]] || die "missing public matchup payload"
 [[ -s "$PUBLIC_DIR/data/site/model_performance_view.json" ]] || die "missing public model performance payload"
 [[ -s "$PUBLIC_DIR/data/site/historical_betting_analytics_v2.json" ]] || die "missing public historical betting analytics payload"
+[[ -s "$PUBLIC_DIR/data/site/historical_betting_explorer_v1.json" ]] || die "missing public historical betting explorer payload"
 [[ -s "$PUBLIC_DIR/data/site/shadow_model_performance.json" ]] || die "missing public Shadow model performance payload"
 [[ -s "$PUBLIC_DIR/war-room.html" ]] || die "missing public War Room terminal"
 [[ -s "$PUBLIC_DIR/data/site/war_room_market_matrix.json" ]] || die "missing public War Room market matrix"
@@ -237,6 +238,7 @@ required = [
     Path("data/site/matchups_view.json"),
     Path("data/site/model_performance_view.json"),
     Path("data/site/historical_betting_analytics_v2.json"),
+    Path("data/site/historical_betting_explorer_v1.json"),
     Path("data/site/shadow_model_performance.json"),
     Path("war-room.html"),
     Path("data/site/war_room_market_matrix.json"),

@@ -122,6 +122,15 @@
       "legacy_total_model_id": "standard_total_40_40_20_sagarin_legacy_v1",
       "modes": ["INDEPENDENT_CHECKPOINT_PERFORMANCE", "MATCHED_SIGNAL_DECAY"],
       "missing_checkpoint_policy": "OMIT_OR_EXPLICITLY_UNAVAILABLE_NEVER_INTERPOLATE"
+    },
+    "historical_betting_explorer": {
+      "artifact": "data/site/historical_betting_explorer_v1.json",
+      "builder": "scripts/site/build_historical_betting_explorer.py",
+      "schema_version": "historical-betting-explorer-v1",
+      "owner": "HISTORICAL_BETTING_ANALYTICS_PROJECTOR",
+      "record_grain": "one canonical game/model/checkpoint state",
+      "browser_policy": "filter and aggregate canonical states; never recalculate model projections",
+      "decay_contract": "data/site/historical_betting_analytics_v2.json"
     }
   }
 }
