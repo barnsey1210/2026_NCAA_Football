@@ -351,7 +351,18 @@ const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_
 function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,channelNonce:CHANNEL_NONCE,...message}},TARGET_ORIGIN)}}
 async function pollTask(taskId,requestId){{
   for(let attempt=0;attempt<240;attempt++){{
-    const response=await fetch(`/war-room/task/${{encodeURIComponent(taskId)}}`,{{cache:'no-store',credentials:'same-origin'}});
+    let response;
+    try{{
+      response=await fetch(`/war-room/task/${{encodeURIComponent(taskId)}}`,{{cache:'no-store',credentials:'same-origin'}});
+    }}catch(error){{
+      send({{type:'SESSION_EXPIRED',requestId,message:'Authenticated operator channel unavailable'}});
+      return;
+    }}
+    const contentType=response.headers.get('content-type') || '';
+    if(response.status===401 || response.status===403 || !contentType.includes('application/json')){{
+      send({{type:'SESSION_EXPIRED',requestId,message:'Cloudflare Access session expired'}});
+      return;
+    }}
     const payload=await response.json().catch(()=>({{}}));
     if(!response.ok)throw new Error(payload?.detail || `Task HTTP ${{response.status}}`);
     send({{type:'TASK',requestId,task:payload.task}});
@@ -365,7 +376,18 @@ addEventListener('message',async event=>{{
   const message=event.data||{{}};
   if(message.channel!==CHANNEL || message.channelNonce!==CHANNEL_NONCE || message.type!=='REQUEST' || !Object.hasOwn(ACTION_ROUTES,message.action))return;
   try{{
-    const response=await fetch(ACTION_ROUTES[message.action],{{method:'POST',cache:'no-store',credentials:'same-origin'}});
+    let response;
+    try{{
+      response=await fetch(ACTION_ROUTES[message.action],{{method:'POST',cache:'no-store',credentials:'same-origin'}});
+    }}catch(error){{
+      send({{type:'SESSION_EXPIRED',requestId:message.requestId,message:'Authenticated operator channel unavailable'}});
+      return;
+    }}
+    const contentType=response.headers.get('content-type') || '';
+    if(response.status===401 || response.status===403 || !contentType.includes('application/json')){{
+      send({{type:'SESSION_EXPIRED',requestId:message.requestId,message:'Cloudflare Access session expired'}});
+      return;
+    }}
     const payload=await response.json().catch(()=>({{}}));
     if(response.status!==202 || !payload.task_id)throw new Error(payload?.detail || `HTTP ${{response.status}}`);
     send({{type:'ACK',requestId:message.requestId,payload}});

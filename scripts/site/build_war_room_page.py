@@ -3466,6 +3466,14 @@ addEventListener('message',event=>{
       RELAY_REQUESTS.delete(message.requestId);
       setTimeout(()=>{pending.button.textContent=pending.old;pending.button.disabled=false},2500);
     }
+  }else if(message.type==='SESSION_EXPIRED'){
+    pending.button.textContent=pending.old;
+    RELAY_REQUESTS.delete(message.requestId);
+    setOperatorControls(false);
+    connect.hidden=false;
+    connect.disabled=false;
+    status.textContent='Operator session expired · reconnect required';
+    CONTROL_WINDOW=null;
   }else if(message.type==='ERROR'){
     pending.button.textContent='⚠ REQUEST FAILED';
     status.textContent=`Request failed · ${message.message}`;
