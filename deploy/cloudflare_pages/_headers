@@ -1,0 +1,36 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/data/site/war_room_health.json
+  Cache-Control: no-store
+
+/data/site/war_room_market_matrix.json
+  Cache-Control: no-store
+
+/data/site/war_room_activity.json
+  Cache-Control: no-store
+
+/data/site/schedule_live_enrichment.json
+  Cache-Control: no-store
+
+/data/site/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/data/snapshots/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/data/research/shadow_value_confidence/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/*.css
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/logos/*
+  Cache-Control: public, max-age=86400, must-revalidate

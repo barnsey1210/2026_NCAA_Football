@@ -34,13 +34,14 @@ ROOT_PUBLICATION_PAGES = (
     "schedule.html",
     "conferences.html",
     "war-room.html",
+    "coaches.html",
 )
 
 
 def cache_bust_site_json(text):
     """Version published data/site JSON URLs so browsers/CDNs fetch each build."""
     return re.sub(
-        r'(data/site/[A-Za-z0-9_./-]+\.json)(?:\?v=[^\'"` )}>]+)?',
+        r'(data/site/[A-Za-z0-9_./-]+\.json)(?!\?v=\$\{)(?:\?v=[^\'"` )}>]+)?',
         lambda m: f"{m.group(1)}?v={BUILD_VERSION}",
         text,
     )

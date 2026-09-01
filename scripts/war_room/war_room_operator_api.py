@@ -18,6 +18,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
+from urllib.parse import urlsplit
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,12 +35,50 @@ GAME_ACTIVITY_INDEX = ROOT / "data/war_room/history/war_room_game_activity_index
 SCHEDULE = ROOT / "data/site/schedule_live_enrichment.json"
 SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
 FINAL_WATCHER_LATEST = ROOT / "data/control/cfbd_final_watcher/latest.json"
-PUBLIC_ORIGIN = os.environ.get(
-    "WAR_ROOM_PUBLIC_ORIGIN", "https://barnsey1210.github.io"
-).rstrip("/")
+def normalize_exact_origin(value: str) -> str:
+    """Return one exact HTTPS origin or fail closed on paths and wildcards."""
+    candidate = value.strip().rstrip("/")
+    parsed = urlsplit(candidate)
+    if (
+        not candidate
+        or "*" in candidate
+        or parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise RuntimeError(f"invalid exact public origin: {value!r}")
+    return candidate
+
+
+def configured_public_origins() -> tuple[str, ...]:
+    primary = os.environ.get(
+        "WAR_ROOM_PUBLIC_ORIGIN", "https://barnsey1210.github.io"
+    )
+    configured = os.environ.get(
+        "WAR_ROOM_PUBLIC_ORIGINS",
+        "https://barnsey1210.github.io,https://barnseywr.com",
+    )
+    pages_origin = os.environ.get("WAR_ROOM_PAGES_ORIGIN", "")
+    origins: list[str] = []
+    for raw in (primary, *configured.split(","), pages_origin):
+        if not raw.strip():
+            continue
+        normalized = normalize_exact_origin(raw)
+        if normalized not in origins:
+            origins.append(normalized)
+    return tuple(origins)
+
+
+PUBLIC_ORIGINS = configured_public_origins()
+PUBLIC_ORIGIN = PUBLIC_ORIGINS[0]
 CONTROL_ORIGIN = os.environ.get(
     "WAR_ROOM_CONTROL_ORIGIN", "https://control.barnseywr.com"
-).rstrip("/")
+)
+CONTROL_ORIGIN = normalize_exact_origin(CONTROL_ORIGIN)
 ACTION_PATHS = {
     "/war-room/market",
     "/war-room/ratings",
@@ -49,7 +88,7 @@ ACTION_PATHS = {
 app = FastAPI(title="NCAAF War Room Control Origin", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[PUBLIC_ORIGIN],
+    allow_origins=list(PUBLIC_ORIGINS),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Cf-Access-Jwt-Assertion"],
@@ -120,7 +159,7 @@ def require_access(
     if request.method == "POST" and request.url.path in ACTION_PATHS:
         if normalized_origin != CONTROL_ORIGIN:
             raise HTTPException(status_code=403, detail="browser origin is not authorized")
-    elif normalized_origin and normalized_origin not in {PUBLIC_ORIGIN, CONTROL_ORIGIN}:
+    elif normalized_origin and normalized_origin not in {*PUBLIC_ORIGINS, CONTROL_ORIGIN}:
         raise HTTPException(status_code=403, detail="browser origin is not authorized")
     request.state.operator = cf_access_authenticated_user_email
     return cf_access_authenticated_user_email
@@ -132,7 +171,7 @@ def require_public_read_origin(
 ) -> None:
     if request.client and request.client.host not in {"127.0.0.1", "::1", "testclient"}:
         raise HTTPException(status_code=403, detail="origin is loopback-only")
-    if origin and origin.rstrip("/") != PUBLIC_ORIGIN:
+    if origin and origin.rstrip("/") not in PUBLIC_ORIGINS:
         raise HTTPException(status_code=403, detail="browser origin is not authorized")
 
 
@@ -334,7 +373,7 @@ def live_schedule(_: None = Depends(require_public_read_origin)):
 
 @app.get("/war-room/bootstrap", response_class=HTMLResponse)
 def bootstrap(request: Request, operator: str = Depends(require_access)):
-    target_origin = json.dumps(PUBLIC_ORIGIN)
+    target_origins = json.dumps(PUBLIC_ORIGINS)
     channel_nonce = request.query_params.get("channel_nonce", "")
     if not channel_nonce.replace("-", "").isalnum() or not (16 <= len(channel_nonce) <= 128):
         raise HTTPException(status_code=400, detail="invalid channel nonce")
@@ -343,12 +382,17 @@ def bootstrap(request: Request, operator: str = Depends(require_access)):
 <html><head><meta charset=\"utf-8\"><title>War Room Operator</title></head>
 <body><p id=\"state\">Operator session ready. Keep this window open.</p>
 <script>
-const TARGET_ORIGIN={target_origin};
+const TARGET_ORIGINS=Object.freeze({target_origins});
+let ACTIVE_TARGET_ORIGIN=null;
 const CHANNEL='ncaaf-war-room-control-v1';
 const CHANNEL_NONCE={nonce_json};
 const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame'}});
 const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
-function send(message){{if(window.opener)window.opener.postMessage({{channel:CHANNEL,channelNonce:CHANNEL_NONCE,...message}},TARGET_ORIGIN)}}
+function send(message){{
+  if(!window.opener)return;
+  const targets=ACTIVE_TARGET_ORIGIN?[ACTIVE_TARGET_ORIGIN]:TARGET_ORIGINS;
+  targets.forEach(target=>window.opener.postMessage({{channel:CHANNEL,channelNonce:CHANNEL_NONCE,...message}},target));
+}}
 async function pollTask(taskId,requestId){{
   for(let attempt=0;attempt<240;attempt++){{
     let response;
@@ -372,7 +416,8 @@ async function pollTask(taskId,requestId){{
   throw new Error(`Task ${{taskId}} status timed out`);
 }}
 addEventListener('message',async event=>{{
-  if(event.origin!==TARGET_ORIGIN || event.source!==window.opener)return;
+  if(!TARGET_ORIGINS.includes(event.origin) || event.source!==window.opener)return;
+  ACTIVE_TARGET_ORIGIN=event.origin;
   const message=event.data||{{}};
   if(message.channel!==CHANNEL || message.channelNonce!==CHANNEL_NONCE || message.type!=='REQUEST' || !Object.hasOwn(ACTION_ROUTES,message.action))return;
   try{{

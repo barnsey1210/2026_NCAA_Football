@@ -25,6 +25,8 @@ if [[ -z "${CFBD_API_KEY:-}" ]]; then
 fi
 
 export WAR_ROOM_PUBLIC_ORIGIN="${WAR_ROOM_PUBLIC_ORIGIN:-https://barnsey1210.github.io}"
+export WAR_ROOM_PUBLIC_ORIGINS="${WAR_ROOM_PUBLIC_ORIGINS:-https://barnsey1210.github.io,https://barnseywr.com}"
+export WAR_ROOM_PAGES_ORIGIN="${WAR_ROOM_PAGES_ORIGIN:-}"
 cd "$RUNTIME_ROOT"
 exec /usr/bin/python3 -m uvicorn \
   scripts.war_room.war_room_operator_api:app \

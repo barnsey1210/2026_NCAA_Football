@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -46,15 +47,17 @@ def request(origin=api.PUBLIC_ORIGIN, method="POST", path="/war-room/market", qu
 
 class OperatorContractTests(unittest.TestCase):
     def test_exact_origin_and_access_identity_are_required(self):
-        value = request(api.PUBLIC_ORIGIN, "GET", "/war-room/status")
-        operator = api.require_access(
-            value,
-            origin=api.PUBLIC_ORIGIN,
-            cf_access_jwt_assertion="fixture-jwt",
-            cf_access_authenticated_user_email="operator@example.invalid",
-        )
-        self.assertEqual(operator, "operator@example.invalid")
-        self.assertEqual(value.state.operator, operator)
+        for origin in api.PUBLIC_ORIGINS:
+            with self.subTest(origin=origin):
+                value = request(origin, "GET", "/war-room/status")
+                operator = api.require_access(
+                    value,
+                    origin=origin,
+                    cf_access_jwt_assertion="fixture-jwt",
+                    cf_access_authenticated_user_email="operator@example.invalid",
+                )
+                self.assertEqual(operator, "operator@example.invalid")
+                self.assertEqual(value.state.operator, operator)
 
         with self.assertRaises(HTTPException) as raised:
             api.require_access(
@@ -84,7 +87,7 @@ class OperatorContractTests(unittest.TestCase):
         )
         self.assertEqual(operator, "operator@example.invalid")
 
-        for rejected_origin in (api.PUBLIC_ORIGIN, "https://foreign.example", None):
+        for rejected_origin in (*api.PUBLIC_ORIGINS, "https://foreign.example", None):
             with self.subTest(origin=rejected_origin):
                 with self.assertRaises(HTTPException) as raised:
                     api.require_access(
@@ -166,8 +169,11 @@ class OperatorContractTests(unittest.TestCase):
             "operator@example.invalid",
         )
         html = response.body.decode()
-        self.assertIn(api.PUBLIC_ORIGIN, html)
-        self.assertIn("event.origin!==TARGET_ORIGIN", html)
+        for origin in api.PUBLIC_ORIGINS:
+            self.assertIn(origin, html)
+        self.assertIn("TARGET_ORIGINS.includes(event.origin)", html)
+        self.assertIn("ACTIVE_TARGET_ORIGIN=event.origin", html)
+        self.assertIn("targets.forEach(target=>window.opener.postMessage", html)
         self.assertIn("event.source!==window.opener", html)
         self.assertIn("message.channelNonce!==CHANNEL_NONCE", html)
         self.assertIn("setInterval(()=>send({type:'READY'}),1000)", html)
@@ -199,16 +205,68 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn('POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))', builder)
 
     def test_public_live_read_origin_is_exact(self):
-        api.require_public_read_origin(
-            request(api.PUBLIC_ORIGIN, "GET", "/war-room/live/version"),
-            origin=api.PUBLIC_ORIGIN,
+        for origin in api.PUBLIC_ORIGINS:
+            with self.subTest(origin=origin):
+                api.require_public_read_origin(
+                    request(origin, "GET", "/war-room/live/version"), origin=origin
+                )
+        for origin in (
+            "https://foreign.example",
+            "https://evil.pages.dev",
+            "https://barnseywr.com.evil.example",
+            "https://www.barnseywr.com",
+        ):
+            with self.subTest(origin=origin), self.assertRaises(HTTPException) as raised:
+                api.require_public_read_origin(
+                    request(origin, "GET", "/war-room/live/version"), origin=origin
+                )
+            self.assertEqual(raised.exception.status_code, 403)
+
+    def test_future_pages_origin_is_exact_and_configurable(self):
+        with patch.dict(
+            os.environ,
+            {
+                "WAR_ROOM_PUBLIC_ORIGIN": "https://barnsey1210.github.io",
+                "WAR_ROOM_PUBLIC_ORIGINS": "https://barnsey1210.github.io,https://barnseywr.com",
+                "WAR_ROOM_PAGES_ORIGIN": "https://exact-project.pages.dev",
+            },
+            clear=False,
+        ):
+            origins = api.configured_public_origins()
+        self.assertEqual(
+            origins,
+            (
+                "https://barnsey1210.github.io",
+                "https://barnseywr.com",
+                "https://exact-project.pages.dev",
+            ),
         )
-        with self.assertRaises(HTTPException) as raised:
-            api.require_public_read_origin(
-                request("https://foreign.example", "GET", "/war-room/live/version"),
-                origin="https://foreign.example",
-            )
-        self.assertEqual(raised.exception.status_code, 403)
+        for unsafe in (
+            "https://*.pages.dev",
+            "https://pages.dev/tenant",
+            "http://barnseywr.com",
+            "https://barnseywr.com.evil.example/path",
+        ):
+            with self.subTest(origin=unsafe), self.assertRaises(RuntimeError):
+                api.normalize_exact_origin(unsafe)
+
+    def test_cors_uses_only_the_exact_configured_public_origins(self):
+        cors = next(
+            middleware
+            for middleware in api.app.user_middleware
+            if middleware.cls.__name__ == "CORSMiddleware"
+        )
+        self.assertEqual(cors.kwargs["allow_origins"], list(api.PUBLIC_ORIGINS))
+        self.assertNotIn("*", cors.kwargs["allow_origins"])
+        self.assertNotIn("https://www.barnseywr.com", cors.kwargs["allow_origins"])
+
+    def test_expired_session_contract_is_preserved(self):
+        html = api.bootstrap(
+            request(path="/war-room/bootstrap", query_string=b"channel_nonce=fixture-nonce-123456"),
+            "operator@example.invalid",
+        ).body.decode()
+        self.assertIn("type:'SESSION_EXPIRED'", html)
+        self.assertIn("Cloudflare Access session expired", html)
 
     def test_live_version_advances_without_publication(self):
         with tempfile.TemporaryDirectory() as temporary:

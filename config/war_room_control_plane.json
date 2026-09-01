@@ -1,9 +1,19 @@
 {
   "schema_version": 1,
   "public_origin": "https://barnsey1210.github.io",
+  "public_origins": [
+    "https://barnsey1210.github.io",
+    "https://barnseywr.com"
+  ],
+  "pages_dev_origin": null,
+  "pages_dev_origin_environment": "WAR_ROOM_PAGES_ORIGIN",
   "control_base_url": "https://control.barnseywr.com",
   "origin_policy": {
-    "public_command_center": "https://barnsey1210.github.io",
+    "public_command_center_origins": [
+      "https://barnsey1210.github.io",
+      "https://barnseywr.com"
+    ],
+    "future_pages_dev_origin": "CONFIGURE_EXACT_ORIGIN_VIA_WAR_ROOM_PAGES_ORIGIN",
     "protected_action_origin": "https://control.barnseywr.com",
     "wildcards_allowed": false
   },
@@ -20,13 +30,14 @@
     ]
   },
   "allowed_routes": {
-    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}", "/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/schedule"],
+    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}", "/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/activity", "/war-room/live/schedule"],
     "POST": ["/war-room/market", "/war-room/ratings", "/war-room/postgame"]
   },
   "public_live_reads": {
     "authentication": "CLOUDFLARE_ACCESS_BYPASS_ON_EXACT_PATH_ONLY",
-    "cors_origin": "https://barnsey1210.github.io",
-    "paths": ["/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/schedule"]
+    "cors_origins": ["https://barnsey1210.github.io", "https://barnseywr.com"],
+    "future_pages_dev_origin": "WAR_ROOM_PAGES_ORIGIN",
+    "paths": ["/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/activity", "/war-room/live/schedule"]
   },
   "browser_version_poll_seconds": 2,
   "activation_status": "CLOUDFLARE_ACCESS_TUNNEL_PROVISIONED"
