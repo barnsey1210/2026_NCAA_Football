@@ -672,7 +672,8 @@ tr:hover td.context-group{background:#202d39}
 
 .matchup-kickoff{display:flex;align-items:center;gap:5px;margin-bottom:2px}
 .matchup-team{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;font-weight:900;line-height:1.2}
-.matchup-team .team-logo-holder{--team-logo-size:30px}
+.matchup-team + .matchup-team{margin-top:2px}
+.matchup-team .team-logo-holder{--team-logo-size:26px;box-sizing:border-box;padding:1px;border-radius:5px}
 .matchup-team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-composite-rank{flex:0 0 22px;min-width:22px;text-align:right;font-size:9.5px;font-weight:950;font-variant-numeric:tabular-nums;line-height:1;color:var(--muted);overflow:visible!important}
 .team-composite-rank.rank-tier-1{color:#39e89a}
@@ -794,8 +795,8 @@ tr:hover td.context-group{background:#202d39}
   justify-content:center;
   padding:2px;
   overflow:hidden;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
+  background:rgba(238,241,244,.82);
+  border:1px solid rgba(255,255,255,.30);
   border-radius:6px;
 }
 
