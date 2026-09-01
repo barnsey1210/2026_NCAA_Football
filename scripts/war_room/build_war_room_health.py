@@ -134,7 +134,7 @@ def number(value):
         return None
 
 
-def build_api_quota_health():
+def build_api_quota_health(now_utc=None):
     if not QUOTA.exists():
         return {
             "status": "UNAVAILABLE",
@@ -148,26 +148,19 @@ def build_api_quota_health():
     remaining = integer(q.get("x_requests_remaining"))
     last_cost = integer(q.get("x_requests_last"))
 
-    now_et = datetime.now(ET)
-
-    if now_et.month == 12:
-        reset_at = datetime(
-            now_et.year + 1,
-            1,
-            1,
-            tzinfo=ET,
-        )
+    now_utc = (now_utc or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    quota_observed_at = parse_ts(q.get("response_received_at") or q.get("pulled_at"))
+    current_period = now_utc.strftime("%Y-%m")
+    observed_period = quota_observed_at.strftime("%Y-%m") if quota_observed_at else None
+    rollover_reconciliation_required = bool(observed_period and observed_period < current_period)
+    if now_utc.month == 12:
+        reset_at = datetime(now_utc.year + 1, 1, 1, tzinfo=timezone.utc)
     else:
-        reset_at = datetime(
-            now_et.year,
-            now_et.month + 1,
-            1,
-            tzinfo=ET,
-        )
+        reset_at = datetime(now_utc.year, now_utc.month + 1, 1, tzinfo=timezone.utc)
 
     days_until_reset = max(
         1,
-        (reset_at.date() - now_et.date()).days,
+        (reset_at.date() - now_utc.date()).days,
     )
 
     available_operating = (
@@ -205,7 +198,10 @@ def build_api_quota_health():
 
     # Reserve-driven health. The color is not based on a percentage of
     # the original monthly allotment; it reflects operational headroom.
-    if remaining is None:
+    if rollover_reconciliation_required:
+        color = "YELLOW"
+        status = "PENDING_PERIOD_RECONCILIATION"
+    elif remaining is None:
         color = "RED"
         status = "UNAVAILABLE"
 
@@ -234,20 +230,26 @@ def build_api_quota_health():
         "estimated_operating_pulls_before_reserve": (
             estimated_operating_pulls
         ),
-        "calendar_month": now_et.strftime("%Y-%m"),
-        "reset_at_et": reset_at.isoformat(),
+        "calendar_month": current_period,
+        "period_timezone": "UTC",
+        "quota_observed_at": quota_observed_at.isoformat() if quota_observed_at else None,
+        "quota_observed_period": observed_period,
+        "rollover_reconciliation_required": rollover_reconciliation_required,
+        "prior_period_credits_remaining": remaining if rollover_reconciliation_required else None,
+        "reset_at_utc": reset_at.isoformat(),
         "days_until_reset": days_until_reset,
         "daily_operating_credit_budget": daily_operating_credits,
         "daily_operating_pull_budget": daily_operating_pulls,
         "scheduled_refresh_allowed": (
-            remaining is not None
-            and remaining > EMERGENCY_RESERVE
+            (rollover_reconciliation_required and MONTHLY_LIMIT - (last_cost or 0) >= EMERGENCY_RESERVE)
+            or (not rollover_reconciliation_required and remaining is not None and remaining > EMERGENCY_RESERVE)
         ),
         "policy": (
-            "Command Center quota is budgeted by calendar month. "
+            "Command Center quota is budgeted by UTC calendar month. "
             "Scheduled fast refreshes protect the configured emergency "
-            "reserve. Provider response headers are the runtime source "
-            "of truth for actual usage."
+            "reserve. A prior-period header permits one normal guarded "
+            "request to reconcile the new period; its response headers "
+            "then become the runtime source of truth."
         ),
     }
 
