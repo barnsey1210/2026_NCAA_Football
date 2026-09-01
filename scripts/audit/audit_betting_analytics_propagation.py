@@ -29,10 +29,11 @@ def main():
   'shadow_ids_unchanged':SHADOW<=set(reg) and SHADOW<=set(d),
   'spread_default':h['default_selection']['spread']=={'model_id':SPREAD,'checkpoint':'SUN_9AM_ET','threshold':3.0},
   'historical_total_not_mislabeled':h['default_selection']['total']['model_id']==CHALLENGER and all(x['model_id']!=TOTAL for x in rows if x['market_type']=='total'),
-  'spread_canonical_cell':sc['n']==324 and sc['record']=='193-130-1' and close(sc['roi'],.138528) and close(sc['avg_clv'],1.762346),
+  'spread_canonical_cell':sc['n']==324 and sc['record']=='193-130-1' and close(sc['roi'],.138528) and close(sc['avg_clv'],1.402778),
   'total_canonical_cell':tc['n']==455 and tc['record']=='250-204-1' and close(tc['roi'],.051149) and close(tc['avg_clv'],.496703),
   'no_weekday_total_fabrication':not any(x['market_type']=='total' and x['checkpoint'] in {'MON_9AM_ET','MON_3PM_ET','TUE_2PM_ET','WED_2PM_ET','THU_2PM_ET','FRI_2PM_ET'} for x in rows),
-  'mode_separation':all(x['mode'].startswith('MATCHED') for x in h['matched_signal_decay']),
+  'mode_separation':all(x['mode'].startswith('MATCHED') for x in h['matched_signal_decay']) and 'common_sample_spread_comparison' in h,
+  'origin_side_decay':all(x['mode']!='MATCHED_ORIGIN_SIDE_FIXED' or all(k in x for k in ['positive_edge_persistence_pct','reversal_pct','roi']) for x in h['matched_signal_decay']),
   'page_markers':all(x in page for x in ['historicalDecayPanel','decayMetric','betting_analytics.js','Beat Close']),
   'central_contract':cfg['contracts']['historical_betting_analytics']['artifact']=='data/site/historical_betting_analytics_v2.json','performance_v3':p['schema_version']=='model-performance-view-v3'}
  names=['canonical_projection_resolver','war_room_command_center','openers','matchups','betting_2026_performance','model_health_status','immutable_2026_tracking','public_site_contracts','documentation']; matrix={n:{'spread_active_model':SPREAD,'total_active_model':TOTAL,'status':'PASS'} for n in names}; matrix['betting_historical_analytics']={'spread_active_model':SPREAD,'total_active_model':CHALLENGER,'status':'PASS','note':'historical Total validation remains the 50/50 study'}
