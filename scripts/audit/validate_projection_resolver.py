@@ -47,20 +47,20 @@ def main():
 
     expected = {
         STANDARD_SPREAD: {
-            "required_components": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
-            "weights": {"SP+": .2, "FPI": .2, "TeamRankings": .2, "Sagarin Rating": .2, "DRatings": .2},
+            "required_components": ["SP+", "FPI", "TeamRankings", "DRatings"],
+            "weights": {"SP+": .25, "FPI": .25, "TeamRankings": .25, "DRatings": .25},
         },
         STANDARD_TOTAL: {
-            "required_components": ["SP+", "Massey Dual", "Sagarin Total"],
-            "weights": {"SP+": .4, "Massey Dual": .4, "Sagarin Total": .2},
+            "required_components": ["SP+", "Massey Dual", "DRatings Total"],
+            "weights": {"SP+": .4, "Massey Dual": .4, "DRatings Total": .2},
         },
         DEGRADED_SPREAD: {
-            "required_components": ["SP+", "FPI", "TeamRankings", "Sagarin Rating", "DRatings"],
-            "nominal_weights": {"SP+": .2, "FPI": .2, "TeamRankings": .2, "Sagarin Rating": .2, "DRatings": .2},
+            "required_components": ["SP+", "FPI", "TeamRankings", "DRatings"],
+            "nominal_weights": {"SP+": .25, "FPI": .25, "TeamRankings": .25, "DRatings": .25},
         },
         DEGRADED_TOTAL: {
-            "required_components": ["SP+", "Massey Dual", "Sagarin Total"],
-            "nominal_weights": {"SP+": .4, "Massey Dual": .4, "Sagarin Total": .2},
+            "required_components": ["SP+", "Massey Dual", "DRatings Total"],
+            "nominal_weights": {"SP+": .4, "Massey Dual": .4, "DRatings Total": .2},
         },
         SHADOW_SPREAD: {
             "required_components": ["Shadow SP+", "Shadow Sagarin"],
