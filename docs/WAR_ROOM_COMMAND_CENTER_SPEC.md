@@ -8,7 +8,8 @@ into `index.html`. The page consumes `data/site/war_room_market_matrix.json`
 and `data/site/war_room_health.json`; their owners remain the corresponding
 builders in `scripts/war_room/`.
 
-The canonical site build packages the page and its two JSON contracts. The
+The canonical site build packages the page and its health, matrix, and activity
+JSON contracts. The
 weekend interactive acquisition path remains
 `scripts/war_room/run_fast_market_refresh.py`. Navigation exposure, Cloudflare
 work, and alternate fast endpoints are outside V1 release preparation.
@@ -96,10 +97,16 @@ not the strict Official model identity.
 
 All scheduled ratings/models have been refreshed for the upcoming week.
 
-For spread, Shadow applies at 0-1 updated sources, Hybrid at 2-4, and Official
-at 5/5. For total, Shadow applies at 0-1, Hybrid at 2/3, and Official at 3/3.
+For spread, the active source set is SP+, FPI, TeamRankings, and DRatings:
+Shadow applies at 0-1 updated sources, Hybrid at 2-3, and Official at 4/4. For
+total, the active source set is SP+ Total, Massey Dual, and DRatings Total:
+Shadow applies at 0-1, Hybrid at 2/3, and Official at 3/3.
 Accepted provider-version changes drive these counts globally. Transitions are
 automatic after acceptance and rebuild; no manual approval is required.
+
+Sagarin does not participate in active Standard authority/health. It remains a
+Shadow Spread and research/diagnostic source. Available projections stay
+visible with explicit partial/degraded/stale state rather than being hidden.
 
 Future: LIVE may be added for real-time adjustments beyond normal model
 cycles.
@@ -186,7 +193,7 @@ Use as context/warning.
 
 ## Refresh Architecture
 
-Existing daily pipeline remains unchanged.
+Existing daily pipeline remains the production backbone.
 
 War Room fast layer:
 
@@ -194,7 +201,10 @@ Saturday/Sunday: - 30-60 minute refresh - manual refresh option
 
 Monday-Friday: Lower cadence.
 
-The War Room should not require a complete site rebuild.
+The War Room should not require a complete site rebuild. Authenticated manual
+actions use the `control.barnseywr.com` operator popup/API. If an already-open
+popup has an expired Cloudflare Access session, the operator should reconnect;
+the failed request can occur before FastAPI receives a POST.
 
 ------------------------------------------------------------------------
 

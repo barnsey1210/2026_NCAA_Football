@@ -7,7 +7,10 @@
 
 ## Purpose
 
-This document is the source-of-truth map for how data is expected to move from raw providers to canonical domain contracts, page adapters, public artifacts, and GitHub Pages.
+This document is the source-of-truth map for how data moves from raw providers
+to canonical domain contracts, page adapters, public artifacts, and the current
+GitHub Pages public site. Migration of the public shell to Cloudflare Pages is
+planned but not complete.
 
 ## Coverage
 
@@ -93,7 +96,7 @@ The Command Center fast feed is intentionally separate from the canonical
 daily current-market contract. `run_fast_market_publication.py` runs the fast
 refresh, rebuilds only the standalone page bundle, validates refresh identity
 and freshness, and delegates to the publisher's bounded War Room mode. That
-mode publishes exactly the page and two JSON artifacts. It does not rebuild or
+mode publishes exactly the page plus health, matrix, and activity JSON. It does not rebuild or
 copy Home, Openers, Odds, Futures, Matchups, or their payloads.
 
 Openers, Odds, and Matchups continue to consume `current_market_contract.json`
@@ -147,8 +150,10 @@ enter the production team-rating composite.
   `standard_spread_5src_legacy_v1` and
   `standard_total_40_40_20_sagarin_legacy_v1`.
 
-These strict named projections are tracked without fallback or renormalization.
-MAIN authority is switched; deployment into AUTO remains pending review.
+These strict named projections are tracked without fallback or renormalization
+and are active in production. Sagarin is not part of active Standard Spread,
+Standard Total, or their authority/health counts; it remains part of Shadow
+Spread and registered legacy/research identities.
 
 Every required component must be present. Missing components produce an
 explicit unavailable state. The resolver must not renormalize available
@@ -171,6 +176,12 @@ for a separately identified renormalized estimate caused by missing
 coverage/input availability; it is not an authority tier. Existing artifacts
 that place `OPERATIONAL_DEGRADED` in an `authority` field retain their current
 runtime behavior but must be interpreted according to that compatibility rule.
+
+Spread and Total authority are independent. Spread is Official at 4/4 accepted
+updates and Hybrid at 2-3/4; Total is Official at 3/3 and Hybrid at 2/3.
+Consumers display an available projection value even when its state is partial,
+degraded, stale, or carry-forward, and label that state rather than suppressing
+the value.
 
 The future controller boundary and the relationship among persisted events,
 rebuildable state, authority selection, builders, validation, and publication

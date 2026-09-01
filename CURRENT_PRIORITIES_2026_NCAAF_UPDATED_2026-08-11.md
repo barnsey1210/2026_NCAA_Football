@@ -1,6 +1,6 @@
 # 2026 NCAAF — Current Priorities and Project Roadmap
 
-_Last updated: 2026-08-11_
+_Last synchronized: 2026-09-01_
 
 This file is the authoritative working backlog for the 2026 NCAAF project. Update it whenever a major decision, regression, completed milestone, or new priority is identified.
 
@@ -21,6 +21,35 @@ This file is the authoritative working backlog for the 2026 NCAAF project. Updat
 - Deploy only explicitly approved source files through the reviewed manifest.
 - Publish only through `scripts/publish/publish_site.sh --push` after validation.
 
+### Active projection authority
+
+- Standard Spread `standard_spread_4src_equal_v1`: SP+, FPI,
+  TeamRankings, and DRatings at 25% each.
+- Standard Total `standard_total_sp_massey_dratings_v1`: SP+ Total 40%,
+  Massey Dual 40%, and DRatings Total 20%.
+- Shadow Spread `shadow_spread_sp_sagarin_v1`: Shadow SP+ / Shadow Sagarin
+  at 50% each.
+- Shadow Total `shadow_total_enhanced_spplus_od_v1`: frozen enhanced SP+
+  offense/defense calculation.
+- `total_sp50_massey50_v1` is a challenger/research model, not active Standard
+  Total. Sagarin remains Shadow/research/legacy only for game projections.
+
+Spread and Total authority are independent. Spread is Official at 4/4 and
+Hybrid at 2-3/4 accepted provider updates. Total is Official at 3/3 and Hybrid
+at 2/3. Available values remain displayed with explicit degraded/partial state.
+
+### Immediate priorities
+
+1. Improve Command Center logo/value spacing so Spread/Total Model values do
+   not clip or spill into adjacent Shadow columns, and improve expired
+   operator-session messaging. Preserve the approved matrix width/layout.
+2. Migrate the public site from GitHub Pages to Cloudflare Pages at
+   `barnseywr.com`; redirect `www` to the apex and preserve
+   `control.barnseywr.com`. Validate CORS/origin/Access before DNS cutover.
+3. Resume historical market-timing work separately. SUN12 and retrospective
+   timing anomalies remain deferred and are not validated production betting
+   conclusions.
+
 ## Completed stabilization milestones
 
 ### Repository roles clarified
@@ -30,7 +59,7 @@ Completed 2026-08-01.
 - `NCAAF_MAIN_REPO` is the authoritative source-code repository.
 - `NCAAF_AUTO` is the non-Git operational runtime workspace.
 - `NCAAF_CONTROL` is limited to guarded/manual refresh and acceptance tooling.
-- `NCAAF_SITE` is the public deployment repository.
+- `NCAAF_SITE` is a legacy checkout and is not part of canonical publication.
 - Main repository stabilization commit: `9318203` — `Stabilize daily odds and email automation`.
 
 ### SGO all-upcoming-games acceptance

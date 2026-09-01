@@ -1,13 +1,15 @@
 # 2026 NCAAF — Current Priorities
 
-_Authoritative as of 2026-08-01_
+_Synchronized as of 2026-09-01_
 
 ## Repository roles
 
 - `/Users/jameslindesmith/NCAAF_MAIN_REPO` is the authoritative Git source for reviewed code, configuration, tests, and documentation.
 - `/Users/jameslindesmith/NCAAF_AUTO` is the operational runtime workspace. It holds mutable data, caches, databases, logs, generated pages, and provider responses and is not a Git repository.
 - `/Users/jameslindesmith/NCAAF_CONTROL` is limited to private manual/control tooling and safe workflow dispatch. It is not a source-code mirror, data repository, or publication repository.
-- `/Users/jameslindesmith/Sites/NCAAF_SITE` is the public-site publication repository. Generated publication artifacts reach it only through the validated publisher.
+- `/Users/jameslindesmith/NCAAF_MAIN_REPO` is also the canonical GitHub Pages
+  publication repository. `/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy
+  and is not part of the canonical workflow.
 
 The V2 site is canonical. Legacy V1 generation and promotion must remain disabled.
 
@@ -40,11 +42,20 @@ Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAg
 
 ## Immediate next priorities
 
-1. Complete review of the standardized V2 page-health summaries documented in `docs/PAGE_HEALTH_SUMMARIES.md`; runtime-affecting work must finish with controlled deployment and a `CURRENT` status check.
-2. Continue provider-coverage and freshness QA without changing the locked odds-source policy.
-3. Consolidate root-level fallback copies only through separate provenance review; do not remove production fallback behavior casually.
-4. Keep ratings acquisition activation gated until SP+, FPI, and TeamRankings provenance is documented.
-5. Preserve preview-first activation, explicit acceptance, and separately gated publication.
+1. Improve Command Center logo/value spacing and expired operator-session UX
+   without changing the approved matrix width/layout.
+2. Migrate the current GitHub Pages public site to Cloudflare Pages at
+   `barnseywr.com`, redirect `www` to the apex, and preserve the authenticated
+   `control.barnseywr.com` origin after pre-cutover CORS/Access validation.
+3. Resume historical timing analysis separately; deferred SUN12 and
+   retrospective anomalies are not validated production betting conclusions.
+
+Active Standard Spread is `standard_spread_4src_equal_v1` (SP+, FPI,
+TeamRankings, DRatings at 25% each). Active Standard Total is
+`standard_total_sp_massey_dratings_v1` (SP+ Total 40%, Massey Dual 40%,
+DRatings Total 20%). Sagarin remains Shadow/research/legacy only for game
+projections. Spread is Official at 4/4 and Hybrid at 2-3/4 accepted updates;
+Total is Official at 3/3 and Hybrid at 2/3.
 
 ## Non-negotiable safeguards
 

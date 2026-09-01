@@ -1,6 +1,6 @@
 # 2026 NCAAF Project Map
 
-_Last updated: 2026-08-06_
+_Last synchronized: 2026-09-01_
 
 ## Current operating rule
 
@@ -9,14 +9,18 @@ The authoritative source-code repository is:
 - Local: `/Users/jameslindesmith/NCAAF_MAIN_REPO`
 - GitHub: `barnsey1210/2026_NCAA_Football`
 
-The operational runtime workspace is `/Users/jameslindesmith/NCAAF_AUTO`. The manual control repository is `/Users/jameslindesmith/NCAAF_CONTROL`. The validated public deployment repository is `/Users/jameslindesmith/Sites/NCAAF_SITE`.
+The operational runtime workspace is `/Users/jameslindesmith/NCAAF_AUTO`. The
+manual control repository is `/Users/jameslindesmith/NCAAF_CONTROL`. MAIN is
+also the canonical GitHub Pages publishing repository;
+`/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy.
 
 Canonical V2 owns public output. Runtime generates and validates; the main repository preserves approved source and publishes explicitly. Do not restore recurring legacy V1 ownership.
 
 ## Repository responsibilities
 
 ### `NCAAF_MAIN_REPO`
-- Approved source code, tests, documentation, canonical data artifacts, and Git history.
+- Approved source code, tests, documentation, canonical data artifacts, Git
+  history, and allowlisted public publication.
 
 ### `NCAAF_AUTO`
 - Scheduled execution, live pulls, runtime data, logs, caches, generated reports, and publication preparation.
@@ -25,7 +29,16 @@ Canonical V2 owns public output. Runtime generates and validates; the main repos
 - Guarded/manual refresh, acceptance, audit-ledger, rollback, and controller-specific tooling.
 
 ### `NCAAF_SITE`
-- Validated public-site files and GitHub Pages publication.
+- Legacy checkout only; not part of current build, deployment, or publication.
+
+## Current public topology
+
+- Current public host: GitHub Pages.
+- Planned primary host: `https://barnseywr.com` on Cloudflare Pages.
+- Planned redirect: `https://www.barnseywr.com` to the apex.
+- Preserved authenticated control/API origin: `https://control.barnseywr.com`.
+- DNS cutover is deferred until CORS, exact-origin, authentication, and public
+  page behavior pass pre-cutover validation.
 
 ## CFBDepth data architecture
 

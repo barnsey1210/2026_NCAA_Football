@@ -85,6 +85,14 @@ Matchups, Futures, or other canonical site behavior.
 
 Displayed state represents model and market readiness.
 
+Canonical authority policy is owned by
+`docs/WAR_ROOM_PROJECTION_AUTHORITY.md`. Spread and Total are evaluated
+independently. Active Spread uses SP+, FPI, TeamRankings, and DRatings (4/4
+Official; 2-3/4 Hybrid). Active Total uses SP+ Total, Massey Dual, and DRatings
+Total (3/3 Official; 2/3 Hybrid). Sagarin is not an active Standard
+authority/health source; it remains relevant to Shadow/research. Available
+projection values remain visible with explicit partial/degraded state.
+
 ### STALE
 
 Market exists, but ratings/model inputs are from the prior update cycle.
@@ -414,6 +422,12 @@ The initial production plan does **not** assume continuous 30-second or
 The first several active Saturdays / Sundays should be used to determine
 whether a faster cadence produces enough incremental information to
 justify the additional API usage.
+
+Authenticated manual actions use the protected `control.barnseywr.com`
+popup/API. An expired Cloudflare Access session in an already-open popup can
+fail before FastAPI sees the POST; reconnecting the operator session restores
+the authenticated channel. This is an operator-session condition, not a
+Market or quota defect.
 
 ------------------------------------------------------------------------
 

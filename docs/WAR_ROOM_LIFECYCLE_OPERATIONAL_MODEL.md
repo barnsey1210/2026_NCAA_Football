@@ -1,6 +1,6 @@
 # War Room Lifecycle Operational Model
 
-_Canonical operational lifecycle reference: 2026-08-24_
+_Canonical operational lifecycle reference: 2026-09-01_
 _Status: architecture only; no controller or workflow implementation_
 
 ## Purpose and authority
@@ -43,6 +43,14 @@ The War Room is not one linear state machine. It is a coordinated system of six 
 6. execution/publication lifecycle.
 
 The future controller persists events, reduces them into state, and requests work from existing owners. It never becomes a formula, provider, authority, edge, UI, validation, or publication owner.
+
+Current execution remains layered: daily automation is the backbone, while
+fast/live War Room Market, score, and Postgame paths augment weekend
+operations. Authenticated manual actions use the protected
+`control.barnseywr.com` popup/API. A stale Cloudflare Access session in an
+already-open popup can fail before FastAPI receives the POST; reconnecting the
+operator session restores the authenticated channel. This is an
+operator-session condition, not a Market or quota defect.
 
 Provider tasks remain conditional after the controller requests them. The
 relevant Market, Postgame, or Ratings Service owns quota/cost evaluation and

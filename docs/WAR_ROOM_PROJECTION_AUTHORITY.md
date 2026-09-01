@@ -1,6 +1,6 @@
 # War Room Projection Authority
 
-_Canonical authority policy: 2026-08-24_
+_Canonical authority policy: 2026-09-01_
 _Scope: selection of the displayed spread/total model and the projection value used for edges_
 
 ## Authority
@@ -27,6 +27,18 @@ Spread Edge / Total Edge
 ```
 
 The market value, sign convention, best-price selection, and edge arithmetic remain owned by their existing canonical contracts. Authority supplies the selected projection value; it does not recalculate the market or edge formula.
+
+Active strict identities:
+
+- Spread `standard_spread_4src_equal_v1`: SP+, FPI, TeamRankings, and
+  DRatings at 25% each.
+- Total `standard_total_sp_massey_dratings_v1`: SP+ Total 40%, Massey Dual
+  40%, and DRatings Total 20%.
+
+Sagarin is excluded from active Standard authority and health. It remains an
+input to `shadow_spread_sp_sagarin_v1` and registered legacy/research models.
+`total_sp50_massey50_v1` is a challenger/research identity, not active
+Standard Total.
 
 ## Authority states
 
@@ -175,6 +187,10 @@ Provider count determines the authority **tier**. Model completeness determines 
 - `OFFICIAL` authority requires the strict official named model to be `AVAILABLE` with every required component.
 
 No tier may fabricate a missing value. A lifecycle controller must record the authority decision and missing reason supplied by the authority/resolver owners; it must not fall back, renormalize a different set, or promote another identity on its own.
+
+An available value remains visible when it is partial, degraded, stale, or
+carry-forward. Consumers label the state and provenance rather than suppressing
+an otherwise valid projection solely because Official completeness is absent.
 
 A `DEGRADED` availability result does not imply `HYBRID` authority. Conversely,
 Hybrid authority does not make the strict Official model `AVAILABLE`; it selects
