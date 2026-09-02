@@ -173,10 +173,10 @@ def main():
 
     stages.append(
         run_stage(
-            "odds_current_market_overlay",
+            "odds_screen_v2_rebuild",
             [
                 sys.executable,
-                "scripts/markets/apply_current_market_to_odds_screen.py",
+                "scripts/site/build_odds_screen_v2.py",
             ],
             current_market_env,
         )
