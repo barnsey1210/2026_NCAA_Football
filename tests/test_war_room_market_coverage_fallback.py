@@ -14,6 +14,7 @@ from scripts.markets.build_current_market_contract import (
 )
 from scripts.war_room.build_war_room_market_matrix import (
     merge_current_market_fallbacks,
+    resolve_kickoff_time,
 )
 
 
@@ -53,6 +54,39 @@ def payload(sides, *, book="BetMGM", market="spread"):
 
 
 class WarRoomMarketCoverageFallbackTests(unittest.TestCase):
+    def test_market_kickoff_remains_authoritative(self):
+        self.assertEqual(
+            resolve_kickoff_time(
+                "g16",
+                {"g16": "2026-09-03T22:05:00Z"},
+                {"g16": "2026-09-03T22:00:00Z"},
+                {"g16": "2026-09-03T21:55:00Z"},
+            ),
+            "2026-09-03T22:05:00Z",
+        )
+
+    def test_schedule_kickoff_fills_missing_market_kickoff(self):
+        self.assertEqual(
+            resolve_kickoff_time(
+                "g16",
+                {},
+                {"g16": "2026-09-03T22:00:00Z"},
+                {},
+            ),
+            "2026-09-03T22:00:00Z",
+        )
+
+    def test_completed_kickoff_remains_final_fallback(self):
+        self.assertEqual(
+            resolve_kickoff_time(
+                "g16",
+                {},
+                {},
+                {"g16": "2026-09-03T22:00:00Z"},
+            ),
+            "2026-09-03T22:00:00Z",
+        )
+
     def test_complete_fresh_pair_fills_exact_missing_slot(self):
         quotes = inventory()
         accepted, rejected = merge_current_market_fallbacks(

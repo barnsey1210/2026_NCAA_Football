@@ -63,6 +63,11 @@ GAME_RESULTS = (
     ROOT
     / "data/canonical/game_results_2026.json"
 )
+
+SCHEDULE_LIVE = (
+    ROOT
+    / "data/site/schedule_live_enrichment.json"
+)
 FINAL_WATCHER_STATE = (
     ROOT / "data/control/cfbd_final_watcher/state.json"
 )
@@ -1855,6 +1860,19 @@ def market_universe_counts(games_out, fast_board_game_ids):
     }
 
 
+def resolve_kickoff_time(
+    gid,
+    commence_by_gid,
+    schedule_kickoff_by_gid,
+    completed_kickoff_by_gid,
+):
+    return (
+        commence_by_gid.get(gid)
+        or schedule_kickoff_by_gid.get(gid)
+        or completed_kickoff_by_gid.get(gid)
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1906,6 +1924,12 @@ def main():
     results_payload = (
         json.loads(GAME_RESULTS.read_text())
         if GAME_RESULTS.exists()
+        else {"games": []}
+    )
+
+    schedule_live_payload = (
+        json.loads(SCHEDULE_LIVE.read_text())
+        if SCHEDULE_LIVE.exists()
         else {"games": []}
     )
 
@@ -2636,6 +2660,13 @@ def main():
             },
         })
 
+    schedule_kickoff_by_gid = {
+        str(row.get("game_id")): row.get("kickoff_raw")
+        for row in schedule_live_payload.get("games", [])
+        if row.get("game_id") is not None
+        and row.get("kickoff_raw")
+    }
+
     completed_kickoff_by_gid = {
         str(row.get("game_id")): row.get("start_date")
         for row in results_payload.get("games", [])
@@ -2646,9 +2677,11 @@ def main():
 
     for game in games_out:
         gid = str(game["game_id"])
-        game["kickoff_time"] = (
-            commence_by_gid.get(gid)
-            or completed_kickoff_by_gid.get(gid)
+        game["kickoff_time"] = resolve_kickoff_time(
+            gid,
+            commence_by_gid,
+            schedule_kickoff_by_gid,
+            completed_kickoff_by_gid,
         )
 
     games_out.sort(
