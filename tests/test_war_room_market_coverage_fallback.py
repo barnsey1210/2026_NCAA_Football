@@ -15,6 +15,7 @@ from scripts.markets.build_current_market_contract import (
 from scripts.war_room.build_war_room_market_matrix import (
     merge_current_market_fallbacks,
     resolve_kickoff_time,
+    scheduled_market_fallback_game_ids,
 )
 
 
@@ -54,6 +55,40 @@ def payload(sides, *, book="BetMGM", market="spread"):
 
 
 class WarRoomMarketCoverageFallbackTests(unittest.TestCase):
+    def test_scheduled_game_remains_fallback_eligible_when_fast_board_omits_it(self):
+        schedule = {
+            "games": [{
+                "game_id": "g16",
+                "away_team": "Massachusetts",
+                "home_team": "Rutgers",
+                "status": "scheduled",
+                "kickoff_raw": "2026-09-03T22:00:00Z",
+            }]
+        }
+
+        eligible = scheduled_market_fallback_game_ids(
+            schedule,
+            reference_time="2026-09-02T02:26:29Z",
+        )
+
+        self.assertEqual(eligible, {"g16"})
+
+    def test_past_kickoff_game_is_not_schedule_fallback_eligible(self):
+        schedule = {
+            "games": [{
+                "game_id": "g16",
+                "status": "scheduled",
+                "kickoff_raw": "2026-09-01T22:00:00Z",
+            }]
+        }
+
+        eligible = scheduled_market_fallback_game_ids(
+            schedule,
+            reference_time="2026-09-02T02:26:29Z",
+        )
+
+        self.assertEqual(eligible, set())
+
     def test_market_kickoff_remains_authoritative(self):
         self.assertEqual(
             resolve_kickoff_time(

@@ -1860,6 +1860,34 @@ def market_universe_counts(games_out, fast_board_game_ids):
     }
 
 
+def scheduled_market_fallback_game_ids(
+    schedule_payload,
+    *,
+    reference_time,
+):
+    """Return canonical scheduled games still pre-kickoff."""
+    now = parse_timestamp(reference_time) or datetime.now(
+        timezone.utc
+    )
+    eligible = set()
+
+    for row in schedule_payload.get("games", []):
+        gid = str(row.get("game_id") or "")
+        if not gid:
+            continue
+
+        if str(row.get("status") or "").lower() != "scheduled":
+            continue
+
+        kickoff = parse_timestamp(row.get("kickoff_raw"))
+        if kickoff is None or kickoff <= now:
+            continue
+
+        eligible.add(gid)
+
+    return eligible
+
+
 def resolve_kickoff_time(
     gid,
     commence_by_gid,
@@ -2220,13 +2248,20 @@ def main():
             current_market_payload,
             participating_books,
             reference_time=last_fast_pull_at,
-            eligible_game_ids=fast_board_game_ids,
+            eligible_game_ids=(
+                fast_board_game_ids
+                | scheduled_market_fallback_game_ids(
+                    schedule_live_payload,
+                    reference_time=last_fast_pull_at,
+                )
+            ),
         )
     )
 
     # Every canonical FBS-vs-FBS game belongs in the War Room matrix,
-    # even before a sportsbook posts a market. Market fallback eligibility
-    # remains restricted to games actually present on the fast board.
+    # even before a sportsbook posts a market. Fresh canonical fallback
+    # quotes may survive a temporary whole-game omission from the fast board
+    # only while the canonical schedule still shows the game pre-kickoff.
     for game in projection_games:
         gid = str(game.get("game_id") or "")
         if not gid:
