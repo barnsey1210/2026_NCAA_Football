@@ -149,6 +149,50 @@ def main():
             env,
         )
     )
+    # The War Room critical path is complete at this point.
+    # Shared current-state refreshes below are deliberately non-critical:
+    # no provider calls, no durable line-history writes, and no full-site publish.
+    war_room_ready_ms = round(
+        (perf_counter() - start) * 1000,
+        1,
+    )
+
+    current_market_env = env.copy()
+    current_market_env["NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY"] = "1"
+
+    stages.append(
+        run_stage(
+            "canonical_current_market_overlay",
+            [
+                sys.executable,
+                "scripts/markets/build_current_market_contract.py",
+            ],
+            current_market_env,
+        )
+    )
+
+    stages.append(
+        run_stage(
+            "odds_current_market_overlay",
+            [
+                sys.executable,
+                "scripts/markets/apply_current_market_to_odds_screen.py",
+            ],
+            current_market_env,
+        )
+    )
+
+    stages.append(
+        run_stage(
+            "matchups_current_market_overlay",
+            [
+                sys.executable,
+                "scripts/markets/apply_current_market_to_matchups.py",
+            ],
+            current_market_env,
+        )
+    )
+
     stages.append(
         run_stage(
             "refresh_history",
@@ -172,7 +216,7 @@ def main():
         "started_at": started_at.isoformat(),
         "finished_at": finished_at.isoformat(),
         "total_duration_ms": total_ms,
-        "critical_path_duration_ms": total_ms,
+        "critical_path_duration_ms": war_room_ready_ms,
         "deferred_to_daily_maintenance": [
             "append_current_market_book_history",
             "build_matchup_line_history_clean",

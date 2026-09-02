@@ -9,11 +9,16 @@ Priority is applied independently for each:
   canonical_game_id × sportsbook × market_type × side
 
 Source priority:
-  1. Fresh The Odds API quote
-  2. Missing
 
-The Odds API is the sole current-game market source for this contract.
-Stale quotes are retained only in the audit counts, never as current values.
+1. Fresh The Odds API quote
+2. Optional newer fast The Odds API spread/total overlay when explicitly enabled
+3. Missing
+
+The Odds API remains the primary current-game market source for this contract.
+When explicitly enabled, the fast Command Center feed may update spread/total
+current state only. It does not replace daily moneylines or write durable
+line-history artifacts. Stale quotes are retained only in the audit counts,
+never as current values.
 """
 
 from __future__ import annotations
@@ -33,6 +38,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MATCHUPS = ROOT / "data/site/matchups_view.json"
 THEODDS = ROOT / "data/odds/theodds_ncaaf_lines_2026.csv"
+THEODDS_FAST = ROOT / "data/war_room/odds/theodds_ncaaf_lines_2026_fast.csv"
 ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
 BOOK_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
 OUT = ROOT / "data/site/current_market_contract.json"
@@ -84,6 +90,13 @@ EXCHANGE_BOOKS = {
 }
 
 MAX_AGE_HOURS = float(os.environ.get("NCAAF_CURRENT_MARKET_MAX_AGE_HOURS", "18"))
+
+FAST_OVERLAY_ENABLED = (
+    os.environ.get("NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY", "")
+    .strip()
+    .lower()
+    in {"1", "true", "yes", "on"}
+)
 
 
 def atomic_json(path: Path, value: dict) -> None:
@@ -673,6 +686,146 @@ def main() -> None:
         candidates[gid][book][market][side] = q
         source_counts["The Odds API"] += 1
 
+    # Optional fast The Odds API current-state overlay.
+    #
+    # Disabled by default. When explicitly enabled, the fast Command Center feed
+    # may update spread/total current state only. It does not update moneylines
+    # and does not write durable line-history artifacts.
+    fast_rows_seen = 0
+    fast_rows_accepted = 0
+    fast_rows_older_or_equal = 0
+    fast_rows_unmatched = 0
+
+    if FAST_OVERLAY_ENABLED:
+        for row in csv_rows(THEODDS_FAST):
+            fast_rows_seen += 1
+
+            local_date = site_date_from_timestamp(row.get("commence_time"))
+            date_candidates = [
+                local_date,
+                str(row.get("commence_time") or "")[:10],
+            ]
+
+            gid, _match_method, reversed_orientation = resolve_game_id(
+                date_candidates,
+                row.get("away_team"),
+                row.get("home_team"),
+                identity,
+                key_to_game_id,
+            )
+
+            if not gid:
+                fast_rows_unmatched += 1
+                excluded.append({
+                    "source": "The Odds API Fast",
+                    "reason": "unmatched_game_identity",
+                    "date_candidates": date_candidates,
+                    "away_team": row.get("away_team"),
+                    "home_team": row.get("home_team"),
+                })
+                continue
+
+            book = normalize_book(row.get("book_key") or row.get("book"))
+
+            raw_market = str(row.get("market") or "").lower()
+            market = {
+                "spreads": "spread",
+                "spread": "spread",
+                "totals": "total",
+                "total": "total",
+            }.get(raw_market)
+
+            # Fast overlay intentionally excludes moneylines.
+            if market not in {"spread", "total"}:
+                continue
+
+            raw_side = str(row.get("side") or "").strip()
+
+            if market == "spread":
+                if normalize_team(raw_side) == normalize_team(row.get("away_team")):
+                    provider_side = "away"
+                elif normalize_team(raw_side) == normalize_team(row.get("home_team")):
+                    provider_side = "home"
+                else:
+                    continue
+
+                if reversed_orientation:
+                    side = "home" if provider_side == "away" else "away"
+                else:
+                    side = provider_side
+            else:
+                side = raw_side.lower()
+
+            if not book or side not in {"away", "home", "over", "under"}:
+                continue
+
+            updated_at = row.get("last_update") or row.get("pulled_at")
+            commence_time = row.get("commence_time")
+            kickoff = parse_time(commence_time)
+
+            if kickoff is not None:
+                kickoff_by_gid[gid] = kickoff
+
+            if post_kickoff_quote(updated_at, commence_time):
+                post_kickoff_counts["The Odds API Fast"] += 1
+                excluded.append({
+                    "source": "The Odds API Fast",
+                    "reason": "post_kickoff_quote",
+                    "game_id": gid,
+                    "sportsbook": book,
+                    "market_type": market,
+                    "side": side,
+                    "source_updated_at": updated_at,
+                    "commence_time": commence_time,
+                })
+                continue
+
+            q = quote_record(
+                source="The Odds API",
+                game_id=gid,
+                book=book,
+                market=market,
+                side=side,
+                line=number(row.get("point")),
+                price=number(row.get("price")),
+                updated_at=updated_at,
+                now=now,
+                venue_type=row.get("venue_type") or VENUE_TYPES.get(book),
+            )
+
+            if q["freshness_status"] != "LIVE":
+                excluded.append({
+                    "source": "The Odds API Fast",
+                    "reason": "stale_current_quote",
+                    **q,
+                })
+                continue
+
+            existing = candidates[gid][book][market].get(side)
+
+            existing_time = (
+                parse_time(existing.get("source_updated_at"))
+                if existing
+                else None
+            )
+            fast_time = parse_time(q.get("source_updated_at"))
+
+            # Never allow an older/equal fast observation to replace a newer
+            # canonical quote.
+            if (
+                existing is not None
+                and existing_time is not None
+                and fast_time is not None
+                and fast_time <= existing_time
+            ):
+                fast_rows_older_or_equal += 1
+                continue
+
+            q["selection_source"] = "THE_ODDS_API_FAST_OVERLAY"
+            candidates[gid][book][market][side] = q
+            source_counts["The Odds API Fast"] += 1
+            fast_rows_accepted += 1
+
     # The Odds API is the sole current-game market source.
 
     # ACTION_NETWORK_TARGETED_FALLBACK_START
@@ -999,6 +1152,13 @@ def main() -> None:
         "games_with_any_current": games_with_any_current,
         "games_missing_current": len(contract_games) - games_with_any_current,
         "accepted_quote_counts_by_source": dict(source_counts),
+        "fast_overlay": {
+            "enabled": FAST_OVERLAY_ENABLED,
+            "rows_seen": fast_rows_seen,
+            "rows_accepted": fast_rows_accepted,
+            "rows_older_or_equal": fast_rows_older_or_equal,
+            "rows_unmatched": fast_rows_unmatched,
+        },
         "invalid_pairs_excluded": invalid_pairs,
         "stale_current_quotes_displayed": stale_current_quotes_displayed,
         "excluded_count": len(excluded),
