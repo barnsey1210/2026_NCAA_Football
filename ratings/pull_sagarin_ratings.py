@@ -443,12 +443,14 @@ def parse_sagarin_text(html, provider_season=None):
         if not raw:
             continue
 
-        # Common Sagarin line shape begins with rank then team then rating fields.
-        # We keep this flexible and audit heavily.
-        m = re.match(r"^\s*(\d{1,4})\s+([A-Za-z0-9 .'\-&()/]+?)\s+(?:=|\s)\s*(-?\d+(?:\.\d+)?)\b(.*)$", line)
-        if not m:
-            # Alternative: rank team rating without equals.
-            m = re.match(r"^\s*(\d{1,4})\s+([A-Za-z0-9 .'\-&()/]+?)\s+(-?\d+(?:\.\d+)?)\s+(.*)$", line)
+        # Ratings-table rows contain an explicit "=" between the team/class
+        # field and the main Sagarin Rating. Game-prediction rows also begin
+        # with rank/team/numbers, so accepting whitespace here can misclassify
+        # prediction rows as ratings and create duplicate teams.
+        m = re.match(
+            r"^\s*(\d{1,4})\s+([A-Za-z0-9 .'\-&()/]+?)\s+=\s*(-?\d+(?:\.\d+)?)\b(.*)$",
+            line,
+        )
         if not m:
             continue
 
@@ -477,8 +479,25 @@ def parse_sagarin_text(html, provider_season=None):
         # strong_recent, strong_recent_rank, ...
         nums = [float(x) for x in re.findall(r"[-+]?\d+(?:\.\d+)?", rest)]
 
-        wins = nums[0] if len(nums) >= 1 else None
-        losses = nums[1] if len(nums) >= 2 else None
+        # A real team ratings row carries integer W/L fields immediately
+        # after the main rating. Conference/aggregate summary rows can also
+        # contain "=" but do not have this team-row structure.
+        if len(nums) < 2:
+            continue
+
+        wins = nums[0]
+        losses = nums[1]
+
+        if (
+            wins < 0
+            or losses < 0
+            or wins > 20
+            or losses > 20
+            or not float(wins).is_integer()
+            or not float(losses).is_integer()
+        ):
+            continue
+
         sos = nums[2] if len(nums) >= 3 else None
         sos_rank = nums[3] if len(nums) >= 4 else None
         predictor = nums[8] if len(nums) >= 9 else None
@@ -518,7 +537,15 @@ def parse_sagarin_text(html, provider_season=None):
             "notes": "preformatted text parse; rating components parsed from Sagarin fields",
         })
 
-    return pd.DataFrame(rows)
+    out = pd.DataFrame(rows)
+
+    # Sagarin's HTML can contain the same ratings table more than once.
+    # Collapse identical canonical team rows so downstream loaders never
+    # receive duplicate ratings for the same team.
+    if not out.empty:
+        out = out.drop_duplicates(subset=["team"], keep="first").reset_index(drop=True)
+
+    return out
 
 def parse_args():
     parser = argparse.ArgumentParser()
