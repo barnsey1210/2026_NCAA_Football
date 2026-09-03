@@ -238,13 +238,12 @@ def load_team_injury_impact(path, now=None):
         and source_status.startswith("AVAILABLE")
     )
     rows = {}
-    if fresh:
-        for row in payload.get("teams", []):
-            team = normalize_team(row.get("team"))
-            rank = number(row.get("injury_impact_rank"))
-            if not team or not isinstance(rank, int) or not 1 <= rank <= 138:
-                continue
-            rows[team] = row
+    for row in payload.get("teams", []):
+        team = normalize_team(row.get("team"))
+        rank = number(row.get("injury_impact_rank"))
+        if not team or not isinstance(rank, int) or not 1 <= rank <= 138:
+            continue
+        rows[team] = row
     return rows, {
         "status": source_status if fresh else "STALE" if pulled_at else "UNAVAILABLE",
         "source": payload.get("source") or "CFBDepth Injury Impact Report",

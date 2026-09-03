@@ -39,8 +39,11 @@ MARKET_TYPES = ("spread", "total")
 PUBLIC_MOVE_BOOKS = {"DraftKings", "FanDuel", "BetMGM", "Caesars", "Pinnacle"}
 PUBLIC_MOVE_THRESHOLD = 0.5
 AGGREGATION_SECONDS = 90
+ACTIONABLE_EDGE_THRESHOLD = 3.0
 DISPLAY_PRIORITY = {
     "EDGE_BECAME_ACTIONABLE": 100, "EDGE_LOST_ACTIONABLE": 100,
+    "EDGE_ACTIONABLE_CHANGED": 95,
+    "BEST_SPREAD_CHANGED": 92, "BEST_TOTAL_CHANGED": 92,
     "MARKET_OPENED": 90, "PINNACLE_OPENED": 88,
     "PINNACLE_MOVE": 82, "MARKET_FOLLOW": 81, "MARKET_MOVE": 80,
     "MODEL_STATE_CHANGED": 70, "SHADOW_SPREAD_READY": 70, "SHADOW_TOTAL_READY": 70,
@@ -136,6 +139,29 @@ def pair_snapshot(game: dict[str, Any], book: str, market: str) -> dict[str, Any
     }
 
 
+def decision_snapshot(game: dict[str, Any], market: str) -> dict[str, Any]:
+    """Observe already-resolved BEST and EDGE values without recalculating them."""
+    edges = (game.get("edges") or {}).get(market) or {}
+    best_side = edges.get("best_side")
+    best_edge = edges.get("best_edge")
+
+    best_market = ((game.get("market") or {}).get("best_sportsbook") or {}).get(market) or {}
+    quote = best_market.get(best_side) if best_side else None
+    if not isinstance(quote, dict):
+        quote = None
+
+    return {
+        "market": market,
+        "best_side": best_side,
+        "best_edge": best_edge,
+        "book": quote.get("book") if quote else None,
+        "line": quote.get("line") if quote else None,
+        "price": quote.get("price") if quote else None,
+        "quote_timestamp": quote_time(quote) if quote else None,
+        "selection_source": quote.get("selection_source") if quote else None,
+    }
+
+
 def selected_week_health(matrix: dict[str, Any]) -> dict[str, Any]:
     by_week: dict[str, Any] = {}
     games = [g for g in matrix.get("games", []) if (g.get("scope") or {}).get("fbs_vs_fbs") is True]
@@ -175,6 +201,7 @@ def current_snapshot(matrix: dict[str, Any], health: dict[str, Any], results: di
     markets: dict[str, Any] = {}
     models: dict[str, Any] = {}
     shadows: dict[str, Any] = {}
+    decisions: dict[str, Any] = {}
     games_meta: dict[str, Any] = {}
     for game in matrix.get("games", []):
         gid = str(game.get("game_id") or "")
@@ -185,6 +212,10 @@ def current_snapshot(matrix: dict[str, Any], health: dict[str, Any], results: di
             "away_team": game.get("away_team"), "home_team": game.get("home_team"),
             "kickoff_time": game.get("kickoff_time") or game.get("date"),
             "neutral_site": game.get("neutral_site"),
+        }
+        decisions[gid] = {
+            market: decision_snapshot(game, market)
+            for market in MARKET_TYPES
         }
         models[gid] = {
             "state": game.get("state"),
@@ -240,7 +271,7 @@ def current_snapshot(matrix: dict[str, Any], health: dict[str, Any], results: di
         "built_at": matrix.get("built_at"), "markets": markets,
         "opened_market_keys": sorted(markets),
         "opened_game_market_keys": sorted({f"{row['game_id']}|{row['market']}" for row in markets.values()}),
-        "models": models, "shadows": shadows,
+        "models": models, "shadows": shadows, "decisions": decisions,
         "ratings": ratings, "finals": finals, "provider_health": selected_week_health(matrix),
         "postgame": {"built_at": postgame.get("built_at"), "status": postgame.get("status"),
                      "completed_team_updates": (postgame.get("summary") or {}).get("completed_team_updates")},
@@ -341,6 +372,135 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
             significance="OPERATIONAL", metadata={"reason": "resolved accepted pair unavailable"},
             identity_parts=(old.get("pair_fingerprint"), refresh_id),
         ))
+
+    # BEST sportsbook and actionable-edge transitions are observed from the
+    # already-resolved matrix. This layer does not select books or calculate edges.
+    for gid, new_domains in current.get("decisions", {}).items():
+        old_domains = (previous.get("decisions") or {}).get(gid)
+        if not isinstance(old_domains, dict):
+            # Establish a baseline when upgrading an existing state file.
+            continue
+
+        meta = games_meta.get(gid, {})
+
+        for market in MARKET_TYPES:
+            new = new_domains.get(market) or {}
+            old = old_domains.get(market) or {}
+
+            if not old:
+                continue
+
+            old_best = (
+                old.get("best_side"),
+                old.get("book"),
+                old.get("line"),
+                old.get("price"),
+            )
+            new_best = (
+                new.get("best_side"),
+                new.get("book"),
+                new.get("line"),
+                new.get("price"),
+            )
+
+            if old_best != new_best and any(value is not None for value in new_best):
+                event_type = "BEST_SPREAD_CHANGED" if market == "spread" else "BEST_TOTAL_CHANGED"
+                out.append(event(
+                    event_type=event_type,
+                    observed_at=detected_at,
+                    detected_at=detected_at,
+                    refresh_id=refresh_id,
+                    entity_type="game_market",
+                    entity_id=f"{gid}|{market}|best",
+                    source_system="war_room_matrix_observer",
+                    season=meta.get("season"),
+                    week=meta.get("week"),
+                    game_id=gid,
+                    away_team=meta.get("away_team"),
+                    home_team=meta.get("home_team"),
+                    book=new.get("book"),
+                    market=market,
+                    side=new.get("best_side"),
+                    old_line=old.get("line"),
+                    new_line=new.get("line"),
+                    old_price=old.get("price"),
+                    new_price=new.get("price"),
+                    significance="ACTIONABLE",
+                    metadata={
+                        "old_best": old,
+                        "new_best": new,
+                        "old_book": old.get("book"),
+                        "new_book": new.get("book"),
+                    },
+                    identity_parts=(stable_hash(old), stable_hash(new)),
+                ))
+
+            try:
+                old_edge = float(old.get("best_edge"))
+            except (TypeError, ValueError):
+                old_edge = None
+            try:
+                new_edge = float(new.get("best_edge"))
+            except (TypeError, ValueError):
+                new_edge = None
+
+            if old_edge is None or new_edge is None:
+                continue
+
+            edge_event = None
+            if old_edge < ACTIONABLE_EDGE_THRESHOLD <= new_edge:
+                edge_event = "EDGE_BECAME_ACTIONABLE"
+            elif old_edge >= ACTIONABLE_EDGE_THRESHOLD > new_edge:
+                edge_event = "EDGE_LOST_ACTIONABLE"
+            elif (
+                old_edge >= ACTIONABLE_EDGE_THRESHOLD
+                and new_edge >= ACTIONABLE_EDGE_THRESHOLD
+                and (
+                    old.get("best_side") != new.get("best_side")
+                    or abs(new_edge - old_edge) >= 0.5
+                )
+            ):
+                edge_event = "EDGE_ACTIONABLE_CHANGED"
+
+            if edge_event:
+                out.append(event(
+                    event_type=edge_event,
+                    observed_at=detected_at,
+                    detected_at=detected_at,
+                    refresh_id=refresh_id,
+                    entity_type="game_edge",
+                    entity_id=f"{gid}|{market}|edge",
+                    source_system="war_room_matrix_observer",
+                    season=meta.get("season"),
+                    week=meta.get("week"),
+                    game_id=gid,
+                    away_team=meta.get("away_team"),
+                    home_team=meta.get("home_team"),
+                    book=new.get("book"),
+                    market=market,
+                    side=new.get("best_side"),
+                    old_line=old.get("line"),
+                    new_line=new.get("line"),
+                    old_price=old.get("price"),
+                    new_price=new.get("price"),
+                    significance="ACTIONABLE",
+                    metadata={
+                        "old_edge": old_edge,
+                        "new_edge": new_edge,
+                        "old_side": old.get("best_side"),
+                        "new_side": new.get("best_side"),
+                        "old_book": old.get("book"),
+                        "new_book": new.get("book"),
+                    },
+                    identity_parts=(
+                        market,
+                        old_edge,
+                        new_edge,
+                        old.get("best_side"),
+                        new.get("best_side"),
+                        refresh_id,
+                    ),
+                ))
 
     for source, new in current.get("ratings", {}).items():
         old = (previous.get("ratings") or {}).get(source)
@@ -467,12 +627,43 @@ def public_summary(events: list[dict[str, Any]]) -> dict[str, int]:
     groups = Counter()
     for row in events:
         kind = row["event_type"]
-        if kind in {"MARKET_OPENED", "PINNACLE_OPENED"}: groups["open"] += 1
-        elif kind in {"MARKET_MOVE", "PINNACLE_MOVE", "MARKET_FOLLOW"}: groups["moves"] += 1
-        elif kind == "RATINGS_UPDATED": groups["ratings"] += 1
-        elif kind in {"MODEL_STATE_CHANGED", "SHADOW_SPREAD_READY", "SHADOW_TOTAL_READY"}: groups["model"] += 1
-        elif kind in {"FINAL_POSTED", "POSTGAME_REFRESHED"}: groups["final"] += 1
-    return {key: groups[key] for key in ("open", "moves", "ratings", "model", "final")}
+        if kind in {"MARKET_OPENED", "PINNACLE_OPENED"}:
+            groups["open"] += 1
+        elif kind in {"MARKET_MOVE", "PINNACLE_MOVE", "MARKET_FOLLOW"}:
+            groups["moves"] += 1
+        elif kind in {"BEST_SPREAD_CHANGED", "BEST_TOTAL_CHANGED"}:
+            groups["best"] += 1
+        elif kind == "EDGE_BECAME_ACTIONABLE":
+            groups["new_edge"] += 1
+        elif kind == "EDGE_ACTIONABLE_CHANGED":
+            groups["edge_changed"] += 1
+        elif kind == "EDGE_LOST_ACTIONABLE":
+            groups["edge_lost"] += 1
+        elif kind == "RATINGS_UPDATED":
+            groups["ratings"] += 1
+        elif kind in {
+            "MODEL_STATE_CHANGED",
+            "SHADOW_SPREAD_READY",
+            "SHADOW_TOTAL_READY",
+        }:
+            groups["model"] += 1
+        elif kind in {"FINAL_POSTED", "POSTGAME_REFRESHED"}:
+            groups["final"] += 1
+
+    return {
+        key: groups[key]
+        for key in (
+            "open",
+            "moves",
+            "best",
+            "new_edge",
+            "edge_changed",
+            "edge_lost",
+            "ratings",
+            "model",
+            "final",
+        )
+    }
 
 
 def public_event(kind: str, rows: list[dict[str, Any]], metadata: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -570,7 +761,8 @@ def project_public(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
     retained = [row for row in history if row.get("event_type") in {
         "MODEL_STATE_CHANGED", "SHADOW_SPREAD_READY", "SHADOW_TOTAL_READY", "FINAL_POSTED",
         "PROVIDER_DEGRADED", "PROVIDER_RECOVERED", "PROVIDER_UNAVAILABLE",
-        "EDGE_BECAME_ACTIONABLE", "EDGE_LOST_ACTIONABLE",
+        "EDGE_BECAME_ACTIONABLE", "EDGE_LOST_ACTIONABLE", "EDGE_ACTIONABLE_CHANGED",
+        "BEST_SPREAD_CHANGED", "BEST_TOTAL_CHANGED",
     }]
     projected = public_openers(history) + public_moves(history) + public_ratings(history)
     projected.extend(public_event(row["event_type"], [row]) for row in retained)
@@ -867,6 +1059,25 @@ def main() -> None:
         newest = project_public(history)
         latest_underlying = {event_id for row in new_events for event_id in [row["event_id"]]}
         latest_public = [row for row in newest if latest_underlying.intersection(row.get("underlying_event_ids") or [])]
+        recent_change_types = {
+            "BEST_SPREAD_CHANGED",
+            "BEST_TOTAL_CHANGED",
+            "EDGE_BECAME_ACTIONABLE",
+            "EDGE_ACTIONABLE_CHANGED",
+            "EDGE_LOST_ACTIONABLE",
+        }
+        recent_change_cutoff = parsed_timestamp(detected_at).timestamp() - (30 * 60)
+        recent_change_events = [
+            row
+            for row in newest
+            if row.get("event_type") in recent_change_types
+            and parsed_timestamp(
+                row.get("detected_at")
+                or row.get("created_at")
+                or row.get("observed_at")
+            ).timestamp() >= recent_change_cutoff
+        ]
+
         payload = {
             "schema_version": "war-room-activity-v1", "built_at": detected_at,
             "latest_refresh_id": current.get("refresh_id"), "event_count": len(history),
@@ -874,6 +1085,8 @@ def main() -> None:
             "latest_refresh_event_ids": [e["event_id"] for e in latest_public],
             "since_last_refresh": public_summary(latest_public),
             "pipeline_refreshes": current.get("pipeline_refreshes"),
+            "recent_change_window_minutes": 30,
+            "recent_change_events": recent_change_events,
             "events": newest[:max(1, args.max_public_events)],
         }
         line_history = load_json(args.line_history, {})

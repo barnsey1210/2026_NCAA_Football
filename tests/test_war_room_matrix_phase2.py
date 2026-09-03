@@ -265,7 +265,11 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn(".mobile-matrix{display:grid", source)
         self.assertIn("MODEL',modelTooltip", source)
         self.assertIn("SHADOW',shadowDisplay", source)
-        self.assertIn("BEST',compactQuote", source)
+        self.assertIn("'BEST',", source)
+        self.assertIn("compactQuote(sprBest,'spread',game,true)", source)
+        self.assertIn("compactQuote(totBest,'total',game,true)", source)
+        self.assertIn("recentBestBadge(game,'spread')", source)
+        self.assertIn("recentEdgeBadge(game,'spread')", source)
         self.assertIn("EXCH',compactQuote", source)
         self.assertNotIn("mobileOpen", source)
 

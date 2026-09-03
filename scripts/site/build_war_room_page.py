@@ -366,6 +366,57 @@ button,select{
 
 .activity-summary{padding:8px 10px;border-bottom:1px solid var(--line);font-size:11px;font-weight:900;line-height:1.45}
 .activity-summary-label{display:block;color:var(--muted);font-size:9px;letter-spacing:.7px}
+.activity-summary{
+  border-left:3px solid #385269;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+}
+.activity-summary.has-activity{
+  border-left-color:#ff9c55;
+  background:linear-gradient(90deg,rgba(255,116,85,.16),rgba(255,156,85,.055));
+}
+.activity-summary.has-edge{
+  border-left-color:var(--green);
+  background:linear-gradient(90deg,rgba(57,232,154,.20),rgba(57,232,154,.055));
+  box-shadow:inset 0 0 0 1px rgba(57,232,154,.22);
+}
+.activity-summary-values{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px 7px;
+  margin-top:4px;
+}
+.activity-summary-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:2px 5px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:4px;
+  background:rgba(0,0,0,.15);
+  font-size:9px;
+  font-weight:950;
+}
+.activity-summary-chip strong{
+  font-size:11px;
+  color:#eef7ff;
+}
+.activity-summary-chip.edge{
+  color:var(--green);
+  border-color:rgba(57,232,154,.38);
+}
+.activity-summary-chip.edge strong{color:var(--green)}
+.activity-summary-chip.lost{
+  color:#ff7b7b;
+  border-color:rgba(255,105,105,.35);
+}
+.activity-summary-chip.lost strong{color:#ff7b7b}
+.activity-no-change{
+  display:block;
+  margin-top:2px;
+  color:#8396a7;
+  font-size:9px;
+  font-weight:900;
+}
 .activity-focus{display:none;padding:7px 9px;border-bottom:1px solid var(--line);background:rgba(66,217,255,.055)}
 .activity-focus.active{display:block}
 .activity-focus-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -376,6 +427,38 @@ button,select{
 .activity-filter{border:1px solid var(--line2);background:#09131d;color:var(--muted);border-radius:10px;padding:3px 7px;font-size:9px;font-weight:900;cursor:pointer}
 .activity-filter.active{border-color:var(--green);color:var(--green)}
 .activity-summary.hidden{display:none}
+.activity-kind.edge{color:var(--green)}
+
+td.cell-hot-market{
+  background:rgba(255,93,72,.21)!important;
+  box-shadow:inset 0 0 0 2px rgba(255,105,89,.72)!important;
+}
+td.cell-hot-edge-new{
+  background:rgba(57,232,154,.25)!important;
+  box-shadow:inset 0 0 0 2px rgba(57,232,154,.90)!important;
+}
+td.cell-hot-edge{
+  background:rgba(57,232,154,.15)!important;
+  box-shadow:inset 0 0 0 1px rgba(57,232,154,.68)!important;
+}
+td.cell-hot-edge-lost{
+  background:rgba(255,105,105,.19)!important;
+  box-shadow:inset 0 0 0 2px rgba(255,105,105,.68)!important;
+}
+.cell-change-badge{
+  display:block;
+  margin:0 auto 2px;
+  width:max-content;
+  padding:1px 4px;
+  border-radius:3px;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.3px;
+  line-height:1.15;
+}
+.cell-change-badge.market{background:#ff6b59;color:#071017}
+.cell-change-badge.edge{background:var(--green);color:#04130d}
+.cell-change-badge.lost{background:#ff6969;color:#150606}
 .activity-snapshot{display:none;padding:5px 8px;border-bottom:1px solid var(--line);background:rgba(66,217,255,.035);font-size:9px;line-height:1.28}
 .activity-snapshot.active{display:block}
 .snapshot-title{color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.7px;margin-bottom:3px}
@@ -404,8 +487,25 @@ button,select{
 .activity-unread{color:var(--yellow);margin-left:5px}
 .activity-flash td{animation:activityFlash 1.8s ease-out}
 @keyframes activityFlash{0%{box-shadow:inset 0 0 0 999px rgba(57,232,154,.25)}100%{box-shadow:none}}
-.game-start.game-selected td{background:rgba(66,153,255,.075);box-shadow:inset 0 1px rgba(66,217,255,.24),inset 0 -1px rgba(66,217,255,.24)}
-.game-start.game-selected td:first-child{box-shadow:inset 3px 0 var(--cyan),inset 0 1px rgba(66,217,255,.24),inset 0 -1px rgba(66,217,255,.24)}
+.game-start.game-selected td{
+  background:rgba(66,153,255,.16);
+  box-shadow:
+    inset 0 2px rgba(66,217,255,.82),
+    inset 0 -2px rgba(66,217,255,.82);
+}
+.game-start.game-selected td:first-child{
+  box-shadow:
+    inset 5px 0 var(--cyan),
+    inset 0 2px rgba(66,217,255,.82),
+    inset 0 -2px rgba(66,217,255,.82);
+}
+.game-start.game-selected td:last-child{
+  box-shadow:
+    inset -2px 0 rgba(66,217,255,.58),
+    inset 0 2px rgba(66,217,255,.82),
+    inset 0 -2px rgba(66,217,255,.82);
+}
+.game-start.game-selected{filter:brightness(1.10)}
 
 .matrix-scroll{
   flex:1;
@@ -1073,7 +1173,10 @@ tr:hover td.context-group{background:#202d39}
   }
   .mobile-game-card.game-selected{
     border-color:var(--cyan);
-    box-shadow:0 0 0 1px rgba(69,217,237,.2);
+    box-shadow:
+      0 0 0 2px rgba(69,217,237,.70),
+      0 0 16px rgba(69,217,237,.18);
+    background:rgba(69,217,237,.035);
   }
   .mobile-activity-slot:empty{display:none}
   .mobile-game-card.activity-flash{animation:mobileActivityFlash 1.8s ease-out}
@@ -1090,7 +1193,49 @@ tr:hover td.context-group{background:#202d39}
   .mobile-kickoff{display:flex;flex-direction:column;color:var(--muted);font-size:9px;font-weight:900;line-height:1.2}
   .mobile-matchup{min-width:0}
   .mobile-matchup .matchup-team{font-size:11px}
-  .mobile-card-state{justify-self:end}
+  .mobile-card-state{
+    justify-self:end;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:3px;
+  }
+  .mobile-change-count{
+    display:inline-flex;
+    align-items:center;
+    padding:2px 5px;
+    border:1px solid rgba(57,232,154,.38);
+    border-radius:4px;
+    background:rgba(57,232,154,.12);
+    color:var(--green);
+    font-size:7px;
+    font-weight:950;
+    letter-spacing:.35px;
+    white-space:nowrap;
+  }
+  .mobile-metric.cell-hot-market{
+    background:rgba(255,93,72,.21)!important;
+    border-color:rgba(255,105,89,.72)!important;
+    box-shadow:inset 0 0 0 1px rgba(255,105,89,.48);
+  }
+  .mobile-metric.cell-hot-edge-new{
+    background:rgba(57,232,154,.25)!important;
+    border-color:rgba(57,232,154,.90)!important;
+    box-shadow:inset 0 0 0 1px rgba(57,232,154,.65);
+  }
+  .mobile-metric.cell-hot-edge{
+    background:rgba(57,232,154,.15)!important;
+    border-color:rgba(57,232,154,.68)!important;
+  }
+  .mobile-metric.cell-hot-edge-lost{
+    background:rgba(255,105,105,.19)!important;
+    border-color:rgba(255,105,105,.68)!important;
+  }
+  .mobile-metric .cell-change-badge{
+    margin-bottom:0;
+    font-size:6px;
+    padding:1px 3px;
+  }
   .mobile-market-band{padding:6px 7px 7px}
   .mobile-market-band + .mobile-market-band{border-top:1px solid var(--line)}
   .mobile-band-title{margin-bottom:5px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.8px}
@@ -1290,6 +1435,7 @@ tr:hover td.context-group{background:#202d39}
       <div class="activity-filters" id="activityFilters">
         <button class="activity-filter active" data-filter="ALL">ALL</button>
         <button class="activity-filter" data-filter="MARKET">MARKET</button>
+        <button class="activity-filter" data-filter="EDGE">EDGE</button>
         <button class="activity-filter" data-filter="MODEL">MODEL</button>
         <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
       </div>
@@ -1989,6 +2135,34 @@ function renderHealth(){
 
 }
 
+function operationalWeek(weeks,rows){
+  if(!weeks.length) return 'ALL';
+
+  const now=Date.now();
+  const postGameGraceMs=12*60*60*1000;
+
+  const candidates=weeks.map(week=>{
+    const kickoffs=rows
+      .filter(game=>String(game.week)===String(week))
+      .map(game=>new Date(game.kickoff_time || game.date || 0).getTime())
+      .filter(Number.isFinite);
+
+    return {
+      week,
+      firstKickoff:kickoffs.length ? Math.min(...kickoffs) : null,
+      lastKickoff:kickoffs.length ? Math.max(...kickoffs) : null
+    };
+  }).filter(row=>row.lastKickoff!==null);
+
+  const current=candidates
+    .filter(row=>row.lastKickoff+postGameGraceMs>=now)
+    .sort((a,b)=>a.firstKickoff-b.firstKickoff);
+
+  return current.length
+    ? String(current[0].week)
+    : String(weeks[weeks.length-1]);
+}
+
 function fillWeeks(){
   const select = document.getElementById('weekSelect');
 
@@ -2020,10 +2194,7 @@ function fillWeeks(){
       )
     )
   ){
-    ACTIVE_WEEK =
-      weeks.length
-        ? String(weeks[0])
-        : 'ALL';
+    ACTIVE_WEEK = operationalWeek(weeks,scopeRows);
   }
 
   select.value = ACTIVE_WEEK;
@@ -2621,6 +2792,18 @@ function updateMatrixRecencyMarkers(){
   });
 }
 
+function mobileRecentChangeCount(game){
+  return (ACTIVITY?.recent_change_events || []).filter(event=>
+    String(event.game_id || '')===String(game?.game_id || '')
+  ).length;
+}
+
+function mobileRecentChangeBadge(game){
+  const count=mobileRecentChangeCount(game);
+  if(!count) return '';
+  return `<span class="mobile-change-count">${count} CHANGE${count===1?'':'S'}</span>`;
+}
+
 function mobileMetric(label,content,extraClass=''){
   return `<div class="mobile-metric ${extraClass}"><span class="mobile-metric-label">${label}</span>${content}</div>`;
 }
@@ -2650,13 +2833,24 @@ function renderMobileMatrix(rows){
           : `<span>${esc(fmtKickoffDateET(game.kickoff_time))}</span><span>${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
         }${game.neutral_site?'<span class="neutral-marker">NEUTRAL</span>':''}</div>
         <div class="mobile-matchup">${matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)}${matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)}</div>
-        <div class="mobile-card-state"><span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
+        <div class="mobile-card-state">
+          ${mobileRecentChangeBadge(game)}
+          <span class="badge ${esc(game.state)}">${esc(game.state)}</span>
+        </div>
       </div>
       <div class="mobile-market-band spread-group">
         <div class="mobile-band-title">SPREAD</div>
         <div class="mobile-band-grid">
-          ${mobileMetric('EDGE',`<span class="edge ${edgeClass(sprEdge)}">${spreadDecision(game,sprSide,sprEdge,true)}</span>`,'edge-focus')}
-          ${mobileMetric('BEST',compactQuote(sprBest,'spread',game,true))}
+          ${mobileMetric(
+            'EDGE',
+            `${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${spreadDecision(game,sprSide,sprEdge,true)}</span>`,
+            `edge-focus ${recentEdgeCellClass(game,'spread')}`
+          )}
+          ${mobileMetric(
+            'BEST',
+            `${recentBestBadge(game,'spread')}${compactQuote(sprBest,'spread',game,true)}`,
+            recentBestCellClass(game,'spread')
+          )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
           ${mobileMetric('EXCH',compactQuote(sprEx,'spread',game))}
@@ -2665,8 +2859,16 @@ function renderMobileMatrix(rows){
       <div class="mobile-market-band total-group">
         <div class="mobile-band-title">TOTAL</div>
         <div class="mobile-band-grid">
-          ${mobileMetric('EDGE',`<span class="edge ${edgeClass(totEdge)}">${totalDecision(totSide,totEdge)}</span>`,'edge-focus')}
-          ${mobileMetric('BEST',compactQuote(totBest,'total',game,true))}
+          ${mobileMetric(
+            'EDGE',
+            `${recentEdgeBadge(game,'total')}<span class="edge ${edgeClass(totEdge)}">${totalDecision(totSide,totEdge)}</span>`,
+            `edge-focus ${recentEdgeCellClass(game,'total')}`
+          )}
+          ${mobileMetric(
+            'BEST',
+            `${recentBestBadge(game,'total')}${compactQuote(totBest,'total',game,true)}`,
+            recentBestCellClass(game,'total')
+          )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           ${mobileMetric('EXCH',compactQuote(totEx,'total',game))}
@@ -2784,7 +2986,8 @@ function renderMatrix(){
           ${shadowDisplay(game, sprShadow, 'spread')}
         </td>
 
-        <td class="best-col spread-group">
+        <td class="best-col spread-group ${recentBestCellClass(game,'spread')}">
+          ${recentBestBadge(game,'spread')}
           ${compactQuote(sprBest, 'spread', game, true)}
         </td>
 
@@ -2792,7 +2995,8 @@ function renderMatrix(){
           ${compactQuote(sprEx, 'spread', game)}
         </td>
 
-        <td class="edge-col spread-group edge-focus">
+        <td class="edge-col spread-group edge-focus ${recentEdgeCellClass(game,'spread')}">
+          ${recentEdgeBadge(game,'spread')}
           <span class="edge ${edgeClass(sprEdge)}">
             ${spreadDecision(game, sprSide, sprEdge)}
           </span>
@@ -2806,7 +3010,8 @@ function renderMatrix(){
           ${shadowDisplay(game, totShadow, 'total')}
         </td>
 
-        <td class="best-col total-group">
+        <td class="best-col total-group ${recentBestCellClass(game,'total')}">
+          ${recentBestBadge(game,'total')}
           ${compactQuote(totBest, 'total', game, true)}
         </td>
 
@@ -2814,7 +3019,8 @@ function renderMatrix(){
           ${compactQuote(totEx, 'total', game)}
         </td>
 
-        <td class="edge-col total-group edge-focus">
+        <td class="edge-col total-group edge-focus ${recentEdgeCellClass(game,'total')}">
+          ${recentEdgeBadge(game,'total')}
           <span class="edge ${edgeClass(totEdge)}">
             ${totalDecision(totSide, totEdge)}
           </span>
@@ -2849,8 +3055,63 @@ function renderMatrix(){
   renderSummary();
 }
 
+function recentChangeEvent(game,market,eventTypes){
+  return (ACTIVITY?.recent_change_events || []).find(event=>
+    String(event.game_id || '')===String(game?.game_id || '') &&
+    (!market || event.market===market) &&
+    eventTypes.includes(event.event_type)
+  ) || null;
+}
+
+function recentBestEvent(game,market){
+  return recentChangeEvent(game,market,[
+    market==='spread' ? 'BEST_SPREAD_CHANGED' : 'BEST_TOTAL_CHANGED'
+  ]);
+}
+
+function recentEdgeEvent(game,market){
+  return recentChangeEvent(game,market,[
+    'EDGE_BECAME_ACTIONABLE',
+    'EDGE_ACTIONABLE_CHANGED',
+    'EDGE_LOST_ACTIONABLE'
+  ]);
+}
+
+function recentBestCellClass(game,market){
+  return recentBestEvent(game,market) ? 'cell-hot-market' : '';
+}
+
+function recentEdgeCellClass(game,market){
+  const event=recentEdgeEvent(game,market);
+  if(!event) return '';
+  if(event.event_type==='EDGE_BECAME_ACTIONABLE') return 'cell-hot-edge-new';
+  if(event.event_type==='EDGE_LOST_ACTIONABLE') return 'cell-hot-edge-lost';
+  return 'cell-hot-edge';
+}
+
+function recentBestBadge(game,market){
+  return recentBestEvent(game,market)
+    ? '<span class="cell-change-badge market">CHANGED</span>'
+    : '';
+}
+
+function recentEdgeBadge(game,market){
+  const event=recentEdgeEvent(game,market);
+  if(!event) return '';
+
+  if(event.event_type==='EDGE_BECAME_ACTIONABLE')
+    return '<span class="cell-change-badge edge">NEW EDGE</span>';
+
+  if(event.event_type==='EDGE_LOST_ACTIONABLE')
+    return '<span class="cell-change-badge lost">EDGE LOST</span>';
+
+  return '<span class="cell-change-badge edge">EDGE MOVE</span>';
+}
+
 function activityCategory(event){
   if(event?.prior_context) return 'POSTGAME';
+  if(String(event?.event_type || '').startsWith('EDGE_')) return 'EDGE';
+  if(['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event?.event_type)) return 'MARKET';
   if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event?.event_type)) return 'OPEN';
   if(String(event?.event_type || '').startsWith('MARKET_') || String(event?.event_type || '').startsWith('PINNACLE_')) return 'MARKET';
   if(['FINAL_POSTED','POSTGAME_REFRESHED'].includes(event?.event_type)) return 'POSTGAME';
@@ -2894,6 +3155,11 @@ function activityTitle(event){
   const labels = {
     MARKET_OPENED:`${String(event.market || 'Market').toUpperCase()} market opened`, PINNACLE_OPENED:'Pinnacle open',
     MARKET_MOVE:'Market move', PINNACLE_MOVE:'Pinnacle move', MARKET_FOLLOW:'Market follow',
+    BEST_SPREAD_CHANGED:'Best spread changed',
+    BEST_TOTAL_CHANGED:'Best total changed',
+    EDGE_BECAME_ACTIONABLE:'NEW GREEN EDGE',
+    EDGE_ACTIONABLE_CHANGED:'Green edge changed',
+    EDGE_LOST_ACTIONABLE:'Green edge lost',
     RATINGS_UPDATED:'Ratings update',
     MODEL_STATE_CHANGED:`${p.domain || 'Model'} state changed`,
     SHADOW_SPREAD_READY:'Shadow spread ready', SHADOW_TOTAL_READY:'Shadow total ready',
@@ -2925,6 +3191,31 @@ function activityDetail(event){
     }
     return `TOTAL MARKET OPENED · ${event.new_line ?? '—'}`;
   }
+  if(['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event.event_type)){
+    const oldBook=p.old_book || p.old_best?.book || '—';
+    const oldValue=event.market==='total'
+      ? (event.old_line ?? '—')
+      : fmtLine(event.old_line);
+
+    const newValue=event.market==='total'
+      ? (event.new_line ?? '—')
+      : fmtLine(event.new_line);
+
+    return `${oldBook} ${oldValue} → ${newValue}`;
+  }
+
+  if(['EDGE_BECAME_ACTIONABLE','EDGE_ACTIONABLE_CHANGED','EDGE_LOST_ACTIONABLE'].includes(event.event_type)){
+    const oldEdge=Number(p.old_edge);
+    const newEdge=Number(p.new_edge);
+
+    const oldShown=Number.isFinite(oldEdge) ? oldEdge.toFixed(1) : '—';
+    const newShown=Number.isFinite(newEdge) ? newEdge.toFixed(1) : '—';
+
+    const side=p.new_side || event.side || '';
+    const sideText=side ? ` · ${String(side).toUpperCase()}` : '';
+    return `${String(event.market || '').toUpperCase()} EDGE ${oldShown} → ${newShown}${sideText}`;
+  }
+
   if(event.event_type === 'RATINGS_UPDATED') return (p.sources || []).join(' · ');
   if(event.event_type === 'MODEL_STATE_CHANGED'){
     if(p.old_state !== p.new_state) return `${p.old_state || '—'} → ${p.new_state || '—'}`;
@@ -2943,7 +3234,7 @@ function activityDetail(event){
 
 function activityRefreshTimestamp(){
   const refreshes=ACTIVITY?.pipeline_refreshes || {};
-  if(ACTIVITY_FILTER==='MARKET') return refreshes.market || HEALTH?.fast_market_refresh?.last_fast_pull_at;
+  if(ACTIVITY_FILTER==='MARKET' || ACTIVITY_FILTER==='EDGE') return refreshes.market || HEALTH?.fast_market_refresh?.last_fast_pull_at;
   if(ACTIVITY_FILTER==='MODEL') return refreshes.model || HEALTH?.ratings_health?.generated_at;
   if(ACTIVITY_FILTER==='POSTGAME') return refreshes.postgame;
   return [refreshes.market,refreshes.model,refreshes.postgame]
@@ -3080,6 +3371,7 @@ function visibleActivity(){
     const category = activityCategory(event);
     if(SELECTED_GAME_ID && event.event_type==='RATINGS_UPDATED') return false;
     if(ACTIVITY_FILTER === 'MARKET' && !['OPEN','MARKET'].includes(category)) return false;
+    if(ACTIVITY_FILTER === 'EDGE' && category !== 'EDGE') return false;
     if(ACTIVITY_FILTER === 'MODEL' && category !== 'MODEL') return false;
     if(ACTIVITY_FILTER === 'POSTGAME' && category !== 'POSTGAME') return false;
     if(SELECTED_GAME_ID) return event.prior_context || String(event.game_id)===String(SELECTED_GAME_ID);
@@ -3210,7 +3502,7 @@ function renderSelectedSnapshot(){
     snapshot.classList.remove('active');snapshot.innerHTML='';return;
   }
   const gameData=SELECTED_GAME_ACTIVITY || fallbackGameActivity(game);
-  snapshot.innerHTML=ACTIVITY_FILTER==='MARKET'
+  snapshot.innerHTML=(ACTIVITY_FILTER==='MARKET' || ACTIVITY_FILTER==='EDGE')
     ? renderMarketSnapshot(game,gameData)
     : ACTIVITY_FILTER==='MODEL'
       ? renderModelSnapshot(game)
@@ -3226,25 +3518,59 @@ function renderActivity(){
     latestIds.has(event.event_id) &&
     (ACTIVE_WEEK === 'ALL' || event.week === null || event.week === undefined || String(event.week) === String(ACTIVE_WEEK))
   );
-  const since = {open:0,moves:0,ratings:0,model:0,final:0};
+  const since = {
+    open:0,
+    moves:0,
+    best:0,
+    newEdge:0,
+    edgeChanged:0,
+    edgeLost:0,
+    ratings:0,
+    model:0,
+    final:0
+  };
   latestEvents.forEach(event=>{
     if(['MARKET_OPENED','PINNACLE_OPENED'].includes(event.event_type)) since.open++;
     else if(['MARKET_MOVE','PINNACLE_MOVE','MARKET_FOLLOW'].includes(event.event_type)) since.moves++;
+    else if(['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event.event_type)) since.best++;
+    else if(event.event_type==='EDGE_BECAME_ACTIONABLE') since.newEdge++;
+    else if(event.event_type==='EDGE_ACTIONABLE_CHANGED') since.edgeChanged++;
+    else if(event.event_type==='EDGE_LOST_ACTIONABLE') since.edgeLost++;
     else if(event.event_type==='RATINGS_UPDATED') since.ratings++;
     else if(['MODEL_STATE_CHANGED','SHADOW_SPREAD_READY','SHADOW_TOTAL_READY'].includes(event.event_type)) since.model++;
     else if(['FINAL_POSTED','POSTGAME_REFRESHED'].includes(event.event_type)) since.final++;
   });
-  const compact = [
-    ['OPEN',since.open],['MOVES',since.moves],['RATINGS',since.ratings],
-    ['MODEL',since.model],['FINAL',since.final]
-  ].filter(([,count])=>Number(count)>0).map(([label,count])=>`${count} ${label}`).join(' · ');
+  const summaryRows = [
+    ['NEW LINES',since.open,''],
+    ['MARKET MOVES',since.moves,''],
+    ['BEST MOVES',since.best,''],
+    ['NEW EDGES',since.newEdge,'edge'],
+    ['EDGE MOVES',since.edgeChanged,'edge'],
+    ['EDGES LOST',since.edgeLost,'lost'],
+    ['RATINGS',since.ratings,''],
+    ['MODEL',since.model,''],
+    ['FINAL',since.final,'']
+  ].filter(([,count])=>Number(count)>0);
   const activityRefresh=activityRefreshTimestamp();
   const updated=document.getElementById('activityUpdated');
   updated.textContent=`UPDATED ${fmtDateTimeET(activityRefresh)}`;
   updated.title=`${ACTIVITY_FILTER} pipeline refresh${ACTIVITY?.latest_refresh_id ? ` · ${ACTIVITY.latest_refresh_id}` : ''}`;
   const summary=document.getElementById('activitySummary');
   summary.classList.toggle('hidden',Boolean(SELECTED_GAME_ID));
-  summary.innerHTML=`<span class="activity-summary-label">SINCE LAST REFRESH</span>${esc(compact || 'NO MATERIAL CHANGES')}`;
+  summary.classList.toggle('has-activity',summaryRows.length>0);
+  summary.classList.toggle('has-edge',since.newEdge>0);
+
+  summary.innerHTML=summaryRows.length
+    ? `<span class="activity-summary-label">SINCE LAST REFRESH</span>
+       <span class="activity-summary-values">
+         ${summaryRows.map(([label,count,kind])=>
+           `<span class="activity-summary-chip ${kind}">
+             <strong>${count}</strong> ${esc(label)}
+           </span>`
+         ).join('')}
+       </span>`
+    : `<span class="activity-summary-label">SINCE LAST REFRESH</span>
+       <span class="activity-no-change">✓ NO MATERIAL CHANGES</span>`;
   renderGameFocus();
   renderSelectedSnapshot();
   document.getElementById('activityList').innerHTML = events.length ? events.map((event,index)=>`

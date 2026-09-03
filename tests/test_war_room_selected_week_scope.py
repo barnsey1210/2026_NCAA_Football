@@ -208,7 +208,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
 
     def test_all_matrix_team_logos_use_sharp_bounded_holders(self):
         for rule in (
-            ".matchup-team .team-logo-holder{--team-logo-size:30px}",
+            ".matchup-team .team-logo-holder{--team-logo-size:26px;box-sizing:border-box;padding:1px;border-radius:5px}",
             ".shadow-team-chip .team-logo-holder{--team-logo-size:26px}",
             ".shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}",
             ".decision-edge .team-logo-holder{--team-logo-size:28px}",
@@ -217,8 +217,8 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             ".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}",
         ):
             self.assertIn(rule, self.source)
-        self.assertIn("padding:2px;", self.source)
-        self.assertIn("border-radius:6px;", self.source)
+        self.assertIn("padding:1px;", self.source)
+        self.assertIn("border-radius:5px;", self.source)
         self.assertIn("image-rendering:auto;", self.source)
         self.assertNotIn("drop-shadow(0 0 1px rgba(255,255,255,.90))", self.source)
 
