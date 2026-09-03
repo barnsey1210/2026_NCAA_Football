@@ -212,7 +212,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             ".shadow-team-chip .team-logo-holder{--team-logo-size:26px}",
             ".shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}",
             ".decision-edge .team-logo-holder{--team-logo-size:28px}",
-            ".injury-team .team-logo-holder{--team-logo-size:26px}",
+            ".injury-team .team-logo-holder{--team-logo-size:22px}",
             ".signal-chip .team-logo-holder{--team-logo-size:26px}",
             ".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}",
         ):

@@ -922,9 +922,9 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
-.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
-.injury-team .team-logo-holder{--team-logo-size:26px}
-.injury-rank{position:absolute;right:-2px;bottom:-1px;min-width:11px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
+.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:22px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
+.injury-team .team-logo-holder{--team-logo-size:22px}
+.injury-rank{position:absolute;right:-1px;bottom:-1px;min-width:10px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
 .injury-rank.injury-tier-1{color:#39e89a}
 .injury-rank.injury-tier-2{color:#a9df6a}
 .injury-rank.injury-tier-3{color:#f4cd4b}
@@ -2189,11 +2189,11 @@ function renderSummary(){
     `<span class="green">${rows.length}</span> games`;
 
   document.getElementById('summarySpread').innerHTML =
-    `<span class="green">ACT ${spreadAction}</span> ` +
+    `<span class="green">BET ${spreadAction}</span> ` +
     `<span class="yellow">LEAN ${spreadLean}</span>`;
 
   document.getElementById('summaryTotal').innerHTML =
-    `<span class="green">ACT ${totalAction}</span> ` +
+    `<span class="green">BET ${totalAction}</span> ` +
     `<span class="yellow">LEAN ${totalLean}</span>`;
 
   const counts = rows.reduce((acc,g)=>{
