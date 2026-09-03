@@ -426,6 +426,138 @@ button,select{
 .activity-filters{display:flex;gap:4px;padding:6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .activity-filter{border:1px solid var(--line2);background:#09131d;color:var(--muted);border-radius:10px;padding:3px 7px;font-size:9px;font-weight:900;cursor:pointer}
 .activity-filter.active{border-color:var(--green);color:var(--green)}
+.team-search{
+  width:150px;
+  min-width:105px;
+  height:27px;
+  border:1px solid var(--line2);
+  border-radius:6px;
+  background:#09131d;
+  color:var(--text);
+  padding:0 8px;
+  font-size:9px;
+  font-weight:850;
+  outline:none;
+}
+.team-search::placeholder{color:#738596}
+.team-search:focus{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(66,217,255,.18)}
+.context-panel{padding:7px 8px 12px;font-size:9px;line-height:1.25}
+.context-section{margin-bottom:10px}
+.context-section:last-child{margin-bottom:0}
+.context-title{
+  margin-bottom:5px;
+  color:var(--cyan);
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.6px;
+}
+.coach-card{
+  margin-bottom:7px;
+  padding:6px;
+  border:1px solid #203445;
+  border-radius:7px;
+  background:#09141e;
+}
+.coach-head{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:4px}
+.coach-name{color:#eef7ff;font-size:10px;font-weight:950}
+.coach-team{color:#eef7ff;font-size:8px;font-weight:850}
+.coach-period{margin-top:2px;color:#afbeca}
+.coach-period strong{color:#eef7ff}
+.coach-role{
+  margin-top:5px;
+  padding-top:4px;
+  border-top:1px solid #1d3040;
+}
+.coach-role-title{color:#eef7ff;font-size:8px;font-weight:950;letter-spacing:.45px}
+.signal-card{
+  margin-bottom:5px;
+  padding:5px 6px;
+  border-left:2px solid var(--green);
+  background:#09141e;
+}
+.signal-head{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.signal-title{color:#eef7ff;font-weight:950}
+.signal-meta{color:var(--muted);font-size:8px;white-space:nowrap}
+.signal-detail{margin-top:2px;color:#aebdca;font-size:8px;line-height:1.28}
+.team-context-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:5px;
+  margin-bottom:4px;
+}
+.team-context-name{color:#eef7ff;font-size:10px;font-weight:950}
+.team-context-record{color:var(--yellow);font-size:8px;font-weight:900}
+.team-table-wrap{overflow-x:auto}
+.team-context-table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+  font-size:8px;
+  white-space:nowrap;
+}
+.team-context-table th{
+  padding:3px 2px;
+  border-bottom:1px solid #294052;
+  color:#7f95a8;
+  text-align:right;
+  font-size:7px;
+  font-weight:950;
+}
+.team-context-table th:nth-child(1),
+.team-context-table th:nth-child(2){text-align:left}
+
+/* DATE */
+.team-context-table th:nth-child(1),
+.team-context-table td:nth-child(1){width:34px}
+
+/* OPP gets all available space */
+.team-context-table th:nth-child(2),
+.team-context-table td:nth-child(2){
+  width:auto;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+/* OVR / OFF / DEF */
+.team-context-table th:nth-child(3),
+.team-context-table td:nth-child(3),
+.team-context-table th:nth-child(4),
+.team-context-table td:nth-child(4),
+.team-context-table th:nth-child(5),
+.team-context-table td:nth-child(5){width:27px}
+
+/* SCORE */
+.team-context-table th:nth-child(6),
+.team-context-table td:nth-child(6){width:44px}
+
+/* ATS / O-U */
+.team-context-table th:nth-child(7),
+.team-context-table td:nth-child(7),
+.team-context-table th:nth-child(8),
+.team-context-table td:nth-child(8){width:24px}
+
+.team-context-table td{
+  padding:3px 2px;
+  border-bottom:1px solid #172937;
+  color:#c5d2dc;
+  text-align:right;
+}
+.team-context-table td:nth-child(1),
+.team-context-table td:nth-child(2){text-align:left}
+.team-context-table .completed{color:#eef7ff}
+.rank-tier-1{color:#39e89a!important;font-weight:950}
+.rank-tier-2{color:#a9df6a!important;font-weight:950}
+.rank-tier-3{color:#f4cd4b!important;font-weight:950}
+.rank-tier-4{color:#f28c45!important;font-weight:950}
+.rank-tier-5{color:#ff626f!important;font-weight:950}
+
+.bet-good{color:#39e89a!important;font-weight:950}
+.bet-mid{color:#f4cd4b!important;font-weight:950}
+.bet-bad{color:#ff626f!important;font-weight:950}
+.bet-neutral{color:#91a5b5!important}
+
+.context-empty{padding:14px 8px;color:var(--muted);font-size:9px}
 .activity-summary.hidden{display:none}
 .activity-kind.edge{color:var(--green)}
 
@@ -1409,6 +1541,15 @@ tr:hover td.context-group{background:#202d39}
         <div class="panel-title">PRIORITY MARKET MATRIX</div>
 
         <div class="panel-tools">
+          <input
+            class="team-search"
+            id="teamSearch"
+            type="search"
+            placeholder="SEARCH TEAM…"
+            autocomplete="off"
+            aria-label="Search teams"
+          >
+
           <select class="week-select" id="scopeSelect">
             <option value="FBS">FBS ONLY</option>
             <option value="ALL">ALL GAMES</option>
@@ -1433,11 +1574,11 @@ tr:hover td.context-group{background:#202d39}
       <div class="activity-summary" id="activitySummary">Loading activity…</div>
       <div class="activity-focus" id="activityFocus"></div>
       <div class="activity-filters" id="activityFilters">
-        <button class="activity-filter active" data-filter="ALL">ALL</button>
-        <button class="activity-filter" data-filter="MARKET">MARKET</button>
-        <button class="activity-filter" data-filter="EDGE">EDGE</button>
+        <button class="activity-filter active" data-filter="MARKET">MARKET</button>
         <button class="activity-filter" data-filter="MODEL">MODEL</button>
         <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
+        <button class="activity-filter" data-filter="SIGNALS">SIGNALS</button>
+        <button class="activity-filter" data-filter="TEAMS">TEAMS</button>
       </div>
       <div class="activity-snapshot" id="activitySnapshot"></div>
       <div class="activity-list" id="activityList"></div>
@@ -1458,6 +1599,7 @@ tr:hover td.context-group{background:#202d39}
 const MATRIX_URL = 'data/site/war_room_market_matrix.json';
 const HEALTH_URL = 'data/site/war_room_health.json';
 const ACTIVITY_URL = 'data/site/war_room_activity.json';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -1466,7 +1608,10 @@ const LIVE_ACTIVITY_URL = 'https://control.barnseywr.com/war-room/live/activity'
 let MATRIX = null;
 let HEALTH = null;
 let ACTIVITY = null;
-let ACTIVITY_FILTER = 'ALL';
+let MATCHUPS_CONTEXT = null;
+let MATCHUPS_CONTEXT_PROMISE = null;
+let ACTIVITY_FILTER = 'MARKET';
+let SEARCH_QUERY = '';
 let SELECTED_GAME_ID = null;
 let SELECTED_GAME_ACTIVITY = null;
 let ACTIVITY_VERSION = null;
@@ -1860,6 +2005,16 @@ function currentRows(){
     rows = rows.filter(
       g => String(g.week) === String(ACTIVE_WEEK)
     );
+  }
+
+  if(SEARCH_QUERY){
+    const needle=SEARCH_QUERY.trim().toLowerCase();
+    if(needle){
+      rows=rows.filter(g=>
+        String(g.away_team || '').toLowerCase().includes(needle) ||
+        String(g.home_team || '').toLowerCase().includes(needle)
+      );
+    }
   }
 
   return [...rows].sort((a,b)=>{
@@ -3089,10 +3244,84 @@ function recentEdgeCellClass(game,market){
   return 'cell-hot-edge';
 }
 
+function bestChangeState(event){
+  if(!event) return null;
+
+  const p=event.payload || {};
+  const oldBest=p.old_best || {};
+  const newBest=p.new_best || {};
+
+  const oldSide=oldBest.best_side ?? null;
+  const newSide=newBest.best_side ?? event.side ?? null;
+  const oldBook=p.old_book || oldBest.book || null;
+  const newBook=p.new_book || newBest.book || event.book || null;
+
+  const oldLine=Number(event.old_line);
+  const newLine=Number(event.new_line);
+  const oldPrice=Number(event.old_price);
+  const newPrice=Number(event.new_price);
+
+  const haveLines=Number.isFinite(oldLine) && Number.isFinite(newLine);
+  const havePrices=Number.isFinite(oldPrice) && Number.isFinite(newPrice);
+
+  if(oldSide && newSide && String(oldSide)!==String(newSide)){
+    return {kind:'SIDE',label:'SIDE CHANGE',arrow:''};
+  }
+
+  if(haveLines && oldLine!==newLine){
+    if(event.market==='total'){
+      return {
+        kind:'LINE',
+        label:'CHANGED',
+        arrow:newLine>oldLine?'↑':'↓'
+      };
+    }
+
+    // Spread lines are already stored from the selected betting side's
+    // perspective. Numerically larger is a better number for that side:
+    // +28.5 -> +29.5 and -7.5 -> -7 are both improvements.
+    return {
+      kind:'LINE',
+      label:'CHANGED',
+      arrow:newLine>oldLine?'▲':'▼'
+    };
+  }
+
+  if(havePrices && oldPrice!==newPrice){
+    return {kind:'PRICE',label:'BEST PRICE',arrow:''};
+  }
+
+  if(oldBook!==newBook){
+    return {kind:'BOOK',label:'BEST BOOK',arrow:''};
+  }
+
+  return {kind:'OTHER',label:'BEST CHANGE',arrow:''};
+}
+
+function bestSideText(event,side){
+  const value=String(side || '').trim();
+  if(!value) return '';
+
+  if(event?.market==='spread'){
+    if(value==='away') return event.away_team || 'Away';
+    if(value==='home') return event.home_team || 'Home';
+    return value;
+  }
+
+  if(value.toLowerCase()==='over') return 'OVER';
+  if(value.toLowerCase()==='under') return 'UNDER';
+  return value.toUpperCase();
+}
+
 function recentBestBadge(game,market){
-  return recentBestEvent(game,market)
-    ? '<span class="cell-change-badge market">CHANGED</span>'
-    : '';
+  const event=recentBestEvent(game,market);
+  if(!event) return '';
+
+  const state=bestChangeState(event);
+  const arrow=state?.arrow ? `${state.arrow} ` : '';
+  const label=state?.label || 'BEST CHANGE';
+
+  return `<span class="cell-change-badge market">${arrow}${label}</span>`;
 }
 
 function recentEdgeBadge(game,market){
@@ -3152,6 +3381,18 @@ function activityBookLogos(event){
 function activityTitle(event){
   const p = event.payload || {};
   const book = p.sportsbook ? `${BOOK_ABBR[p.sportsbook] || p.sportsbook} ` : '';
+
+  if(['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event.event_type)){
+    const state=bestChangeState(event);
+    const domain=event.market==='total'?'total':'spread';
+
+    if(state?.kind==='LINE') return `Best ${domain} line moved`;
+    if(state?.kind==='SIDE') return `Best ${domain} side changed`;
+    if(state?.kind==='PRICE') return `Best ${domain} price changed`;
+    if(state?.kind==='BOOK') return `Best ${domain} book changed`;
+    return `Best ${domain} changed`;
+  }
+
   const labels = {
     MARKET_OPENED:`${String(event.market || 'Market').toUpperCase()} market opened`, PINNACLE_OPENED:'Pinnacle open',
     MARKET_MOVE:'Market move', PINNACLE_MOVE:'Pinnacle move', MARKET_FOLLOW:'Market follow',
@@ -3192,7 +3433,17 @@ function activityDetail(event){
     return `TOTAL MARKET OPENED · ${event.new_line ?? '—'}`;
   }
   if(['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event.event_type)){
-    const oldBook=p.old_book || p.old_best?.book || '—';
+    const oldBest=p.old_best || {};
+    const newBest=p.new_best || {};
+
+    const oldBook=p.old_book || oldBest.book || '—';
+    const newBook=p.new_book || newBest.book || event.book || '—';
+
+    const oldSide=oldBest.best_side || '';
+    const newSide=newBest.best_side || event.side || '';
+    const oldSideText=bestSideText(event,oldSide);
+    const newSideText=bestSideText(event,newSide);
+
     const oldValue=event.market==='total'
       ? (event.old_line ?? '—')
       : fmtLine(event.old_line);
@@ -3201,7 +3452,23 @@ function activityDetail(event){
       ? (event.new_line ?? '—')
       : fmtLine(event.new_line);
 
-    return `${oldBook} ${oldValue} → ${newValue}`;
+    const oldPrice=Number(event.old_price);
+    const newPrice=Number(event.new_price);
+    const oldPriceText=Number.isFinite(oldPrice) ? ` (${fmtLine(oldPrice)})` : '';
+    const newPriceText=Number.isFinite(newPrice) ? ` (${fmtLine(newPrice)})` : '';
+
+    const state=bestChangeState(event);
+
+    if(state?.kind==='SIDE'){
+      return `${oldSideText || '—'} · ${oldBook} ${oldValue}${oldPriceText} → ` +
+        `${newSideText || '—'} · ${newBook} ${newValue}${newPriceText}`;
+    }
+
+    const sideText=newSideText || oldSideText;
+    const prefix=sideText ? `${sideText} · ` : '';
+
+    return `${prefix}${oldBook} ${oldValue}${oldPriceText} → ` +
+      `${newBook} ${newValue}${newPriceText}`;
   }
 
   if(['EDGE_BECAME_ACTIONABLE','EDGE_ACTIONABLE_CHANGED','EDGE_LOST_ACTIONABLE'].includes(event.event_type)){
@@ -3352,16 +3619,369 @@ function priorContextEvents(){
   return output;
 }
 
+
+async function ensureMatchupsContext(){
+  if(MATCHUPS_CONTEXT) return MATCHUPS_CONTEXT;
+  if(MATCHUPS_CONTEXT_PROMISE) return MATCHUPS_CONTEXT_PROMISE;
+
+  MATCHUPS_CONTEXT_PROMISE=(async()=>{
+    try{
+      const resp=await fetch(`${MATCHUPS_CONTEXT_URL}?v=${Date.now()}`,{cache:'no-store'});
+      if(!resp.ok) throw new Error(`Matchups context HTTP ${resp.status}`);
+      MATCHUPS_CONTEXT=await resp.json();
+      return MATCHUPS_CONTEXT;
+    }catch(err){
+      console.warn('War Room matchup context unavailable',err);
+      MATCHUPS_CONTEXT=null;
+      return null;
+    }finally{
+      MATCHUPS_CONTEXT_PROMISE=null;
+    }
+  })();
+
+  return MATCHUPS_CONTEXT_PROMISE;
+}
+
+function selectedContextGame(){
+  const game=selectedGame();
+  if(!game || !MATCHUPS_CONTEXT?.games) return null;
+
+  return MATCHUPS_CONTEXT.games.find(row=>
+    String(row?.game?.game_id || '')===String(game.game_id || '')
+  ) || MATCHUPS_CONTEXT.games.find(row=>
+    String(row?.game?.away_team || '')===String(game.away_team || '') &&
+    String(row?.game?.home_team || '')===String(game.home_team || '') &&
+    (!row?.game?.date || !game?.kickoff_time ||
+      String(row.game.date).slice(0,10)===String(game.kickoff_time).slice(0,10))
+  ) || null;
+}
+
+function pctText(value){
+  const n=Number(value);
+  return Number.isFinite(n) ? `${(n*100).toFixed(1)}%` : '—';
+}
+
+function compactOuRecord(value){
+  if(!value) return '—';
+
+  const raw=String(value).trim();
+
+  const over=raw.match(/(\d+)\s*O\b/i);
+  const under=raw.match(/(\d+)\s*U\b/i);
+  const push=raw.match(/(\d+)\s*P\b/i);
+
+  if(over || under){
+    const parts=[];
+    if(over) parts.push(`${over[1]}O`);
+    if(under) parts.push(`${under[1]}U`);
+    if(push) parts.push(`${push[1]}P`);
+    return parts.join(' / ');
+  }
+
+  return raw;
+}
+
+function bettingPctClass(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return 'bet-neutral';
+  const pct=n<=1 ? n*100 : n;
+  if(pct>60) return 'bet-good';
+  if(pct<40) return 'bet-bad';
+  return 'bet-mid';
+}
+
+function atsRecordPct(record){
+  const parts=String(record || '').match(/(\d+)\D+(\d+)(?:\D+(\d+))?/);
+  if(!parts) return null;
+  const wins=Number(parts[1]);
+  const losses=Number(parts[2]);
+  const pushes=Number(parts[3] || 0);
+  const decisions=wins+losses;
+  return decisions>0 ? wins/decisions : null;
+}
+
+function ouRecordPct(record){
+  const raw=String(record || '');
+  const over=raw.match(/(\d+)\s*O\b/i);
+  const under=raw.match(/(\d+)\s*U\b/i);
+
+  if(over && under){
+    const o=Number(over[1]);
+    const u=Number(under[1]);
+    return o+u>0 ? o/(o+u) : null;
+  }
+
+  const parts=raw.match(/(\d+)\D+(\d+)/);
+  if(!parts) return null;
+
+  const o=Number(parts[1]);
+  const u=Number(parts[2]);
+  return o+u>0 ? o/(o+u) : null;
+}
+
+function rankTierClass(rank){
+  const n=Number(rank);
+  if(!Number.isFinite(n)) return '';
+  if(n<=25) return 'rank-tier-1';
+  if(n<=50) return 'rank-tier-2';
+  if(n<=75) return 'rank-tier-3';
+  if(n<=100) return 'rank-tier-4';
+  return 'rank-tier-5';
+}
+
+function resultClass(value,type){
+  const v=String(value || '').toUpperCase();
+  if(type==='ats'){
+    if(v==='W') return 'bet-good';
+    if(v==='L') return 'bet-bad';
+  }
+  if(type==='ou'){
+    if(v==='O') return 'bet-good';
+    if(v==='U') return 'bet-bad';
+  }
+  return 'bet-neutral';
+}
+
+function coachPeriodLabel(period){
+  return period==='full_game' ? 'FULL' :
+    period==='first_half' ? '1H' :
+    period==='second_half' ? '2H' :
+    String(period || '').toUpperCase();
+}
+
+function currentTeamRole(game,team){
+  const homeLine=Number(game?.market?.best_sportsbook?.spread?.home?.line);
+  if(!Number.isFinite(homeLine) || Math.abs(homeLine)<.05) return 'Pick';
+  const isHome=String(team)===String(game.home_team);
+  const homeRole=homeLine<0 ? 'Favorite' : 'Underdog';
+  return isHome ? homeRole : (homeRole==='Favorite' ? 'Underdog' : 'Favorite');
+}
+
+function renderCoachCard(coach,game){
+  if(!coach) return '';
+
+  const periods=(coach.periods || []).map(row=>{
+    const rank=Number.isFinite(Number(row.ats_rank)) ? ` #${row.ats_rank}` : '';
+    const sample=Number(row.sample || row.ats_sample);
+    const atsPct=atsRecordPct(row.ats_record);
+    const ouPct=ouRecordPct(row.ou_record);
+
+    return `<div class="coach-period"><strong>${esc(coachPeriodLabel(row.period))}</strong> ` +
+      `<span class="${bettingPctClass(atsPct)}">ATS ${esc(row.ats_record || '—')}</span>${esc(rank)} · ` +
+      `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row.ou_record))}</span>` +
+      `</div>`;
+  }).join('');
+
+  const role=currentTeamRole(game,coach.team);
+  const roleRows=(coach.role_splits || [])
+    .filter(row=>String(row.role || '').toLowerCase()===String(role).toLowerCase())
+    .sort((a,b)=>{
+      const order={'Full Game':0,'1H':1,'2H':2};
+      return (order[a.period] ?? 9)-(order[b.period] ?? 9);
+    })
+    .map(row=>{
+      const games=Number(row.games);
+      const ouPct=Number.isFinite(Number(row.over_pct))
+        ? Number(row.over_pct)
+        : ouRecordPct(row.ou_record);
+
+      return `<div class="coach-period"><strong>${esc(row.period || '')}</strong> ` +
+        `<span class="${bettingPctClass(row.ats_pct)}">${esc(row.ats_record || '—')} ATS (${esc(pctText(row.ats_pct))})</span> · ` +
+        `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row.ou_record))}${Number.isFinite(ouPct) ? ` (${esc(pctText(ouPct))})` : ''}</span>` +
+        `</div>`;
+    }).join('');
+
+  return `<div class="coach-card">
+    <div class="coach-head">
+      <span class="coach-name">${esc(coach.coach || 'Coach unavailable')}</span>
+      <span class="coach-team">${esc(coach.team || '')}</span>
+    </div>
+    ${periods || '<div class="coach-period">Historical period records unavailable.</div>'}
+    <div class="coach-role">
+      <div class="coach-role-title">CURRENT ROLE · ${esc(String(role).toUpperCase())}</div>
+      ${roleRows || '<div class="coach-period">Applicable role sample unavailable.</div>'}
+    </div>
+  </div>`;
+}
+
+function dedupedContextAngles(rows){
+  const seen=new Set();
+  return (rows || []).filter(row=>{
+    const key=[
+      row.signal_group,
+      row.signal_type,
+      row.team,
+      row.opponent,
+      row.direction,
+      row.headline,
+      row.detail
+    ].map(v=>String(v || '').trim().toLowerCase()).join('|');
+
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function renderSignalsPanel(game){
+  if(!game) return '<div class="context-empty">Select a game to view signals.</div>';
+  if(!MATCHUPS_CONTEXT) return '<div class="context-empty">Signals context unavailable.</div>';
+
+  const context=selectedContextGame();
+  if(!context) return '<div class="context-empty">No matchup context found for this game.</div>';
+
+  const coaches=context?.matchup?.coaches || [];
+  const angles=dedupedContextAngles(context?.angles || []);
+
+  const coachHtml=coaches.length
+    ? coaches.map(row=>renderCoachCard(row,game)).join('')
+    : '<div class="context-empty">Coaching records unavailable.</div>';
+
+  const angleHtml=angles.length
+    ? angles.map(row=>{
+        const direction=row.direction || row.team || '';
+        const strength=row.strength ? String(row.strength).toUpperCase() : '';
+        const meta=[direction,strength].filter(Boolean).join(' · ');
+        return `<div class="signal-card">
+          <div class="signal-head">
+            <span class="signal-title">${esc(row.headline || row.signal_type || 'Betting signal')}</span>
+            <span class="signal-meta">${esc(meta)}</span>
+          </div>
+          ${row.detail ? `<div class="signal-detail">${esc(row.detail)}</div>` : ''}
+        </div>`;
+      }).join('')
+    : '<div class="context-empty">No qualifying betting signals for this matchup.</div>';
+
+  return `<div class="context-panel">
+    <div class="context-section">
+      <div class="context-title">COACHING BETTING PROFILE</div>
+      ${coachHtml}
+    </div>
+    <div class="context-section">
+      <div class="context-title">QUALIFYING BETTING SIGNALS</div>
+      ${angleHtml}
+    </div>
+  </div>`;
+}
+
+function fmtContextDate(value){
+  if(!value) return '—';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return String(value).slice(5,10);
+  return new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    month:'numeric',
+    day:'numeric'
+  }).format(d);
+}
+
+function scheduleOpponentName(name){
+  return String(name || '—');
+}
+
+function scheduleRows(teamData){
+  const recent=(teamData?.recent_form || [])
+    .filter(row=>String(row?.date || '').startsWith('2026-'))
+    .map(row=>({
+    date:row.date,
+    opponent:row.opponent,
+    site:row.site,
+    ranks:row.opponent_ranks || {},
+    completed:true,
+    teamPoints:row.team_points,
+    opponentPoints:row.opponent_points,
+    ats:row.ats_result,
+    ou:row.total_result
+  }));
+
+  const upcoming=(teamData?.upcoming_schedule || [])
+    .filter(row=>String(row?.date || '').startsWith('2026-'))
+    .map(row=>({
+    date:row.date,
+    opponent:row.opponent,
+    site:row.site,
+    ranks:row.opponent_ranks || {},
+    completed:false,
+    teamPoints:null,
+    opponentPoints:null,
+    ats:null,
+    ou:null
+  }));
+
+  return [...recent,...upcoming].sort((a,b)=>new Date(a.date || 0)-new Date(b.date || 0));
+}
+
+function renderTeamSchedule(teamName,teamData){
+  const betting=teamData?.betting_record || {};
+  const rows=scheduleRows(teamData);
+
+  const body=rows.map(row=>{
+    const opponentFull=String(row.opponent || '—');
+    const opponentShort=scheduleOpponentName(opponentFull);
+    const opp=row.site==='Away' ? `@ ${opponentShort}` : opponentShort;
+    let score='—';
+    if(row.completed && row.teamPoints!==null && row.opponentPoints!==null){
+      const a=Number(row.teamPoints);
+      const b=Number(row.opponentPoints);
+      const result=a>b?'W':a<b?'L':'T';
+      score=`${result} ${row.teamPoints}-${row.opponentPoints}`;
+    }
+
+    return `<tr class="${row.completed?'completed':''}">
+      <td>${esc(fmtContextDate(row.date))}</td>
+      <td title="${esc(opponentFull)}">${esc(opp)}</td>
+      <td class="${rankTierClass(row.ranks?.overall)}">${esc(row.ranks?.overall ?? '—')}</td>
+      <td class="${rankTierClass(row.ranks?.offense)}">${esc(row.ranks?.offense ?? '—')}</td>
+      <td class="${rankTierClass(row.ranks?.defense)}">${esc(row.ranks?.defense ?? '—')}</td>
+      <td>${esc(score)}</td>
+      <td class="${resultClass(row.ats,'ats')}">${esc(row.ats || '—')}</td>
+      <td class="${resultClass(row.ou,'ou')}">${esc(row.ou || '—')}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="context-section">
+    <div class="team-context-head">
+      <span class="team-context-name">${esc(teamName)}</span>
+      <span class="team-context-record">2026 ATS ${esc(betting.ats || '—')} · O/U ${esc(betting.ou || '—')}</span>
+    </div>
+    <div class="team-table-wrap">
+      <table class="team-context-table">
+        <thead>
+          <tr>
+            <th>DATE</th><th>OPP</th><th>OVR</th><th>OFF</th><th>DEF</th><th>SCORE</th><th>ATS</th><th>O/U</th>
+          </tr>
+        </thead>
+        <tbody>${body || '<tr><td colspan="8">Schedule unavailable.</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderTeamsPanel(game){
+  if(!game) return '<div class="context-empty">Select a game to view team schedules.</div>';
+  if(!MATCHUPS_CONTEXT) return '<div class="context-empty">Team context unavailable.</div>';
+
+  const context=selectedContextGame();
+  if(!context) return '<div class="context-empty">No matchup context found for this game.</div>';
+
+  return `<div class="context-panel">
+    ${renderTeamSchedule(game.away_team,context?.teams?.away || {})}
+    ${renderTeamSchedule(game.home_team,context?.teams?.home || {})}
+  </div>`;
+}
+
 function visibleActivity(){
   const gameData=SELECTED_GAME_ID ? (SELECTED_GAME_ACTIVITY || fallbackGameActivity(selectedGame() || {})) : null;
   const selectedEvents=gameData?.events || [];
   const priorEvents=priorContextEvents();
   const selectedHasFinal=selectedEvents.some(event=>event.event_type==='FINAL_POSTED');
   const genuineSelectedEvents=selectedEvents.filter(event=>event.entity_type!=='market_opener');
+  if(['SIGNALS','TEAMS'].includes(ACTIVITY_FILTER)) return [];
+
   const source=SELECTED_GAME_ID
     ? (ACTIVITY_FILTER==='POSTGAME'
       ? [...selectedEvents.filter(event=>activityCategory(event)==='POSTGAME' || (selectedHasFinal && activityCategory(event)==='MODEL')),...priorEvents]
-      : ACTIVITY_FILTER==='ALL' ? genuineSelectedEvents : selectedEvents)
+      : selectedEvents)
     : (ACTIVITY?.events || []);
   const deduped=new Set();
   return source.filter(event=>{
@@ -3371,7 +3991,6 @@ function visibleActivity(){
     const category = activityCategory(event);
     if(SELECTED_GAME_ID && event.event_type==='RATINGS_UPDATED') return false;
     if(ACTIVITY_FILTER === 'MARKET' && !['OPEN','MARKET'].includes(category)) return false;
-    if(ACTIVITY_FILTER === 'EDGE' && category !== 'EDGE') return false;
     if(ACTIVITY_FILTER === 'MODEL' && category !== 'MODEL') return false;
     if(ACTIVITY_FILTER === 'POSTGAME' && category !== 'POSTGAME') return false;
     if(SELECTED_GAME_ID) return event.prior_context || String(event.game_id)===String(SELECTED_GAME_ID);
@@ -3498,11 +4117,15 @@ function renderPostgameSnapshot(game,gameData){
 function renderSelectedSnapshot(){
   const snapshot=document.getElementById('activitySnapshot');
   const game=selectedGame();
-  if(!game || !SELECTED_GAME_ID || ACTIVITY_FILTER==='ALL'){
+  if(
+    !game ||
+    !SELECTED_GAME_ID ||
+    !['MARKET','MODEL','POSTGAME'].includes(ACTIVITY_FILTER)
+  ){
     snapshot.classList.remove('active');snapshot.innerHTML='';return;
   }
   const gameData=SELECTED_GAME_ACTIVITY || fallbackGameActivity(game);
-  snapshot.innerHTML=(ACTIVITY_FILTER==='MARKET' || ACTIVITY_FILTER==='EDGE')
+  snapshot.innerHTML=ACTIVITY_FILTER==='MARKET'
     ? renderMarketSnapshot(game,gameData)
     : ACTIVITY_FILTER==='MODEL'
       ? renderModelSnapshot(game)
@@ -3573,7 +4196,20 @@ function renderActivity(){
        <span class="activity-no-change">✓ NO MATERIAL CHANGES</span>`;
   renderGameFocus();
   renderSelectedSnapshot();
-  document.getElementById('activityList').innerHTML = events.length ? events.map((event,index)=>`
+
+  const activityList=document.getElementById('activityList');
+
+  if(ACTIVITY_FILTER==='SIGNALS'){
+    activityList.innerHTML=renderSignalsPanel(selectedGame());
+    return;
+  }
+
+  if(ACTIVITY_FILTER==='TEAMS'){
+    activityList.innerHTML=renderTeamsPanel(selectedGame());
+    return;
+  }
+
+  activityList.innerHTML = events.length ? events.map((event,index)=>`
     <button class="activity-row ${event.game_id ? 'game-event' : ''}" data-activity-index="${index}">
       <span class="activity-line"><time class="activity-time">${esc(activityTime(event.observed_at || event.created_at))}</time><span class="activity-kind ${activityCategory(event).toLowerCase()}">${esc(activityCategory(event))}</span></span>
       ${event.prior_context ? `<span class="activity-prior-owner">${esc(event.prior_context.selected_team || 'TEAM')} PRIOR GAME · ${esc(String(event.prior_context.status || 'WAITING').replaceAll('_',' '))}</span>` : ''}
@@ -3633,6 +4269,14 @@ function syncWorkingViewport(){
 window.addEventListener('resize',()=>{
   syncWorkingViewport();
   placeActivityRail();
+});
+
+document.getElementById('teamSearch').addEventListener('input',e=>{
+  SEARCH_QUERY=String(e.target.value || '');
+  reconcileSelectedGame();
+  renderHealth();
+  renderMatrix();
+  renderActivity();
 });
 
 document.getElementById('scopeSelect').addEventListener(
@@ -3695,9 +4339,15 @@ document.getElementById('mobileControlsToggle').addEventListener('click',e=>{
   e.currentTarget.setAttribute('aria-expanded',String(open));
 });
 
-document.querySelectorAll('.activity-filter').forEach(button=>button.addEventListener('click',()=>{
+document.querySelectorAll('.activity-filter').forEach(button=>button.addEventListener('click',async()=>{
   ACTIVITY_FILTER=button.dataset.filter;
   document.querySelectorAll('.activity-filter').forEach(b=>b.classList.toggle('active',b===button));
+
+  if(['SIGNALS','TEAMS'].includes(ACTIVITY_FILTER) && !MATCHUPS_CONTEXT){
+    document.getElementById('activityList').innerHTML='<div class="context-empty">Loading matchup context…</div>';
+    await ensureMatchupsContext();
+  }
+
   renderActivity();
 }));
 

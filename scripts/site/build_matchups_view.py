@@ -440,6 +440,68 @@ def main():
     projection_index = index_contract(projection_contract)
     teams = db.get("teams", [])
     games = db.get("games", [])
+
+    live_schedule_path = ROOT / "data/site/schedule_live_enrichment.json"
+    live_schedule = (
+        json.loads(live_schedule_path.read_text())
+        if live_schedule_path.exists()
+        else {"games": []}
+    )
+    live_by_game = {
+        str(row.get("game_id")): row
+        for row in live_schedule.get("games", [])
+        if clean(row.get("game_id"))
+    }
+
+    merged_games = []
+    for base_game in games:
+        game = dict(base_game)
+        live = live_by_game.get(str(base_game.get("game_id"))) or {}
+
+        live_status = clean(live.get("status"))
+
+        def finite_score(value):
+            value = number(value)
+            if value is None:
+                return None
+            # Reject NaN and +/- infinity from partially populated
+            # scoreboard rows before they enter the canonical game view.
+            return value if value == value and abs(value) != float("inf") else None
+
+        away_score = finite_score(
+            live.get("away_score")
+            if live.get("away_score") is not None
+            else live.get("live_away_score")
+        )
+        home_score = finite_score(
+            live.get("home_score")
+            if live.get("home_score") is not None
+            else live.get("live_home_score")
+        )
+
+        if live_status:
+            game["cfbd_status"] = live_status
+
+        if away_score is not None:
+            game["away_score"] = away_score
+
+        if home_score is not None:
+            game["home_score"] = home_score
+
+        final_status = str(live_status or game.get("cfbd_status") or "").strip().upper()
+        completed = boolish(live.get("completed")) or boolish(game.get("cfbd_completed"))
+
+        if final_status == "FINAL" and away_score is not None and home_score is not None:
+            completed = True
+
+        game["cfbd_completed"] = bool(completed)
+
+        if clean(live.get("scoreboard_pulled_at")):
+            game["cfbd_last_updated"] = clean(live.get("scoreboard_pulled_at"))
+
+        merged_games.append(game)
+
+    games = merged_games
     team_by_name = canonical_map(teams)
     conference_ranks = team_ranks(teams)
     style_by_team, style_metadata = load_advanced_profiles(
@@ -653,6 +715,57 @@ def main():
             },
         }
 
+
+    def frozen_close_for_game(game_id):
+        current = current_market_by_game.get(str(game_id)) or {}
+        reference = current.get("reference") or {}
+
+        spread = reference.get("spread") or {}
+        total = reference.get("total") or {}
+
+        away_spread = spread.get("away") if isinstance(spread.get("away"), dict) else None
+        home_spread = spread.get("home") if isinstance(spread.get("home"), dict) else None
+        total_over = total.get("over") if isinstance(total.get("over"), dict) else None
+        total_under = total.get("under") if isinstance(total.get("under"), dict) else None
+
+        def is_frozen(row):
+            return (
+                isinstance(row, dict)
+                and clean(row.get("freshness_status")) == "FROZEN_CLOSE"
+                and number(row.get("line")) is not None
+            )
+
+        return {
+            "away_spread": number(away_spread.get("line")) if is_frozen(away_spread) else None,
+            "home_spread": number(home_spread.get("line")) if is_frozen(home_spread) else None,
+            "total": number(total_over.get("line")) if is_frozen(total_over) else (
+                number(total_under.get("line")) if is_frozen(total_under) else None
+            ),
+            "spread_book": clean(spread.get("sportsbook")),
+            "total_book": clean(total.get("sportsbook")),
+        }
+
+    def grade_spread(team_points, opponent_points, team_line):
+        if team_line is None:
+            return None, None
+        margin = (team_points - opponent_points) + team_line
+        if margin > 0:
+            return "W", margin
+        if margin < 0:
+            return "L", margin
+        return "P", margin
+
+    def grade_total(team_points, opponent_points, total_line):
+        if total_line is None:
+            return None, None
+        actual_total = team_points + opponent_points
+        margin = actual_total - total_line
+        if margin > 0:
+            return "O", margin
+        if margin < 0:
+            return "U", margin
+        return "P", margin
+
     injury_status_path = ROOT / "data/injuries/injury_source_status.json"
     if injury_status_path.exists():
         try:
@@ -679,27 +792,98 @@ def main():
     injuries_by_team = defaultdict(list)
 
     recent_games_by_team = defaultdict(list)
-    record_2025_by_team = defaultdict(lambda: {"wins": 0, "losses": 0, "ties": 0})
-    for row in csv_rows(ROOT / "data/import/coach_halves_team_games_2024_2025.csv"):
-        if str(row.get("Season")) != "2025":
+    record_2026_by_team = defaultdict(lambda: {"wins": 0, "losses": 0, "ties": 0})
+    betting_2026_by_team = defaultdict(
+        lambda: {
+            "ats_wins": 0, "ats_losses": 0, "ats_pushes": 0,
+            "overs": 0, "unders": 0, "total_pushes": 0,
+        }
+    )
+
+    for game in games:
+        if not boolish(game.get("cfbd_completed")):
             continue
-        team = canonical_team(row.get("Historical Team"))
-        if team:
-            team_points, opponent_points = integer(row.get("Game Team Points")), integer(row.get("Game Opp Points"))
-            if team_points is not None and opponent_points is not None:
-                outcome = "wins" if team_points > opponent_points else "losses" if team_points < opponent_points else "ties"
-                record_2025_by_team[team][outcome] += 1
+
+        away = canonical_team(game.get("away_team"))
+        home = canonical_team(game.get("home_team"))
+        away_score = integer(
+            game.get("away_score")
+            if game.get("away_score") is not None
+            else game.get("cfbd_away_score")
+        )
+        home_score = integer(
+            game.get("home_score")
+            if game.get("home_score") is not None
+            else game.get("cfbd_home_score")
+        )
+
+        if away_score is None or home_score is None:
+            continue
+
+        frozen = frozen_close_for_game(game.get("game_id"))
+
+        for team, opponent, site, team_points, opponent_points, team_line in (
+            (away, home, "Away", away_score, home_score, frozen.get("away_spread")),
+            (home, away, "Home", home_score, away_score, frozen.get("home_spread")),
+        ):
+            if not team:
+                continue
+
+            outcome = (
+                "wins"
+                if team_points > opponent_points
+                else "losses"
+                if team_points < opponent_points
+                else "ties"
+            )
+            record_2026_by_team[team][outcome] += 1
+
+            ats_result, ats_margin = grade_spread(
+                team_points,
+                opponent_points,
+                team_line,
+            )
+            total_result, total_margin = grade_total(
+                team_points,
+                opponent_points,
+                frozen.get("total"),
+            )
+
+            if ats_result == "W":
+                betting_2026_by_team[team]["ats_wins"] += 1
+            elif ats_result == "L":
+                betting_2026_by_team[team]["ats_losses"] += 1
+            elif ats_result == "P":
+                betting_2026_by_team[team]["ats_pushes"] += 1
+
+            if total_result == "O":
+                betting_2026_by_team[team]["overs"] += 1
+            elif total_result == "U":
+                betting_2026_by_team[team]["unders"] += 1
+            elif total_result == "P":
+                betting_2026_by_team[team]["total_pushes"] += 1
+
             recent_games_by_team[team].append({
-                "date": clean(row.get("Date")), "opponent": canonical_team(row.get("Opponent")), "site": clean(row.get("Home/Away")),
-                "team_points": integer(row.get("Game Team Points")), "opponent_points": integer(row.get("Game Opp Points")),
-                "spread": number(row.get("Game Spread")), "total_line": number(row.get("Game Total Line")),
-                "ats_result": clean(row.get("Game ATS Result")), "ats_margin": number(row.get("Game ATS +/-")),
-                "total_result": clean(row.get("Game Total Result")), "total_margin": number(row.get("Game Total +/-")),
-                "opponent_ranks": rank_snapshot(row.get("Opponent")), "rank_basis": "current_2026_production",
+                "date": clean(game.get("date")),
+                "opponent": opponent,
+                "site": site,
+                "team_points": team_points,
+                "opponent_points": opponent_points,
+                "spread": team_line,
+                "total_line": frozen.get("total"),
+                "ats_result": ats_result,
+                "ats_margin": ats_margin,
+                "total_result": total_result,
+                "total_margin": total_margin,
+                "closing_spread_source": frozen.get("spread_book"),
+                "closing_total_source": frozen.get("total_book"),
+                "closing_line_authority": "FROZEN_CLOSE",
+                "opponent_ranks": rank_snapshot(opponent),
+                "rank_basis": "current_2026_production",
             })
+
     for team, rows in recent_games_by_team.items():
         rows.sort(key=lambda row: row.get("date") or "", reverse=True)
-        recent_games_by_team[team] = rows[:3]
 
     # Quarterback depth data from the June-era Ourlads pipeline is isolated.
     # Leave this empty until a validated canonical depth source is configured.
@@ -733,6 +917,9 @@ def main():
 
     upcoming_by_team = defaultdict(list)
     for game in games:
+        if boolish(game.get("cfbd_completed")):
+            continue
+
         away, home = canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))
         spread_resolution = resolve_operational_game(
             projection_index,
@@ -834,8 +1021,54 @@ def main():
             return {
                 "team": team, "logo_slug": clean(row.get("slug")), "conference": conference, "overall_rank": integer(row.get("rank")),
                 "conference_rank": conference_ranks.get((team, conference)), "offense_rank": offense_rank_by_team.get(team), "defense_rank": defense_rank_by_team.get(team), "rating": number(row.get("combo")),
-                "record": {"season": 2026, "wins": 0, "losses": 0, "ties": 0, "status": "No completed 2026 results in current site DB"},
-                "betting_record": {"season": 2026, "ats": "0-0-0", "ou": "0-0-0", "status": "No completed 2026 results in current site DB"},
+                "record": {
+                    "season": 2026,
+                    "wins": record_2026_by_team[team]["wins"],
+                    "losses": record_2026_by_team[team]["losses"],
+                    "ties": record_2026_by_team[team]["ties"],
+                    "status": (
+                        "CURRENT"
+                        if sum(record_2026_by_team[team].values()) > 0
+                        else "No completed 2026 results in current site DB"
+                    ),
+                },
+                "betting_record": {
+                    "season": 2026,
+                    "ats": (
+                        f"{betting_2026_by_team[team]['ats_wins']}-"
+                        f"{betting_2026_by_team[team]['ats_losses']}-"
+                        f"{betting_2026_by_team[team]['ats_pushes']}"
+                        if (
+                            betting_2026_by_team[team]["ats_wins"]
+                            + betting_2026_by_team[team]["ats_losses"]
+                            + betting_2026_by_team[team]["ats_pushes"]
+                        ) > 0
+                        else "—"
+                    ),
+                    "ou": (
+                        f"{betting_2026_by_team[team]['overs']}-"
+                        f"{betting_2026_by_team[team]['unders']}-"
+                        f"{betting_2026_by_team[team]['total_pushes']}"
+                        if (
+                            betting_2026_by_team[team]["overs"]
+                            + betting_2026_by_team[team]["unders"]
+                            + betting_2026_by_team[team]["total_pushes"]
+                        ) > 0
+                        else "—"
+                    ),
+                    "status": (
+                        "FROZEN_CLOSE_GRADED"
+                        if (
+                            betting_2026_by_team[team]["ats_wins"]
+                            + betting_2026_by_team[team]["ats_losses"]
+                            + betting_2026_by_team[team]["ats_pushes"]
+                            + betting_2026_by_team[team]["overs"]
+                            + betting_2026_by_team[team]["unders"]
+                            + betting_2026_by_team[team]["total_pushes"]
+                        ) > 0
+                        else "No authoritative frozen-close grading available"
+                    ),
+                },
                 "style_profile": {"source_season": integer(style.get("season")), "offense_type": clean(style.get("play_call_style")), "defense_type": defense_type, "pace": pace, "tempo_score": tempo, "summary": clean(style.get("style_summary"))} if style else None,
                 "returning_production": ({"overall_rank": integer(rp.get("rank")), "overall_pct": number(rp.get("overall")),
                     "offense_rank": integer(rp.get("offRank")), "offense_pct": number(rp.get("off")),
@@ -1021,7 +1254,7 @@ def main():
         "coach_missing_role_teams": missing_roles,
         "duplicate_game_ids": duplicate_ids,
         "known_gaps": [
-            "Recent form currently uses each team's final three 2025 game rows; an in-season opponent-adjusted trajectory still needs to be built.",
+            "Recent form uses completed 2026 games from schedule_live_enrichment.json; ATS/O-U grading uses only canonical current_market_contract.json quotes explicitly marked FROZEN_CLOSE.",
             "Quarterback depth and importance come from Ourlads/player-importance data, not a CFBDepth player rating or national QB ranking.",
             "bets_enriched.csv does not expose a canonical game_id for reliable site-wide joins.",
             "expert picks, notes, and Watch/Pass require the authenticated persistence service.",
