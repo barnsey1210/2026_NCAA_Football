@@ -1077,7 +1077,7 @@ def main():
                 "competition_context": competition,
                 "rating_trend": trend_by_team.get(team),
                 "recent_form": recent_games_by_team.get(team, []),
-                "upcoming_schedule": schedule[max(0, schedule_index - 1):schedule_index + 3],
+                "upcoming_schedule": schedule,
                 "quarterbacks": qb_by_team.get(team, []),
                 "injuries": injuries_by_team.get(team, []),
             }

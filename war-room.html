@@ -402,9 +402,21 @@ button,select{
   border-radius:7px;
   background:#09141e;
 }
-.coach-head{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-bottom:4px}
+.coach-head{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;margin-bottom:4px}
 .coach-name{color:#eef7ff;font-size:10px;font-weight:950}
+.coach-team-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:3px;
+}
 .coach-team{color:#eef7ff;font-size:8px;font-weight:850}
+.coach-team-logo{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+  display:block;
+}
 .coach-period{margin-top:2px;color:#afbeca}
 .coach-period strong{color:#eef7ff}
 .coach-role{
@@ -3738,7 +3750,16 @@ function renderCoachCard(coach,game){
   return `<div class="coach-card">
     <div class="coach-head">
       <span class="coach-name">${esc(coach.coach || 'Coach unavailable')}</span>
-      <span class="coach-team">${esc(coach.team || '')}</span>
+      <span class="coach-team-stack">
+        <span class="coach-team">${esc(coach.team || '')}</span>
+        <img
+          class="coach-team-logo"
+          src="logos/${esc(teamLogoSlug(coach.team))}.png"
+          alt="${esc(coach.team || '')}"
+          title="${esc(coach.team || '')}"
+          onerror="this.style.display='none'"
+        >
+      </span>
     </div>
     ${periods || '<div class="coach-period">Historical period records unavailable.</div>'}
     <div class="coach-role">
