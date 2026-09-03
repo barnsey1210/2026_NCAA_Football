@@ -8,6 +8,7 @@ import pandas as pd
 ROOT = Path(".")
 OUT = Path("data/ratings/ratings_latest.csv")
 AUDIT = Path("data/ratings/ratings_audit.csv")
+LIVE_RATING_CHANGE_STATUS = Path("data/ratings/live_rating_change_status.json")
 
 SITE_INDEX = Path("index.html")
 
@@ -28,6 +29,26 @@ EXISTING_RAW_DIRS = {
 
 def now_utc():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+def accepted_source_pulled_at(source, status_path=LIVE_RATING_CHANGE_STATUS):
+    """Return the source pipeline's actual latest pull timestamp.
+
+    Accepted ratings CSVs may contain values only. Acquisition provenance
+    is owned by live_rating_change_status.json. If provenance is unavailable,
+    fail closed with a blank timestamp rather than aggregate rebuild time.
+    """
+    if not status_path.exists():
+        return ""
+
+    try:
+        payload = json.loads(status_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return ""
+
+    meta = (payload.get("sources") or {}).get(source) or {}
+    value = meta.get("latest_pull_at")
+    return str(value).strip() if value else ""
+
 
 def norm(x):
     return re.sub(r"[^a-z0-9]+", " ", str(x or "").lower()).strip()
@@ -603,6 +624,7 @@ def load_spplus():
             }
 
         ranks = _rank_series(df["spplus"])
+        pulled_at = accepted_source_pulled_at(source)
         rows = []
         for i, r in df.iterrows():
             rows.append({
@@ -618,7 +640,7 @@ def load_spplus():
                 "hfa": "",
                 "sos": "",
                 "source_url": "",
-                "pulled_at": now_utc(),
+                "pulled_at": pulled_at,
                 "source_updated_at": "",
                 "notes": "Validated accepted SP+ 2026 source; rating=spplus.",
             })
@@ -685,6 +707,7 @@ def load_fpi():
             }
 
         ranks = _rank_series(df["fpi"])
+        pulled_at = accepted_source_pulled_at(source)
         rows = []
         for i, r in df.iterrows():
             rows.append({
@@ -700,7 +723,7 @@ def load_fpi():
                 "hfa": "",
                 "sos": "",
                 "source_url": "",
-                "pulled_at": now_utc(),
+                "pulled_at": pulled_at,
                 "source_updated_at": "",
                 "notes": "Validated accepted FPI 2026 source; rating=fpi.",
             })
@@ -768,6 +791,7 @@ def load_teamrankings():
             }
 
         ranks = _rank_series(df["teamrankings"])
+        pulled_at = accepted_source_pulled_at(source)
         rows = []
         for i, r in df.iterrows():
             rows.append({
@@ -783,7 +807,7 @@ def load_teamrankings():
                 "hfa": "",
                 "sos": "",
                 "source_url": "",
-                "pulled_at": now_utc(),
+                "pulled_at": pulled_at,
                 "source_updated_at": "",
                 "notes": "Validated accepted TeamRankings 2026 source; rating=teamrankings.",
             })
