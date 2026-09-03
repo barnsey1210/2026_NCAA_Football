@@ -3716,6 +3716,13 @@ function currentTeamRole(game,team){
 function renderCoachCard(coach,game){
   if(!coach) return '';
 
+  let coachLogoSlug='';
+  try{
+    coachLogoSlug=teamLogoSlug(coach.team);
+  }catch(err){
+    console.error('Coach logo render failed',coach?.team,err);
+  }
+
   const periods=(coach.periods || []).map(row=>{
     const rank=Number.isFinite(Number(row.ats_rank)) ? ` #${row.ats_rank}` : '';
     const sample=Number(row.sample || row.ats_sample);
@@ -3754,7 +3761,7 @@ function renderCoachCard(coach,game){
         <span class="coach-team">${esc(coach.team || '')}</span>
         <img
           class="coach-team-logo"
-          src="logos/${esc(teamLogoSlug(coach.team))}.png"
+          src="logos/${esc(coachLogoSlug)}.png"
           alt="${esc(coach.team || '')}"
           title="${esc(coach.team || '')}"
           onerror="this.style.display='none'"
