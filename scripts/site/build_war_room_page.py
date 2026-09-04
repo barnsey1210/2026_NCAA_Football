@@ -3368,16 +3368,7 @@ function recentBestBadge(game,market){
 }
 
 function recentEdgeBadge(game,market){
-  const event=recentEdgeEvent(game,market);
-  if(!event) return '';
-
-  if(event.event_type==='EDGE_BECAME_ACTIONABLE')
-    return '<span class="cell-change-badge edge">NEW EDGE</span>';
-
-  if(event.event_type==='EDGE_LOST_ACTIONABLE')
-    return '<span class="cell-change-badge lost">EDGE LOST</span>';
-
-  return '<span class="cell-change-badge edge">EDGE MOVE</span>';
+  return '';
 }
 
 function activityCategory(event){
