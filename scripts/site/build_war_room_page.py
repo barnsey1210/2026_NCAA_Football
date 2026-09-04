@@ -2571,7 +2571,16 @@ function modelTooltip(game, model, market){
     const weight = STANDARD_COMPONENT_WEIGHTS[market]?.[name];
     return `<span class="model-component ${freshnessClass}" title="${timestamp ? `Source timestamp ${esc(timestamp)}` : 'Source timestamp unavailable'}"><span>${esc(label)} · ${weight}%</span><span>${shown}</span></span>`;
   }).join('');
-  const value = market === 'spread' ? model?.value_home_line : model?.value_total;
+  // The MODEL cell must display the same projection that drives EDGE.
+  // Keep the Standard model/component payload for tooltip diagnostics,
+  // but use the resolved game authority value for the visible number.
+  const authorityValue = market === 'spread'
+    ? game?.authority?.spread?.value
+    : game?.authority?.total?.value;
+  const standardValue = market === 'spread'
+    ? model?.value_home_line
+    : model?.value_total;
+  const value = authorityValue ?? standardValue;
   const shown=market==='spread'
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
