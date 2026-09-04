@@ -725,7 +725,6 @@ fi
   stage_start "site_build"
   python3 scripts/ratings/refresh_ratings_source_status.py
   # Odds, Openers, Matchups, and Home consume the canonical current-market contract directly.
-  python3 scripts/site/compact_matchups_payload.py
   python3 scripts/audit/audit_current_market_propagation.py
   python3 scripts/war_room/build_war_room_health.py
   python3 scripts/war_room/build_war_room_market_matrix.py

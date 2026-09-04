@@ -2,7 +2,7 @@
 """Assemble approved pages while retaining the monolith for team detail routes."""
 from pathlib import Path
 from datetime import datetime, timezone
-import re, shutil, subprocess, sys
+import json, re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
@@ -192,10 +192,86 @@ def main():
         src = ROOT / js_name
         dst = OUT / js_name
         dst.write_text(cache_bust_public_assets(src.read_text()))
-    # Local preview assets. Publishing copies these directories independently.
-    for name in ('data','logos','helmets'):
-        target=ROOT/name
-        if target.exists(): (OUT/name).symlink_to(target, target_is_directory=True)
+    # Build a real public data/site tree rather than symlinking the runtime data
+    # directory. This lets publication carry a browser-sized Matchups contract
+    # while preserving the full internal runtime artifact unchanged.
+    public_data = OUT / 'data'
+    public_site_data = public_data / 'site'
+    public_data.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(ROOT / 'data' / 'site', public_site_data, dirs_exist_ok=True)
+
+    # Preserve the previous local-preview access to non-public runtime data
+    # without making data/site itself a symlink.
+    runtime_data = ROOT / 'data'
+    for child in runtime_data.iterdir():
+        if child.name == 'site':
+            continue
+        preview_target = public_data / child.name
+        if not preview_target.exists():
+            preview_target.symlink_to(
+                child,
+                target_is_directory=child.is_dir(),
+            )
+
+    # The internal Matchups artifact intentionally contains rich provenance and
+    # research context. Public consumers need only the operative model values;
+    # rank_basis is internal provenance and is repeated for every schedule row.
+    public_matchups = public_site_data / 'matchups_view.json'
+    if public_matchups.exists():
+        payload = json.loads(public_matchups.read_text())
+        for game in payload.get('games', []):
+            model = game.get('model')
+            if isinstance(model, dict):
+                game['model'] = {
+                    key: model[key]
+                    for key in (
+                        'home_spread',
+                        'total',
+                        'home_win_probability',
+                    )
+                    if key in model
+                }
+
+            teams = game.get('teams')
+            if isinstance(teams, dict):
+                for side in ('away', 'home'):
+                    team = teams.get(side)
+                    if not isinstance(team, dict):
+                        continue
+                    schedule = team.get('upcoming_schedule')
+                    if not isinstance(schedule, list):
+                        continue
+                    for row in schedule:
+                        if isinstance(row, dict):
+                            row.pop('rank_basis', None)
+
+        public_matchups.write_text(
+            json.dumps(
+                payload,
+                separators=(',', ':'),
+                ensure_ascii=False,
+            ) + '\n'
+        )
+
+        size = public_matchups.stat().st_size
+        limit = 16 * 1024 * 1024
+        print(
+            f'Public matchup payload: '
+            f'{size / 1024 / 1024:.2f} MiB'
+        )
+        if size > limit:
+            raise RuntimeError(
+                f'public matchup payload exceeds 16 MiB: '
+                f'{size} > {limit}'
+            )
+
+    # Logos and helmets remain local-preview symlinks. Publication copies those
+    # directories independently.
+    for name in ('logos', 'helmets'):
+        target = ROOT / name
+        if target.exists():
+            (OUT / name).symlink_to(target, target_is_directory=True)
+
     print(f'Built {len(PAGES) + 1} non-home pages in {OUT}')
 
 # OPENERS_V2_PUBLIC_SYNC_START
