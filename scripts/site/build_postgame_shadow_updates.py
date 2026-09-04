@@ -81,10 +81,10 @@ def main():
                 site = by_key.get(key(r.get("away_team"), r.get("home_team"), r.get("date")))
                 if not site:
                     payload["warnings"].append(f"Unmatched result: {clean(r.get('away_team'))} at {clean(r.get('home_team'))}"); continue
-                close = number(site.get("market", {}).get("spread", {}).get("home_line"))
+                close = number(r.get("closing_home_spread"))
                 away_score, home_score = number(r.get("away_score")), number(r.get("home_score"))
                 if close is None or away_score is None or home_score is None:
-                    payload["warnings"].append(f"Missing close/score: {clean(r.get('away_team'))} at {clean(r.get('home_team'))}"); continue
+                    payload["warnings"].append(f"Missing canonical close/score: {clean(r.get('away_team'))} at {clean(r.get('home_team'))}"); continue
                 for team, opponent, margin, team_close in ((r.get("home_team"), r.get("away_team"), home_score-away_score, close), (r.get("away_team"), r.get("home_team"), away_score-home_score, -close)):
                     estimate = predict([margin, team_close, margin + team_close, abs(team_close)])
                     upcoming = [g for g in schedules.get(clean(team).casefold(), []) if clean(g["game"].get("date")) > clean(r.get("date"))]

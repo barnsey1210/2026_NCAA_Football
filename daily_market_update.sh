@@ -546,6 +546,7 @@ PY2
   run_py "scripts/results/build_game_results_2026.py" "build_game_results_2026.py"
   run_py "scripts/postgame/pull_cfbd_postgame_2026.py" "pull_cfbd_postgame_2026.py"
   run_py "scripts/postgame/build_postgame_features_2026.py" "build_postgame_features_2026.py"
+  run_py "scripts/site/build_postgame_shadow_updates.py" "build_postgame_shadow_updates.py"
   stage_pass "postgame_refresh"
 
 # Current season/conference Monte Carlo simulations. This stage consumes the
