@@ -668,7 +668,11 @@ fi
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
   run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
-  run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || warn "Futures V2 data build failed"
+  if run_py "scripts/site/build_futures_view.py" "build_futures_view.py"; then
+    run_py "scripts/markets/capture_futures_checkpoint.py" "capture_futures_checkpoint.py" || warn "Futures checkpoint capture failed"
+  else
+    warn "Futures V2 data build failed"
+  fi
   run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py"
   stage_pass "playoff_futures"
 
