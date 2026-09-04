@@ -1,6 +1,6 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-09-04T04:06:09.506644+00:00",
+  "built_at": "2026-09-04T04:37:41.366155+00:00",
   "fast_market_refresh": {
     "refresh_id": "theodds_20260904T040606Z",
     "last_fast_pull_at": "2026-09-04T04:06:06.684440+00:00",
@@ -118,22 +118,22 @@
   "shadow_health": {
     "color": "GREEN",
     "status": "READY",
-    "postgame_status": "awaiting_live_results",
-    "completed_team_updates": 12,
-    "display_ready_games": 6,
-    "displayed_shadow_rows": 6,
+    "postgame_status": "live_shadow_ready",
+    "completed_team_updates": 34,
+    "display_ready_games": 7,
+    "displayed_shadow_rows": 7,
     "component_games": 169,
     "spread_model_status": "ready",
     "total_model_status": "awaiting_current_season_pbp",
-    "postgame_built_at": "2026-08-03T12:02:51.914962+00:00",
-    "components_generated_at": "2026-09-04T03:51:53.999365+00:00",
-    "shadow_lines_built_at": "2026-09-04T03:52:19.075788+00:00",
+    "postgame_built_at": "2026-09-04T04:32:42.326973+00:00",
+    "components_generated_at": "2026-09-04T04:36:47.841689+00:00",
+    "shadow_lines_built_at": "2026-09-04T04:37:11.239087+00:00",
     "activation_policy": "GREEN only after genuine completed-game updates exist and at least one Shadow projection is display-ready. Expected pregame waiting states are YELLOW, not RED."
   },
   "projection_health": {
     "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
     "selection_policy": "Frontend selects the matching week entry. ALL WEEKS does not aggregate season-wide projection health.",
-    "projection_contract_built_at": "2026-09-04T03:51:56.004662+00:00",
+    "projection_contract_built_at": "2026-09-04T04:36:49.744173+00:00",
     "matched_fast_board_games": 146,
     "unmatched_fast_board_games": 0,
     "fbs_vs_fbs_games": 103,
