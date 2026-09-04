@@ -1588,10 +1588,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T144234Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T144234Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T144234Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T144234Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T145804Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T145804Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T145804Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T145804Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -3322,16 +3322,7 @@ function recentBestBadge(game,market){
 }
 
 function recentEdgeBadge(game,market){
-  const event=recentEdgeEvent(game,market);
-  if(!event) return '';
-
-  if(event.event_type==='EDGE_BECAME_ACTIONABLE')
-    return '<span class="cell-change-badge edge">NEW EDGE</span>';
-
-  if(event.event_type==='EDGE_LOST_ACTIONABLE')
-    return '<span class="cell-change-badge lost">EDGE LOST</span>';
-
-  return '<span class="cell-change-badge edge">EDGE MOVE</span>';
+  return '';
 }
 
 function activityCategory(event){
