@@ -26,9 +26,68 @@ function aggregate(a){const n=a.length,w=a.filter(x=>x.result>0).length,l=a.filt
 function filtered(){const model=q('exModel').value,season=q('exSeason').value,week=q('exWeek').value,edge=Number(q('exEdge').value),cp=q('exCheckpoint').value,ev=q('exEvidence').value;return R.filter(r=>r.model_id===model&&(season==='all'||r.season===Number(season))&&(cp==='all'||r.checkpoint===cp)&&(ev==='all'||r.evidence_class===ev)&&Math.abs(r.edge)>=edge&&(week==='all'||week==='0-2'&&r.week<=2||week==='0-4'&&r.week<=4||week==='3-4'&&r.week>=3&&r.week<=4||week==='5+'&&r.week>=5||week.startsWith('W')&&r.week===Number(week.slice(1))))}
 function fmt(v,m){if(v==null)return'—';if(m==='n'||m==='record')return v;if(['ats','roi','beat','move'].includes(m))return(v*100).toFixed(1)+'%';return(Number(v)>0?'+':'')+Number(v).toFixed(2)}
 function color(v,m,n){if(m==='n')return`rgba(52,152,219,${Math.min(.75,n/150)})`;if(m==='record')return'';const center=m==='ats'?.5:0,x=Math.max(-1,Math.min(1,(Number(v)-center)/(m==='ats'?.12:m==='roi'?.2:m==='clv'?2:.3)));return x>=0?`rgba(35,170,100,${.12+.6*x})`:`rgba(220,70,70,${.12-.6*x})`}
-function renderCheckpoint(){const data=filtered(),rd=q('exRows').value,cd=q('exCols').value,m=q('exMetric').value;if(rd===cd){q('exCols').value=cd=rd==='checkpoint'?'week':'checkpoint'}const domain=d=>d==='week'?X.week_domain.map(x=>'W'+x):d==='checkpoint'?X.checkpoint_order.map(x=>dims.checkpoint({checkpoint:x})):[...new Set(data.map(dims[d]))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})),rv=domain(rd),cv=domain(cd);q('exHead').innerHTML='<tr><th>'+esc(rd)+'</th>'+cv.map(x=>`<th>${esc(x)}</th>`).join('')+'</tr>';q('exBody').innerHTML=rv.map(r=>'<tr><th>'+esc(r)+'</th>'+cv.map(c=>{const z=data.filter(x=>dims[rd](x)===r&&dims[cd](x)===c),a=aggregate(z),v=a[m];return`<td class="explorerCell ${a.n<20?'sampleTiny':''}" data-r="${esc(r)}" data-c="${esc(c)}" style="background:${color(v,m,a.n)}" title="N ${a.n} · ${a.record} · ${strength(a.n)}">${fmt(v,m)}</td>`}).join('')+'</tr>').join('');q('explorerStatus').textContent=`${data.length.toLocaleString()} qualifying states`;q('exNote').textContent='Checkpoint Performance: fresh qualifying signals are selected independently at each timestamp. Dotted cells have N < 20.';q('exBody').querySelectorAll('td').forEach(td=>td.onclick=()=>details(data.filter(x=>dims[rd](x)===td.dataset.r&&dims[cd](x)===td.dataset.c)));chart(data,m)}
-function details(z){q('exDetails').innerHTML='<h3>Underlying games</h3><table class="explorerTable"><thead><tr><th>Season / Week</th><th>Matchup</th><th>Checkpoint</th><th>Selection</th><th>Line</th><th>Edge</th><th>Result</th><th>AVG CLV</th></tr></thead><tbody>'+z.slice(0,75).map(r=>`<tr><td>${r.season} / W${r.week}</td><td>${esc(r.away_team||'')} ${r.home_team?'at '+esc(r.home_team):''}</td><td>${esc(r.checkpoint)}</td><td>${esc(r.selected_team)}</td><td>${r.market_line??'—'}</td><td>${Number(r.edge).toFixed(2)}</td><td>${r.result>0?'W':r.result<0?'L':'P'}</td><td>${r.clv==null?'—':Number(r.clv).toFixed(2)}</td></tr>`).join('')+'</tbody></table>'}
-function chart(data,m){const pts=X.checkpoint_order.map((cp,i)=>({cp,i,a:aggregate(data.filter(x=>x.checkpoint===cp))})).filter(x=>x.a.n),vals=pts.map(x=>Number(x.a[m==='record'?'n':m]||0)),W=900,H=210,p=32,lo=Math.min(...vals),hi=Math.max(...vals),y=v=>H-p-(v-lo)/(hi-lo||1)*(H-2*p),x=i=>p+i*(W-2*p)/(X.checkpoint_order.length-1);q('exChart').innerHTML=pts.length?`<svg viewBox="0 0 ${W} ${H}"><polyline class="explorerLine" points="${pts.map(z=>`${x(z.i)},${y(Number(z.a[m==='record'?'n':m]||0))}`).join(' ')}"/>${pts.map(z=>`<circle class="explorerDot" cx="${x(z.i)}" cy="${y(Number(z.a[m==='record'?'n':m]||0))}" r="4"><title>${z.cp}: ${fmt(z.a[m],m)} N ${z.a.n}</title></circle>`).join('')}</svg>`:''}
+function renderCheckpoint(){
+ const data=filtered(),rd=q('exRows').value,cd=q('exCols').value,m=q('exMetric').value;
+ if(rd===cd){q('exCols').value=cd=rd==='checkpoint'?'week':'checkpoint'}
+
+ const weekDomain=()=>{
+  const w=q('exWeek').value;
+  if(w==='0-2')return ['W0','W1','W2'];
+  if(w==='0-4')return ['W0','W1','W2','W3','W4'];
+  if(w==='3-4')return ['W3','W4'];
+  if(w==='5+')return X.week_domain.filter(x=>x>=5).map(x=>'W'+x);
+  if(w.startsWith('W'))return [w];
+  return X.week_domain.map(x=>'W'+x);
+ };
+
+ const domain=d=>
+  d==='week'
+   ?weekDomain()
+   :d==='checkpoint'
+    ?X.checkpoint_order.map(x=>dims.checkpoint({checkpoint:x}))
+    :[...new Set(data.map(dims[d]))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+
+ const rv=domain(rd),cv=domain(cd);
+ const TOTAL='__TOTAL__';
+
+ const cellData=(r,c)=>{
+  if(r===TOTAL&&c===TOTAL)return data;
+  if(r===TOTAL)return data.filter(x=>dims[cd](x)===c);
+  if(c===TOTAL)return data.filter(x=>dims[rd](x)===r);
+  return data.filter(x=>dims[rd](x)===r&&dims[cd](x)===c);
+ };
+
+ const cell=(r,c,isTotal=false)=>{
+  const z=cellData(r,c),a=aggregate(z),v=a[m];
+  return `<td class="explorerCell ${a.n<20?'sampleTiny':''}" data-r="${esc(r)}" data-c="${esc(c)}" style="background:${color(v,m,a.n)};${isTotal?'font-weight:700;':''}" title="N ${a.n} · ${a.record} · ${strength(a.n)}">${fmt(v,m)}</td>`;
+ };
+
+ q('exHead').innerHTML=
+  '<tr><th>'+esc(rd)+'</th>'+
+  cv.map(x=>`<th>${esc(x)}</th>`).join('')+
+  '<th style="font-weight:700">TOTAL</th></tr>';
+
+ q('exBody').innerHTML=
+  rv.map(r=>
+   '<tr><th>'+esc(r)+'</th>'+
+   cv.map(c=>cell(r,c)).join('')+
+   cell(r,TOTAL,true)+
+   '</tr>'
+  ).join('')+
+  '<tr><th style="font-weight:700">TOTAL</th>'+
+  cv.map(c=>cell(TOTAL,c,true)).join('')+
+  cell(TOTAL,TOTAL,true)+
+  '</tr>';
+
+ q('explorerStatus').textContent=`${data.length.toLocaleString()} qualifying states`;
+ q('exNote').textContent='Checkpoint Performance: fresh qualifying signals are selected independently at each timestamp. TOTAL cells are recalculated from the underlying qualifying states. Dotted cells have N < 20.';
+
+ q('exBody').querySelectorAll('td').forEach(td=>{
+  td.onclick=()=>details(cellData(td.dataset.r,td.dataset.c));
+ });
+
+ chart(data,m);
+}
 function renderMatched(){const model=q('exModel').value,t=Number(q('exEdge').value),rows=H.matched_signal_decay.filter(x=>x.model_id===model&&Number(x.threshold)===t);q('exHead').innerHTML='<tr><th>Origin</th><th>Later checkpoint</th><th>N</th><th>Edge persistence</th><th>Reversal</th><th>AVG CLV</th><th>ROI</th></tr>';q('exBody').innerHTML=rows.map(r=>`<tr><th>${esc(r.origin_checkpoint)}</th><td>${esc(r.checkpoint)}</td><td>${r.n}</td><td>${fmt(r.edge_persistence_pct,'ats')}</td><td>${fmt(r.reversal_pct,'ats')}</td><td>${fmt(r.avg_clv,'clv')}</td><td>${fmt(r.roi,'roi')}</td></tr>`).join('');q('exNote').textContent='Fixed-Origin Matched Decay: the same game, origin side, origin wager, and threshold are followed. Opposite-side signals are reversals, never persistence.';q('explorerStatus').textContent=`${rows.length} corrected matched states`;q('exChart').innerHTML='';q('exDetails').innerHTML=''}
 function common(){const z=H.common_sample_spread_comparison.filter(x=>Number(x.threshold)===3&&x.checkpoint==='SUN_9AM_ET');q('exCommon').innerHTML='<details><summary>Corrected 4-source vs 5-source common-sample comparison</summary><div class="explorerWrap"><table class="explorerTable"><thead><tr><th>Cohort</th><th>Model</th><th>N</th><th>Record</th><th>ROI</th><th>Same side</th><th>Disagreements</th></tr></thead><tbody>'+z.map(r=>`<tr><td>${esc(r.cohort)}</td><td>${esc(r.evaluated_model_id)}</td><td>${r.n}</td><td>${esc(r.record)}</td><td>${fmt(r.roi,'roi')}</td><td>${r.same_side_count??'—'}</td><td>${r.disagreement_count??'—'}</td></tr>`).join('')+'</tbody></table></div></details>'}
 function render(){q('exMode').value==='matched'?renderMatched():renderCheckpoint()}

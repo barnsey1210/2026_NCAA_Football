@@ -2,6 +2,8 @@
 """Offline extension of frozen historical models across owned market checkpoints."""
 from pathlib import Path
 import csv,json,math,re,unicodedata
+from datetime import datetime,timedelta,time
+from zoneinfo import ZoneInfo
 import numpy as np,pandas as pd
 
 ROOT=Path(__file__).resolve().parents[3]
@@ -9,8 +11,21 @@ RAW=ROOT/'research/historical/the_odds_api/odds_snapshots_openers_2021_2025'
 SRC=ROOT/'data/research/historical/timestamped_spread_edge_study_2021_2025_v2/timestamped_spread_bets_key_aware_ev.csv'
 MAT=ROOT/'data/research/historical/historical_game_model_market_matrix_2021_2025.csv'
 OUT=ROOT/'data/research/historical/comprehensive_market_timing_2021_2025'
-TH=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,10]
+TH=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,9,10]
 ORDER=['SAT_11PM_ET','SUN_9AM_ET','SUN_12PM_ET','SUN_2PM_ET','SUN_4PM_ET','SUN_9PM_ET','MON_9AM_ET','MON_3PM_ET','TUE_2PM_ET','WED_2PM_ET','THU_2PM_ET','FRI_2PM_ET','CLOSE']
+TIMESTAMP_CONTROLLED_CHECKPOINTS={'SUN_12PM_ET','SUN_4PM_ET','MON_9AM_ET','MON_3PM_ET','TUE_2PM_ET','WED_2PM_ET','THU_2PM_ET','FRI_2PM_ET'}
+CHECKPOINT_DAY_TIME={
+ 'SUN_12PM_ET':(0,12),
+ 'SUN_4PM_ET':(0,16),
+ 'MON_9AM_ET':(1,9),
+ 'MON_3PM_ET':(1,15),
+ 'TUE_2PM_ET':(2,14),
+ 'WED_2PM_ET':(3,14),
+ 'THU_2PM_ET':(4,14),
+ 'FRI_2PM_ET':(5,14),
+}
+ET=ZoneInfo('America/New_York')
+UTC=ZoneInfo('UTC')
 MODELS=['SP+','FPI','TeamRankings','Sagarin','DRatings','Five-source equal weight','SP+ + FPI + TR + DRatings']
 BOOK_ORDER={b:i for i,b in enumerate(['draftkings','fanduel','betmgm','williamhill_us','pinnacle'])}
 
@@ -43,14 +58,44 @@ def profit_at_price(result,price):
  if pd.isna(price):price=-110.0
  return 100.0/abs(price) if price<0 else price/100.0
 
+
+def expected_checkpoint_timestamp(checkpoint,kickoff):
+ if checkpoint not in TIMESTAMP_CONTROLLED_CHECKPOINTS:return None
+ try:
+  k=pd.Timestamp(kickoff)
+  if pd.isna(k):return None
+  if k.tzinfo is None:k=k.tz_localize('UTC')
+  else:k=k.tz_convert('UTC')
+ except Exception:
+  return None
+
+ local=k.tz_convert(ET)
+
+ # CFB game week is anchored to the Sunday preceding the Tue-Fri game-week
+ # checkpoints. For Sunday games, that same calendar Sunday is the anchor.
+ days_since_sunday=(local.weekday()+1)%7
+ sunday_date=local.date()-timedelta(days=days_since_sunday)
+
+ day_delta,hour=CHECKPOINT_DAY_TIME[checkpoint]
+ target_date=sunday_date+timedelta(days=day_delta)
+ target_local=datetime.combine(target_date,time(hour,0),ET)
+ target_utc=pd.Timestamp(target_local).tz_convert('UTC')
+
+ if target_utc>=k:return None
+ return target_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+
 def raw_states():
  rows=[]
  for p in RAW.glob('*.json'):
   try:s=json.loads(p.read_text()); cp=s.get('checkpoint'); data=s.get('payload',{}).get('data',[])
   except:continue
   if cp not in ORDER or not data:continue
+  requested=s.get('requested_timestamp')
   for g in data:
    eid=g.get('id'); home=g.get('home_team'); away=g.get('away_team')
+   if cp in TIMESTAMP_CONTROLLED_CHECKPOINTS:
+    expected=expected_checkpoint_timestamp(cp,g.get('commence_time'))
+    if expected is None or requested!=expected:continue
    for b in g.get('bookmakers',[]):
     for m in b.get('markets',[]):
      if m.get('key')!='spreads':continue
@@ -78,12 +123,17 @@ def build_game_level():
  q['reason_code']=np.where(q.orientation_status.eq('UNRESOLVED'),'EVENT_TEAM_ORIENTATION_UNRESOLVED',np.where(q.side.eq('unresolved'),'OUTCOME_TEAM_UNRESOLVED','VALID'))
  quarantine=q[q.reason_code.ne('VALID')].copy()
  valid=q[q.reason_code.eq('VALID')].copy()
- raw_pair=valid.pivot_table(index=['theodds_event_id','checkpoint','bookmaker'],columns='side',values='line',aggfunc='first').reset_index()
+ raw_pair=valid.pivot_table(index=['theodds_event_id','checkpoint','requested_timestamp','bookmaker'],columns='side',values='line',aggfunc='first').reset_index()
  raw_pair['opposite_delta']=(raw_pair.get('home')+raw_pair.get('away')).abs()
  bad_pairs=raw_pair[raw_pair.opposite_delta.gt(1e-9)].copy();bad_pairs['reason_code']='BOOK_SPREADS_NOT_EXACT_OPPOSITES'
- valid=valid.merge(bad_pairs[['theodds_event_id','checkpoint','bookmaker','reason_code']],on=['theodds_event_id','checkpoint','bookmaker'],how='left',suffixes=('','_pair'))
+ valid=valid.merge(bad_pairs[['theodds_event_id','checkpoint','requested_timestamp','bookmaker','reason_code']],on=['theodds_event_id','checkpoint','requested_timestamp','bookmaker'],how='left',suffixes=('','_pair'))
  valid=valid[valid.reason_code_pair.isna()].copy()
  q=valid
+ controlled=q[q.checkpoint.isin(TIMESTAMP_CONTROLLED_CHECKPOINTS)].copy()
+ if len(controlled):
+  ts_counts=controlled.groupby(['theodds_event_id','checkpoint']).requested_timestamp.nunique()
+  mixed=int((ts_counts>1).sum())
+  if mixed:raise SystemExit(f'checkpoint contamination remains: {mixed} event/checkpoint groups have multiple timestamps')
  keys=['theodds_event_id','checkpoint']; cons=q[q.side.eq('home')].groupby(keys).line.median().rename('consensus_home_spread').reset_index()
  q['book_order']=q.bookmaker.map(BOOK_ORDER).fillna(9999)
  best=q.sort_values(keys+['side','line','price','book_order','bookmaker'],ascending=[True,True,True,False,False,True,True],kind='mergesort').drop_duplicates(keys+['side'])
@@ -92,7 +142,7 @@ def build_game_level():
  quarantined=[]
  if len(quarantine):quarantined.append(quarantine[audit_cols])
  if len(bad_pairs):
-  bp=bad_pairs.merge(valid.drop_duplicates(['theodds_event_id','checkpoint','bookmaker'])[['theodds_event_id','checkpoint','bookmaker','provider_home_team','provider_away_team','raw_file','orientation_status']],on=['theodds_event_id','checkpoint','bookmaker'],how='left');bp['outcome_team']='';bp['line']=np.nan;bp['price']=np.nan;quarantined.append(bp[audit_cols])
+  bp=bad_pairs.merge(valid.drop_duplicates(['theodds_event_id','checkpoint','requested_timestamp','bookmaker'])[['theodds_event_id','checkpoint','requested_timestamp','bookmaker','provider_home_team','provider_away_team','raw_file','orientation_status']],on=['theodds_event_id','checkpoint','requested_timestamp','bookmaker'],how='left');bp['outcome_team']='';bp['line']=np.nan;bp['price']=np.nan;quarantined.append(bp[audit_cols])
  qa=pd.concat(quarantined,ignore_index=True) if quarantined else pd.DataFrame(columns=audit_cols)
  qa.to_csv(OUT/'spread_market_quarantine.csv',index=False)
  wide=best.pivot(index=keys,columns='side',values=['line','price','bookmaker','requested_timestamp','provider_timestamp','raw_file']).reset_index();wide.columns=['_'.join([str(x) for x in c if x]) for c in wide.columns]
