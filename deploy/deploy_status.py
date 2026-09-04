@@ -14,6 +14,7 @@ EXPECTED_REMOTES = {
     "https://github.com/barnsey1210/2026_NCAA_Football.git",
     "https://github.com/barnsey1210/2026_NCAA_Football",
     "git@github.com:barnsey1210/2026_NCAA_Football.git",
+    "git@github-ncaaf-site:barnsey1210/2026_NCAA_Football.git",
 }
 DEFAULT_TARGET = Path("/Users/jameslindesmith/NCAAF_AUTO")
 
