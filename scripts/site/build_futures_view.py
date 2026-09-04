@@ -26,6 +26,7 @@ PLAYOFF_MODEL_PATH = DATA_ROOT / "data/site/playoff_model_2026.json"
 BETS_PATH = DATA_ROOT / "data/site/betting_activity_view.json"
 WIN_MOVEMENT_PATH = DATA_ROOT / "market_win_totals_movement.csv"
 TITLE_MOVEMENT_PATH = DATA_ROOT / "market_conference_futures_movement.csv"
+FUTURES_CHECKPOINTS_PATH = DATA_ROOT / "data/markets/futures_checkpoints_2026.jsonl"
 
 QA_PATH = Path(
     os.environ.get(
@@ -40,6 +41,82 @@ OUT = Path(
         str(DATA_ROOT / "data/site/futures_view.json"),
     )
 ).expanduser().resolve()
+
+def load_futures_checkpoints(path):
+    records = []
+
+    if not path.exists():
+        return records
+
+    for line in path.read_text().splitlines():
+        line = line.strip()
+
+        if not line:
+            continue
+
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        if isinstance(obj, dict):
+            records.append(obj)
+
+    return records
+
+
+def numeric_delta(current, prior):
+    current_value = number(current)
+    prior_value = number(prior)
+
+    if current_value is None or prior_value is None:
+        return None
+
+    return current_value - prior_value
+
+
+def select_7d_baseline(records, current_built_at):
+    if not records or not current_built_at:
+        return None
+
+    try:
+        current_dt = datetime.fromisoformat(
+            str(current_built_at).replace("Z", "+00:00")
+        )
+    except ValueError:
+        return None
+
+    if current_dt.tzinfo is None:
+        current_dt = current_dt.replace(tzinfo=timezone.utc)
+
+    current_date = current_dt.astimezone(timezone.utc).date()
+    candidates = []
+
+    for record in records:
+        checkpoint_date = record.get("checkpoint_date")
+
+        if not checkpoint_date:
+            continue
+
+        try:
+            record_date = datetime.fromisoformat(
+                str(checkpoint_date)
+            ).date()
+        except ValueError:
+            continue
+
+        age_days = (current_date - record_date).days
+
+        if age_days >= 7:
+            candidates.append((record_date, record))
+
+    if not candidates:
+        return None
+
+    # Closest available checkpoint that is at least seven
+    # calendar days old.
+    return max(candidates, key=lambda item: item[0])[1]
+
 
 def number(value):
     try:
@@ -500,6 +577,27 @@ def main():
     for x in read_csv_rows(TITLE_MOVEMENT_PATH):
         title_movement[(canonical_team(x.get("team")), x.get("book"))] = x
 
+    build_generated_at = datetime.now(timezone.utc).isoformat()
+
+    checkpoint_history = load_futures_checkpoints(
+        FUTURES_CHECKPOINTS_PATH
+    )
+
+    baseline_checkpoint = select_7d_baseline(
+        checkpoint_history,
+        build_generated_at,
+    )
+
+    baseline_rows = {
+        canonical_team(x.get("team")): x
+        for x in (
+            baseline_checkpoint.get("rows", [])
+            if baseline_checkpoint
+            else []
+        )
+        if isinstance(x, dict) and x.get("team")
+    }
+
     rows = []
 
     for key, team in teams.items():
@@ -638,6 +736,123 @@ def main():
             "national_title_book_count": national.get(
                 "executable_book_count", 0
             ),
+
+            "delta_7d": (
+                {
+                    "baseline_date": baseline_checkpoint.get(
+                        "checkpoint_date"
+                    ),
+                    "baseline_at": baseline_checkpoint.get(
+                        "checkpoint_at"
+                    ),
+
+                    "win": {
+                        "model": numeric_delta(
+                            projected_wins,
+                            baseline_rows.get(key, {}).get(
+                                "projected_wins"
+                            ),
+                        ),
+                        "market": numeric_delta(
+                            total,
+                            baseline_rows.get(key, {}).get(
+                                "market_win_total"
+                            ),
+                        ),
+                        "edge": numeric_delta(
+                            (
+                                projected_wins - total
+                                if projected_wins is not None
+                                and total is not None
+                                else None
+                            ),
+                            baseline_rows.get(key, {}).get(
+                                "win_edge"
+                            ),
+                        ),
+                    },
+
+                    "conference_title": {
+                        "model": numeric_delta(
+                            title_prob,
+                            baseline_rows.get(key, {}).get(
+                                "title_model_prob"
+                            ),
+                        ),
+                        "market": numeric_delta(
+                            title_market_prob,
+                            baseline_rows.get(key, {}).get(
+                                "title_market_prob"
+                            ),
+                        ),
+                        "edge": numeric_delta(
+                            (
+                                title_prob - title_market_prob
+                                if title_prob is not None
+                                and title_market_prob is not None
+                                else None
+                            ),
+                            baseline_rows.get(key, {}).get(
+                                "title_edge"
+                            ),
+                        ),
+                    },
+
+                    "make_cfp": {
+                        "model": numeric_delta(
+                            playoff_prob,
+                            baseline_rows.get(key, {}).get(
+                                "playoff_model_prob"
+                            ),
+                        ),
+                        "market": numeric_delta(
+                            cfp_prob,
+                            baseline_rows.get(key, {}).get(
+                                "playoff_market_prob"
+                            ),
+                        ),
+                        "edge": numeric_delta(
+                            (
+                                playoff_prob - cfp_prob
+                                if playoff_prob is not None
+                                and cfp_prob is not None
+                                else None
+                            ),
+                            baseline_rows.get(key, {}).get(
+                                "playoff_edge"
+                            ),
+                        ),
+                    },
+
+                    "national_title": {
+                        "model": numeric_delta(
+                            national_model_prob,
+                            baseline_rows.get(key, {}).get(
+                                "national_title_model_prob"
+                            ),
+                        ),
+                        "market": numeric_delta(
+                            national_prob,
+                            baseline_rows.get(key, {}).get(
+                                "national_title_market_prob"
+                            ),
+                        ),
+                        "edge": numeric_delta(
+                            (
+                                national_model_prob - national_prob
+                                if national_model_prob is not None
+                                and national_prob is not None
+                                else None
+                            ),
+                            baseline_rows.get(key, {}).get(
+                                "national_title_edge"
+                            ),
+                        ),
+                    },
+                }
+                if baseline_checkpoint
+                else None
+            ),
         })
 
     season_built = season_model.get("built_at")
@@ -767,7 +982,7 @@ def main():
 
     payload = {
         "schema_version": "futures-view-v4",
-        "built_at": datetime.now(timezone.utc).isoformat(),
+        "built_at": build_generated_at,
 
         # Backward compatibility for current UI.
         "model_updated": season_built,
