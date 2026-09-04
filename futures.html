@@ -8,7 +8,7 @@
 :root{--bg:#061126;--panel:#0b1b36;--line:#244873;--text:#f5f7ff;--muted:#91a6c6;--green:#43df96;--red:#ff7280;--amber:#ffc45b;--blue:#459cff;--purple:#b69cff;--market:#211735;--marketHead:#56356f}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:13px/1.4 Inter,system-ui}.shell{max-width:1760px;margin:auto;padding:16px}.top{display:flex;gap:16px;align-items:center;border-bottom:1px solid #19375f;padding-bottom:11px}.brand{font-size:20px;font-weight:950}.nav{display:flex;gap:5px;overflow:auto}.nav a{color:var(--muted);padding:8px 11px;text-decoration:none;font-weight:850;white-space:nowrap}.nav .active{background:#173b72;color:white;border-radius:8px}.stamp{margin-left:auto;color:#baf8d6;border:1px solid #176747;border-radius:999px;padding:6px 10px;font-size:10px;white-space:nowrap}.hero{display:flex;justify-content:space-between;align-items:end;margin:18px 0 12px}.hero h1{font-size:35px;margin:0}.hero p{color:var(--muted);margin:2px 0}.summary{display:flex;gap:8px}.tile{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:7px 11px}.tile span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.tile b{font-size:18px}.tabs,.filters{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.tabs button{border:1px solid var(--line);background:#091a34;color:var(--muted);border-radius:999px;padding:8px 14px;font-weight:900;cursor:pointer}.tabs .active{background:#1857a7;color:white}.filters select,.filters input{background:#091a34;border:1px solid var(--line);color:white;border-radius:7px;padding:8px}.filters input{min-width:230px}
 .marketStatus{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #28517b;background:#0a213c;border-radius:10px;padding:9px 12px;margin:10px 0;color:#c8d8ed}.marketStatus strong{color:white}.marketStatus.current{border-color:#176747;background:#092438;color:#baf8d6}.marketStatus.stale,.marketStatus.warn{border-color:#8c6726;background:#33270f;color:#ffe0a1}.statusDot{width:8px;height:8px;border-radius:50%;background:var(--green)}.stale .statusDot,.warn .statusDot{background:var(--amber)}.marketStatus .meta{color:var(--muted);font-size:10px}.marketStatus button{margin-left:auto;border:1px solid #42688f;background:#102b50;color:white;border-radius:7px;padding:5px 8px;font-size:10px;cursor:pointer}.qaDetails{display:none;width:100%;border-top:1px solid #31537b;padding-top:7px;margin-top:2px;font-size:10px}.qaDetails.open{display:block}
-.card{border:1px solid var(--line);border-radius:12px;overflow:hidden}.wrap{overflow:auto;max-height:680px}table{width:100%;min-width:1180px;border-collapse:collapse}th{position:sticky;top:0;background:#132a50;color:#afbfda;text-align:left;text-transform:uppercase;font-size:9px;padding:9px;z-index:2}th.sortable{cursor:pointer;user-select:none}th.sortable:hover{color:#fff}th.sortable:after{content:' ↕';opacity:.35}th.sortable.asc:after{content:' ↑';opacity:1}th.sortable.desc:after{content:' ↓';opacity:1}td{padding:8px 9px;border-top:1px solid #17345c;white-space:nowrap}.team{display:flex;align-items:center;gap:8px;font-weight:900}.team img{width:28px;height:28px;object-fit:contain}.sub,.secondary{display:block;color:var(--muted);font-size:9px;font-weight:700}.prob{font-weight:950}.marketCol{background:var(--market)}th.marketCol{background:var(--marketHead);color:#f2dcff}.marketCell{display:flex;align-items:center;gap:7px}.bookLogo{width:24px;height:18px;object-fit:contain;background:white;border-radius:4px;padding:2px}.bookText{font-size:9px;color:#d5c4ee}.good{color:var(--green);font-weight:950}.bad{color:var(--red);font-weight:950}.neutral{color:var(--muted);font-weight:850}.bet{border:1px solid #2b7f5e;color:#baf8d6;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:900}.empty{text-align:center;color:var(--muted);padding:30px}.sectionHead{background:#0d2443;color:#c9daf0;font-weight:900}.edgeLabel{font-size:9px;color:var(--muted)}@media(max-width:900px){.summary,.stamp{display:none}.shell{padding:10px}}
+.card{border:1px solid var(--line);border-radius:12px;overflow:hidden}.wrap{overflow:auto;max-height:680px}table{width:100%;min-width:1180px;border-collapse:collapse}th{position:sticky;top:0;background:#132a50;color:#afbfda;text-align:left;text-transform:uppercase;font-size:9px;padding:9px;z-index:2}th.sortable{cursor:pointer;user-select:none}th.sortable:hover{color:#fff}th.sortable:after{content:' ↕';opacity:.35}th.sortable.asc:after{content:' ↑';opacity:1}th.sortable.desc:after{content:' ↓';opacity:1}td{padding:8px 9px;border-top:1px solid #17345c;white-space:nowrap}.team{display:flex;align-items:center;gap:8px;font-weight:900}.team img{width:28px;height:28px;object-fit:contain}.sub,.secondary{display:block;color:var(--muted);font-size:9px;font-weight:700}.prob{font-weight:950}.marketCol{background:var(--market)}th.marketCol{background:var(--marketHead);color:#f2dcff}.marketCell{display:flex;align-items:center;gap:7px}.bookLogo{width:24px;height:18px;object-fit:contain;background:white;border-radius:4px;padding:2px}.bookText{font-size:9px;color:#d5c4ee}.bookBreadth{display:block;color:#91a8c5;font-size:8px;font-weight:800;margin-top:2px}.good{color:var(--green);font-weight:950}.bad{color:var(--red);font-weight:950}.neutral{color:var(--muted);font-weight:850}.bet{border:1px solid #2b7f5e;color:#baf8d6;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:900}.empty{text-align:center;color:var(--muted);padding:30px}.sectionHead{background:#0d2443;color:#c9daf0;font-weight:900}.edgeLabel{font-size:9px;color:var(--muted)}.freshnessGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:6px 0 10px}.freshCard{min-width:0;border:1px solid var(--line);background:#0b1c35;border-radius:10px;padding:6px 10px}.freshHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px}.freshHead strong{font-size:8px;letter-spacing:.08em}.freshRows{display:grid;gap:2px}.freshRow{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;font-size:8px;line-height:1.25}.freshRow span:first-child{color:var(--muted);font-weight:850;flex:0 0 auto}.freshRow span:last-child{text-align:right;color:#e6edf7;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.freshStatus{font-size:7px;font-weight:950;text-transform:uppercase;flex:0 0 auto}.freshStatus.current{color:var(--green)}.freshStatus.warn{color:#ffd166}.freshStatus.stale{color:var(--red)}@media(max-width:900px){.freshnessGrid{grid-template-columns:1fr}}@media(max-width:900px){.summary,.stamp{display:none}.shell{padding:10px}}
 </style>
 
 <!-- V2_DARK_LOGO_BADGES_CSS_START -->
@@ -113,7 +113,17 @@ img[src$="west-virginia.webp"] {
 <header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html" class="active">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Futures</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
 <main class="shell">
 <section class="hero"><div><h1>Futures</h1><p>Simulation probability versus executable market price, with live wagers and movement.</p></div><div class="summary"><div class="tile"><span>Teams</span><b id="teams">—</b></div><div class="tile"><span>Markets</span><b id="markets">—</b></div><div class="tile"><span>Open wagers</span><b id="wagers">—</b></div></div></section>
-<div id="marketStatus" class="marketStatus"><span class="statusDot"></span><strong>Checking futures market freshness…</strong></div>
+<div class="freshnessGrid">
+<div class="freshCard">
+<div class="freshHead"><strong>MODEL FRESHNESS</strong><span id="modelFreshStatus" class="freshStatus">CHECKING</span></div>
+<div id="modelFreshRows" class="freshRows"></div>
+</div>
+<div class="freshCard">
+<div class="freshHead"><strong>MARKET FRESHNESS</strong><span id="marketFreshStatus" class="freshStatus">CHECKING</span></div>
+<div id="marketFreshRows" class="freshRows"></div>
+<div id="marketQaRow" class="freshRows"></div>
+</div>
+</div>
 <div class="tabs"><button class="active" data-mode="wins">Win totals</button><button data-mode="title">Conference titles</button><button data-mode="playoff">Playoffs</button><button data-mode="bets">My open futures</button></div>
 <div class="filters"><select id="conf"><option value="all">All conferences</option></select><input id="search" placeholder="Find a team"><select id="sort"><option value="edge">Largest edge</option><option value="rank">Team rank</option><option value="team">Team name</option></select></div>
 <div class="card"><div class="wrap"><table><thead id="head"></thead><tbody id="rows"><tr><td class="empty">Loading futures…</td></tr></tbody></table></div></div>
@@ -129,8 +139,11 @@ function fairOdds(p){p=Number(p);if(!Number.isFinite(p)||p<=0||p>=1)return p===0
 function logo(x){const slug=x.slug||'';return slug?`<img src="logos/${e(slug)}.png" alt="" onerror="this.style.display='none'">`:''}
 function bookLogo(name){const k=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,''),m={fanduel:'fanduel',draftkings:'draftkings',betmgm:'betmgm',caesars:'caesars'};return m[k]?`<img class="bookLogo" src="logos/books/${m[k]}.png" title="${e(name)}" alt="${e(name)}">`:`<span class="bookText">${e(name||'—')}</span>`}
 function modelProbCell(p){return`<span class="prob">${pct(p)}</span><span class="secondary">${od(fairOdds(p))} fair</span>`}
-function marketProbCell(p,price,book){return`<span class="marketCell"><span><span class="prob">${pct(p)}</span><span class="secondary">${od(price)} market</span></span>${bookLogo(book)}</span>`}
+function marketProbCell(p,price,book,count=null,total=4){return`<span class="marketCell"><span><span class="prob">${pct(p)}</span><span class="secondary">${od(price)} market</span>${count==null?'':`<span class="bookBreadth">${count}/${total} books</span>`}</span>${bookLogo(book)}</span>`}
+function bestPriceCell(price,book,count=null,total=4){return`<span class="marketCell"><span><b>${od(price)}</b><span class="secondary">${e(book||'—')}</span>${count==null?'':`<span class="bookBreadth">${count}/${total} books</span>`}</span>${bookLogo(book)}</span>`}
 function edgeCell(v){return`<span class="${v==null?'neutral':v>=0?'good':'bad'}">${signedPct(v)}</span>`}
+function deltaWins(v){return Number.isFinite(Number(v))?`<span class="secondary">Δ7D ${Number(v)>=0?'+':''}${Number(v).toFixed(1)}</span>`:'<span class="secondary">Δ7D —</span>'}
+function deltaProb(v){return Number.isFinite(Number(v))?`<span class="secondary">Δ7D ${Number(v)>=0?'+':''}${(Number(v)*100).toFixed(1)} pp</span>`:'<span class="secondary">Δ7D —</span>'}
 function teamCell(x){return`<td><span class="team">${logo(x)}<span>${e(x.team)}<span class="sub">#${x.rank??'—'} · ${e(x.conference)}</span></span></span></td>`}
 function wagerCell(x){return x.open_wagers.length?`<span class="bet">BET ${x.open_wagers.length}</span>`:'—'}
 
@@ -173,16 +186,16 @@ function sortedRows(){
  return a;
 }
 function renderWins(a){
- head.innerHTML=`<tr>${header('Team','team')}${header('Projected wins','projected_wins')}${header('Market total','market_win_total','marketCol')}${header('Win edge','win_edge')}${header('Model side','win_direction')}${header('Best market','win_price','marketCol')}${header('Movement','win_movement')}${header('Wager','wagers')}</tr>`;
- rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${n(x.projected_wins,1)}</td><td class="marketCol">${n(x.market_win_total,1)}</td><td class="${x.win_edge==null?'neutral':x.win_edge>=0?'good':'bad'}">${x.win_edge>0?'+':''}${n(x.win_edge,1)}</td><td>${e(x.win_direction)}</td><td class="marketCol"><span class="marketCell"><span><b>${od(x.win_price)}</b><span class="secondary">${e(x.win_book||'—')}</span></span>${bookLogo(x.win_book)}</span></td><td>${x.win_movement?(x.win_movement.win_total_move>0?'+':'')+n(x.win_movement.win_total_move,1):'—'}</td><td>${wagerCell(x)}</td></tr>`).join('');
+ head.innerHTML=`<tr>${header('Team','team')}${header('Model wins','projected_wins')}${header('Market total','market_win_total','marketCol')}${header('Edge','win_edge')}${header('Model side','win_direction')}${header('Best price','win_price','marketCol')}${header('Open → now','win_movement')}${header('Wager','wagers')}</tr>`;
+ rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${n(x.projected_wins,1)}${deltaWins(x.delta_7d?.win?.model)}</td><td class="marketCol">${n(x.market_win_total,1)}${deltaWins(x.delta_7d?.win?.market)}</td><td class="${x.win_edge==null?'neutral':x.win_edge>=0?'good':'bad'}">${x.win_edge>0?'+':''}${n(x.win_edge,1)}${deltaWins(x.delta_7d?.win?.edge)}</td><td>${e(x.win_direction)}</td><td class="marketCol">${bestPriceCell(x.win_price,x.win_book,x.win_book_count)}</td><td>${x.win_movement?(x.win_movement.win_total_move>0?'+':'')+n(x.win_movement.win_total_move,1):'—'}</td><td>${wagerCell(x)}</td></tr>`).join('');
 }
 function renderTitle(a){
- head.innerHTML=`<tr>${header('Team','team')}${header('Model title','title_model_prob')}${header('Title market','title_market_prob','marketCol')}${header('Title edge','title_edge')}${header('Movement','title_movement')}${header('Wager','wagers')}</tr>`;
- rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${modelProbCell(x.title_model_prob)}</td><td class="marketCol">${marketProbCell(x.title_market_prob,x.title_price,x.title_book)}</td><td>${edgeCell(x.title_edge)}</td><td>${x.title_movement?od(x.title_movement.american_odds_move):'—'}</td><td>${wagerCell(x)}</td></tr>`).join('');
+ head.innerHTML=`<tr>${header('Team','team')}${header('Model title','title_model_prob')}${header('Market','title_market_prob','marketCol')}${header('Edge','title_edge')}${header('Best price','title_price','marketCol')}${header('Open → now','title_movement')}${header('Wager','wagers')}</tr>`;
+ rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${modelProbCell(x.title_model_prob)}${deltaProb(x.delta_7d?.conference_title?.model)}</td><td class="marketCol">${marketProbCell(x.title_market_prob,x.title_price,x.title_book,x.title_book_count)}${deltaProb(x.delta_7d?.conference_title?.market)}</td><td>${edgeCell(x.title_edge)}${deltaProb(x.delta_7d?.conference_title?.edge)}</td><td class="marketCol">${bestPriceCell(x.title_price,x.title_book,x.title_book_count)}</td><td>${x.title_movement?od(x.title_movement.american_odds_move):'—'}</td><td>${wagerCell(x)}</td></tr>`).join('');
 }
 function renderPlayoff(a){
- head.innerHTML=`<tr>${header('Team','team')}${header('Make CFP','playoff_model_prob')}${header('Make CFP market','playoff_market_prob','marketCol')}${header('Make CFP edge','playoff_edge')}${header('Quarterfinal','quarterfinal_model_prob')}${header('Semifinal','semifinal_model_prob')}${header('Title game','national_title_game_model_prob')}${header('Win title','national_title_model_prob')}${header('Title market','national_title_market_prob','marketCol')}${header('Title edge','national_title_edge')}${header('Wager','wagers')}</tr>`;
- rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${modelProbCell(x.playoff_model_prob)}</td><td class="marketCol">${marketProbCell(x.playoff_market_prob,x.playoff_price,x.playoff_book)}</td><td>${edgeCell(x.playoff_edge)}</td><td>${modelProbCell(x.quarterfinal_model_prob)}</td><td>${modelProbCell(x.semifinal_model_prob)}</td><td>${modelProbCell(x.national_title_game_model_prob)}</td><td>${modelProbCell(x.national_title_model_prob)}</td><td class="marketCol">${marketProbCell(x.national_title_market_prob,x.national_title_price,x.national_title_book)}</td><td>${edgeCell(x.national_title_edge)}</td><td>${wagerCell(x)}</td></tr>`).join('');
+ head.innerHTML=`<tr>${header('Team','team')}${header('CFP model','playoff_model_prob')}${header('CFP market','playoff_market_prob','marketCol')}${header('CFP edge','playoff_edge')}${header('CFP best','playoff_price','marketCol')}${header('Quarterfinal','quarterfinal_model_prob')}${header('Semifinal','semifinal_model_prob')}${header('Title game','national_title_game_model_prob')}${header('Title model','national_title_model_prob')}${header('Title market','national_title_market_prob','marketCol')}${header('Title edge','national_title_edge')}${header('Title best','national_title_price','marketCol')}${header('Wager','wagers')}</tr>`;
+ rows.innerHTML=a.map(x=>`<tr>${teamCell(x)}<td>${modelProbCell(x.playoff_model_prob)}${deltaProb(x.delta_7d?.make_cfp?.model)}</td><td class="marketCol">${marketProbCell(x.playoff_market_prob,x.playoff_price,x.playoff_book,x.playoff_book_count)}${deltaProb(x.delta_7d?.make_cfp?.market)}</td><td>${edgeCell(x.playoff_edge)}${deltaProb(x.delta_7d?.make_cfp?.edge)}</td><td class="marketCol">${bestPriceCell(x.playoff_price,x.playoff_book,x.playoff_book_count)}</td><td>${modelProbCell(x.quarterfinal_model_prob)}</td><td>${modelProbCell(x.semifinal_model_prob)}</td><td>${modelProbCell(x.national_title_game_model_prob)}</td><td>${modelProbCell(x.national_title_model_prob)}${deltaProb(x.delta_7d?.national_title?.model)}</td><td class="marketCol">${marketProbCell(x.national_title_market_prob,x.national_title_price,x.national_title_book,x.national_title_book_count)}${deltaProb(x.delta_7d?.national_title?.market)}</td><td>${edgeCell(x.national_title_edge)}${deltaProb(x.delta_7d?.national_title?.edge)}</td><td class="marketCol">${bestPriceCell(x.national_title_price,x.national_title_book,x.national_title_book_count)}</td><td>${wagerCell(x)}</td></tr>`).join('');
 }
 function renderBets(a){
  head.innerHTML=`<tr>${header('Team','team')}${header('Open wagers','wagers')}${header('Win edge','win_edge')}${header('Conference title edge','title_edge')}${header('Make CFP edge','playoff_edge')}${header('National title edge','national_title_edge')}</tr>`;
@@ -197,11 +210,41 @@ function render(){
 }
 function fmtTime(v){if(!v)return'Unavailable';const d=new Date(v);return d.toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})}
 function renderFreshness(){
- const f=D.market_freshness?.playoff_futures||{},qa=D.market_qa||{},box=document.getElementById('marketStatus'),books=(f.books||[]).join(' · ')||'No books reported';
- const cls=f.status==='current'&&qa.status==='pass'?'current':f.status==='current'?'warn':'stale';
- box.className=`marketStatus ${cls}`;
- box.innerHTML=`<span class="statusDot"></span><strong>${f.source||'Futures market'}: ${f.status||'unavailable'}</strong><span>Last pull ${fmtTime(f.pulled_at)}</span><span class="meta">Books: ${e(books)}</span><button id="qaToggle">QA ${String(qa.status||'unknown').toUpperCase()}</button><div class="qaDetails" id="qaDetails">Coverage — Make CFP: ${qa.coverage?.make_cfp??'—'} · National title: ${qa.coverage?.national_title??'—'} · Invalid prices: ${qa.invalid_prices??'—'} · Duplicates: ${qa.duplicate_offers??'—'}${qa.warnings?.length?`<br>Warnings: ${qa.warnings.map(e).join(' · ')}`:'<br>No QA warnings.'}</div>`;
- document.getElementById('qaToggle').onclick=()=>document.getElementById('qaDetails').classList.toggle('open');
+ const mf=D.model_freshness||{},mk=D.market_freshness||{},qa=D.market_qa||{};
+ const season=mf.season_simulation||{},cfp=mf.playoff_simulation||{};
+ const approved=D.market_contract?.approved_executable_books||[];
+ const maxBooks=approved.length||4;
+ const marketRows=[
+  ['Win totals',mk.win_totals],
+  ['Conference titles',mk.conference_titles],
+  ['Make CFP',mk.make_cfp],
+  ['National title',mk.national_title]
+ ];
+ const marketCurrent=marketRows.every(([,x])=>x?.status==='current');
+ const modelOk=!!season.built_at&&!!cfp.built_at;
+
+ const modelStatus=document.getElementById('modelFreshStatus');
+ modelStatus.textContent=modelOk?'CURRENT':'CHECK';
+ modelStatus.className=`freshStatus ${modelOk?'current':'warn'}`;
+
+ document.getElementById('modelFreshRows').innerHTML=[
+  ['Season sim',`${fmtTime(season.built_at)} · ${Number(season.trials||0).toLocaleString()} trials`],
+  ['CFP sim',`${fmtTime(cfp.built_at)} · ${Number(cfp.trials||0).toLocaleString()} trials`]
+ ].map(([k,v])=>`<div class="freshRow"><span>${k}</span><span>${v}</span></div>`).join('');
+
+ const marketStatus=document.getElementById('marketFreshStatus');
+ marketStatus.textContent=marketCurrent&&qa.status==='pass'?'CURRENT':marketCurrent?'CHECK':'STALE';
+ marketStatus.className=`freshStatus ${marketCurrent&&qa.status==='pass'?'current':marketCurrent?'warn':'stale'}`;
+
+ document.getElementById('marketFreshRows').innerHTML=marketRows.map(([label,x])=>{
+  x=x||{};
+  const when=x.pulled_at?fmtTime(x.pulled_at):(x.observed_date||'Unavailable');
+  const count=(x.books||[]).length;
+  return `<div class="freshRow"><span>${e(label)}</span><span>${e(when)} · ${count}/${maxBooks} books · ${e(String(x.status||'unavailable').toUpperCase())}</span></div>`;
+ }).join('');
+
+ document.getElementById('marketQaRow').innerHTML=
+  `<div class="freshRow"><span>QA</span><span>${e(String(qa.status||'unknown').toUpperCase())} · CFP ${qa.coverage?.make_cfp??'—'} · TITLE ${qa.coverage?.national_title??'—'}${qa.warnings?.length?` · ${qa.warnings.length} warning${qa.warnings.length===1?'':'s'}`:' · no warnings'}</span></div>`;
 }
 async function init(){
  D=await fetch(`data/site/futures_view.json?v=${Date.now()}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()});
