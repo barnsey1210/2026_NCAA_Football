@@ -272,6 +272,32 @@ def main():
                 f'{size} > {limit}'
             )
 
+    # Preserve the complete War Room matrix contract while compacting only its
+    # public serialization. The runtime artifact remains unchanged and retains
+    # all model, freshness, market, provenance, Shadow, injury, and signal data.
+    public_war_room_matrix = public_site_data / 'war_room_market_matrix.json'
+    if public_war_room_matrix.exists():
+        matrix_payload = json.loads(public_war_room_matrix.read_text())
+        public_war_room_matrix.write_text(
+            json.dumps(
+                matrix_payload,
+                separators=(',', ':'),
+                ensure_ascii=False,
+            ) + '\n'
+        )
+
+        matrix_size = public_war_room_matrix.stat().st_size
+        matrix_limit = 16 * 1024 * 1024
+        print(
+            f'Public War Room matrix: '
+            f'{matrix_size / 1024 / 1024:.2f} MiB'
+        )
+        if matrix_size > matrix_limit:
+            raise RuntimeError(
+                f'public War Room matrix exceeds 16 MiB: '
+                f'{matrix_size} > {matrix_limit}'
+            )
+
     # Logos and helmets remain local-preview symlinks. Publication copies those
     # directories independently.
     for name in ('logos', 'helmets'):
