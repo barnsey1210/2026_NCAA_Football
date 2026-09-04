@@ -1562,10 +1562,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T133848Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T133848Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T133848Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T133848Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T143346Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T143346Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T143346Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T143346Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -3742,36 +3742,51 @@ function renderCoachCard(coach,game){
     console.error('Coach logo render failed',coach?.team,err);
   }
 
-  const periods=(coach.periods || []).map(row=>{
-    const rank=Number.isFinite(Number(row.ats_rank)) ? ` #${row.ats_rank}` : '';
-    const sample=Number(row.sample || row.ats_sample);
-    const atsPct=atsRecordPct(row.ats_record);
-    const ouPct=ouRecordPct(row.ou_record);
+  // Some current coaches legitimately have no matched historical sample.
+  // Preserve the standard FULL / 1H / 2H fields and render blanks rather
+  // than throwing on null period rows or replacing the card entirely.
+  const validPeriods=(coach.periods || []).filter(row=>row && typeof row==='object');
+  const periodSource=validPeriods.length ? validPeriods : [
+    {period:'full_game'},
+    {period:'first_half'},
+    {period:'second_half'}
+  ];
 
-    return `<div class="coach-period"><strong>${esc(coachPeriodLabel(row.period))}</strong> ` +
-      `<span class="${bettingPctClass(atsPct)}">ATS ${esc(row.ats_record || '—')}</span>${esc(rank)} · ` +
-      `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row.ou_record))}</span>` +
+  const periods=periodSource.map(row=>{
+    const rank=Number.isFinite(Number(row?.ats_rank)) ? ` #${row.ats_rank}` : '';
+    const atsPct=atsRecordPct(row?.ats_record);
+    const ouPct=ouRecordPct(row?.ou_record);
+
+    return `<div class="coach-period"><strong>${esc(coachPeriodLabel(row?.period))}</strong> ` +
+      `<span class="${bettingPctClass(atsPct)}">ATS ${esc(row?.ats_record || '—')}</span>${esc(rank)} · ` +
+      `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row?.ou_record))}</span>` +
       `</div>`;
   }).join('');
 
   const role=currentTeamRole(game,coach.team);
-  const roleRows=(coach.role_splits || [])
-    .filter(row=>String(row.role || '').toLowerCase()===String(role).toLowerCase())
+  const matchedRoleRows=(coach.role_splits || [])
+    .filter(row=>row && String(row.role || '').toLowerCase()===String(role).toLowerCase())
     .sort((a,b)=>{
       const order={'Full Game':0,'1H':1,'2H':2};
       return (order[a.period] ?? 9)-(order[b.period] ?? 9);
-    })
-    .map(row=>{
-      const games=Number(row.games);
-      const ouPct=Number.isFinite(Number(row.over_pct))
-        ? Number(row.over_pct)
-        : ouRecordPct(row.ou_record);
+    });
 
-      return `<div class="coach-period"><strong>${esc(row.period || '')}</strong> ` +
-        `<span class="${bettingPctClass(row.ats_pct)}">${esc(row.ats_record || '—')} ATS (${esc(pctText(row.ats_pct))})</span> · ` +
-        `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row.ou_record))}${Number.isFinite(ouPct) ? ` (${esc(pctText(ouPct))})` : ''}</span>` +
-        `</div>`;
-    }).join('');
+  const roleSource=matchedRoleRows.length ? matchedRoleRows : [
+    {period:'Full Game',role},
+    {period:'1H',role},
+    {period:'2H',role}
+  ];
+
+  const roleRows=roleSource.map(row=>{
+    const ouPct=Number.isFinite(Number(row?.over_pct))
+      ? Number(row.over_pct)
+      : ouRecordPct(row?.ou_record);
+
+    return `<div class="coach-period"><strong>${esc(row?.period || '')}</strong> ` +
+      `<span class="${bettingPctClass(row?.ats_pct)}">${esc(row?.ats_record || '—')} ATS (${esc(pctText(row?.ats_pct))})</span> · ` +
+      `<span class="${bettingPctClass(ouPct)}">O/U ${esc(compactOuRecord(row?.ou_record))}${Number.isFinite(ouPct) ? ` (${esc(pctText(ouPct))})` : ''}</span>` +
+      `</div>`;
+  }).join('');
 
   return `<div class="coach-card">
     <div class="coach-head">
@@ -3824,9 +3839,23 @@ function renderSignalsPanel(game){
   const coaches=context?.matchup?.coaches || [];
   const angles=dedupedContextAngles(context?.angles || []);
 
-  const coachHtml=coaches.length
-    ? coaches.map(row=>renderCoachCard(row,game)).join('')
-    : '<div class="context-empty">Coaching records unavailable.</div>';
+  const coachByTeam=new Map(
+    coaches
+      .filter(row=>row && row.team)
+      .map(row=>[String(row.team),row])
+  );
+
+  const coachHtml=[game.away_team,game.home_team]
+    .map(team=>renderCoachCard(
+      coachByTeam.get(String(team)) || {
+        team,
+        coach:null,
+        periods:[],
+        role_splits:[]
+      },
+      game
+    ))
+    .join('');
 
   const angleHtml=angles.length
     ? angles.map(row=>{
@@ -4335,7 +4364,10 @@ document.querySelectorAll('.activity-filter').forEach(button=>button.addEventLis
   document.querySelectorAll('.activity-filter').forEach(b=>b.classList.toggle('active',b===button));
 
   if(['SIGNALS','TEAMS'].includes(ACTIVITY_FILTER) && !MATCHUPS_CONTEXT){
-    document.getElementById('activityList').innerHTML='<div class="context-empty">Loading matchup context…</div>';
+    const label=ACTIVITY_FILTER==='SIGNALS'
+      ? 'Loading coaching & betting signals…'
+      : 'Loading team schedules…';
+    document.getElementById('activityList').innerHTML=`<div class="context-empty">${label}</div>`;
     await ensureMatchupsContext();
   }
 
