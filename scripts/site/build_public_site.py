@@ -198,7 +198,14 @@ def main():
     public_data = OUT / 'data'
     public_site_data = public_data / 'site'
     public_data.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(ROOT / 'data' / 'site', public_site_data, dirs_exist_ok=True)
+    shutil.copytree(
+        ROOT / 'data' / 'site',
+        public_site_data,
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns(
+            'current_game_projection_contract.json',
+        ),
+    )
 
     # Preserve the previous local-preview access to non-public runtime data
     # without making data/site itself a symlink.
