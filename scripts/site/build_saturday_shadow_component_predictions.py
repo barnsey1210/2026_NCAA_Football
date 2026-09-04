@@ -321,15 +321,28 @@ def main():
     models = artifact["models"]
     generated_at = datetime.now(timezone.utc).isoformat()
     games = []
-    for gid, target in market_by_game.items():
+
+    # Preserve the existing market-target universe, but also include
+    # mapped next games from validated postgame feature rows. A target
+    # market row is not required for a validated Shadow team update.
+    shadow_game_ids = sorted(
+        set(market_by_game)
+        | {gid for gid, _team in team_rows if gid in matchups}
+    )
+
+    for gid in shadow_game_ids:
+        target = market_by_game.get(gid) or {}
         match = matchups.get(gid) or {}
         game = match.get("game") or {}
-        away, home = target.get("away_team"), target.get("home_team")
+        away = target.get("away_team") or game.get("away_team")
+        home = target.get("home_team") or game.get("home_team")
+        if not away or not home:
+            continue
         ar, hr = team_rows.get((gid, away)), team_rows.get((gid, home))
         missing = []
 
         row = {
-            "game_id": gid, "season": 2026, "week": target.get("week"),
+            "game_id": gid, "season": 2026, "week": target.get("week") or game.get("week"),
             "game_date": game.get("date"), "kickoff": game.get("kickoff") or game.get("start_date"),
             "away_team": away, "home_team": home, "neutral_site": bool(target.get("neutral_site")),
             "generated_at": generated_at, "model_version": artifact.get("model_version"),
