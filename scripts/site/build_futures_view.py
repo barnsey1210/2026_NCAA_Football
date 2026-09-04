@@ -2,16 +2,44 @@
 """Build the standalone Futures data contract and daily market QA artifact."""
 from pathlib import Path
 from datetime import datetime, timezone
-import json, re, sys
+import csv, json, os, re, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.lib.ncaaf_config import canonical_team
 
-ACTION_PATH = ROOT / "data/markets/action/action_playoff_futures_2026.json"
-QA_PATH = ROOT / "data/qa/futures_market_qa.json"
-OUT = ROOT / "data/site/futures_view.json"
+from lib.ncaaf_config import canonical_team
+
+DATA_ROOT = Path(
+    os.environ.get("NCAAF_RUNTIME_ROOT", str(ROOT))
+).expanduser().resolve()
+
+ACTION_PATH = DATA_ROOT / "data/markets/action/action_playoff_futures_2026.json"
+MARKET_CONTRACT_PATH = Path(
+    os.environ.get(
+        "NCAAF_FUTURES_CONTRACT_PATH",
+        str(DATA_ROOT / "data/markets/current_futures_market_2026.json"),
+    )
+).expanduser().resolve()
+SEASON_MODEL_PATH = DATA_ROOT / "data/site/season_simulations_2026.json"
+PLAYOFF_MODEL_PATH = DATA_ROOT / "data/site/playoff_model_2026.json"
+BETS_PATH = DATA_ROOT / "data/site/betting_activity_view.json"
+WIN_MOVEMENT_PATH = DATA_ROOT / "market_win_totals_movement.csv"
+TITLE_MOVEMENT_PATH = DATA_ROOT / "market_conference_futures_movement.csv"
+
+QA_PATH = Path(
+    os.environ.get(
+        "NCAAF_FUTURES_QA_OUT",
+        str(DATA_ROOT / "data/qa/futures_market_qa.json"),
+    )
+).expanduser().resolve()
+
+OUT = Path(
+    os.environ.get(
+        "NCAAF_FUTURES_VIEW_OUT",
+        str(DATA_ROOT / "data/site/futures_view.json"),
+    )
+).expanduser().resolve()
 
 def number(value):
     try:
@@ -350,69 +378,193 @@ def build_qa(rows, metadata, raw_qa):
         "warnings": warnings,
     }
 
+def read_csv_rows(path):
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        return list(csv.DictReader(handle))
+
+
+def freshness(timestamp, source, books=None, current_hours=26):
+    hours = age_hours(timestamp)
+    return {
+        "source": source,
+        "status": (
+            "current"
+            if timestamp and hours is not None and hours <= current_hours
+            else "stale" if timestamp
+            else "unavailable"
+        ),
+        "pulled_at": timestamp,
+        "age_hours": round(hours, 2) if hours is not None else None,
+        "books": sorted(set(books or [])),
+    }
+
+
+def observed_date_freshness(observed_date, source, books=None, current_days=1):
+    if not observed_date:
+        return {
+            "source": source,
+            "status": "unavailable",
+            "observed_date": None,
+            "age_days": None,
+            "books": sorted(set(books or [])),
+        }
+
+    try:
+        observed = datetime.fromisoformat(str(observed_date)).date()
+        today = datetime.now(timezone.utc).date()
+        age_days = max(0, (today - observed).days)
+    except ValueError:
+        return {
+            "source": source,
+            "status": "unavailable",
+            "observed_date": observed_date,
+            "age_days": None,
+            "books": sorted(set(books or [])),
+        }
+
+    return {
+        "source": source,
+        "status": "current" if age_days <= current_days else "stale",
+        "observed_date": observed_date,
+        "age_days": age_days,
+        "books": sorted(set(books or [])),
+    }
+
+
 def main():
-    html = (ROOT / "v1.html").read_text(encoding="utf-8")
-    match = re.search(r'<script id="db" type="application/json">(.*?)</script>', html, re.S)
-    if not match:
-        raise SystemExit("Embedded canonical database not found in v1.html")
+    required = (
+        MARKET_CONTRACT_PATH,
+        SEASON_MODEL_PATH,
+        PLAYOFF_MODEL_PATH,
+    )
+    missing = [str(x) for x in required if not x.exists()]
+    if missing:
+        raise SystemExit(
+            "Missing Futures canonical inputs: " + ", ".join(missing)
+        )
 
-    db = json.loads(match.group(1))
-    teams = {canonical_team(x.get("team")): x for x in db.get("teams", [])}
+    market_contract = json.loads(MARKET_CONTRACT_PATH.read_text())
+    season_model = json.loads(SEASON_MODEL_PATH.read_text())
+    playoff_model_payload = json.loads(PLAYOFF_MODEL_PATH.read_text())
 
-    bets_path = ROOT / "data/site/betting_activity_view.json"
-    bets = json.loads(bets_path.read_text()).get("records", []) if bets_path.exists() else []
+    teams = {
+        canonical_team(x.get("team")): x
+        for x in season_model.get("teams", [])
+    }
+
+    playoff_model = {
+        canonical_team(x.get("team")): x
+        for x in playoff_model_payload.get("teams", [])
+    }
+
+    bets = (
+        json.loads(BETS_PATH.read_text()).get("records", [])
+        if BETS_PATH.exists()
+        else []
+    )
     open_futures = [
         x for x in bets
-        if x.get("is_open") and x.get("market") in {"Win Total", "Conference Future"}
+        if x.get("is_open")
+        and x.get("market") in {"Win Total", "Conference Future"}
     ]
 
+    win_market = {
+        canonical_team(x.get("team")): x
+        for x in market_contract.get("win_totals", {}).get("rows", [])
+    }
+
+    title_market = {
+        canonical_team(x.get("team")): x
+        for x in market_contract.get("conference_titles", {}).get("rows", [])
+    }
+
+    cfp_market = {
+        canonical_team(x.get("team")): x
+        for x in market_contract.get("make_cfp", {}).get("rows", [])
+        if x.get("outcome") == "Yes"
+    }
+
+    national_market = {
+        canonical_team(x.get("team")): x
+        for x in market_contract.get("national_title", {}).get("rows", [])
+        if x.get("outcome") == "Yes"
+    }
+
     movement = {}
-    for x in db.get("market_win_totals_movement", []):
+    for x in read_csv_rows(WIN_MOVEMENT_PATH):
         movement[(canonical_team(x.get("team")), x.get("book"))] = x
 
     title_movement = {}
-    for x in db.get("market_conference_futures_movement", []):
+    for x in read_csv_rows(TITLE_MOVEMENT_PATH):
         title_movement[(canonical_team(x.get("team")), x.get("book"))] = x
 
-    playoff_model, playoff_prices, playoff_metadata, raw_qa = load_playoff_markets()
-
-    merged_markets = {}
-    for source in db.get("market_futures_best_prices", []):
-        key = canonical_team(source.get("team"))
-        target = merged_markets.setdefault(key, {})
-        for field, value in source.items():
-            if value not in (None, ""):
-                target[field] = value
-
     rows = []
-    # Build one Futures row for every tracked team, then attach market data when
-    # available. Previously this loop iterated only market_futures_best_prices,
-    # which silently omitted teams with no win-total/conference-title record.
+
     for key, team in teams.items():
-        market = merged_markets.get(key, {})
+        win = win_market.get(key, {})
+        title = title_market.get(key, {})
+        playoff = playoff_model.get(key, {})
+        cfp = cfp_market.get(key, {})
+        national = national_market.get(key, {})
 
         projected_wins = number(team.get("avg_total_wins"))
         title_prob = number(team.get("conference_title_pct"))
-        total = number(market.get("market_win_total"))
-        title_market = number(market.get("market_implied_title_prob"))
+
+        reference_total = number(win.get("reference_number"))
+
         direction = (
             "Over"
-            if projected_wins is not None and total is not None and projected_wins >= total
+            if projected_wins is not None
+            and reference_total is not None
+            and projected_wins >= reference_total
             else "Under"
         )
-        price = market.get("best_over_odds" if direction == "Over" else "best_under_odds")
-        book_name = market.get("best_over_book" if direction == "Over" else "best_under_book")
-        team_bets = [b for b in open_futures if canonical_team(b.get("team")) == key]
 
-        playoff = playoff_model.get(key, {})
-        nat_market = playoff_prices.get("national_title", {}).get(key, {})
-        cfp_market = playoff_prices.get("make_cfp", {}).get(key, {})
+        win_offer = (
+            win.get("best_over")
+            if direction == "Over"
+            else win.get("best_under")
+        ) or {}
+
+        total = number(win_offer.get("number"))
+        if total is None:
+            total = reference_total
+
+        price = (
+            win_offer.get("over_price")
+            if direction == "Over"
+            else win_offer.get("under_price")
+        )
+        book_name = win_offer.get("book")
+
+        title_price = title.get("best_executable_price")
+        title_book = title.get("best_executable_book")
+        title_market_prob = implied(title_price)
+
+        cfp_price = cfp.get("best_executable_price")
+        cfp_book = cfp.get("best_executable_book")
+        cfp_prob = implied(cfp_price)
+
+        national_price = national.get("best_executable_price")
+        national_book = national.get("best_executable_book")
+        national_prob = implied(national_price)
+
+        playoff_prob = number(playoff.get("playoff_pct"))
+        national_model_prob = number(playoff.get("national_title_pct"))
+
+        team_bets = [
+            b for b in open_futures
+            if canonical_team(b.get("team")) == key
+        ]
 
         rows.append({
             "team": team.get("team"),
             "slug": team.get("slug"),
             "conference": team.get("conference"),
             "rank": team.get("rank"),
+
             "projected_wins": projected_wins,
             "market_win_total": total,
             "win_edge": (
@@ -423,110 +575,278 @@ def main():
             "win_direction": direction,
             "win_price": price,
             "win_book": book_name,
+
             "title_model_prob": title_prob,
-            "title_market_prob": title_market,
+            "title_market_prob": title_market_prob,
             "title_edge": (
-                title_prob - title_market
-                if title_prob is not None and title_market is not None
+                title_prob - title_market_prob
+                if title_prob is not None and title_market_prob is not None
                 else None
             ),
-            "title_price": market.get("best_title_odds"),
-            "title_book": market.get("best_title_book"),
-            "playoff_model_prob": number(playoff.get("playoff_pct")),
-            "playoff_market_prob": number(cfp_market.get("market_prob")),
+            "title_price": title_price,
+            "title_book": title_book,
+
+            "playoff_model_prob": playoff_prob,
+            "playoff_market_prob": cfp_prob,
             "playoff_edge": (
-                number(playoff.get("playoff_pct")) - number(cfp_market.get("market_prob"))
-                if number(playoff.get("playoff_pct")) is not None
-                and number(cfp_market.get("market_prob")) is not None
+                playoff_prob - cfp_prob
+                if playoff_prob is not None and cfp_prob is not None
                 else None
             ),
-            "playoff_price": cfp_market.get("price"),
-            "playoff_book": cfp_market.get("book"),
-            "quarterfinal_model_prob": number(playoff.get("quarterfinal_pct")),
-            "semifinal_model_prob": number(playoff.get("semifinal_pct")),
-            "national_title_game_model_prob": number(playoff.get("national_title_game_pct")),
-            "national_title_model_prob": number(playoff.get("national_title_pct")),
-            "national_title_market_prob": number(nat_market.get("market_prob")),
+            "playoff_price": cfp_price,
+            "playoff_book": cfp_book,
+
+            "quarterfinal_model_prob": number(
+                playoff.get("quarterfinal_pct")
+            ),
+            "semifinal_model_prob": number(
+                playoff.get("semifinal_pct")
+            ),
+            "national_title_game_model_prob": number(
+                playoff.get("national_title_game_pct")
+            ),
+            "national_title_model_prob": national_model_prob,
+            "national_title_market_prob": national_prob,
             "national_title_edge": (
-                number(playoff.get("national_title_pct")) - number(nat_market.get("market_prob"))
-                if number(playoff.get("national_title_pct")) is not None
-                and number(nat_market.get("market_prob")) is not None
+                national_model_prob - national_prob
+                if national_model_prob is not None
+                and national_prob is not None
                 else None
             ),
-            "national_title_price": nat_market.get("price"),
-            "national_title_book": nat_market.get("book"),
+            "national_title_price": national_price,
+            "national_title_book": national_book,
+
             "win_movement": movement.get((key, book_name)),
-            "title_movement": title_movement.get(
-                (key, market.get("best_title_book"))
-            ),
+            "title_movement": title_movement.get((key, title_book)),
             "open_wagers": team_bets,
-            "last_updated": market.get("last_updated"),
+
+            # Backward-compatible field used by the current Futures UI.
+            "last_updated": (
+                win.get("last_observed_date")
+                or title.get("last_observed_date")
+                or market_contract.get("built_at")
+            ),
+
+            # New quote-breadth metadata for later UI work.
+            "win_books": win.get("executable_books", []),
+            "win_book_count": win.get("executable_book_count", 0),
+            "title_books": title.get("executable_books", []),
+            "title_book_count": title.get("executable_book_count", 0),
+            "playoff_books": cfp.get("executable_books", []),
+            "playoff_book_count": cfp.get("executable_book_count", 0),
+            "national_title_books": national.get("executable_books", []),
+            "national_title_book_count": national.get(
+                "executable_book_count", 0
+            ),
         })
 
-    qa = build_qa(rows, playoff_metadata, raw_qa)
+    season_built = season_model.get("built_at")
+    playoff_built = playoff_model_payload.get("built_at")
+
+    win_date = market_contract.get(
+        "win_totals", {}
+    ).get("last_observed_date")
+
+    title_date = market_contract.get(
+        "conference_titles", {}
+    ).get("last_observed_date")
+
+    playoff_pulled = market_contract.get(
+        "make_cfp", {}
+    ).get("pulled_at")
+
+    national_pulled = market_contract.get(
+        "national_title", {}
+    ).get("pulled_at")
+
+    win_books = {
+        b
+        for x in market_contract.get("win_totals", {}).get("rows", [])
+        for b in x.get("executable_books", [])
+    }
+
+    title_books = {
+        b
+        for x in market_contract.get(
+            "conference_titles", {}
+        ).get("rows", [])
+        for b in x.get("executable_books", [])
+    }
+
+    cfp_books = {
+        b
+        for x in market_contract.get("make_cfp", {}).get("rows", [])
+        for b in x.get("executable_books", [])
+    }
+
+    national_books = {
+        b
+        for x in market_contract.get(
+            "national_title", {}
+        ).get("rows", [])
+        for b in x.get("executable_books", [])
+    }
+
+    # Current CSVs retain a daily observation date rather than an exact
+    # acquisition timestamp, so report that distinction explicitly instead
+    # of manufacturing a precise pull time.
+    win_market_meta = observed_date_freshness(
+        win_date,
+        market_contract.get("win_totals", {}).get("source"),
+        win_books,
+    )
+
+    title_market_meta = observed_date_freshness(
+        title_date,
+        market_contract.get(
+            "conference_titles", {}
+        ).get("source"),
+        title_books,
+    )
+
+    playoff_market_meta = freshness(
+        playoff_pulled,
+        market_contract.get("make_cfp", {}).get("source")
+        or "Action Network",
+        cfp_books,
+    )
+
+    national_market_meta = freshness(
+        national_pulled,
+        market_contract.get("national_title", {}).get("source")
+        or "Action Network",
+        national_books,
+    )
+
+    warnings = []
+
+    if not win_date:
+        warnings.append("Win-total market data unavailable.")
+    if not title_date:
+        warnings.append("Conference-title market data unavailable.")
+    if playoff_market_meta["status"] != "current":
+        warnings.append("Make-CFP market data is stale or unavailable.")
+    if national_market_meta["status"] != "current":
+        warnings.append("National-title market data is stale or unavailable.")
+
+    unmatched = market_contract.get("audit", {}).get("unmatched", {})
+    if any(unmatched.get(k) for k in unmatched):
+        warnings.append("One or more futures market team identities were unmatched.")
+
+    qa = {
+        "schema_version": "futures-market-qa-v2",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "pass" if not warnings else "warn",
+        "market_domains": {
+            "win_totals": win_market_meta,
+            "conference_titles": title_market_meta,
+            "make_cfp": playoff_market_meta,
+            "national_title": national_market_meta,
+        },
+        "coverage": {
+            "teams": len(rows),
+            "win_totals": sum(
+                x["market_win_total"] is not None for x in rows
+            ),
+            "conference_titles": sum(
+                x["title_price"] is not None for x in rows
+            ),
+            "make_cfp": sum(
+                x["playoff_price"] is not None for x in rows
+            ),
+            "national_title": sum(
+                x["national_title_price"] is not None for x in rows
+            ),
+        },
+        "unmatched_market_teams": unmatched,
+        "warnings": warnings,
+    }
+
     QA_PATH.parent.mkdir(parents=True, exist_ok=True)
     QA_PATH.write_text(json.dumps(qa, indent=2) + "\n")
 
-    canonical_books = sorted({
-        str(book)
-        for row in rows
-        for book in (row.get("win_book"), row.get("title_book"))
-        if book
-    })
-    canonical_timestamps = [
-        parse_dt(row.get("last_updated"))
-        for row in rows
-        if parse_dt(row.get("last_updated"))
-    ]
-    canonical_pulled_at = max(canonical_timestamps).isoformat() if canonical_timestamps else None
-
     payload = {
-        "schema_version": "futures-view-v3",
+        "schema_version": "futures-view-v4",
         "built_at": datetime.now(timezone.utc).isoformat(),
-        "model_updated": db.get("meta", {}).get("generated_at"),
-        "market_freshness": {
-            "playoff_futures": playoff_metadata,
-            "win_and_conference_futures": {
-                "source": "Canonical futures market feed",
-                "status": (
-                    "current"
-                    if canonical_pulled_at and (age_hours(canonical_pulled_at) or 999) <= 26
-                    else "stale" if canonical_pulled_at
-                    else "unavailable"
-                ),
-                "pulled_at": canonical_pulled_at,
-                "age_hours": (
-                    round(age_hours(canonical_pulled_at), 2)
-                    if canonical_pulled_at and age_hours(canonical_pulled_at) is not None
-                    else None
-                ),
-                "books": canonical_books,
+
+        # Backward compatibility for current UI.
+        "model_updated": season_built,
+
+        "model_freshness": {
+            "season_simulation": {
+                "built_at": season_built,
+                "trials": season_model.get("trials"),
+                "schema_version": season_model.get("schema_version"),
+                "simulation_model": season_model.get("simulation_model"),
+            },
+            "playoff_simulation": {
+                "built_at": playoff_built,
+                "trials": playoff_model_payload.get("trials"),
+                "schema_version": playoff_model_payload.get("schema_version"),
             },
         },
+
+        "market_freshness": {
+            # New domain-specific authority.
+            "win_totals": win_market_meta,
+            "conference_titles": title_market_meta,
+            "make_cfp": playoff_market_meta,
+            "national_title": national_market_meta,
+
+            # Backward compatibility until futures_v2.html is updated.
+            "playoff_futures": playoff_market_meta,
+            "win_and_conference_futures": {
+                "source": "Canonical current futures market contract",
+                "status": (
+                    "current"
+                    if win_date and title_date
+                    else "unavailable"
+                ),
+                "pulled_at": None,
+                "observed_date": max(
+                    x for x in (win_date, title_date) if x
+                ) if (win_date or title_date) else None,
+                "age_hours": None,
+                "books": sorted(win_books | title_books),
+            },
+        },
+
         "market_qa": qa,
+        "market_contract": {
+            "schema_version": market_contract.get("schema_version"),
+            "built_at": market_contract.get("built_at"),
+            "approved_executable_books": market_contract.get(
+                "market_policy", {}
+            ).get("approved_executable_books", []),
+        },
+
         "rows": rows,
+
         "summary": {
             "teams": len(rows),
-            "win_markets": sum(x["market_win_total"] is not None for x in rows),
-            "title_markets": sum(x["title_price"] is not None for x in rows),
-            "playoff_markets": sum(x["playoff_price"] is not None for x in rows),
-            "national_title_markets": sum(x["national_title_price"] is not None for x in rows),
+            "win_markets": sum(
+                x["market_win_total"] is not None for x in rows
+            ),
+            "title_markets": sum(
+                x["title_price"] is not None for x in rows
+            ),
+            "playoff_markets": sum(
+                x["playoff_price"] is not None for x in rows
+            ),
+            "national_title_markets": sum(
+                x["national_title_price"] is not None for x in rows
+            ),
             "open_wagers": len(open_futures),
         },
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, separators=(",", ":")) + "\n")
+    OUT.write_text(
+        json.dumps(payload, separators=(",", ":")) + "\n"
+    )
+
     print(json.dumps(payload["summary"], indent=2))
-    print(json.dumps({
-        "market_qa": qa["status"],
-        "source": qa["source"],
-        "last_successful_pull": qa["last_successful_pull"],
-        "books": qa["books"],
-        "warnings": qa["warnings"],
-    }, indent=2))
-    print(OUT)
-    print(QA_PATH)
+
 
 if __name__ == "__main__":
     main()

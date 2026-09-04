@@ -667,8 +667,9 @@ fi
   stage_start "playoff_futures"
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
+  run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
   run_py "scripts/site/build_futures_view.py" "build_futures_view.py" || warn "Futures V2 data build failed"
-run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py"
+  run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py"
   stage_pass "playoff_futures"
 
   # Refresh the production Odds page payloads after the current game and
