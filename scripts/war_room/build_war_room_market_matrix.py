@@ -893,6 +893,23 @@ def projection_is_available(game, model_id):
     return r.get("selection_status") == "AVAILABLE"
 
 
+def authority_source_is_current(meta):
+    """Return whether an accepted provider update is current for this game.
+
+    PRE_GAME means no newer completed-game watermark exists for the matchup,
+    so an accepted weekly-cycle provider update remains eligible.
+
+    UPDATED means the provider changed after the applicable completed-game
+    watermark.
+
+    STALE/UNKNOWN/MISSING do not count toward HYBRID authority.
+    """
+    return (
+        meta.get("accepted_update") is True
+        and meta.get("state") in ("PRE_GAME", "UPDATED")
+    )
+
+
 def refreshed_standard_value(
     game,
     freshness,
@@ -922,7 +939,7 @@ def refreshed_standard_value(
     updated = {}
 
     for component, meta in source_states.items():
-        if meta.get("accepted_update") is not True:
+        if not authority_source_is_current(meta):
             continue
 
         value = number(
@@ -1582,7 +1599,7 @@ def model_freshness(
     ]
 
     updated_count = sum(
-        sources[source]["accepted_update"]
+        authority_source_is_current(sources[source])
         for source in participating
     )
 
