@@ -1230,6 +1230,24 @@ tr:hover td.context-group{background:#202d39}
   .mobile-sticky-title{color:var(--text);font-size:11px;font-weight:950;letter-spacing:.55px;white-space:nowrap}
   .mobile-sticky-title span{color:var(--green)}
   .mobile-sticky-health{min-width:0;color:var(--muted);font-size:8px;font-weight:900;text-align:right;white-space:nowrap}
+  .mobile-team-search{
+    width:100%;
+    height:28px;
+    margin-top:4px;
+    border:1px solid var(--line2);
+    border-radius:4px;
+    background:#0c1722;
+    color:var(--text);
+    padding:3px 8px;
+    font-size:10px;
+    font-weight:900;
+    outline:none;
+  }
+  .mobile-team-search::placeholder{color:#70859a}
+  .mobile-team-search:focus{
+    border-color:var(--cyan);
+    box-shadow:0 0 0 1px rgba(69,217,237,.22);
+  }
   .mobile-sticky-controls{display:grid;grid-template-columns:62px minmax(74px,.8fr) minmax(126px,1.35fr) 72px;gap:4px;margin-top:4px}
   .mobile-control-select,.mobile-controls-toggle{
     min-width:0;
@@ -1329,8 +1347,8 @@ tr:hover td.context-group{background:#202d39}
   .mobile-band-title{margin-bottom:5px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.8px}
   .mobile-band-grid{
     display:grid;
-    grid-template-columns:.78fr 1fr 1.12fr 1.12fr 1fr;
-    gap:3px;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
     align-items:stretch;
   }
   .mobile-metric{
@@ -1449,6 +1467,14 @@ tr:hover td.context-group{background:#202d39}
       <span class="mobile-sticky-title">WAR ROOM · <span>MARKET MATRIX</span></span>
       <span class="mobile-sticky-health" id="mobileStickyHealth">API — · UPDATED —</span>
     </div>
+    <input
+      class="mobile-team-search"
+      id="mobileTeamSearch"
+      type="search"
+      placeholder="SEARCH TEAM…"
+      autocomplete="off"
+      aria-label="Search teams"
+    >
     <div class="mobile-sticky-controls">
       <select class="mobile-control-select" id="mobileScopeSelect" aria-label="Game scope"><option value="FBS">FBS</option><option value="ALL">ALL</option></select>
       <select class="mobile-control-select" id="mobileWeekSelect" aria-label="Week"></select>
@@ -1562,10 +1588,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T143346Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T143346Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T143346Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T143346Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T144234Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T144234Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T144234Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T144234Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2951,8 +2977,6 @@ function renderMobileMatrix(rows){
     const totEdge=totSide?game.edges?.total?.best_edge:null;
     const sprBest=sprSide?game.market?.best_sportsbook?.spread?.[sprSide]:null;
     const totBest=totSide?game.market?.best_sportsbook?.total?.[totSide]:null;
-    const sprEx=sprSide?game.market?.best_exchange?.spread?.[sprSide]:null;
-    const totEx=totSide?game.market?.best_exchange?.total?.[totSide]:null;
     const sprShadow=game.models?.shadow_spread;
     const totShadow=game.models?.shadow_total;
     const live=liveGameDisplay(game);
@@ -2983,8 +3007,7 @@ function renderMobileMatrix(rows){
           )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
-          ${mobileMetric('EXCH',compactQuote(sprEx,'spread',game))}
-        </div>
+          </div>
       </div>
       <div class="mobile-market-band total-group">
         <div class="mobile-band-title">TOTAL</div>
@@ -3001,8 +3024,7 @@ function renderMobileMatrix(rows){
           )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
-          ${mobileMetric('EXCH',compactQuote(totEx,'total',game))}
-        </div>
+          </div>
       </div>
       <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJ</span>${injuryCell(game)}</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
@@ -4293,6 +4315,22 @@ window.addEventListener('resize',()=>{
 
 document.getElementById('teamSearch').addEventListener('input',e=>{
   SEARCH_QUERY=String(e.target.value || '');
+  const mobileSearch=document.getElementById('mobileTeamSearch');
+  if(mobileSearch && mobileSearch.value!==SEARCH_QUERY){
+    mobileSearch.value=SEARCH_QUERY;
+  }
+  reconcileSelectedGame();
+  renderHealth();
+  renderMatrix();
+  renderActivity();
+});
+
+document.getElementById('mobileTeamSearch').addEventListener('input',e=>{
+  SEARCH_QUERY=String(e.target.value || '');
+  const desktopSearch=document.getElementById('teamSearch');
+  if(desktopSearch && desktopSearch.value!==SEARCH_QUERY){
+    desktopSearch.value=SEARCH_QUERY;
+  }
   reconcileSelectedGame();
   renderHealth();
   renderMatrix();
