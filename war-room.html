@@ -203,9 +203,25 @@ button,select{
 .ratings-health-strip{
   margin-top:0;
   display:grid;
-  grid-template-columns:max-content minmax(0, 1fr);
+  grid-template-columns:max-content minmax(0, 1fr) max-content;
   align-items:start;
   gap:3px 8px;
+}
+
+.hfa-note{
+  align-self:center;
+  justify-self:end;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.5px;
+  padding-right:4px;
+}
+
+.hfa-note strong{
+  color:var(--text);
+  font-size:12px;
 }
 
 .model-health-rows{
@@ -1402,6 +1418,10 @@ tr:hover td.context-group{background:#202d39}
     grid-template-columns:1fr;
   }
 
+  .hfa-note{
+    display:none;
+  }
+
   .model-health-label{
     min-width:145px;
   }
@@ -1588,10 +1608,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260904T145804Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260904T145804Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260904T145804Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260904T145804Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260905T001143Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260905T001143Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260905T001143Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260905T001143Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2250,6 +2270,9 @@ function renderHealth(){
           ${totalSources}
         </div>
       </div>
+      <span class="hfa-note" title="War Room home-field advantage used in game projection construction">
+        HFA <strong>2.6</strong>
+      </span>
     `;
   }
 
