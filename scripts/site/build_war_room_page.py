@@ -259,9 +259,25 @@ button,select{
 .ratings-health-strip{
   margin-top:0;
   display:grid;
-  grid-template-columns:max-content minmax(0, 1fr);
+  grid-template-columns:max-content minmax(0, 1fr) max-content;
   align-items:start;
   gap:3px 8px;
+}
+
+.hfa-note{
+  align-self:center;
+  justify-self:end;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.5px;
+  padding-right:4px;
+}
+
+.hfa-note strong{
+  color:var(--text);
+  font-size:12px;
 }
 
 .model-health-rows{
@@ -1458,6 +1474,10 @@ tr:hover td.context-group{background:#202d39}
     grid-template-columns:1fr;
   }
 
+  .hfa-note{
+    display:none;
+  }
+
   .model-health-label{
     min-width:145px;
   }
@@ -2296,6 +2316,9 @@ function renderHealth(){
           ${totalSources}
         </div>
       </div>
+      <span class="hfa-note" title="War Room home-field advantage used in game projection construction">
+        HFA <strong>2.6</strong>
+      </span>
     `;
   }
 
