@@ -25,5 +25,5 @@ class BettingAnalyticsV2Tests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    out=Path(d)/'x.jsonl';a={'id':m.stable_id('prediction','g1','state1')};b={'id':m.stable_id('prediction','g1','state2')};m.append_unique(out,[a],'id',True);before=out.read_bytes();self.assertEqual(m.append_unique(out,[a],'id',True)['accepted'],0);self.assertEqual(before,out.read_bytes());self.assertEqual(m.append_unique(out,[b],'id',True)['accepted'],1);self.assertEqual(len(out.read_text().splitlines()),2)
  def test_page_and_performance_contract(self):
-  page=(ROOT/'betting.html').read_text();self.assertIn('historicalDecayPanel',page);self.assertIn('betting_analytics.js',page);self.assertIn('Beat Close',page);p=json.loads((ROOT/'data/site/model_performance_view.json').read_text());self.assertEqual(p['schema_version'],'model-performance-view-v3');self.assertFalse(p['tracking_started'])
+  page=(ROOT/'betting.html').read_text();self.assertIn('historicalDecayPanel',page);self.assertIn('betting_analytics.js',page);self.assertIn('Beat Close',page);p=json.loads((ROOT/'data/site/model_performance_view.json').read_text());self.assertEqual(p['schema_version'],'model-performance-view-v5')
 if __name__=='__main__':unittest.main()

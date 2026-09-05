@@ -701,6 +701,8 @@ def main() -> int:
                          "--accept"],
                         [sys.executable, "scripts/model_tracking/v2/capture_official_checkpoints.py",
                          "--accept"],
+                        [sys.executable, "scripts/model_tracking/v2/capture_close_checkpoints.py",
+                         "--accept"],
                         [sys.executable, "scripts/model_tracking/settle_model_tracking.py",
                          "--accept"],
                         [sys.executable, "scripts/model_tracking/v2/settle_accepted_observations.py",
