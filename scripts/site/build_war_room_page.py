@@ -2379,19 +2379,28 @@ function operationalWeek(weeks,rows){
     : String(weeks[weeks.length-1]);
 }
 
+function matrixAvailableWeeks(){
+  if(Array.isArray(MATRIX?.available_weeks) && MATRIX.available_weeks.length){
+    return [...MATRIX.available_weeks]
+      .sort((a,b)=>Number(a)-Number(b));
+  }
+
+  return [...new Set(
+    (MATRIX?.games || [])
+      .map(game=>game.week)
+      .filter(value=>value !== null && value !== undefined)
+  )].sort((a,b)=>Number(a)-Number(b));
+}
+
 function fillWeeks(){
   const select = document.getElementById('weekSelect');
 
-  const scopeRows = (MATRIX.games || []).filter(
+  const scopeRows = (MATRIX?.games || []).filter(
     g => ACTIVE_SCOPE !== 'FBS' ||
          g.scope?.fbs_vs_fbs === true
   );
 
-  const weeks = [...new Set(
-    scopeRows
-      .map(g => g.week)
-      .filter(v => v !== null && v !== undefined)
-  )].sort((a,b)=>Number(a)-Number(b));
+  const weeks = matrixAvailableWeeks();
 
   select.innerHTML =
     `<option value="ALL">ALL WEEKS</option>` +
@@ -2401,7 +2410,9 @@ function fillWeeks(){
       )
       .join('');
 
-  if(
+  if(MATRIX?.selected_week && ACTIVE_WEEK === 'AUTO'){
+    ACTIVE_WEEK = String(MATRIX.selected_week);
+  }else if(
     ACTIVE_WEEK === 'AUTO' ||
     (
       ACTIVE_WEEK !== 'ALL' &&
@@ -4105,10 +4116,20 @@ function visibleActivity(){
 
 async function focusActivityGame(event){
   if(!event.game_id) return;
-  if(event.week !== null && event.week !== undefined && String(event.week) !== String(ACTIVE_WEEK)){
-    const option = [...document.getElementById('weekSelect').options].find(o=>o.value===String(event.week));
-    if(option){ ACTIVE_WEEK=String(event.week); document.getElementById('weekSelect').value=ACTIVE_WEEK; renderHealth(); renderMatrix(); }
+
+  if(
+    event.week !== null &&
+    event.week !== undefined &&
+    String(event.week) !== String(ACTIVE_WEEK)
+  ){
+    const option = [...document.getElementById('weekSelect').options]
+      .find(o=>o.value===String(event.week));
+
+    if(option){
+      await switchMatrixWeek(String(event.week));
+    }
   }
+
   const game=(MATRIX?.games || []).find(item=>String(item.game_id)===String(event.game_id));
   if(game) await selectActivityGame(game,{toggle:false});
   requestAnimationFrame(()=>{
@@ -4342,11 +4363,48 @@ async function fetchJsonWithFallback(liveUrl,staticUrl,label){
   }
 }
 
+function matrixLiveUrlForWeek(week){
+  const requested = String(week || 'AUTO');
+  const separator = LIVE_MATRIX_URL.includes('?') ? '&' : '?';
+  return `${LIVE_MATRIX_URL}${separator}week=${encodeURIComponent(requested)}&scope=${encodeURIComponent(ACTIVE_SCOPE)}`;
+}
+
+async function fetchMatrixForWeek(week){
+  const liveUrl = matrixLiveUrlForWeek(week);
+
+  const payload = await fetchJsonWithFallback(
+    liveUrl,
+    MATRIX_URL,
+    'Matrix'
+  );
+
+  if(payload?.selected_week){
+    ACTIVE_WEEK = String(payload.selected_week);
+  }
+
+  return payload;
+}
+
+async function switchMatrixWeek(week){
+  ACTIVE_WEEK = String(week || 'AUTO');
+  MATRIX = await fetchMatrixForWeek(ACTIVE_WEEK);
+
+  if(MATRIX?.selected_week){
+    ACTIVE_WEEK = String(MATRIX.selected_week);
+  }
+
+  fillWeeks();
+  reconcileSelectedGame();
+  renderHealth();
+  renderMatrix();
+  renderActivity();
+}
+
 async function loadData(){
   const priorActivityVersion=ACTIVITY_VERSION;
 
   [MATRIX,HEALTH,ACTIVITY]=await Promise.all([
-    fetchJsonWithFallback(LIVE_MATRIX_URL,MATRIX_URL,'Matrix'),
+    fetchMatrixForWeek(ACTIVE_WEEK),
     fetchJsonWithFallback(LIVE_HEALTH_URL,HEALTH_URL,'Health'),
     fetchJsonWithFallback(LIVE_ACTIVITY_URL,ACTIVITY_URL,'Activity')
   ]);
@@ -4424,12 +4482,8 @@ document.getElementById('scopeSelect').addEventListener(
 
 document.getElementById('weekSelect').addEventListener(
   'change',
-  e=>{
-    ACTIVE_WEEK = e.target.value;
-    reconcileSelectedGame();
-    renderHealth();
-    renderMatrix();
-    renderActivity();
+  async e=>{
+    await switchMatrixWeek(e.target.value);
   }
 );
 
@@ -4443,13 +4497,9 @@ document.getElementById('mobileScopeSelect').addEventListener('change',e=>{
   renderActivity();
 });
 
-document.getElementById('mobileWeekSelect').addEventListener('change',e=>{
-  ACTIVE_WEEK=e.target.value;
+document.getElementById('mobileWeekSelect').addEventListener('change',async e=>{
+  await switchMatrixWeek(e.target.value);
   document.getElementById('weekSelect').value=String(ACTIVE_WEEK);
-  reconcileSelectedGame();
-  renderHealth();
-  renderMatrix();
-  renderActivity();
 });
 
 document.getElementById('mobileSortSelect').addEventListener('change',e=>{

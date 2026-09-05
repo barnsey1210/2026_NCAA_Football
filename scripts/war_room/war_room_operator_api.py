@@ -297,10 +297,124 @@ def live_health(_: None = Depends(require_public_read_origin)):
     return live_response(public_artifact(HEALTH, "war-room-health-v1"))
 
 
+def matrix_game_kickoff(game: dict) -> Optional[datetime]:
+    value = game.get("kickoff_time") or game.get("date")
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(
+            str(value).replace("Z", "+00:00")
+        )
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def matrix_scope_games(games: list[dict], scope: str) -> list[dict]:
+    if str(scope).upper() != "FBS":
+        return games
+    return [
+        game
+        for game in games
+        if (game.get("scope") or {}).get("fbs_vs_fbs") is True
+    ]
+
+
+def matrix_available_weeks(games: list[dict]) -> list:
+    values = {
+        game.get("week")
+        for game in games
+        if game.get("week") is not None
+    }
+    return sorted(values, key=lambda value: int(value))
+
+
+def matrix_operational_week(games: list[dict], weeks: list) -> Optional[str]:
+    if not weeks:
+        return None
+
+    now = datetime.now(timezone.utc)
+    grace_seconds = 12 * 60 * 60
+    candidates = []
+
+    for week in weeks:
+        kickoffs = [
+            matrix_game_kickoff(game)
+            for game in games
+            if str(game.get("week")) == str(week)
+        ]
+        kickoffs = [value for value in kickoffs if value is not None]
+
+        if not kickoffs:
+            continue
+
+        candidates.append({
+            "week": week,
+            "first": min(kickoffs),
+            "last": max(kickoffs),
+        })
+
+    current = [
+        row
+        for row in candidates
+        if (row["last"] - now).total_seconds() + grace_seconds >= 0
+    ]
+    current.sort(key=lambda row: row["first"])
+
+    if current:
+        return str(current[0]["week"])
+
+    return str(weeks[-1])
+
+
 @app.get("/war-room/live/market-matrix")
-def live_market_matrix(_: None = Depends(require_public_read_origin)):
+def live_market_matrix(
+    week: str = Query(default="AUTO", min_length=1, max_length=16),
+    scope: str = Query(default="FBS", min_length=1, max_length=16),
+    _: None = Depends(require_public_read_origin),
+):
     matrix = public_artifact(MATRIX, "war-room-market-matrix-v1")
     schedule = public_artifact(SCHEDULE, "schedule-live-enrichment-v2")
+
+    all_games = [
+        game
+        for game in matrix.get("games", [])
+        if isinstance(game, dict)
+    ]
+
+    scope_games = matrix_scope_games(all_games, scope)
+    available_weeks = matrix_available_weeks(scope_games)
+
+    requested_week = str(week).upper()
+
+    if requested_week == "AUTO":
+        selected_week = matrix_operational_week(
+            scope_games,
+            available_weeks,
+        )
+    elif requested_week == "ALL":
+        selected_week = "ALL"
+    else:
+        if not any(
+            str(value) == str(week)
+            for value in available_weeks
+        ):
+            raise HTTPException(
+                status_code=404,
+                detail=f"War Room week not available: {week}",
+            )
+        selected_week = str(week)
+
+    if selected_week == "ALL":
+        selected_games = scope_games
+    else:
+        selected_games = [
+            game
+            for game in scope_games
+            if str(game.get("week")) == str(selected_week)
+        ]
 
     live_by_game = {
         str(game.get("game_id")): game
@@ -318,15 +432,23 @@ def live_market_matrix(_: None = Depends(require_public_read_origin)):
         "live_score_source",
     )
 
-    for game in matrix.get("games", []):
-        if not isinstance(game, dict):
-            continue
+    for game in selected_games:
         live = live_by_game.get(str(game.get("game_id")))
         if not live:
             continue
         for field in live_fields:
             if field in live:
                 game[field] = live.get(field)
+
+    matrix["games"] = selected_games
+    matrix["available_weeks"] = available_weeks
+    matrix["selected_week"] = selected_week
+    matrix["delivery_scope"] = str(scope).upper()
+    matrix["delivery_mode"] = (
+        "FULL_SEASON"
+        if selected_week == "ALL"
+        else "WEEK_SCOPED"
+    )
 
     return live_response(json_safe(matrix))
 
