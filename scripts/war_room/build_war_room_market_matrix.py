@@ -109,6 +109,10 @@ MATCHUP_LINE_HISTORY = ROOT / "data/site/matchup_line_history.json"
 BOOK_LINE_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
 ACTIVITY_HISTORY = ROOT / "data/war_room/history/war_room_events.jsonl"
 ACTIVITY_STATE = ROOT / "data/war_room/history/war_room_activity_state.json"
+PREGAME_PROJECTION_SNAPSHOTS = (
+    ROOT
+    / "data/war_room/history/war_room_pregame_projection_snapshots.json"
+)
 FAST_REFRESH_HISTORY = ROOT / "data/war_room/audits/fast_market_refresh_history.csv"
 
 BETTABLE = (
@@ -213,6 +217,82 @@ def load_json(path, default):
         return json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         return default
+
+
+def write_json_atomic(path, payload):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2) + "\n"
+    )
+    temporary.replace(path)
+
+
+def projection_freeze_payload(game, source_matrix_built_at, captured_at):
+    """Preserve the exact last War Room projection state observed pre-kickoff."""
+    return {
+        "game_id": game.get("game_id"),
+        "season": game.get("season"),
+        "week": game.get("week"),
+        "away_team": game.get("away_team"),
+        "home_team": game.get("home_team"),
+        "kickoff_time": game.get("kickoff_time"),
+        "captured_at": captured_at,
+        "source_matrix_built_at": source_matrix_built_at,
+        "state": game.get("state"),
+        "authority": game.get("authority"),
+        "models": game.get("models"),
+        "shadow_readiness": game.get("shadow_readiness"),
+        "standard_freshness": game.get("standard_freshness"),
+    }
+
+
+def apply_projection_freeze(game, snapshot):
+    """Restore immutable pregame projection fields onto a historical row."""
+    for key in (
+        "state",
+        "authority",
+        "models",
+        "shadow_readiness",
+        "standard_freshness",
+    ):
+        if key in snapshot:
+            game[key] = snapshot[key]
+
+
+def resolve_projection_freeze(
+    *,
+    gid,
+    kickoff,
+    freeze_now,
+    previous_matrix,
+    previous_matrix_built_at,
+    previous_games_by_gid,
+    frozen_games,
+):
+    """Resolve one write-once pregame projection snapshot."""
+    snapshot = frozen_games.get(gid)
+
+    if snapshot is not None:
+        return snapshot, False
+
+    previous_game = previous_games_by_gid.get(gid)
+
+    if (
+        previous_game is None
+        or previous_matrix_built_at is None
+        or previous_matrix_built_at >= kickoff
+    ):
+        return None, False
+
+    snapshot = projection_freeze_payload(
+        previous_game,
+        previous_matrix.get("built_at"),
+        freeze_now.isoformat(),
+    )
+    snapshot["kickoff_time"] = kickoff.isoformat()
+    frozen_games[gid] = snapshot
+    return snapshot, True
 
 
 def load_team_composite_ranks(path):
@@ -1918,6 +1998,28 @@ def resolve_kickoff_time(
 
 
 def main():
+    previous_matrix = load_json(OUT, {})
+    previous_matrix_built_at = parse_timestamp(
+        previous_matrix.get("built_at")
+    )
+    previous_games_by_gid = {
+        str(row.get("game_id")): row
+        for row in previous_matrix.get("games", [])
+        if row.get("game_id") is not None
+    }
+
+    pregame_snapshot_store = load_json(
+        PREGAME_PROJECTION_SNAPSHOTS,
+        {},
+    )
+    if not isinstance(pregame_snapshot_store, dict):
+        pregame_snapshot_store = {}
+
+    frozen_games = pregame_snapshot_store.get("games")
+    if not isinstance(frozen_games, dict):
+        frozen_games = {}
+
+    snapshot_store_changed = False
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--activity-enrichment-only",
@@ -2726,6 +2828,8 @@ def main():
         and row.get("start_date")
     }
 
+    freeze_now = datetime.now(timezone.utc)
+
     for game in games_out:
         gid = str(game["game_id"])
         game["kickoff_time"] = resolve_kickoff_time(
@@ -2736,7 +2840,36 @@ def main():
         )
 
         kickoff = parse_timestamp(game.get("kickoff_time"))
-        if kickoff is not None and kickoff <= datetime.now(timezone.utc):
+
+        if kickoff is not None and kickoff <= freeze_now:
+            snapshot, snapshot_created = resolve_projection_freeze(
+                gid=gid,
+                kickoff=kickoff,
+                freeze_now=freeze_now,
+                previous_matrix=previous_matrix,
+                previous_matrix_built_at=previous_matrix_built_at,
+                previous_games_by_gid=previous_games_by_gid,
+                frozen_games=frozen_games,
+            )
+            if snapshot_created:
+                snapshot_store_changed = True
+
+            if snapshot is not None:
+                apply_projection_freeze(game, snapshot)
+                game["projection_freeze"] = {
+                    "status": "FROZEN_PREKICKOFF",
+                    "source_matrix_built_at": snapshot.get(
+                        "source_matrix_built_at"
+                    ),
+                    "captured_at": snapshot.get("captured_at"),
+                }
+            else:
+                game["projection_freeze"] = {
+                    "status": "UNAVAILABLE_NO_PREKICKOFF_MATRIX",
+                    "source_matrix_built_at": None,
+                    "captured_at": None,
+                }
+
             game["edge_state"] = "CLOSED_AT_KICKOFF"
             game["edges"]["spread"] = {
                 "away": None,
@@ -2751,8 +2884,14 @@ def main():
                 "best_edge": None,
             }
             game["edges"]["best_action"] = None
+
         else:
             game["edge_state"] = "ACTIVE"
+            game["projection_freeze"] = {
+                "status": "PREGAME_LIVE",
+                "source_matrix_built_at": None,
+                "captured_at": None,
+            }
 
     games_out.sort(
         key=lambda g: (
@@ -2909,6 +3048,18 @@ def main():
             ),
         },
     }
+
+    if snapshot_store_changed:
+        write_json_atomic(
+            PREGAME_PROJECTION_SNAPSHOTS,
+            {
+                "schema_version": (
+                    "war-room-pregame-projection-snapshots-v1"
+                ),
+                "updated_at": freeze_now.isoformat(),
+                "games": frozen_games,
+            },
+        )
 
     OUT.parent.mkdir(
         parents=True,
