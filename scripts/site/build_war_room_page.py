@@ -4323,27 +4323,33 @@ function renderActivity(){
   document.querySelectorAll('[data-activity-index]').forEach((el)=>el.addEventListener('click',()=>focusActivityGame(events[Number(el.dataset.activityIndex)])));
 }
 
-async function fetchDataBundle(matrixUrl,healthUrl,activityUrl){
-  const bust = Date.now();
-  const [matrixResp, healthResp, activityResp] = await Promise.all([
-    fetch(`${matrixUrl}?v=${bust}`, {cache:'no-store'}),
-    fetch(`${healthUrl}?v=${bust}`, {cache:'no-store'}),
-    fetch(`${activityUrl}?v=${bust}`, {cache:'no-store'})
-  ]);
-  if(!matrixResp.ok)throw new Error(`Matrix HTTP ${matrixResp.status}`);
-  if(!healthResp.ok)throw new Error(`Health HTTP ${healthResp.status}`);
-  if(!activityResp.ok)throw new Error(`Activity HTTP ${activityResp.status}`);
-  return Promise.all([matrixResp.json(),healthResp.json(),activityResp.json()]);
+function runtimeBustUrl(url){
+  const separator=url.includes('?')?'&':'?';
+  return `${url}${separator}runtime=${Date.now()}`;
+}
+
+async function fetchJsonWithFallback(liveUrl,staticUrl,label){
+  try{
+    const liveResp=await fetch(runtimeBustUrl(liveUrl),{cache:'no-store'});
+    if(!liveResp.ok)throw new Error(`${label} live HTTP ${liveResp.status}`);
+    return await liveResp.json();
+  }catch(liveError){
+    console.warn(`${label} live unavailable; using static snapshot`,liveError);
+
+    const staticResp=await fetch(runtimeBustUrl(staticUrl),{cache:'no-store'});
+    if(!staticResp.ok)throw new Error(`${label} static HTTP ${staticResp.status}`);
+    return await staticResp.json();
+  }
 }
 
 async function loadData(){
   const priorActivityVersion=ACTIVITY_VERSION;
-  try{
-    [MATRIX,HEALTH,ACTIVITY]=await fetchDataBundle(LIVE_MATRIX_URL,LIVE_HEALTH_URL,LIVE_ACTIVITY_URL);
-  }catch(liveError){
-    console.warn('Live War Room data unavailable; using static snapshot',liveError);
-    [MATRIX,HEALTH,ACTIVITY]=await fetchDataBundle(MATRIX_URL,HEALTH_URL,ACTIVITY_URL);
-  }
+
+  [MATRIX,HEALTH,ACTIVITY]=await Promise.all([
+    fetchJsonWithFallback(LIVE_MATRIX_URL,MATRIX_URL,'Matrix'),
+    fetchJsonWithFallback(LIVE_HEALTH_URL,HEALTH_URL,'Health'),
+    fetchJsonWithFallback(LIVE_ACTIVITY_URL,ACTIVITY_URL,'Activity')
+  ]);
 
   ACTIVITY_VERSION=[ACTIVITY?.built_at,ACTIVITY?.latest_refresh_id,ACTIVITY?.public_event_count].join('|');
   if(priorActivityVersion && priorActivityVersion!==ACTIVITY_VERSION){
