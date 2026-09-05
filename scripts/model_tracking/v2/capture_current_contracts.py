@@ -10,9 +10,10 @@ COMPONENT_IDS={('spread','SP+'):('sp_plus_spread','v1'),('spread','FPI'):('fpi_s
 def canonical(value): return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False)
 def future_trackable(g,now):
  if str(g.get('availability_status') or '').upper() in {'CLOSING','CLOSED','FINAL'}:return False
- stamps=[q.get('kickoff_at') for markets in g.get('quotes',{}).values() for sides in markets.values() if isinstance(sides,dict) for q in sides.values() if isinstance(q,dict) and q.get('kickoff_at')]
- try:return bool(stamps) and max(datetime.fromisoformat(x.replace('Z','+00:00')) for x in stamps)>now
- except ValueError:return False
+ kickoff=g.get('kickoff_at')
+ if not kickoff:return False
+ try:return datetime.fromisoformat(str(kickoff).replace('Z','+00:00'))>now
+ except (TypeError,ValueError):return False
 def prediction_row(g,model_id,x,market,projection,component_values=None,model_version=None,source_updated=None):
  state={'projection':projection,'components':component_values if component_values is not None else x.get('component_values',{}),'weights':x.get('weights',{}),'availability':x.get('component_status',{}),'missing':x.get('missing_sources',[]),'lifecycle':x.get('formula_status'),'status':x.get('availability_status'),'source_updated':source_updated or x.get('freshness_timestamp')}
  oid=stable_id('prediction',g['game_id'],model_id,model_version or x.get('formula_version'),market,canonical(state))

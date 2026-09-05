@@ -356,12 +356,12 @@ def validate(root: Path, out: Path) -> list[str]:
     betting = out / "betting.html"
     if betting.is_file():
         betting_text = betting.read_text(errors="ignore")
-        for marker in ('data-view="bets">My Bets', 'data-view="model">Model Performance',
+        for marker in ('data-view="bets">My Bets', 'data-view="model">2026 Model Tracker', 'data-view="history">Historical Research',
                        'id="modelPerformanceView"', 'data-performance-mode="standard"',
                        'data-performance-mode="shadow"', 'id="standardModelsPanel"',
                        'id="shadowModelsPanel"', 'data/site/shadow_model_performance.json'):
             if marker not in betting_text:
-                errors.append(f"Betting Model Performance marker missing: {marker}")
+                errors.append(f"Betting view marker missing: {marker}")
         for marker in ('historicalDecayPanel', 'decayMetric', 'betting_analytics.js'):
             if marker not in betting_text:
                 errors.append(f"Betting historical analytics marker missing: {marker}")
@@ -374,8 +374,8 @@ def validate(root: Path, out: Path) -> list[str]:
         except (json.JSONDecodeError, OSError) as exc:
             errors.append(f"Model Performance public artifact malformed: {exc}")
         else:
-            if model_data.get("schema_version") != "model-performance-view-v3":
-                errors.append("Model Performance public artifact schema mismatch")
+            if model_data.get("schema_version") != "model-performance-view-v5":
+                errors.append("2026 Model Tracker public artifact schema mismatch")
     historical_analytics = out / "data/site/historical_betting_analytics_v2.json"
     if not historical_analytics.is_file():
         errors.append("Historical Betting analytics public artifact missing")

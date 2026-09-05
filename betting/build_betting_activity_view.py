@@ -68,6 +68,24 @@ def strategy_tags(row):
     return tags or ["Other"]
 
 
+def bet_source_group(row):
+    """Normalize the wager's explicit source without changing provenance."""
+    source = clean(row.get("Source")).lower()
+    if source in {"open", "model / open"}:
+        return "Open"
+    if source == "powers":
+        return "Powers"
+    return "Other"
+
+
+def clv_eligible(market, game):
+    """Only canonical full-game spread/total wagers enter CLV tracking."""
+    return bool(
+        game is not None
+        and market in {"Spread", "Game Total"}
+    )
+
+
 def bet_period(row, game=None):
     """Classify the wager into the page's canonical season-period controls."""
     week = game.get("week") if game else week_from_row(row)
@@ -183,6 +201,28 @@ def main():
         closing_market_price = number(row.get("closing_market_price"))
         closing_frozen = boolean(row.get("closing_clv_frozen"))
 
+        source_group = bet_source_group(row)
+        clv_eligible_flag = clv_eligible(market, game)
+        current_line_clv = number(row.get("line_clv_current"))
+        final_line_clv = number(row.get("closing_line_clv"))
+
+        tracking_clv_points = None
+        tracking_clv_state = "INELIGIBLE"
+
+        if clv_eligible_flag:
+            if closing_frozen and final_line_clv is not None:
+                tracking_clv_points = final_line_clv
+                tracking_clv_state = "FINAL_CLOSE"
+            elif (
+                is_open
+                and boolean(row.get("current_market_match"))
+                and current_line_clv is not None
+            ):
+                tracking_clv_points = current_line_clv
+                tracking_clv_state = "CURRENT_MARKET"
+            else:
+                tracking_clv_state = "UNAVAILABLE"
+
         current_market_ev_pct = None
         final_clv_ev_pct = None
         ev_state = "UNAVAILABLE"
@@ -258,7 +298,12 @@ def main():
             "away_team": game.get("away_team") if game else None, "home_team": game.get("home_team") if game else None,
             "actor": actor(row), "placed_at": clean(row.get("Date")), "status": clean(row.get("status")) or "Open",
             "is_open": is_open, "sport": clean(row.get("Sport")), "market": market,
-            "strategy_tags": strategy_tags(row), "bet_period": period,
+            "strategy_tags": strategy_tags(row),
+            "bet_source_group": source_group,
+            "clv_eligible": clv_eligible_flag,
+            "tracking_clv_points": tracking_clv_points,
+            "tracking_clv_state": tracking_clv_state,
+            "bet_period": period,
             "period_sort": int(game.get("week")) if game and game.get("week") is not None else week_from_row(row),
             "market_group": market, "is_future": period == "Futures", "is_graded": is_graded,
             "selection": clean(row.get("Bet")), "team": team or None, "side": clean(row.get("side")) or None,
@@ -272,13 +317,13 @@ def main():
             "current_market_price": current_market_price,
             "current_market_book": clean(row.get("current_market_book")),
             "current_market_match": boolean(row.get("current_market_match")),
-            "line_clv_current": number(row.get("line_clv_current")),
+            "line_clv_current": current_line_clv,
 
             "closing_clv_frozen": closing_frozen,
             "closing_market_line": closing_market_line,
             "closing_market_price": closing_market_price,
             "closing_market_book": clean(row.get("closing_market_book")),
-            "closing_line_clv": number(row.get("closing_line_clv")),
+            "closing_line_clv": final_line_clv,
 
             "current_market_ev_pct": current_market_ev_pct,
             "final_clv_ev_pct": final_clv_ev_pct,
@@ -306,7 +351,17 @@ def main():
         settled = [row for row in rows if not row["is_open"]]
         settled_stake = sum(row["stake"] or 0 for row in settled)
         profit = sum(row["realized_profit"] or 0 for row in settled)
-        clv = [row["clv_pct_current"] for row in rows if row["clv_pct_current"] is not None]
+        legacy_clv = [
+            row["clv_pct_current"]
+            for row in rows
+            if row["clv_pct_current"] is not None
+        ]
+        tracking_clv = [
+            row["tracking_clv_points"]
+            for row in rows
+            if row.get("clv_eligible")
+            and row.get("tracking_clv_points") is not None
+        ]
         ev = [row["ev_current_pct"] for row in rows if row["ev_current_pct"] is not None]
         return {"bets": len(rows), "open": len(open_group), "settled": len(settled),
                 "amount_risked": round(sum(row["stake"] or 0 for row in rows), 2),
@@ -315,14 +370,35 @@ def main():
                 "wins": sum(row["status"] == "Won" for row in settled), "losses": sum(row["status"] == "Lost" for row in settled),
                 "pushes": sum(row["status"] == "Push" for row in settled), "profit": round(profit, 2),
                 "roi": round(profit / settled_stake, 4) if settled_stake else None,
-                "clv_matched": len(clv), "positive_clv": sum(value > 0 for value in clv),
-                "positive_clv_pct": round(sum(value > 0 for value in clv) / len(clv), 4) if clv else None,
-                "avg_clv_pct": round(sum(clv) / len(clv), 4) if clv else None,
+                "clv_matched": len(legacy_clv),
+                "positive_clv": sum(value > 0 for value in legacy_clv),
+                "positive_clv_pct": round(sum(value > 0 for value in legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
+                "avg_clv_pct": round(sum(legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
+                "eligible_clv_sample": len(tracking_clv),
+                "eligible_positive_clv": sum(value > 0 for value in tracking_clv),
+                "eligible_positive_clv_pct": round(sum(value > 0 for value in tracking_clv) / len(tracking_clv), 4) if tracking_clv else None,
+                "eligible_avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
                 "avg_ev_pct": round(sum(ev) / len(ev), 4) if ev else None,
                 "current_ev_dollars": round(sum((row["stake"] or 0) * (row["ev_current_pct"] or 0) for row in open_group), 2)}
 
     groups = {"Overall": metrics(records), "Powers": metrics([row for row in records if "Powers" in row["strategy_tags"]]),
               "Model": metrics([row for row in records if "Model" in row["strategy_tags"]])}
+
+    source_groups = {
+        "Overall": metrics(records),
+        "Open": metrics([
+            row for row in records
+            if row.get("bet_source_group") == "Open"
+        ]),
+        "Powers": metrics([
+            row for row in records
+            if row.get("bet_source_group") == "Powers"
+        ]),
+        "Other": metrics([
+            row for row in records
+            if row.get("bet_source_group") == "Other"
+        ]),
+    }
     market_groups = {name: metrics([row for row in records if row["market"] == name]) for name in sorted({row["market"] for row in records})}
     week_groups = {}
     for week in sorted({row["week"] for row in records if row["week"] is not None}):
@@ -345,12 +421,18 @@ def main():
             for row in csv.DictReader(handle):
                 history.append({key: number(value) if key not in {"snapshot_at", "season_phase"} else clean(value) for key, value in row.items()})
     built_at = datetime.now(timezone.utc).isoformat()
-    payload = {"schema_version": "betting-activity-v1", "built_at": built_at, "summary": summary,
-               "strategy_metrics": groups, "market_metrics": market_groups, "week_metrics": week_groups,
+    payload = {"schema_version": "betting-activity-v2", "built_at": built_at, "summary": summary,
+               "strategy_metrics": groups, "source_metrics": source_groups,
+               "market_metrics": market_groups, "week_metrics": week_groups,
                "period_metrics": period_groups,
                "performance_history": history, "records": records}
     audit = {"built_at": built_at, "summary": summary, "game_match_reasons": match_reasons,
-             "policy": {"all_sheet_rows": "owned_wager", "strategy_tags": "Powers and Model are independent, non-exclusive tags"}}
+             "policy": {
+                 "all_sheet_rows": "owned_wager",
+                 "strategy_tags": "Legacy compatibility only; Powers and Model remain non-exclusive tags",
+                 "source_groups": "Explicit wager Source normalized to Open, Powers, or Other",
+                 "clv_eligibility": "Canonical game-linked full-game Spread and Game Total only"
+             }}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     AUDIT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, separators=(",", ":")) + "\n")

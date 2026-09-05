@@ -180,12 +180,224 @@ img[src$="west-virginia.webp"] {
 @media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
 </style><style id="betting-analytics-v2-css">
 .histInlineControls,.decayControls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:8px 0}.histInlineControls select,.decayControls select{background:#091a34;border:1px solid #29476c;color:#dcecff;border-radius:6px;padding:7px 9px;font-size:11px;font-weight:800}.histDecayCard{margin-top:14px}.decayChart{height:250px;border:1px solid #203b5f;border-radius:8px;background:linear-gradient(180deg,#07162b,#091a31);overflow:hidden}.decayChart svg{width:100%;height:100%;display:block}.decayAxis{stroke:#29476c;stroke-width:1}.decayLine{stroke:#55a2ff;stroke-width:2.5}.decayPoint{fill:#68d9a5;stroke:#061327;stroke-width:2}.decayLabel{fill:#9db5d2;font:9px system-ui}.decayValue{fill:#f3f8ff;font:700 10px system-ui}@media(max-width:700px){.decayChart{height:220px}.decayControls select,.histInlineControls select{flex:1 1 135px}}
-</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style></head><body>
+</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style>
+<style id="betting-2026-redesign-css">
+.viewSwitch{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:18px 0 14px;
+}
+.viewSwitch button{
+  border:1px solid #29476c;
+  background:#091a34;
+  color:#9db5d2;
+  border-radius:7px;
+  padding:9px 14px;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.viewSwitch button.active{
+  background:#173d6d;
+  border-color:#4f91df;
+  color:#fff;
+}
+.sourceSummaryGrid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0;
+}
+.sourceSummaryCard{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:9px;
+  padding:11px 12px;
+}
+.sourceSummaryCard h3{
+  margin:0 0 8px;
+  font-size:13px;
+}
+.sourceSummaryStats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.sourceSummaryStats span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.sourceSummaryStats b{
+  display:block;
+  margin-top:3px;
+  font-size:13px;
+}
+.ledger.compactLedger{
+  font-size:11px;
+}
+.ledger.compactLedger th,
+.ledger.compactLedger td{
+  padding:5px 8px;
+  vertical-align:middle;
+}
+.ledger.compactLedger .sub{
+  margin-top:2px;
+  font-size:9px;
+  line-height:1.2;
+}
+.compactSource{
+  font-weight:900;
+  white-space:nowrap;
+}
+.compactSelection{
+  min-width:190px;
+}
+.compactSelection b{
+  display:block;
+}
+.compactClv{
+  font-weight:900;
+  white-space:nowrap;
+}
+.tracker2026{
+  margin-top:6px;
+}
+.trackerHero{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-end;
+  margin-bottom:14px;
+}
+.trackerHero h1{
+  margin:0;
+  font-size:26px;
+}
+.trackerHero p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+.trackerControlRow{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin:10px 0;
+}
+.trackerControlRow button{
+  border:1px solid #29476c;
+  background:#091a34;
+  color:#9db5d2;
+  border-radius:6px;
+  padding:7px 10px;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.trackerControlRow button.active{
+  color:#fff;
+  background:#173d6d;
+  border-color:#4f91df;
+}
+.trackerTableWrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:9px;
+}
+.trackerTable{
+  width:100%;
+  border-collapse:collapse;
+  min-width:920px;
+}
+.trackerTable th,
+.trackerTable td{
+  padding:10px 11px;
+  border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line);
+  vertical-align:top;
+}
+.trackerTable th{
+  color:#9db5d2;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  background:#08182f;
+}
+.trackerTable th:first-child,
+.trackerTable td:first-child{
+  text-align:left;
+  width:220px;
+}
+.trackerModelName{
+  font-size:12px;
+  font-weight:1000;
+}
+.trackerModelMeta{
+  color:var(--muted);
+  font-size:9px;
+  margin-top:3px;
+}
+.trackerCellMain{
+  font-weight:1000;
+  font-size:13px;
+  white-space:nowrap;
+}
+.trackerCellSub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
+}
+.trackerEmpty{
+  color:var(--muted);
+  font-size:11px;
+}
+.trackerMethod{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.history2026Head{
+  margin:4px 0 15px;
+}
+.history2026Head h1{
+  margin:0;
+  font-size:26px;
+}
+.history2026Head p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+#historicalResearchView > .histCard,
+#historicalResearchView > .histSection{
+  margin-bottom:14px;
+}
+@media(max-width:800px){
+  .sourceSummaryGrid{
+    grid-template-columns:1fr;
+  }
+  .sourceSummaryStats{
+    grid-template-columns:repeat(3,1fr);
+  }
+  .trackerHero{
+    display:block;
+  }
+}
+</style>
+
+</head><body>
 <header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html" class="active">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Betting</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
-<main class="shell"><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">Model Performance</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open</span><b id="ownedCount">—</b></div><div class="metric"><span>Exposure</span><b id="exposure">—</b></div><div class="metric"><span>P/L</span><b id="profitLoss">—</b></div><div class="metric"><span>ROI</span><b id="roi">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div><div class="metric"><span>CLV · Pinnacle</span><b id="averageClv">—</b></div></div></section>
+<main class="shell"><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">2026 Model Tracker</button><button data-view="history">Historical Research</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open</span><b id="ownedCount">—</b></div><div class="metric"><span>Exposure</span><b id="exposure">—</b></div><div class="metric"><span>P/L</span><b id="profitLoss">—</b></div><div class="metric"><span>ROI</span><b id="roi">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div><div class="metric"><span>AVG CLV · PINNACLE</span><b id="averageClv">—</b></div></div></section>
 
 
-<div class="tabs" id="tabs"><button class="active" data-tab="all">All wagers</button><button data-tab="powers">Powers bets</button><button data-tab="opener">Model / Open</button><button data-tab="drafts">Site-entered drafts</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger"><thead><tr><th>Source</th><th>Date</th><th>Market</th><th>Selection</th><th>Book</th><th>Stake</th><th>Bet</th><th>Pinnacle benchmark</th><th>CLV / EV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="modelPerformanceView" class="modelView" hidden>
+<div class="tabs" id="tabs"><button class="active" data-tab="all">All</button><button data-tab="open_source">Open</button><button data-tab="powers_source">Powers</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger compactLedger"><thead><tr><th>Source</th><th>Date</th><th>Selection</th><th>Book</th><th>Bet</th><th>Stake</th><th>Close</th><th>CLV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="historicalResearchView" class="modelView" hidden></section><section id="modelPerformanceView" class="modelView" hidden>
 <section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Betting summary</h2><small>Overall, Powers, and Model / Open</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section>
 <div class="shadowModeSwitch" id="shadowModeSwitch" role="tablist" aria-label="Model performance type">
   <button class="active" type="button" role="tab" aria-selected="true" data-performance-mode="standard">Standard Models</button>
@@ -3647,14 +3859,50 @@ function pPeriodForWeek(week){return Number(week)===14?'Conference Championships
 function pNormalize(r){if(r.bet_period)return r;const game=r.game_id?GAMES.games.find(x=>x.game.game_id===r.game_id):null,week=game?.game.week,description=`${r.market||''} ${r.selection||''}`.toLowerCase();let period=game?pPeriodForWeek(week):'Unassigned';if(!game&&/(win total|conf title|conference future|heisman|future)/.test(description))period='Futures';else if(!game&&/(bowl|playoff|national championship)/.test(description))period='Bowl / Playoff';return{...r,game_week:week,bet_period:period,market_group:r.market||'Other',is_future:period==='Futures',is_graded:['Won','Lost','Push','Cashout'].includes(r.status),settled_risk:['Won','Lost','Push','Cashout'].includes(r.status)?Number(r.stake)||0:0,realized_pl:Number(r.realized_profit)||0,current_ev:r.is_open?(Number(r.stake)||0)*(Number(r.ev_current_pct)||0):0,clv_value:r.clv_pct_current,has_valid_closing_line:r.clv_pct_current!=null}}
 function pRecords(){return allRecords().map(pNormalize)}
 function pSelected(records=pRecords(),period=ACTIVE_PERIOD){return period==='All Bets'?records:records.filter(r=>r.bet_period===period)}
-function pMetrics(list){const open=list.filter(r=>r.is_open),graded=list.filter(r=>r.is_graded),risk=graded.reduce((s,r)=>s+(Number(r.settled_risk)||0),0),amountRisked=list.reduce((s,r)=>s+(Number(r.stake)||0),0),pl=graded.reduce((s,r)=>s+(Number(r.realized_pl)||0),0),clv=list.filter(r=>r.has_valid_closing_line&&Number.isFinite(Number(r.clv_value))),positive=clv.filter(r=>Number(r.clv_value)>0).length;return{bets:list.length,open:open.length,settled:graded.length,amount_risked:amountRisked,open_exposure:open.reduce((s,r)=>s+(Number(r.stake)||0),0),wins:graded.filter(r=>r.status==='Won').length,losses:graded.filter(r=>r.status==='Lost').length,pushes:graded.filter(r=>r.status==='Push').length,settled_risk:risk,profit:pl,realized_pl:pl,roi:risk?pl/risk:null,clv_matched:clv.length,positive_clv:positive,positive_clv_pct:clv.length?positive/clv.length:null,avg_clv_pct:clv.length?clv.reduce((s,r)=>s+Number(r.clv_value),0)/clv.length:null,current_ev_dollars:open.reduce((s,r)=>s+(Number(r.current_ev)||0),0)}}
-function pScore(label,list){const m=pMetrics(list);return`<div class="score"><h3>${esc(label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>Bets</dt><dd>${m.bets}</dd><dt>Amount risked</dt><dd>${money(m.amount_risked)}</dd><dt>Profit / loss</dt><dd class="${tone(m.realized_pl)}">${money(m.realized_pl)}</dd><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${m.positive_clv_pct==null?'—':num(m.positive_clv_pct*100,1)+'%'}</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_pct)}">${m.avg_clv_pct==null?'—':num(m.avg_clv_pct*100,2)+'%'}</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd><dt>Open exposure</dt><dd>${money(m.open_exposure)}</dd></dl></div>`}
+function pMetrics(list){
+  const open=list.filter(r=>r.is_open);
+  const graded=list.filter(r=>r.is_graded);
+  const risk=graded.reduce((s,r)=>s+(Number(r.settled_risk)||0),0);
+  const amountRisked=list.reduce((s,r)=>s+(Number(r.stake)||0),0);
+  const pl=graded.reduce((s,r)=>s+(Number(r.realized_pl)||0),0);
+
+  const clv=list.filter(r=>
+    r.clv_eligible===true &&
+    r.tracking_clv_state==='FINAL_CLOSE' &&
+    Number.isFinite(Number(r.tracking_clv_points))
+  );
+
+  const positive=clv.filter(r=>Number(r.tracking_clv_points)>0).length;
+
+  return{
+    bets:list.length,
+    open:open.length,
+    settled:graded.length,
+    amount_risked:amountRisked,
+    open_exposure:open.reduce((s,r)=>s+(Number(r.stake)||0),0),
+    wins:graded.filter(r=>r.status==='Won').length,
+    losses:graded.filter(r=>r.status==='Lost').length,
+    pushes:graded.filter(r=>r.status==='Push').length,
+    settled_risk:risk,
+    profit:pl,
+    realized_pl:pl,
+    roi:risk?pl/risk:null,
+    clv_matched:clv.length,
+    positive_clv:positive,
+    positive_clv_pct:clv.length?positive/clv.length:null,
+    avg_clv_points:clv.length
+      ? clv.reduce((s,r)=>s+Number(r.tracking_clv_points),0)/clv.length
+      : null,
+    current_ev_dollars:open.reduce((s,r)=>s+(Number(r.current_ev)||0),0)
+  };
+}
+function pScore(label,list){const m=pMetrics(list);return`<div class="score"><h3>${esc(label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>Bets</dt><dd>${m.bets}</dd><dt>Amount risked</dt><dd>${money(m.amount_risked)}</dd><dt>Profit / loss</dt><dd class="${tone(m.realized_pl)}">${money(m.realized_pl)}</dd><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${m.positive_clv_pct==null?'—':num(m.positive_clv_pct*100,1)+'%'}</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)} pts`}</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd><dt>Open exposure</dt><dd>${money(m.open_exposure)}</dd></dl></div>`}
 function pMini(title,groups){return mini(title,groups.map(([label,list])=>({label,...pMetrics(list)})))}
 function pGroup(list,key){const map=new Map;list.forEach(r=>{const name=r[key]||'Other';if(!map.has(name))map.set(name,[]);map.get(name).push(r)});return[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0]))}
 function pChart(list){const by=new Map;list.forEach(r=>{const key=ACTIVE_PERIOD==='Futures'?(r.placed_at||r.source_pulled_at):(r.game_date||r.placed_at)||'Unknown';if(!by.has(key))by.set(key,[]);by.get(key).push(r)});let realized=0,ev=0;const p=[...by.entries()].sort((a,b)=>new Date(a[0])-new Date(b[0])).map(([date,rows])=>{realized+=rows.reduce((s,r)=>s+(r.is_graded?Number(r.realized_pl)||0:0),0);ev+=rows.reduce((s,r)=>s+(r.is_open?Number(r.current_ev)||0:0),0);return{snapshot_at:date,realized_profit:realized,total_ev_current_dollars:ev}}),vals=p.flatMap(x=>[x.realized_profit,x.total_ev_current_dollars]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?(W-L-R)/2:i/(p.length-1)*(W-L-R)),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(d[k])}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
 function pPeriodMetrics(period){return pMetrics(pSelected(pRecords().filter(r=>r.actor?.type!=='site_draft'),period))}
 function pResults(){const activity=new Set((DATA.records||[]).map(r=>r.bet_period)),shown=['Futures',...PERIODS.filter(p=>p.startsWith('Week ')&&activity.has(p)),'Conference Championships','Bowl / Playoff',...(activity.has('Unassigned')?['Unassigned']:[])],rowsData=shown.map(p=>[p,pPeriodMetrics(p)]),total=pPeriodMetrics('All Bets');periodResultsBody.innerHTML=rowsData.map(([p,m])=>pResultRow(p,m)).join('')+pResultRow('All Bets',total,true);periodResultsBody.querySelectorAll('tr[data-period]').forEach(r=>r.onclick=()=>pSetPeriod(r.dataset.period))}
-function pResultRow(period,m,total=false){return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_pct)}">${pPct(m.avg_clv_pct,2)}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
+function pResultRow(period,m,total=false){return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
 
 function spreadMarketReference(r){
   if(r.market!=='Spread') return null;
@@ -3785,7 +4033,63 @@ function resultDisplay(r){
   return `<b class="${resultTone}">${esc(status)}</b>`;
 }
 
-function pVisible(r){if(ACTIVE_PERIOD!=='All Bets'&&r.bet_period!==ACTIVE_PERIOD)return false;if(tab==='open'&&!(r.is_open&&r.actor.type!=='site_draft'))return false;if(tab==='powers'&&!(r.strategy_tags||[]).includes('Powers'))return false;if(tab==='opener'&&!(r.strategy_tags||[]).includes('Model'))return false;if(tab==='drafts'&&r.actor.type!=='site_draft')return false;const q=search.value.toLowerCase();if(q&&!`${r.selection} ${r.team} ${r.actor?.source} ${r.away_team} ${r.home_team} ${r.sportsbook}`.toLowerCase().includes(q))return false;if(market.value!=='all'&&r.market!==market.value)return false;if(link.value==='linked'&&!r.game_id)return false;if(link.value==='team'&&r.game_id)return false;if(link.value==='unlinked'&&(r.game_id||r.game_link_status==='not_game_market'))return false;return true}
+function pVisible(r){
+  if(ACTIVE_PERIOD!=='All Bets'&&r.bet_period!==ACTIVE_PERIOD)return false;
+
+  if(tab==='open_source'&&r.bet_source_group!=='Open')return false;
+  if(tab==='powers_source'&&r.bet_source_group!=='Powers')return false;
+
+  const q=search.value.toLowerCase();
+
+  if(
+    q &&
+    !`${r.selection} ${r.team} ${r.actor?.source} ${r.away_team} ${r.home_team} ${r.sportsbook}`
+      .toLowerCase()
+      .includes(q)
+  )return false;
+
+  if(market.value!=='all'&&r.market!==market.value)return false;
+  if(link.value==='linked'&&!r.game_id)return false;
+  if(link.value==='team'&&r.game_id)return false;
+  if(
+    link.value==='unlinked' &&
+    (r.game_id||r.game_link_status==='not_game_market')
+  )return false;
+
+  return true;
+}
+function compactCloseDisplay(r){
+  if(r.tracking_clv_state!=='FINAL_CLOSE')return '—';
+
+  const spreadRef=spreadMarketReference(r);
+
+  if(spreadRef){
+    return `<b>${num(spreadRef.line)} ${odds(spreadRef.price)}</b>`;
+  }
+
+  if(r.current_market_line!=null){
+    return `<b>${num(r.current_market_line)} ${odds(r.current_market_price)}</b>`;
+  }
+
+  return '—';
+}
+
+function compactClvDisplay(r){
+  if(!r.clv_eligible)return '<span class="sub">N/A</span>';
+
+  if(r.tracking_clv_state!=='FINAL_CLOSE'){
+    return '<span class="sub">—</span>';
+  }
+
+  if(r.tracking_clv_points==null){
+    return '<span class="sub">—</span>';
+  }
+
+  const value=Number(r.tracking_clv_points);
+
+  return `<span class="compactClv ${tone(value)}">${value>0?'+':''}${value.toFixed(2)}</span>`;
+}
+
 function pRows(){
   const list=pRecords().filter(pVisible);
 
@@ -3794,38 +4098,240 @@ function pRows(){
 
   rows.innerHTML=list.map(r=>`
     <tr>
-      <td>${tags(r)}</td>
-      <td>${esc(r.placed_at||'—')}</td>
-      <td>${esc(r.market||'—')}</td>
       <td>
+        <span class="compactSource">${esc(r.actor?.source||'Google Sheet')}</span>
+      </td>
+      <td>${esc(r.placed_at||'—')}</td>
+      <td class="compactSelection">
         <b>${esc(r.selection||'—')}</b>
         <div class="sub">
+          ${esc(r.market||'—')}
           ${r.game_id
-            ? `${esc(r.away_team)} at ${esc(r.home_team)}`
-            : esc(r.team||'Team/future')}
+            ? ` · ${esc(r.away_team)} at ${esc(r.home_team)}`
+            : r.team
+              ? ` · ${esc(r.team)}`
+              : ''}
         </div>
       </td>
       <td>${bookLogo(r.sportsbook)}</td>
-      <td>${money(r.stake)}</td>
       <td>${ticketDisplay(r)}</td>
-      <td>${marketReferenceDisplay(r)}</td>
-      <td>${valueDisplay(r)}</td>
+      <td>${money(r.stake)}</td>
+      <td>${compactCloseDisplay(r)}</td>
+      <td>${compactClvDisplay(r)}</td>
       <td>${resultDisplay(r)}</td>
-      <td><details class="betDetails"><summary onclick="event.preventDefault();this.parentElement.open=!this.parentElement.open">View</summary><div class="betDetailsBody"><div class="detailGrid">
-        <span>Wager source</span><b>${esc(r.actor?.source||'Google Sheet')}</b>
-        <span>Benchmark</span><b>Pinnacle</b>
-        <span>Game link</span><b>${esc(r.game_link_status||'Team market')}</b>
-        <span>EV method</span><b>${esc(r.spread_ev_method||'Standard market-relative')}</b>
-        <span>Weakest half-point sample</span><b>${r.spread_ev_weakest_half_point_sample_n!=null?esc(r.spread_ev_weakest_half_point_sample_n):'Not applicable'}</b>
-        <span>Provenance</span><b>${esc(r.current_market_provenance||r.current_market_book||'Unavailable')}</b>
-        <span>Game</span><b>${r.game_id?`<a class="gameLink" href="matchups.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`:'Unavailable for CLV'}</b>
-      </div></div></details></td>
+      <td>
+        <details class="betDetails">
+          <summary onclick="event.preventDefault();this.parentElement.open=!this.parentElement.open">View</summary>
+          <div class="betDetailsBody">
+            <div class="detailGrid">
+              <span>Wager source</span>
+              <b>${esc(r.actor?.source||'Google Sheet')}</b>
+
+              <span>Source group</span>
+              <b>${esc(r.bet_source_group||'Other')}</b>
+
+              <span>Market</span>
+              <b>${esc(r.market||'—')}</b>
+
+              <span>Bet</span>
+              <b>${esc(r.selection||'—')} · ${ticketDisplay(r)}</b>
+
+              <span>Pinnacle benchmark</span>
+              <b>${marketReferenceDisplay(r)}</b>
+
+              <span>CLV eligibility</span>
+              <b>${r.clv_eligible?'Eligible':'Not eligible'}</b>
+
+              <span>CLV state</span>
+              <b>${esc(r.tracking_clv_state||'UNAVAILABLE')}</b>
+
+              <span>Current EV</span>
+              <b>${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'%':'—'}</b>
+
+              <span>Game link</span>
+              <b>${esc(r.game_link_status||'Team market')}</b>
+
+              <span>EV method</span>
+              <b>${esc(r.spread_ev_method||'Standard market-relative')}</b>
+
+              <span>Provenance</span>
+              <b>${esc(r.current_market_provenance||r.current_market_book||'Unavailable')}</b>
+
+              <span>Game</span>
+              <b>${r.game_id
+                ? `<a class="gameLink" href="matchups.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`
+                : 'Unavailable for CLV'}
+              </b>
+            </div>
+          </div>
+        </details>
+      </td>
     </tr>
-  `).join('') || '<tr><td colspan="11" class="empty">No records in this period and filter combination.</td></tr>';
+  `).join('') || '<tr><td colspan="10" class="empty">No records in this period and filter combination.</td></tr>';
 }
-function pDashboard(){const list=pSelected(),overall=pMetrics(list),powers=list.filter(r=>(r.strategy_tags||[]).includes('Powers')),model=list.filter(r=>(r.strategy_tags||[]).includes('Model'));ownedCount.textContent=overall.open;exposure.textContent=money(overall.open_exposure);profitLoss.textContent=money(overall.realized_pl);profitLoss.className=tone(overall.realized_pl);roi.textContent=pPct(overall.roi);roi.className=tone(overall.roi);totalEv.textContent=money(overall.current_ev_dollars);totalEv.className=tone(overall.current_ev_dollars);averageClv.textContent=pPct(overall.avg_clv_pct,2);averageClv.className=tone(overall.avg_clv_pct);scores.innerHTML=pScore('Overall',list)+pScore('Powers',powers)+pScore('Model / Open',model);const categories=pGroup(list,'market_group');if(ACTIVE_PERIOD==='All Bets')weeks.innerHTML=pMini('Period',PERIODS.filter(p=>p!=='All Bets').map(p=>[p,pSelected(pRecords(),p)]).filter(x=>x[1].length));else weeks.innerHTML=pMini('Strategy',[['Powers',powers],['Model / Open',model]]);markets.innerHTML=pMini('Category',categories);pChart(list);pRows();pResults()}
+
+function pDashboard(){const periodList=pSelected();const list=tab==='open_source'?periodList.filter(r=>r.bet_source_group==='Open'):tab==='powers_source'?periodList.filter(r=>r.bet_source_group==='Powers'):periodList;const overall=pMetrics(list),powers=list.filter(r=>(r.strategy_tags||[]).includes('Powers')),model=list.filter(r=>(r.strategy_tags||[]).includes('Model'));ownedCount.textContent=overall.open;exposure.textContent=money(overall.open_exposure);profitLoss.textContent=money(overall.realized_pl);profitLoss.className=tone(overall.realized_pl);roi.textContent=pPct(overall.roi);roi.className=tone(overall.roi);totalEv.textContent=money(overall.current_ev_dollars);totalEv.className=tone(overall.current_ev_dollars);averageClv.textContent=overall.avg_clv_points==null?'—':`${Number(overall.avg_clv_points)>0?'+':''}${num(overall.avg_clv_points,2)} pts`;averageClv.className=tone(overall.avg_clv_points);scores.innerHTML=pScore('Overall',list)+pScore('Powers',powers)+pScore('Model / Open',model);const categories=pGroup(list,'market_group');if(ACTIVE_PERIOD==='All Bets')weeks.innerHTML=pMini('Period',PERIODS.filter(p=>p!=='All Bets').map(p=>[p,pSelected(pRecords(),p)]).filter(x=>x[1].length));else weeks.innerHTML=pMini('Strategy',[['Powers',powers],['Model / Open',model]]);markets.innerHTML=pMini('Category',categories);pChart(list);pRows();pResults()}
 function pSetPeriod(period){ACTIVE_PERIOD=period;sessionStorage.setItem('ncaaf-betting-period',period);document.querySelectorAll('#periodBar button').forEach(b=>b.classList.toggle('active',b.dataset.period===period));pDashboard()}
-function pInit(){const regular=[...new Set(GAMES.games.map(x=>Number(x.game.week)).filter(x=>Number.isFinite(x)&&x!==14))].sort((a,b)=>a-b).map(x=>`Week ${x}`);PERIODS=['Futures',...regular,'Conference Championships','Bowl / Playoff','All Bets'];const stored=sessionStorage.getItem('ncaaf-betting-period'),gamePeriods=(DATA.records||[]).map(pNormalize).filter(r=>r.bet_period?.startsWith('Week ')).sort((a,b)=>(a.period_sort??999)-(b.period_sort??999));ACTIVE_PERIOD=stored&&PERIODS.includes(stored)?stored:(gamePeriods[0]?.bet_period||((DATA.records||[]).some(r=>pNormalize(r).bet_period==='Futures')?'Futures':'All Bets'));const bar=document.createElement('div');bar.id='periodBar';bar.className='periodBar';bar.innerHTML=PERIODS.map(p=>`<button data-period="${esc(p)}">${esc(p.replace('Week ','W'))}</button>`).join('');document.querySelector('.hero').after(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>pSetPeriod(b.dataset.period));const results=document.createElement('section');results.className='card resultsCard';results.innerHTML='<div class="cardHead"><h2>Season Betting Results by Week</h2><small>Graded performance, Pinnacle CLV, current EV, and exposure</small></div><div class="resultsWrap"><table class="resultsTable"><thead><tr><th>Period</th><th>Bets</th><th>Record</th><th>Risked</th><th>Profit/Loss</th><th>ROI</th><th>CLV Hit</th><th>Avg CLV</th><th>CLV Sample</th><th>Current EV</th><th>Open Exposure</th></tr></thead><tbody id="periodResultsBody"></tbody></table></div>';const ledger=document.querySelector('.card:has(.ledger)'),heading=document.createElement('div');heading.className='ledgerHeading';heading.innerHTML='<h2 id="ledgerTitle">Wager ledger</h2><small id="ledgerSubtitle"></small>';ledger.prepend(heading);ledger.after(results);document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;pRows()});[market,link,search].forEach(x=>x.addEventListener('input',pRows));pSetPeriod(ACTIVE_PERIOD)}
+function renderSourceSummary(){
+  const root=document.getElementById('sourceSummary');
+  if(!root)return;
+
+  const records=pRecords().filter(r=>r.actor?.type!=='site_draft');
+
+  const groups=[
+    ['Overall',records],
+    ['Open',records.filter(r=>r.bet_source_group==='Open')],
+    ['Powers',records.filter(r=>r.bet_source_group==='Powers')]
+  ];
+
+  root.innerHTML=groups.map(([label,list])=>{
+    const m=pMetrics(list);
+
+    return `
+      <div class="sourceSummaryCard">
+        <h3>${esc(label)}</h3>
+        <div class="sourceSummaryStats">
+          <div>
+            <span>Record</span>
+            <b>${m.wins}-${m.losses}-${m.pushes}</b>
+          </div>
+          <div>
+            <span>ROI</span>
+            <b class="${tone(m.roi)}">${pPct(m.roi)}</b>
+          </div>
+          <div>
+            <span>CLV Hit</span>
+            <b>${pPct(m.positive_clv_pct)}</b>
+          </div>
+          <div>
+            <span>Avg CLV</span>
+            <b class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</b>
+          </div>
+          <div>
+            <span>CLV Sample</span>
+            <b>${m.clv_matched}</b>
+          </div>
+          <div>
+            <span>Bets</span>
+            <b>${m.bets}</b>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function pInit(){
+  const regular=[
+    ...new Set(
+      GAMES.games
+        .map(x=>Number(x.game.week))
+        .filter(x=>Number.isFinite(x)&&x!==14)
+    )
+  ]
+    .sort((a,b)=>a-b)
+    .map(x=>`Week ${x}`);
+
+  PERIODS=[
+    'Futures',
+    ...regular,
+    'Conference Championships',
+    'Bowl / Playoff',
+    'All Bets'
+  ];
+
+  const stored=sessionStorage.getItem('ncaaf-betting-period');
+
+  const gamePeriods=(DATA.records||[])
+    .map(pNormalize)
+    .filter(r=>r.bet_period?.startsWith('Week '))
+    .sort((a,b)=>(a.period_sort??999)-(b.period_sort??999));
+
+  ACTIVE_PERIOD='All Bets';
+
+  const bar=document.createElement('div');
+  bar.id='periodBar';
+  bar.className='periodBar';
+  bar.innerHTML=PERIODS.map(p=>`
+    <button data-period="${esc(p)}">
+      ${esc(p.replace('Week ','W'))}
+    </button>
+  `).join('');
+
+  document.querySelector('.hero').after(bar);
+
+  bar.querySelectorAll('button').forEach(button=>{
+    button.onclick=()=>pSetPeriod(button.dataset.period);
+  });
+
+  const results=document.createElement('section');
+  results.className='card resultsCard';
+  results.innerHTML=`
+    <div class="cardHead">
+      <h2>Season Betting Results by Week</h2>
+      <small>Graded performance, eligible Pinnacle CLV, current EV, and exposure</small>
+    </div>
+    <div class="resultsWrap">
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Bets</th>
+            <th>Record</th>
+            <th>Risked</th>
+            <th>Profit/Loss</th>
+            <th>ROI</th>
+            <th>CLV Hit</th>
+            <th>Avg CLV</th>
+            <th>CLV Sample</th>
+            <th>Current EV</th>
+            <th>Open Exposure</th>
+          </tr>
+        </thead>
+        <tbody id="periodResultsBody"></tbody>
+      </table>
+    </div>
+  `;
+
+  bar.after(results);
+
+  const sourceSummary=document.createElement('div');
+  sourceSummary.id='sourceSummary';
+  sourceSummary.className='sourceSummaryGrid';
+  results.after(sourceSummary);
+
+  const ledger=document.querySelector('.card:has(.ledger)');
+
+  const heading=document.createElement('div');
+  heading.className='ledgerHeading';
+  heading.innerHTML=`
+    <h2 id="ledgerTitle">Wager ledger</h2>
+    <small id="ledgerSubtitle"></small>
+  `;
+
+  ledger.prepend(heading);
+
+  renderSourceSummary();
+
+  document.querySelectorAll('#tabs button').forEach(button=>{
+    button.onclick=()=>{
+      document.querySelectorAll('#tabs button').forEach(x=>{
+        x.classList.remove('active');
+      });
+
+      button.classList.add('active');
+      tab=button.dataset.tab;
+      pDashboard();
+    };
+  });
+
+  [market,link,search].forEach(control=>{
+    control.addEventListener('input',pRows);
+  });
+
+  pSetPeriod(ACTIVE_PERIOD);
+}
+
 (function waitForBettingData(){if(DATA&&GAMES)return pInit();setTimeout(waitForBettingData,25)})();
 </script><script src="matchup_workspace.js?v=20260905T004759Z"></script>
 <!-- V2_DARK_LOGO_BADGES_START -->
@@ -3929,20 +4435,363 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 <script defer src="betting_analytics.js"></script>
 <script id="model-performance-preview-js">
 (function(){
-let MP=null,mode='spread',period='All',modelFilter='core',opportunityFilter='all',sortKey='display_name',sortDir=1;
-const val=(v,s='—')=>v==null?s:v,pct=v=>v==null?'—':(Number(v)*100).toFixed(1)+'%',num1=v=>v==null?'—':Number(v).toFixed(1);
-function switchView(name){const mine=name==='bets';document.getElementById('myBetsView').hidden=!mine;document.getElementById('modelPerformanceView').hidden=mine;document.querySelectorAll('.viewSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.view===name))}
-function statusLabel(r){const map={NO_SETTLED_PREDICTIONS:'NO SETTLED PREDICTIONS','UNRANKED — SMALL SAMPLE':'UNRANKED — SMALL SAMPLE',AVAILABLE:'AVAILABLE',STALE:'STALE',NOT_YET_RELEASED:'NOT YET RELEASED',NOT_ENOUGH_APPROVED_SOURCES:'WAITING FOR 3 SOURCES',COMPARISON_ONLY:'COMPARISON ONLY',BENCHMARK:'BENCHMARK'};return map[r.ranking_status]||map[r.status]||String(r.ranking_status||r.status||'').replaceAll('_',' ')}
-function statusClass(r){if(String(r.tracking_status||'').startsWith('ACTIVE'))return'active';if(['STALE','NOT_YET_RELEASED','NOT_ENOUGH_APPROVED_SOURCES'].includes(r.status))return'warn';return'muted'}
-function currentRows(){if(!MP)return[];let rows=mode==='totals'?MP.total_matrix:MP.spread_matrix;if(modelFilter==='core')rows=rows.filter(r=>r.default_visible);else if(modelFilter==='individual')rows=rows.filter(r=>r.model_type==='individual');else if(modelFilter==='consensus')rows=rows.filter(r=>r.model_type==='consensus');return [...rows].sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return-1;if(typeof av==='string')return av.localeCompare(bv)*sortDir;return(Number(av)-Number(bv))*sortDir})}
-function renderMatrix(){const rows=currentRows();modelMatrixRows.innerHTML=rows.map(r=>`<tr><td><b>${r.display_name||r.model}</b><div class="modelNameSub">${r.model!==r.display_name?r.model:''}</div><div><span class="statusPill ${statusClass(r)}">${statusLabel(r)}</span></div></td><td>${r.games}</td><td>${r.record}</td><td>${pct(r.win_pct)}</td><td>${num1(r.mae)}</td><td>${num1(r.rmse)}</td><td>${num1(r.bias)}</td><td>${pct(r.roi)}</td><td>${num1(r.average_point_clv)}</td><td>${pct(r.beat_close_pct)}</td></tr>`).join('')||'<tr><td colspan="10" class="modelEmpty">No models match the current filter.</td></tr>'}
-function opportunityPeriod(o){const w=o.site_week;return w==null?'All':`W${w}`}
-function renderLedger(){let rows=(MP.opportunities||[]).filter(o=>mode==='totals'?o.market_type==='total':o.market_type==='spread');if(period!=='All')rows=rows.filter(o=>opportunityPeriod(o)===period);if(opportunityFilter==='qualified')rows=rows.filter(o=>o.qualification_status==='QUALIFIED');modelLedgerRows.innerHTML=rows.map(o=>`<tr><td><b>${o.site_week!=null?'W'+o.site_week:'—'}</b><div class="modelNameSub">${o.away_team} at ${o.home_team}</div></td><td>${o.market_type}</td><td>${(o.consensus_versions||[]).join(', ')||'Individual models'}</td><td>—</td><td>${o.opener_market_observation_id?'Captured':'—'}</td><td>${val(o.estimated_ev_pct)}</td><td>—</td><td>${o.qualification_status||'—'}</td><td>${o.opener_provenance_grade||'—'}</td><td>—</td><td>—</td><td>Open</td></tr>`).join('')||'<tr><td colspan="12" class="modelEmpty">No accepted prospective opportunities in this view.</td></tr>'}
-function renderCards(){const s=MP.summary[mode==='totals'?'totals':'spread'];modelCards.innerHTML=[['Opportunities',s.opportunities],['Settled selections',s.settled_selections],['Average point CLV','—'],[mode==='totals'?'O/U ROI':'ATS ROI','—']].map(x=>`<div class="modelCard"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}
-function renderSummary(){const h=MP.methodology.hfa,core=MP.methodology.spread_core_v1,total=MP.methodology.total;modelSummarySection.innerHTML=`<div class="modelSummaryBlock"><h3>Spread tracking</h3><p><b>Formula:</b> ${MP.methodology.spread_projection_formula}</p><p><b>HFA:</b> ${h.non_neutral} non-neutral; ${h.neutral} neutral</p><p><b>Core consensus:</b> ${core.models.join(', ')}</p></div><div class="modelSummaryBlock"><h3>Total tracking</h3><p><b>Current state:</b> Site Total Projection is tracked individually.</p><p><b>Consensus rule:</b> ${total.minimum_independent_sources} approved independent sources required.</p><p><b>Shadow Total:</b> excluded from consensus.</p></div><div class="modelSummaryBlock"><h3>Ranking policy</h3><p><b>Minimum sample:</b> ${MP.ranking_minimum} settled selections.</p><p>Models below the threshold remain unranked.</p><p>Dry-run and preview captures never enter official records.</p></div>`}
-function render(){if(!MP)return;const summary=mode==='summary';modelMatrixSection.hidden=summary;modelSummarySection.hidden=!summary;opportunityFilters.hidden=summary;modelTypeFilters.hidden=summary;modelMatrixTitle.textContent=mode==='totals'?'Total model matrix':'Spread model matrix';renderCards();if(summary)renderSummary();else renderMatrix();renderLedger()}
-function bindButtons(){document.querySelectorAll('.viewSwitch button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));document.querySelectorAll('[data-model-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.modelTab;render()});document.querySelectorAll('[data-model-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-model-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');modelFilter=b.dataset.modelFilter;render()});document.querySelectorAll('[data-opportunity-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-opportunity-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');opportunityFilter=b.dataset.opportunityFilter;render()});document.querySelectorAll('#modelMatrixSection th[data-sort]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.sort)sortDir*=-1;else{sortKey=th.dataset.sort;sortDir=1}renderMatrix()})}
-fetch('data/site/model_performance_view.json?v=20260905T004759Z').then(r=>r.json()).then(d=>{MP=d;modelPeriods.innerHTML=d.periods.map(p=>`<button class="${p==='All'?'active':''}" data-period="${p}">${p}</button>`).join('');modelPeriods.querySelectorAll('button').forEach(b=>b.onclick=()=>{modelPeriods.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');period=b.dataset.period;renderLedger()});if(d.tracking_started)modelTrackerNotice.innerHTML='<strong>Official prospective tracking is active.</strong> Results include accepted captures only; personal wagers remain separate.';bindButtons();render()}).catch(e=>modelMatrixRows.innerHTML=`<tr><td colspan="12" class="modelEmpty">Unable to load preview data: ${e.message}</td></tr>`);switchView('bets')
+  'use strict';
+
+  let MP=null;
+  let trackerMarket='spread';
+  let trackerPeriod='W0';
+
+  const $=id=>document.getElementById(id);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[ch]));
+  const pct=value=>value==null?'—':`${(Number(value)*100).toFixed(1)}%`;
+  const signedPct=value=>{
+    if(value==null)return'—';
+    const n=Number(value)*100;
+    return `${n>0?'+':''}${n.toFixed(1)}%`;
+  };
+  const signedNum=value=>{
+    if(value==null)return'—';
+    const n=Number(value);
+    return `${n>0?'+':''}${n.toFixed(2)}`;
+  };
+  const num1=value=>value==null?'—':Number(value).toFixed(1);
+
+  function historicalNodes(){
+    const modelView=$('modelPerformanceView');
+    if(!modelView)return[];
+
+    return [...modelView.querySelectorAll('.histSection,.histCard')]
+      .filter(node=>{
+        const parent=node.parentElement;
+        return !parent?.closest('.histSection,.histCard');
+      });
+  }
+
+  function prepareViews(){
+    const modelView=$('modelPerformanceView');
+    const historyView=$('historicalResearchView');
+
+    if(!modelView||!historyView)return;
+
+    const nodes=historicalNodes();
+
+    nodes.forEach(node=>historyView.appendChild(node));
+
+    historyView.insertAdjacentHTML(
+      'afterbegin',
+      `<div class="history2026Head">
+        <h1>Historical Research</h1>
+        <p>2021–2025 model validation, edge studies, market timing, signal decay, and Shadow research.</p>
+      </div>`
+    );
+
+    [...modelView.children].forEach(child=>{
+      child.hidden=true;
+      child.dataset.legacyModelUi='true';
+    });
+
+    const root=document.createElement('section');
+    root.id='tracker2026';
+    root.className='tracker2026';
+    root.hidden=false;
+    root.innerHTML=`
+      <div class="trackerHero">
+        <div>
+          <h1>2026 Model Tracker</h1>
+          <p>Official immutable model observations at Sunday 9 PM ET, Tuesday 9 PM ET, and Close.</p>
+        </div>
+        <div id="trackerStatus" class="trackerEmpty">Loading tracker…</div>
+      </div>
+
+      <div class="trackerControlRow" id="trackerMarketTabs">
+        <button class="active" data-tracker-market="spread">Spread</button>
+        <button data-tracker-market="total">Totals</button>
+      </div>
+
+      <div class="trackerControlRow" id="trackerPeriods"></div>
+
+      <div class="trackerTableWrap">
+        <table class="trackerTable">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Sunday 9 PM ET</th>
+              <th>Tuesday 9 PM ET</th>
+              <th>Close</th>
+            </tr>
+          </thead>
+          <tbody id="trackerRows">
+            <tr>
+              <td colspan="4" class="trackerEmpty">Loading model performance…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="trackerMethod" id="trackerMethod"></div>
+    `;
+
+    modelView.prepend(root);
+  }
+
+  function switchView(name){
+    $('myBetsView').hidden=name!=='bets';
+    $('modelPerformanceView').hidden=name!=='model';
+    $('historicalResearchView').hidden=name!=='history';
+
+    document.querySelectorAll('.viewSwitch button').forEach(button=>{
+      button.classList.toggle(
+        'active',
+        button.dataset.view===name
+      );
+    });
+  }
+
+  function displayName(row){
+    const names={
+      standard_spread_4src_equal_v1:'Standard Spread',
+      standard_spread_5src_legacy_v1:'Standard Spread · Legacy',
+      sp_plus_spread:'SP+',
+      fpi_spread:'FPI',
+      teamrankings_spread:'TeamRankings',
+      sagarin_spread:'Sagarin',
+      dratings_spread:'DRatings',
+      shadow_spread_sp_sagarin_v1:'Shadow Spread',
+      standard_total_sp_massey_dratings_v1:'Standard Total',
+      standard_total_40_40_20_sagarin_legacy_v1:'Standard Total · Legacy',
+      sp_plus_total:'SP+ Total',
+      massey_dual_total:'Massey Dual',
+      sagarin_total:'Sagarin Total',
+      dratings_total:'DRatings Total',
+      total_sp50_massey50_v1:'50/50 Total Challenger',
+      shadow_total_enhanced_spplus_od_v1:'Shadow Total'
+    };
+
+    return names[row.model_id]
+      || row.display_name
+      || row.model_id;
+  }
+
+  function roleLabel(row){
+    const role=String(row.role||'');
+
+    if(role==='active_standard_authority')return 'Active Standard';
+    if(role==='individual')return 'Individual';
+    if(role==='prospective_challenger')return 'Prospective';
+    if(role==='legacy_comparison')return 'Legacy';
+    if(role.toLowerCase().includes('shadow'))return 'Shadow';
+
+    return role
+      ? role.replaceAll('_',' ')
+      : 'Tracked model';
+  }
+
+  function roleRank(row){
+    const id=row.model_id||'';
+
+    if(row.role==='active_standard_authority')return 0;
+    if(id==='sp_plus_spread'||id==='sp_plus_total')return 10;
+    if(id==='fpi_spread')return 11;
+    if(id==='teamrankings_spread')return 12;
+    if(id==='sagarin_spread'||id==='sagarin_total')return 13;
+    if(id==='dratings_spread'||id==='dratings_total')return 14;
+    if(id==='massey_dual_total')return 15;
+    if(String(row.role||'').includes('shadow'))return 30;
+    if(row.role==='prospective_challenger')return 25;
+    if(row.role==='legacy_comparison')return 40;
+
+    return 20;
+  }
+
+  function cell(metrics,checkpoint,row){
+    if(!metrics||!metrics.games){
+      const historicalPeriod=['W0','W1'].includes(trackerPeriod);
+      const unavailableHistorical=
+        historicalPeriod &&
+        (
+          row.role==='active_standard_authority' ||
+          row.role==='prospective_challenger' ||
+          String(row.role||'').toLowerCase().includes('shadow') ||
+          String(row.model_id||'').startsWith('dratings_')
+        );
+
+      const note=unavailableHistorical
+        ? 'Historical checkpoint unavailable'
+        : 'No official sample yet';
+
+      return `
+        <div class="trackerEmpty">—</div>
+        <div class="trackerCellSub">${note}</div>
+      `;
+    }
+
+    const resultLabel=trackerMarket==='spread'?'ATS':'O/U';
+
+    const secondary=[
+      `N ${metrics.games}`,
+      `ROI ${signedPct(metrics.roi)}`,
+      `MAE ${num1(metrics.mae)}`
+    ];
+
+    if(checkpoint!=='CLOSE'){
+      secondary.push(
+        `CLV ${signedNum(metrics.average_point_clv)}`
+      );
+    }
+
+    return `
+      <div class="trackerCellMain">
+        ${esc(metrics.record)} · ${pct(metrics.ats_or_ou_pct)}
+      </div>
+      <div class="trackerCellSub">
+        ${resultLabel} · ${secondary.join(' · ')}
+      </div>
+    `;
+  }
+
+  function currentRows(){
+    if(!MP)return[];
+
+    const contract=trackerMarket==='spread'
+      ? MP.spread_checkpoint_tracker
+      : MP.total_checkpoint_tracker;
+
+    return [...(contract?.[trackerPeriod]||[])]
+      .filter(row=>
+        row.role!=='legacy_comparison' &&
+        !String(row.model_id||'').includes('_legacy_')
+      )
+      .sort((a,b)=>{
+        const rank=roleRank(a)-roleRank(b);
+        if(rank)return rank;
+        return displayName(a).localeCompare(displayName(b));
+      });
+  }
+
+  function renderTracker(){
+    if(!MP)return;
+
+    const rows=currentRows();
+
+    $('trackerRows').innerHTML=rows.map(row=>{
+      const c=row.checkpoints||{};
+
+      return `
+        <tr>
+          <td>
+            <div class="trackerModelName">${esc(displayName(row))}</div>
+            <div class="trackerModelMeta">
+              ${esc(roleLabel(row))}
+            </div>
+          </td>
+          <td>${cell(c.SUNDAY_9PM_ET,'SUNDAY_9PM_ET',row)}</td>
+          <td>${cell(c.TUESDAY_9PM_ET,'TUESDAY_9PM_ET',row)}</td>
+          <td>${cell(c.CLOSE,'CLOSE',row)}</td>
+        </tr>
+      `;
+    }).join('') || `
+      <tr>
+        <td colspan="4" class="trackerEmpty">
+          No official observations for this market and period.
+        </td>
+      </tr>
+    `;
+
+    const modelsWithResults=rows.filter(row=>
+      Object.values(row.checkpoints||{}).some(
+        metrics=>Number(metrics?.games||0)>0
+      )
+    ).length;
+
+    $('trackerStatus').textContent=
+      `${trackerPeriod} · ${modelsWithResults} models with results`;
+
+    const method=MP.methodology||{};
+
+    $('trackerMethod').innerHTML=`
+      <b>Checkpoint contract:</b>
+      ${esc(method.checkpoint_contract||'one game × one model × checkpoint')}
+      · <b>Closing authority:</b>
+      ${esc(method.closing_authority||'canonical FROZEN_CLOSE')}
+      · Close CLV is intentionally not shown.
+    `;
+  }
+
+  function bindTracker(){
+    document.querySelectorAll('[data-tracker-market]').forEach(button=>{
+      button.onclick=()=>{
+        trackerMarket=button.dataset.trackerMarket;
+
+        document.querySelectorAll('[data-tracker-market]').forEach(x=>{
+          x.classList.toggle('active',x===button);
+        });
+
+        renderTracker();
+      };
+    });
+
+    document.querySelectorAll('[data-tracker-period]').forEach(button=>{
+      button.onclick=()=>{
+        trackerPeriod=button.dataset.trackerPeriod;
+
+        document.querySelectorAll('[data-tracker-period]').forEach(x=>{
+          x.classList.toggle('active',x===button);
+        });
+
+        renderTracker();
+      };
+    });
+  }
+
+  function buildPeriodButtons(){
+    const periods=[
+      'W0','W1','W2','W3','W4','W5','W6','W7',
+      'W8','W9','W10','W11','W12','W13','W14','Season'
+    ];
+
+    $('trackerPeriods').innerHTML=periods.map(period=>`
+      <button
+        class="${period===trackerPeriod?'active':''}"
+        data-tracker-period="${period}">
+        ${period}
+      </button>
+    `).join('');
+  }
+
+  prepareViews();
+
+  document.querySelectorAll('.viewSwitch button').forEach(button=>{
+    button.onclick=()=>switchView(button.dataset.view);
+  });
+
+  fetch('data/site/model_performance_view.json')
+    .then(response=>{
+      if(!response.ok)throw Error(response.status);
+      return response.json();
+    })
+    .then(data=>{
+      MP=data;
+      buildPeriodButtons();
+      bindTracker();
+      renderTracker();
+    })
+    .catch(error=>{
+      $('trackerRows').innerHTML=`
+        <tr>
+          <td colspan="4" class="trackerEmpty">
+            Unable to load 2026 model tracker: ${esc(error.message)}
+          </td>
+        </tr>
+      `;
+    });
+
+  switchView('bets');
 })();
 </script>
 <script id="shadow-model-performance-js">
@@ -4017,39 +4866,58 @@ fetch('data/site/model_performance_view.json?v=20260905T004759Z').then(r=>r.json
   function setBettingView(view){
     const bets = document.getElementById('myBetsView');
     const model = document.getElementById('modelPerformanceView');
-    const buttons = Array.from(document.querySelectorAll('.viewSwitch button[data-view]'));
-    if(!bets || !model || !buttons.length) return;
+    const history = document.getElementById('historicalResearchView');
+    const buttons = Array.from(
+      document.querySelectorAll('.viewSwitch button[data-view]')
+    );
 
-    const showModel = view === 'model';
-    bets.hidden = showModel;
-    model.hidden = !showModel;
-    bets.style.display = showModel ? 'none' : '';
-    model.style.display = showModel ? '' : 'none';
+    if(!bets || !model || !history || !buttons.length) return;
+
+    bets.hidden = view !== 'bets';
+    model.hidden = view !== 'model';
+    history.hidden = view !== 'history';
+
+    bets.style.display = view === 'bets' ? '' : 'none';
+    model.style.display = view === 'model' ? '' : 'none';
+    history.style.display = view === 'history' ? '' : 'none';
 
     buttons.forEach(btn => {
       const active = btn.dataset.view === view;
       btn.classList.toggle('active', active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.setAttribute(
+        'aria-selected',
+        active ? 'true' : 'false'
+      );
     });
   }
 
   function bind(){
-    const buttons = Array.from(document.querySelectorAll('.viewSwitch button[data-view]'));
+    const buttons = Array.from(
+      document.querySelectorAll('.viewSwitch button[data-view]')
+    );
+
     if(!buttons.length) return;
+
     buttons.forEach(btn => {
       if(btn.dataset.viewSwitchBound === '1') return;
+
       btn.dataset.viewSwitchBound = '1';
+
       btn.addEventListener('click', function(ev){
         ev.preventDefault();
         setBettingView(btn.dataset.view);
       });
     });
-    const active = buttons.find(x => x.classList.contains('active'));
-    setBettingView(active ? active.dataset.view : 'bets');
+
+    setBettingView('bets');
   }
 
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', bind, {once:true});
+    document.addEventListener(
+      'DOMContentLoaded',
+      bind,
+      {once:true}
+    );
   } else {
     bind();
   }

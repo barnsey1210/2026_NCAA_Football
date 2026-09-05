@@ -9,7 +9,8 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
     def test_production_page_has_both_views_and_my_bets_is_default(self):
         text = (ROOT / "betting_v2.html").read_text()
         self.assertIn('class="active" data-view="bets">My Bets', text)
-        self.assertIn('data-view="model">Model Performance', text)
+        self.assertIn('data-view="model">2026 Model Tracker', text)
+        self.assertIn('data-view="history">Historical Research', text)
         self.assertIn('<div id="myBetsView"', text)
         self.assertIn('id="modelPerformanceView" class="modelView" hidden', text)
         self.assertIn("data/site/betting_activity_view.json", text)
