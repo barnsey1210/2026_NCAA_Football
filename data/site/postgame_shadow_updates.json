@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-04T12:02:14.597406+00:00",
+  "built_at": "2026-09-05T04:32:56.825370+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -366,6 +366,62 @@
       "next_opponent": "UL-Monroe",
       "total_estimate_status": "pending_current_season_pbp",
       "synthetic_input": false
+    },
+    {
+      "team": "Eastern Michigan",
+      "opponent": "San Jose State",
+      "completed_game_id": "g19",
+      "completed_date": "2026-09-04",
+      "team_margin": -6.0,
+      "team_closing_spread": -3.5,
+      "team_ats_margin": -9.5,
+      "estimated_spread_rating_innovation": -0.01,
+      "next_game_id": "g143",
+      "next_opponent": "Michigan State",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "San Jose State",
+      "opponent": "Eastern Michigan",
+      "completed_game_id": "g19",
+      "completed_date": "2026-09-04",
+      "team_margin": 6.0,
+      "team_closing_spread": 3.5,
+      "team_ats_margin": 9.5,
+      "estimated_spread_rating_innovation": 0.12,
+      "next_game_id": "g162",
+      "next_opponent": "Cal Poly",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Stanford",
+      "opponent": "Miami-FL",
+      "completed_game_id": "g22",
+      "completed_date": "2026-09-04",
+      "team_margin": -39.0,
+      "team_closing_spread": 21.5,
+      "team_ats_margin": -17.5,
+      "estimated_spread_rating_innovation": -7.42,
+      "next_game_id": "g204",
+      "next_opponent": "Duke",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Miami-FL",
+      "opponent": "Stanford",
+      "completed_game_id": "g22",
+      "completed_date": "2026-09-04",
+      "team_margin": 39.0,
+      "team_closing_spread": -21.5,
+      "team_ats_margin": 17.5,
+      "estimated_spread_rating_innovation": 7.17,
+      "next_game_id": "g100",
+      "next_opponent": "Florida A&M",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
     }
   ],
   "warnings": [
@@ -375,11 +431,17 @@
     "Missing canonical close/score: Eastern Illinois at Minnesota",
     "Missing canonical close/score: UAPB at Missouri",
     "Missing canonical close/score: Idaho at Utah",
-    "Missing canonical close/score: UAlbany at Buffalo"
+    "Missing canonical close/score: UAlbany at Buffalo",
+    "Missing canonical close/score: North Carolina A&T at Georgia State",
+    "Missing canonical close/score: LIU at Kansas",
+    "Unmatched result: Toledo at Michigan State",
+    "Unmatched result: UTEP at Oklahoma",
+    "Unmatched result: Indiana State at Purdue",
+    "Unmatched result: Fresno State at USC"
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 24,
-    "warnings": 7
+    "completed_team_updates": 28,
+    "warnings": 13
   }
 }
