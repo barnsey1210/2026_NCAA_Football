@@ -2735,6 +2735,25 @@ def main():
             completed_kickoff_by_gid,
         )
 
+        kickoff = parse_timestamp(game.get("kickoff_time"))
+        if kickoff is not None and kickoff <= datetime.now(timezone.utc):
+            game["edge_state"] = "CLOSED_AT_KICKOFF"
+            game["edges"]["spread"] = {
+                "away": None,
+                "home": None,
+                "best_side": None,
+                "best_edge": None,
+            }
+            game["edges"]["total"] = {
+                "over": None,
+                "under": None,
+                "best_side": None,
+                "best_edge": None,
+            }
+            game["edges"]["best_action"] = None
+        else:
+            game["edge_state"] = "ACTIVE"
+
     games_out.sort(
         key=lambda g: (
             g.get("week")

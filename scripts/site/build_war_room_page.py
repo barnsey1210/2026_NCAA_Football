@@ -2024,8 +2024,8 @@ function sourceHealthTooltip(label,status,coverage,fallback){
 }
 
 function edgeClass(edge){
-  const n = Number(edge);
-  if(!Number.isFinite(n)) return 'watch';
+  const n = numericSortValue(edge);
+  if(n === null) return 'watch';
   if(n >= 3) return 'action';
   if(n >= 2) return 'lean';
   return 'watch';
@@ -2444,12 +2444,12 @@ function renderSummary(){
   const rows = currentRows();
 
   const spreadEdges = rows
-    .map(g => Number(g.edges?.spread?.best_edge))
-    .filter(Number.isFinite);
+    .map(g => numericSortValue(g.edges?.spread?.best_edge))
+    .filter(v => v !== null);
 
   const totalEdges = rows
-    .map(g => Number(g.edges?.total?.best_edge))
-    .filter(Number.isFinite);
+    .map(g => numericSortValue(g.edges?.total?.best_edge))
+    .filter(v => v !== null);
 
   const spreadAction = spreadEdges.filter(x=>x>=3).length;
   const spreadLean = spreadEdges.filter(x=>x>=2 && x<3).length;
@@ -2553,9 +2553,9 @@ function modelDisplay(value, market){
 }
 
 function edgeDisplay(value){
-  const n = Number(value);
+  const n = numericSortValue(value);
 
-  if(!Number.isFinite(n) || n < 0){
+  if(n === null || n < 0){
     return '—';
   }
 
@@ -2563,7 +2563,8 @@ function edgeDisplay(value){
 }
 
 function spreadDecision(game, side, edge, useShortName=false){
-  if(!side || !Number.isFinite(Number(edge)) || Number(edge) <= 0){
+  const n = numericSortValue(edge);
+  if(!side || n === null || n <= 0){
     return edgeDisplay(edge);
   }
   const team = side === 'away' ? game.away_team : game.home_team;
@@ -2573,7 +2574,8 @@ function spreadDecision(game, side, edge, useShortName=false){
 }
 
 function totalDecision(side, edge){
-  if(!side || !Number.isFinite(Number(edge))){
+  const n = numericSortValue(edge);
+  if(!side || n === null){
     return edgeDisplay(edge);
   }
   const label = side === 'under' ? 'U' : 'O';
