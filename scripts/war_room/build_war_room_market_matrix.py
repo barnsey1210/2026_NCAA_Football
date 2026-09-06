@@ -138,6 +138,7 @@ SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
 BEST_EXCHANGE_MIN_PRICE = -120
+ACTIONABLE_QUOTE_MAX_AGE_MINUTES = 70
 MATERIAL_MOVE_THRESHOLD = 0.5
 MOVEMENT_RECENCY_MINUTES = {"very_recent": 15, "recent": 45, "older_recent": 90}
 OPENER_RECENCY_MINUTES = {"new": 30, "recent": 90}
@@ -547,6 +548,94 @@ def current_quote_pair_is_fresh(sides, *, now, max_age_hours):
             return False
 
     return True
+
+
+def current_quote_pair_is_actionable(
+    sides,
+    *,
+    now,
+    max_age_minutes=ACTIONABLE_QUOTE_MAX_AGE_MINUTES,
+):
+    if not sides:
+        return False
+
+    statuses = {
+        str(quote.get("freshness_status") or "").upper()
+        for quote in sides.values()
+    }
+
+    if statuses == {"FROZEN_CLOSE"}:
+        return True
+
+    for quote in sides.values():
+        updated = parse_timestamp(
+            quote.get("last_update")
+            or quote.get("source_updated_at")
+        )
+        if updated is None:
+            return False
+
+        age_seconds = (now - updated).total_seconds()
+
+        if age_seconds < -15 * 60:
+            return False
+
+        if age_seconds > max_age_minutes * 60:
+            return False
+
+    return True
+
+
+def prune_non_actionable_quote_inventory(
+    quote_inventory,
+    *,
+    reference_time,
+    max_age_minutes=ACTIONABLE_QUOTE_MAX_AGE_MINUTES,
+):
+    """Hide aged pregame quotes from current War Room decisioning.
+
+    Canonical retention and history remain untouched. FROZEN_CLOSE is
+    preserved. Removed pairs cannot display, win BEST/EXCH, or create EDGE.
+    """
+    now = parse_timestamp(reference_time) or datetime.now(timezone.utc)
+    removed = []
+
+    for gid, books in quote_inventory.items():
+        for book, book_data in books.items():
+            for market in ("spread", "total"):
+                sides = book_data.get(market)
+
+                if not sides:
+                    continue
+
+                if current_quote_pair_is_actionable(
+                    sides,
+                    now=now,
+                    max_age_minutes=max_age_minutes,
+                ):
+                    continue
+
+                timestamps = [
+                    str(
+                        quote.get("last_update")
+                        or quote.get("source_updated_at")
+                        or ""
+                    )
+                    for quote in sides.values()
+                ]
+
+                removed.append({
+                    "game_id": gid,
+                    "book": book,
+                    "market": market,
+                    "reason": "ACTIONABLE_QUOTE_TOO_OLD",
+                    "max_age_minutes": max_age_minutes,
+                    "latest_quote_timestamp": max(timestamps) if timestamps else None,
+                })
+
+                book_data.pop(market, None)
+
+    return removed
 
 
 def merge_current_market_fallbacks(
@@ -2392,6 +2481,11 @@ def main():
             continue
 
         quote_inventory[gid]
+
+    non_actionable_quote_removals = prune_non_actionable_quote_inventory(
+        quote_inventory,
+        reference_time=last_fast_pull_at,
+    )
 
     games_out = []
 
