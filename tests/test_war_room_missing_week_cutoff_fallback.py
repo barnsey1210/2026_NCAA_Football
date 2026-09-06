@@ -97,3 +97,33 @@ class AuthorityCurrentFallbackTest(unittest.TestCase):
                 "authority_current": False,
             })
         )
+
+class TeamRatingFallbackScopeTest(unittest.TestCase):
+
+    def test_game_feed_does_not_get_date_only_fallback(self):
+        meta={
+            "latest_accepted_update_at":
+                "2026-09-06T16:52:11Z"
+        }
+
+        self.assertFalse(
+            mod.has_accepted_source_update(
+                meta,
+                None,
+                None,
+            )
+        )
+
+    def test_team_rating_can_use_date_only_fallback(self):
+        meta={
+            "latest_accepted_update_at":
+                "2026-09-06T15:16:16Z"
+        }
+
+        self.assertTrue(
+            mod.has_accepted_source_update(
+                meta,
+                None,
+                "2026-09-05",
+            )
+        )

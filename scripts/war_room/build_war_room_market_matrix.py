@@ -1757,10 +1757,12 @@ def model_freshness(
                 comparison_available=meta.get("comparison_available"),
             )
 
+        is_team_rating_source = component in TEAM_SOURCE_MAP
+
         accepted_update = has_accepted_source_update(
             meta,
             week_cutoff_at,
-            watermark_date,
+            watermark_date if is_team_rating_source else None,
         )
 
         authority_current = (
@@ -1768,7 +1770,8 @@ def model_freshness(
             and (
                 state in ("PRE_GAME", "UPDATED")
                 or (
-                    week_cutoff_at is None
+                    is_team_rating_source
+                    and week_cutoff_at is None
                     and watermark_date is not None
                 )
             )
