@@ -1063,16 +1063,18 @@ def projection_is_available(game, model_id):
 
 
 def authority_source_is_current(meta):
-    """Return whether an accepted provider update is current for this game.
+    """Return whether an accepted provider update is current for authority.
 
-    PRE_GAME means no newer completed-game watermark exists for the matchup,
-    so an accepted weekly-cycle provider update remains eligible.
+    ``state`` remains the diagnostic game-relative lifecycle state.
 
-    UPDATED means the provider changed after the applicable completed-game
-    watermark.
-
-    STALE/UNKNOWN/MISSING do not count toward HYBRID authority.
+    ``authority_current`` is used when model_freshness has stronger durable
+    evidence for authority eligibility, including the conservative
+    watermark-date fallback used when an exact prior-week cutoff cannot be
+    reconstructed.
     """
+    if "authority_current" in meta:
+        return meta.get("authority_current") is True
+
     return (
         meta.get("accepted_update") is True
         and meta.get("state") in ("PRE_GAME", "UPDATED")
@@ -1760,6 +1762,18 @@ def model_freshness(
             week_cutoff_at,
             watermark_date,
         )
+
+        authority_current = (
+            accepted_update
+            and (
+                state in ("PRE_GAME", "UPDATED")
+                or (
+                    week_cutoff_at is None
+                    and watermark_date is not None
+                )
+            )
+        )
+
         sources[component] = {
             "source_key": source_key,
             "participating": present,
@@ -1780,6 +1794,7 @@ def model_freshness(
             # above. A PRE_GAME game can still consume a panel whose owning
             # pipeline has accepted a proven changed version.
             "accepted_update": accepted_update,
+            "authority_current": authority_current,
         }
 
     participating_states = [

@@ -59,3 +59,41 @@ class MissingWeekCutoffFallbackTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class AcceptedUpdateStateTest(unittest.TestCase):
+
+    def test_authority_source_counts_when_accepted_and_updated(self):
+        self.assertTrue(
+            mod.authority_source_is_current({
+                "accepted_update": True,
+                "state": "UPDATED",
+            })
+        )
+
+    def test_authority_source_does_not_count_stale(self):
+        self.assertFalse(
+            mod.authority_source_is_current({
+                "accepted_update": True,
+                "state": "STALE",
+            })
+        )
+
+class AuthorityCurrentFallbackTest(unittest.TestCase):
+
+    def test_explicit_authority_current_can_count_stale_diagnostic_state(self):
+        self.assertTrue(
+            mod.authority_source_is_current({
+                "accepted_update": True,
+                "state": "STALE",
+                "authority_current": True,
+            })
+        )
+
+    def test_exact_cutoff_stale_source_remains_excluded(self):
+        self.assertFalse(
+            mod.authority_source_is_current({
+                "accepted_update": True,
+                "state": "STALE",
+                "authority_current": False,
+            })
+        )
