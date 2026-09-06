@@ -1536,8 +1536,27 @@ def source_date_state(
     return "STALE"
 
 
-def has_accepted_source_update(meta, cutoff_at=None):
-    return accepted_after_cutoff(meta, cutoff_at)
+def has_accepted_source_update(
+    meta,
+    cutoff_at=None,
+    watermark_date=None,
+):
+    if cutoff_at is not None:
+        return accepted_after_cutoff(meta, cutoff_at)
+
+    # Conservative fallback when completed-game evidence exists but the
+    # final watcher cannot provide a complete exact prior-week cutoff.
+    # Only a durable accepted source update on a strictly later calendar
+    # date qualifies. Same-day ambiguity therefore continues to fail closed.
+    accepted_date = iso_date(
+        meta.get("latest_accepted_update_at")
+    )
+
+    return bool(
+        accepted_date
+        and watermark_date
+        and accepted_date > watermark_date
+    )
 
 
 def load_team_source_snapshots(
@@ -1739,6 +1758,7 @@ def model_freshness(
         accepted_update = has_accepted_source_update(
             meta,
             week_cutoff_at,
+            watermark_date,
         )
         sources[component] = {
             "source_key": source_key,
@@ -1776,7 +1796,7 @@ def model_freshness(
 
     nominal_count = len(nominal)
 
-    if week_cutoff_at is None:
+    if week_cutoff_at is None and watermark_date is None:
         temporal_status = "PRE_GAME"
     elif participating_count == 0:
         temporal_status = "UNAVAILABLE"
