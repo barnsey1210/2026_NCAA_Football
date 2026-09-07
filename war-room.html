@@ -952,9 +952,21 @@ tr:hover td.context-group{background:#202d39}
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{width:1.8%;text-align:center}
-.signal-col{width:5%}
-.state-col{width:5.5%;text-align:center}
+.injury-col{
+  width:102px;
+  min-width:102px;
+  max-width:102px;
+  text-align:center;
+  box-sizing:border-box;
+}
+
+.state-col{
+  width:94px;
+  min-width:94px;
+  max-width:94px;
+  text-align:center;
+  box-sizing:border-box;
+}
 
 /* Canonical Priority Market Matrix header typography. Column classes also
    style body cells, so this late header-only rule prevents those body font
@@ -1205,15 +1217,70 @@ tr:hover td.context-group{background:#202d39}
   color:var(--muted);
 }
 
-.injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
-.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:22px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
-.injury-team .team-logo-holder{--team-logo-size:22px}
-.injury-rank{position:absolute;right:-1px;bottom:-1px;min-width:10px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
+.injury-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  gap:3px;
+  width:100%;
+}
+.injury-team{
+  display:grid;
+  grid-template-columns:28px 26px 38px;
+  grid-template-rows:26px;
+  align-items:center;
+  justify-content:center;
+  column-gap:3px;
+  width:100%;
+  min-height:26px;
+  white-space:nowrap;
+  font-weight:950;
+  line-height:1;
+}
+.injury-team .team-logo-holder{
+  --team-logo-size:24px;
+  grid-column:2;
+  grid-row:1;
+  justify-self:center;
+  align-self:center;
+}
+.injury-rank{
+  grid-column:1;
+  grid-row:1;
+  min-width:22px;
+  padding:3px 3px;
+  justify-self:end;
+  align-self:center;
+  border-radius:4px;
+  background:#071019;
+  box-shadow:0 0 0 1px rgba(255,255,255,.22);
+  text-align:center;
+  font-size:11px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
 .injury-rank.injury-tier-1{color:#39e89a}
 .injury-rank.injury-tier-2{color:#a9df6a}
 .injury-rank.injury-tier-3{color:#f4cd4b}
 .injury-rank.injury-tier-4{color:#f28c45}
 .injury-rank.injury-tier-5{color:#ff626f}
+.injury-trend{
+  grid-column:3;
+  grid-row:1;
+  min-width:38px;
+  text-align:left;
+  font-size:10px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+  justify-self:start;
+  align-self:center;
+}
+.injury-trend.worse{color:var(--red)}
+.injury-trend.better{color:var(--green)}
+.injury-trend.flat{color:var(--muted)}
+.injury-trend.unavailable{color:var(--muted)}
+
 
 .signal-stack{
   display:flex;
@@ -1529,9 +1596,9 @@ tr:hover td.context-group{background:#202d39}
     background:#09131d;
   }
   .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
-  .mobile-foot-injury{display:flex;align-items:center;gap:5px;min-width:0}
-  .mobile-foot-injury .injury-stack{flex-direction:row;gap:5px}
-  .mobile-foot-signals{display:flex;align-items:center;gap:5px;min-width:0}
+  .mobile-foot-injury{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
+  .mobile-foot-injury .injury-stack{flex-direction:row;gap:12px;justify-content:flex-start}
+  .mobile-foot-injury .injury-team{width:auto}
 
   .wr-top{
     align-items:flex-start;
@@ -1593,19 +1660,9 @@ tr:hover td.context-group{background:#202d39}
   }
 }
 </style>
-<style id="shared-war-room-shell-v2">
-:root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
-.war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
-.war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
-.war-room-global .war-room-nav{display:flex!important;align-items:stretch!important;gap:0!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;height:82px!important;scrollbar-width:none!important}.war-room-global .war-room-nav::-webkit-scrollbar{display:none!important}.war-room-global .war-room-nav a{display:flex!important;align-items:center!important;padding:0 10px!important;color:#becada!important;font-size:14px!important;font-weight:900!important;white-space:nowrap!important;text-decoration:none!important;position:relative!important}.war-room-global .war-room-nav a.active{color:var(--wr-gold)!important}.war-room-global .war-room-nav a.active:after{content:"";position:absolute;left:9px;right:9px;bottom:0;height:4px;background:var(--wr-gold);border-radius:4px}
-.war-room-global .war-room-meta{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;min-width:max-content!important}.war-room-global .war-room-context{color:#8fa7c5!important;font-size:10px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important}.war-room-global .war-room-health{margin:0!important;white-space:nowrap!important}
-@media(max-width:1550px){.war-room-global{grid-template-columns:235px minmax(0,1fr) max-content!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:34px!important}.war-room-global .war-room-nav a{font-size:12px!important;padding:0 7px!important}.war-room-global .war-room-context{display:none!important}}
-@media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
-@media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
-</style></head>
+</head>
 
 <body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html" class="active">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a></nav><div class="war-room-meta"><span class="war-room-context">Command Center</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
 <div class="wr-shell">
 
   <div class="wr-top">
@@ -1811,10 +1868,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260907T124838Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260907T124838Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260907T124838Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260907T124838Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json';
+const HEALTH_URL = 'data/site/war_room_health.json';
+const ACTIVITY_URL = 'data/site/war_room_activity.json';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2681,8 +2738,7 @@ function renderHead(){
         TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="matrix-header-cell injury-col context-group">INJ</th>
-      <th class="matrix-header-cell signal-col context-group">SIGNALS</th>
+      <th class="matrix-header-cell injury-col context-group">INJURY</th>
       <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
           MODEL<br>STATE
@@ -2964,32 +3020,77 @@ function injuryRankClass(rank){
   return 'injury-tier-5';
 }
 
+function injuryTrend(row){
+  const delta=Number(row?.weekly_impact_delta);
+  const direction=String(row?.weekly_direction || 'UNAVAILABLE').toUpperCase();
+
+  if(!Number.isFinite(delta) || direction==='UNAVAILABLE'){
+    return '<span class="injury-trend unavailable">—</span>';
+  }
+
+  const rounded=Math.round(Math.abs(delta));
+
+  if(direction==='WORSE'){
+    return `<span class="injury-trend worse">↑ +${rounded}</span>`;
+  }
+
+  if(direction==='BETTER'){
+    return `<span class="injury-trend better">↓ -${rounded}</span>`;
+  }
+
+  const flatRounded=Math.round(delta);
+  const signed=flatRounded>0 ? `+${flatRounded}` : `${flatRounded}`;
+  return `<span class="injury-trend flat">→ ${signed}</span>`;
+}
+
 function injuryTeam(team,row,source){
   if(!row || !Number.isInteger(Number(row.injury_impact_rank))){
     return `<span class="injury-team" title="${esc(team)} · injury impact unavailable"><span class="injury-placeholder">—</span></span>`;
   }
+
   const rank=Number(row.injury_impact_rank);
   const slug=teamLogoSlug(team);
   const updated=row.source_updated_at
     ? fmtDateTimeET(row.source_updated_at)
     : 'source update time unverified';
+
+  const delta=Number(row.weekly_impact_delta);
+  const priorRank=Number(row.weekly_prior_rank);
+  const priorScore=Number(row.weekly_prior_score);
+  const direction=String(row.weekly_direction || 'UNAVAILABLE').toUpperCase();
+
   const title=[
     team,
-    `Injury Impact Rank: ${rank}/138`,
-    `Impact Score: ${row.injury_impact_score ?? '—'}`,
+    `Current Injury Impact Rank: ${rank}/138`,
+    `Current Impact Score: ${row.injury_impact_score ?? '—'}`,
     `Impact Injuries: ${row.injury_number ?? '—'}`,
     `New Injuries: ${row.injury_new ?? '—'}`,
+    Number.isFinite(priorScore)
+      ? `${row.weekly_days ?? '7'}-Day Prior Impact Score: ${priorScore}`
+      : 'Weekly prior impact unavailable',
+    Number.isInteger(priorRank)
+      ? `${row.weekly_days ?? '7'}-Day Prior Rank: ${priorRank}/138`
+      : null,
+    Number.isFinite(delta)
+      ? `Weekly Impact Change: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} · ${direction}`
+      : null,
+    row.weekly_baseline_date
+      ? `Comparison Baseline: ${row.weekly_baseline_date}`
+      : null,
     `Updated: ${updated}`,
     source?.pulled_at ? `Pulled: ${fmtDateTimeET(source.pulled_at)}` : null
   ].filter(Boolean).join('\n');
-  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span></span>`;
+
+  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span>${injuryTrend(row)}</span>`;
 }
 
 function injuryCell(game){
   const injury=game.injury_rank || {};
+
   if(!injury.away && !injury.home){
     return '<span class="injury-placeholder">—</span>';
   }
+
   return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
 }
 
@@ -3355,7 +3456,7 @@ function renderMobileMatrix(rows){
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           </div>
       </div>
-      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJ</span>${injuryCell(game)}</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
+      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJURY</span>${injuryCell(game)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
     </article>`;
   }).join('');
@@ -3515,10 +3616,6 @@ function renderMatrix(){
 
         <td class="injury-col context-group">
           ${injuryCell(game)}
-        </td>
-
-        <td class="signal-col context-group">
-          ${signalCell(game)}
         </td>
 
         <td class="state-col context-group">

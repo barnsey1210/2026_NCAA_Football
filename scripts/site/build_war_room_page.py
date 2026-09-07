@@ -1008,8 +1008,21 @@ tr:hover td.context-group{background:#202d39}
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{width:6.8%;text-align:center}
-.state-col{width:5.5%;text-align:center}
+.injury-col{
+  width:102px;
+  min-width:102px;
+  max-width:102px;
+  text-align:center;
+  box-sizing:border-box;
+}
+
+.state-col{
+  width:94px;
+  min-width:94px;
+  max-width:94px;
+  text-align:center;
+  box-sizing:border-box;
+}
 
 /* Canonical Priority Market Matrix header typography. Column classes also
    style body cells, so this late header-only rule prevents those body font
@@ -1269,20 +1282,32 @@ tr:hover td.context-group{background:#202d39}
   width:100%;
 }
 .injury-team{
-  display:flex;
+  display:grid;
+  grid-template-columns:28px 26px 38px;
+  grid-template-rows:26px;
   align-items:center;
   justify-content:center;
-  gap:4px;
+  column-gap:3px;
   width:100%;
   min-height:26px;
   white-space:nowrap;
   font-weight:950;
   line-height:1;
 }
-.injury-team .team-logo-holder{--team-logo-size:28px}
+.injury-team .team-logo-holder{
+  --team-logo-size:24px;
+  grid-column:2;
+  grid-row:1;
+  justify-self:center;
+  align-self:center;
+}
 .injury-rank{
-  min-width:24px;
-  padding:3px 4px;
+  grid-column:1;
+  grid-row:1;
+  min-width:22px;
+  padding:3px 3px;
+  justify-self:end;
+  align-self:center;
   border-radius:4px;
   background:#071019;
   box-shadow:0 0 0 1px rgba(255,255,255,.22);
@@ -1297,11 +1322,15 @@ tr:hover td.context-group{background:#202d39}
 .injury-rank.injury-tier-4{color:#f28c45}
 .injury-rank.injury-tier-5{color:#ff626f}
 .injury-trend{
-  min-width:42px;
+  grid-column:3;
+  grid-row:1;
+  min-width:38px;
   text-align:left;
   font-size:10px;
   font-weight:950;
   font-variant-numeric:tabular-nums;
+  justify-self:start;
+  align-self:center;
 }
 .injury-trend.worse{color:var(--red)}
 .injury-trend.better{color:var(--green)}
@@ -3055,15 +3084,18 @@ function injuryTrend(row){
     return '<span class="injury-trend unavailable">—</span>';
   }
 
+  const rounded=Math.round(Math.abs(delta));
+
   if(direction==='WORSE'){
-    return `<span class="injury-trend worse">↑ +${Math.abs(delta).toFixed(1)}</span>`;
+    return `<span class="injury-trend worse">↑ +${rounded}</span>`;
   }
 
   if(direction==='BETTER'){
-    return `<span class="injury-trend better">↓ -${Math.abs(delta).toFixed(1)}</span>`;
+    return `<span class="injury-trend better">↓ -${rounded}</span>`;
   }
 
-  const signed=delta>0 ? `+${delta.toFixed(1)}` : delta.toFixed(1);
+  const flatRounded=Math.round(delta);
+  const signed=flatRounded>0 ? `+${flatRounded}` : `${flatRounded}`;
   return `<span class="injury-trend flat">→ ${signed}</span>`;
 }
 
