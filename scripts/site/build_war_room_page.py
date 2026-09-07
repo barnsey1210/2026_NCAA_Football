@@ -184,6 +184,29 @@ button,select{
   opacity:.65;
 }
 
+.ratings-health-strip{
+  position:relative;
+}
+
+.ratings-health-content{
+  display:flex;
+  align-items:center;
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.ratings-model-mode{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-left:auto;
+  flex:0 0 auto;
+}
+
+.ratings-model-mode .hfa-note{
+  white-space:nowrap;
+}
+
 .model-mode-control{
   display:flex;
   align-items:center;
@@ -216,14 +239,14 @@ button,select{
 }
 
 .model-mode-btn.manual.active{
-  color:var(--yellow);
-  border-color:var(--yellow);
+  color:var(--green);
+  border-color:var(--green);
 }
 
 .manual-source-panel{
   position:absolute;
   right:8px;
-  top:42px;
+  top:100%;
   z-index:40;
   min-width:330px;
   padding:8px;
@@ -1566,6 +1589,48 @@ tr:hover td.context-group{background:#202d39}
     grid-template-columns:1fr;
   }
 
+  .ratings-health-content{
+    width:100%;
+    min-width:0;
+  }
+
+  .ratings-model-mode{
+    width:100%;
+    margin-left:0;
+    justify-content:flex-start;
+  }
+
+  .model-mode-control{
+    width:max-content;
+  }
+
+  .manual-source-panel{
+    left:4px;
+    right:4px;
+    top:100%;
+    min-width:0;
+    width:auto;
+    box-sizing:border-box;
+  }
+
+  .manual-source-row{
+    gap:6px;
+  }
+
+  .manual-source-title{
+    width:100%;
+    margin-bottom:1px;
+  }
+
+  .manual-source-actions{
+    flex-wrap:wrap;
+  }
+
+  .manual-source-status{
+    width:100%;
+    margin-right:0;
+  }
+
   .hfa-note{
     display:none;
   }
@@ -1615,35 +1680,6 @@ tr:hover td.context-group{background:#202d39}
       <button class="wr-btn operator-control" id="postgameBtn" disabled>
         ↻ REFRESH POSTGAME
       </button>
-
-      <div class="model-mode-control">
-        <span class="model-mode-label">MODEL</span>
-        <button class="model-mode-btn operator-control active" id="modelAutoBtn" type="button" disabled>AUTO</button>
-        <button class="model-mode-btn manual operator-control" id="modelManualBtn" type="button" disabled>MANUAL</button>
-      </div>
-
-      <div class="manual-source-panel" id="manualSourcePanel" hidden>
-        <div class="manual-source-row">
-          <span class="manual-source-title">SPREAD</span>
-          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="SP+" checked>SP+</label>
-          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="FPI" checked>FPI</label>
-          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="TeamRankings" checked>TR</label>
-          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="DRatings" checked>DR</label>
-        </div>
-
-        <div class="manual-source-row">
-          <span class="manual-source-title">TOTAL</span>
-          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="SP+" checked>SP+</label>
-          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="Massey Dual" checked>Massey</label>
-          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="DRatings Total" checked>DR</label>
-        </div>
-
-        <div class="manual-source-actions">
-          <span class="manual-source-status" id="manualSourceStatus">Equal-weight selected sources</span>
-          <button class="wr-btn operator-control" id="manualCancelBtn" type="button" disabled>CANCEL</button>
-          <button class="wr-btn acquire operator-control" id="manualApplyBtn" type="button" disabled>APPLY MANUAL</button>
-        </div>
-      </div>
 
       <div class="operator-status" id="operatorStatus">Checking operator authentication…</div>
     </div>
@@ -1710,7 +1746,44 @@ tr:hover td.context-group{background:#202d39}
   </section>
 
   <section class="health-strip ratings-health-strip" id="ratingsHealthStrip">
-    <span class="health-title">RATINGS / MODEL HEALTH</span>
+    <div class="ratings-health-content" id="ratingsHealthContent">
+      <span class="health-title">RATINGS / MODEL HEALTH</span>
+    </div>
+
+    <div class="ratings-model-mode">
+      <div class="model-mode-control">
+        <span class="model-mode-label">MODEL</span>
+        <button class="model-mode-btn operator-control active" id="modelAutoBtn" type="button" disabled>AUTO</button>
+        <button class="model-mode-btn manual operator-control" id="modelManualBtn" type="button" disabled>MANUAL</button>
+      </div>
+
+      <span class="hfa-note" title="War Room home-field advantage used in game projection construction">
+        HFA <strong>2.6</strong>
+      </span>
+    </div>
+
+    <div class="manual-source-panel" id="manualSourcePanel" hidden>
+      <div class="manual-source-row">
+        <span class="manual-source-title">SPREAD</span>
+        <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="SP+" checked>SP+</label>
+        <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="FPI" checked>FPI</label>
+        <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="TeamRankings" checked>TR</label>
+        <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="DRatings" checked>DR</label>
+      </div>
+
+      <div class="manual-source-row">
+        <span class="manual-source-title">TOTAL</span>
+        <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="SP+" checked>SP+</label>
+        <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="Massey Dual" checked>Massey</label>
+        <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="DRatings Total" checked>DR</label>
+      </div>
+
+      <div class="manual-source-actions">
+        <span class="manual-source-status" id="manualSourceStatus">Equal-weight selected sources</span>
+        <button class="wr-btn operator-control" id="manualCancelBtn" type="button" disabled>CANCEL</button>
+        <button class="wr-btn acquire operator-control" id="manualApplyBtn" type="button" disabled>APPLY MANUAL</button>
+      </div>
+    </div>
   </section>
 
   <section class="command-grid">
@@ -2367,7 +2440,7 @@ function renderHealth(){
     HEALTH?.ratings_health?.sources || {};
 
   const ratingsStrip =
-    document.getElementById('ratingsHealthStrip');
+    document.getElementById('ratingsHealthContent');
 
   if(ratingsStrip){
     const weekProjectionHealth =
@@ -2437,9 +2510,6 @@ function renderHealth(){
           ${totalSources}
         </div>
       </div>
-      <span class="hfa-note" title="War Room home-field advantage used in game projection construction">
-        HFA <strong>2.6</strong>
-      </span>
     `;
   }
 
@@ -4965,6 +5035,14 @@ function submitModelOverride(mode,button){
     total_sources:total
   };
 
+  const auto=document.getElementById('modelAutoBtn');
+  const manual=document.getElementById('modelManualBtn');
+  const panel=document.getElementById('manualSourcePanel');
+
+  if(auto) auto.classList.remove('active');
+  if(manual) manual.classList.remove('active');
+  if(panel) panel.hidden=true;
+
   requestOperation(
     'model-override',
     button,
@@ -5023,7 +5101,7 @@ async function pollPublishedVersion(){
     const response = await fetch(`${LIVE_VERSION_URL}?version=${Date.now()}`,{cache:'no-store'});
     if(!response.ok) return;
     const live = await response.json();
-    const version = [live.refresh_id,live.activity_built_at,live.activity_event_count,live.scoreboard_pulled_at,live.schedule_built_at].join('|');
+    const version = [live.refresh_id,live.matrix_built_at,live.activity_built_at,live.activity_event_count,live.scoreboard_pulled_at,live.schedule_built_at].join('|');
     if(LAST_BUILD_ID === null){LAST_BUILD_ID=version;return}
     if(version && version !== LAST_BUILD_ID){LAST_BUILD_ID=version;await loadData()}
   }catch(_err){ /* preserve the last valid rendered state */ }
