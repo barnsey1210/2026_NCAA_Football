@@ -210,36 +210,45 @@ button,select{
 .model-mode-control{
   display:flex;
   align-items:center;
-  gap:4px;
-  padding:2px 4px;
-  border:1px solid var(--line);
-  background:var(--panel);
+  gap:6px;
+  padding:4px 6px;
+  border:1px solid var(--line2);
+  background:#08121b;
 }
 
 .model-mode-label{
   color:var(--muted);
-  font-size:9px;
-  font-weight:900;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.5px;
   white-space:nowrap;
 }
 
 .model-mode-btn{
+  min-width:66px;
+  min-height:30px;
   border:1px solid var(--line2);
-  background:#08121b;
+  background:#07111a;
   color:var(--muted);
-  padding:3px 6px;
+  padding:5px 11px;
   cursor:pointer;
-  font-size:9px;
-  font-weight:900;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.4px;
 }
 
 .model-mode-btn.active{
-  color:var(--green);
+  color:#06120d;
+  background:var(--green);
   border-color:var(--green);
+  box-shadow:
+    0 0 0 1px rgba(57,232,154,.35),
+    0 0 10px rgba(57,232,154,.22);
 }
 
 .model-mode-btn.manual.active{
-  color:var(--green);
+  color:#06120d;
+  background:var(--green);
   border-color:var(--green);
 }
 
@@ -5035,12 +5044,8 @@ function submitModelOverride(mode,button){
     total_sources:total
   };
 
-  const auto=document.getElementById('modelAutoBtn');
-  const manual=document.getElementById('modelManualBtn');
   const panel=document.getElementById('manualSourcePanel');
 
-  if(auto) auto.classList.remove('active');
-  if(manual) manual.classList.remove('active');
   if(panel) panel.hidden=true;
 
   requestOperation(
