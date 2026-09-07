@@ -128,6 +128,98 @@ button,select{
   opacity:.65;
 }
 
+.model-mode-control{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 4px;
+  border:1px solid var(--line);
+  background:var(--panel);
+}
+
+.model-mode-label{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.model-mode-btn{
+  border:1px solid var(--line2);
+  background:#08121b;
+  color:var(--muted);
+  padding:3px 6px;
+  cursor:pointer;
+  font-size:9px;
+  font-weight:900;
+}
+
+.model-mode-btn.active{
+  color:var(--green);
+  border-color:var(--green);
+}
+
+.model-mode-btn.manual.active{
+  color:var(--yellow);
+  border-color:var(--yellow);
+}
+
+.manual-source-panel{
+  position:absolute;
+  right:8px;
+  top:42px;
+  z-index:40;
+  min-width:330px;
+  padding:8px;
+  border:1px solid var(--line2);
+  background:#08121b;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+}
+
+.manual-source-panel[hidden]{
+  display:none;
+}
+
+.manual-source-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:5px 0;
+  flex-wrap:wrap;
+}
+
+.manual-source-title{
+  width:52px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+}
+
+.manual-source-option{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  color:var(--text);
+  font-size:9px;
+  white-space:nowrap;
+}
+
+.manual-source-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:5px;
+  margin-top:7px;
+  padding-top:6px;
+  border-top:1px solid var(--line);
+}
+
+.manual-source-status{
+  margin-right:auto;
+  align-self:center;
+  color:var(--muted);
+  font-size:8px;
+}
+
 .operator-status{
   position:absolute;
   right:9px;
@@ -1478,6 +1570,35 @@ tr:hover td.context-group{background:#202d39}
         ↻ REFRESH POSTGAME
       </button>
 
+      <div class="model-mode-control">
+        <span class="model-mode-label">MODEL</span>
+        <button class="model-mode-btn operator-control active" id="modelAutoBtn" type="button" disabled>AUTO</button>
+        <button class="model-mode-btn manual operator-control" id="modelManualBtn" type="button" disabled>MANUAL</button>
+      </div>
+
+      <div class="manual-source-panel" id="manualSourcePanel" hidden>
+        <div class="manual-source-row">
+          <span class="manual-source-title">SPREAD</span>
+          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="SP+" checked>SP+</label>
+          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="FPI" checked>FPI</label>
+          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="TeamRankings" checked>TR</label>
+          <label class="manual-source-option"><input type="checkbox" class="manual-spread-source" value="DRatings" checked>DR</label>
+        </div>
+
+        <div class="manual-source-row">
+          <span class="manual-source-title">TOTAL</span>
+          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="SP+" checked>SP+</label>
+          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="Massey Dual" checked>Massey</label>
+          <label class="manual-source-option"><input type="checkbox" class="manual-total-source" value="DRatings Total" checked>DR</label>
+        </div>
+
+        <div class="manual-source-actions">
+          <span class="manual-source-status" id="manualSourceStatus">Equal-weight selected sources</span>
+          <button class="wr-btn operator-control" id="manualCancelBtn" type="button" disabled>CANCEL</button>
+          <button class="wr-btn acquire operator-control" id="manualApplyBtn" type="button" disabled>APPLY MANUAL</button>
+        </div>
+      </div>
+
       <div class="operator-status" id="operatorStatus">Checking operator authentication…</div>
     </div>
   </div>
@@ -1608,10 +1729,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260907T021149Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260907T021149Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260907T021149Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260907T021149Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260907T022838Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260907T022838Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260907T022838Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260907T022838Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2046,21 +2167,21 @@ function currentRows(){
 
     else if(SORT_KEY === 'spread_edge'){
       av = numericSortValue(
-        a.edges?.spread?.best_edge
+        displayedEdge(a,'spread')?.best_edge
       );
 
       bv = numericSortValue(
-        b.edges?.spread?.best_edge
+        displayedEdge(b,'spread')?.best_edge
       );
     }
 
     else if(SORT_KEY === 'total_edge'){
       av = numericSortValue(
-        a.edges?.total?.best_edge
+        displayedEdge(a,'total')?.best_edge
       );
 
       bv = numericSortValue(
-        b.edges?.total?.best_edge
+        displayedEdge(b,'total')?.best_edge
       );
     }
 
@@ -2071,19 +2192,19 @@ function currentRows(){
 
     else{
       const aSpread = numericSortValue(
-        a.edges?.spread?.best_edge
+        displayedEdge(a,'spread')?.best_edge
       );
 
       const aTotal = numericSortValue(
-        a.edges?.total?.best_edge
+        displayedEdge(a,'total')?.best_edge
       );
 
       const bSpread = numericSortValue(
-        b.edges?.spread?.best_edge
+        displayedEdge(b,'spread')?.best_edge
       );
 
       const bTotal = numericSortValue(
-        b.edges?.total?.best_edge
+        displayedEdge(b,'total')?.best_edge
       );
 
       av = Math.max(
@@ -2409,11 +2530,11 @@ function renderSummary(){
   const rows = currentRows();
 
   const spreadEdges = rows
-    .map(g => numericSortValue(g.edges?.spread?.best_edge))
+    .map(g => numericSortValue(displayedEdge(g,'spread')?.best_edge))
     .filter(v => v !== null);
 
   const totalEdges = rows
-    .map(g => numericSortValue(g.edges?.total?.best_edge))
+    .map(g => numericSortValue(displayedEdge(g,'total')?.best_edge))
     .filter(v => v !== null);
 
   const spreadAction = spreadEdges.filter(x=>x>=3).length;
@@ -2498,6 +2619,77 @@ function renderHead(){
     </tr>
   `;
 }
+
+function manualDisplayActive(game){
+  return (
+    String(game?.operator_model?.mode || 'AUTO').toUpperCase() === 'MANUAL' &&
+    game?.edge_state === 'ACTIVE'
+  );
+}
+
+function displayedModelValue(game,market){
+  if(manualDisplayActive(game)){
+    const manual=game?.operator_model?.manual?.[market];
+    const value=Number(manual?.value);
+
+    if(Number.isFinite(value)){
+      return value;
+    }
+  }
+
+  const authority=game?.authority?.[market]?.value;
+  const authorityNumber=Number(authority);
+
+  if(Number.isFinite(authorityNumber)){
+    return authorityNumber;
+  }
+
+  const fallback=market==='spread'
+    ? game?.models?.standard_spread?.value_home_line
+    : game?.models?.standard_total?.value_total;
+
+  const fallbackNumber=Number(fallback);
+
+  return Number.isFinite(fallbackNumber)
+    ? fallbackNumber
+    : null;
+}
+
+function displayedEdge(game,market){
+  if(manualDisplayActive(game)){
+    const manual=game?.operator_model?.manual?.[market];
+    const value=Number(manual?.value);
+    const edge=game?.operator_model?.manual_edges?.[market];
+
+    if(Number.isFinite(value) && edge){
+      return edge;
+    }
+  }
+
+  return game?.edges?.[market] || null;
+}
+
+function manualModelLabel(game,market){
+  if(!manualDisplayActive(game)) return '';
+
+  const manual=game?.operator_model?.manual?.[market];
+
+  if(!manual || !Number.isFinite(Number(manual.value))){
+    return '';
+  }
+
+  const sources=manual.participating_sources || [];
+
+  if(!sources.length) return '';
+
+  return `MANUAL · ${sources.map(source=>{
+    if(source==='TeamRankings') return 'TR';
+    if(source==='DRatings Total') return 'DR';
+    if(source==='Massey Dual') return 'MAS';
+    return source;
+  }).join(' + ')}`;
+}
+
 
 function modelDisplay(value, market){
   if(
@@ -2584,23 +2776,43 @@ function modelTooltip(game, model, market){
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
     const label = market === 'total' && name === 'SP+' ? 'SP+ Total' : name;
     const timestamp = freshnessRow.snapshot_date || freshnessRow.pulled_at || model?.freshness_timestamp || '';
-    const weight = STANDARD_COMPONENT_WEIGHTS[market]?.[name];
-    return `<span class="model-component ${freshnessClass}" title="${timestamp ? `Source timestamp ${esc(timestamp)}` : 'Source timestamp unavailable'}"><span>${esc(label)} · ${weight}%</span><span>${shown}</span></span>`;
+    const manual=manualDisplayActive(game)
+      ? game?.operator_model?.manual?.[market]
+      : null;
+
+    const requested=new Set(
+      manual?.requested_sources || []
+    );
+
+    const manualWeight=Number(
+      manual?.weights_used?.[name]
+    );
+
+    let weightText;
+
+    if(manual){
+      if(Number.isFinite(manualWeight)){
+        weightText=`${(manualWeight*100).toFixed(1)}%`;
+      }else if(requested.has(name)){
+        weightText='SELECTED · MISSING';
+      }else{
+        weightText='OFF';
+      }
+    }else{
+      weightText=`${STANDARD_COMPONENT_WEIGHTS[market]?.[name]}%`;
+    }
+
+    return `<span class="model-component ${freshnessClass}" title="${timestamp ? `Source timestamp ${esc(timestamp)}` : 'Source timestamp unavailable'}"><span>${esc(label)} · ${weightText}</span><span>${shown}</span></span>`;
   }).join('');
   // The MODEL cell must display the same projection that drives EDGE.
   // Keep the Standard model/component payload for tooltip diagnostics,
   // but use the resolved game authority value for the visible number.
-  const authorityValue = market === 'spread'
-    ? game?.authority?.spread?.value
-    : game?.authority?.total?.value;
-  const standardValue = market === 'spread'
-    ? model?.value_home_line
-    : model?.value_total;
-  const value = authorityValue ?? standardValue;
+  const value = displayedModelValue(game,market);
   const shown=market==='spread'
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  const modeLabel=manualModelLabel(game,market);
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel)}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
 
 function positionModelTooltip(trigger){
@@ -3007,10 +3219,12 @@ function renderMobileMatrix(rows){
   const grid=document.querySelector('.command-grid');
   if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);
   mobile.innerHTML=rows.map(game=>{
-    const sprSide=game.edges?.spread?.best_side;
-    const totSide=game.edges?.total?.best_side;
-    const sprEdge=sprSide?game.edges?.spread?.best_edge:null;
-    const totEdge=totSide?game.edges?.total?.best_edge:null;
+    const displayedSpreadEdge=displayedEdge(game,'spread');
+    const displayedTotalEdge=displayedEdge(game,'total');
+    const sprSide=displayedSpreadEdge?.best_side;
+    const totSide=displayedTotalEdge?.best_side;
+    const sprEdge=sprSide?displayedSpreadEdge?.best_edge:null;
+    const totEdge=totSide?displayedTotalEdge?.best_edge:null;
     const sprBest=sprSide?game.market?.best_sportsbook?.spread?.[sprSide]:null;
     const totBest=totSide?game.market?.best_sportsbook?.total?.[totSide]:null;
     const sprShadow=game.models?.shadow_spread;
@@ -3100,20 +3314,26 @@ function renderMatrix(){
 
   body.innerHTML = rows.map(game=>{
 
+    const displayedSpreadEdge =
+      displayedEdge(game,'spread');
+
+    const displayedTotalEdge =
+      displayedEdge(game,'total');
+
     const sprSide =
-      game.edges?.spread?.best_side;
+      displayedSpreadEdge?.best_side;
 
     const totSide =
-      game.edges?.total?.best_side;
+      displayedTotalEdge?.best_side;
 
     const sprEdge =
       sprSide
-        ? game.edges?.spread?.best_edge
+        ? displayedSpreadEdge?.best_edge
         : null;
 
     const totEdge =
       totSide
-        ? game.edges?.total?.best_edge
+        ? displayedTotalEdge?.best_edge
         : null;
 
     const sprBest =
@@ -4349,6 +4569,7 @@ async function switchMatrixWeek(week){
 
   fillWeeks();
   reconcileSelectedGame();
+  syncModelModeControls();
   renderHealth();
   renderMatrix();
   renderActivity();
@@ -4511,7 +4732,7 @@ const CONTROL_BASE_URL = "https://control.barnseywr.com";
 const VERSION_POLL_MS = 2000;
 const CONTROL_ORIGIN = CONTROL_BASE_URL ? new URL(CONTROL_BASE_URL).origin : '';
 const CONTROL_CHANNEL = 'ncaaf-war-room-control-v1';
-const CONTROL_ACTIONS = new Set(['market','ratings','postgame']);
+const CONTROL_ACTIONS = new Set(['market','ratings','postgame','model-override']);
 const RELAY_REQUESTS = new Map();
 let CONTROL_WINDOW = null;
 const CONTROL_NONCE_KEY = 'ncaaf-war-room-control-nonce-v1';
@@ -4540,11 +4761,21 @@ function connectOperator(){
   status.textContent='Waiting for operator authentication…';
 }
 
-function requestViaRelay(action, button, old){
+function requestViaRelay(action, button, old, payload=null){
   if(!CONTROL_ACTIONS.has(action) || !CONTROL_WINDOW || CONTROL_WINDOW.closed) throw new Error('Operator session is not connected');
   const requestId=crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
   RELAY_REQUESTS.set(requestId,{button,old});
-  CONTROL_WINDOW.postMessage({channel:CONTROL_CHANNEL,channelNonce:ensureControlNonce(),type:'REQUEST',requestId,action},CONTROL_ORIGIN);
+  CONTROL_WINDOW.postMessage(
+    {
+      channel:CONTROL_CHANNEL,
+      channelNonce:ensureControlNonce(),
+      type:'REQUEST',
+      requestId,
+      action,
+      payload
+    },
+    CONTROL_ORIGIN
+  );
 }
 
 addEventListener('message',event=>{
@@ -4592,13 +4823,13 @@ addEventListener('message',event=>{
   }
 });
 
-function requestOperation(action, button, runningLabel){
+function requestOperation(action, button, runningLabel, payload=null){
   const old = button.textContent;
   button.disabled = true;
   button.textContent = runningLabel;
   const status = document.getElementById('operatorStatus');
   status.textContent = 'Submitting authenticated request…';
-  try{requestViaRelay(action,button,old)}catch(err){
+  try{requestViaRelay(action,button,old,payload)}catch(err){
     button.textContent='⚠ REQUEST FAILED';
     status.textContent = `Request failed · ${err.message}`;
     setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
@@ -4627,6 +4858,104 @@ function detectOperator(){
     if(!CONTROL_WINDOW){status.textContent='Connect authenticated operator session';connect.hidden=false}
   },2000);
 }
+
+function currentOperatorModel(){
+  const game=(MATRIX?.games || []).find(g=>g?.operator_model);
+  return game?.operator_model || {
+    mode:'AUTO',
+    spread_sources:['SP+','FPI','TeamRankings','DRatings'],
+    total_sources:['SP+','Massey Dual','DRatings Total']
+  };
+}
+
+function selectedManualSources(selector){
+  return Array.from(document.querySelectorAll(selector))
+    .filter(input=>input.checked)
+    .map(input=>input.value);
+}
+
+function setManualCheckboxes(selector,selected){
+  const wanted=new Set(selected || []);
+  document.querySelectorAll(selector).forEach(input=>{
+    input.checked=wanted.has(input.value);
+  });
+}
+
+function syncModelModeControls(){
+  const config=currentOperatorModel();
+  const mode=String(config.mode || 'AUTO').toUpperCase();
+  const auto=document.getElementById('modelAutoBtn');
+  const manual=document.getElementById('modelManualBtn');
+  const panel=document.getElementById('manualSourcePanel');
+
+  if(auto) auto.classList.toggle('active',mode==='AUTO');
+  if(manual) manual.classList.toggle('active',mode==='MANUAL');
+
+  if(config.spread_sources){
+    setManualCheckboxes('.manual-spread-source',config.spread_sources);
+  }
+
+  if(config.total_sources){
+    setManualCheckboxes('.manual-total-source',config.total_sources);
+  }
+
+  if(panel && mode==='AUTO'){
+    panel.hidden=true;
+  }
+}
+
+function submitModelOverride(mode,button){
+  const spread=selectedManualSources('.manual-spread-source');
+  const total=selectedManualSources('.manual-total-source');
+
+  if(mode==='MANUAL' && spread.length===0 && total.length===0){
+    document.getElementById('manualSourceStatus').textContent='Select at least one source';
+    return;
+  }
+
+  const payload={
+    mode,
+    spread_sources:spread,
+    total_sources:total
+  };
+
+  requestOperation(
+    'model-override',
+    button,
+    mode==='AUTO' ? 'AUTO…' : 'APPLYING…',
+    payload
+  );
+}
+
+document.getElementById('modelAutoBtn').addEventListener('click',e=>{
+  document.getElementById('manualSourcePanel').hidden=true;
+  submitModelOverride('AUTO',e.currentTarget);
+});
+
+document.getElementById('modelManualBtn').addEventListener('click',()=>{
+  const panel=document.getElementById('manualSourcePanel');
+  panel.hidden=!panel.hidden;
+});
+
+document.getElementById('manualCancelBtn').addEventListener('click',()=>{
+  const config=currentOperatorModel();
+
+  setManualCheckboxes(
+    '.manual-spread-source',
+    config.spread_sources || []
+  );
+
+  setManualCheckboxes(
+    '.manual-total-source',
+    config.total_sources || []
+  );
+
+  document.getElementById('manualSourcePanel').hidden=true;
+});
+
+document.getElementById('manualApplyBtn').addEventListener('click',e=>{
+  submitModelOverride('MANUAL',e.currentTarget);
+});
 
 document.getElementById('connectOperatorBtn').addEventListener('click',connectOperator);
 
