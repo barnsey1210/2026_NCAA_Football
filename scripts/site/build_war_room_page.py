@@ -4720,6 +4720,7 @@ async function loadData(){
 
   fillWeeks();
   reconcileSelectedGame();
+  syncModelModeControls();
   renderHealth();
   renderMatrix();
   renderActivity();
