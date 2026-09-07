@@ -362,9 +362,51 @@ def main():
             row["rank"] = rank
             row["ranking_status"] = "RANKED"
 
-    opportunities = []
+    public_decisions_by_key = {}
 
     for decision in decisions:
+        prediction = predictions_by_id.get(
+            decision.get(
+                "prediction_observation_id"
+            ),
+            {},
+        )
+
+        model_identity = (
+            prediction.get("model_id")
+            or decision.get(
+                "prediction_observation_id"
+            )
+            or decision.get("decision_id")
+        )
+
+        key = (
+            decision.get("canonical_game_id"),
+            decision.get("market_type"),
+            decision.get("checkpoint"),
+            model_identity,
+        )
+
+        prior = public_decisions_by_key.get(key)
+
+        if (
+            prior is None
+            or str(decision.get("created_at") or "")
+            >= str(prior.get("created_at") or "")
+        ):
+            public_decisions_by_key[key] = decision
+
+    public_decisions = sorted(
+        public_decisions_by_key.values(),
+        key=lambda row: (
+            str(row.get("created_at") or ""),
+            str(row.get("decision_id") or ""),
+        ),
+    )
+
+    opportunities = []
+
+    for decision in public_decisions:
         prediction = predictions_by_id.get(
             decision.get(
                 "prediction_observation_id"
@@ -618,7 +660,7 @@ def main():
         "tracking_started": bool(predictions),
         "ranking_minimum": 30,
         "summary": {
-            "opportunities": len(decisions),
+            "opportunities": len(public_decisions),
             "predictions": len(predictions),
             "score_rows_all_versions": len(
                 scores_all
@@ -628,7 +670,7 @@ def main():
                 "opportunities": sum(
                     row.get("market_type")
                     == "spread"
-                    for row in decisions
+                    for row in public_decisions
                 ),
                 "settled_selections": sum(
                     row.get("market_type")
@@ -640,7 +682,7 @@ def main():
                 "opportunities": sum(
                     row.get("market_type")
                     == "total"
-                    for row in decisions
+                    for row in public_decisions
                 ),
                 "settled_selections": sum(
                     row.get("market_type")
