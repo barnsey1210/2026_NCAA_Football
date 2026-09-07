@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -42,7 +43,9 @@ def utc_now() -> str:
 
 
 def number(value):
-    text = str(value or "").strip()
+    if value is None:
+        return None
+    text = str(value).strip()
     if not text:
         return None
     try:
@@ -228,8 +231,30 @@ def main() -> None:
     args = parser.parse_args()
 
     pulled_at = args.pulled_at or utc_now()
-    raw_bytes = args.input.read_bytes() if args.input else acquire(args.url)
-    rows = normalize(raw_bytes, pulled_at, args.source_updated_at)
+
+    if args.input:
+        raw_bytes = args.input.read_bytes()
+        rows = normalize(raw_bytes, pulled_at, args.source_updated_at)
+    else:
+        last_error = None
+        for attempt in range(2):
+            raw_bytes = acquire(args.url)
+            try:
+                rows = normalize(raw_bytes, pulled_at, args.source_updated_at)
+                break
+            except ValueError as exc:
+                last_error = exc
+                if attempt == 0:
+                    print(
+                        f"CFBDepth validation failed on first acquisition; "
+                        f"retrying once: {exc}",
+                        file=sys.stderr,
+                    )
+                    time.sleep(3)
+                    continue
+                raise
+        else:
+            raise last_error
 
     output = args.output.resolve()
     audit_path = args.audit.resolve()
