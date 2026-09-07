@@ -23,6 +23,7 @@ from urllib.parse import urlsplit
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parents[2]
 LATEST = ROOT / "data/control/war_room_services/latest.json"
@@ -35,6 +36,7 @@ GAME_ACTIVITY_INDEX = ROOT / "data/war_room/history/war_room_game_activity_index
 SCHEDULE = ROOT / "data/site/schedule_live_enrichment.json"
 SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
 FINAL_WATCHER_LATEST = ROOT / "data/control/cfbd_final_watcher/latest.json"
+MODEL_OVERRIDE = ROOT / "data/control/war_room_model_override.json"
 def normalize_exact_origin(value: str) -> str:
     """Return one exact HTTPS origin or fail closed on paths and wildcards."""
     candidate = value.strip().rstrip("/")
@@ -83,7 +85,14 @@ ACTION_PATHS = {
     "/war-room/market",
     "/war-room/ratings",
     "/war-room/postgame",
+    "/war-room/model-override",
 }
+
+class ModelOverrideRequest(BaseModel):
+    mode: str
+    spread_sources: list[str] = []
+    total_sources: list[str] = []
+
 
 app = FastAPI(title="NCAAF War Room Control Origin", version="1.0.0")
 app.add_middleware(
@@ -508,7 +517,7 @@ const TARGET_ORIGINS=Object.freeze({target_origins});
 let ACTIVE_TARGET_ORIGIN=null;
 const CHANNEL='ncaaf-war-room-control-v1';
 const CHANNEL_NONCE={nonce_json};
-const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame'}});
+const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame','model-override':'/war-room/model-override'}});
 const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
 function send(message){{
   if(!window.opener)return;
@@ -545,7 +554,13 @@ addEventListener('message',async event=>{{
   try{{
     let response;
     try{{
-      response=await fetch(ACTION_ROUTES[message.action],{{method:'POST',cache:'no-store',credentials:'same-origin'}});
+      response=await fetch(ACTION_ROUTES[message.action],{{
+      method:'POST',
+      cache:'no-store',
+      credentials:'same-origin',
+      headers:message.payload?{{'Content-Type':'application/json'}}:undefined,
+      body:message.payload?JSON.stringify(message.payload):undefined
+    }});
     }}catch(error){{
       send({{type:'SESSION_EXPIRED',requestId:message.requestId,message:'Authenticated operator channel unavailable'}});
       return;
@@ -598,6 +613,153 @@ def ratings(request: Request, operator: str = Depends(require_access)):
 @app.post("/war-room/postgame", status_code=202)
 def postgame(request: Request, operator: str = Depends(require_access)):
     return request_action("postgame", operator, request)
+
+
+@app.post("/war-room/model-override", status_code=202)
+def model_override(
+    payload: ModelOverrideRequest,
+    request: Request,
+    operator: str = Depends(require_access),
+):
+    mode = str(payload.mode or "").upper()
+
+    spread_allowed = {
+        "SP+",
+        "FPI",
+        "TeamRankings",
+        "DRatings",
+    }
+
+    total_allowed = {
+        "SP+",
+        "Massey Dual",
+        "DRatings Total",
+    }
+
+    spread = [
+        source
+        for source in payload.spread_sources
+        if source in spread_allowed
+    ]
+
+    total = [
+        source
+        for source in payload.total_sources
+        if source in total_allowed
+    ]
+
+    if mode not in {"AUTO", "MANUAL"}:
+        raise HTTPException(
+            status_code=400,
+            detail="invalid model mode",
+        )
+
+    if len(spread) != len(payload.spread_sources):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid spread source",
+        )
+
+    if len(total) != len(payload.total_sources):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid total source",
+        )
+
+    if mode == "MANUAL" and not spread and not total:
+        raise HTTPException(
+            status_code=400,
+            detail="MANUAL requires selected sources",
+        )
+
+    identity = f"model-override-{uuid.uuid4().hex[:12]}"
+    task_path = TASKS / f"{identity}.json"
+
+    task = {
+        "schema_version": 1,
+        "task_id": identity,
+        "action": "model-override",
+        "trigger": "cloudflare-access",
+        "requester": operator[:120],
+        "requested_at": utc_now(),
+        "status": "REQUESTED",
+        "correlation_id": request.state.correlation_id,
+        "command_owner":
+            "scripts/war_room/apply_war_room_model_override.py",
+    }
+
+    atomic_json(task_path, task)
+    atomic_json(LATEST, task)
+
+    command = [
+        sys.executable,
+        "scripts/war_room/apply_war_room_model_override.py",
+        "--mode",
+        mode,
+        "--spread-sources",
+        ",".join(spread),
+        "--total-sources",
+        ",".join(total),
+        "--requester",
+        operator,
+        "--task-id",
+        identity,
+    ]
+
+    process = subprocess.Popen(
+        command,
+        cwd=ROOT,
+        env=os.environ.copy(),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+    task["status"] = "RUNNING"
+    task["dispatcher_pid"] = process.pid
+    atomic_json(task_path, task)
+    atomic_json(LATEST, task)
+
+    request.state.task_id = identity
+
+    return {
+        "ok": True,
+        "status": "RUNNING",
+        "action": "model-override",
+        "task_id": identity,
+        "correlation_id": request.state.correlation_id,
+        "dispatcher_pid": process.pid,
+    }
+
+
+@app.get("/war-room/model-override")
+def get_model_override(
+    operator: str = Depends(require_access),
+):
+    return {
+        "ok": True,
+        "operator": operator,
+        "override": load_json(
+            MODEL_OVERRIDE,
+            {
+                "schema_version":
+                    "war-room-model-override-v1",
+                "mode": "AUTO",
+                "spread_sources": [
+                    "SP+",
+                    "FPI",
+                    "TeamRankings",
+                    "DRatings",
+                ],
+                "total_sources": [
+                    "SP+",
+                    "Massey Dual",
+                    "DRatings Total",
+                ],
+            },
+        ),
+    }
 
 
 @app.get("/war-room/state")

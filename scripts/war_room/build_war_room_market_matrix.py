@@ -138,6 +138,21 @@ SHADOW_SPREAD = "shadow_spread_sp_sagarin_v1"
 SHADOW_TOTAL = "shadow_total_enhanced_spplus_od_v1"
 
 BEST_EXCHANGE_MIN_PRICE = -120
+
+MODEL_OVERRIDE = ROOT / "data/control/war_room_model_override.json"
+
+MANUAL_SPREAD_SOURCES = (
+    "SP+",
+    "FPI",
+    "TeamRankings",
+    "DRatings",
+)
+
+MANUAL_TOTAL_SOURCES = (
+    "SP+",
+    "Massey Dual",
+    "DRatings Total",
+)
 ACTIONABLE_QUOTE_MAX_AGE_MINUTES = 70
 MATERIAL_MOVE_THRESHOLD = 0.5
 MOVEMENT_RECENCY_MINUTES = {"very_recent": 15, "recent": 45, "older_recent": 90}
@@ -1863,6 +1878,194 @@ def model_freshness(
 
 
 
+def load_model_override():
+    default = {
+        "schema_version": "war-room-model-override-v1",
+        "mode": "AUTO",
+        "spread_sources": list(MANUAL_SPREAD_SOURCES),
+        "total_sources": list(MANUAL_TOTAL_SOURCES),
+        "updated_at": None,
+        "updated_by": None,
+    }
+
+    if not MODEL_OVERRIDE.exists():
+        return default
+
+    try:
+        payload = json.loads(MODEL_OVERRIDE.read_text())
+    except (OSError, json.JSONDecodeError):
+        return default
+
+    mode = str(payload.get("mode") or "AUTO").upper()
+    if mode not in {"AUTO", "MANUAL"}:
+        mode = "AUTO"
+
+    spread = [
+        source
+        for source in payload.get("spread_sources") or []
+        if source in MANUAL_SPREAD_SOURCES
+    ]
+
+    total = [
+        source
+        for source in payload.get("total_sources") or []
+        if source in MANUAL_TOTAL_SOURCES
+    ]
+
+    return {
+        "schema_version": "war-room-model-override-v1",
+        "mode": mode,
+        "spread_sources": spread,
+        "total_sources": total,
+        "updated_at": payload.get("updated_at"),
+        "updated_by": payload.get("updated_by"),
+    }
+
+
+def manual_projection_value(
+    game,
+    *,
+    model_id,
+    field,
+    selected_sources,
+):
+    projection = (
+        game.get("projections", {})
+        .get(model_id, {})
+    )
+
+    values = projection.get("component_values") or {}
+    statuses = projection.get("component_status") or {}
+
+    requested = [
+        source
+        for source in selected_sources
+        if source
+    ]
+
+    participating = []
+    missing = []
+    numeric_values = {}
+
+    for source in requested:
+        value = number(values.get(source))
+        present = statuses.get(source) == "PRESENT"
+
+        if not present or value is None:
+            missing.append(source)
+            continue
+
+        participating.append(source)
+        numeric_values[source] = value
+
+    if not participating:
+        return {
+            "value": None,
+            "requested_sources": requested,
+            "participating_sources": [],
+            "missing_sources": missing,
+            "weights_used": {},
+            "status": "UNAVAILABLE",
+        }
+
+    weight = 1.0 / len(participating)
+
+    blended = sum(
+        numeric_values[source] * weight
+        for source in participating
+    )
+
+    if field == "value_home_line":
+        blended = -blended
+
+    return {
+        "value": blended,
+        "requested_sources": requested,
+        "participating_sources": participating,
+        "missing_sources": missing,
+        "weights_used": {
+            source: weight
+            for source in participating
+        },
+        "status": (
+            "FULL"
+            if not missing
+            else "DEGRADED"
+        ),
+    }
+
+
+def manual_operator_overlay(
+    game,
+    model_override,
+    *,
+    auto_spread_authority,
+    auto_total_authority,
+    best_sportsbook,
+):
+    mode = str(
+        model_override.get("mode") or "AUTO"
+    ).upper()
+
+    payload = {
+        "mode": mode,
+        "spread_sources":
+            model_override.get("spread_sources") or [],
+        "total_sources":
+            model_override.get("total_sources") or [],
+        "updated_at":
+            model_override.get("updated_at"),
+        "updated_by":
+            model_override.get("updated_by"),
+        "auto_authority": {
+            "spread": auto_spread_authority,
+            "total": auto_total_authority,
+        },
+        "manual": {
+            "spread": None,
+            "total": None,
+        },
+        "manual_edges": {
+            "spread": None,
+            "total": None,
+        },
+    }
+
+    if mode != "MANUAL":
+        return payload
+
+    manual_spread = manual_projection_value(
+        game,
+        model_id=STANDARD_SPREAD,
+        field="value_home_line",
+        selected_sources=payload["spread_sources"],
+    )
+
+    manual_total = manual_projection_value(
+        game,
+        model_id=STANDARD_TOTAL,
+        field="value_total",
+        selected_sources=payload["total_sources"],
+    )
+
+    payload["manual"]["spread"] = manual_spread
+    payload["manual"]["total"] = manual_total
+
+    if manual_spread.get("value") is not None:
+        payload["manual_edges"]["spread"] = spread_edges(
+            manual_spread["value"],
+            best_sportsbook["spread"],
+        )
+
+    if manual_total.get("value") is not None:
+        payload["manual_edges"]["total"] = total_edges(
+            manual_total["value"],
+            best_sportsbook["total"],
+        )
+
+    return payload
+
+
 def spread_edges(model_home_line, best):
     if model_home_line is None:
         return {
@@ -2217,6 +2420,8 @@ def main():
     team_source_snapshots = load_team_source_snapshots(
         RATINGS_SOURCE_STATUS
     )
+
+    model_override = load_model_override()
 
     projection_source_payload = (
         json.loads(PROJECTION_SOURCE_STATUS.read_text())
@@ -2712,6 +2917,17 @@ def main():
             "value_total",
         )
 
+        auto_spread_authority = spread_authority
+        auto_total_authority = total_authority
+
+        operator_model = manual_operator_overlay(
+            game,
+            model_override,
+            auto_spread_authority=auto_spread_authority,
+            auto_total_authority=auto_total_authority,
+            best_sportsbook=best_sportsbook,
+        )
+
         spread_edge = spread_edges(
             spread_authority.get("value"),
             best_sportsbook["spread"],
@@ -2865,6 +3081,8 @@ def main():
                 "spread": spread_authority,
                 "total": total_authority,
             },
+
+            "operator_model": operator_model,
 
             "models": {
                 "standard_spread": {
