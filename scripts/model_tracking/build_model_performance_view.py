@@ -372,31 +372,49 @@ def main():
             {},
         )
 
+        market_provenance = (
+            decision.get("market_provenance")
+            if isinstance(
+                decision.get("market_provenance"),
+                dict,
+            )
+            else {}
+        )
+
         opportunities.append({
-            **decision,
-            "site_week": prediction.get("week"),
-            "away_team": prediction.get("away_team"),
-            "home_team": prediction.get("home_team"),
+            "canonical_game_id":
+                decision.get("canonical_game_id"),
+            "site_week":
+                prediction.get("week"),
+            "away_team":
+                prediction.get("away_team"),
+            "home_team":
+                prediction.get("home_team"),
+            "market_type":
+                decision.get("market_type"),
+            "checkpoint":
+                decision.get("checkpoint"),
             "consensus_versions": (
                 [prediction.get("model_id")]
                 if prediction
+                and prediction.get("model_id")
                 else []
             ),
-            "opener_market_observation_id": (
-                decision.get(
-                    "market_observation_id"
-                )
-            ),
+            "opener_market_observation_id":
+                decision.get("market_observation_id"),
             "estimated_ev_pct": None,
-            "qualification_status": (
-                "TRACKED_NOT_QUALIFIED"
-            ),
-            "opener_provenance_grade": (
-                decision.get(
-                    "market_provenance",
-                    {},
-                ).get("freshness_status")
-            ),
+            "qualification_status":
+                "TRACKED_NOT_QUALIFIED",
+            "opener_provenance_grade":
+                market_provenance.get(
+                    "freshness_status"
+                ),
+            "bet_side":
+                decision.get("bet_side"),
+            "edge":
+                decision.get("edge"),
+            "created_at":
+                decision.get("created_at"),
         })
 
     def score_metrics(rows, checkpoint=None):
