@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-09-05T15:20:00+00:00",
+  "built_at": "2026-09-07T02:11:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -8,8 +8,8 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:20:55.741424+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
+      "last_success_at": "2026-09-07T02:11:54.719803+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
       "age_minutes": -0.9,
       "age_hours": -0.02,
       "metrics": [
@@ -20,7 +20,7 @@
         },
         {
           "label": "Betting signals",
-          "value": 232,
+          "value": 273,
           "detail": ""
         },
         {
@@ -35,12 +35,12 @@
         },
         {
           "label": "Open wagers",
-          "value": 55,
+          "value": 52,
           "detail": ""
         },
         {
           "label": "Last completed run",
-          "value": "FAILED \u00b7 Sep 5, 2026 at 8:08 AM ET",
+          "value": "FAILED \u00b7 Sep 6, 2026 at 8:08 AM ET",
           "detail": ""
         }
       ],
@@ -60,10 +60,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T00:00:00+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
-      "age_minutes": 920.0,
-      "age_hours": 15.33,
+      "last_success_at": "2026-09-06T00:00:00+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
+      "age_minutes": 1571.0,
+      "age_hours": 26.18,
       "metrics": [
         {
           "label": "Composite",
@@ -114,29 +114,29 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:18:14+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
-      "age_minutes": 1.8,
+      "last_success_at": "2026-09-07T02:09:21+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
+      "age_minutes": 1.6,
       "age_hours": 0.03,
       "metrics": [
         {
           "label": "Games",
-          "value": 158,
+          "value": 59,
           "detail": ""
         },
         {
           "label": "Spread openers",
-          "value": 158,
+          "value": 59,
           "detail": ""
         },
         {
           "label": "Total openers",
-          "value": 158,
+          "value": 59,
           "detail": ""
         },
         {
           "label": "History",
-          "value": 158,
+          "value": 53,
           "detail": ""
         },
         {
@@ -146,13 +146,15 @@
         },
         {
           "label": "Market updated",
-          "value": "Sep 5, 2026 at 11:18 AM ET",
+          "value": "Sep 6, 2026 at 10:09 PM ET",
           "detail": ""
         }
       ],
       "warnings": [],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "Retained opener history is available for 53/59 current market games."
+      ],
       "page_url": "openers.html",
       "source_artifacts": [
         "data/site/matchups_view.json",
@@ -166,8 +168,8 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:20:55.741424+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
+      "last_success_at": "2026-09-07T02:11:54.719803+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
       "age_minutes": -0.9,
       "age_hours": -0.02,
       "metrics": [
@@ -178,7 +180,7 @@
         },
         {
           "label": "Model coverage",
-          "value": "765 S \u00b7 808 T",
+          "value": "765 S \u00b7 843 T",
           "detail": ""
         },
         {
@@ -193,7 +195,7 @@
         },
         {
           "label": "Odds",
-          "value": 185,
+          "value": 156,
           "detail": ""
         },
         {
@@ -219,29 +221,29 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:18:14+00:00",
-      "artifact_built_at": "2026-09-05T15:19:28.914513+00:00",
-      "age_minutes": 1.8,
+      "last_success_at": "2026-09-07T02:09:21+00:00",
+      "artifact_built_at": "2026-09-07T02:10:25.544524+00:00",
+      "age_minutes": 1.6,
       "age_hours": 0.03,
       "metrics": [
         {
           "label": "Games",
-          "value": 158,
+          "value": 59,
           "detail": ""
         },
         {
           "label": "Spreads",
-          "value": 158,
+          "value": 58,
           "detail": ""
         },
         {
           "label": "Totals",
-          "value": 158,
+          "value": 58,
           "detail": ""
         },
         {
           "label": "Moneylines",
-          "value": 147,
+          "value": 49,
           "detail": ""
         },
         {
@@ -257,7 +259,9 @@
       ],
       "warnings": [],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "Current spread quotes are posted for 58/59 provider games."
+      ],
       "page_url": "odds.html",
       "source_artifacts": [
         "data/site/odds_screen_v2.json",
@@ -273,8 +277,8 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:20:55.741424+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
+      "last_success_at": "2026-09-07T02:11:54.719803+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
       "age_minutes": -0.9,
       "age_hours": -0.02,
       "metrics": [
@@ -295,12 +299,12 @@
         },
         {
           "label": "Odds",
-          "value": 185,
+          "value": 156,
           "detail": ""
         },
         {
           "label": "Results / integrity",
-          "value": "809 results \u00b7 0 dupes",
+          "value": "848 results \u00b7 0 dupes",
           "detail": ""
         },
         {
@@ -325,10 +329,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Sportsbook futures are stale or have partial provider coverage.",
-      "last_success_at": "2026-09-05T12:07:59.219562+00:00",
-      "artifact_built_at": "2026-09-05T12:07:59.219562+00:00",
-      "age_minutes": 192.0,
-      "age_hours": 3.2,
+      "last_success_at": "2026-09-06T12:08:06.096829+00:00",
+      "artifact_built_at": "2026-09-06T12:08:06.096829+00:00",
+      "age_minutes": 842.9,
+      "age_hours": 14.05,
       "metrics": [
         {
           "label": "Teams",
@@ -382,10 +386,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Conference title market data is stale.",
-      "last_success_at": "2026-09-05T12:08:07.247225+00:00",
-      "artifact_built_at": "2026-09-05T12:08:07.247225+00:00",
-      "age_minutes": 191.9,
-      "age_hours": 3.2,
+      "last_success_at": "2026-09-06T12:08:14.181308+00:00",
+      "artifact_built_at": "2026-09-06T12:08:14.181308+00:00",
+      "age_minutes": 842.8,
+      "age_hours": 14.05,
       "metrics": [
         {
           "label": "Conferences",
@@ -436,10 +440,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Playoff prices were not updated within 24 hours.",
-      "last_success_at": "2026-09-05T12:07:59.219562+00:00",
-      "artifact_built_at": "2026-09-05T12:07:59.219562+00:00",
-      "age_minutes": 192.0,
-      "age_hours": 3.2,
+      "last_success_at": "2026-09-06T12:08:06.096829+00:00",
+      "artifact_built_at": "2026-09-06T12:08:06.096829+00:00",
+      "age_minutes": 842.9,
+      "age_hours": 14.05,
       "metrics": [
         {
           "label": "Simulations",
@@ -486,10 +490,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T12:08:07.247225+00:00",
-      "artifact_built_at": "2026-09-05T12:08:07.247225+00:00",
-      "age_minutes": 191.9,
-      "age_hours": 3.2,
+      "last_success_at": "2026-09-06T12:08:14.181308+00:00",
+      "artifact_built_at": "2026-09-06T12:08:14.181308+00:00",
+      "age_minutes": 842.8,
+      "age_hours": 14.05,
       "metrics": [
         {
           "label": "Simulations",
@@ -538,8 +542,8 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-09-05T15:20:55.741424+00:00",
-      "artifact_built_at": "2026-09-05T15:20:55.741424+00:00",
+      "last_success_at": "2026-09-07T02:11:54.719803+00:00",
+      "artifact_built_at": "2026-09-07T02:11:54.719803+00:00",
       "age_minutes": -0.9,
       "age_hours": -0.02,
       "metrics": [
@@ -550,7 +554,7 @@
         },
         {
           "label": "Active signals",
-          "value": 232,
+          "value": 273,
           "detail": ""
         },
         {
@@ -560,7 +564,7 @@
         },
         {
           "label": "Open wagers",
-          "value": 55,
+          "value": 52,
           "detail": ""
         },
         {
