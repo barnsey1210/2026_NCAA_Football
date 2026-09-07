@@ -9,7 +9,7 @@ import hashlib
 import io
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -27,6 +27,7 @@ SOURCE_URL = (
 )
 DEFAULT_OUTPUT = ROOT / "data/canonical/cfbdepth_team_injury_impact_current.json"
 DEFAULT_AUDIT = ROOT / "data/audits/cfbdepth_team_injury_impact_audit.json"
+RAW_HISTORY_ROOT = ROOT / "data/raw/cfbdepth"
 REQUIRED_COLUMNS = {
     "School",
     "Conference",
@@ -111,6 +112,110 @@ def normalize(raw_bytes: bytes, pulled_at: str, source_updated_at: str | None = 
     return normalized
 
 
+def parse_timestamp(value: str):
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def load_weekly_baseline(pulled_at: str):
+    current = parse_timestamp(pulled_at)
+    if current is None:
+        return {}, {
+            "status": "UNAVAILABLE",
+            "reason": "INVALID_CURRENT_TIMESTAMP",
+            "baseline_date": None,
+            "days": None,
+        }
+
+    for days in (7, 6, 8):
+        baseline_date = (current - timedelta(days=days)).date().isoformat()
+        directory = RAW_HISTORY_ROOT / baseline_date
+        candidates = sorted(
+            directory.glob("cfbdepth-injury_*.csv"),
+            reverse=True,
+        )
+
+        for candidate in candidates:
+            try:
+                baseline_rows = normalize(
+                    candidate.read_bytes(),
+                    baseline_date + "T00:00:00Z",
+                )
+            except (OSError, UnicodeDecodeError, ValueError):
+                continue
+
+            if len(baseline_rows) != 138:
+                continue
+
+            return (
+                {
+                    row["canonical_team_key"]: row
+                    for row in baseline_rows
+                },
+                {
+                    "status": "AVAILABLE",
+                    "baseline_date": baseline_date,
+                    "days": days,
+                    "source_file": str(candidate),
+                },
+            )
+
+    return {}, {
+        "status": "UNAVAILABLE",
+        "reason": "NO_VALID_6_TO_8_DAY_BASELINE",
+        "baseline_date": None,
+        "days": None,
+    }
+
+
+def apply_weekly_trend(rows, pulled_at: str):
+    baseline, metadata = load_weekly_baseline(pulled_at)
+
+    for row in rows:
+        prior = baseline.get(row["canonical_team_key"])
+
+        if prior is None:
+            row["weekly_prior_rank"] = None
+            row["weekly_prior_score"] = None
+            row["weekly_impact_delta"] = None
+            row["weekly_direction"] = "UNAVAILABLE"
+            row["weekly_baseline_date"] = metadata.get("baseline_date")
+            row["weekly_days"] = metadata.get("days")
+            continue
+
+        current_score = number(row.get("injury_impact_score"))
+        prior_score = number(prior.get("injury_impact_score"))
+
+        if current_score is None or prior_score is None:
+            delta = None
+            direction = "UNAVAILABLE"
+        else:
+            delta = round(float(current_score) - float(prior_score), 1)
+            if delta >= 0.5:
+                direction = "WORSE"
+            elif delta <= -0.5:
+                direction = "BETTER"
+            else:
+                direction = "FLAT"
+
+        row["weekly_prior_rank"] = prior.get("injury_impact_rank")
+        row["weekly_prior_score"] = prior_score
+        row["weekly_impact_delta"] = delta
+        row["weekly_direction"] = direction
+        row["weekly_baseline_date"] = metadata.get("baseline_date")
+        row["weekly_days"] = metadata.get("days")
+
+    return metadata
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, help="Use an existing official CSV without network access")
@@ -139,8 +244,10 @@ def main() -> None:
         raw_output.resolve().parent.mkdir(parents=True, exist_ok=True)
         raw_output.resolve().write_bytes(raw_bytes)
 
+    weekly_trend = apply_weekly_trend(rows, pulled_at)
+
     payload = {
-        "schema_version": "cfbdepth-team-injury-impact-v1",
+        "schema_version": "cfbdepth-team-injury-impact-v2",
         "source": "CFBDepth Injury Impact Report",
         "source_url": args.url,
         "source_updated_at": args.source_updated_at,
@@ -156,6 +263,7 @@ def main() -> None:
             "rank_1": "lowest injury impact / healthiest",
             "tie_break": "canonical team name ascending",
         },
+        "weekly_trend": weekly_trend,
         "teams": rows,
     }
     output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
@@ -173,6 +281,7 @@ def main() -> None:
         "warnings": [] if len(rows) == 138 else [f"Expected 138 teams; found {len(rows)}"],
         "output": str(output),
         "raw_output": str(raw_output.resolve()) if raw_output else None,
+        "weekly_trend": weekly_trend,
     }
     audit_path.write_text(json.dumps(audit, indent=2, sort_keys=True) + "\n")
     print(f"CFBDepth injury impact normalized: {len(rows)} teams -> {output}")

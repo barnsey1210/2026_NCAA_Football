@@ -1008,8 +1008,7 @@ tr:hover td.context-group{background:#202d39}
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{width:1.8%;text-align:center}
-.signal-col{width:5%}
+.injury-col{width:6.8%;text-align:center}
 .state-col{width:5.5%;text-align:center}
 
 /* Canonical Priority Market Matrix header typography. Column classes also
@@ -1261,15 +1260,54 @@ tr:hover td.context-group{background:#202d39}
   color:var(--muted);
 }
 
-.injury-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%}
-.injury-team{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:22px;white-space:nowrap;font-size:7px;font-weight:950;line-height:1}
-.injury-team .team-logo-holder{--team-logo-size:22px}
-.injury-rank{position:absolute;right:-1px;bottom:-1px;min-width:10px;padding:1px;border-radius:3px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-variant-numeric:tabular-nums}
+.injury-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  gap:3px;
+  width:100%;
+}
+.injury-team{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  min-height:26px;
+  white-space:nowrap;
+  font-weight:950;
+  line-height:1;
+}
+.injury-team .team-logo-holder{--team-logo-size:28px}
+.injury-rank{
+  min-width:24px;
+  padding:3px 4px;
+  border-radius:4px;
+  background:#071019;
+  box-shadow:0 0 0 1px rgba(255,255,255,.22);
+  text-align:center;
+  font-size:11px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
 .injury-rank.injury-tier-1{color:#39e89a}
 .injury-rank.injury-tier-2{color:#a9df6a}
 .injury-rank.injury-tier-3{color:#f4cd4b}
 .injury-rank.injury-tier-4{color:#f28c45}
 .injury-rank.injury-tier-5{color:#ff626f}
+.injury-trend{
+  min-width:42px;
+  text-align:left;
+  font-size:10px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.injury-trend.worse{color:var(--red)}
+.injury-trend.better{color:var(--green)}
+.injury-trend.flat{color:var(--muted)}
+.injury-trend.unavailable{color:var(--muted)}
+
 
 .signal-stack{
   display:flex;
@@ -1585,9 +1623,9 @@ tr:hover td.context-group{background:#202d39}
     background:#09131d;
   }
   .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
-  .mobile-foot-injury{display:flex;align-items:center;gap:5px;min-width:0}
-  .mobile-foot-injury .injury-stack{flex-direction:row;gap:5px}
-  .mobile-foot-signals{display:flex;align-items:center;gap:5px;min-width:0}
+  .mobile-foot-injury{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
+  .mobile-foot-injury .injury-stack{flex-direction:row;gap:12px;justify-content:flex-start}
+  .mobile-foot-injury .injury-team{width:auto}
 
   .wr-top{
     align-items:flex-start;
@@ -2727,8 +2765,7 @@ function renderHead(){
         TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="matrix-header-cell injury-col context-group">INJ</th>
-      <th class="matrix-header-cell signal-col context-group">SIGNALS</th>
+      <th class="matrix-header-cell injury-col context-group">INJURY</th>
       <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
           MODEL<br>STATE
@@ -3010,32 +3047,74 @@ function injuryRankClass(rank){
   return 'injury-tier-5';
 }
 
+function injuryTrend(row){
+  const delta=Number(row?.weekly_impact_delta);
+  const direction=String(row?.weekly_direction || 'UNAVAILABLE').toUpperCase();
+
+  if(!Number.isFinite(delta) || direction==='UNAVAILABLE'){
+    return '<span class="injury-trend unavailable">—</span>';
+  }
+
+  if(direction==='WORSE'){
+    return `<span class="injury-trend worse">↑ +${Math.abs(delta).toFixed(1)}</span>`;
+  }
+
+  if(direction==='BETTER'){
+    return `<span class="injury-trend better">↓ -${Math.abs(delta).toFixed(1)}</span>`;
+  }
+
+  const signed=delta>0 ? `+${delta.toFixed(1)}` : delta.toFixed(1);
+  return `<span class="injury-trend flat">→ ${signed}</span>`;
+}
+
 function injuryTeam(team,row,source){
   if(!row || !Number.isInteger(Number(row.injury_impact_rank))){
     return `<span class="injury-team" title="${esc(team)} · injury impact unavailable"><span class="injury-placeholder">—</span></span>`;
   }
+
   const rank=Number(row.injury_impact_rank);
   const slug=teamLogoSlug(team);
   const updated=row.source_updated_at
     ? fmtDateTimeET(row.source_updated_at)
     : 'source update time unverified';
+
+  const delta=Number(row.weekly_impact_delta);
+  const priorRank=Number(row.weekly_prior_rank);
+  const priorScore=Number(row.weekly_prior_score);
+  const direction=String(row.weekly_direction || 'UNAVAILABLE').toUpperCase();
+
   const title=[
     team,
-    `Injury Impact Rank: ${rank}/138`,
-    `Impact Score: ${row.injury_impact_score ?? '—'}`,
+    `Current Injury Impact Rank: ${rank}/138`,
+    `Current Impact Score: ${row.injury_impact_score ?? '—'}`,
     `Impact Injuries: ${row.injury_number ?? '—'}`,
     `New Injuries: ${row.injury_new ?? '—'}`,
+    Number.isFinite(priorScore)
+      ? `${row.weekly_days ?? '7'}-Day Prior Impact Score: ${priorScore}`
+      : 'Weekly prior impact unavailable',
+    Number.isInteger(priorRank)
+      ? `${row.weekly_days ?? '7'}-Day Prior Rank: ${priorRank}/138`
+      : null,
+    Number.isFinite(delta)
+      ? `Weekly Impact Change: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} · ${direction}`
+      : null,
+    row.weekly_baseline_date
+      ? `Comparison Baseline: ${row.weekly_baseline_date}`
+      : null,
     `Updated: ${updated}`,
     source?.pulled_at ? `Pulled: ${fmtDateTimeET(source.pulled_at)}` : null
   ].filter(Boolean).join('\n');
-  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span></span>`;
+
+  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span>${injuryTrend(row)}</span>`;
 }
 
 function injuryCell(game){
   const injury=game.injury_rank || {};
+
   if(!injury.away && !injury.home){
     return '<span class="injury-placeholder">—</span>';
   }
+
   return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
 }
 
@@ -3401,7 +3480,7 @@ function renderMobileMatrix(rows){
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           </div>
       </div>
-      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJ</span>${injuryCell(game)}</span><span class="mobile-foot-signals"><span class="mobile-foot-label">SIGNALS</span>${signalCell(game)}</span></div>
+      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJURY</span>${injuryCell(game)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
     </article>`;
   }).join('');
@@ -3561,10 +3640,6 @@ function renderMatrix(){
 
         <td class="injury-col context-group">
           ${injuryCell(game)}
-        </td>
-
-        <td class="signal-col context-group">
-          ${signalCell(game)}
         </td>
 
         <td class="state-col context-group">
