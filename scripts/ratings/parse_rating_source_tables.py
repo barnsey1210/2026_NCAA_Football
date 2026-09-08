@@ -454,9 +454,33 @@ def parse_spplus():
     out = pd.DataFrame()
     out["team_raw"] = df["team"]
     out["team"] = out["team_raw"].map(canonical)
-    sp_col = "sp" if "sp" in df.columns else "sp_rk"
-    off_col = "off_sp" if "off_sp" in df.columns else "off"
-    def_col = "def_sp" if "def_sp" in df.columns else "def"
+
+    if "rating" in df.columns:
+        sp_col = "rating"
+    elif "sp" in df.columns:
+        sp_col = "sp"
+    elif "sp_rk" in df.columns:
+        sp_col = "sp_rk"
+    else:
+        raise SystemExit(f"SP+ rating column unavailable: {list(df.columns)}")
+
+    if "offense" in df.columns:
+        off_col = "offense"
+    elif "off_sp" in df.columns:
+        off_col = "off_sp"
+    elif "off" in df.columns:
+        off_col = "off"
+    else:
+        raise SystemExit(f"SP+ offense column unavailable: {list(df.columns)}")
+
+    if "defense" in df.columns:
+        def_col = "defense"
+    elif "def_sp" in df.columns:
+        def_col = "def_sp"
+    elif "def" in df.columns:
+        def_col = "def"
+    else:
+        raise SystemExit(f"SP+ defense column unavailable: {list(df.columns)}")
 
     out["spplus"] = pd.to_numeric(df[sp_col], errors="coerce")
     out["spplus_off"] = df[off_col].astype(str).str.extract(r"([-+]?\d+(?:\.\d+)?)")[0].astype(float)
