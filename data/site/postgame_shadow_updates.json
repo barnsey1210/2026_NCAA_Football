@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-07T12:01:54.214742+00:00",
+  "built_at": "2026-09-08T12:01:51.901430+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -1318,6 +1318,34 @@
       "next_opponent": "Villanova",
       "total_estimate_status": "pending_current_season_pbp",
       "synthetic_input": false
+    },
+    {
+      "team": "Florida State",
+      "opponent": "SMU",
+      "completed_game_id": "g99",
+      "completed_date": "2026-09-07",
+      "team_margin": -3.0,
+      "team_closing_spread": 2.5,
+      "team_ats_margin": -0.5,
+      "estimated_spread_rating_innovation": -0.63,
+      "next_game_id": "g189",
+      "next_opponent": "Alabama",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "SMU",
+      "opponent": "Florida State",
+      "completed_game_id": "g99",
+      "completed_date": "2026-09-07",
+      "team_margin": 3.0,
+      "team_closing_spread": -2.5,
+      "team_ats_margin": 0.5,
+      "estimated_spread_rating_innovation": 0.76,
+      "next_game_id": "g160",
+      "next_opponent": "UC Davis",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
     }
   ],
   "warnings": [
@@ -1376,7 +1404,7 @@
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 92,
+    "completed_team_updates": 94,
     "warnings": 52
   }
 }
