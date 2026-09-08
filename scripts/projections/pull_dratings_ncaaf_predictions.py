@@ -19,7 +19,7 @@ OUT = ROOT / "data/ratings/external_sources/dratings_ncaaf_predictions_latest.cs
 AUDIT = ROOT / "data/ratings/external_sources/dratings_ncaaf_predictions_audit.json"
 
 BASE = "https://www.dratings.com"
-START_URL = BASE + "/predictor/ncaa-football-predictions/upcoming/3#scroll-upcoming"
+START_URL = BASE + "/predictor/ncaa-football-predictions/upcoming/1#scroll-upcoming"
 MAX_NAV_PAGES = 250
 
 ALIASES = {
