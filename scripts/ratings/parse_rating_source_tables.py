@@ -410,7 +410,8 @@ def canonical(s):
         "Smu": "SMU", "Tcu": "TCU", "Unlv": "UNLV", "Utep": "UTEP",
         "Uab": "UAB", "Utsa": "UTSA", "Ucf": "Central Florida", "Usf": "South Florida",
         "Fau": "Florida Atlantic", "Fiu": "Florida International", "Nc State": "NC State",
-        "J Ville St": "Jacksonville State", "Nc St": "NC State", "Wvu": "West Virginia",
+        "J Ville St": "Jacksonville State", "Jsu": "Jacksonville State",
+        "New Mex St": "New Mexico State", "Nc St": "NC State", "Wvu": "West Virginia",
     }
     return fixes.get(out, out)
 
