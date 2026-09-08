@@ -23,6 +23,8 @@ START_URL = BASE + "/predictor/ncaa-football-predictions/upcoming/1#scroll-upcom
 MAX_NAV_PAGES = 250
 
 ALIASES = {
+    "mtsu blue raiders": "Middle Tennessee",
+
     "miami hurricanes": "Miami-FL",
     "miami florida hurricanes": "Miami-FL",
     "miami redhawks": "Miami-OH",
