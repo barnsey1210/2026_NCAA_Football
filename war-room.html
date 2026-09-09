@@ -1878,10 +1878,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260909T122829Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260909T122829Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260909T122829Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260909T122829Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260909T123544Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260909T123544Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260909T123544Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260909T123544Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2171,7 +2171,10 @@ function sourceCoverage(domain,source,rows){
   );
 
   const fresh = available.filter(
-    item => item?.health_state === 'CURRENT'
+    item =>
+      item?.health_state === 'CURRENT' ||
+      item?.health_state === 'UPDATED' ||
+      item?.health_state === 'PRE_GAME'
   );
 
   const stale = available.filter(
