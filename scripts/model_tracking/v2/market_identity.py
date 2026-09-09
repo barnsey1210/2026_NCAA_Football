@@ -135,3 +135,69 @@ def decision_state_row(
         "legacy_market_observation_id":
             decision.get("market_observation_id"),
     }
+
+
+def decision_confirmation_id(
+    decision: dict,
+    market_row: dict,
+    decision_state_id_value: str | None = None,
+) -> str:
+    state_id = market_state_id(market_row)
+
+    decision_state_id_value = (
+        decision_state_id_value
+        or decision_state_id(
+            decision.get("prediction_observation_id"),
+            state_id,
+            decision.get("bet_side"),
+            decision.get("edge"),
+        )
+    )
+
+    market_confirmation_id_value = market_confirmation_id(
+        market_row,
+        state_id,
+    )
+
+    return stable_id(
+        "decision_confirmation_v1",
+        decision_state_id_value,
+        market_confirmation_id_value,
+    )
+
+
+def decision_confirmation_row(
+    decision: dict,
+    market_row: dict,
+    decision_state_id_value: str | None = None,
+) -> dict:
+    state_id = market_state_id(market_row)
+
+    decision_state_id_value = (
+        decision_state_id_value
+        or decision_state_id(
+            decision.get("prediction_observation_id"),
+            state_id,
+            decision.get("bet_side"),
+            decision.get("edge"),
+        )
+    )
+
+    market_confirmation_id_value = market_confirmation_id(
+        market_row,
+        state_id,
+    )
+
+    return {
+        "confirmation_id": decision_confirmation_id(
+            decision,
+            market_row,
+            decision_state_id_value,
+        ),
+        "decision_state_id": decision_state_id_value,
+        "market_confirmation_id": market_confirmation_id_value,
+        "created_at": decision.get("created_at"),
+        "legacy_decision_id": decision.get("decision_id"),
+        "legacy_market_observation_id":
+            decision.get("market_observation_id"),
+    }
