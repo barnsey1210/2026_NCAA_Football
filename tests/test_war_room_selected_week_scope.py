@@ -128,7 +128,9 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             "function positionModelTooltip", 1
         )[0]
         self.assertIn("game?.standard_freshness?.[market]?.sources", block)
-        self.assertIn("freshnessRow.accepted_update === true", block)
+        self.assertIn("freshnessRow.health_state ||", block)
+        self.assertIn("freshnessRow.state ||", block)
+        self.assertIn("['CURRENT','UPDATED','PRE_GAME'].includes(freshnessState)", block)
         self.assertNotIn("freshnessRow.state === 'UPDATED'", block)
         self.assertIn("freshnessRow.participating !== true", block)
         self.assertIn("'available'", block)
