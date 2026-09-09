@@ -2217,7 +2217,10 @@ function sourceCoverage(domain,source,rows){
   );
 
   const fresh = available.filter(
-    item => item?.health_state === 'CURRENT'
+    item =>
+      item?.health_state === 'CURRENT' ||
+      item?.health_state === 'UPDATED' ||
+      item?.health_state === 'PRE_GAME'
   );
 
   const stale = available.filter(
