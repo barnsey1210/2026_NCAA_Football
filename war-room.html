@@ -1170,8 +1170,6 @@ tr:hover td.context-group{background:#202d39}
 .model-tooltip.open .model-tooltip-panel{display:block}
 .model-component{display:grid;grid-template-columns:minmax(78px,1fr) auto;gap:10px;padding:1px 0}
 .model-component.updated{color:var(--green)}
-.model-component.stale{color:var(--yellow)}
-.model-component.unavailable{color:var(--red)}
 .model-component.available{color:#a8b6c3}
 .model-component.missing{color:#718393}
 
@@ -1880,10 +1878,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260909T124806Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260909T124806Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260909T124806Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260909T124806Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260909T195318Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260909T195318Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260909T195318Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260909T195318Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -2950,21 +2948,11 @@ function modelTooltip(game, model, market){
     const value = values[name];
     const missing = value === null || value === undefined || value === '' || !Number.isFinite(Number(value));
     const freshnessRow = freshness[name] || {};
-    const freshnessState = String(
-      freshnessRow.health_state ||
-      freshnessRow.state ||
-      ''
-    ).toUpperCase();
-
-    const freshnessClass = missing
-      ? 'unavailable'
-      : freshnessRow.participating !== true
-        ? 'missing'
-        : ['CURRENT','UPDATED','PRE_GAME'].includes(freshnessState)
-          ? 'updated'
-          : ['STALE','CARRY_FORWARD','DEGRADED'].includes(freshnessState)
-            ? 'stale'
-            : 'available';
+    const freshnessClass = missing || freshnessRow.participating !== true
+      ? 'missing'
+      : freshnessRow.accepted_update === true
+        ? 'updated'
+        : 'available';
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
     const label = market === 'total' && name === 'SP+' ? 'SP+ Total' : name;
     const timestamp = freshnessRow.snapshot_date || freshnessRow.pulled_at || model?.freshness_timestamp || '';
