@@ -1878,10 +1878,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260908T194742Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260908T194742Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260908T194742Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260908T194742Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260909T122829Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260909T122829Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260909T122829Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260909T122829Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -1905,7 +1905,7 @@ const INITIAL_MOBILE_VIEW = window.matchMedia('(max-width:900px)').matches;
 let SORT_KEY = INITIAL_MOBILE_VIEW ? 'spread_edge' : 'best_edge';
 let SORT_DIR = 'desc';
 
-const TEAM_ABBREVIATIONS = {"Abilene Christian": "ACU", "Air Force": "AF", "Akron": "AKR", "Alabama": "ALA", "Alabama State": "ALST", "Alcorn State": "ALCN", "Arizona": "ARIZ", "Arizona State": "ASU", "Arkansas": "ARK", "Arkansas State": "ARST", "Army": "ARMY", "Auburn": "AUB", "Austin Peay": "APSU", "BYU": "BYU", "Ball State": "BALL", "Baylor": "BAY", "Bethune-Cookman": "BCU", "Boise State": "BOIS", "Boston College": "BC", "Bowling Green": "BGSU", "Bryant": "BRY", "Buffalo": "BUF", "Cal Poly": "CP", "California": "CAL", "Campbell": "CAM", "Central Michigan": "CMU", "Charleston So.": "CHSO", "Charlotte": "CLT", "Cincinnati": "CIN", "Clemson": "CLEM", "Coastal Carolina": "CCU", "Colgate": "COLG", "Colorado": "COLO", "Colorado State": "CSU", "Delaware": "DEL", "Duke": "DUKE", "Duquesne": "DUQ", "East Carolina": "ECU", "Eastern Illinois": "EIU", "Eastern Kentucky": "EKU", "Eastern Michigan": "EMU", "Florida": "FLA", "Florida A&M": "FAMU", "Florida Atlantic": "FAU", "Florida International": "FIU", "Florida State": "FSU", "Fordham": "FOR", "Fresno State": "FRES", "Furman": "FUR", "Gardner-Webb": "GWEB", "Georgia": "UGA", "Georgia Southern": "GASO", "Georgia State": "GAST", "Georgia Tech": "GT", "Hampton": "HAMP", "Hawaii": "HAW", "Holy Cross": "HC", "Houston": "HOU", "Howard": "HOW", "Idaho": "IDHO", "Idaho State": "IDST", "Illinois": "ILL", "Illinois State": "ILST", "Indiana": "IU", "Indiana State": "INST", "Iowa": "IOWA", "Iowa State": "ISU", "Jacksonville State": "JXST", "James Madison": "JMU", "Kansas": "KU", "Kansas State": "KSU", "Kennesaw State": "KENN", "Kent State": "KENT", "Kentucky": "UK", "LSU": "LSU", "Lafayette": "LAF", "Lamar": "LAM", "Liberty": "LIB", "Lindenwood": "LIN", "Louisiana": "UL", "Louisiana Tech": "LT", "Louisville": "LOU", "Maine": "ME", "Marshall": "MRSH", "Maryland": "MD", "Massachusetts": "MASS", "Memphis": "MEM", "Mercyhurst": "MERC", "Merrimack": "MRMK", "Miami-OH": "M-OH", "Michigan": "MICH", "Michigan State": "MSU", "Middle Tennessee": "MTSU", "Minnesota": "MINN", "Mississippi State": "MSST", "Missouri": "MIZ", "Missouri State": "MOST", "Monmouth": "MONM", "Montana State": "MTST", "Morgan State": "MORG", "Murray State": "MUR", "NC State": "NCSU", "Navy": "NAVY", "Nebraska": "NEB", "Nevada": "NEV", "New Hampshire": "UNH", "New Mexico": "UNM", "New Mexico State": "NMSU", "Nicholls": "NICH", "Norfolk State": "NORF", "North Alabama": "UNA", "North Carolina": "UNC", "North Carolina A&T": "NCAT", "North Dakota State": "NDSU", "North Texas": "UNT", "Northern Arizona": "NAU", "Northern Colorado": "UNCO", "Northern Illinois": "NIU", "Northwestern": "NU", "Northwestern State": "NWST", "Notre Dame": "ND", "Ohio": "OHIO", "Ohio State": "OSU", "Oklahoma": "OU", "Oklahoma State": "OKST", "Old Dominion": "ODU", "Ole Miss": "MISS", "Oregon": "ORE", "Oregon State": "ORST", "Penn State": "PSU", "Pittsburgh": "PITT", "Portland State": "PRST", "Prairie View A&M": "PV", "Purdue": "PUR", "Rhode Island": "URI", "Rice": "RICE", "Richmond": "RICH", "Robert Morris": "RMU", "Rutgers": "RUTG", "SMU": "SMU", "Sacramento State": "SAC", "Sacred Heart": "SHU", "Sam Houston": "SHSU", "San Diego State": "SDSU", "San Jose State": "SJSU", "South Alabama": "USA", "South Carolina": "SC", "South Dakota State": "SDST", "South Florida": "USF", "Southeast Missouri": "SEMO", "Southern": "SOU", "Southern Miss": "USM", "Southern Utah": "SUU", "Stanford": "STAN", "Stony Brook": "STBK", "Syracuse": "SYR", "TCU": "TCU", "Tarleton State": "TAR", "Temple": "TEM", "Tennessee": "TENN", "Tennessee State": "TNST", "Texas": "TEX", "Texas A&M": "TA&M", "Texas Southern": "TXSO", "Texas State": "TXST", "Texas Tech": "TTU", "The Citadel": "CIT", "Toledo": "TOL", "Towson": "TOW", "Troy": "TROY", "Tulane": "TULN", "Tulsa": "TLSA", "UAB": "UAB", "UAlbany": "UALB", "UCLA": "UCLA", "UL-Monroe": "ULM", "UNLV": "UNLV", "USC": "USC", "UT Martin": "UTM", "UTEP": "UTEP", "UTSA": "UTSA", "Utah": "UTAH", "Utah State": "USU", "Utah Tech": "UTU", "VMI": "VMI", "Vanderbilt": "VAN", "Villanova": "VILL", "Virginia": "UVA", "Virginia Tech": "VT", "Wagner": "WAG", "Wake Forest": "WAKE", "Washington": "WASH", "Washington State": "WSU", "Weber State": "WEB", "West Georgia": "WGA", "West Virginia": "WVU", "Western Carolina": "WCU", "Western Illinois": "WIU", "Western Kentucky": "WKU", "Western Michigan": "WMU", "Wisconsin": "WIS", "Wofford": "WOF", "Wyoming": "WYO", "Youngstown State": "YSU"};
+const TEAM_ABBREVIATIONS = {"Abilene Christian": "ACU", "Air Force": "AF", "Akron": "AKR", "Alabama": "ALA", "Alabama State": "ALST", "Alcorn State": "ALCN", "Arizona": "ARIZ", "Arizona State": "ASU", "Arkansas": "ARK", "Arkansas State": "ARST", "Army": "ARMY", "Auburn": "AUB", "Austin Peay": "APSU", "BYU": "BYU", "Ball State": "BALL", "Baylor": "BAY", "Bethune-Cookman": "BCU", "Boise State": "BOIS", "Boston College": "BC", "Bowling Green": "BGSU", "Bryant": "BRY", "Buffalo": "BUF", "Cal Poly": "CP", "California": "CAL", "Campbell": "CAM", "Central Michigan": "CMU", "Charleston So.": "CHSO", "Charlotte": "CLT", "Cincinnati": "CIN", "Clemson": "CLEM", "Coastal Carolina": "CCU", "Colgate": "COLG", "Colorado": "COLO", "Colorado State": "CSU", "Delaware": "DEL", "Duke": "DUKE", "Duquesne": "DUQ", "East Carolina": "ECU", "Eastern Illinois": "EIU", "Eastern Kentucky": "EKU", "Eastern Michigan": "EMU", "Florida": "FLA", "Florida A&M": "FAMU", "Florida Atlantic": "FAU", "Florida International": "FIU", "Florida State": "FSU", "Fordham": "FOR", "Fresno State": "FRES", "Furman": "FUR", "Gardner-Webb": "GWEB", "Georgia": "UGA", "Georgia Southern": "GASO", "Georgia State": "GAST", "Georgia Tech": "GT", "Hampton": "HAMP", "Hawaii": "HAW", "Holy Cross": "HC", "Houston": "HOU", "Howard": "HOW", "Idaho": "IDHO", "Idaho State": "IDST", "Illinois": "ILL", "Illinois State": "ILST", "Indiana": "IU", "Indiana State": "INST", "Iowa": "IOWA", "Iowa State": "ISU", "Jacksonville State": "JXST", "James Madison": "JMU", "Kansas": "KU", "Kansas State": "KSU", "Kennesaw State": "KENN", "Kent State": "KENT", "Kentucky": "UK", "LSU": "LSU", "Lafayette": "LAF", "Lamar": "LAM", "Liberty": "LIB", "Lindenwood": "LIN", "Louisiana": "UL", "Louisiana Tech": "LT", "Louisville": "LOU", "Maine": "ME", "Marshall": "MRSH", "Maryland": "MD", "Massachusetts": "MASS", "Memphis": "MEM", "Mercyhurst": "MERC", "Merrimack": "MRMK", "Miami-OH": "M-OH", "Michigan": "MICH", "Michigan State": "MSU", "Middle Tennessee": "MTSU", "Minnesota": "MINN", "Mississippi State": "MSST", "Missouri": "MIZ", "Missouri State": "MOST", "Monmouth": "MONM", "Montana State": "MTST", "Morgan State": "MORG", "Murray State": "MUR", "NC State": "NCSU", "Navy": "NAVY", "Nebraska": "NEB", "Nevada": "NEV", "New Hampshire": "UNH", "New Mexico": "UNM", "New Mexico State": "NMSU", "Nicholls": "NICH", "Norfolk State": "NORF", "North Alabama": "UNA", "North Carolina": "UNC", "North Carolina A&T": "NCAT", "North Dakota State": "NDSU", "North Texas": "UNT", "Northern Arizona": "NAU", "Northern Colorado": "UNCO", "Northern Illinois": "NIU", "Northwestern": "NU", "Northwestern State": "NWST", "Notre Dame": "ND", "Ohio": "OHIO", "Ohio State": "OSU", "Oklahoma": "OU", "Oklahoma State": "OKST", "Old Dominion": "ODU", "Ole Miss": "MISS", "Oregon": "ORE", "Oregon State": "ORST", "Penn State": "PSU", "Pittsburgh": "PITT", "Portland State": "PRST", "Prairie View A&M": "PV", "Purdue": "PUR", "Rhode Island": "URI", "Rice": "RICE", "Richmond": "RICH", "Robert Morris": "RMU", "Rutgers": "RUTG", "SMU": "SMU", "Sacramento State": "SAC", "Sacred Heart": "SHU", "Sam Houston": "SHSU", "San Diego State": "SDSU", "San Jose State": "SJSU", "South Alabama": "USA", "South Carolina": "SC", "South Dakota State": "SDST", "South Florida": "USF", "Southeast Missouri": "SEMO", "Southern": "SOU", "Southern Miss": "USM", "Southern Utah": "SUU", "Stanford": "STAN", "Stony Brook": "STBK", "Syracuse": "SYR", "TCU": "TCU", "Tarleton State": "TAR", "Temple": "TEM", "Tennessee": "TENN", "Tennessee State": "TNST", "Texas": "TEX", "Texas A&M": "TA&M", "Texas Southern": "TXSO", "Texas State": "TXST", "Texas Tech": "TTU", "The Citadel": "CIT", "Toledo": "TOL", "Towson": "TOW", "Troy": "TROY", "Tulane": "TULN", "Tulsa": "TLSA", "UAB": "UAB", "UAlbany": "UALB", "UC Davis": "UCD", "UCLA": "UCLA", "UL-Monroe": "ULM", "UNLV": "UNLV", "USC": "USC", "UT Martin": "UTM", "UTEP": "UTEP", "UTSA": "UTSA", "Utah": "UTAH", "Utah State": "USU", "Utah Tech": "UTU", "VMI": "VMI", "Vanderbilt": "VAN", "Villanova": "VILL", "Virginia": "UVA", "Virginia Tech": "VT", "Wagner": "WAG", "Wake Forest": "WAKE", "Washington": "WASH", "Washington State": "WSU", "Weber State": "WEB", "West Georgia": "WGA", "West Virginia": "WVU", "Western Carolina": "WCU", "Western Illinois": "WIU", "Western Kentucky": "WKU", "Western Michigan": "WMU", "Wisconsin": "WIS", "Wofford": "WOF", "Wyoming": "WYO", "Youngstown State": "YSU"};
 
 const BOOK_ABBR = {
   DraftKings:'DK',
@@ -2170,6 +2170,14 @@ function sourceCoverage(domain,source,rows){
     item => item?.participating === true
   );
 
+  const fresh = available.filter(
+    item => item?.health_state === 'CURRENT'
+  );
+
+  const stale = available.filter(
+    item => item?.health_state === 'STALE'
+  );
+
   const updated = available.filter(
     item => item?.accepted_update === true
   );
@@ -2178,26 +2186,45 @@ function sourceCoverage(domain,source,rows){
     .map(item => item.latest_accepted_update_at)
     .filter(Boolean)
     .sort();
+
   const lastChangedAt = acceptedUpdates.length
     ? acceptedUpdates[acceptedUpdates.length - 1]
     : null;
 
-  const states = [...new Set(
+  const healthPulls = available
+    .map(item => item.health_pulled_at)
+    .filter(Boolean)
+    .sort();
+
+  const latestHealthPullAt = healthPulls.length
+    ? healthPulls[healthPulls.length - 1]
+    : null;
+
+  const authorityStates = [...new Set(
     entries
       .map(item => item?.state)
+      .filter(Boolean)
+  )];
+
+  const healthStates = [...new Set(
+    entries
+      .map(item => item?.health_state)
       .filter(Boolean)
   )];
 
   return {
     required:rows.length,
     available:available.length,
+    fresh:fresh.length,
+    stale:stale.length,
     updated:updated.length,
     missing:rows.length - available.length,
     lastChangedAt,
-    states
+    latestHealthPullAt,
+    states:authorityStates,
+    healthStates
   };
 }
-
 function coverageStatus(coverage){
   if(!coverage.required){
     return {status:'UNAVAILABLE',color:'GRAY'};
@@ -2205,48 +2232,62 @@ function coverageStatus(coverage){
 
   if(
     coverage.available === coverage.required &&
-    coverage.updated === coverage.required
+    coverage.fresh === coverage.required
   ){
-    return {status:'UPDATED',color:'GREEN'};
+    return {status:'CURRENT',color:'GREEN'};
   }
 
   if(coverage.available > 0){
-    return {status:'AVAILABLE',color:'YELLOW'};
+    return {status:'DEGRADED',color:'YELLOW'};
   }
 
   return {status:'UNAVAILABLE',color:'RED'};
 }
-
 function sourceHealthTooltip(label,status,coverage,fallback){
-  const updated =
+  const authorityUpdated =
     coverage.lastChangedAt ||
     fallback?.latest_accepted_update_at ||
+    fallback?.last_changed_at ||
+    null;
+
+  const healthPulled =
+    coverage.latestHealthPullAt ||
+    fallback?.latest_pulled_at ||
+    fallback?.latest_pull_at ||
+    fallback?.pulled_at ||
     null;
 
   const lines = [
     label,
     `Status: ${status.status}`,
-    `Freshness: ${coverage.states.join(', ') || fallback?.status || 'UNKNOWN'}`,
-    `Accepted updates: ${coverage.updated}/${coverage.required} selected-week games`,
+    `Operational freshness: ${coverage.healthStates.join(', ') || fallback?.status || 'UNKNOWN'}`,
+    `Fresh games: ${coverage.fresh}/${coverage.required}`,
     `Availability: ${coverage.available}/${coverage.required} selected-week games`,
-    `Missing: ${coverage.missing}`
+    `Stale: ${coverage.stale}`,
+    `Missing: ${coverage.missing}`,
+    `Authority updates: ${coverage.updated}/${coverage.required}`
   ];
 
-  if(updated){
-    lines.push(`Last accepted update: ${fmtDateTimeET(updated)}`);
+  if(healthPulled){
+    lines.push(`Latest game-feed pull: ${fmtDateTimeET(healthPulled)}`);
   } else {
-    lines.push('Last accepted update: UNVERIFIED');
+    lines.push('Latest game-feed pull: UNVERIFIED');
   }
 
-  if(status.status === 'AVAILABLE'){
-    lines.push('Reason: Available, but no accepted changed-version evidence applies to every selected-week game.');
+  if(authorityUpdated){
+    lines.push(`Last accepted authority update: ${fmtDateTimeET(authorityUpdated)}`);
+  } else {
+    lines.push('Last accepted authority update: UNVERIFIED');
+  }
+
+  if(status.status === 'DEGRADED'){
+    lines.push('Reason: One or more selected-week source rows are stale or unavailable.');
   } else if(status.status === 'UNAVAILABLE'){
     lines.push('Reason: Source is unavailable for the selected week.');
   }
 
   return lines.join('\n');
 }
-
 function edgeClass(edge){
   const n = numericSortValue(edge);
   if(n === null) return 'watch';
@@ -2482,7 +2523,9 @@ function renderHealth(){
       const coverage = sourceCoverage(domain,key,projectionRows);
       const status = coverageStatus(coverage);
       const fallback = ratings[healthKey] || {};
-      const updated = coverage.lastChangedAt ||
+      const updated = coverage.latestHealthPullAt ||
+        coverage.lastChangedAt ||
+        fallback.latest_pulled_at ||
         fallback.last_changed_at ||
         null;
       const title = sourceHealthTooltip(

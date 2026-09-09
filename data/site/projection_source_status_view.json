@@ -1,14 +1,14 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-09-08T19:32:30.998101+00:00",
+  "generated_at": "2026-09-09T12:07:39.249294+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_4src_equal_v1",
     "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
-    "full_available": 99,
-    "degraded_available": 666,
+    "full_available": 100,
+    "degraded_available": 665,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -46,9 +46,9 @@
       {
         "key": "DRatings",
         "name": "DRatings Game Predictions",
-        "games_available": 99,
+        "games_available": 100,
         "production_games": 765,
-        "coverage_pct": 12.9,
+        "coverage_pct": 13.1,
         "state": "PARTIAL"
       }
     ],
@@ -59,7 +59,7 @@
           "FPI",
           "TeamRankings"
         ],
-        "games": 666,
+        "games": 665,
         "effective_weights": {
           "SP+": 0.333333,
           "FPI": 0.333333,
@@ -73,7 +73,7 @@
           "TeamRankings",
           "DRatings Game Predictions"
         ],
-        "games": 99,
+        "games": 100,
         "effective_weights": {
           "SP+": 0.25,
           "FPI": 0.25,
@@ -87,8 +87,8 @@
     "model_id": "standard_total_sp_massey_dratings_v1",
     "degraded_model_id": "standard_total_degraded_v1",
     "production_games": 765,
-    "full_available": 99,
-    "degraded_available": 666,
+    "full_available": 100,
+    "degraded_available": 665,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -117,9 +117,9 @@
       {
         "key": "DRatings Total",
         "name": "DRatings Total",
-        "games_available": 99,
+        "games_available": 100,
         "production_games": 765,
-        "coverage_pct": 12.9,
+        "coverage_pct": 13.1,
         "state": "PARTIAL"
       }
     ],
@@ -139,22 +139,11 @@
           "Massey Dual",
           "DRatings Total"
         ],
-        "games": 99,
+        "games": 100,
         "effective_weights": {
           "SP+": 0.4,
           "Massey Dual": 0.4,
           "DRatings Total": 0.2
-        }
-      },
-      {
-        "components": [
-          "SP+",
-          "Massey Dual"
-        ],
-        "games": 1,
-        "effective_weights": {
-          "SP+": 0.5,
-          "Massey Dual": 0.5
         }
       }
     ]
@@ -164,12 +153,12 @@
       "name": "DRatings Game Predictions",
       "source_key": "DRatings Predictions",
       "role": "Standard Spread game-prediction input",
-      "games_available": 99,
+      "games_available": 100,
       "production_games": 765,
-      "coverage_pct": 12.9,
+      "coverage_pct": 13.1,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-09-08T19:32:04.795089+00:00",
-      "latest_snapshot_date": "2026-09-08",
+      "latest_pulled_at": "2026-09-09T12:01:59.038195+00:00",
+      "latest_snapshot_date": "2026-09-09",
       "latest_check_status": "NO_CHANGE",
       "latest_accepted_update_at": "2026-09-08T16:35:56.071491+00:00",
       "comparison_available": true,
@@ -185,7 +174,7 @@
       "coverage_pct": 13.1,
       "state": "PARTIAL",
       "latest_pulled_at": "2026-09-08T16:43:05.027662+00:00",
-      "latest_snapshot_date": "2026-09-08",
+      "latest_snapshot_date": "2026-09-09",
       "latest_check_status": "NO_CHANGE",
       "latest_accepted_update_at": "2026-09-08T16:35:56.071491+00:00",
       "comparison_available": true,
