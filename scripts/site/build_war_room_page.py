@@ -2216,6 +2216,14 @@ function sourceCoverage(domain,source,rows){
     item => item?.participating === true
   );
 
+  const fresh = available.filter(
+    item => item?.health_state === 'CURRENT'
+  );
+
+  const stale = available.filter(
+    item => item?.health_state === 'STALE'
+  );
+
   const updated = available.filter(
     item => item?.accepted_update === true
   );
@@ -2224,26 +2232,45 @@ function sourceCoverage(domain,source,rows){
     .map(item => item.latest_accepted_update_at)
     .filter(Boolean)
     .sort();
+
   const lastChangedAt = acceptedUpdates.length
     ? acceptedUpdates[acceptedUpdates.length - 1]
     : null;
 
-  const states = [...new Set(
+  const healthPulls = available
+    .map(item => item.health_pulled_at)
+    .filter(Boolean)
+    .sort();
+
+  const latestHealthPullAt = healthPulls.length
+    ? healthPulls[healthPulls.length - 1]
+    : null;
+
+  const authorityStates = [...new Set(
     entries
       .map(item => item?.state)
+      .filter(Boolean)
+  )];
+
+  const healthStates = [...new Set(
+    entries
+      .map(item => item?.health_state)
       .filter(Boolean)
   )];
 
   return {
     required:rows.length,
     available:available.length,
+    fresh:fresh.length,
+    stale:stale.length,
     updated:updated.length,
     missing:rows.length - available.length,
     lastChangedAt,
-    states
+    latestHealthPullAt,
+    states:authorityStates,
+    healthStates
   };
 }
-
 function coverageStatus(coverage){
   if(!coverage.required){
     return {status:'UNAVAILABLE',color:'GRAY'};
@@ -2251,48 +2278,62 @@ function coverageStatus(coverage){
 
   if(
     coverage.available === coverage.required &&
-    coverage.updated === coverage.required
+    coverage.fresh === coverage.required
   ){
-    return {status:'UPDATED',color:'GREEN'};
+    return {status:'CURRENT',color:'GREEN'};
   }
 
   if(coverage.available > 0){
-    return {status:'AVAILABLE',color:'YELLOW'};
+    return {status:'DEGRADED',color:'YELLOW'};
   }
 
   return {status:'UNAVAILABLE',color:'RED'};
 }
-
 function sourceHealthTooltip(label,status,coverage,fallback){
-  const updated =
+  const authorityUpdated =
     coverage.lastChangedAt ||
     fallback?.latest_accepted_update_at ||
+    fallback?.last_changed_at ||
+    null;
+
+  const healthPulled =
+    coverage.latestHealthPullAt ||
+    fallback?.latest_pulled_at ||
+    fallback?.latest_pull_at ||
+    fallback?.pulled_at ||
     null;
 
   const lines = [
     label,
     `Status: ${status.status}`,
-    `Freshness: ${coverage.states.join(', ') || fallback?.status || 'UNKNOWN'}`,
-    `Accepted updates: ${coverage.updated}/${coverage.required} selected-week games`,
+    `Operational freshness: ${coverage.healthStates.join(', ') || fallback?.status || 'UNKNOWN'}`,
+    `Fresh games: ${coverage.fresh}/${coverage.required}`,
     `Availability: ${coverage.available}/${coverage.required} selected-week games`,
-    `Missing: ${coverage.missing}`
+    `Stale: ${coverage.stale}`,
+    `Missing: ${coverage.missing}`,
+    `Authority updates: ${coverage.updated}/${coverage.required}`
   ];
 
-  if(updated){
-    lines.push(`Last accepted update: ${fmtDateTimeET(updated)}`);
+  if(healthPulled){
+    lines.push(`Latest game-feed pull: ${fmtDateTimeET(healthPulled)}`);
   } else {
-    lines.push('Last accepted update: UNVERIFIED');
+    lines.push('Latest game-feed pull: UNVERIFIED');
   }
 
-  if(status.status === 'AVAILABLE'){
-    lines.push('Reason: Available, but no accepted changed-version evidence applies to every selected-week game.');
+  if(authorityUpdated){
+    lines.push(`Last accepted authority update: ${fmtDateTimeET(authorityUpdated)}`);
+  } else {
+    lines.push('Last accepted authority update: UNVERIFIED');
+  }
+
+  if(status.status === 'DEGRADED'){
+    lines.push('Reason: One or more selected-week source rows are stale or unavailable.');
   } else if(status.status === 'UNAVAILABLE'){
     lines.push('Reason: Source is unavailable for the selected week.');
   }
 
   return lines.join('\n');
 }
-
 function edgeClass(edge){
   const n = numericSortValue(edge);
   if(n === null) return 'watch';
@@ -2528,7 +2569,9 @@ function renderHealth(){
       const coverage = sourceCoverage(domain,key,projectionRows);
       const status = coverageStatus(coverage);
       const fallback = ratings[healthKey] || {};
-      const updated = coverage.lastChangedAt ||
+      const updated = coverage.latestHealthPullAt ||
+        coverage.lastChangedAt ||
+        fallback.latest_pulled_at ||
         fallback.last_changed_at ||
         null;
       const title = sourceHealthTooltip(
