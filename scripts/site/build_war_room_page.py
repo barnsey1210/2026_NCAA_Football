@@ -2299,7 +2299,7 @@ function sourceHealthTooltip(label,status,coverage,fallback){
     fallback?.last_changed_at ||
     null;
 
-  const healthPulled =
+  const sourcePulled =
     coverage.latestHealthPullAt ||
     fallback?.latest_pulled_at ||
     fallback?.latest_pull_at ||
@@ -2309,30 +2309,19 @@ function sourceHealthTooltip(label,status,coverage,fallback){
   const lines = [
     label,
     `Status: ${status.status}`,
-    `Operational freshness: ${coverage.healthStates.join(', ') || fallback?.status || 'UNKNOWN'}`,
-    `Fresh games: ${coverage.fresh}/${coverage.required}`,
-    `Availability: ${coverage.available}/${coverage.required} selected-week games`,
-    `Stale: ${coverage.stale}`,
-    `Missing: ${coverage.missing}`,
-    `Authority updates: ${coverage.updated}/${coverage.required}`
+    `Availability: ${coverage.available}/${coverage.required}`
   ];
 
-  if(healthPulled){
-    lines.push(`Latest game-feed pull: ${fmtDateTimeET(healthPulled)}`);
+  if(sourcePulled){
+    lines.push(`Latest source pull: ${fmtDateTimeET(sourcePulled)}`);
   } else {
-    lines.push('Latest game-feed pull: UNVERIFIED');
+    lines.push('Latest source pull: UNVERIFIED');
   }
 
   if(authorityUpdated){
     lines.push(`Last accepted authority update: ${fmtDateTimeET(authorityUpdated)}`);
   } else {
     lines.push('Last accepted authority update: UNVERIFIED');
-  }
-
-  if(status.status === 'DEGRADED'){
-    lines.push('Reason: One or more selected-week source rows are stale or unavailable.');
-  } else if(status.status === 'UNAVAILABLE'){
-    lines.push('Reason: Source is unavailable for the selected week.');
   }
 
   return lines.join('\n');

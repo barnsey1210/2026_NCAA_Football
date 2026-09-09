@@ -1880,7 +1880,19 @@ def model_freshness(
             else:
                 health_state = "STALE"
         else:
-            health_state = state
+            health_timestamp = parse_timestamp(
+                health_pulled_at
+            )
+
+            if health_timestamp is None:
+                health_state = "STALE"
+            elif (
+                datetime.now(timezone.utc) - health_timestamp
+                <= GAME_FEED_MAX_AGE
+            ):
+                health_state = "CURRENT"
+            else:
+                health_state = "STALE"
 
         is_team_rating_source = component in TEAM_SOURCE_MAP
 
