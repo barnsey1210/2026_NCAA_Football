@@ -34,12 +34,18 @@ def load_jsonl(name):
 def parse_dt(value):
     if not value:
         return None
+
     try:
-        return datetime.fromisoformat(
+        parsed = datetime.fromisoformat(
             str(value).replace("Z", "+00:00")
         )
     except (TypeError, ValueError):
         return None
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+
+    return parsed.astimezone(timezone.utc)
 
 
 def game_checkpoints(kickoff_value):

@@ -124,6 +124,12 @@ def main():
     overall = {}
 
     for name in requested:
+        raw_dir = RAW / name
+        raw_dir.mkdir(parents=True, exist_ok=True)
+
+        for stale_table in raw_dir.glob(f"{name}_table_*.csv"):
+            stale_table.unlink()
+
         url = URLS[name]
         html, content, content_type = fetch(name, url)
         summaries = inspect_tables(name, html)

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from datetime import datetime, timezone
 import argparse
+import hashlib
+import json
 import re
 import pandas as pd
 
@@ -415,6 +418,69 @@ def canonical(s):
     }
     return fixes.get(out, out)
 
+CANDIDATE_RECEIPTS = OUT / "candidate_receipts"
+
+CANDIDATE_PATHS = {
+    "teamrankings": OUT / "teamrankings_2026_candidate.csv",
+    "fpi": OUT / "fpi_2026_candidate.csv",
+    "spplus": OUT / "spplus_2026_candidate.csv",
+}
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def receipt_path(source):
+    return CANDIDATE_RECEIPTS / f"{source}.json"
+
+
+def invalidate_candidate(source):
+    candidate = CANDIDATE_PATHS[source]
+    receipt = receipt_path(source)
+
+    if candidate.exists():
+        candidate.unlink()
+
+    if receipt.exists():
+        receipt.unlink()
+
+
+def write_candidate_receipt(source):
+    candidate = CANDIDATE_PATHS[source]
+
+    if not candidate.exists():
+        raise SystemExit(
+            f"{source}: candidate missing after successful parse: {candidate}"
+        )
+
+    CANDIDATE_RECEIPTS.mkdir(parents=True, exist_ok=True)
+
+    receipt = {
+        "schema_version": 1,
+        "source": source,
+        "candidate": candidate.name,
+        "sha256": sha256_file(candidate),
+        "generated_at": (
+            datetime.now(timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        ),
+    }
+
+    target = receipt_path(source)
+    temporary = target.with_suffix(".json.tmp")
+    temporary.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+    )
+    temporary.replace(target)
+
+
 def latest_table(source, table_num):
     files = sorted((RAW / source).glob(f"{source}_table_{table_num}.csv"))
     if not files:
@@ -518,6 +584,9 @@ def main():
     if unknown:
         raise SystemExit(f"Unknown rating sources: {unknown}")
 
+    for source in requested:
+        invalidate_candidate(source)
+
     parsed = {}
 
     if "teamrankings" in requested:
@@ -542,6 +611,11 @@ def main():
         print(f"\nCoverage vs 2026 site universe — {name}")
         print("missing from source:", len(missing), missing)
         print("extra in source:", len(extra), extra)
+
+    for name in parsed:
+        write_candidate_receipt(name)
+        print(f"{name}: wrote validated candidate receipt")
+
 
 if __name__ == "__main__":
     main()
