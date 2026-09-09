@@ -96,6 +96,12 @@ CFBDEPTH_INJURY_IMPACT = (
 )
 INJURY_MAX_AGE = timedelta(hours=6)
 
+GAME_FEED_MAX_AGE = timedelta(hours=24)
+GAME_PROJECTION_SOURCES = (
+    ROOT / "data/projections/game_projection_sources_2026.csv"
+)
+_GAME_SOURCE_ROWS_CACHE = None
+
 BETTING_ANGLES = (
     ROOT / "data/signals/game_betting_angles_2026.csv"
 )
@@ -1696,6 +1702,63 @@ def load_game_feed_snapshots(payload):
     return out
 
 
+def load_game_source_rows_cached():
+    global _GAME_SOURCE_ROWS_CACHE
+
+    if _GAME_SOURCE_ROWS_CACHE is not None:
+        return _GAME_SOURCE_ROWS_CACHE
+
+    out = {}
+
+    if not GAME_PROJECTION_SOURCES.exists():
+        _GAME_SOURCE_ROWS_CACHE = out
+        return out
+
+    with GAME_PROJECTION_SOURCES.open(
+        newline="",
+        encoding="utf-8-sig",
+    ) as handle:
+        for row in csv.DictReader(handle):
+            gid = str(row.get("game_id") or "").strip()
+            source = str(row.get("source") or "").strip()
+
+            if not gid or not source:
+                continue
+
+            candidate = {
+                "snapshot_date": iso_date(
+                    row.get("snapshot_date")
+                ),
+                "pulled_at": row.get("pulled_at"),
+            }
+
+            key = (gid, source)
+            existing = out.get(key)
+
+            if existing is None:
+                out[key] = candidate
+                continue
+
+            candidate_ts = parse_timestamp(
+                candidate.get("pulled_at")
+            )
+            existing_ts = parse_timestamp(
+                existing.get("pulled_at")
+            )
+
+            if (
+                candidate_ts is not None
+                and (
+                    existing_ts is None
+                    or candidate_ts > existing_ts
+                )
+            ):
+                out[key] = candidate
+
+    _GAME_SOURCE_ROWS_CACHE = out
+    return out
+
+
 TEAM_SOURCE_MAP = {
     "SP+": "SP+",
     "FPI": "FPI",
@@ -1761,6 +1824,34 @@ def model_freshness(
 
         snapshot_date = meta.get("snapshot_date")
 
+
+        is_game_feed_source = component in GAME_FEED_MAP
+        game_row_meta = {}
+
+        if is_game_feed_source:
+            game_row_meta = load_game_source_rows_cached().get(
+                (
+                    str(game.get("game_id") or ""),
+                    source_key,
+                ),
+                {},
+            )
+
+        health_snapshot_date = (
+            game_row_meta.get("snapshot_date")
+            if is_game_feed_source
+            else snapshot_date
+        )
+
+        health_pulled_at = (
+            game_row_meta.get("pulled_at")
+            if is_game_feed_source
+            else (
+                meta.get("pulled_at")
+                or meta.get("latest_pull_at")
+            )
+        )
+
         if not present:
             state = "MISSING"
         else:
@@ -1771,6 +1862,25 @@ def model_freshness(
                 last_changed_at=meta.get("last_changed_at"),
                 comparison_available=meta.get("comparison_available"),
             )
+
+        if not present:
+            health_state = "MISSING"
+        elif is_game_feed_source:
+            health_timestamp = parse_timestamp(
+                health_pulled_at
+            )
+
+            if health_timestamp is None:
+                health_state = "STALE"
+            elif (
+                datetime.now(timezone.utc) - health_timestamp
+                <= GAME_FEED_MAX_AGE
+            ):
+                health_state = "CURRENT"
+            else:
+                health_state = "STALE"
+        else:
+            health_state = state
 
         is_team_rating_source = component in TEAM_SOURCE_MAP
 
@@ -1797,6 +1907,9 @@ def model_freshness(
             "participating": present,
             "state": state,
             "snapshot_date": snapshot_date,
+            "health_snapshot_date": health_snapshot_date,
+            "health_pulled_at": health_pulled_at,
+            "health_state": health_state,
             "pulled_at": (
                 meta.get("pulled_at")
                 or meta.get("latest_pull_at")
