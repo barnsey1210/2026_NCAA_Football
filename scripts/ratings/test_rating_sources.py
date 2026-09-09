@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from io import StringIO
 import argparse
 from datetime import datetime
 import re
@@ -12,11 +13,18 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "data" / "ratings"
 RAW = OUT / "raw"
 
+SPPLUS_FALLBACK_URL = (
+    "https://www.espn.com/college-football/story/_/id/49868647/"
+    "2026-college-football-sp+-rankings-all-138-fbs-teams"
+)
+
+ESPN_SEARCH_URL = "https://site.web.api.espn.com/apis/search/v2"
+
 URLS = {
     "teamrankings": "https://www.teamrankings.com/college-football/ranking/predictive-by-other",
     "kford": "https://kfordratings.com/power",
     "fpi": "https://www.espn.com/college-football/fpi",
-    "spplus": "https://www.espn.com/college-football/story/_/id/49868647/2026-college-football-sp+-rankings-all-138-fbs-teams",
+    "spplus": SPPLUS_FALLBACK_URL,
     "bradpowers": "https://nebula.wsimg.com/884a927043bff9994159619ba0ba890c?AccessKeyId=F4E5462B12CB60B63AD2&disposition=0&alloworigin=1",
 }
 
@@ -40,6 +48,156 @@ def save_html(name, html):
     p = d / f"{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
     p.write_text(html, encoding="utf-8")
     return p
+
+def discover_spplus_candidates():
+    candidates = []
+
+    try:
+        response = requests.get(
+            ESPN_SEARCH_URL,
+            params={
+                "query": "2026 college football SP+ rankings",
+                "limit": 20,
+            },
+            headers=HEADERS,
+            timeout=30,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        for result in data.get("results") or []:
+            for item in result.get("contents") or []:
+                title = str(item.get("displayName") or "")
+                url = str((item.get("link") or {}).get("web") or "")
+                date = str(item.get("date") or "")
+
+                title_lower = title.lower()
+                url_lower = url.lower()
+
+                if item.get("type") != "story":
+                    continue
+                if "espn.com/college-football/story/" not in url_lower:
+                    continue
+                if "2026" not in title_lower:
+                    continue
+                if "sp+" not in title_lower and "sp+" not in url_lower:
+                    continue
+
+                candidates.append(
+                    {
+                        "title": title,
+                        "url": url,
+                        "date": date,
+                    }
+                )
+
+    except Exception as exc:
+        print("\nSPPLUS DISCOVERY")
+        print("discovery error:", exc)
+
+    candidates.sort(
+        key=lambda row: row.get("date") or "",
+        reverse=True,
+    )
+
+    seen = set()
+    unique = []
+
+    for row in candidates:
+        url = row["url"]
+        if url in seen:
+            continue
+        seen.add(url)
+        unique.append(row)
+
+    if SPPLUS_FALLBACK_URL not in seen:
+        unique.append(
+            {
+                "title": "Known-good manual fallback",
+                "url": SPPLUS_FALLBACK_URL,
+                "date": "",
+            }
+        )
+
+    return unique
+
+
+def valid_spplus_html(html):
+    if not html.strip():
+        return False
+
+    try:
+        tables = pd.read_html(StringIO(html))
+    except Exception:
+        return False
+
+    for table in tables:
+        df = table.copy()
+        df.columns = [norm_col(c) for c in df.columns]
+
+        columns = set(df.columns)
+
+        rating_ok = bool(
+            {"rating", "sp", "sp_rk"} & columns
+        )
+        offense_ok = bool(
+            {"offense", "off_sp", "off"} & columns
+        )
+        defense_ok = bool(
+            {"defense", "def_sp", "def"} & columns
+        )
+
+        if (
+            len(df) == 138
+            and "team" in columns
+            and rating_ok
+            and offense_ok
+            and defense_ok
+        ):
+            return True
+
+    return False
+
+
+def fetch_spplus():
+    candidates = discover_spplus_candidates()
+
+    print("\nSPPLUS DISCOVERY")
+    print("candidate URLs:", len(candidates))
+
+    for index, candidate in enumerate(candidates, start=1):
+        url = candidate["url"]
+        title = candidate["title"]
+        date = candidate["date"]
+
+        print(
+            f"candidate {index}: "
+            f"{date or 'NO_DATE'} | {title}"
+        )
+
+        html, content, content_type = fetch("spplus", url)
+
+        if not valid_spplus_html(html):
+            print("SPPLUS VALIDATION: REJECTED")
+            continue
+
+        mode = (
+            "FALLBACK"
+            if title == "Known-good manual fallback"
+            else "DISCOVERED"
+        )
+
+        print("SPPLUS VALIDATION: PASSED")
+        print("SPPLUS URL MODE:", mode)
+        print("SPPLUS SELECTED URL:", url)
+
+        return url, html, content, content_type, mode
+
+    raise SystemExit(
+        "SP+: no discovered or fallback ESPN article "
+        "contained a valid 138-team SP+ table"
+    )
+
 
 def fetch(name, url):
     try:
@@ -77,7 +235,7 @@ def inspect_tables(name, html):
         return []
 
     try:
-        tables = pd.read_html(html)
+        tables = pd.read_html(StringIO(html))
     except Exception as e:
         print("read_html error:", e)
         return []
@@ -130,12 +288,24 @@ def main():
         for stale_table in raw_dir.glob(f"{name}_table_*.csv"):
             stale_table.unlink()
 
-        url = URLS[name]
-        html, content, content_type = fetch(name, url)
+        if name == "spplus":
+            (
+                url,
+                html,
+                content,
+                content_type,
+                discovery_mode,
+            ) = fetch_spplus()
+        else:
+            url = URLS[name]
+            html, content, content_type = fetch(name, url)
+            discovery_mode = None
+
         summaries = inspect_tables(name, html)
 
         overall[name] = {
             "url": url,
+            "discovery_mode": discovery_mode,
             "content_type": content_type,
             "html_length": len(html),
             "binary_length": len(content),
