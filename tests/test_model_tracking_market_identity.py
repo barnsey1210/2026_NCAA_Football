@@ -101,14 +101,17 @@ def test_a_to_b_to_a_reuses_material_a_identity():
     a1 = market_row(
         line=-7.0,
         observed_at="2026-09-09T12:00:00+00:00",
+        source_updated_at="2026-09-09T11:59:00+00:00",
     )
     b = market_row(
         line=-7.5,
         observed_at="2026-09-09T12:20:00+00:00",
+        source_updated_at="2026-09-09T12:19:00+00:00",
     )
     a2 = market_row(
         line=-7.0,
         observed_at="2026-09-09T12:40:00+00:00",
+        source_updated_at="2026-09-09T12:39:00+00:00",
     )
 
     assert M.market_state_id(a1) != M.market_state_id(b)
@@ -164,3 +167,54 @@ def test_decision_state_changes_when_market_state_changes():
     )
 
     assert first_id != second_id
+
+
+def test_repeated_capture_same_provider_evidence_is_same_confirmation():
+    first = market_row(
+        observed_at="2026-09-09T12:00:00+00:00",
+        source_updated_at="2026-09-09T11:59:00+00:00",
+    )
+    second = market_row(
+        observed_at="2026-09-09T12:02:00+00:00",
+        source_updated_at="2026-09-09T11:59:00+00:00",
+    )
+
+    assert M.market_state_id(first) == M.market_state_id(second)
+    assert (
+        M.market_confirmation_id(first)
+        == M.market_confirmation_id(second)
+    )
+
+
+def test_provider_timestamp_change_creates_confirmation_not_state():
+    first = market_row(
+        observed_at="2026-09-09T12:00:00+00:00",
+        source_updated_at="2026-09-09T11:59:00+00:00",
+    )
+    second = market_row(
+        observed_at="2026-09-09T12:02:00+00:00",
+        source_updated_at="2026-09-09T12:01:00+00:00",
+    )
+
+    assert M.market_state_id(first) == M.market_state_id(second)
+    assert (
+        M.market_confirmation_id(first)
+        != M.market_confirmation_id(second)
+    )
+
+
+def test_missing_source_timestamp_falls_back_to_observed_at():
+    first = market_row(
+        observed_at="2026-09-09T12:00:00+00:00",
+        source_updated_at=None,
+    )
+    second = market_row(
+        observed_at="2026-09-09T12:02:00+00:00",
+        source_updated_at=None,
+    )
+
+    assert M.market_state_id(first) == M.market_state_id(second)
+    assert (
+        M.market_confirmation_id(first)
+        != M.market_confirmation_id(second)
+    )

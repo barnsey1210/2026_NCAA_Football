@@ -65,12 +65,14 @@ def market_confirmation_id(
     state_id: str | None = None,
 ) -> str:
     state_id = state_id or market_state_id(row)
+    evidence_timestamp = (
+        row.get("source_updated_at")
+        or row.get("observed_at")
+    )
     return stable_id(
         "market_confirmation_v1",
         state_id,
-        row.get("observed_at"),
-        row.get("source_updated_at"),
-        row.get("contract_id"),
+        evidence_timestamp,
     )
 
 
