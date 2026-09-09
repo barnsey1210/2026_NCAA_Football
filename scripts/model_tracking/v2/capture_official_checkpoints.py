@@ -9,6 +9,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from immutable_tracking import append_unique, stable_id
+from normalized_checkpoint_reader import (
+    build_normalized_context,
+    choose_reference_fallback as choose_normalized_reference_fallback,
+    semantic_market,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 D = ROOT / "data/model_tracking/v2"
@@ -190,13 +195,54 @@ def choose_reference_fallback(
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--accept", action="store_true")
+    ap.add_argument(
+        "--normalized-shadow",
+        action="store_true",
+    )
+    ap.add_argument(
+        "--require-normalized-parity",
+        action="store_true",
+    )
     args = ap.parse_args()
+
+    if (
+        args.require_normalized_parity
+        and not args.normalized_shadow
+    ):
+        ap.error(
+            "--require-normalized-parity requires "
+            "--normalized-shadow"
+        )
 
     now = datetime.now(timezone.utc)
 
     predictions = load_jsonl("prediction_observations.jsonl")
     markets = load_jsonl("market_observations.jsonl")
     decisions = load_jsonl("decision_observations.jsonl")
+
+    normalized = (
+        build_normalized_context(D)
+        if args.normalized_shadow
+        else None
+    )
+
+    normalized_shadow = {
+        "enabled": bool(args.normalized_shadow),
+        "compared": 0,
+        "mismatches": 0,
+        "missing_normalized_market": 0,
+        "superseded_market_confirmations": (
+            normalized["superseded_market_confirmations"]
+            if normalized
+            else 0
+        ),
+        "unresolved_market_states": (
+            normalized["unresolved_market_states"]
+            if normalized
+            else 0
+        ),
+        "first_mismatches": [],
+    }
 
     markets_by_id = {
         row["observation_id"]: row
@@ -322,6 +368,129 @@ def main():
                             float(prediction["projection"]) - line
                         )
 
+                if args.normalized_shadow:
+                    (
+                        normalized_market,
+                        normalized_benchmark,
+                    ) = choose_pinnacle_market(
+                        normalized["markets_by_game"].get(
+                            game_id,
+                            [],
+                        ),
+                        prediction["projection"],
+                        market_type,
+                        checkpoint_at,
+                    )
+
+                    normalized_decision = None
+
+                    if normalized_market is None:
+                        (
+                            normalized_market,
+                            normalized_decision,
+                            normalized_benchmark,
+                        ) = choose_normalized_reference_fallback(
+                            normalized,
+                            prediction["observation_id"],
+                            checkpoint_at,
+                        )
+
+                    normalized_shadow["compared"] += 1
+
+                    if normalized_market is None:
+                        normalized_side = None
+                        normalized_edge = None
+                        normalized_shadow[
+                            "missing_normalized_market"
+                        ] += 1
+                        mismatch = True
+
+                    else:
+                        if normalized_decision is not None:
+                            normalized_side = (
+                                normalized_decision.get(
+                                    "bet_side"
+                                )
+                            )
+                            normalized_edge = (
+                                normalized_decision.get(
+                                    "edge"
+                                )
+                            )
+
+                        else:
+                            normalized_line = float(
+                                normalized_market["line"]
+                            )
+
+                            if market_type == "spread":
+                                normalized_side = (
+                                    "home"
+                                    if float(
+                                        prediction["projection"]
+                                    ) + normalized_line >= 0
+                                    else "away"
+                                )
+                                normalized_edge = abs(
+                                    float(
+                                        prediction["projection"]
+                                    ) + normalized_line
+                                )
+
+                            else:
+                                normalized_side = (
+                                    "over"
+                                    if float(
+                                        prediction["projection"]
+                                    ) - normalized_line >= 0
+                                    else "under"
+                                )
+                                normalized_edge = abs(
+                                    float(
+                                        prediction["projection"]
+                                    ) - normalized_line
+                                )
+
+                        mismatch = not (
+                            semantic_market(market)
+                            == semantic_market(normalized_market)
+                            and benchmark == normalized_benchmark
+                            and side == normalized_side
+                            and edge == normalized_edge
+                        )
+
+                    if mismatch:
+                        normalized_shadow["mismatches"] += 1
+
+                        if len(
+                            normalized_shadow["first_mismatches"]
+                        ) < 10:
+                            normalized_shadow[
+                                "first_mismatches"
+                            ].append({
+                                "game_id": game_id,
+                                "checkpoint": checkpoint_name,
+                                "model_id": model_id,
+                                "model_version": model_version,
+                                "market_type": market_type,
+                                "legacy_market":
+                                    semantic_market(market),
+                                "normalized_market":
+                                    semantic_market(
+                                        normalized_market
+                                    ),
+                                "legacy_benchmark":
+                                    benchmark,
+                                "normalized_benchmark":
+                                    normalized_benchmark,
+                                "legacy_side": side,
+                                "normalized_side":
+                                    normalized_side,
+                                "legacy_edge": edge,
+                                "normalized_edge":
+                                    normalized_edge,
+                            })
+
                 prediction_observed = parse_dt(
                     prediction.get("observed_at")
                 )
@@ -405,6 +574,7 @@ def main():
             "immutability": "one row per game/model/version/market/checkpoint",
         },
         "skipped": dict(skipped),
+        "normalized_shadow": normalized_shadow,
         "checkpoints": append_unique(
             D / "checkpoint_observations.jsonl",
             checkpoint_rows,
@@ -414,6 +584,22 @@ def main():
     }
 
     print(json.dumps(report, indent=2))
+
+    if (
+        args.require_normalized_parity
+        and (
+            normalized_shadow["mismatches"] != 0
+            or normalized_shadow[
+                "missing_normalized_market"
+            ] != 0
+            or normalized_shadow[
+                "unresolved_market_states"
+            ] != 0
+        )
+    ):
+        raise SystemExit(
+            "normalized checkpoint parity failed"
+        )
 
 
 if __name__ == "__main__":
