@@ -213,8 +213,6 @@ def main():
     )
     args = ap.parse_args()
 
-    if args.normalized_authority:
-        args.normalized_shadow = True
 
     if (
         args.require_normalized_parity
@@ -228,12 +226,30 @@ def main():
     now = datetime.now(timezone.utc)
 
     predictions = load_jsonl("prediction_observations.jsonl")
-    markets = load_jsonl("market_observations.jsonl")
-    decisions = load_jsonl("decision_observations.jsonl")
+
+    legacy_selection_enabled = (
+        not args.normalized_authority
+        or args.normalized_shadow
+    )
+
+    markets = (
+        load_jsonl("market_observations.jsonl")
+        if legacy_selection_enabled
+        else []
+    )
+
+    decisions = (
+        load_jsonl("decision_observations.jsonl")
+        if legacy_selection_enabled
+        else []
+    )
 
     normalized = (
         build_normalized_context(D)
-        if args.normalized_shadow
+        if (
+            args.normalized_shadow
+            or args.normalized_authority
+        )
         else None
     )
 
@@ -333,53 +349,13 @@ def main():
                     skipped["missing_prediction_before_checkpoint"] += 1
                     continue
 
-                market, benchmark = choose_pinnacle_market(
-                    markets_by_game.get(game_id, []),
-                    prediction["projection"],
-                    market_type,
-                    checkpoint_at,
-                )
+                normalized_market = None
+                normalized_decision = None
+                normalized_benchmark = None
+                normalized_side = None
+                normalized_edge = None
 
-                decision = None
-
-                if market is None:
-                    market, decision, benchmark = choose_reference_fallback(
-                        decisions,
-                        markets_by_id,
-                        prediction["observation_id"],
-                        checkpoint_at,
-                    )
-
-                if market is None:
-                    skipped["missing_market_before_checkpoint"] += 1
-                    continue
-
-                if decision is not None:
-                    side = decision.get("bet_side")
-                    edge = decision.get("edge")
-                else:
-                    line = float(market["line"])
-
-                    if market_type == "spread":
-                        side = (
-                            "home"
-                            if float(prediction["projection"]) + line >= 0
-                            else "away"
-                        )
-                        edge = abs(
-                            float(prediction["projection"]) + line
-                        )
-                    else:
-                        side = (
-                            "over"
-                            if float(prediction["projection"]) - line >= 0
-                            else "under"
-                        )
-                        edge = abs(
-                            float(prediction["projection"]) - line
-                        )
-
-                if args.normalized_shadow:
+                if args.normalized_authority:
                     (
                         normalized_market,
                         normalized_benchmark,
@@ -393,8 +369,6 @@ def main():
                         checkpoint_at,
                     )
 
-                    normalized_decision = None
-
                     if normalized_market is None:
                         (
                             normalized_market,
@@ -406,154 +380,116 @@ def main():
                             checkpoint_at,
                         )
 
-                    normalized_shadow["compared"] += 1
-
                     if normalized_market is None:
-                        normalized_side = None
-                        normalized_edge = None
-                        normalized_shadow[
-                            "missing_normalized_market"
+                        skipped[
+                            "missing_normalized_market_before_checkpoint"
                         ] += 1
-                        mismatch = True
+                        continue
 
+                    if normalized_decision is not None:
+                        normalized_side = (
+                            normalized_decision.get("bet_side")
+                        )
+                        normalized_edge = (
+                            normalized_decision.get("edge")
+                        )
                     else:
-                        if normalized_decision is not None:
+                        line = float(normalized_market["line"])
+
+                        if market_type == "spread":
                             normalized_side = (
-                                normalized_decision.get(
-                                    "bet_side"
-                                )
+                                "home"
+                                if float(prediction["projection"]) + line >= 0
+                                else "away"
                             )
-                            normalized_edge = (
-                                normalized_decision.get(
-                                    "edge"
-                                )
+                            normalized_edge = abs(
+                                float(prediction["projection"]) + line
                             )
-
                         else:
-                            normalized_line = float(
-                                normalized_market["line"]
+                            normalized_side = (
+                                "over"
+                                if float(prediction["projection"]) - line >= 0
+                                else "under"
                             )
-
-                            if market_type == "spread":
-                                normalized_side = (
-                                    "home"
-                                    if float(
-                                        prediction["projection"]
-                                    ) + normalized_line >= 0
-                                    else "away"
-                                )
-                                normalized_edge = abs(
-                                    float(
-                                        prediction["projection"]
-                                    ) + normalized_line
-                                )
-
-                            else:
-                                normalized_side = (
-                                    "over"
-                                    if float(
-                                        prediction["projection"]
-                                    ) - normalized_line >= 0
-                                    else "under"
-                                )
-                                normalized_edge = abs(
-                                    float(
-                                        prediction["projection"]
-                                    ) - normalized_line
-                                )
-
-                        mismatch = not (
-                            semantic_market(market)
-                            == semantic_market(normalized_market)
-                            and benchmark == normalized_benchmark
-                            and side == normalized_side
-                            and edge == normalized_edge
-                        )
-
-                    if mismatch:
-                        normalized_shadow["mismatches"] += 1
-
-                        if len(
-                            normalized_shadow["first_mismatches"]
-                        ) < 10:
-                            normalized_shadow[
-                                "first_mismatches"
-                            ].append({
-                                "game_id": game_id,
-                                "checkpoint": checkpoint_name,
-                                "model_id": model_id,
-                                "model_version": model_version,
-                                "market_type": market_type,
-                                "legacy_market":
-                                    semantic_market(market),
-                                "normalized_market":
-                                    semantic_market(
-                                        normalized_market
-                                    ),
-                                "legacy_benchmark":
-                                    benchmark,
-                                "normalized_benchmark":
-                                    normalized_benchmark,
-                                "legacy_side": side,
-                                "normalized_side":
-                                    normalized_side,
-                                "legacy_edge": edge,
-                                "normalized_edge":
-                                    normalized_edge,
-                            })
-
-                if args.normalized_authority:
-                    if normalized_market is None:
-                        raise RuntimeError(
-                            "normalized authority missing market "
-                            f"{game_id} {checkpoint_name} "
-                            f"{model_id} {market_type}"
-                        )
-
-                    compatibility_market_id = (
-                        normalized_market.get(
-                            "legacy_market_observation_id"
-                        )
-                    )
-
-                    if not compatibility_market_id:
-                        raise RuntimeError(
-                            "normalized authority market lacks "
-                            "legacy compatibility observation id"
-                        )
+                            normalized_edge = abs(
+                                float(prediction["projection"]) - line
+                            )
 
                     market = dict(normalized_market)
-                    market["observation_id"] = (
-                        compatibility_market_id
-                    )
-
                     benchmark = normalized_benchmark
                     side = normalized_side
                     edge = normalized_edge
 
-                    if normalized_decision is not None:
-                        compatibility_decision_id = (
-                            normalized_decision.get(
-                                "decision_id"
-                            )
+                    market["observation_id"] = (
+                        normalized_market.get(
+                            "legacy_market_observation_id"
+                        )
+                        or normalized_market.get(
+                            "market_confirmation_id"
+                        )
+                    )
+
+                    decision = (
+                        dict(normalized_decision)
+                        if normalized_decision is not None
+                        else None
+                    )
+
+                else:
+                    market, benchmark = choose_pinnacle_market(
+                        markets_by_game.get(game_id, []),
+                        prediction["projection"],
+                        market_type,
+                        checkpoint_at,
+                    )
+
+                    decision = None
+
+                    if market is None:
+                        (
+                            market,
+                            decision,
+                            benchmark,
+                        ) = choose_reference_fallback(
+                            decisions,
+                            markets_by_id,
+                            prediction["observation_id"],
+                            checkpoint_at,
                         )
 
-                        if not compatibility_decision_id:
-                            raise RuntimeError(
-                                "normalized fallback decision lacks "
-                                "legacy compatibility id"
-                            )
+                    if market is None:
+                        skipped[
+                            "missing_market_before_checkpoint"
+                        ] += 1
+                        continue
 
-                        decision = dict(
-                            normalized_decision
-                        )
-                        decision["decision_id"] = (
-                            compatibility_decision_id
-                        )
+                    if decision is not None:
+                        side = decision.get("bet_side")
+                        edge = decision.get("edge")
                     else:
-                        decision = None
+                        line = float(market["line"])
+
+                        if market_type == "spread":
+                            side = (
+                                "home"
+                                if float(prediction["projection"]) + line >= 0
+                                else "away"
+                            )
+                            edge = abs(
+                                float(prediction["projection"]) + line
+                            )
+                        else:
+                            side = (
+                                "over"
+                                if float(prediction["projection"]) - line >= 0
+                                else "under"
+                            )
+                            edge = abs(
+                                float(prediction["projection"]) - line
+                            )
 
                 prediction_observed = parse_dt(
+
                     prediction.get("observed_at")
                 )
                 market_observed = parse_dt(

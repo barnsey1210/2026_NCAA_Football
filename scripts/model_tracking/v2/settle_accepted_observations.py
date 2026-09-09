@@ -261,7 +261,6 @@ def main():
         "first_mismatches": [],
     }
 
-    raw_decisions = load_jsonl("decision_observations.jsonl")
     checkpoint_rows_all = load_jsonl(
         "checkpoint_observations.jsonl"
     )
@@ -327,97 +326,52 @@ def main():
                 checkpoint.get("prediction_observation_id")
             )
 
-            legacy_checkpoint_market = markets.get(
-                checkpoint.get("market_observation_id")
-            )
+            if (
+                args.normalized_market_authority
+                and checkpoint.get("checkpoint") != "CLOSE"
+            ):
+                checkpoint_market = (
+                    resolve_normalized_checkpoint_market(
+                        checkpoint,
+                        normalized_context,
+                        normalized_by_legacy_id,
+                    )
+                )
 
-            checkpoint_market = legacy_checkpoint_market
+                normalized_resolution["compared"] += 1
 
-            if args.normalized_market_authority:
-                if checkpoint.get("checkpoint") == "CLOSE":
+                if checkpoint_market is None:
+                    normalized_resolution[
+                        "missing_authority_market"
+                    ] = (
+                        normalized_resolution.get(
+                            "missing_authority_market",
+                            0,
+                        ) + 1
+                    )
+                elif checkpoint.get(
+                    "market_confirmation_id"
+                ):
+                    normalized_resolution[
+                        "resolved_normalized"
+                    ] += 1
+                else:
+                    normalized_resolution[
+                        "checkpoint_snapshot_fallback"
+                    ] += 1
+
+            else:
+                checkpoint_market = markets.get(
+                    checkpoint.get("market_observation_id")
+                )
+
+                if (
+                    args.normalized_market_authority
+                    and checkpoint.get("checkpoint") == "CLOSE"
+                ):
                     normalized_resolution[
                         "close_legacy"
                     ] += 1
-                else:
-                    normalized_checkpoint_market = (
-                        resolve_normalized_checkpoint_market(
-                            checkpoint,
-                            normalized_context,
-                            normalized_by_legacy_id,
-                        )
-                    )
-
-                    normalized_resolution[
-                        "compared"
-                    ] += 1
-
-                    if normalized_checkpoint_market is not None:
-                        if checkpoint.get(
-                            "market_confirmation_id"
-                        ):
-                            normalized_resolution[
-                                "resolved_normalized"
-                            ] += 1
-                        else:
-                            normalized_resolution[
-                                "checkpoint_snapshot_fallback"
-                            ] += 1
-
-                        if not market_semantics_match(
-                            legacy_checkpoint_market,
-                            normalized_checkpoint_market,
-                        ):
-                            normalized_resolution[
-                                "mismatches"
-                            ] += 1
-
-                            if len(
-                                normalized_resolution[
-                                    "first_mismatches"
-                                ]
-                            ) < 10:
-                                normalized_resolution[
-                                    "first_mismatches"
-                                ].append({
-                                    "checkpoint_id":
-                                        checkpoint.get(
-                                            "checkpoint_id"
-                                        ),
-                                    "checkpoint":
-                                        checkpoint.get(
-                                            "checkpoint"
-                                        ),
-                                    "legacy_market":
-                                        semantic_market(
-                                            legacy_checkpoint_market
-                                        ),
-                                    "normalized_market":
-                                        semantic_market(
-                                            normalized_checkpoint_market
-                                        ),
-                                })
-
-                        checkpoint_market = dict(
-                            normalized_checkpoint_market
-                        )
-
-                        # Preserve the historical compatibility
-                        # identifier in existing score schema.
-                        checkpoint_market[
-                            "observation_id"
-                        ] = checkpoint.get(
-                            "market_observation_id"
-                        )
-
-                    else:
-                        normalized_resolution[
-                            "missing_authority_market"
-                        ] = (
-                            normalized_resolution.get(
-                                "missing_authority_market",
-                                0,
-                            ) + 1
-                        )
 
             if prediction is None:
                 skipped["missing_prediction"] += 1
@@ -620,7 +574,6 @@ def main():
         "schema_version": "settlement-preview-v4",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "verified_games": len(games),
-        "raw_decision_rows": len(raw_decisions),
         "checkpoint_rows_total": len(checkpoint_rows_all),
         "official_checkpoint_rows": len(checkpoints),
         "normalized_market_resolution": normalized_resolution,

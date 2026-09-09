@@ -100,13 +100,65 @@ def authoritative_scores(scores_all):
     return list(selected.values())
 
 
+
+def normalized_decisions():
+    states = {
+        row["decision_state_id"]: row
+        for row in load("decision_states.jsonl")
+    }
+
+    confirmations = load(
+        "decision_confirmations.jsonl"
+    )
+
+    rows = []
+
+    for confirmation in confirmations:
+        state = states.get(
+            confirmation.get("decision_state_id")
+        )
+
+        if state is None:
+            continue
+
+        rows.append({
+            **state,
+            "decision_id": (
+                confirmation.get("legacy_decision_id")
+                or state.get("decision_state_id")
+            ),
+            "market_observation_id": (
+                confirmation.get(
+                    "legacy_market_observation_id"
+                )
+            ),
+            "created_at": confirmation.get(
+                "created_at"
+            ),
+            "decision_state_id": state.get(
+                "decision_state_id"
+            ),
+            "decision_confirmation_id": (
+                confirmation.get("confirmation_id")
+            ),
+            "market_confirmation_id": (
+                confirmation.get(
+                    "market_confirmation_id"
+                )
+            ),
+        })
+
+    return rows
+
+
+
 def main():
     registry = json.loads(
         (STORE / "model_registry.json").read_text()
     )["models"]
 
     predictions = load("prediction_observations.jsonl")
-    decisions = load("decision_observations.jsonl")
+    decisions = normalized_decisions()
     scores_all = load("scores.jsonl")
     scores = authoritative_scores(scores_all)
 
