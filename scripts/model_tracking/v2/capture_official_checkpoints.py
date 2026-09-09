@@ -595,6 +595,20 @@ def main():
                         3,
                     ),
                     "market_observation_id": market["observation_id"],
+                    "market_state_id": (
+                        normalized_market.get("market_state_id")
+                        if args.normalized_authority
+                        and normalized_market is not None
+                        else None
+                    ),
+                    "market_confirmation_id": (
+                        normalized_market.get(
+                            "market_confirmation_id"
+                        )
+                        if args.normalized_authority
+                        and normalized_market is not None
+                        else None
+                    ),
                     "market_line": market.get("line"),
                     "market_price": market.get("price"),
                     "market_book": market.get("sportsbook"),
@@ -615,6 +629,22 @@ def main():
                     "decision_id": (
                         decision.get("decision_id")
                         if decision
+                        else None
+                    ),
+                    "decision_state_id": (
+                        normalized_decision.get(
+                            "decision_state_id"
+                        )
+                        if args.normalized_authority
+                        and normalized_decision is not None
+                        else None
+                    ),
+                    "decision_confirmation_id": (
+                        normalized_decision.get(
+                            "decision_confirmation_id"
+                        )
+                        if args.normalized_authority
+                        and normalized_decision is not None
                         else None
                     ),
                     "selection_status": "OFFICIAL",

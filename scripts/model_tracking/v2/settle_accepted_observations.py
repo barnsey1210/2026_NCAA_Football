@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from immutable_tracking import append_unique, stable_id
+from normalized_checkpoint_reader import (
+    build_normalized_context,
+    semantic_market,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 D = ROOT / "data/model_tracking/v2"
@@ -79,10 +83,123 @@ def frozen_close(game, market_type, side):
     }
 
 
+
+
+def build_normalized_market_lookup():
+    context = build_normalized_context(D)
+    return context, {}
+
+
+def checkpoint_market_snapshot(checkpoint):
+    """Reconstruct the immutable market used by a frozen checkpoint."""
+    if checkpoint.get("market_line") is None:
+        return None
+
+    return {
+        "observation_id":
+            checkpoint.get("market_observation_id"),
+        "market_state_id":
+            checkpoint.get("market_state_id"),
+        "market_confirmation_id":
+            checkpoint.get("market_confirmation_id"),
+        "canonical_game_id":
+            checkpoint.get("canonical_game_id"),
+        "market_type":
+            checkpoint.get("market_type"),
+        "sportsbook":
+            checkpoint.get("market_book"),
+        "side":
+            checkpoint.get("bet_side"),
+        "line":
+            checkpoint.get("market_line"),
+        "price":
+            checkpoint.get("market_price"),
+        "source":
+            checkpoint.get("market_source"),
+        "observed_at":
+            checkpoint.get("market_observed_at"),
+        "source_updated_at":
+            checkpoint.get("market_source_updated_at"),
+    }
+
+
+def resolve_normalized_checkpoint_market(
+    checkpoint,
+    normalized_context,
+    normalized_by_legacy_id,
+):
+    # CLOSE stays on its existing legacy path for this stage.
+    if checkpoint.get("checkpoint") == "CLOSE":
+        return None
+
+    # New checkpoints can carry their exact normalized
+    # confirmation directly.
+    confirmation_id = checkpoint.get(
+        "market_confirmation_id"
+    )
+
+    if confirmation_id:
+        row = normalized_context[
+            "markets_by_confirmation"
+        ].get(confirmation_id)
+
+        if row is not None:
+            return row
+
+    # Historical Sunday/Tuesday checkpoints are already
+    # immutable market snapshots. Do not depend on a legacy
+    # observation ID to score them.
+    return checkpoint_market_snapshot(checkpoint)
+
+
+
+def market_semantics_match(
+    legacy_market,
+    authority_market,
+):
+    if legacy_market is None or authority_market is None:
+        return legacy_market is authority_market
+
+    fields = (
+        "canonical_game_id",
+        "market_type",
+        "sportsbook",
+        "side",
+        "line",
+        "price",
+        "source",
+        "observed_at",
+        "source_updated_at",
+    )
+
+    return all(
+        legacy_market.get(field)
+        == authority_market.get(field)
+        for field in fields
+    )
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--accept", action="store_true")
+    ap.add_argument(
+        "--normalized-market-authority",
+        action="store_true",
+    )
+    ap.add_argument(
+        "--require-normalized-parity",
+        action="store_true",
+    )
     args = ap.parse_args()
+
+    if (
+        args.require_normalized_parity
+        and not args.normalized_market_authority
+    ):
+        ap.error(
+            "--require-normalized-parity requires "
+            "--normalized-market-authority"
+        )
 
     results_payload = json.loads(RESULTS.read_text())
     market_payload = json.loads(MARKET_CONTRACT.read_text())
@@ -107,6 +224,41 @@ def main():
     markets = {
         row["observation_id"]: row
         for row in load_jsonl("market_observations.jsonl")
+    }
+
+    normalized_context = None
+    normalized_by_legacy_id = {}
+
+    if args.normalized_market_authority:
+        (
+            normalized_context,
+            normalized_by_legacy_id,
+        ) = build_normalized_market_lookup()
+
+    normalized_resolution = {
+        "enabled": bool(
+            args.normalized_market_authority
+        ),
+        "compared": 0,
+        "resolved_normalized": 0,
+        "checkpoint_snapshot_fallback": 0,
+        "mismatches": 0,
+        "close_legacy": 0,
+        "superseded_market_confirmations": (
+            normalized_context[
+                "superseded_market_confirmations"
+            ]
+            if normalized_context
+            else 0
+        ),
+        "unresolved_market_states": (
+            normalized_context[
+                "unresolved_market_states"
+            ]
+            if normalized_context
+            else 0
+        ),
+        "first_mismatches": [],
     }
 
     raw_decisions = load_jsonl("decision_observations.jsonl")
@@ -175,9 +327,97 @@ def main():
                 checkpoint.get("prediction_observation_id")
             )
 
-            checkpoint_market = markets.get(
+            legacy_checkpoint_market = markets.get(
                 checkpoint.get("market_observation_id")
             )
+
+            checkpoint_market = legacy_checkpoint_market
+
+            if args.normalized_market_authority:
+                if checkpoint.get("checkpoint") == "CLOSE":
+                    normalized_resolution[
+                        "close_legacy"
+                    ] += 1
+                else:
+                    normalized_checkpoint_market = (
+                        resolve_normalized_checkpoint_market(
+                            checkpoint,
+                            normalized_context,
+                            normalized_by_legacy_id,
+                        )
+                    )
+
+                    normalized_resolution[
+                        "compared"
+                    ] += 1
+
+                    if normalized_checkpoint_market is not None:
+                        if checkpoint.get(
+                            "market_confirmation_id"
+                        ):
+                            normalized_resolution[
+                                "resolved_normalized"
+                            ] += 1
+                        else:
+                            normalized_resolution[
+                                "checkpoint_snapshot_fallback"
+                            ] += 1
+
+                        if not market_semantics_match(
+                            legacy_checkpoint_market,
+                            normalized_checkpoint_market,
+                        ):
+                            normalized_resolution[
+                                "mismatches"
+                            ] += 1
+
+                            if len(
+                                normalized_resolution[
+                                    "first_mismatches"
+                                ]
+                            ) < 10:
+                                normalized_resolution[
+                                    "first_mismatches"
+                                ].append({
+                                    "checkpoint_id":
+                                        checkpoint.get(
+                                            "checkpoint_id"
+                                        ),
+                                    "checkpoint":
+                                        checkpoint.get(
+                                            "checkpoint"
+                                        ),
+                                    "legacy_market":
+                                        semantic_market(
+                                            legacy_checkpoint_market
+                                        ),
+                                    "normalized_market":
+                                        semantic_market(
+                                            normalized_checkpoint_market
+                                        ),
+                                })
+
+                        checkpoint_market = dict(
+                            normalized_checkpoint_market
+                        )
+
+                        # Preserve the historical compatibility
+                        # identifier in existing score schema.
+                        checkpoint_market[
+                            "observation_id"
+                        ] = checkpoint.get(
+                            "market_observation_id"
+                        )
+
+                    else:
+                        normalized_resolution[
+                            "missing_authority_market"
+                        ] = (
+                            normalized_resolution.get(
+                                "missing_authority_market",
+                                0,
+                            ) + 1
+                        )
 
             if prediction is None:
                 skipped["missing_prediction"] += 1
@@ -283,6 +523,16 @@ def main():
                 "market_observation_id": (
                     checkpoint_market["observation_id"]
                 ),
+                "market_state_id": (
+                    checkpoint_market.get(
+                        "market_state_id"
+                    )
+                ),
+                "market_confirmation_id": (
+                    checkpoint_market.get(
+                        "market_confirmation_id"
+                    )
+                ),
                 "checkpoint_observation_id": (
                     checkpoint["checkpoint_id"]
                 ),
@@ -373,7 +623,15 @@ def main():
         "raw_decision_rows": len(raw_decisions),
         "checkpoint_rows_total": len(checkpoint_rows_all),
         "official_checkpoint_rows": len(checkpoints),
+        "normalized_market_resolution": normalized_resolution,
         "scoring_authority": (
+            "normalized checkpoint markets for Sunday/Tuesday; "
+            "legacy CLOSE"
+            if args.normalized_market_authority
+            else
+            "checkpoint_observations.jsonl OFFICIAL rows only"
+        ),
+        "legacy_scoring_authority": (
             "checkpoint_observations.jsonl OFFICIAL rows only"
         ),
         "closing_authority": (
@@ -398,6 +656,23 @@ def main():
     }
 
     print(json.dumps(report, indent=2))
+
+    if (
+        args.require_normalized_parity
+        and (
+            normalized_resolution["mismatches"] != 0
+            or normalized_resolution.get(
+                "missing_authority_market",
+                0,
+            ) != 0
+            or normalized_resolution[
+                "unresolved_market_states"
+            ] != 0
+        )
+    ):
+        raise SystemExit(
+            "normalized settlement market parity failed"
+        )
 
 
 if __name__ == "__main__":
