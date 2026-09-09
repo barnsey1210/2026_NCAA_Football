@@ -175,6 +175,15 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
         [sys.executable, "scripts/war_room/build_war_room_activity.py"],
+        [sys.executable, "scripts/war_room/build_war_room_page.py"],
+        [sys.executable, "scripts/site/build_ratings_view.py"],
+        [sys.executable, "scripts/site/build_public_site.py"],
+        [sys.executable, "scripts/site/build_war_room_home.py"],
+        [sys.executable, "scripts/site/inject_market_presentation_fixes.py"],
+        [sys.executable, "scripts/site/compact_matchups_payload.py"],
+        [sys.executable, "scripts/site/apply_shared_war_room_shell.py"],
+        [sys.executable, "scripts/publish/check_public_site.py"],
+        [sys.executable, "scripts/audit/audit_publication_parity.py"],
     ]
 
 
@@ -278,11 +287,33 @@ def execute_ratings_service(
         if changed
         else ratings_no_change_commands(matchup_report)
     )
-    if run_commands(run, commands):
-        run["change_counts"]["projections"] = 1 if changed else 0
-        run["status"] = "COMPLETED" if changed else "NO_CHANGES"
+    if not run_commands(run, commands):
+        run["status"] = "FAILED"
+        return
+
+    run["change_counts"]["projections"] = 1 if changed else 0
+
+    if not changed:
+        run["publication"] = {"status": "SKIPPED_NO_CHANGES"}
+        run["status"] = "NO_CHANGES"
+        return
+
+    pub = shell(["bash", "scripts/publish/publish_site.sh", "--push"])
+    run["publication"] = {
+        "status": "COMPLETED" if pub["returncode"] == 0 else "FAILED",
+        **pub,
+    }
+    run["stages"].append({
+        "name": "canonical_publish",
+        "status": "PASSED" if pub["returncode"] == 0 else "FAILED",
+        **pub,
+    })
+
+    if pub["returncode"] == 0:
+        run["status"] = "COMPLETED"
     else:
         run["status"] = "FAILED"
+        run["errors"].append("ratings publication failed")
 
 
 def deployed_commit() -> str | None:
