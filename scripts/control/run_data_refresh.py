@@ -753,8 +753,13 @@ def main() -> int:
                          "--accept"],
                         [sys.executable, "scripts/model_tracking/settle_model_tracking.py",
                          "--accept"],
-                        [sys.executable, "scripts/model_tracking/v2/settle_accepted_observations.py",
-                         "--accept"],
+                        [
+                            sys.executable,
+                            "scripts/model_tracking/v2/settle_accepted_observations.py",
+                            "--normalized-market-authority",
+                            "--require-normalized-parity",
+                            "--accept",
+                        ],
                         [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
 
                         # 7. Canonical public build and validation.
