@@ -203,7 +203,18 @@ def main():
         "--require-normalized-parity",
         action="store_true",
     )
+    ap.add_argument(
+        "--normalized-authority",
+        action="store_true",
+        help=(
+            "Use normalized Sunday/Tuesday checkpoint selection "
+            "while preserving legacy downstream reference IDs."
+        ),
+    )
     args = ap.parse_args()
+
+    if args.normalized_authority:
+        args.normalized_shadow = True
 
     if (
         args.require_normalized_parity
@@ -491,6 +502,57 @@ def main():
                                     normalized_edge,
                             })
 
+                if args.normalized_authority:
+                    if normalized_market is None:
+                        raise RuntimeError(
+                            "normalized authority missing market "
+                            f"{game_id} {checkpoint_name} "
+                            f"{model_id} {market_type}"
+                        )
+
+                    compatibility_market_id = (
+                        normalized_market.get(
+                            "legacy_market_observation_id"
+                        )
+                    )
+
+                    if not compatibility_market_id:
+                        raise RuntimeError(
+                            "normalized authority market lacks "
+                            "legacy compatibility observation id"
+                        )
+
+                    market = dict(normalized_market)
+                    market["observation_id"] = (
+                        compatibility_market_id
+                    )
+
+                    benchmark = normalized_benchmark
+                    side = normalized_side
+                    edge = normalized_edge
+
+                    if normalized_decision is not None:
+                        compatibility_decision_id = (
+                            normalized_decision.get(
+                                "decision_id"
+                            )
+                        )
+
+                        if not compatibility_decision_id:
+                            raise RuntimeError(
+                                "normalized fallback decision lacks "
+                                "legacy compatibility id"
+                            )
+
+                        decision = dict(
+                            normalized_decision
+                        )
+                        decision["decision_id"] = (
+                            compatibility_decision_id
+                        )
+                    else:
+                        decision = None
+
                 prediction_observed = parse_dt(
                     prediction.get("observed_at")
                 )
@@ -575,6 +637,16 @@ def main():
         },
         "skipped": dict(skipped),
         "normalized_shadow": normalized_shadow,
+        "selection_authority": (
+            "NORMALIZED"
+            if args.normalized_authority
+            else "LEGACY"
+        ),
+        "compatibility_policy": (
+            "normalized selection with legacy observation IDs"
+            if args.normalized_authority
+            else "legacy observation selection"
+        ),
         "checkpoints": append_unique(
             D / "checkpoint_observations.jsonl",
             checkpoint_rows,
