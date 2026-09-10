@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-10T14:10:31.697509+00:00",
+  "built_at": "2026-09-10T17:27:21.157233+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -420,90 +420,6 @@
       "estimated_spread_rating_innovation": 7.17,
       "next_game_id": "g100",
       "next_opponent": "Florida A&M",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "Michigan State",
-      "opponent": "Toledo",
-      "completed_game_id": "g58",
-      "completed_date": "2026-09-04",
-      "team_margin": 10.0,
-      "team_closing_spread": -11.5,
-      "team_ats_margin": -1.5,
-      "estimated_spread_rating_innovation": 2.78,
-      "next_game_id": "g143",
-      "next_opponent": "Eastern Michigan",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "Toledo",
-      "opponent": "Michigan State",
-      "completed_game_id": "g58",
-      "completed_date": "2026-09-04",
-      "team_margin": -10.0,
-      "team_closing_spread": 11.5,
-      "team_ats_margin": 1.5,
-      "estimated_spread_rating_innovation": -2.82,
-      "next_game_id": "g170",
-      "next_opponent": "CCSU",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "Oklahoma",
-      "opponent": "UTEP",
-      "completed_game_id": "g69",
-      "completed_date": "2026-09-04",
-      "team_margin": 51.0,
-      "team_closing_spread": -39.5,
-      "team_ats_margin": 11.5,
-      "estimated_spread_rating_innovation": 11.0,
-      "next_game_id": "g142",
-      "next_opponent": "Michigan",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "UTEP",
-      "opponent": "Oklahoma",
-      "completed_game_id": "g69",
-      "completed_date": "2026-09-04",
-      "team_margin": -51.0,
-      "team_closing_spread": 39.5,
-      "team_ats_margin": -11.5,
-      "estimated_spread_rating_innovation": -11.62,
-      "next_game_id": "g176",
-      "next_opponent": "Texas Southern",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "USC",
-      "opponent": "Fresno State",
-      "completed_game_id": "g90",
-      "completed_date": "2026-09-04",
-      "team_margin": 39.0,
-      "team_closing_spread": -23.5,
-      "team_ats_margin": 15.5,
-      "estimated_spread_rating_innovation": 7.46,
-      "next_game_id": "g175",
-      "next_opponent": "Louisiana",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "Fresno State",
-      "opponent": "USC",
-      "completed_game_id": "g90",
-      "completed_date": "2026-09-04",
-      "team_margin": -39.0,
-      "team_closing_spread": 23.5,
-      "team_ats_margin": -15.5,
-      "estimated_spread_rating_innovation": -7.75,
-      "next_game_id": "g124",
-      "next_opponent": "Sacramento State",
       "total_estimate_status": "pending_current_season_pbp",
       "synthetic_input": false
     },
@@ -1348,34 +1264,6 @@
       "synthetic_input": false
     },
     {
-      "team": "Washington",
-      "opponent": "Washington State",
-      "completed_game_id": "g95",
-      "completed_date": "2026-09-06",
-      "team_margin": 14.0,
-      "team_closing_spread": -21.5,
-      "team_ats_margin": -7.5,
-      "estimated_spread_rating_innovation": 4.63,
-      "next_game_id": "g181",
-      "next_opponent": "Utah State",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
-      "team": "Washington State",
-      "opponent": "Washington",
-      "completed_game_id": "g95",
-      "completed_date": "2026-09-06",
-      "team_margin": -14.0,
-      "team_closing_spread": 21.5,
-      "team_ats_margin": 7.5,
-      "estimated_spread_rating_innovation": -4.88,
-      "next_game_id": "g133",
-      "next_opponent": "Kansas State",
-      "total_estimate_status": "pending_current_season_pbp",
-      "synthetic_input": false
-    },
-    {
       "team": "Notre Dame",
       "opponent": "Wisconsin",
       "completed_game_id": "g97",
@@ -1470,7 +1358,10 @@
     "Missing canonical close/score: UAlbany at Buffalo",
     "Missing canonical close/score: North Carolina A&T at Georgia State",
     "Missing canonical close/score: LIU at Kansas",
-    "Missing canonical close/score: Indiana State at Purdue",
+    "Unmatched result: Toledo at Michigan State",
+    "Unmatched result: UTEP at Oklahoma",
+    "Unmatched result: Indiana State at Purdue",
+    "Unmatched result: Fresno State at USC",
     "Missing canonical close/score: Duquesne at Air Force",
     "Missing canonical close/score: Maine at Appalachian State",
     "Missing canonical close/score: Northern Arizona at Arizona",
@@ -1508,11 +1399,12 @@
     "Missing canonical close/score: UTRGV at UTSA",
     "Missing canonical close/score: Idaho State at Utah State",
     "Missing canonical close/score: Austin Peay at Vanderbilt",
-    "Missing canonical close/score: VMI at Virginia Tech"
+    "Missing canonical close/score: VMI at Virginia Tech",
+    "Unmatched result: Washington State at Washington"
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 102,
-    "warnings": 48
+    "completed_team_updates": 94,
+    "warnings": 52
   }
 }
