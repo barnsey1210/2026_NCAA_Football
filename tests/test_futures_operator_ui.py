@@ -49,6 +49,11 @@ class FuturesWeeklyBaselineTests(unittest.TestCase):
 
 
 class FuturesOperatorMarkupTests(unittest.TestCase):
+    def test_public_builder_uses_compact_futures_source(self):
+        builder = (ROOT / "scripts/site/build_public_site.py").read_text()
+        self.assertIn('"futures.html":"futures.html"', builder)
+        self.assertNotIn('"futures_v2.html":"futures.html"', builder)
+
     def test_desktop_and_mobile_operator_contract(self):
         html = (ROOT / "futures.html").read_text()
         for label in ("Model wins", "Market", "CFP model", "Title market", "Open → now"):

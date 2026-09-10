@@ -10,7 +10,7 @@ PAGES = {
     "openers.html":"openers.html",
     "matchups.html":"matchups.html",
     "matchup.html":"matchup.html",
-    "futures_v2.html":"futures.html",
+    "futures.html":"futures.html",
     "betting.html":"betting.html",
     "team.html":"team.html",
     "ratings_v2.html":"ratings.html",
