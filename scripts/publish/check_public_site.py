@@ -91,6 +91,19 @@ def validate(root: Path, out: Path) -> list[str]:
                     if marker not in text:
                         errors.append(f"Schedule live-score shell marker missing: {marker}")
 
+            if name == "team.html":
+                for marker in (
+                    "data/site/team_game_evaluations_2026.json",
+                    "SP+ Mgn",
+                    "CFBD Mgn",
+                    "VS SP+ games",
+                    "VS CFBD games",
+                    "model_delta_vs_sp_plus_margin",
+                    "model_delta_vs_cfbd_margin",
+                ):
+                    if marker not in text:
+                        errors.append(f"Team Model Fit marker missing: {marker}")
+
             if name == "index.html":
                 required_home_markers = (
                     'data-war-room-home-release="locked-v2-navigation-fixed-r2-canonical-market"',

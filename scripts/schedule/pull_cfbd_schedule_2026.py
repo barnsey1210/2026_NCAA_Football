@@ -16,6 +16,23 @@ RAW_JSON = OUT_DIR / "cfbd_schedule_2026_raw.json"
 OUT_JSON = OUT_DIR / "cfbd_schedule_2026.json"
 AUDIT_JSON = Path("data/audits/cfbd_schedule_2026_audit.json")
 
+def pgwe_pair(g):
+    """Return the provider PGWE pair only when it is valid and complementary."""
+    home = g.get("homePostgameWinProbability")
+    away = g.get("awayPostgameWinProbability")
+    if home is None and away is None:
+        return None, None, "missing"
+    try:
+        home = float(home)
+        away = float(away)
+    except (TypeError, ValueError):
+        return None, None, "invalid"
+    if not (0 <= home <= 1 and 0 <= away <= 1):
+        return None, None, "invalid"
+    if abs(home + away - 1.0) > 1e-6:
+        return None, None, "non_complementary"
+    return home, away, "available"
+
 def require_key():
     key = os.environ.get("CFBD_API_KEY")
     if not key:
@@ -41,6 +58,7 @@ def main():
     RAW_JSON.write_text(json.dumps(raw, indent=2) + "\n")
 
     games = []
+    pgwe_status_counts = {"available": 0, "missing": 0, "invalid": 0, "non_complementary": 0}
     for g in raw:
         start = g.get("startDate")
         local_date = None
@@ -62,6 +80,8 @@ def main():
             canonical_week = 0
 
         kickoff_status = classify_kickoff(start, g.get("startTimeTBD"))
+        home_pgwe, away_pgwe, pgwe_status = pgwe_pair(g)
+        pgwe_status_counts[pgwe_status] += 1
         games.append({
             "cfbd_game_id": g.get("id"),
             "season": g.get("season"),
@@ -80,6 +100,11 @@ def main():
             "away_team": g.get("awayTeam"),
             "home_points": g.get("homePoints"),
             "away_points": g.get("awayPoints"),
+            # Preserve valid provider probabilities on the 0-1 scale. Invalid
+            # or non-complementary pairs fail closed.
+            "home_postgame_win_probability": home_pgwe,
+            "away_postgame_win_probability": away_pgwe,
+            "pgwe_status": pgwe_status,
             "status": g.get("status"),
             "cfbd_last_updated": g.get("lastUpdated"),
             "pulled_at": pulled_at,
@@ -108,6 +133,10 @@ def main():
         },
         "canonical_week_overrides": sum(
             g.get("week") != g.get("provider_week") for g in games
+        ),
+        "pgwe": pgwe_status_counts,
+        "completed_games_with_pgwe": sum(
+            bool(g["completed"]) and g["pgwe_status"] == "available" for g in games
         ),
         "first_date": min((g["date"] for g in games if g["date"]), default=None),
         "last_date": max((g["date"] for g in games if g["date"]), default=None),

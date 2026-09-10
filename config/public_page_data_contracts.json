@@ -18,7 +18,7 @@
     "playoff.html": ["futures", "ratings", "schedule"],
     "simulations.html": ["ratings", "schedule", "futures"],
     "betting.html": ["betting", "current_market", "market_history", "historical_betting_analytics", "model_performance"],
-    "team.html": ["ratings", "schedule", "current_market", "injuries", "coaches"],
+    "team.html": ["ratings", "schedule", "current_market", "model_fit", "injuries", "coaches"],
     "coaches.html": ["coaches", "schedule", "current_market"],
     "v1.html": ["legacy_embedded_data"]
   },
@@ -110,6 +110,16 @@
       "shadow_artifact": "data/site/shadow_model_performance.json",
       "shadow_builder": "scripts/site/build_shadow_model_performance.py",
       "shadow_policy": "historical statistics and presentation labels remain separate; labels are not automatic betting rules"
+    },
+    "model_fit": {
+      "artifact": "data/site/team_game_evaluations_2026.json",
+      "builder": "scripts/model_fit/build_team_game_evaluations_2026.py",
+      "schema_version": "team-game-evaluations-2026-v3",
+      "owner": "TEAM_GAME_EVALUATION_PROJECTOR",
+      "record_grain": "one team-game",
+      "pregame_immutability": "captured or reconstructed exclusively from timestamped pre-kickoff model and market observations",
+      "postgame_benchmark_semantics": "SP+ adjusted margin is preserved directly from the public SP+ postgame source. CollegeFootballData /games complementary probabilities are preserved exactly on the 0-1 scale and separately converted through the project-owned, versioned cfbd_equivalent_margin_v1 reference mapping. The lenses are never blended.",
+      "depends_on": ["schedule", "model_performance", "current_market"]
     },
     "historical_betting_analytics": {
       "artifact": "data/site/historical_betting_analytics_v2.json",

@@ -12,7 +12,7 @@ PAGES = {
     "matchup.html":"matchup.html",
     "futures_v2.html":"futures.html",
     "betting.html":"betting.html",
-    "team_v2.html":"team.html",
+    "team.html":"team.html",
     "ratings_v2.html":"ratings.html",
     "simulations_v2.html":"simulations.html",
     "playoff_v2.html":"playoff.html",

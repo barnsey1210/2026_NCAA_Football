@@ -181,6 +181,7 @@
       "entrypoint": "daily_market_update.sh#postgame_refresh",
       "scripts": [
         "scripts/results/build_game_results_2026.py",
+        "scripts/postgame/pull_sp_plus_postgame_2026.py",
         "scripts/postgame/pull_cfbd_postgame_2026.py",
         "scripts/postgame/build_postgame_features_2026.py",
         "scripts/site/build_postgame_shadow_updates.py"
@@ -293,6 +294,7 @@
       "entrypoint": "daily_market_update.sh#model_tracking_v2",
       "scripts": [
         "scripts/model_tracking/v2/capture_current_contracts.py",
+        "scripts/model_fit/build_team_game_evaluations_2026.py",
         "scripts/model_tracking/v2/settle_accepted_observations.py",
         "scripts/model_tracking/build_model_performance_view.py"
       ]

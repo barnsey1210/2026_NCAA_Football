@@ -65,6 +65,7 @@ CANONICAL_STAGE_ORDER=(
   betting_ledger
   line_history_assets
   shadow_models
+  model_tracking_v2
   playoff_futures
   odds_payloads
   email_send
@@ -110,6 +111,7 @@ stage_enabled() {
     postgame:postgame_refresh|\
     postgame:matchup_core|\
     postgame:shadow_models|\
+    postgame:model_tracking_v2|\
     postgame:site_build|\
     postgame:site_validation|\
     postgame:publication)
@@ -544,6 +546,7 @@ PY2
   if stage_enabled "postgame_refresh"; then
   stage_start "postgame_refresh"
   run_py "scripts/results/build_game_results_2026.py" "build_game_results_2026.py"
+  run_py "scripts/postgame/pull_sp_plus_postgame_2026.py" "pull_sp_plus_postgame_2026.py" || warn "SP+ postgame refresh unavailable; SP+ Model Fit will remain explicitly unavailable or use the last accepted canonical artifact"
   run_py "scripts/postgame/pull_cfbd_postgame_2026.py" "pull_cfbd_postgame_2026.py"
   run_py "scripts/postgame/build_postgame_features_2026.py" "build_postgame_features_2026.py"
   run_py "scripts/site/build_postgame_shadow_updates.py" "build_postgame_shadow_updates.py"
@@ -657,6 +660,7 @@ fi
   stage_start "model_tracking_v2"
   run_py "scripts/model_tracking/v2/capture_current_contracts.py" "capture_current_contracts.py" --accept
   run_py "scripts/model_tracking/v2/settle_accepted_observations.py" "settle_accepted_observations.py" --accept
+  run_py "scripts/model_fit/build_team_game_evaluations_2026.py" "build_team_game_evaluations_2026.py"
   run_py "scripts/model_tracking/build_model_performance_view.py" "build_model_performance_view.py"
   stage_pass "model_tracking_v2"
   else

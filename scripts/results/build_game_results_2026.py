@@ -206,6 +206,24 @@ def main() -> None:
             "home_score": clean_int(home_score),
             "home_margin_actual": clean_int(home_margin),
             "total_points_actual": clean_int(total_points),
+            "home_postgame_win_probability": finite(
+                cg.get("home_postgame_win_probability")
+            ),
+            "away_postgame_win_probability": finite(
+                cg.get("away_postgame_win_probability")
+            ),
+            "pgwe_source": (
+                "CollegeFootballData /games"
+                if cg.get("home_postgame_win_probability") is not None
+                and cg.get("away_postgame_win_probability") is not None
+                else None
+            ),
+            "pgwe_source_timestamp": (
+                cg.get("pulled_at") or cfbd_payload.get("pulled_at")
+                if cg.get("home_postgame_win_probability") is not None
+                and cg.get("away_postgame_win_probability") is not None
+                else None
+            ),
             **market,
             "close_available": close_spread is not None and close_total is not None,
             "ats_margin_home": (
@@ -250,6 +268,11 @@ def main() -> None:
             "with_closing_spread": sum(r["closing_home_spread"] is not None for r in rows),
             "with_closing_total": sum(r["closing_total"] is not None for r in rows),
             "with_complete_close": sum(r["close_available"] for r in rows),
+            "with_pgwe": sum(
+                r["home_postgame_win_probability"] is not None
+                and r["away_postgame_win_probability"] is not None
+                for r in rows
+            ),
         },
     }
 
