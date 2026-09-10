@@ -965,11 +965,11 @@ tr:hover td.context-group{background:#202d39}
   font-weight:900;
 }
 
-.matchup-col{width:13.1%}
-.model-col{width:4.8%}
+.matchup-col{width:15.5%}
+.model-col{width:5.4%}
 
 .shadow-col{
-  width:7.2%;
+  width:7.8%;
   font-size:10px;
   text-align:center;
   padding-left:0;
@@ -998,11 +998,10 @@ tr:hover td.context-group{background:#202d39}
 .shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}
 .projection-value{display:inline-flex;align-items:center;justify-content:center;gap:3px}
 .shadow-tooltip-panel{min-width:220px;white-space:nowrap}
-.best-col{width:8.8%}
-.exchange-col{width:8%}
+.best-col{width:9.4%}
 .open-col{width:5.7%} /* retained for future/mobile opener presentation */
 .edge-col{
-  width:6.5%;
+  width:7.2%;
   text-align:center;
   padding-left:5px;
   padding-right:5px;
@@ -1015,6 +1014,14 @@ tr:hover td.context-group{background:#202d39}
   text-align:center;
   box-sizing:border-box;
 }
+.model-fit-col{width:112px;min-width:112px;max-width:112px;text-align:center;box-sizing:border-box}
+.model-fit-stack{display:flex;flex-direction:column;gap:3px;align-items:stretch}
+.model-fit-team{display:grid;grid-template-columns:18px 7px 36px 22px;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
+.model-fit-team .team-logo-holder{--team-logo-size:17px}
+.model-fit-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.model-fit-dot.GREEN{background:var(--green)}.model-fit-dot.YELLOW{background:var(--yellow)}.model-fit-dot.RED{background:var(--red)}.model-fit-dot.GRAY{background:#687786}
+.model-fit-value{font-size:11px;font-weight:900}.model-fit-value.positive{color:var(--green)}.model-fit-value.neutral{color:var(--yellow)}.model-fit-value.negative{color:var(--red)}
+.model-fit-team.disagree .model-fit-value:after{content:'!';color:var(--yellow);margin-left:1px}
 
 .state-col{
   width:94px;
@@ -2810,7 +2817,6 @@ function renderHead(){
       <th class="matrix-header-cell model-col spread-group"><span class="spread-label">SPREAD</span><br>MODEL</th>
       <th class="matrix-header-cell shadow-col spread-group"><span class="spread-label">SPREAD</span><br>SHADOW</th>
       <th class="matrix-header-cell best-col spread-group"><span class="spread-label">SPREAD</span><br>BEST</th>
-      <th class="matrix-header-cell exchange-col spread-group"><span class="spread-label">SPREAD</span><br>EXCH</th>
 
       <th
         class="matrix-header-cell edge-col spread-group edge-focus sortable"
@@ -2822,7 +2828,6 @@ function renderHead(){
       <th class="matrix-header-cell model-col total-group">TOTAL<br>MODEL</th>
       <th class="matrix-header-cell shadow-col total-group">TOTAL<br>SHADOW</th>
       <th class="matrix-header-cell best-col total-group">TOTAL<br>BEST</th>
-      <th class="matrix-header-cell exchange-col total-group">TOTAL<br>EXCH</th>
 
       <th
         class="matrix-header-cell edge-col total-group edge-focus sortable"
@@ -2832,6 +2837,7 @@ function renderHead(){
       </th>
 
       <th class="matrix-header-cell injury-col context-group">INJURY</th>
+      <th class="matrix-header-cell model-fit-col context-group">PERF<br>VS MODEL</th>
       <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
           MODEL<br>STATE
@@ -3197,6 +3203,49 @@ function injuryCell(game){
   return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
 }
 
+function modelFitNumber(value){
+  if(value===null || value===undefined || value==='') return '—';
+  const n=Number(value);
+  return Number.isFinite(n)?`${n>=0?'+':''}${n.toFixed(1)}`:'—';
+}
+
+function modelFitState(value){
+  return String(value||'UNAVAILABLE').replaceAll('_',' ');
+}
+
+function performanceValueClass(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return '';
+  if(n>=2) return 'positive';
+  if(n<=-2) return 'negative';
+  return 'neutral';
+}
+
+function modelFitTeam(team,row){
+  const fit=row||{};
+  const slug=teamLogoSlug(team);
+  const games=Number(fit.games_evaluated)||0;
+  const disagreement=fit.agreement==='DISAGREE';
+  const title=[
+    `${team} PERFORMANCE VS MODEL`,
+    `${games} game${games===1?'':'s'} · ${modelFitState(fit.model_fit_health)} · ${modelFitState(fit.sample_state)}`,
+    `Performance vs Model ${modelFitNumber(fit.performance_vs_model)}`,
+    `Score vs Model ${modelFitNumber(fit.score_vs_model)}`,
+    `SP+ vs Model ${modelFitNumber(fit.sp_plus_vs_model)}`,
+    `CFBD vs Model ${modelFitNumber(fit.cfbd_vs_model)}`,
+    disagreement && `DISAGREE${Number.isFinite(Number(fit.lens_gap))?` · gap ${Math.abs(Number(fit.lens_gap)).toFixed(1)}`:''}`
+  ].filter(Boolean).join('\n');
+  const disagree=disagreement?' disagree':'';
+  const value=fit.performance_vs_model;
+  const rank=fit.performance_vs_model_rank;
+  return `<span class="model-fit-team${disagree}" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="model-fit-dot ${esc(fit.model_fit_status||'GRAY')}"></span><span class="model-fit-value ${performanceValueClass(value)}">${modelFitNumber(value)}</span><span class="team-composite-rank ${compositeRankClass(rank)}">${rank?esc(rank):'—'}</span></span>`;
+}
+
+function modelFitCell(game){
+  const fit=game.model_fit||{};
+  return `<span class="model-fit-stack">${modelFitTeam(game.away_team,fit.away)}${modelFitTeam(game.home_team,fit.home)}</span>`;
+}
+
 function matchupTeam(team,rank,score=null){
   const slug = teamLogoSlug(team);
   const value=Number(rank);
@@ -3559,7 +3608,7 @@ function renderMobileMatrix(rows){
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           </div>
       </div>
-      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJURY</span>${injuryCell(game)}</span></div>
+      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJURY</span>${injuryCell(game)}</span><span class="mobile-foot-injury"><span class="mobile-foot-label">PERF VS MODEL</span>${modelFitCell(game)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
     </article>`;
   }).join('');
@@ -3629,16 +3678,6 @@ function renderMatrix(){
         ? game.market?.best_sportsbook?.total?.[totSide]
         : null;
 
-    const sprEx =
-      sprSide
-        ? game.market?.best_exchange?.spread?.[sprSide]
-        : null;
-
-    const totEx =
-      totSide
-        ? game.market?.best_exchange?.total?.[totSide]
-        : null;
-
     const sprModel =
       game.models?.standard_spread?.value_home_line;
 
@@ -3682,10 +3721,6 @@ function renderMatrix(){
           ${compactQuote(sprBest, 'spread', game, true)}
         </td>
 
-        <td class="exchange-col spread-group">
-          ${compactQuote(sprEx, 'spread', game)}
-        </td>
-
         <td class="edge-col spread-group edge-focus ${recentEdgeCellClass(game,'spread')}">
           ${recentEdgeBadge(game,'spread')}
           <span class="edge ${edgeClass(sprEdge)}">
@@ -3706,10 +3741,6 @@ function renderMatrix(){
           ${compactQuote(totBest, 'total', game, true)}
         </td>
 
-        <td class="exchange-col total-group">
-          ${compactQuote(totEx, 'total', game)}
-        </td>
-
         <td class="edge-col total-group edge-focus ${recentEdgeCellClass(game,'total')}">
           ${recentEdgeBadge(game,'total')}
           <span class="edge ${edgeClass(totEdge)}">
@@ -3719,6 +3750,10 @@ function renderMatrix(){
 
         <td class="injury-col context-group">
           ${injuryCell(game)}
+        </td>
+
+        <td class="model-fit-col context-group">
+          ${modelFitCell(game)}
         </td>
 
         <td class="state-col context-group">

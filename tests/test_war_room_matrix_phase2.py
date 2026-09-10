@@ -189,7 +189,10 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertNotIn("SPREAD</span><br>PINN", source)
         self.assertNotIn("TOTAL<br>PINN", source)
         self.assertIn("compactQuote(sprBest, 'spread', game, true)", source)
-        self.assertIn("compactQuote(sprEx, 'spread', game)", source)
+        self.assertNotIn("SPREAD</span><br>EXCH", head)
+        self.assertNotIn("TOTAL<br>EXCH", head)
+        self.assertNotIn("compactQuote(sprEx, 'spread', game)", rows)
+        self.assertNotIn("compactQuote(totEx, 'total', game)", rows)
         self.assertIn("const move=q.last_material_move", source)
         self.assertIn("setInterval(updateMatrixRecencyMarkers, 30000)", source)
         self.assertIn("minutes>90", source)
@@ -225,8 +228,8 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         head = source.split("function renderHead(){", 1)[1].split(
             "function modelDisplay", 1
         )[0]
-        self.assertEqual(head.count("<th"), 14)
-        self.assertEqual(head.count('<th class="matrix-header-cell'), 12)
+        self.assertEqual(head.count("<th"), 12)
+        self.assertEqual(head.count('<th class="matrix-header-cell'), 10)
         self.assertEqual(source.count('class="matrix-header-cell edge-col'), 2)
         self.assertIn(".matrix-header-cell .spread-label", source)
         self.assertIn(".matrix-header-cell .matchup-sort-button", source)
@@ -270,7 +273,7 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertIn("compactQuote(totBest,'total',game,true)", source)
         self.assertIn("recentBestBadge(game,'spread')", source)
         self.assertIn("recentEdgeBadge(game,'spread')", source)
-        self.assertIn("EXCH',compactQuote", source)
+        self.assertNotIn("EXCH',compactQuote", source)
         self.assertNotIn("mobileOpen", source)
 
     def test_mobile_activity_remains_available_and_selection_is_shared(self):

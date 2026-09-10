@@ -90,6 +90,41 @@ class ModelFitMathTests(unittest.TestCase):
         self.assertIsNone(row["model_abs_error_cfbd_margin"])
         self.assertIsNone(row["sp_plus_adjusted_margin"])
 
+    def test_postgame_lifecycle_matures_and_ages_without_immediate_degradation(self):
+        model={"model_margin_home":4.0,"component_values":dict.fromkeys(MF.COMPONENTS,4.0),"component_snapshot_timestamps":{},"model_observed_at":"t","model_provenance":MF.SNAPSHOT_PROVENANCE,"source_artifacts":[]}
+        market={"market_margin_home":2.0,"close_book":"Pinnacle","close_provider":"fixture","close_timestamp":"t","close_provenance":"fixture","market_source_artifact":"fixture"}
+        fresh=datetime(2026,8,30,12,tzinfo=timezone.utc)
+        stale=datetime(2026,9,2,12,tzinfo=timezone.utc)
+        score=MF.grade("Home","Away","home",self.game(),model,market,None,now=fresh)
+        self.assertEqual(score["lifecycle_state"],"SCORE_READY")
+        cfbd=MF.grade("Home","Away","home",self.game(),model,market,(.8,.2,"t"),now=fresh)
+        self.assertEqual(cfbd["lifecycle_state"],"CFBD_READY")
+        sp={"sp_plus_pgwe":.8,"sp_plus_adjusted_margin":7,"source":"fixture","collected_at":"t"}
+        complete=MF.grade("Home","Away","home",self.game(),model,market,(.8,.2,"t"),sp,now=fresh)
+        self.assertEqual(complete["lifecycle_state"],"COMPLETE")
+        self.assertEqual(MF.grade("Home","Away","home",self.game(),model,market,None,now=stale)["lifecycle_state"],"DEGRADED")
+
+    def test_refresh_preserves_accepted_lens_and_frozen_inputs(self):
+        model={"model_margin_home":4.0,"component_values":dict.fromkeys(MF.COMPONENTS,4.0),"component_snapshot_timestamps":{},"model_observed_at":"t","model_provenance":MF.SNAPSHOT_PROVENANCE,"source_artifacts":[]}
+        market={"market_margin_home":2.0,"close_book":"Pinnacle","close_provider":"fixture","close_timestamp":"t","close_provenance":"fixture","market_source_artifact":"fixture"}
+        sp={"sp_plus_pgwe":.8,"sp_plus_adjusted_margin":7,"source":"fixture","collected_at":"t"}
+        first=MF.grade("Home","Away","home",self.game(),model,market,(.8,.2,"t"),sp,now=datetime(2026,8,30,tzinfo=timezone.utc))
+        repeated=MF.grade("Home","Away","home",self.game(),model,market,None,None,now=datetime(2026,8,30,tzinfo=timezone.utc),previous=first)
+        self.assertEqual(repeated["lifecycle_state"],"COMPLETE")
+        self.assertEqual((repeated["model_margin"],repeated["market_margin"]),(4.0,2.0))
+        self.assertEqual((repeated["sp_plus_adjusted_margin"],repeated["cfbd_equivalent_margin"]),(7,11.0))
+
+    def test_team_health_rank_agreement_and_sample_are_separate(self):
+        base={"model_abs_error_actual":1.0,"market_abs_error_actual":2.0,"model_advantage_vs_market_actual":1.0,"qualified_edge":False,"directional_bias_actual":3.0,"model_market_edge":1.0,"model_abs_error_sp_plus_margin":1.0,"market_abs_error_sp_plus_margin":2.0,"model_advantage_vs_market_sp_plus":1.0,"model_abs_error_cfbd_margin":1.0,"market_abs_error_cfbd_margin":2.0,"model_advantage_vs_market_cfbd":1.0}
+        rows=[{**base,"team":"Alpha","lifecycle_state":"COMPLETE","sp_plus_adjusted_margin":8,"directional_bias_sp_plus":4,"cfbd_equivalent_margin":6,"directional_bias_cfbd":2},
+              {**base,"team":"Beta","lifecycle_state":"CFBD_READY","sp_plus_adjusted_margin":None,"directional_bias_sp_plus":None,"cfbd_equivalent_margin":1,"directional_bias_cfbd":-3}]
+        result={row["team"]:row for row in MF.aggregate(rows)}
+        self.assertEqual((result["Alpha"]["model_fit_health"],result["Alpha"]["sample_state"],result["Alpha"]["model_fit_rank"]),("COMPLETE","LOW_SAMPLE",1))
+        self.assertEqual((result["Beta"]["model_fit_health"],result["Beta"]["display_model_fit"],result["Beta"]["model_fit_rank"]),("PARTIAL",None,None))
+        self.assertEqual(result["Alpha"]["agreement"],"AGREE")
+        self.assertEqual(result["Alpha"]["performance_vs_model"], 3)
+        self.assertEqual(result["Alpha"]["display_model_fit"], result["Alpha"]["performance_vs_model"])
+
     def test_pgwe_aggregate_keeps_score_and_pgwe_lenses_separate(self):
         row = {
             "team":"Home", "model_abs_error_actual":3.0, "market_abs_error_actual":5.0,

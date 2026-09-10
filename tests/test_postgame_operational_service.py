@@ -212,9 +212,13 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertEqual(prepared, full[2:])
         self.assertEqual(
             Path(prepared[0][1]).name,
-            "build_team_game_evaluations_2026.py",
+            "pull_sp_plus_postgame_2026.py",
         )
         self.assertEqual(Path(prepared[1][1]).name, "pull_cfbd_postgame_2026.py")
+        self.assertLess(
+            [Path(command[1]).name for command in prepared].index("pull_cfbd_postgame_2026.py"),
+            [Path(command[1]).name for command in prepared].index("build_team_game_evaluations_2026.py"),
+        )
         dispatcher = (ROOT / "scripts/control/run_war_room_service.py").read_text()
         self.assertIn('command = [*command, "--postgame-skip-schedule"]', dispatcher)
 

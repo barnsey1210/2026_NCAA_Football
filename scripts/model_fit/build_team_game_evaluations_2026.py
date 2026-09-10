@@ -15,7 +15,7 @@ import math
 import tempfile
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +37,19 @@ CONTRACT_PROVENANCE = "RECONSTRUCTED_FROM_PREKICKOFF_PROJECTION_CONTRACT"
 SNAPSHOT_PROVENANCE = "RECONSTRUCTED_FROM_PREKICKOFF_COMPONENT_SNAPSHOTS"
 FLOAT_TOLERANCE = 1e-9
 SP_PLUS_SOURCE_ALIASES = {"usf": "south florida"}
+MODEL_FIT_DEGRADED_AFTER = timedelta(hours=48)
+MODEL_FIT_NEAR_ZERO_TOLERANCE = 0.1
+POSTGAME_PRESERVED_FIELDS = (
+    "sp_plus_pgwe", "sp_plus_adjusted_margin", "model_abs_error_sp_plus_margin",
+    "market_abs_error_sp_plus_margin", "model_advantage_vs_market_sp_plus",
+    "directional_bias_sp_plus", "model_delta_vs_sp_plus_margin", "sp_plus_source",
+    "sp_plus_collected_at", "cfbd_postgame_win_probability",
+    "cfbd_opponent_postgame_win_probability", "cfbd_equivalent_margin",
+    "model_abs_error_cfbd_margin", "market_abs_error_cfbd_margin",
+    "model_advantage_vs_market_cfbd", "directional_bias_cfbd",
+    "model_delta_vs_cfbd_margin", "cfbd_pgwe_source",
+    "cfbd_pgwe_source_timestamp",
+)
 
 
 def sp_plus_team_key(value):
@@ -326,7 +339,71 @@ def sp_plus_index(payload, games):
                      "ambiguous": ambiguous}
 
 
-def grade(team, opponent, side, game, model, market, pgwe, sp_plus=None):
+def lifecycle_state(row, now=None, degraded_after=MODEL_FIT_DEGRADED_AFTER):
+    """Return source maturity without treating statistical sample size as health."""
+    if not row.get("game_final", True):
+        return "PREGAME_FROZEN"
+    has_score = row.get("actual_margin") is not None
+    has_cfbd = row.get("cfbd_equivalent_margin") is not None
+    has_sp = row.get("sp_plus_adjusted_margin") is not None
+    if has_score and has_cfbd and has_sp:
+        return "COMPLETE"
+    current = now or datetime.now(timezone.utc)
+    kickoff = dt(row.get("kickoff"))
+    if has_score and kickoff and current - kickoff > degraded_after:
+        return "DEGRADED"
+    if has_score and has_cfbd:
+        return "CFBD_READY"
+    if has_score and has_sp:
+        return "SP_PLUS_READY"
+    if has_score:
+        return "SCORE_READY"
+    return "PREGAME_FROZEN"
+
+
+def preserve_accepted_postgame(row, previous):
+    """Retain accepted lenses when a refresh temporarily omits a source."""
+    if not previous:
+        return row
+    for field in POSTGAME_PRESERVED_FIELDS:
+        if row.get(field) is None and previous.get(field) is not None:
+            row[field] = previous[field]
+    return row
+
+
+def accepted_frozen_inputs(previous_home):
+    """Recover immutable pregame inputs from the last accepted team-game row."""
+    if not previous_home:
+        return None, None
+    model_margin = num(previous_home.get("model_margin"))
+    market_margin = num(previous_home.get("market_margin"))
+    model = None
+    market = None
+    if model_margin is not None:
+        model = {
+            "model_margin_home": model_margin,
+            "component_values": previous_home.get("component_values") or {},
+            "component_snapshot_timestamps": previous_home.get("component_snapshot_timestamps"),
+            "model_observed_at": previous_home.get("model_observed_at"),
+            "model_provenance": previous_home.get("model_provenance"),
+            "source_git_commit": previous_home.get("model_source_git_commit"),
+            "source_artifact": previous_home.get("model_source_artifact"),
+            "source_commit_timestamp": previous_home.get("model_source_commit_timestamp"),
+            "source_artifacts": previous_home.get("source_artifacts") or [],
+        }
+    if market_margin is not None:
+        market = {
+            "market_margin_home": market_margin,
+            "close_book": previous_home.get("close_book"),
+            "close_provider": previous_home.get("close_provider"),
+            "close_timestamp": previous_home.get("close_timestamp"),
+            "close_provenance": previous_home.get("close_provenance"),
+            "market_source_artifact": "data/model_tracking/v2/checkpoint_observations.jsonl",
+        }
+    return model, market
+
+
+def grade(team, opponent, side, game, model, market, pgwe, sp_plus=None, *, now=None, previous=None):
     sign = 1 if side == "home" else -1
     model_margin = sign * model["model_margin_home"] if model else None
     market_margin = sign * market["market_margin_home"] if market else None
@@ -351,7 +428,7 @@ def grade(team, opponent, side, game, model, market, pgwe, sp_plus=None):
     market_error_sp = abs(sp_margin - market_margin) if sp_margin is not None and market_margin is not None else None
     model_error_cfbd = abs(cfbd_margin - model_margin) if cfbd_margin is not None and model_margin is not None else None
     market_error_cfbd = abs(cfbd_margin - market_margin) if cfbd_margin is not None and market_margin is not None else None
-    return {
+    row = {
         "game_id": str(game["game_id"]), "cfbd_game_id": game.get("cfbd_game_id"), "season": 2026,
         "week": game.get("week"), "kickoff": game.get("start_date"), "team": team, "opponent": opponent,
         "home_away": side.upper(), "provenance_state": "CAPTURED" if model and model["model_provenance"] == "CAPTURED" and market and market.get("close_provenance") == "CAPTURED" else "RECONSTRUCTED",
@@ -384,12 +461,72 @@ def grade(team, opponent, side, game, model, market, pgwe, sp_plus=None):
         "cfbd_pgwe_source": "CollegeFootballData /games", "cfbd_pgwe_source_timestamp": pgwe[2] if pgwe else None,
         "source_artifacts": sorted(set((model.get("source_artifacts", []) if model else []) + ([market["market_source_artifact"]] if market else []) + ["data/canonical/game_results_2026.json"] + (["data/canonical/sp_plus_postgame_2026.json"] if sp_plus else []))),
     }
+    row["game_final"] = bool(game.get("completed", True))
+    preserve_accepted_postgame(row, previous)
+    # Recompute every semantic delta after accepted postgame carry-forward.
+    row["directional_bias_sp_plus"] = (
+        row["sp_plus_adjusted_margin"] - row["model_margin"]
+        if row.get("sp_plus_adjusted_margin") is not None and row.get("model_margin") is not None else None
+    )
+    row["directional_bias_cfbd"] = (
+        row["cfbd_equivalent_margin"] - row["model_margin"]
+        if row.get("cfbd_equivalent_margin") is not None and row.get("model_margin") is not None else None
+    )
+    row["standard_model_margin"] = row.get("model_margin")
+    row["score_vs_model"] = row.get("directional_bias_actual")
+    row["sp_plus_vs_model"] = row.get("directional_bias_sp_plus")
+    row["cfbd_vs_model"] = row.get("directional_bias_cfbd")
+    if row.get("sp_plus_adjusted_margin") is not None and row.get("cfbd_equivalent_margin") is not None:
+        row["performance_margin"] = (
+            row["sp_plus_adjusted_margin"] + row["cfbd_equivalent_margin"]
+        ) / 2
+        row["performance_vs_model"] = (
+            row["performance_margin"] - row["standard_model_margin"]
+            if row["standard_model_margin"] is not None else None
+        )
+        row["performance_completeness"] = "COMPLETE"
+    else:
+        row["performance_margin"] = None
+        row["performance_vs_model"] = None
+        row["performance_completeness"] = "PARTIAL" if (
+            row.get("sp_plus_adjusted_margin") is not None
+            or row.get("cfbd_equivalent_margin") is not None
+        ) else "UNAVAILABLE"
+    row["lifecycle_state"] = lifecycle_state(row, now=now)
+    row["lifecycle_reason"] = {
+        "PREGAME_FROZEN": "pregame inputs frozen; final score pending",
+        "SCORE_READY": "final score available; CFBD and SP+ pending",
+        "CFBD_READY": "score and CFBD available; SP+ pending",
+        "SP_PLUS_READY": "score and SP+ available; CFBD pending",
+        "COMPLETE": "score, CFBD, and SP+ available",
+        "DEGRADED": "final is older than 48 hours and at least one postgame lens is unavailable",
+    }[row["lifecycle_state"]]
+    return row
 
 
-def aggregate(rows):
+def aggregate(rows, team_universe=None):
     by_team = defaultdict(list)
     for row in rows:
+        row.setdefault("score_vs_model", row.get("directional_bias_actual"))
+        row.setdefault("sp_plus_vs_model", row.get("directional_bias_sp_plus"))
+        row.setdefault("cfbd_vs_model", row.get("directional_bias_cfbd"))
+        if "performance_vs_model" not in row:
+            sp_value = row.get("sp_plus_vs_model")
+            cfbd_value = row.get("cfbd_vs_model")
+            row["performance_vs_model"] = (
+                (sp_value + cfbd_value) / 2
+                if sp_value is not None and cfbd_value is not None else None
+            )
+        if "performance_margin" not in row:
+            sp_margin = row.get("sp_plus_adjusted_margin")
+            cfbd_margin = row.get("cfbd_equivalent_margin")
+            row["performance_margin"] = (
+                (sp_margin + cfbd_margin) / 2
+                if sp_margin is not None and cfbd_margin is not None else None
+            )
         by_team[row["team"]].append(row)
+    for team in team_universe or ():
+        by_team.setdefault(team, [])
     output = []
     for team, games in sorted(by_team.items()):
         gradeable = [g for g in games if g["model_abs_error_actual"] is not None and g["market_abs_error_actual"] is not None]
@@ -402,7 +539,29 @@ def aggregate(rows):
         lens_counts = lambda sample, key: (sum(g[key] > 0 for g in sample), sum(g[key] < 0 for g in sample))
         sp_model_beats, sp_market_beats = lens_counts(sp, "model_advantage_vs_market_sp_plus")
         cfbd_model_beats, cfbd_market_beats = lens_counts(cfbd, "model_advantage_vs_market_cfbd")
-        output.append({"team": team, "games_evaluated": n, "model_mae_vs_actual": mean("model_abs_error_actual"), "market_mae_vs_actual": mean("market_abs_error_actual"),
+        sp_bias = mean("directional_bias_sp_plus", sp)
+        cfbd_bias = mean("directional_bias_cfbd", cfbd)
+        performance = [g for g in gradeable if g.get("performance_vs_model") is not None]
+        performance_margin = mean("performance_margin", performance)
+        performance_vs_model = mean("performance_vs_model", performance)
+        lens_gap = abs(sp_bias - cfbd_bias) if sp_bias is not None and cfbd_bias is not None else None
+        agreement = None
+        if sp_bias is not None and cfbd_bias is not None:
+            agreement = "AGREE" if (abs(sp_bias) <= MODEL_FIT_NEAR_ZERO_TOLERANCE or abs(cfbd_bias) <= MODEL_FIT_NEAR_ZERO_TOLERANCE or sp_bias * cfbd_bias > 0) else "DISAGREE"
+        states = [g.get("lifecycle_state") for g in games]
+        health = "DEGRADED" if "DEGRADED" in states else "COMPLETE" if games and all(s == "COMPLETE" for s in states) else "PARTIAL" if games else "UNAVAILABLE"
+        output.append({"team": team, "games_evaluated": n, "eligible_completed_games": len(games),
+            "model_fit_health": health, "model_fit_status": {"COMPLETE":"GREEN", "PARTIAL":"YELLOW", "DEGRADED":"RED", "UNAVAILABLE":"GRAY"}[health],
+            "performance_games_available": len(performance),
+            "performance_margin": performance_margin,
+            "performance_vs_model": performance_vs_model,
+            # Compatibility alias for existing consumers. It is not a distinct metric.
+            "display_model_fit": performance_vs_model,
+            "score_vs_model": mean("score_vs_model"),
+            "sp_plus_vs_model": sp_bias, "cfbd_vs_model": cfbd_bias,
+            "sp_plus_bias": sp_bias, "cfbd_bias": cfbd_bias,
+            "lens_gap": lens_gap, "agreement": agreement,
+            "model_mae_vs_actual": mean("model_abs_error_actual"), "market_mae_vs_actual": mean("market_abs_error_actual"),
             "model_advantage_vs_market_actual": mean("model_advantage_vs_market_actual"), "advantage_actual": mean("model_advantage_vs_market_actual"), "model_beat_market_games": model_beats, "market_beat_model_games": market_beats, "ties": n-model_beats-market_beats,
             "model_beat_market_rate": model_beats/n if n else None, "directional_bias_actual": mean("directional_bias_actual"), "bias_actual": mean("directional_bias_actual"), "mean_abs_model_market_edge": sum(abs(g["model_market_edge"]) for g in gradeable)/n if n else None,
             "qualified_edge_games": len(qualified), "qualified_edge_record": f"{wins}-{losses}-{pushes}", "qualified_edge_pushes": pushes, "qualified_edge_win_rate": wins/(wins+losses) if wins+losses else None,
@@ -419,6 +578,13 @@ def aggregate(rows):
             "model_beat_market_cfbd_games": cfbd_model_beats, "market_beat_model_cfbd_games": cfbd_market_beats,
             "cfbd_ties": len(cfbd)-cfbd_model_beats-cfbd_market_beats, "model_beat_market_cfbd_rate": cfbd_model_beats/len(cfbd) if cfbd else None,
             "sample_state": "UNAVAILABLE" if n == 0 else "LOW_SAMPLE" if n <= 2 else "DEVELOPING" if n <= 4 else "ESTABLISHED"})
+    ranked = sorted((row for row in output if row["performance_vs_model"] is not None), key=lambda row: (-row["performance_vs_model"], row["team"]))
+    for rank, row in enumerate(ranked, 1):
+        row["model_fit_rank"] = rank
+    for row in output:
+        row.setdefault("model_fit_rank", None)
+        row["performance_vs_model_rank"] = row["model_fit_rank"]
+        row["rank_population"] = len(ranked)
     return output
 
 
@@ -433,6 +599,9 @@ def main():
     parser.add_argument("--pgwe", default="data/canonical/cfbd_schedule_2026.json")
     parser.add_argument("--sp-plus-postgame", default="data/canonical/sp_plus_postgame_2026.json")
     parser.add_argument("--output", default="data/site/team_game_evaluations_2026.json")
+    parser.add_argument("--previous", help="accepted prior artifact used for immutable carry-forward; defaults to output")
+    parser.add_argument("--as-of", help="UTC timestamp used for deterministic lifecycle aging tests")
+    parser.add_argument("--fbs-universe", default="data/ratings/ratings_preseason_2026.csv")
     parser.add_argument("--allow-empty-output", action="store_true", help="explicitly permit replacing a populated artifact with zero team-game rows")
     args = parser.parse_args()
     results = load_json(args.results).get("games", []); observations = load_jsonl(args.predictions); markets = read_market(args.market_history); checkpoints = load_jsonl(args.checkpoints)
@@ -441,6 +610,11 @@ def main():
     sp_plus, sp_plus_audit = sp_plus_index(load_json(args.sp_plus_postgame), eligible_games) if Path(args.sp_plus_postgame).exists() else ({}, {"source_team_rows": 0, "matched_games": 0, "matched_team_rows": 0, "unmatched": [], "ambiguous": []})
     reconstructed_contract = load_json(args.reconstructed_contract) if Path(args.reconstructed_contract).exists() else {"games": []}
     component_snapshots = load_json(args.component_snapshots) if Path(args.component_snapshots).exists() else {"games": []}
+    output = Path(args.output)
+    previous_path = Path(args.previous) if args.previous else output
+    previous_payload = load_json(previous_path) if previous_path.exists() else {"team_games": []}
+    previous_rows = {(str(row.get("game_id")), row.get("team")): row for row in previous_payload.get("team_games", [])}
+    as_of = dt(args.as_of) if args.as_of else datetime.now(timezone.utc)
     rows = []; gaps = []; coverage = defaultdict(lambda: {"eligible": 0, "model_reconstructable": 0, "market_reconstructable": 0, "result_available": 0, "all_three": 0, "sp_plus_available": 0, "cfbd_pgwe_available": 0})
     # A non-null result closing spread defines the established 51-game FBS-v-FBS evaluation universe; it is never used as close lifecycle proof.
     for game in results:
@@ -452,6 +626,12 @@ def main():
         market_gap = None
         if not market:
             market, market_gap = market_close(game, markets)
+        prior_home = previous_rows.get((str(game["game_id"]), game["home_team"]))
+        prior_model, prior_market = accepted_frozen_inputs(prior_home)
+        if not model and prior_model:
+            model, model_gap = prior_model, None
+        if not market and prior_market:
+            market, market_gap = prior_market, None
         if model: coverage[week]["model_reconstructable"] += 1
         if market: coverage[week]["market_reconstructable"] += 1
         if model and market: coverage[week]["all_three"] += 1
@@ -461,9 +641,23 @@ def main():
         if probability: coverage[week]["cfbd_pgwe_available"] += 1
         if model_gap or market_gap: gaps.append({"game_id": game["game_id"], "week": game["week"], "away_team": game["away_team"], "home_team": game["home_team"], "model_gap": model_gap, "market_gap": market_gap})
         for side in ("home", "away"):
-            rows.append(grade(game[f"{side}_team"], game["away_team" if side == "home" else "home_team"], side, game, model, market, probability, sp_game.get(sp_plus_team_key(game[f"{side}_team"]))))
-    payload = {"schema_version": "team-game-evaluations-2026-v3", "built_at": datetime.now(timezone.utc).isoformat(), "policy": {"positive_margin": "team expected or actual to win", "positive_advantage": "model closer than market under the named lens", "positive_bias": "performance or actual margin minus model margin; model underrated team", "benchmarks": "score, SP+ adjusted performance margin, and CFBD equivalent margin remain separate; no blended consensus", "sp_plus_adjusted_margin": "direct source truth from the SP+ POSTGAME WIN EXPECTANCY table", "cfbd_equivalent_margin": {"version": CFBD_EQUIVALENT_MARGIN_VERSION, "anchors_percent_to_margin": [list(anchor) for anchor in CFBD_EQUIVALENT_MARGIN_ANCHORS], "interpolation": "linear between anchors with exact sign symmetry below 50%", "provenance": CFBD_EQUIVALENT_MARGIN_PROVENANCE, "endpoint_policy": "0 maps to -65.0 and 1 maps to +65.0 under the approved reference tail"}, "deprecated_public_model_fit_conversion": "pgwe_adjusted_margin_v1 is research-only and does not feed this contract", "fbs_universe_note": "result closing_home_spread selects the established FBS-v-FBS universe only; market reconstruction comes exclusively from pre-kickoff history"}, "coverage_by_week": dict(coverage), "sp_plus_match_audit": sp_plus_audit, "gaps": gaps, "team_games": rows, "team_aggregates": aggregate(rows)}
-    output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
+            key = (str(game["game_id"]), game[f"{side}_team"])
+            rows.append(grade(game[f"{side}_team"], game["away_team" if side == "home" else "home_team"], side, game, model, market, probability, sp_game.get(sp_plus_team_key(game[f"{side}_team"])), now=as_of, previous=previous_rows.get(key)))
+    universe_path = Path(args.fbs_universe)
+    universe = []
+    if universe_path.exists():
+        with universe_path.open(newline="", encoding="utf-8-sig") as handle:
+            universe = [str(row.get("team") or "").strip() for row in csv.DictReader(handle)]
+            universe = [team for team in universe if team]
+    decision_weeks = list(range(0, 18))
+    aggregates_by_decision_week = {
+        str(week): aggregate(
+            [row for row in rows if int(row.get("week")) < week], universe
+        )
+        for week in decision_weeks
+    }
+    payload = {"schema_version": "team-game-evaluations-2026-v5", "built_at": as_of.isoformat(), "policy": {"positive_margin": "team expected or actual to win", "positive_advantage": "model closer than market under the named lens", "positive_bias": "performance or actual margin minus model margin; model underrated team", "performance_margin": "equal average of SP+ adjusted margin and CFBD equivalent margin only when both lenses exist; otherwise unavailable while each lens remains separate", "performance_vs_model": "performance_margin minus frozen standard_model_margin; primary signed diagnostic and ranking basis", "score_vs_model": "actual_margin minus frozen standard_model_margin; secondary scoreboard diagnostic", "display_model_fit_alias": "compatibility alias equal to performance_vs_model; not a separate metric", "benchmarks": "score, SP+ adjusted performance margin, and CFBD equivalent margin remain separately visible; no partial combined value is fabricated", "lifecycle_states": ["PREGAME_FROZEN", "SCORE_READY", "CFBD_READY", "SP_PLUS_READY", "COMPLETE", "DEGRADED"], "degraded_after_hours": 48, "near_zero_agreement_tolerance_points": MODEL_FIT_NEAR_ZERO_TOLERANCE, "accepted_value_policy": "available accepted postgame lens values persist across temporary source omissions; an available source row may explicitly revise its own value", "sp_plus_adjusted_margin": "direct source truth from the SP+ POSTGAME WIN EXPECTANCY table", "cfbd_equivalent_margin": {"version": CFBD_EQUIVALENT_MARGIN_VERSION, "anchors_percent_to_margin": [list(anchor) for anchor in CFBD_EQUIVALENT_MARGIN_ANCHORS], "interpolation": "linear between anchors with exact sign symmetry below 50%", "provenance": CFBD_EQUIVALENT_MARGIN_PROVENANCE, "endpoint_policy": "0 maps to -65.0 and 1 maps to +65.0 under the approved reference tail"}, "deprecated_public_model_fit_conversion": "pgwe_adjusted_margin_v1 is research-only and does not feed this contract", "rank_policy": "signed descending performance_vs_model among teams with at least one complete two-lens performance game; all FBS teams remain present and no-sample teams are unranked", "fbs_universe_size": len(universe), "fbs_universe_note": "result closing_home_spread selects gradeable completed games; no-sample FBS teams remain explicit and unranked"}, "coverage_by_week": dict(coverage), "sp_plus_match_audit": sp_plus_audit, "gaps": gaps, "team_games": rows, "team_aggregates": aggregate(rows, universe), "team_aggregates_by_decision_week": aggregates_by_decision_week}
+    output.parent.mkdir(parents=True, exist_ok=True)
     if not rows and output.exists() and not args.allow_empty_output:
         prior = load_json(output)
         if prior.get("team_games"):

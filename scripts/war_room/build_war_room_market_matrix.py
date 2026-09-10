@@ -91,6 +91,7 @@ PROJECTION_SOURCE_STATUS = (
 )
 
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
+TEAM_GAME_EVALUATIONS = ROOT / "data/site/team_game_evaluations_2026.json"
 CFBDEPTH_INJURY_IMPACT = (
     ROOT / "data/canonical/cfbdepth_team_injury_impact_current.json"
 )
@@ -327,6 +328,98 @@ def load_team_composite_ranks(path):
             continue
         ranks[team] = rank
     return ranks
+
+
+def load_team_model_fit(path):
+    payload = load_json(path, {})
+    by_week = {}
+    for week, rows in payload.get("team_aggregates_by_decision_week", {}).items():
+        by_week[str(week)] = {
+            normalize_team(row.get("team")): row for row in rows if row.get("team")
+        }
+    return {
+        "season": {normalize_team(row.get("team")): row for row in payload.get("team_aggregates", []) if row.get("team")},
+        "by_week": by_week,
+        "team_games": payload.get("team_games", []),
+    }
+
+
+def unavailable_model_fit(team):
+    return {
+        "team": team, "games_evaluated": 0, "eligible_completed_games": 0,
+        "model_fit_health": "UNAVAILABLE", "model_fit_status": "GRAY",
+        "sample_state": "UNAVAILABLE", "display_model_fit": None,
+        "performance_margin": None, "performance_vs_model": None,
+        "score_vs_model": None, "performance_vs_model_rank": None,
+        "rank_population": 0, "model_fit_rank": None,
+        "sp_plus_vs_model": None, "cfbd_vs_model": None,
+        "sp_plus_bias": None, "cfbd_bias": None,
+        "lens_gap": None, "agreement": None, "directional_bias_actual": None,
+        "model_advantage_vs_market_sp_plus": None,
+        "model_advantage_vs_market_cfbd": None,
+    }
+
+
+def selected_week_model_fit(row, team, target_week, projection_games, results_by_gid, evaluation_rows, fbs_teams, now=None):
+    """Make health answer whether all history expected before target_week is processed."""
+    current = dict(row)
+    if target_week is None:
+        return current
+    team_key = normalize_team(team)
+    expected = []
+    for game in projection_games:
+        try:
+            prior = int(game.get("week")) < int(target_week)
+        except (TypeError, ValueError):
+            prior = False
+        participants = {normalize_team(game.get("away_team")), normalize_team(game.get("home_team"))}
+        if prior and team_key in participants and participants <= fbs_teams:
+            expected.append(game)
+    if not expected:
+        current.update({"model_fit_health": "NO_SAMPLE", "model_fit_status": "GRAY", "selected_week_expected_games": 0})
+        return current
+    eval_keys = {
+        (str(item.get("game_id")), normalize_team(item.get("team"))): item
+        for item in evaluation_rows
+    }
+    pending = []
+    missing = []
+    states = []
+    for game in expected:
+        gid = str(game.get("game_id"))
+        result = results_by_gid.get(gid, {})
+        if result.get("completed") is not True:
+            pending.append(gid)
+            continue
+        evaluation = eval_keys.get((gid, team_key))
+        if not evaluation:
+            missing.append(game)
+        else:
+            states.append(evaluation.get("lifecycle_state"))
+    current["selected_week_expected_games"] = len(expected)
+    current["selected_week_pending_games"] = len(pending)
+    if pending:
+        current.update({"model_fit_health": "PENDING", "model_fit_status": "YELLOW"})
+    elif "DEGRADED" in states:
+        current.update({"model_fit_health": "DEGRADED", "model_fit_status": "RED"})
+    elif missing:
+        current_time = now or datetime.now(timezone.utc)
+        overdue = all(
+            (parse_timestamp(game.get("kickoff_time") or game.get("start_date") or game.get("date")) or current_time)
+            < current_time - timedelta(hours=48)
+            for game in missing
+        )
+        current.update({
+            "model_fit_health": "DEGRADED" if overdue else "PARTIAL",
+            "model_fit_status": "RED" if overdue else "YELLOW",
+        })
+    elif states and all(state == "COMPLETE" for state in states):
+        current.update({"model_fit_health": "COMPLETE", "model_fit_status": "GREEN"})
+    elif states:
+        current.update({"model_fit_health": "PARTIAL", "model_fit_status": "YELLOW"})
+    else:
+        current.update({"model_fit_health": "NO_SAMPLE", "model_fit_status": "GRAY"})
+    return current
 
 
 def load_team_injury_impact(path, now=None):
@@ -2527,6 +2620,11 @@ def main():
         if GAME_RESULTS.exists()
         else {"games": []}
     )
+    results_by_gid = {
+        str(row.get("game_id")): row
+        for row in results_payload.get("games", [])
+        if row.get("game_id") is not None
+    }
 
     schedule_live_payload = (
         json.loads(SCHEDULE_LIVE.read_text())
@@ -2560,6 +2658,7 @@ def main():
 
     fbs_teams = load_fbs_team_universe()
     team_composite_ranks = load_team_composite_ranks(RATINGS_VIEW)
+    team_model_fit = load_team_model_fit(TEAM_GAME_EVALUATIONS)
     team_injury_impact, injury_source = load_team_injury_impact(
         CFBDEPTH_INJURY_IMPACT
     )
@@ -3001,6 +3100,9 @@ def main():
         except (TypeError, ValueError):
             target_week = None
         cutoff = week_cutoffs.get(target_week) if target_week is not None else None
+        model_fit_for_week = team_model_fit["by_week"].get(
+            str(target_week), team_model_fit["season"]
+        )
         freshness_watermark["week_cutoff_at"] = (
             cutoff.get("final_completion_at") if cutoff else None
         )
@@ -3152,6 +3254,20 @@ def main():
                     normalize_team(game.get("home_team"))
                 ),
                 "source": "ratings_view.teams.overall_rank",
+            },
+            "model_fit": {
+                "away": selected_week_model_fit(
+                    model_fit_for_week.get(normalize_team(game.get("away_team")), unavailable_model_fit(game.get("away_team"))),
+                    game.get("away_team"), target_week, projection_games, results_by_gid,
+                    team_model_fit["team_games"], fbs_teams,
+                ),
+                "home": selected_week_model_fit(
+                    model_fit_for_week.get(normalize_team(game.get("home_team")), unavailable_model_fit(game.get("home_team"))),
+                    game.get("home_team"), target_week, projection_games, results_by_gid,
+                    team_model_fit["team_games"], fbs_teams,
+                ),
+                "source": "team_game_evaluations_2026.team_aggregates",
+                "display_only": True,
             },
             "neutral_site": game.get("neutral_site"),
             "provider_game_ids": sorted(

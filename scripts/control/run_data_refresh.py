@@ -225,9 +225,10 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
     commands = [
         [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
         [sys.executable, "scripts/results/build_game_results_2026.py"],
-        [sys.executable, "scripts/model_fit/build_team_game_evaluations_2026.py"],
+        [sys.executable, "scripts/postgame/pull_sp_plus_postgame_2026.py"],
         [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
         [sys.executable, "scripts/postgame/build_postgame_features_2026.py"],
+        [sys.executable, "scripts/model_fit/build_team_game_evaluations_2026.py"],
         [sys.executable, "scripts/site/build_postgame_shadow_updates.py"],
         [sys.executable, "scripts/research/build_market_implied_power_ratings.py", "--production-2026"],
         [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
