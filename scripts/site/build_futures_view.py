@@ -27,6 +27,15 @@ BETS_PATH = DATA_ROOT / "data/site/betting_activity_view.json"
 WIN_MOVEMENT_PATH = DATA_ROOT / "market_win_totals_movement.csv"
 TITLE_MOVEMENT_PATH = DATA_ROOT / "market_conference_futures_movement.csv"
 FUTURES_CHECKPOINTS_PATH = DATA_ROOT / "data/markets/futures_checkpoints_2026.jsonl"
+RELIABILITY_AUDIT_PATH = Path(
+    os.environ.get(
+        "NCAAF_FUTURES_RELIABILITY_PATH",
+        str(DATA_ROOT / "data/audits/futures_market_reliability.json"),
+    )
+).expanduser().resolve()
+SCHEDULE_PATH = DATA_ROOT / "data/canonical/cfbd_schedule_2026.json"
+RESULTS_PATH = DATA_ROOT / "data/canonical/game_results_2026.json"
+PRESEASON_DB_PATH = DATA_ROOT / "data/snapshots/preseason/preseason_db.json"
 
 QA_PATH = Path(
     os.environ.get(
@@ -75,47 +84,48 @@ def numeric_delta(current, prior):
     return current_value - prior_value
 
 
-def select_7d_baseline(records, current_built_at):
-    if not records or not current_built_at:
-        return None
+def select_weekly_baseline(records, games, current_built_at, fbs_teams):
+    """Select the latest checkpoint before the prior completed FBS week began."""
+    current_dt = parse_dt(current_built_at)
+    if not records or current_dt is None:
+        return None, {"status": "unavailable", "reason": "No checkpoint history or current build timestamp."}
 
-    try:
-        current_dt = datetime.fromisoformat(
-            str(current_built_at).replace("Z", "+00:00")
-        )
-    except ValueError:
-        return None
+    completed_weeks = []
+    for game in games or []:
+        week = game.get("cfbd_week") if game.get("cfbd_week") is not None else game.get("week")
+        teams = {canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))}
+        if (game.get("cfbd_completed") or game.get("completed")) and week is not None and teams <= fbs_teams:
+            completed_weeks.append(int(week))
+    if not completed_weeks:
+        return None, {"status": "unavailable", "reason": "No completed FBS game week is available."}
 
-    if current_dt.tzinfo is None:
-        current_dt = current_dt.replace(tzinfo=timezone.utc)
+    prior_week = max(completed_weeks)
+    kickoffs = []
+    for game in games or []:
+        week = game.get("cfbd_week") if game.get("cfbd_week") is not None else game.get("week")
+        teams = {canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))}
+        if week is None or int(week) != prior_week or not teams <= fbs_teams:
+            continue
+        kickoff = parse_dt(game.get("cfbd_start_date") or game.get("start_date") or game.get("date"))
+        if kickoff is not None:
+            kickoffs.append(kickoff)
+    if not kickoffs:
+        return None, {"status": "unavailable", "reason": f"Week {prior_week} has no usable FBS kickoff timestamp."}
 
-    current_date = current_dt.astimezone(timezone.utc).date()
+    cutoff = min(kickoffs)
     candidates = []
-
     for record in records:
-        checkpoint_date = record.get("checkpoint_date")
-
-        if not checkpoint_date:
-            continue
-
-        try:
-            record_date = datetime.fromisoformat(
-                str(checkpoint_date)
-            ).date()
-        except ValueError:
-            continue
-
-        age_days = (current_date - record_date).days
-
-        if age_days >= 7:
-            candidates.append((record_date, record))
-
+        checkpoint_at = parse_dt(record.get("checkpoint_at") or record.get("source_view_built_at"))
+        successful = record.get("status") in (None, "successful")
+        if checkpoint_at is not None and checkpoint_at < cutoff and record.get("rows") and successful:
+            candidates.append((checkpoint_at, record))
+    meta = {"prior_week": prior_week, "cutoff_at": cutoff.isoformat()}
     if not candidates:
-        return None
-
-    # Closest available checkpoint that is at least seven
-    # calendar days old.
-    return max(candidates, key=lambda item: item[0])[1]
+        meta.update({"status": "unavailable", "reason": f"No successful checkpoint exists before Week {prior_week}'s first FBS kickoff."})
+        return None, meta
+    selected_at, selected = max(candidates, key=lambda item: item[0])
+    meta.update({"status": "available", "checkpoint_at": selected_at.isoformat(), "checkpoint_date": selected.get("checkpoint_date"), "checkpoint_id": selected.get("checkpoint_id") or f"{selected.get('checkpoint_date')}@{selected_at.isoformat()}"})
+    return selected, meta
 
 
 def number(value):
@@ -525,6 +535,9 @@ def main():
     market_contract = json.loads(MARKET_CONTRACT_PATH.read_text())
     season_model = json.loads(SEASON_MODEL_PATH.read_text())
     playoff_model_payload = json.loads(PLAYOFF_MODEL_PATH.read_text())
+    schedule = json.loads(SCHEDULE_PATH.read_text()) if SCHEDULE_PATH.exists() else {"games": []}
+    results = json.loads(RESULTS_PATH.read_text()) if RESULTS_PATH.exists() else {"games": []}
+    preseason_db = json.loads(PRESEASON_DB_PATH.read_text()) if PRESEASON_DB_PATH.exists() else {"games": []}
 
     teams = {
         canonical_team(x.get("team")): x
@@ -583,10 +596,26 @@ def main():
         FUTURES_CHECKPOINTS_PATH
     )
 
-    baseline_checkpoint = select_7d_baseline(
+    baseline_checkpoint, weekly_baseline = select_weekly_baseline(
         checkpoint_history,
+        schedule.get("games", []),
         build_generated_at,
+        set(teams),
     )
+
+    records = {key: {"wins": 0, "losses": 0, "conf_wins": 0, "conf_losses": 0} for key in teams}
+    conference_by_game = {str(game.get("game_id")): bool(game.get("is_conference_game")) for game in preseason_db.get("games", [])}
+    for game in results.get("games", []):
+        if not game.get("completed"):
+            continue
+        away, home = canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))
+        ap, hp = number(game.get("away_score")), number(game.get("home_score"))
+        if ap is None or hp is None or away not in records or home not in records or ap == hp:
+            continue
+        winner, loser = (away, home) if ap > hp else (home, away)
+        records[winner]["wins"] += 1; records[loser]["losses"] += 1
+        if conference_by_game.get(str(game.get("game_id")), False):
+            records[winner]["conf_wins"] += 1; records[loser]["conf_losses"] += 1
 
     baseline_rows = {
         canonical_team(x.get("team")): x
@@ -597,6 +626,14 @@ def main():
         )
         if isinstance(x, dict) and x.get("team")
     }
+    current_dt = parse_dt(build_generated_at)
+    prior_candidates = []
+    for checkpoint in checkpoint_history:
+        checkpoint_at = parse_dt(checkpoint.get("checkpoint_at") or checkpoint.get("source_view_built_at"))
+        if checkpoint_at and current_dt and checkpoint_at.date() < current_dt.date() and checkpoint.get("rows"):
+            prior_candidates.append((checkpoint_at, checkpoint))
+    daily_checkpoint = max(prior_candidates, key=lambda item: item[0])[1] if prior_candidates else None
+    daily_rows = {canonical_team(x.get("team")): x for x in (daily_checkpoint or {}).get("rows", []) if isinstance(x, dict) and x.get("team")}
 
     rows = []
 
@@ -662,6 +699,7 @@ def main():
             "slug": team.get("slug"),
             "conference": team.get("conference"),
             "rank": team.get("rank"),
+            "record": records.get(key),
 
             "projected_wins": projected_wins,
             "market_win_total": total,
@@ -736,8 +774,12 @@ def main():
             "national_title_book_count": national.get(
                 "executable_book_count", 0
             ),
+            "win_quotes": win.get("quotes", {}),
+            "title_quotes": title.get("quotes", {}),
+            "playoff_quotes": cfp.get("quotes", {}),
+            "national_title_quotes": national.get("quotes", {}),
 
-            "delta_7d": (
+            "delta_week": (
                 {
                     "baseline_date": baseline_checkpoint.get(
                         "checkpoint_date"
@@ -855,6 +897,34 @@ def main():
             ),
         })
 
+        # Temporary compatibility for consumers that have not migrated yet.
+        rows[-1]["delta_7d"] = rows[-1]["delta_week"]
+
+        current_row = rows[-1]
+        prior_row = daily_rows.get(key, {})
+        current_row["delta_day"] = ({
+            "baseline_date": daily_checkpoint.get("checkpoint_date"),
+            "baseline_at": daily_checkpoint.get("checkpoint_at"),
+            "win": {field: numeric_delta(current_row.get(source), prior_row.get(source)) for field, source in {"model":"projected_wins", "market":"market_win_total", "edge":"win_edge"}.items()},
+            "conference_title": {field: numeric_delta(current_row.get(source), prior_row.get(source)) for field, source in {"model":"title_model_prob", "market":"title_market_prob", "edge":"title_edge"}.items()},
+            "make_cfp": {field: numeric_delta(current_row.get(source), prior_row.get(source)) for field, source in {"model":"playoff_model_prob", "market":"playoff_market_prob", "edge":"playoff_edge"}.items()},
+            "national_title": {field: numeric_delta(current_row.get(source), prior_row.get(source)) for field, source in {"model":"national_title_model_prob", "market":"national_title_market_prob", "edge":"national_title_edge"}.items()},
+        } if daily_checkpoint else None)
+
+        history = []
+        for checkpoint in checkpoint_history:
+            historical = next((x for x in checkpoint.get("rows", []) if canonical_team(x.get("team")) == key), None)
+            if not historical:
+                continue
+            history.append({
+                "checkpoint_date": checkpoint.get("checkpoint_date"), "checkpoint_at": checkpoint.get("checkpoint_at"),
+                "model_projected_wins": historical.get("projected_wins"), "market_win_total": historical.get("market_win_total"), "win_edge": historical.get("win_edge"), "win_book": historical.get("win_book"),
+                "conference_title_model_prob": historical.get("title_model_prob"), "conference_title_market_prob": historical.get("title_market_prob"), "conference_title_edge": historical.get("title_edge"), "conference_title_book": historical.get("title_book"),
+                "cfp_model_prob": historical.get("playoff_model_prob"), "cfp_market_prob": historical.get("playoff_market_prob"), "cfp_edge": historical.get("playoff_edge"), "cfp_book": historical.get("playoff_book"),
+                "national_title_model_prob": historical.get("national_title_model_prob"), "national_title_market_prob": historical.get("national_title_market_prob"), "national_title_edge": historical.get("national_title_edge"), "national_title_book": historical.get("national_title_book"),
+            })
+        current_row["history"] = history
+
     season_built = season_model.get("built_at")
     playoff_built = playoff_model_payload.get("built_at")
 
@@ -948,6 +1018,14 @@ def main():
     if any(unmatched.get(k) for k in unmatched):
         warnings.append("One or more futures market team identities were unmatched.")
 
+    reliability = {}
+    if RELIABILITY_AUDIT_PATH.exists():
+        reliability = json.loads(RELIABILITY_AUDIT_PATH.read_text())
+        warnings.extend(
+            warning for warning in reliability.get("warnings", [])
+            if warning not in warnings
+        )
+
     qa = {
         "schema_version": "futures-market-qa-v2",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -974,6 +1052,10 @@ def main():
             ),
         },
         "unmatched_market_teams": unmatched,
+        "reliability_audit": {
+            "status": reliability.get("status"),
+            "generated_at": reliability.get("generated_at"),
+        },
         "warnings": warnings,
     }
 
@@ -1034,6 +1116,8 @@ def main():
                 "market_policy", {}
             ).get("approved_executable_books", []),
         },
+
+        "weekly_baseline": weekly_baseline,
 
         "rows": rows,
 

@@ -1,37 +1,73 @@
 {
-  "schema_version": "futures-market-qa-v1",
-  "generated_at": "2026-08-04T12:02:01.691587+00:00",
-  "status": "pass",
-  "source": "Action Network",
-  "last_successful_pull": "2026-08-04T12:01:59.564307+00:00",
-  "age_hours": 0.0,
-  "books": [
-    "BetMGM",
-    "BetRivers",
-    "Caesars",
-    "Casumo ES",
-    "DraftKings",
-    "FanDuel",
-    "Sports Interaction",
-    "TheScore ON",
-    "bet365"
-  ],
+  "schema_version": "futures-market-qa-v2",
+  "generated_at": "2026-09-10T21:19:31.039099+00:00",
+  "status": "warn",
+  "market_domains": {
+    "win_totals": {
+      "source": "normalized current win totals imports",
+      "status": "current",
+      "observed_date": "2026-09-10",
+      "age_days": 0,
+      "books": [
+        "BetMGM",
+        "Caesars",
+        "DraftKings",
+        "FanDuel"
+      ]
+    },
+    "conference_titles": {
+      "source": "normalized current conference futures import",
+      "status": "current",
+      "observed_date": "2026-09-10",
+      "age_days": 0,
+      "books": [
+        "BetMGM",
+        "Caesars",
+        "DraftKings",
+        "FanDuel"
+      ]
+    },
+    "make_cfp": {
+      "source": "Action Network",
+      "status": "current",
+      "pulled_at": "2026-09-10T12:08:26.384431+00:00",
+      "age_hours": 9.18,
+      "books": [
+        "Caesars",
+        "DraftKings",
+        "FanDuel"
+      ]
+    },
+    "national_title": {
+      "source": "Action Network",
+      "status": "current",
+      "pulled_at": "2026-09-10T12:08:26.384431+00:00",
+      "age_hours": 9.18,
+      "books": [
+        "BetMGM",
+        "Caesars",
+        "DraftKings",
+        "FanDuel"
+      ]
+    }
+  },
   "coverage": {
     "teams": 138,
-    "win_totals": 106,
-    "conference_titles": 108,
+    "win_totals": 138,
+    "conference_titles": 136,
     "make_cfp": 138,
     "national_title": 138
   },
-  "raw_offer_counts": {
-    "make_cfp": 4870,
-    "national_title": 19647
+  "unmatched_market_teams": {
+    "win_totals": [],
+    "conference_titles": [],
+    "playoff_futures": []
   },
-  "invalid_prices": 0,
-  "invalid_implied_probabilities": 0,
-  "skipped_incomplete_offers": 27,
-  "repeated_offer_rows": 20262,
-  "unmatched_market_teams": [],
-  "duplicate_offers": 0,
-  "warnings": []
+  "reliability_audit": {
+    "status": "warn",
+    "generated_at": "2026-09-10T21:05:23.914164+00:00"
+  },
+  "warnings": [
+    "win_totals: 2 team/book pairs expose multiple totals; the existing selector collapses these at brand level"
+  ]
 }

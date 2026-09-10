@@ -6,20 +6,32 @@ from pathlib import Path
 import json, sys
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
-from scripts.lib.ncaaf_config import canonical_team
+from lib.ncaaf_config import canonical_team
 DB_PATH=ROOT/"data/snapshots/preseason/preseason_db.json"
 SIM_PATH=ROOT/"data/site/season_simulations_2026.json"
 FUTURES_PATH=ROOT/"data/site/futures_view.json"
+RESULTS_PATH=ROOT/"data/canonical/game_results_2026.json"
 OUT_PATH=ROOT/"data/site/conference_workspace.json"
 
 def number(x):
     try: return None if x is None or x=="" else float(x)
     except Exception: return None
 
+def apply_canonical_results(games, results):
+    results_by_game={str(x.get("game_id")):x for x in results if x.get("game_id")}
+    for game in games:
+        result=results_by_game.get(str(game.get("game_id")))
+        if result and result.get("completed"):
+            game["cfbd_completed"]=True
+            game["away_points"]=result.get("away_score")
+            game["home_points"]=result.get("home_score")
+
 def main():
     for p in (DB_PATH,SIM_PATH,FUTURES_PATH):
         if not p.exists(): raise SystemExit(f"Missing required conference workspace input: {p}")
     db=json.loads(DB_PATH.read_text()); sims=json.loads(SIM_PATH.read_text()); fv=json.loads(FUTURES_PATH.read_text())
+    results=json.loads(RESULTS_PATH.read_text()) if RESULTS_PATH.exists() else {"games":[]}
+    apply_canonical_results(db.get("games",[]), results.get("games",[]))
     sim_by_team={canonical_team(x.get("team")):x for x in sims.get("teams",[]) if x.get("team")}
     markets={canonical_team(x.get("team")):x for x in fv.get("rows",[]) if x.get("team")}
     teams={canonical_team(x.get("team")):x for x in db.get("teams",[]) if x.get("team")}; games=db.get("games",[]); rows=[]
@@ -53,6 +65,6 @@ def main():
         conferences.append({"conference":conf_name,"slug":c.get("slug"),"average_strength":c.get("average_strength"),"average_team_rating":sum(ratings)/len(ratings) if ratings else None,"championship_game":c.get("championship_game"),"teams":cr})
     ranked_confs=sorted(conferences,key=lambda x:x.get("average_team_rating") if x.get("average_team_rating") is not None else -999,reverse=True)
     for i,c in enumerate(ranked_confs,1): c["conference_rank"]=i
-    out={"schema_version":"conference-workspace-v2","built_at":datetime.now(timezone.utc).isoformat(),"simulation_built_at":sims.get("built_at"),"simulation_trials":sims.get("trials"),"simulation_source":"data/site/season_simulations_2026.json","schedule_source":"data/snapshots/preseason/preseason_db.json","market_source":"data/site/futures_view.json","conferences":conferences}
+    out={"schema_version":"conference-workspace-v2","built_at":datetime.now(timezone.utc).isoformat(),"simulation_built_at":sims.get("built_at"),"simulation_trials":sims.get("trials"),"simulation_source":"data/site/season_simulations_2026.json","schedule_source":"data/snapshots/preseason/preseason_db.json + data/canonical/game_results_2026.json","market_source":"data/site/futures_view.json","conferences":conferences}
     OUT_PATH.write_text(json.dumps(out,separators=(",",":"))+"\n"); print(len(conferences),sum(len(x["teams"]) for x in conferences)); print("simulation_built_at:",sims.get("built_at")); print("simulation_trials:",sims.get("trials"))
 if __name__=="__main__": main()

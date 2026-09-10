@@ -310,6 +310,8 @@ def build_payload(
                     "dark_logo": team.get("slug") in DARK_TEAM_LOGO_SLUGS,
                     "current_conf_wins": team.get("current_conf_wins", 0),
                     "current_conf_losses": team.get("current_conf_losses", 0),
+                    "current_wins": team.get("current_wins", 0),
+                    "current_losses": team.get("current_losses", 0),
                     "projected_conf_wins": team.get("projected_conf_wins"),
                     "projected_conf_losses": team.get("projected_conf_losses"),
                     "projected_finish": team.get("projected_finish"),
@@ -664,7 +666,7 @@ function rowParts(row,currentWeek){{
  const futuresHref='futures.html';
  const bookMark=bookBadge(row.title_book,row.title_book_logo); const titleMarket=row.title_price!=null?`<span class="book-line"><span class="market-price">${{american(row.title_price)}}</span>${{bookMark}}</span><span class="market-edge ${{edgeClass(row.title_edge)}}">${{row.title_edge==null?'':`${{Number(row.title_edge)>=0?'+':''}}${{Math.round(Number(row.title_edge)*100)}}% edge`}}</span>`:'<span class="market-price">No market</span>';
  const confSosClass=sosClass(row.conf_sos_rank,row.conference_size),remSosClass=sosClass(row.remaining_sos_rank,row.conference_size);
- const left=`<tr><td class="team-column"><div class="team-name"><span class="team-logo-badge ${{row.dark_logo?'light-logo':''}}"><img src="logos/${{esc(row.slug)}}.png" alt="${{esc(row.team)}} logo"></span><div><strong class="team-primary">${{esc(row.team)}}</strong><span class="team-meta"><b class="${{esc(row.rank_tone)}}">#${{esc(row.rank)}}</b><span class="rating-value">| ${{num(row.rating)}}</span></span><span class="sos-lines"><span class="${{confSosClass}}">Conf SOS: ${{sosText(row.conf_sos_rank,row.conference_size)}}</span><span class="${{remSosClass}}">Rem SOS: ${{sosText(row.remaining_sos_rank,row.conference_size)}}</span></span></div></div></td><td class="record-column"><strong>${{confRecord}}</strong></td></tr>`;
+ const left=`<tr><td class="team-column"><div class="team-name"><span class="team-logo-badge ${{row.dark_logo?'light-logo':''}}"><img src="logos/${{esc(row.slug)}}.png" alt="${{esc(row.team)}} logo"></span><div><strong class="team-primary">${{esc(row.team)}}</strong><span class="team-meta">${{Number(row.current_wins||0)}}-${{Number(row.current_losses||0)}} overall · <b class="${{esc(row.rank_tone)}}">#${{esc(row.rank)}}</b><span class="rating-value"> | ${{num(row.rating)}}</span></span><span class="sos-lines"><span class="${{confSosClass}}">Conf SOS: ${{sosText(row.conf_sos_rank,row.conference_size)}}</span><span class="${{remSosClass}}">Rem SOS: ${{sosText(row.remaining_sos_rank,row.conference_size)}}</span></span></div></div></td><td class="record-column"><strong>${{confRecord}}</strong></td></tr>`;
  const schedule=`<tr>${{scheduleCells}}</tr>`;
  const right=`<tr><td class="proj-finish outcome"><span class="finish-rank">#${{esc(row.projected_finish)}}</span><span class="record">${{num(row.projected_conf_wins)}}–${{num(row.projected_conf_losses)}}</span></td><td class="make-title outcome"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.make_title_game_pct)}}</span><span class="futures-label">View futures</span></a></td><td class="win-title outcome title-prob"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.title_pct)}}</span>${{titleMarket}}</a></td></tr>`;
  return {{left,schedule,right}};
