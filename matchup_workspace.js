@@ -1468,6 +1468,7 @@ function contextTable(game){ const rows=contextRows(game); const empty=!rows.len
 
   function isRowOpenClick(target,row){
     if(!row||row.closest('thead'))return false;
+    if(row.matches('.inlineDetailRow'))return false;
     if(target.closest('input,select,textarea,label'))return false;
 
     const button=target.closest('button');
