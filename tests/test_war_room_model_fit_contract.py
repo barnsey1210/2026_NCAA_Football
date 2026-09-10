@@ -46,6 +46,20 @@ class WarRoomModelFitContractTests(unittest.TestCase):
         self.assertIn('"display_only": True', source)
         self.assertIn("selected_week_model_fit", source)
 
+    def test_matrix_projection_keeps_only_display_fields(self):
+        row = {field: field for field in matrix.MODEL_FIT_DISPLAY_FIELDS}
+        row["internal_metric"] = 123
+        projected = matrix.compact_model_fit(row)
+        self.assertEqual(set(projected), set(matrix.MODEL_FIT_DISPLAY_FIELDS))
+        self.assertNotIn("internal_metric", projected)
+        for field in (
+            "games_evaluated", "model_fit_health", "model_fit_status",
+            "sample_state", "performance_vs_model", "score_vs_model",
+            "sp_plus_vs_model", "cfbd_vs_model",
+            "performance_vs_model_rank", "lens_gap", "agreement",
+        ):
+            self.assertIn(field, projected)
+
     def test_value_colors_and_rank_use_canonical_helpers(self):
         source = PAGE.read_text()
         self.assertIn("if(n>=2) return 'positive'", source)

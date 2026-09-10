@@ -92,6 +92,13 @@ PROJECTION_SOURCE_STATUS = (
 
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
 TEAM_GAME_EVALUATIONS = ROOT / "data/site/team_game_evaluations_2026.json"
+MODEL_FIT_DISPLAY_FIELDS = (
+    "team", "games_evaluated", "model_fit_health", "model_fit_status",
+    "sample_state", "performance_vs_model", "score_vs_model",
+    "sp_plus_vs_model", "cfbd_vs_model", "performance_vs_model_rank",
+    "lens_gap", "agreement", "selected_week_expected_games",
+    "selected_week_pending_games",
+)
 CFBDEPTH_INJURY_IMPACT = (
     ROOT / "data/canonical/cfbdepth_team_injury_impact_current.json"
 )
@@ -358,6 +365,11 @@ def unavailable_model_fit(team):
         "model_advantage_vs_market_sp_plus": None,
         "model_advantage_vs_market_cfbd": None,
     }
+
+
+def compact_model_fit(row):
+    """Keep the repeated matrix projection limited to display-consumed fields."""
+    return {field: row.get(field) for field in MODEL_FIT_DISPLAY_FIELDS}
 
 
 def selected_week_model_fit(row, team, target_week, projection_games, results_by_gid, evaluation_rows, fbs_teams, now=None):
@@ -3256,16 +3268,16 @@ def main():
                 "source": "ratings_view.teams.overall_rank",
             },
             "model_fit": {
-                "away": selected_week_model_fit(
+                "away": compact_model_fit(selected_week_model_fit(
                     model_fit_for_week.get(normalize_team(game.get("away_team")), unavailable_model_fit(game.get("away_team"))),
                     game.get("away_team"), target_week, projection_games, results_by_gid,
                     team_model_fit["team_games"], fbs_teams,
-                ),
-                "home": selected_week_model_fit(
+                )),
+                "home": compact_model_fit(selected_week_model_fit(
                     model_fit_for_week.get(normalize_team(game.get("home_team")), unavailable_model_fit(game.get("home_team"))),
                     game.get("home_team"), target_week, projection_games, results_by_gid,
                     team_model_fit["team_games"], fbs_teams,
-                ),
+                )),
                 "source": "team_game_evaluations_2026.team_aggregates",
                 "display_only": True,
             },
