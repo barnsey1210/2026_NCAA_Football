@@ -341,6 +341,7 @@ trap on_exit EXIT
   run_py "pull_bettingpros_caesars_win_totals.py" || warn "Caesars/BettingPros pull failed; preserving cached data"
   run_py "pulls/pull_actionnetwork_conference_futures_api.py" || warn "Action Network conference futures pull failed; preserving cached data"
   run_py "odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || warn "bad DraftKings win total quarantine failed"
+  run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase acquisition
   run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
   run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
   run_py "build_market_arbitrage_report.py" || warn "market arbitrage report build failed; preserving prior report"
@@ -673,6 +674,7 @@ fi
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
   run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
+  run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture
   if run_py "scripts/site/build_futures_view.py" "build_futures_view.py"; then
     run_py "scripts/markets/capture_futures_checkpoint.py" "capture_futures_checkpoint.py" || warn "Futures checkpoint capture failed"
   else

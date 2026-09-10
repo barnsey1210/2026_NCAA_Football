@@ -19,6 +19,7 @@
         "pull_bettingpros_caesars_win_totals.py",
         "pulls/pull_actionnetwork_conference_futures_api.py",
         "odds/quarantine_bad_draftkings_win_total_rows.py",
+        "scripts/markets/audit_futures_market_reliability.py",
         "append_market_history.py",
         "build_daily_market_movement_report.py",
         "build_market_arbitrage_report.py"
@@ -310,6 +311,8 @@
       "entrypoint": "daily_market_update.sh#playoff_futures",
       "scripts": [
         "scripts/markets/pull_actionnetwork_playoff_futures.py",
+        "scripts/markets/build_current_futures_market_contract.py",
+        "scripts/markets/audit_futures_market_reliability.py",
         "scripts/site/build_futures_view.py",
         "scripts/site/build_conference_workspace.py"
       ]
