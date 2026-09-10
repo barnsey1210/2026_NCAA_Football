@@ -59,6 +59,8 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
         self.assertIn(".moveButton.moveUp{color:var(--green)}", html)
         self.assertIn(".moveButton.moveDown{color:var(--red)}", html)
         self.assertIn(".moveButton.neutral{color:var(--muted)}", html)
+        self.assertIn("Number(raw.toFixed(1))", html)
+        self.assertIn("h.checkpoint_date===data.baselineDate?'Pre-W1':'Checkpoint'", html)
 
     def test_desktop_and_mobile_operator_contract(self):
         html = (ROOT / "futures.html").read_text()
@@ -76,7 +78,7 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
         self.assertIn('data-history=', html)
         self.assertIn('data-quotes=', html)
         self.assertIn("'MODEL WINS HISTORY'", html)
-        self.assertIn('label:`Pre-W1 · ${historyDate(h.checkpoint_date)}`', html)
+        self.assertIn("h.checkpoint_date===data.baselineDate?'Pre-W1':'Checkpoint'", html)
         self.assertIn('label:`W${data.currentWeek} current`', html)
         self.assertIn("x.win_direction==='Over'?'O'", html)
         self.assertNotIn("header('Model side'", html)
@@ -102,7 +104,7 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
     def test_missing_values_are_not_coerced_to_zero(self):
         html = (ROOT / "futures.html").read_text()
         self.assertIn("const hasNumber=x=>x!==null&&x!==undefined&&x!==''", html)
-        self.assertIn("const z=hasNumber(v)?Number(v)*scale:null", html)
+        self.assertIn("const raw=hasNumber(v)?Number(v)*scale:null", html)
         self.assertIn("a.filter(x=>hasNumber(x.delta_week?.[field]?.[key]))", html)
 
     def test_futures_view_carries_reliability_warnings(self):
