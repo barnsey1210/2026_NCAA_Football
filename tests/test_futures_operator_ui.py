@@ -54,6 +54,12 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
         self.assertIn('"futures.html":"futures.html"', builder)
         self.assertNotIn('"futures_v2.html":"futures.html"', builder)
 
+    def test_movement_button_colors_override_inherited_button_color(self):
+        html = (ROOT / "futures.html").read_text()
+        self.assertIn(".moveButton.moveUp{color:var(--green)}", html)
+        self.assertIn(".moveButton.moveDown{color:var(--red)}", html)
+        self.assertIn(".moveButton.neutral{color:var(--muted)}", html)
+
     def test_desktop_and_mobile_operator_contract(self):
         html = (ROOT / "futures.html").read_text()
         for label in ("Model wins", "Market", "CFP model", "Title market", "Open → now"):
