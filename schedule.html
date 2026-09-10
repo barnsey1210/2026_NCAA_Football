@@ -279,7 +279,7 @@ img[src$="west-virginia.webp"] {
     el.innerHTML=items.map(([k,v])=>`<div class="shadowMetric"><span>${k}</span><b>${v}</b></div>`).join('');
   }
   Promise.all([
-    fetch('data/site/postgame_shadow_updates.json?v=20260910T232814Z').then(r=>r.json()),
+    fetch('data/site/postgame_shadow_updates.json?v=20260910T233211Z').then(r=>r.json()),
     fetch('data/research/shadow_value_confidence/summary.json?v=20260726-value1').then(r=>r.json())
   ])
     .then(([d,value])=>{
@@ -675,7 +675,7 @@ function scheduleMap(x){
   return m
 }
 async function refreshLiveSchedule(){try{const response=await fetch('https://control.barnseywr.com/war-room/live/schedule',{cache:'no-store',credentials:'omit'});if(response.ok){const payload=await response.json();updateLiveDataStatus(payload);SH=scheduleMap(payload);draw()}}catch(_){}}
-async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260910T232814Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260910T232814Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch('data/site/schedule_live_enrichment.json?v=20260910T232814Z',{cache:'no-store'}).then(r=>r.json()).then(x=>{updateLiveDataStatus(x);return scheduleMap(x)}).catch(()=>new Map)]);const ws=[...new Set(D.games.map(r=>r.game.week))].sort((a,b)=>a-b);week=ws[0]||0;weeks.innerHTML=ws.map(w=>`<button data-week="${w}">Week ${w}</button>`).join('');weeks.querySelectorAll('button').forEach(b=>b.onclick=()=>{week=Number(b.dataset.week);draw()});draw();setInterval(refreshLiveSchedule,7500)}fbsOnly.onclick=()=>{fbsOnlyMode=true;fbsOnly.classList.add('active');allGames.classList.remove('active');draw()};
+async function init(){[D,GC,SH]=await Promise.all([fetch('data/site/matchups_view.json?v=20260910T233211Z').then(r=>r.json()),fetch('data/site/game_control_team_games_2026.json?v=20260910T233211Z').then(r=>r.json()).then(x=>new Map((x.rows||[]).map(y=>[`${y.game_id}|${y.team}`,y]))).catch(()=>new Map),fetch('data/site/schedule_live_enrichment.json?v=20260910T233211Z',{cache:'no-store'}).then(r=>r.json()).then(x=>{updateLiveDataStatus(x);return scheduleMap(x)}).catch(()=>new Map)]);const ws=[...new Set(D.games.map(r=>r.game.week))].sort((a,b)=>a-b);week=ws[0]||0;weeks.innerHTML=ws.map(w=>`<button data-week="${w}">Week ${w}</button>`).join('');weeks.querySelectorAll('button').forEach(b=>b.onclick=()=>{week=Number(b.dataset.week);draw()});draw();setInterval(refreshLiveSchedule,7500)}fbsOnly.onclick=()=>{fbsOnlyMode=true;fbsOnly.classList.add('active');allGames.classList.remove('active');draw()};
 allGames.onclick=()=>{fbsOnlyMode=false;allGames.classList.add('active');fbsOnly.classList.remove('active');draw()};
 search.oninput=draw;init().catch(e=>rows.innerHTML=`<tr><td class="empty">${esc(e.message)}</td></tr>`);
 </script>
