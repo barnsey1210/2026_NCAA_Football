@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Tuple
 
 ROOT = Path(__file__).resolve().parents[2]
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
+RESULTS = ROOT / "data/canonical/game_results_2026.json"
 
 # Project-wide fixed home-field advantage.
 FIXED_HFA = 2.6
@@ -511,6 +512,8 @@ def run_model(db: dict, sims: int, seed: int, sigma: float) -> dict:
             "win_probability_logistic_scale": WIN_PROB_LOGISTIC_SCALE,
             "fixed_home_field_advantage": FIXED_HFA,
             "resume_margin_sigma": sigma,
+            "results_source": db.get("meta", {}).get("results_source"),
+            "completed_finals_frozen": db.get("meta", {}).get("completed_finals_frozen", 0),
         },
         "projected_field": [
             {"seed": i + 1, "team": t, "automatic_qualifier": t in projected_auto}
@@ -542,6 +545,10 @@ def main():
         raise SystemExit(f"Missing canonical preseason DB: {db_path}")
 
     db = json.loads(db_path.read_text(encoding="utf-8"))
+    results = json.loads(RESULTS.read_text()) if RESULTS.exists() else {"games": []}
+    finals_applied = CONF.apply_canonical_results(db, results.get("games", []))
+    db.setdefault("meta", {})["results_source"] = "data/canonical/game_results_2026.json"
+    db["meta"]["completed_finals_frozen"] = finals_applied
     db = run_model(db, args.sims, args.seed, args.sigma)
 
     out = ROOT / args.output

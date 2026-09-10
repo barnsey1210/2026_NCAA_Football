@@ -324,6 +324,36 @@ def build_regular_games(db: Dict[str, Any]) -> List[Dict[str, Any]]:
     return games
 
 
+def apply_canonical_results(db: Dict[str, Any], results: Iterable[Dict[str, Any]]) -> int:
+    """Overlay exact canonical finals onto the static preseason schedule."""
+    by_id = {str(r.get("game_id")): r for r in results if r.get("game_id")}
+    changed = 0
+    for game in db.get("games", []):
+        result = by_id.get(str(game.get("game_id")))
+        if not result or not result.get("completed"):
+            continue
+        away_score, home_score = result.get("away_score"), result.get("home_score")
+        if away_score is None or home_score is None or fnum(away_score) == fnum(home_score):
+            continue
+        game["cfbd_completed"] = True
+        game["away_score"] = away_score
+        game["home_score"] = home_score
+        game["away_points"] = away_score
+        game["home_points"] = home_score
+        changed += 1
+    return changed
+
+
+def completed_game_winner(game: Dict[str, Any]) -> Optional[str]:
+    if not (game.get("cfbd_completed") or game.get("completed")):
+        return None
+    away_score = game.get("away_score", game.get("away_points"))
+    home_score = game.get("home_score", game.get("home_points"))
+    if away_score is None or home_score is None or fnum(away_score) == fnum(home_score):
+        return None
+    return game.get("home_team") if fnum(home_score) > fnum(away_score) else game.get("away_team")
+
+
 def expected_conf_games(conf: str, team: str) -> Optional[int]:
     if conf == "ACC":
         return 8 if team in ACC_EIGHT_GAME_TEAMS_2026 else 9
@@ -399,7 +429,10 @@ def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sig
 
         for g, p_home in game_probs:
             away, home = g.get("away_team"), g.get("home_team")
-            if rng.random() < p_home:
+            actual_winner = completed_game_winner(g)
+            if actual_winner is not None:
+                winner = actual_winner
+            elif rng.random() < p_home:
                 winner = home
             else:
                 winner = away
@@ -506,8 +539,9 @@ def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sig
     db.setdefault("meta", {})["conference_sims_rerun_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     db["meta"]["conference_sims_num_trials"] = sims
     db["meta"]["conference_sims_model"] = (
-        "Monte Carlo from canonical Game Projection Consensus margins/probabilities "
-        "for scheduled games and Site Composite rating-derived margins for hypothetical "
+        "Completed games are frozen to canonical final scores. Remaining games use "
+        "Monte Carlo from canonical Game Projection Consensus margins/probabilities, "
+        "and hypothetical "
         "conference title games; all model margins convert to win probability with "
         "logistic scale 6.5."
     )
