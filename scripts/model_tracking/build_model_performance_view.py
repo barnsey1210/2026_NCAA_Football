@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import hashlib
 import tempfile
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / "data/model_tracking/v2"
 OUT = ROOT / "data/site/model_performance_view.json"
+PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 
 SCORE_PRIORITY = {
     "settlement_v4_frozen_close": 4,
@@ -30,6 +32,109 @@ def load(name):
         for line in path.read_text().splitlines()
         if line.strip()
     ]
+
+
+def load_json(path, default):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, TypeError, ValueError):
+        return default
+
+
+def ledger_audit(names):
+    evidence = {}
+    for name in names:
+        path = STORE / name
+        if not path.exists():
+            evidence[name] = {"status": "UNAVAILABLE", "rows": None, "sha256": None}
+            continue
+        raw = path.read_bytes()
+        evidence[name] = {
+            "status": "AVAILABLE",
+            "rows": sum(bool(line.strip()) for line in raw.splitlines()),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    return {"status": "AVAILABLE" if any(v["status"] == "AVAILABLE" for v in evidence.values()) else "UNAVAILABLE", "ledgers": evidence}
+
+
+def omission_reasons(*, schedule_n, projection_n, captured_n, settled_n,
+                     market_n, period, checkpoint, model_id, market_type):
+    reasons = {}
+    historical = period in {"W0", "W1"}
+    known_uncaptured_history = historical and captured_n == 0 and (
+        model_id.startswith("standard_")
+        or model_id.startswith("dratings_")
+        or market_type == "total"
+    )
+    if known_uncaptured_history and schedule_n:
+        reasons["model_projection_not_historically_captured"] = schedule_n
+    elif historical and projection_n == 0 and schedule_n:
+        reasons["not_projection_eligible"] = schedule_n
+    elif projection_n < schedule_n:
+        reasons["model_source_missing"] = schedule_n - projection_n
+    if projection_n and captured_n < projection_n and not known_uncaptured_history:
+        reasons["market_checkpoint_missing"] = projection_n - captured_n
+    if checkpoint == "CLOSE" and historical and captured_n == 0:
+        reasons["close_capture_not_active"] = schedule_n
+    if captured_n > settled_n:
+        reasons["settlement_pending"] = captured_n - settled_n
+    if market_n < captured_n:
+        reasons["no_valid_pre_checkpoint_market"] = captured_n - market_n
+    if model_id.startswith("standard_") and projection_n < schedule_n and not historical:
+        reasons["component_incomplete"] = schedule_n - projection_n
+    return reasons
+
+
+def coverage_metrics(rows, *, checkpoint, schedule_n, projection_n,
+                     captured_rows, model_id, market_type, period):
+    wins = sum(row.get("result") == 1 for row in rows)
+    losses = sum(row.get("result") == -1 for row in rows)
+    pushes = sum(row.get("result") == 0 for row in rows)
+    ae = [float(row["absolute_error"]) for row in rows if row.get("absolute_error") is not None]
+    signed = [float(row["signed_error"]) for row in rows if row.get("signed_error") is not None]
+    squared = [float(row["squared_error"]) for row in rows if row.get("squared_error") is not None]
+    clv = [float(row["clv"]) for row in rows if row.get("clv") is not None]
+    captured_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows})
+    market_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows if row.get("market_line") is not None or row.get("market_observation_id")})
+    settled_n = len(rows)
+    primary_n = wins + losses + pushes
+    provenance_rows = captured_rows
+    market_books = sorted({str(row.get("market_book")) for row in provenance_rows if row.get("market_book")})
+    market_sources = sorted({str(row.get("market_source")) for row in provenance_rows if row.get("market_source")})
+    target_times = sorted({str(row.get("checkpoint_at")) for row in provenance_rows if row.get("checkpoint_at")})
+    close = checkpoint == "CLOSE"
+    return {
+        "games": settled_n, "record": f"{wins}-{losses}-{pushes}",
+        "wins": wins, "losses": losses, "pushes": pushes,
+        "schedule_eligible_n": schedule_n, "projection_eligible_n": projection_n,
+        "market_eligible_n": market_n, "captured_n": captured_n,
+        "settled_n": settled_n,
+        "ats_n": wins + losses if market_type == "spread" else None,
+        "ou_n": wins + losses if market_type == "total" else None,
+        "roi_n": settled_n, "mae_n": len(ae), "clv_n": None if close else len(clv),
+        "ats_or_ou_pct": wins / (wins + losses) if wins + losses else None,
+        "roi": sum(float(row.get("profit") or 0) for row in rows) / settled_n if settled_n else None,
+        "mae": sum(ae) / len(ae) if ae else None,
+        "bias": sum(signed) / len(signed) if signed else None,
+        "rmse": math.sqrt(sum(squared) / len(squared)) if squared else None,
+        "average_point_clv": None if close else (sum(clv) / len(clv) if clv else None),
+        "median_clv": None if close else median(clv),
+        "positive_clv_pct": None if close else (sum(value > 0 for value in clv) / len(clv) if clv else None),
+        "beat_close_pct": None if close else (
+            sum(bool(row.get("beat_close")) for row in rows if row.get("beat_close") is not None)
+            / sum(row.get("beat_close") is not None for row in rows)
+            if any(row.get("beat_close") is not None for row in rows) else None
+        ),
+        "omission_reasons": omission_reasons(schedule_n=schedule_n, projection_n=projection_n, captured_n=captured_n, settled_n=settled_n, market_n=market_n, period=period, checkpoint=checkpoint, model_id=model_id, market_type=market_type),
+        "provenance": {
+            "checkpoint": checkpoint,
+            "checkpoint_target_timestamps": target_times,
+            "market_timestamp_semantics": "EXACT_FROZEN_CLOSE" if close else "LATEST_VALID_AT_OR_BEFORE_TARGET",
+            "market_books": market_books,
+            "market_sources": market_sources,
+            "evidence_status": "AVAILABLE" if provenance_rows else "UNAVAILABLE",
+        },
+    }
 
 
 def atomic(payload):
@@ -158,9 +263,11 @@ def main():
     )["models"]
 
     predictions = load("prediction_observations.jsonl")
+    checkpoints = load("checkpoint_observations.jsonl")
     decisions = normalized_decisions()
     scores_all = load("scores.jsonl")
     scores = authoritative_scores(scores_all)
+    schedule_games = load_json(PROJECTION_CONTRACT, {}).get("games", [])
 
     latest = {}
 
@@ -511,114 +618,6 @@ def main():
                 decision.get("created_at"),
         })
 
-    def score_metrics(rows, checkpoint=None):
-        wins = sum(row.get("result") == 1 for row in rows)
-        losses = sum(row.get("result") == -1 for row in rows)
-        pushes = sum(row.get("result") == 0 for row in rows)
-
-        ae = [
-            float(row["absolute_error"])
-            for row in rows
-            if row.get("absolute_error") is not None
-        ]
-
-        signed = [
-            float(row["signed_error"])
-            for row in rows
-            if row.get("signed_error") is not None
-        ]
-
-        squared = [
-            float(row["squared_error"])
-            for row in rows
-            if row.get("squared_error") is not None
-        ]
-
-        clv = [
-            float(row["clv"])
-            for row in rows
-            if row.get("clv") is not None
-        ]
-
-        n = len(rows)
-
-        if checkpoint == "CLOSE":
-            avg_clv = None
-            median_point_clv = None
-            positive_clv_pct = None
-            beat_close_pct = None
-        else:
-            avg_clv = (
-                sum(clv) / len(clv)
-                if clv
-                else None
-            )
-            median_point_clv = median(clv)
-
-            positive_clv_pct = (
-                sum(value > 0 for value in clv)
-                / len(clv)
-                if clv
-                else None
-            )
-
-            beat_rows = [
-                row
-                for row in rows
-                if row.get("beat_close") is not None
-            ]
-
-            beat_close_pct = (
-                sum(
-                    bool(row.get("beat_close"))
-                    for row in beat_rows
-                ) / len(beat_rows)
-                if beat_rows
-                else None
-            )
-
-        return {
-            "games": n,
-            "record": f"{wins}-{losses}-{pushes}",
-            "wins": wins,
-            "losses": losses,
-            "pushes": pushes,
-            "ats_or_ou_pct": (
-                wins / (wins + losses)
-                if wins + losses
-                else None
-            ),
-            "roi": (
-                sum(
-                    float(row.get("profit") or 0)
-                    for row in rows
-                ) / n
-                if n
-                else None
-            ),
-            "mae": (
-                sum(ae) / len(ae)
-                if ae
-                else None
-            ),
-            "bias": (
-                sum(signed) / len(signed)
-                if signed
-                else None
-            ),
-            "rmse": (
-                math.sqrt(
-                    sum(squared) / len(squared)
-                )
-                if squared
-                else None
-            ),
-            "average_point_clv": avg_clv,
-            "median_clv": median_point_clv,
-            "positive_clv_pct": positive_clv_pct,
-            "beat_close_pct": beat_close_pct,
-        }
-
     checkpoint_order = [
         "SUNDAY_9PM_ET",
         "TUESDAY_9PM_ET",
@@ -667,6 +666,16 @@ def main():
             for spec in market_specs:
                 model_id = spec["model_id"]
                 model_version = spec["model_version"]
+                model_prediction_rows = [
+                    prediction for prediction in predictions
+                    if prediction.get("model_id") == model_id
+                    and prediction.get("model_version") == model_version
+                ]
+                formula_versions = sorted({
+                    str(prediction.get("formula_version"))
+                    for prediction in model_prediction_rows
+                    if prediction.get("formula_version")
+                })
 
                 row = {
                     "model_id": model_id,
@@ -677,6 +686,17 @@ def main():
                         .title()
                     ),
                     "role": spec.get("role"),
+                    "formula_version": formula_versions[-1] if len(formula_versions) == 1 else None,
+                    "formula_versions": formula_versions,
+                    "weights": spec.get("weights"),
+                    "authority_status": (
+                        "REFERENCE_ONLY"
+                        if model_id.startswith("sagarin_")
+                        else "PRODUCTION_AUTHORITY"
+                        if spec.get("role") == "active_standard_authority"
+                        else "TRACKED_COMPARISON"
+                    ),
+                    "historical_status": "HISTORICAL_PARTIAL" if period in {"W0", "W1"} else "PROSPECTIVE",
                     "checkpoints": {},
                 }
 
@@ -689,9 +709,21 @@ def main():
                         and score.get("checkpoint") == checkpoint
                     ]
 
-                    row["checkpoints"][checkpoint] = score_metrics(
-                        selected_rows,
-                        checkpoint=checkpoint,
+                    if period == "Season":
+                        schedule_n = len({str(game.get("game_id")) for game in schedule_games if game.get("game_id")})
+                        prediction_rows = [p for p in predictions if p.get("model_id") == model_id and p.get("model_version") == model_version and p.get("market_type") == market_type and p.get("availability_status") == "AVAILABLE"]
+                        captured_rows = [c for c in checkpoints if c.get("model_id") == model_id and c.get("model_version") == model_version and c.get("market_type") == market_type and c.get("checkpoint") == checkpoint and c.get("selection_status") == "OFFICIAL"]
+                    else:
+                        schedule_n = len({str(game.get("game_id")) for game in schedule_games if game.get("week") == week and game.get("game_id")})
+                        prediction_rows = [p for p in predictions if p.get("week") == week and p.get("model_id") == model_id and p.get("model_version") == model_version and p.get("market_type") == market_type and p.get("availability_status") == "AVAILABLE"]
+                        captured_rows = [c for c in checkpoints if c.get("week") == week and c.get("model_id") == model_id and c.get("model_version") == model_version and c.get("market_type") == market_type and c.get("checkpoint") == checkpoint and c.get("selection_status") == "OFFICIAL"]
+
+                    row["checkpoints"][checkpoint] = coverage_metrics(
+                        selected_rows, checkpoint=checkpoint,
+                        schedule_n=schedule_n,
+                        projection_n=len({p.get("canonical_game_id") for p in prediction_rows}),
+                        captured_rows=captured_rows, model_id=model_id,
+                        market_type=market_type, period=period,
                     )
 
                 model_rows.append(row)
@@ -699,7 +731,7 @@ def main():
             tracker[market_type][period] = model_rows
 
     payload = {
-        "schema_version": "model-performance-view-v5",
+        "schema_version": "model-performance-view-v6",
         "built_at": datetime.now(
             timezone.utc
         ).isoformat(),
@@ -749,6 +781,12 @@ def main():
         "total_checkpoint_tracker": tracker["total"],
         "checkpoint_order": checkpoint_order,
         "opportunities": opportunities,
+        "audit": ledger_audit([
+            "prediction_observations.jsonl", "checkpoint_observations.jsonl",
+            "market_states.jsonl", "market_confirmations.jsonl",
+            "decision_states.jsonl", "decision_confirmations.jsonl",
+            "settlements.jsonl", "scores.jsonl",
+        ]),
         "methodology": {
             "source": "immutable-model-tracking-v2",
             "prediction_contract": (

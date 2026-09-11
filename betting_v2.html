@@ -4568,6 +4568,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     const role=String(row.role||'');
 
     if(role==='active_standard_authority')return 'Active Standard';
+    if(String(row.authority_status||'')==='REFERENCE_ONLY')return 'Reference only';
     if(role==='individual')return 'Individual';
     if(role==='prospective_challenger')return 'Prospective';
     if(role==='legacy_comparison')return 'Legacy';
@@ -4596,23 +4597,36 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
   }
 
   function cell(metrics,checkpoint,row){
+    const reasonLabels={
+      model_projection_not_historically_captured:'Model projection was not historically captured',
+      model_source_missing:'Model source unavailable',
+      market_checkpoint_missing:'Checkpoint market unavailable',
+      close_capture_not_active:'Close capture was not active',
+      component_incomplete:'Required model component incomplete',
+      settlement_pending:'Settlement pending',
+      no_valid_pre_checkpoint_market:'No valid market at or before checkpoint',
+      not_projection_eligible:'Not projection eligible'
+    };
+    const reasons=Object.entries(metrics?.omission_reasons||{})
+      .filter(([,count])=>Number(count)>0)
+      .map(([key,count])=>`${reasonLabels[key]||key}: ${count}`);
+    const provenance=metrics?.provenance||{};
+    const provenanceTitle=[
+      `${row.model_id} · ${row.formula_version||row.model_version||'version unavailable'}`,
+      row.weights?`Formula weights ${JSON.stringify(row.weights)}`:null,
+      row.authority_status,
+      row.historical_status,
+      checkpoint,
+      provenance.market_timestamp_semantics,
+      ...(provenance.market_books||[]),
+      ...(provenance.market_sources||[]),
+      ...reasons
+    ].filter(Boolean).join(' · ');
     if(!metrics||!metrics.games){
-      const historicalPeriod=['W0','W1'].includes(trackerPeriod);
-      const unavailableHistorical=
-        historicalPeriod &&
-        (
-          row.role==='active_standard_authority' ||
-          row.role==='prospective_challenger' ||
-          String(row.role||'').toLowerCase().includes('shadow') ||
-          String(row.model_id||'').startsWith('dratings_')
-        );
-
-      const note=unavailableHistorical
-        ? 'Historical checkpoint unavailable'
-        : 'No official sample yet';
+      const note=reasons[0]||'No official sample yet';
 
       return `
-        <div class="trackerEmpty">—</div>
+        <div class="trackerEmpty" title="${esc(provenanceTitle)}">—</div>
         <div class="trackerCellSub">${note}</div>
       `;
     }
@@ -4620,23 +4634,27 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     const resultLabel=trackerMarket==='spread'?'ATS':'O/U';
 
     const secondary=[
-      `N ${metrics.games}`,
+      `${metrics.settled_n} / ${metrics.projection_eligible_n} projectable`,
+      `${metrics.projection_eligible_n} / ${metrics.schedule_eligible_n} schedule`,
       `ROI ${signedPct(metrics.roi)}`,
       `MAE ${num1(metrics.mae)}`
     ];
 
     if(checkpoint!=='CLOSE'){
       secondary.push(
-        `CLV ${signedNum(metrics.average_point_clv)}`
+        `CLV ${signedNum(metrics.average_point_clv)} (N ${metrics.clv_n})`
       );
+    }else{
+      secondary.push('CLV N/A');
     }
 
     return `
-      <div class="trackerCellMain">
+      <div class="trackerCellMain" title="${esc(provenanceTitle)}">
         ${esc(metrics.record)} · ${pct(metrics.ats_or_ou_pct)}
       </div>
       <div class="trackerCellSub">
         ${resultLabel} · ${secondary.join(' · ')}
+        ${metrics.schedule_eligible_n&&metrics.settled_n/metrics.schedule_eligible_n<.5?' · ⚠ Low sample':''}
       </div>
     `;
   }
@@ -4651,6 +4669,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     return [...(contract?.[trackerPeriod]||[])]
       .filter(row=>
         row.role!=='legacy_comparison' &&
+        !String(row.role||'').toLowerCase().includes('shadow') &&
         !String(row.model_id||'').includes('_legacy_')
       )
       .sort((a,b)=>{
@@ -4696,7 +4715,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     ).length;
 
     $('trackerStatus').textContent=
-      `${trackerPeriod} · ${modelsWithResults} models with results`;
+      `${trackerPeriod} · ${modelsWithResults} of ${rows.length} displayed models have graded observations`;
 
     const method=MP.methodology||{};
 
@@ -4705,7 +4724,8 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
       ${esc(method.checkpoint_contract||'one game × one model × checkpoint')}
       · <b>Closing authority:</b>
       ${esc(method.closing_authority||'canonical FROZEN_CLOSE')}
-      · Close CLV is intentionally not shown.
+      · Close CLV is intentionally unavailable.
+      ${['W0','W1'].includes(trackerPeriod)?' · Historical coverage is partial; missing rows are not backfilled.':''}
     `;
   }
 

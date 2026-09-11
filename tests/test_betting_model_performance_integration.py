@@ -72,7 +72,7 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         if not path.exists():
             self.skipTest("generated runtime view is not versioned in the source worktree")
         data = json.loads(path.read_text())
-        self.assertEqual(data["schema_version"], "model-performance-view-v5")
+        self.assertEqual(data["schema_version"], "model-performance-view-v6")
         self.assertEqual(data["methodology"]["source"], "immutable-model-tracking-v2")
         self.assertEqual(data["ranking_minimum"], 30)
 
@@ -82,6 +82,16 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         ).read_text()
         self.assertEqual(source.count("range(1, 16)"), 2)
         self.assertNotIn("range(1, 15)", source)
+
+    def test_tracker_ui_exposes_truthful_coverage_and_reference_status(self):
+        text = (ROOT / "betting_v2.html").read_text()
+        for marker in (
+            "projection_eligible_n", "schedule_eligible_n", "clv_n",
+            "CLV N/A", "Reference only", "displayed models have graded observations",
+            "Historical coverage is partial", "market_timestamp_semantics",
+        ):
+            self.assertIn(marker, text)
+        self.assertNotIn("models with results", text)
 
 
 if __name__ == "__main__":
