@@ -2,7 +2,7 @@
 """Build the standalone Futures data contract and daily market QA artifact."""
 from pathlib import Path
 from datetime import datetime, timezone
-import csv, json, os, re, sys
+import csv, json, math, os, re, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -38,6 +38,8 @@ RESULTS_PATH = DATA_ROOT / "data/canonical/game_results_2026.json"
 PRESEASON_DB_PATH = DATA_ROOT / "data/snapshots/preseason/preseason_db.json"
 RATINGS_MASTER_PATH = DATA_ROOT / "data/ratings/ratings_master_latest.csv"
 RATINGS_HISTORY_PATH = DATA_ROOT / "data/ratings/ratings_history.csv"
+PROJECTION_BLEND_PATH = DATA_ROOT / "data/projections/game_projection_blend_2026.csv"
+WIN_PROB_LOGISTIC_SCALE = 6.5
 
 QA_PATH = Path(
     os.environ.get(
@@ -135,6 +137,60 @@ def number(value):
         return float(value) if value not in (None, "") else None
     except (TypeError, ValueError):
         return None
+
+
+def build_schedule_index(schedule_games, projection_rows, fbs_teams):
+    """Store each canonical game once and return chronological team references."""
+    projections = {}
+    for row in projection_rows:
+        key = (
+            str(row.get("date") or "")[:10],
+            canonical_team(row.get("away_team")),
+            canonical_team(row.get("home_team")),
+        )
+        projections[key] = number(row.get("site_spread_home"))
+
+    schedule_index = {}
+    team_game_ids = {team: [] for team in fbs_teams}
+    for game in schedule_games or []:
+        if str(game.get("season_type") or "regular").lower() != "regular":
+            continue
+        away = canonical_team(game.get("away_team"))
+        home = canonical_team(game.get("home_team"))
+        participants = [team for team in (away, home) if team in team_game_ids]
+        if not participants:
+            continue
+        date = str(game.get("date") or game.get("start_date") or "")[:10]
+        margin_home = projections.get((date, away, home))
+        home_win_prob = (
+            1.0 / (1.0 + math.exp(-margin_home / WIN_PROB_LOGISTIC_SCALE))
+            if margin_home is not None and not game.get("completed")
+            else None
+        )
+        provider_id = game.get("cfbd_game_id") or game.get("game_id")
+        game_id = str(provider_id or f"{date}:{away}:{home}")
+        schedule_index[game_id] = {
+            "week": game.get("week"),
+            "date": date,
+            "away_team": away,
+            "home_team": home,
+            "neutral_site": bool(game.get("neutral_site")),
+            "completed": bool(game.get("completed")),
+            "away_score": number(game.get("away_points")),
+            "home_score": number(game.get("home_points")),
+            "home_win_probability": home_win_prob,
+        }
+        for team in participants:
+            team_game_ids[team].append(game_id)
+    order = lambda game_id: (
+        int(schedule_index[game_id].get("week") or 99),
+        schedule_index[game_id].get("date") or "",
+        game_id,
+    )
+    for game_ids in team_game_ids.values():
+        game_ids.sort(key=order)
+    schedule_index = dict(sorted(schedule_index.items(), key=lambda item: order(item[0])))
+    return schedule_index, team_game_ids
 
 def implied(odds):
     odds = number(odds)
@@ -607,6 +663,18 @@ def main():
         canonical_team(x.get("team")): x
         for x in season_model.get("teams", [])
     }
+    projection_rows = read_csv_rows(PROJECTION_BLEND_PATH)
+    schedule_index, team_schedule_game_ids = build_schedule_index(
+        schedule.get("games", []), projection_rows, set(teams)
+    )
+    regular_weeks = [
+        int(game.get("week"))
+        for game in schedule.get("games", [])
+        if game.get("week") is not None
+        and str(game.get("season_type") or "regular").lower() == "regular"
+        and ({canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))} & set(teams))
+    ]
+    final_regular_week = max(regular_weeks, default=15)
 
     playoff_model = {
         canonical_team(x.get("team")): x
@@ -771,6 +839,7 @@ def main():
             "team_rating_prior_week_date": rating.get("prior_date"),
             "team_rating_delta_week": rating.get("delta"),
             "team_rating_history": rating.get("history", []),
+            "schedule_game_ids": team_schedule_game_ids.get(key, []),
 
             "projected_wins": projected_wins,
             "market_win_total": total,
@@ -1134,7 +1203,7 @@ def main():
     QA_PATH.write_text(json.dumps(qa, indent=2) + "\n")
 
     payload = {
-        "schema_version": "futures-view-v4",
+        "schema_version": "futures-view-v5",
         "built_at": build_generated_at,
 
         # Backward compatibility for current UI.
@@ -1189,6 +1258,23 @@ def main():
         },
 
         "weekly_baseline": weekly_baseline,
+        "history_axis": {
+            "labels": ["W0", "Pre-W1"] + [f"W{week}" for week in range(1, final_regular_week + 1)],
+            "final_regular_week": final_regular_week,
+            "current_week": (weekly_baseline.get("prior_week") or 0) + 1,
+            "missing_value_policy": "gap_null_never_zero_or_interpolated",
+        },
+        "schedule_contract": {
+            "schema_version": "futures-schedule-index-v1",
+            "source": str(SCHEDULE_PATH.relative_to(DATA_ROOT)),
+            "projection_source": str(PROJECTION_BLEND_PATH.relative_to(DATA_ROOT)),
+            "win_probability_model": "logistic_margin_scale_6_5_v1",
+            "completed_games": "canonical_final_score_frozen",
+            "team_reference_field": "schedule_game_ids",
+            "perspective_policy": "browser_derives_team_view_from_shared_game",
+        },
+
+        "schedule_games": schedule_index,
 
         "rows": rows,
 

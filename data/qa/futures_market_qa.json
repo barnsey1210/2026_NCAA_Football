@@ -1,13 +1,13 @@
 {
   "schema_version": "futures-market-qa-v2",
-  "generated_at": "2026-09-10T21:19:31.039099+00:00",
-  "status": "warn",
+  "generated_at": "2026-09-11T03:08:33.747608+00:00",
+  "status": "pass",
   "market_domains": {
     "win_totals": {
       "source": "normalized current win totals imports",
       "status": "current",
       "observed_date": "2026-09-10",
-      "age_days": 0,
+      "age_days": 1,
       "books": [
         "BetMGM",
         "Caesars",
@@ -19,7 +19,7 @@
       "source": "normalized current conference futures import",
       "status": "current",
       "observed_date": "2026-09-10",
-      "age_days": 0,
+      "age_days": 1,
       "books": [
         "BetMGM",
         "Caesars",
@@ -30,8 +30,8 @@
     "make_cfp": {
       "source": "Action Network",
       "status": "current",
-      "pulled_at": "2026-09-10T12:08:26.384431+00:00",
-      "age_hours": 9.18,
+      "pulled_at": "2026-09-10T22:53:19.999540+00:00",
+      "age_hours": 4.25,
       "books": [
         "Caesars",
         "DraftKings",
@@ -41,8 +41,8 @@
     "national_title": {
       "source": "Action Network",
       "status": "current",
-      "pulled_at": "2026-09-10T12:08:26.384431+00:00",
-      "age_hours": 9.18,
+      "pulled_at": "2026-09-10T22:53:19.999540+00:00",
+      "age_hours": 4.25,
       "books": [
         "BetMGM",
         "Caesars",
@@ -64,10 +64,8 @@
     "playoff_futures": []
   },
   "reliability_audit": {
-    "status": "warn",
-    "generated_at": "2026-09-10T21:05:23.914164+00:00"
+    "status": null,
+    "generated_at": null
   },
-  "warnings": [
-    "win_totals: 2 team/book pairs expose multiple totals; the existing selector collapses these at brand level"
-  ]
+  "warnings": []
 }
