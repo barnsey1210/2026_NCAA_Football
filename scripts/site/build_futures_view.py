@@ -36,6 +36,8 @@ RELIABILITY_AUDIT_PATH = Path(
 SCHEDULE_PATH = DATA_ROOT / "data/canonical/cfbd_schedule_2026.json"
 RESULTS_PATH = DATA_ROOT / "data/canonical/game_results_2026.json"
 PRESEASON_DB_PATH = DATA_ROOT / "data/snapshots/preseason/preseason_db.json"
+RATINGS_MASTER_PATH = DATA_ROOT / "data/ratings/ratings_master_latest.csv"
+RATINGS_HISTORY_PATH = DATA_ROOT / "data/ratings/ratings_history.csv"
 
 QA_PATH = Path(
     os.environ.get(
@@ -472,6 +474,67 @@ def read_csv_rows(path):
         return list(csv.DictReader(handle))
 
 
+def build_weekly_team_ratings(master_path, history_path):
+    """Return authentic weekly snapshots of the official four-source composite."""
+    master = read_csv_rows(master_path)
+    current = {
+        canonical_team(row.get("team")): number(row.get("power_rating"))
+        for row in master
+        if row.get("team")
+    }
+    current_date = max(
+        (str(row.get("rating_date")) for row in master if row.get("rating_date")),
+        default=None,
+    )
+    by_date = {}
+    for row in read_csv_rows(history_path):
+        day = str(row.get("snapshot_date") or "")
+        source = str(row.get("source") or "")
+        if not day or source not in {"SP+", "FPI", "TeamRankings", "Sagarin Rating"}:
+            continue
+        rating = number(row.get("rating"))
+        team = canonical_team(row.get("team"))
+        if rating is not None and team:
+            by_date.setdefault(day, {}).setdefault(team, {})[source] = rating
+
+    composites = {}
+    for day, teams_for_day in by_date.items():
+        sagarin = [sources["Sagarin Rating"] for sources in teams_for_day.values() if "Sagarin Rating" in sources]
+        if not sagarin:
+            continue
+        sagarin_mean = sum(sagarin) / len(sagarin)
+        for team, sources in teams_for_day.items():
+            if not all(source in sources for source in ("SP+", "FPI", "TeamRankings", "Sagarin Rating")):
+                continue
+            composites.setdefault(team, {})[day] = (
+                sources["SP+"] + sources["FPI"] + sources["TeamRankings"]
+                + sources["Sagarin Rating"] - sagarin_mean
+            ) / 4.0
+
+    output = {}
+    for team, values in composites.items():
+        weekly = {}
+        for day, value in values.items():
+            parsed = datetime.fromisoformat(day).date()
+            cycle = parsed.isocalendar()[:2]
+            if cycle not in weekly or day > weekly[cycle]["date"]:
+                weekly[cycle] = {"date": day, "rating": value}
+        history = [weekly[cycle] for cycle in sorted(weekly)]
+        if current_date and team in current:
+            history = [point for point in history if point["date"] != current_date]
+            history.append({"date": current_date, "rating": current[team]})
+        prior = history[-2] if len(history) >= 2 else None
+        output[team] = {
+            "current": current.get(team),
+            "current_date": current_date,
+            "prior": prior.get("rating") if prior else None,
+            "prior_date": prior.get("date") if prior else None,
+            "delta": numeric_delta(current.get(team), prior.get("rating") if prior else None),
+            "history": history,
+        }
+    return output
+
+
 def freshness(timestamp, source, books=None, current_hours=26):
     hours = age_hours(timestamp)
     return {
@@ -538,6 +601,7 @@ def main():
     schedule = json.loads(SCHEDULE_PATH.read_text()) if SCHEDULE_PATH.exists() else {"games": []}
     results = json.loads(RESULTS_PATH.read_text()) if RESULTS_PATH.exists() else {"games": []}
     preseason_db = json.loads(PRESEASON_DB_PATH.read_text()) if PRESEASON_DB_PATH.exists() else {"games": []}
+    weekly_ratings = build_weekly_team_ratings(RATINGS_MASTER_PATH, RATINGS_HISTORY_PATH)
 
     teams = {
         canonical_team(x.get("team")): x
@@ -643,6 +707,7 @@ def main():
         playoff = playoff_model.get(key, {})
         cfp = cfp_market.get(key, {})
         national = national_market.get(key, {})
+        rating = weekly_ratings.get(key, {})
 
         projected_wins = number(team.get("avg_total_wins"))
         title_prob = number(team.get("conference_title_pct"))
@@ -700,6 +765,12 @@ def main():
             "conference": team.get("conference"),
             "rank": team.get("rank"),
             "record": records.get(key),
+            "team_rating": rating.get("current"),
+            "team_rating_date": rating.get("current_date"),
+            "team_rating_prior_week": rating.get("prior"),
+            "team_rating_prior_week_date": rating.get("prior_date"),
+            "team_rating_delta_week": rating.get("delta"),
+            "team_rating_history": rating.get("history", []),
 
             "projected_wins": projected_wins,
             "market_win_total": total,
