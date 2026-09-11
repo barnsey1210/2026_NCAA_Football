@@ -114,12 +114,13 @@
     "model_fit": {
       "artifact": "data/site/team_game_evaluations_2026.json",
       "builder": "scripts/model_fit/build_team_game_evaluations_2026.py",
-      "schema_version": "team-game-evaluations-2026-v3",
+      "schema_version": "team-game-evaluations-2026-v5",
       "owner": "TEAM_GAME_EVALUATION_PROJECTOR",
       "record_grain": "one team-game",
       "pregame_immutability": "captured or reconstructed exclusively from timestamped pre-kickoff model and market observations",
-      "postgame_benchmark_semantics": "SP+ adjusted margin is preserved directly from the public SP+ postgame source. CollegeFootballData /games complementary probabilities are preserved exactly on the 0-1 scale and separately converted through the project-owned, versioned cfbd_equivalent_margin_v1 reference mapping. The lenses are never blended.",
-      "depends_on": ["schedule", "model_performance", "current_market"]
+      "postgame_benchmark_semantics": "SP+ adjusted margin and CFBD equivalent margin remain independent source lenses. performance_margin is their equal average only when both exist. performance_vs_model is performance_margin minus the frozen Standard model margin and is the primary diagnostic/ranking value. score_vs_model remains a separate secondary scoreboard delta. display_model_fit is a compatibility alias equal to performance_vs_model and never feeds a projection.",
+      "lifecycle_contract": "For a selected decision week, evaluate all prior scheduled FBS history: unfinished expected games are PENDING/YELLOW, finalized rows mature SCORE_READY -> CFBD_READY or SP_PLUS_READY -> COMPLETE, and a missing lens becomes DEGRADED/RED only after 48 hours. Byes do not create pending state; no eligible sample is gray. Team health and statistical sample_state are separate.",
+      "depends_on": ["schedule", "model_performance", "current_market", "sp_plus_postgame", "cfbd_postgame"]
     },
     "historical_betting_analytics": {
       "artifact": "data/site/historical_betting_analytics_v2.json",

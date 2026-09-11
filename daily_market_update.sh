@@ -660,6 +660,7 @@ fi
   if stage_enabled "model_tracking_v2"; then
   stage_start "model_tracking_v2"
   run_py "scripts/model_tracking/v2/capture_current_contracts.py" "capture_current_contracts.py" --accept
+  run_py "scripts/model_tracking/v2/capture_close_checkpoints.py" "capture_close_checkpoints.py" --accept
   run_py "scripts/model_tracking/v2/settle_accepted_observations.py" "settle_accepted_observations.py" --accept
   run_py "scripts/model_fit/build_team_game_evaluations_2026.py" "build_team_game_evaluations_2026.py"
   run_py "scripts/model_tracking/build_model_performance_view.py" "build_model_performance_view.py"
