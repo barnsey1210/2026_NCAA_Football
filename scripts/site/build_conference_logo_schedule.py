@@ -378,8 +378,8 @@ h1 {{ margin:0; font-size:25px; }}
 select {{ color:var(--text); background:#101c2c; border:1px solid var(--line); border-radius:8px; padding:8px 10px; }}
 .legend {{ display:flex; gap:7px; flex-wrap:wrap; margin:10px 0 12px; font-size:10px; color:var(--muted); }}
 .legend span {{ padding:5px 7px; border:1px solid var(--line); border-radius:6px; }}
-.schedule-layout {{ width:100%; max-width:100%; display:grid; grid-template-columns:226px minmax(0,1fr) 254px; border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; }}
-.floating-table-header {{ position:fixed; top:0; left:0; z-index:75; display:none; grid-template-columns:226px minmax(0,1fr) 254px; background:#101c2c; border:1px solid var(--line); border-top:0; box-shadow:0 8px 18px rgba(0,0,0,.38); overflow:hidden; }}
+.schedule-layout {{ width:100%; max-width:100%; display:grid; grid-template-columns:190px minmax(0,1fr) 254px; border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; }}
+.floating-table-header {{ position:fixed; top:0; left:0; z-index:75; display:none; grid-template-columns:190px minmax(0,1fr) 254px; background:#101c2c; border:1px solid var(--line); border-top:0; box-shadow:0 8px 18px rgba(0,0,0,.38); overflow:hidden; }}
 .floating-table-header.visible {{ display:grid; }}
 .floating-table-header table {{ border-collapse:separate; border-spacing:0; width:100%; table-layout:fixed; }}
 .floating-table-header .floating-schedule {{ min-width:0; overflow:hidden; background:#101c2c; }}
@@ -395,8 +395,8 @@ select {{ color:var(--text); background:#101c2c; border:1px solid var(--line); b
 .fixed-pane table {{ width:100%; table-layout:fixed; }}
 table {{ border-collapse:separate; border-spacing:0; }}
 thead tr {{ height:46px; }}
-tbody tr {{ height:112px; }}
-tbody td {{ height:112px; }}
+tbody tr {{ height:84px; }}
+tbody td {{ height:84px; }}
 th,td {{ border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:4px; text-align:center; vertical-align:middle; background:var(--panel); }}
 th {{ position:sticky; top:0; z-index:8; background:#101c2c; color:var(--muted); font-size:10px; letter-spacing:.04em; text-transform:uppercase; }}
 th.sortable {{ cursor:pointer; user-select:none; }}
@@ -404,31 +404,29 @@ th.sortable:hover {{ color:var(--text); }}
 th .sort-arrow {{ margin-left:4px; opacity:.35; }}
 th.sorted .sort-arrow {{ opacity:1; }}
 .sticky-left {{ z-index:7; }}
-.team-column {{ width:168px; text-align:left; }}
-.record-column {{ width:58px; }}
+.team-column {{ width:190px; text-align:left; }}
 th.sticky-left {{ z-index:10; }}
 .team-name {{ display:flex; align-items:center; gap:8px; }}
-.team-name img {{ width:32px; height:32px; object-fit:contain; }}
-.team-logo-badge {{ width:38px; height:38px; display:grid; place-items:center; border-radius:9px; flex:0 0 38px; }}
+.team-name img {{ width:27px; height:27px; object-fit:contain; }}
+.team-logo-badge {{ width:32px; height:32px; display:grid; place-items:center; border-radius:8px; flex:0 0 32px; }}
 .team-logo-badge.light-logo {{ background:#f7f8fb; box-shadow:0 0 0 1px rgba(255,255,255,.30) inset; }}
 .team-logo-badge.light-logo img {{ width:30px; height:30px; }}
-.team-primary {{ font-size:15px; line-height:1.1; }}
-.team-meta {{ display:flex; align-items:center; gap:5px; margin-top:4px; font-size:13px; line-height:1; font-weight:800; }}
+.team-primary {{ font-size:14px; line-height:1.05; }}
+.team-meta {{ display:block; margin-top:3px; font-size:10px; line-height:1.15; font-weight:800; white-space:nowrap; }}
 .team-meta .rating-value {{ color:var(--muted); }}
 .rank-good {{ color:#49e99a; }} .rank-mid {{ color:#f4c451; }} .rank-low {{ color:#ff6877; }} .rank-unknown {{ color:var(--muted); }}
-.sos-lines {{ display:grid; gap:2px; margin-top:5px; font-size:9px; line-height:1.15; font-weight:750; }}
+.sos-lines {{ display:inline; font-size:9px; line-height:1.15; font-weight:750; }}
 .sos-easy {{ color:#49e99a; }} .sos-mid {{ color:#f4c451; }} .sos-hard {{ color:#ff6877; }} .sos-unknown {{ color:var(--muted); }}
-.record-column strong {{ font-size:15px; }}
 .week-header {{ width:84px; min-width:84px; }}
 .week-header strong,.week-header small {{ display:block; }}
 .week-header strong {{ color:var(--text); font-size:10px; }}
 .week-header small {{ margin-top:2px; color:var(--muted); font-size:8px; }}
-.schedule-cell {{ width:76px; height:102px; min-height:102px; border-radius:7px; padding:5px; display:flex; flex-direction:column; justify-content:space-between; text-decoration:none; color:var(--text); border:1px solid rgba(255,255,255,.08); cursor:pointer; }}
+.schedule-cell {{ width:76px; height:76px; min-height:76px; border-radius:7px; padding:4px; display:flex; flex-direction:column; justify-content:space-between; text-decoration:none; color:var(--text); border:1px solid rgba(255,255,255,.08); cursor:pointer; }}
 .cell-top,.projection {{ display:flex; justify-content:space-between; align-items:center; gap:4px; }}
 .location {{ font-size:10px; font-weight:800; }}
 .rank-badge {{ font-size:9px; padding:1px 4px; border-radius:5px; background:#e6bd50; color:#111; font-weight:800; }}
-.logo-wrap {{ height:30px; display:grid; place-items:center; }}
-.logo-wrap img {{ width:28px; height:28px; object-fit:contain; }}
+.logo-wrap {{ height:23px; display:grid; place-items:center; }}
+.logo-wrap img {{ width:23px; height:23px; object-fit:contain; }}
 .logo-wrap.light-logo {{ width:36px; height:36px; margin:0 auto; border-radius:8px; background:#f7f8fb; box-shadow:0 0 0 1px rgba(255,255,255,.28) inset; }}
 .logo-wrap.light-logo img {{ width:27px; height:27px; }}
 .opponent-name {{ font-size:8px; line-height:1.05; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
@@ -479,8 +477,8 @@ td.current-week-cell .schedule-cell {{ box-shadow:0 0 0 2px #fff inset; }}
 .popover a {{ color:#83b7ff; font-size:11px; font-weight:700; text-decoration:none; }}
 .close-popover {{ border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:17px; padding:0; }}
 .empty {{ padding:32px; color:var(--muted); text-align:center; }}
-@media (max-width:1050px) {{ .schedule-layout{{grid-template-columns:202px minmax(0,1fr) 226px}} .team-column{{width:148px}} .record-column{{width:54px}} .proj-finish{{width:84px}} .make-title{{width:68px}} .win-title{{width:74px}} .page{{padding:12px}} }}
-@media (max-width:700px) {{ body{{padding-bottom:48px}} .range-key{{justify-content:flex-start;gap:13px;padding:9px 10px;font-size:10px}} .page{{padding:10px}} .header{{display:block}} .controls{{margin-top:10px;justify-content:flex-start}} .schedule-layout{{grid-template-columns:176px minmax(0,1fr) 210px}} .team-column{{width:126px}} .record-column{{width:50px}} .team-primary{{font-size:13px}} .team-meta{{font-size:11px}} .sos-lines{{font-size:8px}} .proj-finish{{width:76px}} .make-title{{width:62px}} .win-title{{width:72px}} }}
+@media (max-width:1050px) {{ .schedule-layout{{grid-template-columns:180px minmax(0,1fr) 226px}} .team-column{{width:180px}} .proj-finish{{width:84px}} .make-title{{width:68px}} .win-title{{width:74px}} .page{{padding:12px}} }}
+@media (max-width:700px) {{ body{{padding-bottom:48px}} .range-key{{justify-content:flex-start;gap:13px;padding:9px 10px;font-size:10px}} .page{{padding:10px}} .header{{display:block}} .controls{{margin-top:10px;justify-content:flex-start}} .schedule-layout{{grid-template-columns:166px minmax(0,1fr) 210px}} .team-column{{width:166px}} .team-primary{{font-size:12px}} .team-meta{{font-size:9px}} .sos-lines{{font-size:8px}} .proj-finish{{width:76px}} .make-title{{width:62px}} .win-title{{width:72px}} }}
 
 .top {{ width:100%; display:flex; align-items:center; gap:16px; padding:12px 18px; border-bottom:1px solid var(--line); background:#071326; overflow-x:auto; }}
 .top .brand {{ font-size:20px; font-weight:950; white-space:nowrap; }}
@@ -666,7 +664,8 @@ function rowParts(row,currentWeek){{
  const futuresHref='futures.html';
  const bookMark=bookBadge(row.title_book,row.title_book_logo); const titleMarket=row.title_price!=null?`<span class="book-line"><span class="market-price">${{american(row.title_price)}}</span>${{bookMark}}</span><span class="market-edge ${{edgeClass(row.title_edge)}}">${{row.title_edge==null?'':`${{Number(row.title_edge)>=0?'+':''}}${{Math.round(Number(row.title_edge)*100)}}% edge`}}</span>`:'<span class="market-price">No market</span>';
  const confSosClass=sosClass(row.conf_sos_rank,row.conference_size),remSosClass=sosClass(row.remaining_sos_rank,row.conference_size);
- const left=`<tr><td class="team-column"><div class="team-name"><span class="team-logo-badge ${{row.dark_logo?'light-logo':''}}"><img src="logos/${{esc(row.slug)}}.png" alt="${{esc(row.team)}} logo"></span><div><strong class="team-primary">${{esc(row.team)}}</strong><span class="team-meta">${{Number(row.current_wins||0)}}-${{Number(row.current_losses||0)}} overall · <b class="${{esc(row.rank_tone)}}">#${{esc(row.rank)}}</b><span class="rating-value"> | ${{num(row.rating)}}</span></span><span class="sos-lines"><span class="${{confSosClass}}">Conf SOS: ${{sosText(row.conf_sos_rank,row.conference_size)}}</span><span class="${{remSosClass}}">Rem SOS: ${{sosText(row.remaining_sos_rank,row.conference_size)}}</span></span></div></div></td><td class="record-column"><strong>${{confRecord}}</strong></td></tr>`;
+ const overallRecord=`${{Number(row.current_wins||0)}}-${{Number(row.current_losses||0)}}`;
+ const left=`<tr><td class="team-column"><div class="team-name"><span class="team-logo-badge ${{row.dark_logo?'light-logo':''}}"><img src="logos/${{esc(row.slug)}}.png" alt="${{esc(row.team)}} logo"></span><div><strong class="team-primary">${{esc(row.team)}} <b class="${{esc(row.rank_tone)}}">#${{esc(row.rank)}}</b><span class="rating-value"> | ${{num(row.rating)}}</span></strong><span class="team-meta" title="Overall record ${{overallRecord}}">${{esc(activeConference)}} ${{confRecord}} · <span class="sos-lines"><span class="${{confSosClass}}">Conf SOS #${{esc(row.conf_sos_rank)}}</span> · <span class="${{remSosClass}}">Rem #${{esc(row.remaining_sos_rank)}}</span></span></span></div></div></td></tr>`;
  const schedule=`<tr>${{scheduleCells}}</tr>`;
  const right=`<tr><td class="proj-finish outcome"><span class="finish-rank">#${{esc(row.projected_finish)}}</span><span class="record">${{num(row.projected_conf_wins)}}–${{num(row.projected_conf_losses)}}</span></td><td class="make-title outcome"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.make_title_game_pct)}}</span><span class="futures-label">View futures</span></a></td><td class="win-title outcome title-prob"><a class="outcome-link" href="${{futuresHref}}"><span>${{pct(row.title_pct)}}</span>${{titleMarket}}</a></td></tr>`;
  return {{left,schedule,right}};
@@ -718,14 +717,14 @@ function updateFloatingHeader(){{
  if(visible){{
   floatingTableHeader.style.left=`${{rect.left}}px`;
   floatingTableHeader.style.width=`${{rect.width}}px`;
-  floatingTableHeader.style.gridTemplateColumns=`226px minmax(0,1fr) 254px`;
+  floatingTableHeader.style.gridTemplateColumns=getComputedStyle(scheduleLayout).gridTemplateColumns;
   syncFloatingHeaderScroll();
  }}
 }}
 function render(){{
  const c=conf();const currentWeek=currentWeekFor(c);document.getElementById('pageTitle').textContent=`${{c.conference}} Logo Schedule`;
  const currentMeta=c.weeks.find(w=>Number(w.week)===Number(currentWeek));document.getElementById('weekStatus').textContent=currentMeta?`Week ${{currentWeek}} · ${{dlabel(currentMeta.date)}}`:'';
- leftHeaderRow.innerHTML=sortHeader('Team','team','team-column')+sortHeader('Conf Record','conf_record','record-column');
+ leftHeaderRow.innerHTML=sortHeader('Team · conference record','team','team-column');
  scheduleHeaderRow.innerHTML=c.weeks.map(w=>`<th class="week-header ${{Number(w.week)===Number(currentWeek)?'current-week-header':''}}"><strong>${{dlabel(w.date)}}</strong><small>W${{w.week}}</small></th>`).join('');
  rightHeaderRow.innerHTML=sortHeader('Proj Finish / Record','projected_finish','proj-finish')+sortHeader('Make Title','make_title','make-title')+sortHeader('Win Title','win_title','win-title');
  const parts=[...c.rows].sort(compare).map(row=>rowParts(row,currentWeek));
