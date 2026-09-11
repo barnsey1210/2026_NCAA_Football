@@ -35,6 +35,14 @@ CORE_COMPOSITE = {
     "Sagarin Predictor": "sagarin",
 }
 
+# The Ratings view still reads the provider's Predictor rows for raw display
+# context, but the official composite consumes the normalized main Rating from
+# ratings_master_latest.csv. Its source-health metadata must therefore come
+# from the canonical Sagarin Rating status row.
+COMPOSITE_METADATA_SOURCE = {
+    "Sagarin Predictor": "Sagarin Rating",
+}
+
 REFERENCE_ONLY = {
     "Brad Powers": "bradpowers",
     "Donchess Overall": "dratings",
@@ -123,7 +131,8 @@ for label, key in DISPLAY_SOURCES.items():
         if r.get("source_updated_at")
     })
 
-    status = source_status.get(label, {})
+    metadata_label = COMPOSITE_METADATA_SOURCE.get(label, label)
+    status = source_status.get(metadata_label, {})
 
     tracked_pull = status.get("latest_pull_at") or None
     tracked_provider_update = status.get("source_updated_at") or None
@@ -137,7 +146,7 @@ for label, key in DISPLAY_SOURCES.items():
         tracked_changed = changed
 
     source_meta[key] = {
-        "label": label,
+        "label": metadata_label,
         "latest_snapshot": available[-1] if available else None,
         "teams_available": (
             len(vectors.get((available[-1], label), {}))
@@ -600,11 +609,11 @@ payload = {
         "label": "Site Composite Rating",
         "method": "SP+ / FPI / TeamRankings / Sagarin equal weight; gracefully renormalized across currently available canonical sources",
         "eligible_sources": {
-            key: label
+            key: COMPOSITE_METADATA_SOURCE.get(label, label)
             for label, key in CORE_COMPOSITE.items()
         },
         "active_sources": {
-            key: label
+            key: COMPOSITE_METADATA_SOURCE.get(label, label)
             for label, key in active_composite.items()
         },
         "reference_only_sources": {
