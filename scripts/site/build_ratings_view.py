@@ -3,9 +3,12 @@
 
 import csv
 import json
+import statistics
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
+
+from ratings_l2 import absolute_movement_ranks, two_cycle_ago_baseline
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -135,7 +138,12 @@ for label, key in DISPLAY_SOURCES.items():
 
     source_meta[key] = {
         "label": label,
-        "latest_snapshot": latest,
+        "latest_snapshot": available[-1] if available else None,
+        "teams_available": (
+            len(vectors.get((available[-1], label), {}))
+            if available
+            else 0
+        ),
         "latest_pull": tracked_pull or (pulls[-1] if pulls else None),
         "provider_updated_at": tracked_provider_update or (
             provider[-1] if provider else None
@@ -152,6 +160,13 @@ for label, key in DISPLAY_SOURCES.items():
         "composite_eligible": label in CORE_COMPOSITE,
         "reference_only": label in REFERENCE_ONLY,
         "display_status": status.get("display_status") or None,
+        "health_state": (
+            "CURRENT"
+            if available and available[-1] == latest
+            else "DEGRADED"
+            if available
+            else "UNAVAILABLE"
+        ),
         "production_weight_pct": (
             (100.0 / len(active_composite))
             if label in active_composite and active_composite
@@ -167,38 +182,10 @@ for label, key in DISPLAY_SOURCES.items():
         ),
     }
 
-# Build equal-weight historical composites for preseason and recent movement.
-history = defaultdict(dict)
-
-for r in csv.DictReader(ratings_history_path.open()):
-    if (
-        r.get("season") != "2026"
-        or r.get("source") not in active_composite
-        or not r.get("snapshot_date")
-    ):
-        continue
-
-    try:
-        history[(r["team"], r["snapshot_date"])][active_composite[r["source"]]] = float(r["rating"])
-    except (ValueError, TypeError):
-        pass
-
-team_series = defaultdict(list)
-
-for (team, snapshot_date), sources in history.items():
-    if len(sources) >= 3:
-        team_series[team].append((
-            snapshot_date,
-            sum(sources.values()) / len(sources),
-        ))
-
-for series in team_series.values():
-    series.sort()
-
-
-def at_or_before(series, target):
-    eligible = [x for x in series if x[0] <= target]
-    return eligible[-1][1] if eligible else None
+# L2 compares like with like: current canonical four-source composite versus
+# the latest complete accepted snapshot from two ISO weekly cycles ago.
+l2_baseline = two_cycle_ago_baseline(ratings_history_path, latest)
+l2_ratings = l2_baseline["ratings"] if l2_baseline else {}
 
 
 # Load the current four-source ratings.
@@ -244,6 +231,27 @@ for team, row in master_by_team.items():
         "raw_rating": float(row["sagarin_raw"]) if row.get("sagarin_raw") not in (None, "", "nan") else None,
         "pulled_at": existing_sagarin.get("pulled_at"),
     }
+
+
+# Load Brad Powers published Start / Now / Diff provenance.
+bradpowers_detail = {}
+bradpowers_path = ROOT / "data/ratings/bradpowers_2026_latest.csv"
+
+if bradpowers_path.exists():
+    for row in csv.DictReader(bradpowers_path.open()):
+        team = row.get("team")
+        if not team:
+            continue
+        try:
+            bradpowers_detail[team] = {
+                "start": float(row["bradpowers_start"]),
+                "raw_rating": float(row["bradpowers_raw"]),
+                "diff": float(row["bradpowers_diff"]),
+                "normalized_rating": float(row["bradpowers"]),
+                "rank": int(float(row["rank"])),
+            }
+        except (ValueError, TypeError, KeyError):
+            continue
 
 
 # Load the latest market-derived ratings.
@@ -316,9 +324,26 @@ for team, sources in by_team.items():
         "team": team,
         "rating": current,
         "sources": sources,
+        "bradpowers_detail": bradpowers_detail.get(team),
         "composite_sources": composite_sources,
         "source_count": len(composite_sources),
-        "variance": max(values) - min(values),
+        # Ratings-page disagreement metric.
+        #
+        # Use population standard deviation because the four canonical systems
+        # are the complete set being compared, not a sample of a larger
+        # population. Keep the high/low range separately for diagnostics and
+        # tooltips.
+        "variance": statistics.pstdev(values),
+        "variance_stddev": statistics.pstdev(values),
+        "variance_range": max(values) - min(values),
+        "variance_mean": statistics.mean(values),
+        "variance_status": (
+            "RED"
+            if statistics.pstdev(values) >= 3.0
+            else "YELLOW"
+            if statistics.pstdev(values) >= 2.0
+            else "GREEN"
+        ),
         "high_source": max(
             composite_sources,
             key=lambda k: composite_sources[k]["rating"],
@@ -342,8 +367,6 @@ for team, sources in by_team.items():
 matched_for_scale = [x for x in out if x.get("market")]
 
 if len(matched_for_scale) >= 2:
-    import statistics
-
     composite_values = [x["rating"] for x in matched_for_scale]
     raw_market_values = [x["market"]["rating"] for x in matched_for_scale]
 
@@ -385,6 +408,7 @@ for rank, item in enumerate(composite_ranked, 1):
 # Current and Preseason remain identical. On and after 2026-08-29, the final
 # saved baseline becomes immutable unless deliberately replaced by an operator.
 baseline_path = ROOT / "data/ratings/ratings_preseason_2026.csv"
+preseason_provenance_path = ROOT / "data/ratings/ratings_preseason_2026_provenance.csv"
 preseason_freeze_date = date(2026, 8, 29)
 preseason_mode = date.today() < preseason_freeze_date
 
@@ -438,6 +462,27 @@ else:
     )
 
 
+preseason_provenance = {}
+if preseason_provenance_path.exists():
+    for row in csv.DictReader(preseason_provenance_path.open()):
+        try:
+            preseason_provenance[row["team"]] = {
+                "baseline_as_of": row.get("baseline_as_of"),
+                "spplus": float(row["spplus"]),
+                "spplus_snapshot_date": row.get("spplus_snapshot_date"),
+                "fpi": float(row["fpi"]),
+                "fpi_snapshot_date": row.get("fpi_snapshot_date"),
+                "teamrankings": float(row["teamrankings"]),
+                "teamrankings_snapshot_date": row.get("teamrankings_snapshot_date"),
+                "sagarin": float(row["sagarin"]),
+                "sagarin_raw": float(row["sagarin_raw"]),
+                "sagarin_snapshot_date": row.get("sagarin_snapshot_date"),
+                "formula": row.get("formula"),
+            }
+        except (ValueError, TypeError, KeyError):
+            continue
+
+
 for item in out:
     baseline_item = baseline.get(
         item["team"],
@@ -447,14 +492,9 @@ for item in out:
     item["preseason_rating"] = baseline_item["rating"]
     item["preseason_rank"] = baseline_item["rank"]
     item["preseason_delta"] = item["rating"] - baseline_item["rating"]
+    item["preseason_provenance"] = preseason_provenance.get(item["team"])
 
-    series = team_series.get(item["team"], [])
-    current_date = date.fromisoformat(latest)
-
-    l2 = at_or_before(
-        series,
-        (current_date - timedelta(days=14)).isoformat(),
-    )
+    l2 = l2_ratings.get(item["team"])
 
     item["l2_change"] = (
         0.0
@@ -463,6 +503,13 @@ for item in out:
         if l2 is not None
         else None
     )
+
+
+l2_movement_ranks = absolute_movement_ranks({
+    item["team"]: item["l2_change"] for item in out
+})
+for item in out:
+    item["l2_movement_rank"] = l2_movement_ranks.get(item["team"])
 
 
 # Build market summary metadata.
@@ -490,6 +537,19 @@ market_meta = {
     "ratings_page_missing": ratings_page_missing,
     "independent_ready": readiness.get("independent_market_ready", 0),
     "context_only": readiness.get("market_context_only", 0),
+    # Market health includes structural/sample quality, not just snapshot
+    # freshness. Early-season market ratings can be freshly rebuilt while
+    # still being too thin or disconnected for fully independent use.
+    "health_state": (
+        "UNAVAILABLE"
+        if not market_rows or ratings_page_matched == 0
+        else "CURRENT"
+        if (
+            ratings_page_matched >= 130
+            and readiness.get("market_context_only", 0) == 0
+        )
+        else "DEGRADED"
+    ),
     "model_version": market_rows[0].get("model_version") if market_rows else None,
     "lookback_weeks": (
         int(float(market_rows[0]["lookback_weeks"]))
@@ -522,6 +582,20 @@ active_weight = (
 
 payload = {
     "snapshot_date": latest,
+    "l2_definition": {
+        "method": "current canonical four-source composite minus the latest complete accepted canonical snapshot from two ISO weekly cycles ago",
+        "required_sources": ["SP+", "FPI", "TeamRankings", "normalized Sagarin"],
+        "baseline_snapshot_date": (
+            l2_baseline["snapshot_date"] if l2_baseline else None
+        ),
+        "baseline_cycle": (
+            f"{l2_baseline['cycle'][0]}-W{l2_baseline['cycle'][1]:02d}"
+            if l2_baseline
+            else None
+        ),
+        "movement_rank_method": "ordinal rank by absolute L2 movement; team name is the deterministic tie-breaker",
+        "movement_rank_bands": [[1, 28], [29, 55], [56, 83], [84, 110], [111, 138]],
+    },
     "composite_model": {
         "label": "Site Composite Rating",
         "method": "SP+ / FPI / TeamRankings / Sagarin equal weight; gracefully renormalized across currently available canonical sources",
@@ -558,6 +632,13 @@ print("market ratings missing:", sum(1 for x in out if not x["market"]))
 
 if len(out) < 130:
     raise SystemExit("ratings view coverage below 130")
+
+movement_ranks = [
+    item["l2_movement_rank"] for item in out
+    if item["l2_movement_rank"] is not None
+]
+if movement_ranks and sorted(movement_ranks) != list(range(1, len(movement_ranks) + 1)):
+    raise SystemExit("L2 movement ranks must be unique and contiguous")
 
 # Basic invariants.
 for item in out:
