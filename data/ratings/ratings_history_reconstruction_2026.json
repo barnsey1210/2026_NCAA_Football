@@ -1,0 +1,207 @@
+{
+  "schema_version": "ratings-history-reconstruction-v1",
+  "generated_at": "2026-09-11T16:52:14.711245+00:00",
+  "season": 2026,
+  "baseline": {
+    "git_commit": "e704691b705553f4a6fe475b244e801031d0e723",
+    "relationship_note": "History content unchanged from verified 3f9292d baseline; e704691 adds Week 2 evidence only.",
+    "rows": 69197,
+    "sha256_before_union": "5b9920f0ad0034e53b690c3b8692f0fc49112ffbaa923acc9940ff9c84e50b41"
+  },
+  "reconstruction_input": {
+    "artifact": "/Users/jameslindesmith/NCAAF_MAIN_REPO/data/ratings/ratings_history.csv",
+    "rows_used": 168888,
+    "relationship": "verified subset of AUTO runtime ledger"
+  },
+  "output": {
+    "rows": 169990,
+    "rows_restored": 1102,
+    "rows_removed": 0,
+    "uniqueness_key": [
+      "snapshot_date",
+      "season",
+      "source",
+      "team",
+      "pulled_at"
+    ]
+  },
+  "sources": [
+    {
+      "source": "",
+      "date_range": [],
+      "rows": 143,
+      "pull_count": 0,
+      "coverage_min": 143,
+      "coverage_max": 143,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "Brad Powers",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 21986,
+      "pull_count": 161,
+      "coverage_min": 38,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "Donchess Overall",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 13261,
+      "pull_count": 97,
+      "coverage_min": 136,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "FPI",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 21962,
+      "pull_count": 163,
+      "coverage_min": 2,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "KFord",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 21760,
+      "pull_count": 163,
+      "coverage_min": 14,
+      "coverage_max": 136,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "Massey Power",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 13524,
+      "pull_count": 99,
+      "coverage_min": 29,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "SP+",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 22080,
+      "pull_count": 161,
+      "coverage_min": 45,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "Sagarin Predictor",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 21942,
+      "pull_count": 163,
+      "coverage_min": 1,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "Sagarin Rating",
+      "date_range": [
+        "2026-08-17",
+        "2026-09-10"
+      ],
+      "rows": 11316,
+      "pull_count": 83,
+      "coverage_min": 1,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    },
+    {
+      "source": "TeamRankings",
+      "date_range": [
+        "2026-05-12",
+        "2026-09-10"
+      ],
+      "rows": 22016,
+      "pull_count": 162,
+      "coverage_min": 9,
+      "coverage_max": 138,
+      "provenance_quality": "runtime-ledger attested; raw artifact availability varies by source",
+      "validation_status": "pass"
+    }
+  ],
+  "exceptions": [
+    {
+      "type": "partial_panel",
+      "source": "FPI",
+      "snapshot_date": "2026-07-11",
+      "pulled_at": "2026-07-12T01:26:29Z",
+      "teams": 2
+    },
+    {
+      "type": "partial_panel",
+      "source": "FPI",
+      "snapshot_date": "2026-07-21",
+      "pulled_at": "2026-07-21T17:19:22Z",
+      "teams": 2
+    },
+    {
+      "type": "partial_panel",
+      "source": "FPI",
+      "snapshot_date": "2026-08-10",
+      "pulled_at": "2026-08-10T19:37:34Z",
+      "teams": 2
+    },
+    {
+      "type": "legacy_rows",
+      "snapshot_date": "2026-04-29",
+      "rows": 143,
+      "note": "Preserved legacy wide-format rows; excluded from canonical panel/L2 validation."
+    }
+  ],
+  "l2_validation": {
+    "complete_cycles": [
+      {
+        "snapshot_date": "2026-08-17",
+        "teams": 136
+      },
+      {
+        "snapshot_date": "2026-08-30",
+        "teams": 138
+      },
+      {
+        "snapshot_date": "2026-09-06",
+        "teams": 138
+      },
+      {
+        "snapshot_date": "2026-09-10",
+        "teams": 138
+      }
+    ],
+    "status": "pass"
+  }
+}
