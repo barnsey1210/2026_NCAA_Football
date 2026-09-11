@@ -32,6 +32,8 @@ from typing import Any, Dict, List, Tuple
 ROOT = Path(__file__).resolve().parents[2]
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 RESULTS = ROOT / "data/canonical/game_results_2026.json"
+RATINGS = ROOT / "data/ratings/ratings_master_latest.csv"
+PROJECTION_BLEND = ROOT / "data/projections/game_projection_blend_2026.csv"
 
 # Project-wide fixed home-field advantage.
 FIXED_HFA = 2.6
@@ -547,8 +549,10 @@ def main():
     db = json.loads(db_path.read_text(encoding="utf-8"))
     results = json.loads(RESULTS.read_text()) if RESULTS.exists() else {"games": []}
     finals_applied = CONF.apply_canonical_results(db, results.get("games", []))
+    current_inputs = CONF.apply_current_simulation_inputs(db, RATINGS, PROJECTION_BLEND)
     db.setdefault("meta", {})["results_source"] = "data/canonical/game_results_2026.json"
     db["meta"]["completed_finals_frozen"] = finals_applied
+    db["meta"]["current_simulation_inputs"] = current_inputs
     db = run_model(db, args.sims, args.seed, args.sigma)
 
     out = ROOT / args.output

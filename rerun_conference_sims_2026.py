@@ -127,6 +127,88 @@ def american_from_prob(p: float) -> Optional[int]:
 WIN_PROB_LOGISTIC_SCALE = 6.5
 WIN_PROB_MODEL_VERSION = "logistic_margin_scale_6_5_v1"
 
+
+def apply_current_simulation_inputs(
+    db: Dict[str, Any],
+    ratings_path: Path,
+    projection_blend_path: Path,
+) -> Dict[str, Any]:
+    """Overlay current accepted ratings and matchup projections in memory.
+
+    ``preseason_db.json`` owns the immutable schedule, but its embedded team
+    ratings and game probabilities are not an acceptable current-season input.
+    Simulations load the two canonical rolling artifacts directly so a later
+    schedule refresh or deployment cannot silently restore preseason strength.
+    """
+    if not ratings_path.exists():
+        raise SystemExit(f"Missing current ratings input: {ratings_path}")
+    if not projection_blend_path.exists():
+        raise SystemExit(f"Missing current projection blend: {projection_blend_path}")
+
+    with ratings_path.open(encoding="utf-8") as handle:
+        rating_rows = list(csv.DictReader(handle))
+    current_ratings: Dict[str, float] = {}
+    rating_dates = set()
+    for row in rating_rows:
+        team = str(row.get("team") or "").strip()
+        rating = fnum(row.get("power_rating"), float("nan"))
+        if team and math.isfinite(rating):
+            current_ratings[team] = rating
+        if row.get("rating_date"):
+            rating_dates.add(str(row["rating_date"]))
+
+    teams = db.get("teams", [])
+    missing_ratings = sorted(
+        str(team.get("team")) for team in teams
+        if team.get("team") not in current_ratings
+    )
+    if missing_ratings:
+        raise SystemExit(
+            "Current ratings missing simulation teams: " + ", ".join(missing_ratings[:20])
+        )
+    for team in teams:
+        team["combo"] = current_ratings[team["team"]]
+
+    with projection_blend_path.open(encoding="utf-8") as handle:
+        blend_rows = list(csv.DictReader(handle))
+    by_id = {str(row.get("game_id") or ""): row for row in blend_rows}
+    valid_teams = {team.get("team") for team in teams}
+    projected = 0
+    missing_remaining = []
+    for game in db.get("games", []):
+        if game.get("away_team") not in valid_teams or game.get("home_team") not in valid_teams:
+            continue
+        if to_int(game.get("week"), 0) == 14 or completed_game_winner(game) is not None:
+            continue
+        row = by_id.get(str(game.get("game_id") or ""))
+        margin = fnum(row.get("blend_spread_home"), float("nan")) if row else float("nan")
+        if not math.isfinite(margin):
+            missing_remaining.append(str(game.get("game_id") or "unknown"))
+            continue
+        game["projected_margin_home"] = margin
+        game["win_prob_home"] = canonical_home_prob_from_margin(margin)
+        game["projection_spread_model_version"] = "spread_consensus_equal_available_v1"
+        game["projection_spread_sources"] = str(row.get("spread_sources_used") or "")
+        projected += 1
+
+    if missing_remaining:
+        raise SystemExit(
+            "Current projection blend missing remaining FBS games: "
+            + ", ".join(missing_remaining[:20])
+        )
+
+    meta = db.setdefault("meta", {})
+    meta["simulation_ratings_source"] = str(ratings_path)
+    meta["simulation_rating_date"] = max(rating_dates) if rating_dates else None
+    meta["simulation_projection_source"] = str(projection_blend_path)
+    meta["simulation_current_ratings_applied"] = len(teams)
+    meta["simulation_remaining_projections_applied"] = projected
+    return {
+        "rating_date": meta["simulation_rating_date"],
+        "ratings_applied": len(teams),
+        "remaining_projections_applied": projected,
+    }
+
 def canonical_home_prob_from_margin(margin_home: float) -> float:
     """Canonical 2026 Game Projection Consensus win-probability conversion."""
     p = 1.0 / (1.0 + math.exp(-float(margin_home) / WIN_PROB_LOGISTIC_SCALE))

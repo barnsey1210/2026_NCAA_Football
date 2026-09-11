@@ -1,6 +1,8 @@
 from copy import deepcopy
 import importlib.util
 from pathlib import Path
+import csv
+import tempfile
 import unittest
 
 
@@ -23,6 +25,23 @@ def fixture():
 
 
 class CompletedGameFreezingTests(unittest.TestCase):
+    def apply_inputs(self, db, ratings):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            ratings_path = base / "ratings.csv"
+            blend_path = base / "blend.csv"
+            with ratings_path.open("w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["rating_date", "team", "power_rating"])
+                writer.writeheader()
+                for team, rating in ratings.items():
+                    writer.writerow({"rating_date": "2026-09-10", "team": team, "power_rating": rating})
+            with blend_path.open("w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["game_id", "blend_spread_home", "spread_sources_used"])
+                writer.writeheader()
+                writer.writerow({"game_id": "g1", "blend_spread_home": -30, "spread_sources_used": "SP+,FPI"})
+                writer.writerow({"game_id": "g2", "blend_spread_home": 2, "spread_sources_used": "SP+,FPI"})
+            return SIM.apply_current_simulation_inputs(db, ratings_path, blend_path)
+
     def test_canonical_final_is_frozen_in_every_trial(self):
         db = fixture()
         applied = SIM.apply_canonical_results(db, [{"game_id": "g1", "completed": True, "away_score": 7, "home_score": 10}])
@@ -42,6 +61,39 @@ class CompletedGameFreezingTests(unittest.TestCase):
             winners.append(SIM.completed_game_winner(db["games"][0]))
             SIM.rerun_sims(db, sims=5, seed=seed, sigma=14, title_sigma=14)
         self.assertEqual(winners, ["A", "A", "A"])
+
+    def test_current_inputs_preserve_final_and_replace_remaining_probability(self):
+        db = fixture()
+        SIM.apply_canonical_results(db, [{"game_id": "g1", "completed": True, "away_score": 7, "home_score": 10}])
+        before = SIM.game_home_prob(db["games"][1], {x["team"]: x for x in db["teams"]}, 14)
+        meta = self.apply_inputs(db, {"A": -10, "B": 12})
+        after = SIM.game_home_prob(db["games"][1], {x["team"]: x for x in db["teams"]}, 14)
+        self.assertEqual(SIM.completed_game_winner(db["games"][0]), "A")
+        self.assertNotEqual(before, after)
+        self.assertAlmostEqual(after, SIM.canonical_home_prob_from_margin(2))
+        self.assertEqual([x["combo"] for x in db["teams"]], [-10, 12])
+        self.assertEqual(meta["remaining_projections_applied"], 1)
+
+    def test_same_current_inputs_produce_deterministic_simulation(self):
+        outputs = []
+        for _ in range(2):
+            db = fixture()
+            SIM.apply_canonical_results(db, [{"game_id": "g1", "completed": True, "away_score": 7, "home_score": 10}])
+            self.apply_inputs(db, {"A": -10, "B": 12})
+            out = SIM.rerun_sims(db, sims=100, seed=44, sigma=14, title_sigma=14)
+            outputs.append([(x["team"], x["avg_total_wins"], x["conference_title_pct"]) for x in out["teams"]])
+        self.assertEqual(outputs[0], outputs[1])
+
+    def test_requested_teams_match_current_canonical_rating_input(self):
+        import json
+        ratings = {}
+        with (ROOT / "data/ratings/ratings_master_latest.csv").open(newline="") as handle:
+            for row in csv.DictReader(handle):
+                ratings[row["team"]] = float(row["power_rating"])
+        view = json.loads((ROOT / "data/site/ratings_view.json").read_text())
+        displayed = {row["team"]: row["rating"] for row in view["teams"]}
+        for team in ("Massachusetts", "Western Kentucky", "Hawaii"):
+            self.assertAlmostEqual(ratings[team], displayed[team], places=9)
 
 
 if __name__ == "__main__":
