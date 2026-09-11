@@ -6,3 +6,5 @@ def test_preview_does_not_write(tmp_path):
  p=tmp_path/'x.jsonl';r=M.append_unique(p,[{'id':'a'}],'id',False);assert r['would_append']==1 and not p.exists()
 def test_accept_is_idempotent(tmp_path):
  p=tmp_path/'x.jsonl';rows=[{'id':'a','v':1}];M.append_unique(p,rows,'id',True);r=M.append_unique(p,rows,'id',True);assert r['accepted']==0 and len(p.read_text().splitlines())==1
+def test_settlement_rerun_preserves_existing_w0_w1_rows(tmp_path):
+ p=tmp_path/'settlement_observations.jsonl';historical=[{'settlement_id':'w0','week':0},{'settlement_id':'w1','week':1}];M.append_unique(p,historical,'settlement_id',True);prospective=[{'settlement_id':'w2','week':2}];M.append_unique(p,prospective,'settlement_id',True);M.append_unique(p,prospective,'settlement_id',True);assert [__import__('json').loads(line) for line in p.read_text().splitlines()]==historical+prospective

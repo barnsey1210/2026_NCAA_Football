@@ -627,7 +627,7 @@ def main():
 
     periods = (
         ["W0"]
-        + [f"W{i}" for i in range(1, 15)]
+        + [f"W{i}" for i in range(1, 16)]
         + ["Season"]
     )
 
@@ -819,7 +819,7 @@ def main():
             ["W0"]
             + [
                 f"W{i}"
-                for i in range(1, 15)
+                for i in range(1, 16)
             ]
             + [
                 "Conference Championships",

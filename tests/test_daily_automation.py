@@ -111,6 +111,25 @@ class DailyAutomationAuditTests(unittest.TestCase):
             self.assertEqual(result["unresolved_script_count"], 0)
             self.assertEqual(result["repository_completeness_percent"], 100.0)
 
+    def test_daily_model_tracking_lifecycle_is_registered_and_ordered(self) -> None:
+        scripts = {
+            stage["id"]: stage["scripts"]
+            for stage in json.loads(REGISTRY.read_text())["stages"]
+        }["model_tracking_v2"]
+        expected = [
+            "scripts/model_tracking/v2/capture_current_contracts.py",
+            "scripts/model_tracking/v2/capture_official_checkpoints.py",
+            "scripts/model_tracking/v2/capture_close_checkpoints.py",
+            "scripts/model_tracking/v2/settle_accepted_observations.py",
+            "scripts/model_fit/build_team_game_evaluations_2026.py",
+            "scripts/model_tracking/build_model_performance_view.py",
+        ]
+        self.assertEqual(scripts, expected)
+
+        source = ORCHESTRATOR.read_text()
+        offsets = [source.index(f'run_py "{path}"') for path in expected]
+        self.assertEqual(offsets, sorted(offsets))
+
     def test_launcher_business_logic_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             launcher = Path(temp_dir) / "daily_market_update.sh"

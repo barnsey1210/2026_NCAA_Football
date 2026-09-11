@@ -238,6 +238,7 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
         [sys.executable, "scripts/audit/validate_projection_resolver.py"],
         [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
+        [sys.executable, "scripts/model_tracking/v2/capture_close_checkpoints.py", "--accept"],
         [sys.executable, "scripts/model_tracking/settle_model_tracking.py", "--accept"],
         [
             sys.executable,

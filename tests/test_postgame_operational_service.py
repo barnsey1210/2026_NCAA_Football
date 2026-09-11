@@ -155,6 +155,18 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             names.index("build_market_implied_power_ratings.py")
         ]
         self.assertIn("--production-2026", market_command)
+        self.assertLess(
+            names.index("capture_close_checkpoints.py"),
+            names.index("settle_model_tracking.py"),
+        )
+        self.assertLess(
+            names.index("capture_close_checkpoints.py"),
+            names.index("settle_accepted_observations.py"),
+        )
+        self.assertLess(
+            names.index("settle_accepted_observations.py"),
+            names.index("build_model_performance_view.py"),
+        )
         self.assertEqual(
             names[-3:],
             [
@@ -168,6 +180,8 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             "build_public_site.py", "build_war_room_home.py", "publish_site.sh",
             "check_public_site.py", "apply_shared_war_room_shell.py",
             "compact_matchups_payload.py", "inject_market_presentation_fixes.py",
+            "reconstruct_2026_historical_checkpoints.py",
+            "reconstruct_2026_historical_close.py",
         ):
             self.assertNotIn(forbidden, joined)
 

@@ -76,6 +76,13 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         self.assertEqual(data["methodology"]["source"], "immutable-model-tracking-v2")
         self.assertEqual(data["ranking_minimum"], 30)
 
+    def test_week_15_is_in_the_isolated_tracker_period_contract(self):
+        source = (
+            ROOT / "scripts/model_tracking/build_model_performance_view.py"
+        ).read_text()
+        self.assertEqual(source.count("range(1, 16)"), 2)
+        self.assertNotIn("range(1, 15)", source)
+
 
 if __name__ == "__main__":
     unittest.main()
