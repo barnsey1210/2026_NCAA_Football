@@ -1,8 +1,8 @@
 #!/bin/bash
 set -u
 
-MAIN="/Users/jameslindesmith/NCAAF_MAIN_REPO"
-AUTO="/Users/jameslindesmith/NCAAF_AUTO"
+MAIN="${NCAAF_MAIN_REPO:-/Users/jameslindesmith/NCAAF_MAIN_REPO}"
+AUTO="${NCAAF_AUTO_ROOT:-/Users/jameslindesmith/NCAAF_AUTO}"
 
 ROLLBACK_DIR="$AUTO/.deploy_rollback"
 ACCEPTANCE_DIR="$AUTO/data/control/acceptance_dry_runs"
