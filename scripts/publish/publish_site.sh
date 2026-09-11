@@ -308,8 +308,23 @@ if [[ -s "$TMP_MANIFEST" ]]; then
 fi
 git -C "$MAIN_REPO" add index.html
 
+run_post_publish_cleanup() {
+  local cleanup_script="$MAIN_REPO/scripts/control/cleanup_ncaaf_disk.sh"
+
+  if [[ ! -x "$cleanup_script" ]]; then
+    log "post-publish cleanup helper unavailable; skipping"
+    return 0
+  fi
+
+  log "running post-publish operational disk cleanup"
+  if ! "$cleanup_script" --apply --skip-worktrees; then
+    log "WARNING: post-publish cleanup failed; publication remains successful"
+  fi
+}
+
 if git -C "$MAIN_REPO" diff --cached --quiet; then
   log "no public data changes to commit"
+  run_post_publish_cleanup
   exit 0
 fi
 
@@ -326,3 +341,4 @@ if ! git -C "$MAIN_REPO" push origin main; then
 fi
 
 log "published canonical main at $(git -C "$MAIN_REPO" rev-parse --short HEAD)"
+run_post_publish_cleanup

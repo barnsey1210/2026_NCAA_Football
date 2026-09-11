@@ -11,15 +11,26 @@ KEEP_ROLLBACKS=5
 ACCEPTANCE_MAX_AGE_DAYS=7
 
 MODE="dry-run"
+SKIP_WORKTREES=0
 
-if [ "${1:-}" = "--apply" ]; then
-  MODE="apply"
-elif [ "${1:-}" = "--dry-run" ] || [ -z "${1:-}" ]; then
-  MODE="dry-run"
-else
-  echo "Usage: $0 [--dry-run|--apply]"
-  exit 2
-fi
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --apply)
+      MODE="apply"
+      ;;
+    --dry-run)
+      MODE="dry-run"
+      ;;
+    --skip-worktrees)
+      SKIP_WORKTREES=1
+      ;;
+    *)
+      echo "Usage: $0 [--dry-run|--apply] [--skip-worktrees]"
+      exit 2
+      ;;
+  esac
+  shift
+done
 
 echo "============================================"
 echo " NCAAF operational disk cleanup"
@@ -152,7 +163,9 @@ echo
 
 echo "== Temporary Git worktrees =="
 
-if git -C "$MAIN" rev-parse --git-dir >/dev/null 2>&1; then
+if [ "$SKIP_WORKTREES" -eq 1 ]; then
+  echo "Skipping temporary worktree cleanup for automatic/post-publish mode."
+elif git -C "$MAIN" rev-parse --git-dir >/dev/null 2>&1; then
   git -C "$MAIN" worktree list --porcelain \
     | sed -n 's/^worktree //p' \
     | while IFS= read -r wt; do
