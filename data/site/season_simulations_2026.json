@@ -1,6 +1,6 @@
 {
   "schema_version": "season-simulations-2026-v1",
-  "built_at": "2026-09-10T22:35:42.890679+00:00",
+  "built_at": "2026-09-11T02:24:53.929715+00:00",
   "season": 2026,
   "trials": 20000,
   "seed": 20260511,
@@ -8,52 +8,14 @@
   "title_sigma": 14.0,
   "source_db": "data/snapshots/preseason/preseason_db.json",
   "results_source": "data/canonical/game_results_2026.json",
+  "ratings_source": "data/ratings/ratings_master_latest.csv",
+  "projection_source": "data/projections/game_projection_blend_2026.csv",
+  "simulation_input_rating_date": "2026-09-10",
+  "current_ratings_applied": 138,
+  "remaining_projections_applied": 714,
   "completed_finals_frozen": 99,
   "conference_game_overrides_applied": 0,
-  "projection_model_metadata": {
-    "family": "Game Projection Consensus",
-    "spread_version": "spread_consensus_equal_available_v1",
-    "spread_max_sources": 5,
-    "spread_sources": [
-      "SP+",
-      "FPI",
-      "TeamRankings",
-      "DRatings Predictions",
-      "Sagarin Predictor Prediction"
-    ],
-    "spread_active_sources": [
-      "SP+",
-      "FPI",
-      "TeamRankings",
-      "DRatings Predictions"
-    ],
-    "spread_pending_sources": [
-      "Sagarin Predictor Prediction"
-    ],
-    "spread_fallback": "equal weight across available eligible production sources",
-    "win_probability_version": "logistic_margin_scale_6_5_v1",
-    "win_probability_method": "logistic from canonical projected home margin",
-    "win_probability_logistic_scale": 6.5,
-    "win_probability_calibration": "logistic scale 6.5 validated against fitted alternatives on 2025 holdout using current-style four-source historical proxy",
-    "total_version": "total_consensus_equal_available_v1",
-    "total_max_sources": 4,
-    "total_sources": [
-      "SP+",
-      "DRatings Predictions",
-      "Massey Games",
-      "Sagarin Predictor Prediction"
-    ],
-    "total_active_sources": [
-      "SP+",
-      "DRatings Predictions"
-    ],
-    "total_pending_sources": [
-      "Massey Games",
-      "Sagarin Predictor Prediction"
-    ],
-    "total_fallback": "equal weight across available eligible production sources",
-    "updated_at": "2026-09-10T22:34:54.355249+00:00"
-  },
+  "projection_model_metadata": {},
   "simulation_model": "Completed games are frozen to canonical final scores. Remaining games use Monte Carlo from canonical Game Projection Consensus margins/probabilities, and hypothetical conference title games; all model margins convert to win probability with logistic scale 6.5.",
   "teams": [
     {
@@ -63,8 +25,8 @@
       "avg_conference_wins": 7.912,
       "bowl_eligibility_pct": 1.0,
       "make_title_game_pct": 0.7216,
-      "conference_title_pct": 0.5254,
-      "lose_title_game_pct": 0.1961,
+      "conference_title_pct": 0.5217,
+      "lose_title_game_pct": 0.1998,
       "win_distribution": [
         {
           "wins": 5,
@@ -106,9 +68,9 @@
       "avg_total_wins": 9.3143,
       "avg_conference_wins": 7.3444,
       "bowl_eligibility_pct": 0.9998,
-      "make_title_game_pct": 0.4096,
-      "conference_title_pct": 0.2041,
-      "lose_title_game_pct": 0.2055,
+      "make_title_game_pct": 0.3175,
+      "conference_title_pct": 0.1288,
+      "lose_title_game_pct": 0.1888,
       "win_distribution": [
         {
           "wins": 4,
@@ -182,9 +144,9 @@
       "avg_total_wins": 9.5817,
       "avg_conference_wins": 7.5971,
       "bowl_eligibility_pct": 0.9995,
-      "make_title_game_pct": 0.6688,
-      "conference_title_pct": 0.4148,
-      "lose_title_game_pct": 0.254,
+      "make_title_game_pct": 0.6129,
+      "conference_title_pct": 0.3078,
+      "lose_title_game_pct": 0.305,
       "win_distribution": [
         {
           "wins": 4,
@@ -226,9 +188,9 @@
       "avg_total_wins": 9.655,
       "avg_conference_wins": 7.6567,
       "bowl_eligibility_pct": 0.9999,
-      "make_title_game_pct": 0.4891,
-      "conference_title_pct": 0.2176,
-      "lose_title_game_pct": 0.2715,
+      "make_title_game_pct": 0.5812,
+      "conference_title_pct": 0.2664,
+      "lose_title_game_pct": 0.3148,
       "win_distribution": [
         {
           "wins": 5,
@@ -266,9 +228,9 @@
       "avg_total_wins": 10.0039,
       "avg_conference_wins": 7.4649,
       "bowl_eligibility_pct": 0.9998,
-      "make_title_game_pct": 0.5613,
-      "conference_title_pct": 0.3347,
-      "lose_title_game_pct": 0.2266,
+      "make_title_game_pct": 0.6173,
+      "conference_title_pct": 0.4032,
+      "lose_title_game_pct": 0.2141,
       "win_distribution": [
         {
           "wins": 5,
@@ -311,8 +273,8 @@
       "avg_conference_wins": 7.9246,
       "bowl_eligibility_pct": 0.9999,
       "make_title_game_pct": 0.8288,
-      "conference_title_pct": 0.6782,
-      "lose_title_game_pct": 0.1506,
+      "conference_title_pct": 0.4958,
+      "lose_title_game_pct": 0.333,
       "win_distribution": [
         {
           "wins": 5,
@@ -351,8 +313,8 @@
       "avg_conference_wins": 8.6267,
       "bowl_eligibility_pct": 1.0,
       "make_title_game_pct": 0.9627,
-      "conference_title_pct": 0.8345,
-      "lose_title_game_pct": 0.1281,
+      "conference_title_pct": 0.8589,
+      "lose_title_game_pct": 0.1038,
       "win_distribution": [
         {
           "wins": 6,
@@ -386,9 +348,9 @@
       "avg_total_wins": 7.5351,
       "avg_conference_wins": 5.6203,
       "bowl_eligibility_pct": 0.9446,
-      "make_title_game_pct": 0.1016,
-      "conference_title_pct": 0.0372,
-      "lose_title_game_pct": 0.0643,
+      "make_title_game_pct": 0.0962,
+      "conference_title_pct": 0.0338,
+      "lose_title_game_pct": 0.0624,
       "win_distribution": [
         {
           "wins": 3,
@@ -434,9 +396,9 @@
       "avg_total_wins": 8.919,
       "avg_conference_wins": 6.9274,
       "bowl_eligibility_pct": 0.997,
-      "make_title_game_pct": 0.3493,
-      "conference_title_pct": 0.1134,
-      "lose_title_game_pct": 0.2359,
+      "make_title_game_pct": 0.3667,
+      "conference_title_pct": 0.1656,
+      "lose_title_game_pct": 0.2011,
       "win_distribution": [
         {
           "wins": 4,
@@ -478,9 +440,9 @@
       "avg_total_wins": 7.9721,
       "avg_conference_wins": 6.0332,
       "bowl_eligibility_pct": 0.9711,
-      "make_title_game_pct": 0.1594,
-      "conference_title_pct": 0.0577,
-      "lose_title_game_pct": 0.1017,
+      "make_title_game_pct": 0.1473,
+      "conference_title_pct": 0.0496,
+      "lose_title_game_pct": 0.0976,
       "win_distribution": [
         {
           "wins": 2,
@@ -531,8 +493,8 @@
       "avg_conference_wins": 5.5129,
       "bowl_eligibility_pct": 0.973,
       "make_title_game_pct": 0.0703,
-      "conference_title_pct": 0.0233,
-      "lose_title_game_pct": 0.047,
+      "conference_title_pct": 0.0221,
+      "lose_title_game_pct": 0.0481,
       "win_distribution": [
         {
           "wins": 3,
@@ -582,9 +544,9 @@
       "avg_total_wins": 8.3996,
       "avg_conference_wins": 5.4143,
       "bowl_eligibility_pct": 0.9934,
-      "make_title_game_pct": 0.0547,
-      "conference_title_pct": 0.012,
-      "lose_title_game_pct": 0.0427,
+      "make_title_game_pct": 0.0522,
+      "conference_title_pct": 0.0109,
+      "lose_title_game_pct": 0.0413,
       "win_distribution": [
         {
           "wins": 4,
@@ -630,9 +592,9 @@
       "avg_total_wins": 6.6132,
       "avg_conference_wins": 4.3201,
       "bowl_eligibility_pct": 0.8188,
-      "make_title_game_pct": 0.0058,
-      "conference_title_pct": 0.0011,
-      "lose_title_game_pct": 0.0047,
+      "make_title_game_pct": 0.0056,
+      "conference_title_pct": 0.0006,
+      "lose_title_game_pct": 0.0051,
       "win_distribution": [
         {
           "wins": 2,
@@ -682,9 +644,9 @@
       "avg_total_wins": 6.735,
       "avg_conference_wins": 4.9009,
       "bowl_eligibility_pct": 0.8303,
-      "make_title_game_pct": 0.0305,
-      "conference_title_pct": 0.0067,
-      "lose_title_game_pct": 0.0238,
+      "make_title_game_pct": 0.0299,
+      "conference_title_pct": 0.0062,
+      "lose_title_game_pct": 0.0237,
       "win_distribution": [
         {
           "wins": 1,
@@ -738,9 +700,9 @@
       "avg_total_wins": 6.2041,
       "avg_conference_wins": 4.2068,
       "bowl_eligibility_pct": 0.7175,
-      "make_title_game_pct": 0.0112,
-      "conference_title_pct": 0.0036,
-      "lose_title_game_pct": 0.0076,
+      "make_title_game_pct": 0.0107,
+      "conference_title_pct": 0.0022,
+      "lose_title_game_pct": 0.0085,
       "win_distribution": [
         {
           "wins": 2,
@@ -790,9 +752,9 @@
       "avg_total_wins": 10.4003,
       "avg_conference_wins": 7.4275,
       "bowl_eligibility_pct": 1.0,
-      "make_title_game_pct": 0.2777,
-      "conference_title_pct": 0.0355,
-      "lose_title_game_pct": 0.2421,
+      "make_title_game_pct": 0.2802,
+      "conference_title_pct": 0.0663,
+      "lose_title_game_pct": 0.214,
       "win_distribution": [
         {
           "wins": 6,
@@ -831,8 +793,8 @@
       "avg_conference_wins": 7.1324,
       "bowl_eligibility_pct": 0.9832,
       "make_title_game_pct": 0.4886,
-      "conference_title_pct": 0.1669,
-      "lose_title_game_pct": 0.3217,
+      "conference_title_pct": 0.2364,
+      "lose_title_game_pct": 0.2522,
       "win_distribution": [
         {
           "wins": 3,
@@ -878,9 +840,9 @@
       "avg_total_wins": 6.8783,
       "avg_conference_wins": 5.0812,
       "bowl_eligibility_pct": 0.8481,
-      "make_title_game_pct": 0.0308,
-      "conference_title_pct": 0.0066,
-      "lose_title_game_pct": 0.0242,
+      "make_title_game_pct": 0.0319,
+      "conference_title_pct": 0.0072,
+      "lose_title_game_pct": 0.0247,
       "win_distribution": [
         {
           "wins": 2,
@@ -983,8 +945,8 @@
       "avg_conference_wins": 4.2166,
       "bowl_eligibility_pct": 0.7117,
       "make_title_game_pct": 0.0063,
-      "conference_title_pct": 0.0004,
-      "lose_title_game_pct": 0.0059,
+      "conference_title_pct": 0.0006,
+      "lose_title_game_pct": 0.0058,
       "win_distribution": [
         {
           "wins": 2,
@@ -1034,9 +996,9 @@
       "avg_total_wins": 7.6712,
       "avg_conference_wins": 5.7478,
       "bowl_eligibility_pct": 0.9547,
-      "make_title_game_pct": 0.0264,
-      "conference_title_pct": 0.0029,
-      "lose_title_game_pct": 0.0234,
+      "make_title_game_pct": 0.0265,
+      "conference_title_pct": 0.0039,
+      "lose_title_game_pct": 0.0226,
       "win_distribution": [
         {
           "wins": 2,
@@ -1086,9 +1048,9 @@
       "avg_total_wins": 4.8594,
       "avg_conference_wins": 3.6938,
       "bowl_eligibility_pct": 0.3211,
-      "make_title_game_pct": 0.0031,
-      "conference_title_pct": 0.001,
-      "lose_title_game_pct": 0.002,
+      "make_title_game_pct": 0.0014,
+      "conference_title_pct": 0.0001,
+      "lose_title_game_pct": 0.0012,
       "win_distribution": [
         {
           "wins": 0,
@@ -1143,8 +1105,8 @@
       "avg_conference_wins": 4.4657,
       "bowl_eligibility_pct": 0.7117,
       "make_title_game_pct": 0.0152,
-      "conference_title_pct": 0.0019,
-      "lose_title_game_pct": 0.0133,
+      "conference_title_pct": 0.0022,
+      "lose_title_game_pct": 0.0129,
       "win_distribution": [
         {
           "wins": 2,
@@ -1195,8 +1157,8 @@
       "avg_conference_wins": 6.5823,
       "bowl_eligibility_pct": 0.9831,
       "make_title_game_pct": 0.3128,
-      "conference_title_pct": 0.0827,
-      "lose_title_game_pct": 0.2301,
+      "conference_title_pct": 0.1381,
+      "lose_title_game_pct": 0.1747,
       "win_distribution": [
         {
           "wins": 2,
@@ -1298,9 +1260,9 @@
       "avg_total_wins": 7.1143,
       "avg_conference_wins": 6.5522,
       "bowl_eligibility_pct": 0.8797,
-      "make_title_game_pct": 0.2772,
-      "conference_title_pct": 0.0475,
-      "lose_title_game_pct": 0.2297,
+      "make_title_game_pct": 0.2452,
+      "conference_title_pct": 0.0326,
+      "lose_title_game_pct": 0.2126,
       "win_distribution": [
         {
           "wins": 2,
@@ -1346,9 +1308,9 @@
       "avg_total_wins": 8.0233,
       "avg_conference_wins": 6.9722,
       "bowl_eligibility_pct": 0.9852,
-      "make_title_game_pct": 0.374,
-      "conference_title_pct": 0.0708,
-      "lose_title_game_pct": 0.3032,
+      "make_title_game_pct": 0.3354,
+      "conference_title_pct": 0.0447,
+      "lose_title_game_pct": 0.2907,
       "win_distribution": [
         {
           "wins": 3,
@@ -1394,9 +1356,9 @@
       "avg_total_wins": 8.5102,
       "avg_conference_wins": 6.6242,
       "bowl_eligibility_pct": 0.9843,
-      "make_title_game_pct": 0.2024,
-      "conference_title_pct": 0.0417,
-      "lose_title_game_pct": 0.1608,
+      "make_title_game_pct": 0.2069,
+      "conference_title_pct": 0.0863,
+      "lose_title_game_pct": 0.1206,
       "win_distribution": [
         {
           "wins": 2,
@@ -1446,9 +1408,9 @@
       "avg_total_wins": 6.4143,
       "avg_conference_wins": 4.6377,
       "bowl_eligibility_pct": 0.753,
-      "make_title_game_pct": 0.0366,
-      "conference_title_pct": 0.0088,
-      "lose_title_game_pct": 0.0278,
+      "make_title_game_pct": 0.0339,
+      "conference_title_pct": 0.0099,
+      "lose_title_game_pct": 0.024,
       "win_distribution": [
         {
           "wins": 1,
@@ -1558,9 +1520,9 @@
       "avg_total_wins": 7.5675,
       "avg_conference_wins": 6.0049,
       "bowl_eligibility_pct": 0.9439,
-      "make_title_game_pct": 0.1338,
-      "conference_title_pct": 0.0164,
-      "lose_title_game_pct": 0.1174,
+      "make_title_game_pct": 0.1732,
+      "conference_title_pct": 0.0245,
+      "lose_title_game_pct": 0.1487,
       "win_distribution": [
         {
           "wins": 1,
@@ -1666,9 +1628,9 @@
       "avg_total_wins": 4.1838,
       "avg_conference_wins": 3.2256,
       "bowl_eligibility_pct": 0.1573,
-      "make_title_game_pct": 0.0049,
-      "conference_title_pct": 0.001,
-      "lose_title_game_pct": 0.0039,
+      "make_title_game_pct": 0.0039,
+      "conference_title_pct": 0.0006,
+      "lose_title_game_pct": 0.0033,
       "win_distribution": [
         {
           "wins": 0,
@@ -1766,9 +1728,9 @@
       "avg_total_wins": 6.4883,
       "avg_conference_wins": 4.6254,
       "bowl_eligibility_pct": 0.775,
-      "make_title_game_pct": 0.0237,
-      "conference_title_pct": 0.0067,
-      "lose_title_game_pct": 0.0169,
+      "make_title_game_pct": 0.0213,
+      "conference_title_pct": 0.006,
+      "lose_title_game_pct": 0.0153,
       "win_distribution": [
         {
           "wins": 1,
@@ -1874,9 +1836,9 @@
       "avg_total_wins": 2.5131,
       "avg_conference_wins": 2.4831,
       "bowl_eligibility_pct": 0.0123,
-      "make_title_game_pct": 0.0005,
+      "make_title_game_pct": 0.0004,
       "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0004,
+      "lose_title_game_pct": 0.0003,
       "win_distribution": [
         {
           "wins": 0,
@@ -1923,8 +1885,8 @@
       "avg_conference_wins": 7.0776,
       "bowl_eligibility_pct": 0.9947,
       "make_title_game_pct": 0.9406,
-      "conference_title_pct": 0.7484,
-      "lose_title_game_pct": 0.1922,
+      "conference_title_pct": 0.7554,
+      "lose_title_game_pct": 0.1852,
       "win_distribution": [
         {
           "wins": 4,
@@ -1962,9 +1924,9 @@
       "avg_total_wins": 8.2784,
       "avg_conference_wins": 6.431,
       "bowl_eligibility_pct": 0.9842,
-      "make_title_game_pct": 0.1509,
-      "conference_title_pct": 0.0165,
-      "lose_title_game_pct": 0.1343,
+      "make_title_game_pct": 0.1512,
+      "conference_title_pct": 0.0202,
+      "lose_title_game_pct": 0.131,
       "win_distribution": [
         {
           "wins": 3,
@@ -2010,9 +1972,9 @@
       "avg_total_wins": 7.6753,
       "avg_conference_wins": 5.916,
       "bowl_eligibility_pct": 0.9587,
-      "make_title_game_pct": 0.0801,
-      "conference_title_pct": 0.0118,
-      "lose_title_game_pct": 0.0684,
+      "make_title_game_pct": 0.1127,
+      "conference_title_pct": 0.0175,
+      "lose_title_game_pct": 0.0951,
       "win_distribution": [
         {
           "wins": 2,
@@ -2062,9 +2024,9 @@
       "avg_total_wins": 5.9306,
       "avg_conference_wins": 4.8832,
       "bowl_eligibility_pct": 0.6322,
-      "make_title_game_pct": 0.0425,
-      "conference_title_pct": 0.007,
-      "lose_title_game_pct": 0.0355,
+      "make_title_game_pct": 0.0438,
+      "conference_title_pct": 0.0134,
+      "lose_title_game_pct": 0.0304,
       "win_distribution": [
         {
           "wins": 0,
@@ -2124,7 +2086,7 @@
       "bowl_eligibility_pct": 0.0775,
       "make_title_game_pct": 0.0009,
       "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0008,
+      "lose_title_game_pct": 0.0009,
       "win_distribution": [
         {
           "wins": 0,
@@ -2175,8 +2137,8 @@
       "avg_conference_wins": 4.7213,
       "bowl_eligibility_pct": 0.6608,
       "make_title_game_pct": 0.0073,
-      "conference_title_pct": 0.0009,
-      "lose_title_game_pct": 0.0064,
+      "conference_title_pct": 0.0008,
+      "lose_title_game_pct": 0.0065,
       "win_distribution": [
         {
           "wins": 1,
@@ -2279,8 +2241,8 @@
       "avg_conference_wins": 4.6626,
       "bowl_eligibility_pct": 0.9201,
       "make_title_game_pct": 0.0027,
-      "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0026,
+      "conference_title_pct": 0.0003,
+      "lose_title_game_pct": 0.0024,
       "win_distribution": [
         {
           "wins": 2,
@@ -2470,9 +2432,9 @@
       "avg_total_wins": 4.6786,
       "avg_conference_wins": 3.831,
       "bowl_eligibility_pct": 0.2753,
-      "make_title_game_pct": 0.0077,
-      "conference_title_pct": 0.0015,
-      "lose_title_game_pct": 0.0063,
+      "make_title_game_pct": 0.0076,
+      "conference_title_pct": 0.0021,
+      "lose_title_game_pct": 0.0056,
       "win_distribution": [
         {
           "wins": 0,
@@ -2526,9 +2488,9 @@
       "avg_total_wins": 5.3154,
       "avg_conference_wins": 3.3587,
       "bowl_eligibility_pct": 0.4343,
-      "make_title_game_pct": 0.0053,
-      "conference_title_pct": 0.0007,
-      "lose_title_game_pct": 0.0046,
+      "make_title_game_pct": 0.0051,
+      "conference_title_pct": 0.0009,
+      "lose_title_game_pct": 0.0042,
       "win_distribution": [
         {
           "wins": 1,
@@ -2739,8 +2701,8 @@
       "avg_conference_wins": 3.0473,
       "bowl_eligibility_pct": 0.3138,
       "make_title_game_pct": 0.0008,
-      "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0007,
+      "conference_title_pct": 0.0002,
+      "lose_title_game_pct": 0.0006,
       "win_distribution": [
         {
           "wins": 1,
@@ -2839,8 +2801,8 @@
       "avg_conference_wins": 3.9459,
       "bowl_eligibility_pct": 0.4378,
       "make_title_game_pct": 0.0114,
-      "conference_title_pct": 0.0014,
-      "lose_title_game_pct": 0.01,
+      "conference_title_pct": 0.0022,
+      "lose_title_game_pct": 0.0092,
       "win_distribution": [
         {
           "wins": 1,
@@ -2894,8 +2856,8 @@
       "avg_total_wins": 4.945,
       "avg_conference_wins": 3.3797,
       "bowl_eligibility_pct": 0.3381,
-      "make_title_game_pct": 0.0014,
-      "conference_title_pct": 0.0001,
+      "make_title_game_pct": 0.0013,
+      "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0013,
       "win_distribution": [
         {
@@ -2946,9 +2908,9 @@
       "avg_total_wins": 8.4385,
       "avg_conference_wins": 6.0499,
       "bowl_eligibility_pct": 0.9889,
-      "make_title_game_pct": 0.5659,
-      "conference_title_pct": 0.3755,
-      "lose_title_game_pct": 0.1904,
+      "make_title_game_pct": 0.5134,
+      "conference_title_pct": 0.2594,
+      "lose_title_game_pct": 0.254,
       "win_distribution": [
         {
           "wins": 3,
@@ -2994,9 +2956,9 @@
       "avg_total_wins": 6.1102,
       "avg_conference_wins": 4.8909,
       "bowl_eligibility_pct": 0.6617,
-      "make_title_game_pct": 0.0321,
-      "conference_title_pct": 0.0031,
-      "lose_title_game_pct": 0.029,
+      "make_title_game_pct": 0.0328,
+      "conference_title_pct": 0.008,
+      "lose_title_game_pct": 0.0248,
       "win_distribution": [
         {
           "wins": 0,
@@ -3146,9 +3108,9 @@
       "avg_total_wins": 7.1709,
       "avg_conference_wins": 6.1385,
       "bowl_eligibility_pct": 0.8999,
-      "make_title_game_pct": 0.5181,
-      "conference_title_pct": 0.3298,
-      "lose_title_game_pct": 0.1884,
+      "make_title_game_pct": 0.4478,
+      "conference_title_pct": 0.2221,
+      "lose_title_game_pct": 0.2256,
       "win_distribution": [
         {
           "wins": 2,
@@ -3255,8 +3217,8 @@
       "avg_conference_wins": 2.7561,
       "bowl_eligibility_pct": 0.162,
       "make_title_game_pct": 0.0017,
-      "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0015,
+      "conference_title_pct": 0.0003,
+      "lose_title_game_pct": 0.0014,
       "win_distribution": [
         {
           "wins": 1,
@@ -3398,9 +3360,9 @@
       "avg_total_wins": 8.1424,
       "avg_conference_wins": 6.224,
       "bowl_eligibility_pct": 0.9823,
-      "make_title_game_pct": 0.6426,
-      "conference_title_pct": 0.3222,
-      "lose_title_game_pct": 0.3204,
+      "make_title_game_pct": 0.64,
+      "conference_title_pct": 0.3474,
+      "lose_title_game_pct": 0.2926,
       "win_distribution": [
         {
           "wins": 3,
@@ -3447,8 +3409,8 @@
       "avg_conference_wins": 4.0064,
       "bowl_eligibility_pct": 0.3129,
       "make_title_game_pct": 0.0073,
-      "conference_title_pct": 0.0002,
-      "lose_title_game_pct": 0.0071,
+      "conference_title_pct": 0.0003,
+      "lose_title_game_pct": 0.007,
       "win_distribution": [
         {
           "wins": 0,
@@ -3502,9 +3464,9 @@
       "avg_total_wins": 8.058,
       "avg_conference_wins": 5.8483,
       "bowl_eligibility_pct": 0.9822,
-      "make_title_game_pct": 0.4191,
-      "conference_title_pct": 0.2119,
-      "lose_title_game_pct": 0.2072,
+      "make_title_game_pct": 0.4299,
+      "conference_title_pct": 0.2521,
+      "lose_title_game_pct": 0.1778,
       "win_distribution": [
         {
           "wins": 4,
@@ -3547,8 +3509,8 @@
       "avg_conference_wins": 5.7792,
       "bowl_eligibility_pct": 0.923,
       "make_title_game_pct": 0.6734,
-      "conference_title_pct": 0.1808,
-      "lose_title_game_pct": 0.4926,
+      "conference_title_pct": 0.1875,
+      "lose_title_game_pct": 0.4859,
       "win_distribution": [
         {
           "wins": 2,
@@ -3598,9 +3560,9 @@
       "avg_total_wins": 8.6563,
       "avg_conference_wins": 5.9082,
       "bowl_eligibility_pct": 0.9956,
-      "make_title_game_pct": 0.4485,
-      "conference_title_pct": 0.1953,
-      "lose_title_game_pct": 0.2531,
+      "make_title_game_pct": 0.5036,
+      "conference_title_pct": 0.2898,
+      "lose_title_game_pct": 0.2138,
       "win_distribution": [
         {
           "wins": 3,
@@ -3690,9 +3652,9 @@
       "avg_total_wins": 7.2385,
       "avg_conference_wins": 5.8181,
       "bowl_eligibility_pct": 0.8964,
-      "make_title_game_pct": 0.3699,
-      "conference_title_pct": 0.1774,
-      "lose_title_game_pct": 0.1924,
+      "make_title_game_pct": 0.3641,
+      "conference_title_pct": 0.1729,
+      "lose_title_game_pct": 0.1912,
       "win_distribution": [
         {
           "wins": 2,
@@ -3782,9 +3744,9 @@
       "avg_total_wins": 5.7331,
       "avg_conference_wins": 4.7072,
       "bowl_eligibility_pct": 0.5742,
-      "make_title_game_pct": 0.0622,
-      "conference_title_pct": 0.0267,
-      "lose_title_game_pct": 0.0356,
+      "make_title_game_pct": 0.0566,
+      "conference_title_pct": 0.0159,
+      "lose_title_game_pct": 0.0407,
       "win_distribution": [
         {
           "wins": 1,
@@ -3835,8 +3797,8 @@
       "avg_conference_wins": 6.0014,
       "bowl_eligibility_pct": 0.9585,
       "make_title_game_pct": 0.5208,
-      "conference_title_pct": 0.4039,
-      "lose_title_game_pct": 0.1169,
+      "conference_title_pct": 0.3292,
+      "lose_title_game_pct": 0.1916,
       "win_distribution": [
         {
           "wins": 2,
@@ -3886,9 +3848,9 @@
       "avg_total_wins": 5.4453,
       "avg_conference_wins": 3.1719,
       "bowl_eligibility_pct": 0.4825,
-      "make_title_game_pct": 0.0442,
-      "conference_title_pct": 0.0124,
-      "lose_title_game_pct": 0.0318,
+      "make_title_game_pct": 0.0418,
+      "conference_title_pct": 0.0047,
+      "lose_title_game_pct": 0.037,
       "win_distribution": [
         {
           "wins": 0,
@@ -3946,9 +3908,9 @@
       "avg_total_wins": 6.586,
       "avg_conference_wins": 5.1579,
       "bowl_eligibility_pct": 0.7836,
-      "make_title_game_pct": 0.2219,
-      "conference_title_pct": 0.0857,
-      "lose_title_game_pct": 0.1362,
+      "make_title_game_pct": 0.2272,
+      "conference_title_pct": 0.0794,
+      "lose_title_game_pct": 0.1479,
       "win_distribution": [
         {
           "wins": 1,
@@ -4002,9 +3964,9 @@
       "avg_total_wins": 7.3952,
       "avg_conference_wins": 4.5694,
       "bowl_eligibility_pct": 0.9244,
-      "make_title_game_pct": 0.1142,
-      "conference_title_pct": 0.0544,
-      "lose_title_game_pct": 0.0597,
+      "make_title_game_pct": 0.0886,
+      "conference_title_pct": 0.0315,
+      "lose_title_game_pct": 0.0571,
       "win_distribution": [
         {
           "wins": 2,
@@ -4054,9 +4016,9 @@
       "avg_total_wins": 5.4573,
       "avg_conference_wins": 5.0416,
       "bowl_eligibility_pct": 0.5007,
-      "make_title_game_pct": 0.2384,
-      "conference_title_pct": 0.1172,
-      "lose_title_game_pct": 0.1212,
+      "make_title_game_pct": 0.1926,
+      "conference_title_pct": 0.0454,
+      "lose_title_game_pct": 0.1472,
       "win_distribution": [
         {
           "wins": 0,
@@ -4158,9 +4120,9 @@
       "avg_total_wins": 7.6084,
       "avg_conference_wins": 5.7851,
       "bowl_eligibility_pct": 0.925,
-      "make_title_game_pct": 0.311,
-      "conference_title_pct": 0.1345,
-      "lose_title_game_pct": 0.1765,
+      "make_title_game_pct": 0.4103,
+      "conference_title_pct": 0.2404,
+      "lose_title_game_pct": 0.1699,
       "win_distribution": [
         {
           "wins": 1,
@@ -4214,9 +4176,9 @@
       "avg_total_wins": 5.4694,
       "avg_conference_wins": 3.8141,
       "bowl_eligibility_pct": 0.4953,
-      "make_title_game_pct": 0.0278,
-      "conference_title_pct": 0.0098,
-      "lose_title_game_pct": 0.018,
+      "make_title_game_pct": 0.0217,
+      "conference_title_pct": 0.0032,
+      "lose_title_game_pct": 0.0185,
       "win_distribution": [
         {
           "wins": 0,
@@ -4270,9 +4232,9 @@
       "avg_total_wins": 4.7979,
       "avg_conference_wins": 4.5194,
       "bowl_eligibility_pct": 0.3085,
-      "make_title_game_pct": 0.2014,
-      "conference_title_pct": 0.0429,
-      "lose_title_game_pct": 0.1585,
+      "make_title_game_pct": 0.2037,
+      "conference_title_pct": 0.0403,
+      "lose_title_game_pct": 0.1634,
       "win_distribution": [
         {
           "wins": 0,
@@ -4326,9 +4288,9 @@
       "avg_total_wins": 3.5737,
       "avg_conference_wins": 3.5705,
       "bowl_eligibility_pct": 0.07,
-      "make_title_game_pct": 0.0751,
-      "conference_title_pct": 0.044,
-      "lose_title_game_pct": 0.0311,
+      "make_title_game_pct": 0.0612,
+      "conference_title_pct": 0.0181,
+      "lose_title_game_pct": 0.0431,
       "win_distribution": [
         {
           "wins": 0,
@@ -4374,9 +4336,9 @@
       "avg_total_wins": 5.9811,
       "avg_conference_wins": 4.3526,
       "bowl_eligibility_pct": 0.6382,
-      "make_title_game_pct": 0.0799,
-      "conference_title_pct": 0.038,
-      "lose_title_game_pct": 0.0419,
+      "make_title_game_pct": 0.0682,
+      "conference_title_pct": 0.0228,
+      "lose_title_game_pct": 0.0454,
       "win_distribution": [
         {
           "wins": 1,
@@ -4430,9 +4392,9 @@
       "avg_total_wins": 5.6935,
       "avg_conference_wins": 4.6399,
       "bowl_eligibility_pct": 0.5547,
-      "make_title_game_pct": 0.1732,
-      "conference_title_pct": 0.0977,
-      "lose_title_game_pct": 0.0755,
+      "make_title_game_pct": 0.1437,
+      "conference_title_pct": 0.0545,
+      "lose_title_game_pct": 0.0892,
       "win_distribution": [
         {
           "wins": 0,
@@ -4490,9 +4452,9 @@
       "avg_total_wins": 4.4291,
       "avg_conference_wins": 3.3515,
       "bowl_eligibility_pct": 0.2241,
-      "make_title_game_pct": 0.0461,
-      "conference_title_pct": 0.0076,
-      "lose_title_game_pct": 0.0385,
+      "make_title_game_pct": 0.0458,
+      "conference_title_pct": 0.0038,
+      "lose_title_game_pct": 0.042,
       "win_distribution": [
         {
           "wins": 0,
@@ -4542,8 +4504,8 @@
       "avg_total_wins": 5.0282,
       "avg_conference_wins": 3.5997,
       "bowl_eligibility_pct": 0.3545,
-      "make_title_game_pct": 0.0394,
-      "conference_title_pct": 0.0175,
+      "make_title_game_pct": 0.0295,
+      "conference_title_pct": 0.0076,
       "lose_title_game_pct": 0.0219,
       "win_distribution": [
         {
@@ -4595,8 +4557,8 @@
       "avg_conference_wins": 3.1422,
       "bowl_eligibility_pct": 0.1347,
       "make_title_game_pct": 0.0447,
-      "conference_title_pct": 0.0041,
-      "lose_title_game_pct": 0.0406,
+      "conference_title_pct": 0.0037,
+      "lose_title_game_pct": 0.041,
       "win_distribution": [
         {
           "wins": 0,
@@ -4646,9 +4608,9 @@
       "avg_total_wins": 7.0317,
       "avg_conference_wins": 5.5445,
       "bowl_eligibility_pct": 0.8821,
-      "make_title_game_pct": 0.4455,
-      "conference_title_pct": 0.2813,
-      "lose_title_game_pct": 0.1642,
+      "make_title_game_pct": 0.4737,
+      "conference_title_pct": 0.2565,
+      "lose_title_game_pct": 0.2172,
       "win_distribution": [
         {
           "wins": 1,
@@ -4698,9 +4660,9 @@
       "avg_total_wins": 4.8228,
       "avg_conference_wins": 3.3594,
       "bowl_eligibility_pct": 0.3054,
-      "make_title_game_pct": 0.0169,
-      "conference_title_pct": 0.007,
-      "lose_title_game_pct": 0.01,
+      "make_title_game_pct": 0.0115,
+      "conference_title_pct": 0.0019,
+      "lose_title_game_pct": 0.0096,
       "win_distribution": [
         {
           "wins": 0,
@@ -4754,8 +4716,8 @@
       "avg_total_wins": 3.2666,
       "avg_conference_wins": 1.8008,
       "bowl_eligibility_pct": 0.0432,
-      "make_title_game_pct": 0.0006,
-      "conference_title_pct": 0.0003,
+      "make_title_game_pct": 0.0004,
+      "conference_title_pct": 0.0001,
       "lose_title_game_pct": 0.0003,
       "win_distribution": [
         {
@@ -4803,8 +4765,8 @@
       "avg_conference_wins": 6.8487,
       "bowl_eligibility_pct": 0.9752,
       "make_title_game_pct": 0.8458,
-      "conference_title_pct": 0.5276,
-      "lose_title_game_pct": 0.3182,
+      "conference_title_pct": 0.6606,
+      "lose_title_game_pct": 0.1852,
       "win_distribution": [
         {
           "wins": 2,
@@ -4850,9 +4812,9 @@
       "avg_total_wins": 6.8533,
       "avg_conference_wins": 4.7498,
       "bowl_eligibility_pct": 0.8571,
-      "make_title_game_pct": 0.0943,
-      "conference_title_pct": 0.0203,
-      "lose_title_game_pct": 0.074,
+      "make_title_game_pct": 0.1033,
+      "conference_title_pct": 0.035,
+      "lose_title_game_pct": 0.0683,
       "win_distribution": [
         {
           "wins": 2,
@@ -4902,9 +4864,9 @@
       "avg_total_wins": 6.3319,
       "avg_conference_wins": 5.236,
       "bowl_eligibility_pct": 0.7319,
-      "make_title_game_pct": 0.2996,
-      "conference_title_pct": 0.1575,
-      "lose_title_game_pct": 0.1421,
+      "make_title_game_pct": 0.3129,
+      "conference_title_pct": 0.1423,
+      "lose_title_game_pct": 0.1706,
       "win_distribution": [
         {
           "wins": 0,
@@ -4958,9 +4920,9 @@
       "avg_total_wins": 2.4289,
       "avg_conference_wins": 1.8055,
       "bowl_eligibility_pct": 0.008,
-      "make_title_game_pct": 0.0032,
-      "conference_title_pct": 0.0004,
-      "lose_title_game_pct": 0.0027,
+      "make_title_game_pct": 0.0031,
+      "conference_title_pct": 0.0001,
+      "lose_title_game_pct": 0.003,
       "win_distribution": [
         {
           "wins": 0,
@@ -5002,9 +4964,9 @@
       "avg_total_wins": 4.3933,
       "avg_conference_wins": 3.1528,
       "bowl_eligibility_pct": 0.2054,
-      "make_title_game_pct": 0.0464,
-      "conference_title_pct": 0.0032,
-      "lose_title_game_pct": 0.0431,
+      "make_title_game_pct": 0.0469,
+      "conference_title_pct": 0.0044,
+      "lose_title_game_pct": 0.0424,
       "win_distribution": [
         {
           "wins": 1,
@@ -5054,9 +5016,9 @@
       "avg_total_wins": 6.6913,
       "avg_conference_wins": 6.0836,
       "bowl_eligibility_pct": 0.8181,
-      "make_title_game_pct": 0.5206,
-      "conference_title_pct": 0.2109,
-      "lose_title_game_pct": 0.3098,
+      "make_title_game_pct": 0.5423,
+      "conference_title_pct": 0.308,
+      "lose_title_game_pct": 0.2344,
       "win_distribution": [
         {
           "wins": 1,
@@ -5110,9 +5072,9 @@
       "avg_total_wins": 4.0333,
       "avg_conference_wins": 3.6307,
       "bowl_eligibility_pct": 0.1343,
-      "make_title_game_pct": 0.022,
-      "conference_title_pct": 0.0075,
-      "lose_title_game_pct": 0.0145,
+      "make_title_game_pct": 0.0177,
+      "conference_title_pct": 0.0037,
+      "lose_title_game_pct": 0.014,
       "win_distribution": [
         {
           "wins": 0,
@@ -5162,9 +5124,9 @@
       "avg_total_wins": 4.7093,
       "avg_conference_wins": 3.7269,
       "bowl_eligibility_pct": 0.2718,
-      "make_title_game_pct": 0.0156,
-      "conference_title_pct": 0.004,
-      "lose_title_game_pct": 0.0116,
+      "make_title_game_pct": 0.016,
+      "conference_title_pct": 0.0043,
+      "lose_title_game_pct": 0.0117,
       "win_distribution": [
         {
           "wins": 0,
@@ -5218,9 +5180,9 @@
       "avg_total_wins": 4.8584,
       "avg_conference_wins": 4.2136,
       "bowl_eligibility_pct": 0.3306,
-      "make_title_game_pct": 0.0996,
-      "conference_title_pct": 0.0399,
-      "lose_title_game_pct": 0.0597,
+      "make_title_game_pct": 0.0985,
+      "conference_title_pct": 0.0374,
+      "lose_title_game_pct": 0.0611,
       "win_distribution": [
         {
           "wins": 0,
@@ -5278,9 +5240,9 @@
       "avg_total_wins": 7.2127,
       "avg_conference_wins": 5.4581,
       "bowl_eligibility_pct": 0.9056,
-      "make_title_game_pct": 0.2616,
-      "conference_title_pct": 0.1089,
-      "lose_title_game_pct": 0.1527,
+      "make_title_game_pct": 0.2498,
+      "conference_title_pct": 0.1015,
+      "lose_title_game_pct": 0.1483,
       "win_distribution": [
         {
           "wins": 1,
@@ -5331,60 +5293,56 @@
     {
       "team": "Kennesaw State",
       "conference": "CUSA",
-      "avg_total_wins": 7.3618,
-      "avg_conference_wins": 5.8753,
-      "bowl_eligibility_pct": 0.9076,
-      "make_title_game_pct": 0.5517,
-      "conference_title_pct": 0.2631,
-      "lose_title_game_pct": 0.2886,
+      "avg_total_wins": 6.6637,
+      "avg_conference_wins": 5.1772,
+      "bowl_eligibility_pct": 0.8055,
+      "make_title_game_pct": 0.4507,
+      "conference_title_pct": 0.2626,
+      "lose_title_game_pct": 0.1881,
       "win_distribution": [
-        {
-          "wins": 0,
-          "probability": 0.0001
-        },
         {
           "wins": 1,
           "probability": 0.0001
         },
         {
           "wins": 2,
-          "probability": 0.0003
+          "probability": 0.0018
         },
         {
           "wins": 3,
-          "probability": 0.0027
+          "probability": 0.0115
         },
         {
           "wins": 4,
-          "probability": 0.0188
+          "probability": 0.0481
         },
         {
           "wins": 5,
-          "probability": 0.0704
+          "probability": 0.1329
         },
         {
           "wins": 6,
-          "probability": 0.162
+          "probability": 0.2461
         },
         {
           "wins": 7,
-          "probability": 0.2659
+          "probability": 0.2762
         },
         {
           "wins": 8,
-          "probability": 0.2704
+          "probability": 0.1995
         },
         {
           "wins": 9,
-          "probability": 0.1646
+          "probability": 0.075
         },
         {
           "wins": 10,
-          "probability": 0.0442
+          "probability": 0.0087
         },
         {
           "wins": 11,
-          "probability": 0.0005
+          "probability": 0.0001
         }
       ]
     },
@@ -5394,8 +5352,8 @@
       "avg_total_wins": 2.9294,
       "avg_conference_wins": 2.2121,
       "bowl_eligibility_pct": 0.0216,
-      "make_title_game_pct": 0.0008,
-      "conference_title_pct": 0.0003,
+      "make_title_game_pct": 0.0006,
+      "conference_title_pct": 0.0001,
       "lose_title_game_pct": 0.0005,
       "win_distribution": [
         {
@@ -5502,9 +5460,9 @@
       "avg_total_wins": 6.7656,
       "avg_conference_wins": 5.9061,
       "bowl_eligibility_pct": 0.8315,
-      "make_title_game_pct": 0.4975,
-      "conference_title_pct": 0.2418,
-      "lose_title_game_pct": 0.2558,
+      "make_title_game_pct": 0.5433,
+      "conference_title_pct": 0.2125,
+      "lose_title_game_pct": 0.3308,
       "win_distribution": [
         {
           "wins": 1,
@@ -5554,9 +5512,9 @@
       "avg_total_wins": 4.4177,
       "avg_conference_wins": 3.8502,
       "bowl_eligibility_pct": 0.1938,
-      "make_title_game_pct": 0.0127,
-      "conference_title_pct": 0.0027,
-      "lose_title_game_pct": 0.0101,
+      "make_title_game_pct": 0.0124,
+      "conference_title_pct": 0.0026,
+      "lose_title_game_pct": 0.0098,
       "win_distribution": [
         {
           "wins": 0,
@@ -5606,9 +5564,9 @@
       "avg_total_wins": 4.4487,
       "avg_conference_wins": 4.1101,
       "bowl_eligibility_pct": 0.2173,
-      "make_title_game_pct": 0.0624,
-      "conference_title_pct": 0.0163,
-      "lose_title_game_pct": 0.0461,
+      "make_title_game_pct": 0.0593,
+      "conference_title_pct": 0.0122,
+      "lose_title_game_pct": 0.0471,
       "win_distribution": [
         {
           "wins": 0,
@@ -5658,9 +5616,9 @@
       "avg_total_wins": 6.8656,
       "avg_conference_wins": 5.3101,
       "bowl_eligibility_pct": 0.8325,
-      "make_title_game_pct": 0.2328,
-      "conference_title_pct": 0.0772,
-      "lose_title_game_pct": 0.1555,
+      "make_title_game_pct": 0.2713,
+      "conference_title_pct": 0.1253,
+      "lose_title_game_pct": 0.146,
       "win_distribution": [
         {
           "wins": 2,
@@ -5710,9 +5668,9 @@
       "avg_total_wins": 6.1848,
       "avg_conference_wins": 4.3038,
       "bowl_eligibility_pct": 0.7105,
-      "make_title_game_pct": 0.0758,
-      "conference_title_pct": 0.01,
-      "lose_title_game_pct": 0.0659,
+      "make_title_game_pct": 0.0767,
+      "conference_title_pct": 0.0193,
+      "lose_title_game_pct": 0.0574,
       "win_distribution": [
         {
           "wins": 1,
@@ -5766,9 +5724,9 @@
       "avg_total_wins": 3.6852,
       "avg_conference_wins": 3.1551,
       "bowl_eligibility_pct": 0.0951,
-      "make_title_game_pct": 0.0187,
-      "conference_title_pct": 0.0059,
-      "lose_title_game_pct": 0.0129,
+      "make_title_game_pct": 0.0166,
+      "conference_title_pct": 0.0026,
+      "lose_title_game_pct": 0.014,
       "win_distribution": [
         {
           "wins": 0,
@@ -5818,9 +5776,9 @@
       "avg_total_wins": 6.354,
       "avg_conference_wins": 5.5068,
       "bowl_eligibility_pct": 0.746,
-      "make_title_game_pct": 0.4581,
-      "conference_title_pct": 0.2095,
-      "lose_title_game_pct": 0.2486,
+      "make_title_game_pct": 0.4905,
+      "conference_title_pct": 0.2586,
+      "lose_title_game_pct": 0.2319,
       "win_distribution": [
         {
           "wins": 1,
@@ -5874,9 +5832,9 @@
       "avg_total_wins": 3.9235,
       "avg_conference_wins": 3.7109,
       "bowl_eligibility_pct": 0.0967,
-      "make_title_game_pct": 0.0218,
-      "conference_title_pct": 0.0051,
-      "lose_title_game_pct": 0.0167,
+      "make_title_game_pct": 0.0225,
+      "conference_title_pct": 0.0041,
+      "lose_title_game_pct": 0.0184,
       "win_distribution": [
         {
           "wins": 0,
@@ -5926,9 +5884,9 @@
       "avg_total_wins": 4.8228,
       "avg_conference_wins": 3.8826,
       "bowl_eligibility_pct": 0.3171,
-      "make_title_game_pct": 0.0456,
-      "conference_title_pct": 0.0154,
-      "lose_title_game_pct": 0.0302,
+      "make_title_game_pct": 0.0455,
+      "conference_title_pct": 0.0131,
+      "lose_title_game_pct": 0.0324,
       "win_distribution": [
         {
           "wins": 0,
@@ -5987,8 +5945,8 @@
       "avg_conference_wins": 4.987,
       "bowl_eligibility_pct": 0.5746,
       "make_title_game_pct": 0.1888,
-      "conference_title_pct": 0.0631,
-      "lose_title_game_pct": 0.1256,
+      "conference_title_pct": 0.0401,
+      "lose_title_game_pct": 0.1487,
       "win_distribution": [
         {
           "wins": 1,
@@ -6038,9 +5996,9 @@
       "avg_total_wins": 4.9361,
       "avg_conference_wins": 3.8723,
       "bowl_eligibility_pct": 0.3391,
-      "make_title_game_pct": 0.0565,
-      "conference_title_pct": 0.0175,
-      "lose_title_game_pct": 0.0389,
+      "make_title_game_pct": 0.067,
+      "conference_title_pct": 0.0196,
+      "lose_title_game_pct": 0.0474,
       "win_distribution": [
         {
           "wins": 0,
@@ -6094,9 +6052,9 @@
       "avg_total_wins": 3.9369,
       "avg_conference_wins": 3.2421,
       "bowl_eligibility_pct": 0.1422,
-      "make_title_game_pct": 0.0179,
-      "conference_title_pct": 0.0049,
-      "lose_title_game_pct": 0.013,
+      "make_title_game_pct": 0.0176,
+      "conference_title_pct": 0.0043,
+      "lose_title_game_pct": 0.0133,
       "win_distribution": [
         {
           "wins": 0,
@@ -6151,8 +6109,8 @@
       "avg_conference_wins": 2.2474,
       "bowl_eligibility_pct": 0.0279,
       "make_title_game_pct": 0.0022,
-      "conference_title_pct": 0.0001,
-      "lose_title_game_pct": 0.0021,
+      "conference_title_pct": 0.0002,
+      "lose_title_game_pct": 0.0019,
       "win_distribution": [
         {
           "wins": 0,
@@ -6202,9 +6160,9 @@
       "avg_total_wins": 4.458,
       "avg_conference_wins": 4.3472,
       "bowl_eligibility_pct": 0.189,
-      "make_title_game_pct": 0.073,
-      "conference_title_pct": 0.0168,
-      "lose_title_game_pct": 0.0562,
+      "make_title_game_pct": 0.0771,
+      "conference_title_pct": 0.0161,
+      "lose_title_game_pct": 0.061,
       "win_distribution": [
         {
           "wins": 1,
@@ -6251,8 +6209,8 @@
       "avg_conference_wins": 3.5459,
       "bowl_eligibility_pct": 0.384,
       "make_title_game_pct": 0.0167,
-      "conference_title_pct": 0.0012,
-      "lose_title_game_pct": 0.0155,
+      "conference_title_pct": 0.0015,
+      "lose_title_game_pct": 0.0152,
       "win_distribution": [
         {
           "wins": 1,
@@ -6302,9 +6260,9 @@
       "avg_total_wins": 4.4455,
       "avg_conference_wins": 4.0953,
       "bowl_eligibility_pct": 0.2363,
-      "make_title_game_pct": 0.1026,
-      "conference_title_pct": 0.0254,
-      "lose_title_game_pct": 0.0772,
+      "make_title_game_pct": 0.1252,
+      "conference_title_pct": 0.0394,
+      "lose_title_game_pct": 0.0858,
       "win_distribution": [
         {
           "wins": 0,
@@ -6447,44 +6405,48 @@
     {
       "team": "Missouri State",
       "conference": "CUSA",
-      "avg_total_wins": 2.1346,
-      "avg_conference_wins": 1.7967,
-      "bowl_eligibility_pct": 0.005,
-      "make_title_game_pct": 0.0018,
-      "conference_title_pct": 0.0003,
-      "lose_title_game_pct": 0.0014,
+      "avg_total_wins": 2.8327,
+      "avg_conference_wins": 2.4947,
+      "bowl_eligibility_pct": 0.0181,
+      "make_title_game_pct": 0.0078,
+      "conference_title_pct": 0.0009,
+      "lose_title_game_pct": 0.0069,
       "win_distribution": [
         {
           "wins": 0,
-          "probability": 0.0717
+          "probability": 0.0138
         },
         {
           "wins": 1,
-          "probability": 0.2414
+          "probability": 0.1136
         },
         {
           "wins": 2,
-          "probability": 0.3297
+          "probability": 0.2783
         },
         {
           "wins": 3,
-          "probability": 0.2326
+          "probability": 0.3179
         },
         {
           "wins": 4,
-          "probability": 0.0922
+          "probability": 0.1936
         },
         {
           "wins": 5,
-          "probability": 0.0273
+          "probability": 0.0647
         },
         {
           "wins": 6,
-          "probability": 0.0046
+          "probability": 0.0158
         },
         {
           "wins": 7,
-          "probability": 0.0003
+          "probability": 0.0021
+        },
+        {
+          "wins": 8,
+          "probability": 0.0001
         }
       ]
     },
@@ -6494,8 +6456,8 @@
       "avg_total_wins": 3.0895,
       "avg_conference_wins": 3.0099,
       "bowl_eligibility_pct": 0.0373,
-      "make_title_game_pct": 0.0138,
-      "conference_title_pct": 0.0027,
+      "make_title_game_pct": 0.0132,
+      "conference_title_pct": 0.0021,
       "lose_title_game_pct": 0.0111,
       "win_distribution": [
         {
@@ -6626,9 +6588,9 @@
       "avg_total_wins": 3.8916,
       "avg_conference_wins": 3.5878,
       "bowl_eligibility_pct": 0.1127,
-      "make_title_game_pct": 0.0212,
-      "conference_title_pct": 0.0027,
-      "lose_title_game_pct": 0.0185,
+      "make_title_game_pct": 0.0219,
+      "conference_title_pct": 0.0024,
+      "lose_title_game_pct": 0.0195,
       "win_distribution": [
         {
           "wins": 0,
@@ -6678,9 +6640,9 @@
       "avg_total_wins": 4.6346,
       "avg_conference_wins": 3.923,
       "bowl_eligibility_pct": 0.2682,
-      "make_title_game_pct": 0.0471,
-      "conference_title_pct": 0.0092,
-      "lose_title_game_pct": 0.038,
+      "make_title_game_pct": 0.0493,
+      "conference_title_pct": 0.0135,
+      "lose_title_game_pct": 0.0358,
       "win_distribution": [
         {
           "wins": 0,
@@ -6822,7 +6784,7 @@
       "avg_total_wins": 2.541,
       "avg_conference_wins": 2.4644,
       "bowl_eligibility_pct": 0.0132,
-      "make_title_game_pct": 0.0033,
+      "make_title_game_pct": 0.0032,
       "conference_title_pct": 0.0003,
       "lose_title_game_pct": 0.003,
       "win_distribution": [
@@ -6870,9 +6832,9 @@
       "avg_total_wins": 2.6475,
       "avg_conference_wins": 2.2401,
       "bowl_eligibility_pct": 0.022,
-      "make_title_game_pct": 0.0057,
-      "conference_title_pct": 0.0009,
-      "lose_title_game_pct": 0.0048,
+      "make_title_game_pct": 0.0065,
+      "conference_title_pct": 0.0011,
+      "lose_title_game_pct": 0.0053,
       "win_distribution": [
         {
           "wins": 0,
@@ -6918,9 +6880,9 @@
       "avg_total_wins": 2.3834,
       "avg_conference_wins": 2.2626,
       "bowl_eligibility_pct": 0.0073,
-      "make_title_game_pct": 0.0035,
-      "conference_title_pct": 0.0005,
-      "lose_title_game_pct": 0.003,
+      "make_title_game_pct": 0.0046,
+      "conference_title_pct": 0.0008,
+      "lose_title_game_pct": 0.0037,
       "win_distribution": [
         {
           "wins": 0,
@@ -6966,9 +6928,9 @@
       "avg_total_wins": 4.3995,
       "avg_conference_wins": 3.3014,
       "bowl_eligibility_pct": 0.2024,
-      "make_title_game_pct": 0.0152,
-      "conference_title_pct": 0.0006,
-      "lose_title_game_pct": 0.0147,
+      "make_title_game_pct": 0.0155,
+      "conference_title_pct": 0.0016,
+      "lose_title_game_pct": 0.0139,
       "win_distribution": [
         {
           "wins": 1,
@@ -7049,7 +7011,7 @@
     {
       "conference": "ACC",
       "num_teams": 17,
-      "average_strength": 6.3704,
+      "average_strength": 6.2841,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": true,
@@ -7059,15 +7021,15 @@
           "away_team": "SMU",
           "home_team": "Miami-FL"
         },
-        "projected_spread": 10.4,
+        "projected_spread": 13.4,
         "projected_total": 50.3,
-        "home_win_pct": 0.8320183851339245
+        "home_win_pct": 0.8871083342296
       }
     },
     {
       "conference": "American",
       "num_teams": 14,
-      "average_strength": -7.3201,
+      "average_strength": -6.7515,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": false,
@@ -7077,15 +7039,15 @@
           "away_team": "Memphis",
           "home_team": "Navy"
         },
-        "projected_spread": 4.9,
+        "projected_spread": 0.7,
         "projected_total": 56.5,
-        "home_win_pct": 0.6800161786632919
+        "home_win_pct": 0.5268970867343741
       }
     },
     {
       "conference": "B12",
       "num_teams": 16,
-      "average_strength": 7.0867,
+      "average_strength": 7.1283,
       "championship_game": {
         "date": "2026-12-04",
         "neutral_site": true,
@@ -7095,15 +7057,15 @@
           "away_team": "BYU",
           "home_team": "Texas Tech"
         },
-        "projected_spread": 7.3,
+        "projected_spread": 1.2,
         "projected_total": 51.9,
-        "home_win_pct": 0.7545590079507374
+        "home_win_pct": 0.5460232035558019
       }
     },
     {
       "conference": "B1G",
       "num_teams": 18,
-      "average_strength": 11.1724,
+      "average_strength": 11.0585,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": true,
@@ -7113,33 +7075,33 @@
           "away_team": "Indiana",
           "home_team": "Ohio State"
         },
-        "projected_spread": 4.9,
+        "projected_spread": 4.1,
         "projected_total": 50.2,
-        "home_win_pct": 0.6800161786632919
+        "home_win_pct": 0.6526638624685417
       }
     },
     {
       "conference": "CUSA",
       "num_teams": 10,
-      "average_strength": -13.5136,
+      "average_strength": -12.9883,
       "championship_game": {
         "date": "2026-12-04",
         "neutral_site": false,
         "site_type": "Home/Host",
         "template": "CUSA No. 2 at CUSA No. 1",
         "projected_matchup": {
-          "away_team": "Delaware",
-          "home_team": "Kennesaw State"
+          "away_team": "Liberty",
+          "home_team": "Delaware"
         },
         "projected_spread": 2.3,
-        "projected_total": 54.8,
+        "projected_total": 57.6,
         "home_win_pct": 0.587549949442362
       }
     },
     {
       "conference": "MAC",
       "num_teams": 13,
-      "average_strength": -14.7991,
+      "average_strength": -15.101,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": true,
@@ -7149,15 +7111,15 @@
           "away_team": "Toledo",
           "home_team": "Western Michigan"
         },
-        "projected_spread": 1.3,
+        "projected_spread": 5.5,
         "projected_total": 44.7,
-        "home_win_pct": 0.549833997312478
+        "home_win_pct": 0.6997597020563492
       }
     },
     {
       "conference": "MW",
       "num_teams": 10,
-      "average_strength": -9.2688,
+      "average_strength": -8.1703,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": false,
@@ -7167,16 +7129,16 @@
           "away_team": "UNLV",
           "home_team": "New Mexico"
         },
-        "projected_spread": -1.7,
+        "projected_spread": 2.1,
         "projected_total": 55.6,
-        "home_win_pct": 0.43498555795224525,
+        "home_win_pct": 0.5800739383102872,
         "eligibility_note": "North Dakota State excluded: First-year Mountain West member; not eligible for 2026 MW title."
       }
     },
     {
       "conference": "PAC12",
       "num_teams": 8,
-      "average_strength": -3.3933,
+      "average_strength": -4.2311,
       "championship_game": {
         "date": "2026-12-04",
         "neutral_site": false,
@@ -7186,45 +7148,45 @@
           "away_team": "San Diego State",
           "home_team": "Boise State"
         },
-        "projected_spread": 8.8,
+        "projected_spread": 8.5,
         "projected_total": 50.4,
-        "home_win_pct": 0.7947577159732137
+        "home_win_pct": 0.7871267392372587
       }
     },
     {
       "conference": "SEC",
       "num_teams": 16,
-      "average_strength": 15.4204,
+      "average_strength": 16.6055,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": true,
         "site_type": "Neutral",
         "template": "SEC No. 2 at SEC No. 1",
         "projected_matchup": {
-          "away_team": "Texas",
-          "home_team": "Georgia"
+          "away_team": "Georgia",
+          "home_team": "Texas"
         },
-        "projected_spread": 0.1,
+        "projected_spread": 2.6,
         "projected_total": 51.7,
-        "home_win_pct": 0.5038460779869267
+        "home_win_pct": 0.598687660112452
       }
     },
     {
       "conference": "Sun Belt",
       "num_teams": 14,
-      "average_strength": -10.8926,
+      "average_strength": -10.1045,
       "championship_game": {
         "date": "2026-12-05",
         "neutral_site": false,
         "site_type": "Home/Host",
         "template": "Sun Belt East at Sun Belt West",
         "projected_matchup": {
-          "away_team": "Louisiana Tech",
-          "home_team": "James Madison"
+          "away_team": "James Madison",
+          "home_team": "Louisiana Tech"
         },
-        "projected_spread": 10.4,
+        "projected_spread": 1.3,
         "projected_total": 52.3,
-        "home_win_pct": 0.8320183851339245
+        "home_win_pct": 0.549833997312478
       }
     }
   ]
