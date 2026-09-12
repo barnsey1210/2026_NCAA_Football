@@ -297,6 +297,16 @@ def main():
         if game.get("away_team") in fbs_teams
         and game.get("home_team") in fbs_teams
     ]
+    fbs_game_ids = {
+        str(game.get("game_id"))
+        for game in schedule_games
+        if game.get("game_id")
+    }
+    predictions = [row for row in predictions if str(row.get("canonical_game_id")) in fbs_game_ids]
+    checkpoints = [row for row in checkpoints if str(row.get("canonical_game_id")) in fbs_game_ids]
+    decisions = [row for row in decisions if str(row.get("canonical_game_id")) in fbs_game_ids]
+    scores = [row for row in scores if str(row.get("canonical_game_id")) in fbs_game_ids]
+    prediction_scores = [row for row in prediction_scores if str(row.get("canonical_game_id")) in fbs_game_ids]
 
     latest = {}
 

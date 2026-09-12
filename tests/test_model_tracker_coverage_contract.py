@@ -161,3 +161,4 @@ def test_schedule_denominators_are_fbs_vs_fbs_only():
     assert "PRESEASON_DB" in source
     assert 'game.get("away_team") in fbs_teams' in source
     assert 'game.get("home_team") in fbs_teams' in source
+    assert 'str(row.get("canonical_game_id")) in fbs_game_ids' in source
