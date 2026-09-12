@@ -157,7 +157,7 @@ def test_prediction_market_close_and_final_scores_all_metric_families():
 
 
 def test_schedule_denominators_are_fbs_vs_fbs_only():
-    source = SCRIPT.read_text()
+    source = (ROOT / "scripts/model_tracking/build_model_performance_view.py").read_text()
     assert "PRESEASON_DB" in source
     assert 'game.get("away_team") in fbs_teams' in source
     assert 'game.get("home_team") in fbs_teams' in source
