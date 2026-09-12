@@ -55,6 +55,11 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         self.assertIn("model_performance_view.json", validator)
         self.assertIn("shadow_model_performance.json", validator)
 
+    def test_optional_model_open_tab_is_null_safe(self):
+        for name in ("betting.html", "betting_v2.html"):
+            page = (ROOT / name).read_text()
+            self.assertIn("if(modelOpenTab)modelOpenTab.textContent", page)
+
     def test_shadow_contract_is_rendered_without_ui_metric_calculation(self):
         text = (ROOT / "betting_v2.html").read_text()
         for marker in ("shadowSpreadRows", "shadowTotalsRows", "shadowSpreadQuality",
