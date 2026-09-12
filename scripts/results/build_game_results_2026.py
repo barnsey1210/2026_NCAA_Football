@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 CFBD = ROOT / "data/canonical/cfbd_schedule_2026.json"
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
+MARKET_CONTRACT = ROOT / "data/site/current_market_contract.json"
 
 OUT_JSON = ROOT / "data/canonical/game_results_2026.json"
 OUT_CSV = ROOT / "data/canonical/game_results_2026.csv"
@@ -101,6 +102,57 @@ def market_fields(game: dict) -> dict:
     }
 
 
+def frozen_quote(game: dict, market_type: str, side: str) -> dict | None:
+    """Choose one canonical frozen quote, preferring Pinnacle sharp reference."""
+    quotes = game.get("quotes") or {}
+    candidates = []
+    for book, markets in quotes.items():
+        quote = ((markets or {}).get(market_type) or {}).get(side) or {}
+        if str(quote.get("freshness_status") or "").upper() != "FROZEN_CLOSE":
+            continue
+        if finite(quote.get("line")) is None:
+            continue
+        candidates.append((
+            0 if book == "Pinnacle" and quote.get("venue_type") == "sharp_reference" else
+            1 if quote.get("venue_type") == "sharp_reference" else 2,
+            str(book),
+            quote,
+        ))
+    if not candidates:
+        return None
+    return min(candidates, key=lambda item: (item[0], item[1]))[2]
+
+
+def closing_market_fields(canonical_game: dict | None, legacy_game: dict) -> dict:
+    """Resolve closes from canonical FROZEN_CLOSE, with legacy field fallback."""
+    legacy = market_fields(legacy_game)
+    spread_quote = frozen_quote(canonical_game or {}, "spread", "home")
+    total_quote = frozen_quote(canonical_game or {}, "total", "over")
+
+    spread = finite(spread_quote.get("line")) if spread_quote else legacy["closing_home_spread"]
+    total = finite(total_quote.get("line")) if total_quote else legacy["closing_total"]
+
+    return {
+        **legacy,
+        "closing_home_spread": spread,
+        "closing_total": total,
+        "closing_home_spread_source": (
+            "data/site/current_market_contract.json" if spread_quote else
+            "data/snapshots/preseason/preseason_db.json" if spread is not None else None
+        ),
+        "closing_home_spread_book": spread_quote.get("sportsbook") if spread_quote else None,
+        "closing_home_spread_source_updated_at": spread_quote.get("source_updated_at") if spread_quote else None,
+        "closing_home_spread_freshness_status": spread_quote.get("freshness_status") if spread_quote else None,
+        "closing_total_source": (
+            "data/site/current_market_contract.json" if total_quote else
+            "data/snapshots/preseason/preseason_db.json" if total is not None else None
+        ),
+        "closing_total_book": total_quote.get("sportsbook") if total_quote else None,
+        "closing_total_source_updated_at": total_quote.get("source_updated_at") if total_quote else None,
+        "closing_total_freshness_status": total_quote.get("freshness_status") if total_quote else None,
+    }
+
+
 def main() -> None:
     if not CFBD.exists():
         raise SystemExit(f"Missing required input: {CFBD}")
@@ -109,9 +161,15 @@ def main() -> None:
 
     cfbd_payload = json.loads(CFBD.read_text())
     db = json.loads(DB.read_text())
+    market_payload = json.loads(MARKET_CONTRACT.read_text()) if MARKET_CONTRACT.exists() else {}
 
     cfbd_games = cfbd_payload.get("games", [])
     site_games = db.get("games", [])
+    market_by_game_id = {
+        str(g.get("game_id")): g
+        for g in market_payload.get("games", [])
+        if g.get("game_id") is not None
+    }
 
     by_cfbd_id = {
         str(g.get("cfbd_game_id")): g
@@ -181,7 +239,8 @@ def main() -> None:
             })
             continue
 
-        market = market_fields(sg)
+        game_id = str(sg.get("game_id") or "")
+        market = closing_market_fields(market_by_game_id.get(game_id), sg)
         home_margin = home_score - away_score
         total_points = home_score + away_score
 

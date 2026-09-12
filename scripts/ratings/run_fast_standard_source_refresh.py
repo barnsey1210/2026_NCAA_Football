@@ -110,7 +110,7 @@ def commands(start_date, end_date, as_of_date=None):
     return {
         "sagarin": [sys.executable, "ratings/pull_sagarin_ratings.py", *bounds, *clock],
         "dratings": [sys.executable, "scripts/projections/pull_dratings_ncaaf_predictions.py", *bounds, *clock],
-        "massey": [sys.executable, "scripts/projections/refresh_massey_game_projections_2026.py", "--days", "7", *clock],
+        "massey": [sys.executable, "scripts/projections/refresh_massey_game_projections_2026.py", "--days", "10", *clock],
     }
 
 
