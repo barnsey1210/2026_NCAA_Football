@@ -154,3 +154,10 @@ def test_prediction_market_close_and_final_scores_all_metric_families():
     )
     assert metrics["mae_n"] == metrics["ats_n"] == metrics["roi_n"] == 1
     assert metrics["clv_n"] == 1
+
+
+def test_schedule_denominators_are_fbs_vs_fbs_only():
+    source = SCRIPT.read_text()
+    assert "PRESEASON_DB" in source
+    assert 'game.get("away_team") in fbs_teams' in source
+    assert 'game.get("home_team") in fbs_teams' in source

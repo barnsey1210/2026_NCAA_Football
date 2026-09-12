@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / "data/model_tracking/v2"
 OUT = ROOT / "data/site/model_performance_view.json"
 PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
+PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 
 SCORE_PRIORITY = {
     "settlement_v4_frozen_close": 4,
@@ -285,7 +286,17 @@ def main():
     scores = authoritative_scores(scores_all)
     prediction_scores_all = load("prediction_scores.jsonl")
     prediction_scores = authoritative_prediction_scores(prediction_scores_all)
-    schedule_games = load_json(PROJECTION_CONTRACT, {}).get("games", [])
+    fbs_teams = {
+        str(row.get("team"))
+        for row in load_json(PRESEASON_DB, {}).get("teams", [])
+        if row.get("team")
+    }
+    schedule_games = [
+        game
+        for game in load_json(PROJECTION_CONTRACT, {}).get("games", [])
+        if game.get("away_team") in fbs_teams
+        and game.get("home_team") in fbs_teams
+    ]
 
     latest = {}
 
