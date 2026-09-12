@@ -303,9 +303,10 @@ def main():
         if game.get("game_id")
     }
     predictions = [row for row in predictions if str(row.get("canonical_game_id")) in fbs_game_ids]
+    fbs_prediction_ids = {str(row.get("observation_id")) for row in predictions}
     checkpoints = [row for row in checkpoints if str(row.get("canonical_game_id")) in fbs_game_ids]
     decisions = [row for row in decisions if str(row.get("canonical_game_id")) in fbs_game_ids]
-    scores = [row for row in scores if str(row.get("canonical_game_id")) in fbs_game_ids]
+    scores = [row for row in scores if str(row.get("prediction_observation_id")) in fbs_prediction_ids]
     prediction_scores = [row for row in prediction_scores if str(row.get("canonical_game_id")) in fbs_game_ids]
 
     latest = {}
