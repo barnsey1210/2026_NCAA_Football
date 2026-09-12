@@ -85,14 +85,15 @@ def omission_reasons(*, schedule_n, projection_n, captured_n, settled_n,
     return reasons
 
 
-def coverage_metrics(rows, *, checkpoint, schedule_n, projection_n,
+def coverage_metrics(rows, *, accuracy_rows=None, checkpoint, schedule_n, projection_n,
                      captured_rows, model_id, market_type, period):
+    accuracy_rows = rows if accuracy_rows is None else accuracy_rows
     wins = sum(row.get("result") == 1 for row in rows)
     losses = sum(row.get("result") == -1 for row in rows)
     pushes = sum(row.get("result") == 0 for row in rows)
-    ae = [float(row["absolute_error"]) for row in rows if row.get("absolute_error") is not None]
-    signed = [float(row["signed_error"]) for row in rows if row.get("signed_error") is not None]
-    squared = [float(row["squared_error"]) for row in rows if row.get("squared_error") is not None]
+    ae = [float(row["absolute_error"]) for row in accuracy_rows if row.get("absolute_error") is not None]
+    signed = [float(row["signed_error"]) for row in accuracy_rows if row.get("signed_error") is not None]
+    squared = [float(row["squared_error"]) for row in accuracy_rows if row.get("squared_error") is not None]
     clv = [float(row["clv"]) for row in rows if row.get("clv") is not None]
     captured_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows})
     market_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows if row.get("market_line") is not None or row.get("market_observation_id")})
@@ -104,14 +105,16 @@ def coverage_metrics(rows, *, checkpoint, schedule_n, projection_n,
     target_times = sorted({str(row.get("checkpoint_at")) for row in provenance_rows if row.get("checkpoint_at")})
     close = checkpoint == "CLOSE"
     return {
-        "games": settled_n, "record": f"{wins}-{losses}-{pushes}",
+        "games": len(accuracy_rows), "record": f"{wins}-{losses}-{pushes}",
         "wins": wins, "losses": losses, "pushes": pushes,
         "schedule_eligible_n": schedule_n, "projection_eligible_n": projection_n,
-        "market_eligible_n": market_n, "captured_n": captured_n,
+        "prediction_n": projection_n, "settled_prediction_n": len(accuracy_rows),
+        "market_n": market_n, "market_eligible_n": market_n, "captured_n": captured_n,
         "settled_n": settled_n,
         "ats_n": wins + losses if market_type == "spread" else None,
         "ou_n": wins + losses if market_type == "total" else None,
-        "roi_n": settled_n, "mae_n": len(ae), "clv_n": None if close else len(clv),
+        "roi_n": settled_n, "mae_n": len(ae), "rmse_n": len(squared),
+        "bias_n": len(signed), "clv_n": None if close else len(clv),
         "ats_or_ou_pct": wins / (wins + losses) if wins + losses else None,
         "roi": sum(float(row.get("profit") or 0) for row in rows) / settled_n if settled_n else None,
         "mae": sum(ae) / len(ae) if ae else None,
@@ -205,6 +208,19 @@ def authoritative_scores(scores_all):
     return list(selected.values())
 
 
+def authoritative_prediction_scores(rows):
+    selected = {}
+    for row in rows:
+        key = (
+            row.get("canonical_game_id"), row.get("model_id"),
+            row.get("model_version"), row.get("market_type"),
+        )
+        prior = selected.get(key)
+        if prior is None or str(row.get("frozen_at") or "") > str(prior.get("frozen_at") or ""):
+            selected[key] = row
+    return list(selected.values())
+
+
 
 def normalized_decisions():
     states = {
@@ -267,6 +283,8 @@ def main():
     decisions = normalized_decisions()
     scores_all = load("scores.jsonl")
     scores = authoritative_scores(scores_all)
+    prediction_scores_all = load("prediction_scores.jsonl")
+    prediction_scores = authoritative_prediction_scores(prediction_scores_all)
     schedule_games = load_json(PROJECTION_CONTRACT, {}).get("games", [])
 
     latest = {}
@@ -285,6 +303,7 @@ def main():
     }
 
     grouped = defaultdict(list)
+    accuracy_grouped = defaultdict(list)
 
     for score in scores:
         grouped[
@@ -293,6 +312,9 @@ def main():
                 score.get("model_version"),
             )
         ].append(score)
+
+    for score in prediction_scores:
+        accuracy_grouped[(score.get("model_id"), score.get("model_version"))].append(score)
 
     matrices = {
         "spread": [],
@@ -306,6 +328,7 @@ def main():
         )
 
         rows = grouped[key]
+        accuracy_rows = accuracy_grouped[key]
         latest_prediction = latest.get(key, {})
 
         wins = sum(
@@ -329,19 +352,19 @@ def main():
 
         absolute_error = [
             row["absolute_error"]
-            for row in rows
+            for row in accuracy_rows
             if row.get("absolute_error") is not None
         ]
 
         squared_error = [
             row["squared_error"]
-            for row in rows
+            for row in accuracy_rows
             if row.get("squared_error") is not None
         ]
 
         signed_error = [
             row["signed_error"]
-            for row in rows
+            for row in accuracy_rows
             if row.get("signed_error") is not None
         ]
 
@@ -370,6 +393,8 @@ def main():
             model_type = "composite"
 
         n = len(rows)
+        prediction_n = len({row.get("canonical_game_id") for row in available})
+        settled_prediction_n = len(accuracy_rows)
 
         beat_close_rows = [
             row
@@ -413,10 +438,20 @@ def main():
             "rank": None,
             "ranking_status": (
                 "UNRANKED — SMALL SAMPLE"
-                if n < 30
+                if settled_prediction_n < 30
                 else "ELIGIBLE"
             ),
-            "games": n,
+            "games": settled_prediction_n,
+            "prediction_n": prediction_n,
+            "settled_prediction_n": settled_prediction_n,
+            "mae_n": len(absolute_error),
+            "rmse_n": len(squared_error),
+            "bias_n": len(signed_error),
+            "market_n": n,
+            "ats_n": wins + losses if spec["market_type"] == "spread" else None,
+            "ou_n": wins + losses if spec["market_type"] == "total" else None,
+            "roi_n": n,
+            "clv_n": len(clv),
             "availability_pct": (
                 len(available) / len(observed)
                 if observed
@@ -498,7 +533,7 @@ def main():
             [
                 row
                 for row in matrices[market]
-                if row["games"] >= 30
+                if row["settled_prediction_n"] >= 30
             ],
             key=lambda row: (
                 -(
@@ -651,12 +686,21 @@ def main():
                     for row in scores
                     if row.get("market_type") == market_type
                 ]
+                period_accuracy_rows = [
+                    row for row in prediction_scores
+                    if row.get("market_type") == market_type
+                ]
             else:
                 week = int(period[1:])
 
                 period_rows = [
                     row
                     for row in scores
+                    if row.get("market_type") == market_type
+                    and row.get("week") == week
+                ]
+                period_accuracy_rows = [
+                    row for row in prediction_scores
                     if row.get("market_type") == market_type
                     and row.get("week") == week
                 ]
@@ -708,6 +752,11 @@ def main():
                         and score.get("model_version") == model_version
                         and score.get("checkpoint") == checkpoint
                     ]
+                    selected_accuracy_rows = [
+                        score for score in period_accuracy_rows
+                        if score.get("model_id") == model_id
+                        and score.get("model_version") == model_version
+                    ]
 
                     if period == "Season":
                         schedule_n = len({str(game.get("game_id")) for game in schedule_games if game.get("game_id")})
@@ -719,7 +768,8 @@ def main():
                         captured_rows = [c for c in checkpoints if c.get("week") == week and c.get("model_id") == model_id and c.get("model_version") == model_version and c.get("market_type") == market_type and c.get("checkpoint") == checkpoint and c.get("selection_status") == "OFFICIAL"]
 
                     row["checkpoints"][checkpoint] = coverage_metrics(
-                        selected_rows, checkpoint=checkpoint,
+                        selected_rows, accuracy_rows=selected_accuracy_rows,
+                        checkpoint=checkpoint,
                         schedule_n=schedule_n,
                         projection_n=len({p.get("canonical_game_id") for p in prediction_rows}),
                         captured_rows=captured_rows, model_id=model_id,
@@ -731,7 +781,7 @@ def main():
             tracker[market_type][period] = model_rows
 
     payload = {
-        "schema_version": "model-performance-view-v6",
+        "schema_version": "model-performance-view-v7",
         "built_at": datetime.now(
             timezone.utc
         ).isoformat(),
@@ -750,6 +800,8 @@ def main():
                 scores_all
             ),
             "settled": len(scores),
+            "settled_predictions": len(prediction_scores),
+            "prediction_score_rows_all_versions": len(prediction_scores_all),
             "spread": {
                 "opportunities": sum(
                     row.get("market_type")
@@ -785,7 +837,7 @@ def main():
             "prediction_observations.jsonl", "checkpoint_observations.jsonl",
             "market_states.jsonl", "market_confirmations.jsonl",
             "decision_states.jsonl", "decision_confirmations.jsonl",
-            "settlements.jsonl", "scores.jsonl",
+            "settlements.jsonl", "scores.jsonl", "prediction_scores.jsonl",
         ]),
         "methodology": {
             "source": "immutable-model-tracking-v2",
@@ -802,8 +854,7 @@ def main():
             ),
             "no_fake_backfill": True,
             "score_authority": (
-                "newest scoring version per "
-                "official checkpoint"
+                "prediction accuracy uses the latest valid pre-kickoff observation per game/model; betting metrics use the newest scoring version per official checkpoint"
             ),
             "closing_authority": (
                 "current_market_contract "

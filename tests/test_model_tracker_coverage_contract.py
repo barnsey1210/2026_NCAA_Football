@@ -103,7 +103,7 @@ def test_schema_covers_normalized_ledgers_and_missing_audit_is_truthful(tmp_path
     for name in (
         "checkpoint_observations.jsonl", "market_states.jsonl",
         "market_confirmations.jsonl", "decision_states.jsonl",
-        "decision_confirmations.jsonl",
+        "decision_confirmations.jsonl", "prediction_scores.jsonl",
     ):
         assert name in schema["datasets"]
     old_store = MODULE.STORE
@@ -115,3 +115,42 @@ def test_schema_covers_normalized_ledgers_and_missing_audit_is_truthful(tmp_path
     assert audit["status"] == "UNAVAILABLE"
     assert audit["ledgers"]["scores.jsonl"]["rows"] is None
 
+
+def test_prediction_and_final_without_market_scores_accuracy_only():
+    accuracy = [score("g1")]
+    metrics = MODULE.coverage_metrics(
+        [], accuracy_rows=accuracy, checkpoint="SUNDAY_9PM_ET",
+        schedule_n=1, projection_n=1, captured_rows=[],
+        model_id="standard_spread_4src_equal_v1",
+        market_type="spread", period="W2",
+    )
+    assert metrics["mae_n"] == metrics["rmse_n"] == metrics["bias_n"] == 1
+    assert metrics["settled_prediction_n"] == 1
+    assert metrics["market_n"] == metrics["ats_n"] == metrics["roi_n"] == 0
+    assert metrics["clv_n"] == 0
+
+
+def test_prediction_market_and_final_scores_accuracy_and_betting_without_clv():
+    accuracy = [score("g1")]
+    betting = [score("g1", clv=None)]
+    metrics = MODULE.coverage_metrics(
+        betting, accuracy_rows=accuracy, checkpoint="SUNDAY_9PM_ET",
+        schedule_n=1, projection_n=1, captured_rows=checkpoints(1),
+        model_id="standard_spread_4src_equal_v1",
+        market_type="spread", period="W2",
+    )
+    assert metrics["mae_n"] == metrics["ats_n"] == metrics["roi_n"] == 1
+    assert metrics["clv_n"] == 0
+
+
+def test_prediction_market_close_and_final_scores_all_metric_families():
+    accuracy = [score("g1")]
+    betting = [score("g1", clv=0.5)]
+    metrics = MODULE.coverage_metrics(
+        betting, accuracy_rows=accuracy, checkpoint="SUNDAY_9PM_ET",
+        schedule_n=1, projection_n=1, captured_rows=checkpoints(1),
+        model_id="standard_spread_4src_equal_v1",
+        market_type="spread", period="W2",
+    )
+    assert metrics["mae_n"] == metrics["ats_n"] == metrics["roi_n"] == 1
+    assert metrics["clv_n"] == 1

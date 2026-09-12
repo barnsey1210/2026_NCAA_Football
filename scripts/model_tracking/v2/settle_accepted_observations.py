@@ -179,6 +179,72 @@ def market_semantics_match(
     )
 
 
+def parse_time(value):
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
+    except (TypeError, ValueError):
+        return None
+
+
+def frozen_prediction_scores(predictions, games, settlements_by_game):
+    """Score the last valid observation before kickoff, without a market gate."""
+    selected = {}
+    skipped = {"unavailable": 0, "invalid_projection": 0, "not_pre_kickoff": 0}
+
+    for row in predictions:
+        game_id = str(row.get("canonical_game_id") or "")
+        if game_id not in games or row.get("availability_status") != "AVAILABLE":
+            skipped["unavailable"] += 1
+            continue
+        try:
+            float(row["projection"])
+        except (KeyError, TypeError, ValueError):
+            skipped["invalid_projection"] += 1
+            continue
+        observed_at = parse_time(row.get("observed_at"))
+        kickoff_at = parse_time(row.get("kickoff_at"))
+        if observed_at is None or kickoff_at is None or observed_at >= kickoff_at:
+            skipped["not_pre_kickoff"] += 1
+            continue
+        key = (game_id, row.get("model_id"), row.get("model_version"), row.get("market_type"))
+        prior = selected.get(key)
+        if prior is None or str(row.get("observed_at")) > str(prior.get("observed_at")):
+            selected[key] = row
+
+    scores = []
+    for key, prediction in selected.items():
+        game_id, model_id, model_version, market_type = key
+        game = games[game_id]
+        actual = game.get("home_margin_actual") if market_type == "spread" else game.get("total_points_actual") if market_type == "total" else None
+        try:
+            error = float(prediction["projection"]) - float(actual)
+        except (TypeError, ValueError):
+            continue
+        settlement_id = settlements_by_game[game_id]
+        score_id = stable_id("prediction_score", prediction["observation_id"], settlement_id, "prediction_accuracy_v1")
+        scores.append({
+            "prediction_score_id": score_id,
+            "prediction_observation_id": prediction["observation_id"],
+            "settlement_id": settlement_id,
+            "canonical_game_id": game_id,
+            "model_id": model_id,
+            "model_version": model_version,
+            "market_type": market_type,
+            "season": prediction.get("season"),
+            "week": prediction.get("week"),
+            "frozen_at": prediction.get("observed_at"),
+            "kickoff_at": prediction.get("kickoff_at"),
+            "projection": prediction.get("projection"),
+            "actual": actual,
+            "absolute_error": abs(error),
+            "signed_error": error,
+            "squared_error": error * error,
+            "scoring_version": "prediction_accuracy_v1",
+        })
+    return scores, skipped
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--accept", action="store_true")
@@ -216,10 +282,8 @@ def main():
         if row.get("game_id")
     }
 
-    predictions = {
-        row["observation_id"]: row
-        for row in load_jsonl("prediction_observations.jsonl")
-    }
+    prediction_rows = load_jsonl("prediction_observations.jsonl")
+    predictions = {row["observation_id"]: row for row in prediction_rows}
 
     markets = {
         row["observation_id"]: row
@@ -280,6 +344,7 @@ def main():
             checkpoints_by_game.setdefault(game_id, []).append(row)
 
     settlements = []
+    settlements_by_game = {}
     scores = []
 
     skipped = {
@@ -318,6 +383,7 @@ def main():
             ),
             "revision": 1,
         })
+        settlements_by_game[game_id] = settlement_id
 
         canonical_market_game = market_games.get(game_id, {})
 
@@ -570,8 +636,12 @@ def main():
                 ),
             })
 
+    prediction_scores, prediction_skipped = frozen_prediction_scores(
+        prediction_rows, games, settlements_by_game
+    )
+
     report = {
-        "schema_version": "settlement-preview-v4",
+        "schema_version": "settlement-preview-v5",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "verified_games": len(games),
         "checkpoint_rows_total": len(checkpoint_rows_all),
@@ -594,6 +664,11 @@ def main():
         "frozen_close_available": frozen_close_available,
         "frozen_close_missing": frozen_close_missing,
         "skipped": skipped,
+        "prediction_accuracy": {
+            "policy": "latest valid immutable prediction observed before kickoff; no market required",
+            "candidates": len(prediction_scores),
+            "skipped": prediction_skipped,
+        },
         "settlements": append_unique(
             D / "settlements.jsonl",
             settlements,
@@ -604,6 +679,12 @@ def main():
             D / "scores.jsonl",
             scores,
             "score_id",
+            args.accept,
+        ),
+        "prediction_scores": append_unique(
+            D / "prediction_scores.jsonl",
+            prediction_scores,
+            "prediction_score_id",
             args.accept,
         ),
     }

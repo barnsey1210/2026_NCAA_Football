@@ -110,6 +110,7 @@
       "shadow_artifact": "data/site/shadow_model_performance.json",
       "shadow_builder": "scripts/site/build_shadow_model_performance.py",
       "shadow_policy": "historical statistics and presentation labels remain separate; labels are not automatic betting rules"
+      ,"prospective_accuracy_policy": "MAE, RMSE, and Bias require only a valid frozen pre-kickoff prediction plus verified final; ATS/O-U and ROI additionally require a tracked market; CLV additionally requires canonical close"
     },
     "model_fit": {
       "artifact": "data/site/team_game_evaluations_2026.json",

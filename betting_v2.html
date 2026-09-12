@@ -3786,7 +3786,7 @@ img[src$="west-virginia.webp"] {
 <!-- HISTORICAL_BETTING_SECTION_END -->
 <section class="histCard histDecayCard" id="historicalDecayPanel"><div class="histHead"><div><h2>Historical Edge Through Time</h2><small>Independent checkpoint performance and matched-origin signal decay are separate modes.</small></div><small id="decayCoverage">Loading preserved coverage…</small></div><div class="decayControls"><select id="decayMarket"><option value="spread">Spread</option><option value="total">Total</option></select><select id="decayModel"></select><select id="decayThreshold"></select><select id="decayMode"><option value="independent">Checkpoint Performance</option><option value="matched">Signal Decay</option></select><select id="decayOrigin"></select><select id="decayMetric"></select></div><div class="decayChart" id="decayChart" role="img"></div><div class="histNote" id="decayNote">Loading canonical historical analytics…</div></section>
 
-<div class="modelNotice" id="modelTrackerNotice"><strong>Prospective tracking has not started.</strong> Official records begin with the first accepted market capture. Preview and dry-run predictions are excluded.</div>
+<div class="modelNotice" id="modelTrackerNotice"><strong>Prospective prediction tracking is active.</strong> Model accuracy uses frozen pre-kickoff predictions and verified finals; betting and CLV samples additionally require their market evidence.</div>
 <div class="modelMethod"><div><b>Active Standard Spread</b><span>SP+, FPI, TeamRankings, and DRatings at 25% each; all four required</span></div><div><b>Active Standard Total</b><span>40% SP+ Total, 40% Massey Dual, 20% DRatings Total; all required</span></div><div><b>Total challenger</b><span>50% SP+ Total and 50% Massey Dual; both required</span></div></div>
 <div class="modelTabs"><button class="active" data-model-tab="spread">Spread</button><button data-model-tab="totals">Totals</button><button data-model-tab="summary">Summary</button></div>
 <div class="modelFilters" id="modelPeriods"></div>
@@ -4634,7 +4634,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     const resultLabel=trackerMarket==='spread'?'ATS':'O/U';
 
     const secondary=[
-      `${metrics.settled_n} / ${metrics.projection_eligible_n} projectable`,
+      `${metrics.settled_prediction_n} / ${metrics.prediction_n} predictions settled`,
       `${metrics.projection_eligible_n} / ${metrics.schedule_eligible_n} schedule`,
       `ROI ${signedPct(metrics.roi)}`,
       `MAE ${num1(metrics.mae)}`
@@ -4654,7 +4654,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
       </div>
       <div class="trackerCellSub">
         ${resultLabel} · ${secondary.join(' · ')}
-        ${metrics.schedule_eligible_n&&metrics.settled_n/metrics.schedule_eligible_n<.5?' · ⚠ Low sample':''}
+        ${metrics.schedule_eligible_n&&metrics.settled_prediction_n/metrics.schedule_eligible_n<.5?' · ⚠ Low sample':''}
       </div>
     `;
   }

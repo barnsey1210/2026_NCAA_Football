@@ -11,7 +11,7 @@ CSS = r'''<style id="model-performance-preview-css">
 </style>'''
 
 HTML = r'''<section id="modelPerformanceView" class="modelView" hidden>
-<div class="modelNotice" id="modelTrackerNotice"><strong>Prospective tracking has not started.</strong> Official records begin with the first accepted market capture. Preview and dry-run predictions are excluded.</div>
+<div class="modelNotice" id="modelTrackerNotice"><strong>Prospective prediction tracking is active.</strong> Model accuracy uses frozen pre-kickoff predictions and verified finals; betting and CLV samples additionally require their market evidence.</div>
 <div class="modelMethod"><div><b>Spread formula</b><span>Home rating − away rating + HFA</span></div><div><b>Home-field advantage</b><span>2.6 points for non-neutral games; 0.0 at neutral sites</span></div><div><b>Core Spread Consensus</b><span>SP+, FPI, TeamRankings, and Brad Powers at 25% each; all four required</span></div></div>
 <div class="modelTabs"><button class="active" data-model-tab="spread">Spread</button><button data-model-tab="totals">Totals</button><button data-model-tab="summary">Summary</button></div>
 <div class="modelFilters" id="modelPeriods"></div>

@@ -121,3 +121,26 @@ def test_market_semantic_parity_ignores_ids():
         legacy,
         normalized,
     )
+
+
+def test_prediction_accuracy_freezes_latest_valid_pre_kickoff_without_market():
+    base = {
+        "canonical_game_id": "g1", "model_id": "standard_spread_4src_equal_v1",
+        "model_version": "v1", "market_type": "spread", "season": 2026,
+        "week": 2, "kickoff_at": "2026-09-12T16:00:00+00:00",
+        "availability_status": "AVAILABLE",
+    }
+    predictions = [
+        {**base, "observation_id": "early", "observed_at": "2026-09-11T12:00:00+00:00", "projection": 7},
+        {**base, "observation_id": "latest", "observed_at": "2026-09-12T15:00:00+00:00", "projection": 9},
+        {**base, "observation_id": "late", "observed_at": "2026-09-12T17:00:00+00:00", "projection": 99},
+    ]
+    rows, skipped = M.frozen_prediction_scores(
+        predictions,
+        {"g1": {"home_margin_actual": 6, "total_points_actual": 48}},
+        {"g1": "settlement-1"},
+    )
+    assert len(rows) == 1
+    assert rows[0]["prediction_observation_id"] == "latest"
+    assert rows[0]["absolute_error"] == 3
+    assert skipped["not_pre_kickoff"] == 1

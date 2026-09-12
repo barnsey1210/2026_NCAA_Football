@@ -388,7 +388,7 @@ def validate(root: Path, out: Path) -> list[str]:
         except (json.JSONDecodeError, OSError) as exc:
             errors.append(f"Model Performance public artifact malformed: {exc}")
         else:
-            if model_data.get("schema_version") != "model-performance-view-v6":
+            if model_data.get("schema_version") != "model-performance-view-v7":
                 errors.append("2026 Model Tracker public artifact schema mismatch")
     historical_analytics = out / "data/site/historical_betting_analytics_v2.json"
     if not historical_analytics.is_file():
