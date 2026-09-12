@@ -26,4 +26,5 @@ class BettingAnalyticsV2Tests(unittest.TestCase):
    out=Path(d)/'x.jsonl';a={'id':m.stable_id('prediction','g1','state1')};b={'id':m.stable_id('prediction','g1','state2')};m.append_unique(out,[a],'id',True);before=out.read_bytes();self.assertEqual(m.append_unique(out,[a],'id',True)['accepted'],0);self.assertEqual(before,out.read_bytes());self.assertEqual(m.append_unique(out,[b],'id',True)['accepted'],1);self.assertEqual(len(out.read_text().splitlines()),2)
  def test_page_and_performance_contract(self):
   page=(ROOT/'betting.html').read_text();self.assertIn('historicalDecayPanel',page);self.assertIn('betting_analytics.js',page);self.assertIn('Beat Close',page);p=json.loads((ROOT/'data/site/model_performance_view.json').read_text());self.assertIn(p['schema_version'],{'model-performance-view-v6','model-performance-view-v7'});self.assertIn('model-performance-view-v7',(ROOT/'scripts/model_tracking/build_model_performance_view.py').read_text())
+  self.assertIn("'model-performance-view-v6','model-performance-view-v7'",(ROOT/'scripts/audit/audit_betting_analytics_propagation.py').read_text())
 if __name__=='__main__':unittest.main()
