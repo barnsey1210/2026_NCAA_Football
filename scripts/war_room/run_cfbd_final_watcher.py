@@ -269,26 +269,24 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
     if not accepted:
         report.update(status="FINAL_CANDIDATE", retryable_game_ids=[r["game_id"] for r in pending if int(state["candidates"][r["game_id"]].get("attempts", 0)) < max_attempts]); return 0, report
     report["status"] = "FINAL_ACCEPTED"; failed = []; market_deferred = []
-    for row in accepted:
-        task_id = f"postgame-{row['game_id'].lower().replace('_','-')}-{now:%Y%m%d%H%M%S}"[:64]
-        result = runner([sys.executable, "scripts/control/run_war_room_service.py", "postgame", "--trigger", "cfbd-final-watcher", "--requester", "scheduler", "--task-id", task_id, "--prepared-results"])
-        try:
-            task_result = json.loads(result.stdout or "{}")
-        except (TypeError, ValueError):
-            task_result = {}
-        if result.returncode == 0: state.setdefault("dispatched", {})[row["game_id"]] = {"task_id": task_id, "completed_at": pulled_at}
-        elif task_result.get("status") == "DEFERRED_BY_MARKET_PRIORITY":
-            market_deferred.append(row["game_id"])
+    task_id = f"postgame-batch-{now:%Y%m%d%H%M%S}"
+    result = runner([sys.executable, "scripts/control/run_war_room_service.py", "postgame", "--trigger", "cfbd-final-watcher", "--requester", "scheduler", "--task-id", task_id, "--prepared-results"])
+    try:
+        task_result = json.loads(result.stdout or "{}")
+    except (TypeError, ValueError):
+        task_result = {}
+    if result.returncode == 0:
+        for row in accepted:
+            state.setdefault("dispatched", {})[row["game_id"]] = {"task_id": task_id, "completed_at": pulled_at}
+    elif task_result.get("status") in {"DEFERRED_BY_MARKET_PRIORITY", "WAITING_FOR_CANONICAL_WRITER"}:
+        market_deferred = [row["game_id"] for row in accepted]
+        for row in accepted:
             meta = state["accepted"][row["game_id"]]
             delay = delays[0] if delays else 5
-            meta.update(
-                postgame_last_attempt_at=pulled_at,
-                postgame_next_retry_at=iso(
-                    now + timedelta(minutes=float(delay))
-                ),
-            )
-        else:
-            failed.append(row["game_id"])
+            meta.update(postgame_last_attempt_at=pulled_at, postgame_next_retry_at=iso(now + timedelta(minutes=float(delay))))
+    else:
+        failed = [row["game_id"] for row in accepted]
+        for row in accepted:
             meta = state["accepted"][row["game_id"]]
             attempts = int(meta.get("postgame_attempts", 0)) + 1
             delay = delays[min(attempts-1, len(delays)-1)] if delays else 5
