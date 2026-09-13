@@ -3,7 +3,7 @@ import json
 import sys
 import tempfile
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
@@ -244,21 +244,88 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertIs(result, lock)
         self.assertEqual(waiting, ["overlap blocked by running task postgame-test"])
 
-    def test_postgame_defers_through_high_frequency_market_band(self):
+    def test_postgame_high_frequency_band_uses_explicit_market_gap(self):
         dispatcher = load(
             "postgame_dispatcher_band",
             "scripts/control/run_war_room_service.py",
         )
         et = ZoneInfo("America/New_York")
-        self.assertTrue(dispatcher.high_frequency_market_band(
-            datetime(2026, 9, 12, 22, 0, tzinfo=et)
-        ))
-        self.assertTrue(dispatcher.high_frequency_market_band(
-            datetime(2026, 9, 13, 10, 0, tzinfo=et)
-        ))
-        self.assertFalse(dispatcher.high_frequency_market_band(
-            datetime(2026, 9, 13, 23, 0, tzinfo=et)
-        ))
+        now = datetime(2026, 9, 13, 0, 10, tzinfo=et)
+        with tempfile.TemporaryDirectory() as temporary:
+            latest = Path(temporary) / "latest.json"
+            latest.write_text(json.dumps({
+                "checked_at": now.astimezone(timezone.utc).isoformat(),
+                "next_due_at": (now + timedelta(seconds=90)).astimezone(timezone.utc).isoformat(),
+                "status": "NOT_DUE",
+            }))
+            gap = dispatcher.postgame_market_gap(now, latest)
+            self.assertTrue(gap["allowed"])
+            self.assertEqual(gap["required_gap_seconds"], 45)
+            latest.write_text(json.dumps({
+                "checked_at": now.astimezone(timezone.utc).isoformat(),
+                "next_due_at": (now + timedelta(seconds=44)).astimezone(timezone.utc).isoformat(),
+                "status": "NOT_DUE",
+            }))
+            self.assertFalse(dispatcher.postgame_market_gap(now, latest)["allowed"])
+
+    def test_postgame_gap_fails_closed_for_stale_scheduler_state(self):
+        dispatcher = load("postgame_dispatcher_stale", "scripts/control/run_war_room_service.py")
+        et = ZoneInfo("America/New_York")
+        now = datetime(2026, 9, 13, 0, 10, tzinfo=et)
+        with tempfile.TemporaryDirectory() as temporary:
+            latest = Path(temporary) / "latest.json"
+            latest.write_text(json.dumps({
+                "checked_at": (now - timedelta(seconds=46)).astimezone(timezone.utc).isoformat(),
+                "next_due_at": (now + timedelta(seconds=90)).astimezone(timezone.utc).isoformat(),
+                "status": "NOT_DUE",
+            }))
+            gap = dispatcher.postgame_market_gap(now, latest)
+            self.assertFalse(gap["allowed"])
+            self.assertIn("stale", gap["reason"])
+
+    def test_postgame_rechecks_gap_after_lock_before_running(self):
+        dispatcher = load("postgame_dispatcher_gap_race", "scripts/control/run_war_room_service.py")
+        lock = Path(tempfile.mkdtemp()) / "lock"
+        lock.mkdir()
+        gaps = iter([
+            {"allowed": True, "reason": "safe"},
+            {"allowed": False, "reason": "Market became due"},
+            {"allowed": True, "reason": "safe again"},
+            {"allowed": True, "reason": "safe again"},
+        ])
+        acquired = []
+        def acquire(action, identity):
+            acquired.append((action, identity))
+            lock.mkdir(exist_ok=True)
+            return lock
+        waiting = []
+        with patch.object(dispatcher, "acquire", side_effect=acquire):
+            result, gap = dispatcher.acquire_postgame_in_market_gap(
+                "postgame-test", timeout_seconds=5, poll_seconds=0.01,
+                waiting=waiting.append, gap_reader=lambda: next(gaps),
+                market_pending=lambda: False,
+                sleeper=lambda _: None,
+            )
+        self.assertEqual(result, lock)
+        self.assertEqual(gap["reason"], "safe again")
+        self.assertEqual(len(acquired), 2)
+        self.assertEqual(waiting[0]["reason"], "Market became due")
+
+    def test_live_market_request_wins_postgame_admission(self):
+        dispatcher = load("postgame_dispatcher_market_first", "scripts/control/run_war_room_service.py")
+        lock = Path(tempfile.mkdtemp()) / "lock"
+        market_pending = iter([True, False, False])
+        waiting = []
+        with patch.object(dispatcher, "acquire", side_effect=lambda *_: (lock.mkdir(), lock)[1]):
+            result, _ = dispatcher.acquire_postgame_in_market_gap(
+                "postgame-test", timeout_seconds=5, poll_seconds=0.01,
+                waiting=waiting.append,
+                gap_reader=lambda: {"allowed": True, "reason": "safe gap"},
+                market_pending=lambda: next(market_pending),
+                sleeper=lambda _: None,
+            )
+        self.assertEqual(result, lock)
+        self.assertEqual(waiting[0]["reason"], "live Market request has admission priority")
 
     def test_prepared_results_skips_only_schedule_and_results(self):
         full = CONTROL.postgame_commands()
