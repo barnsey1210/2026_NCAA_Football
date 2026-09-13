@@ -189,7 +189,7 @@ def component_snapshot_model(game, payload):
 def captured_model(game, observations):
     kickoff = exact_kickoff(game)
     candidates = []
-    for row in observations:
+    for row in game_rows(observations, game["game_id"]):
         if str(row.get("canonical_game_id")) != str(game["game_id"]) or row.get("model_id") != MODEL_ID:
             continue
         if (row.get("provenance_flags") or {}).get("authority") != "OFFICIAL":
@@ -233,10 +233,26 @@ def read_market(path):
         return list(csv.DictReader(handle))
 
 
+def index_by_game(rows, field):
+    """Index append-only observation ledgers once instead of rescanning per game."""
+    indexed = defaultdict(list)
+    for row in rows:
+        game_id = row.get(field)
+        if game_id is not None:
+            indexed[str(game_id)].append(row)
+    return indexed
+
+
+def game_rows(rows_or_index, game_id):
+    if isinstance(rows_or_index, dict):
+        return rows_or_index.get(str(game_id), ())
+    return rows_or_index
+
+
 def market_close(game, rows):
     kickoff = exact_kickoff(game)
     candidates = []
-    for row in rows:
+    for row in game_rows(rows, game["game_id"]):
         if str(row.get("canonical_game_id")) != str(game["game_id"]):
             continue
         observed = dt(row.get("snapshot_ts"))
@@ -267,7 +283,7 @@ def market_close(game, rows):
 def captured_close(game, checkpoints):
     kickoff = exact_kickoff(game)
     candidates = []
-    for row in checkpoints:
+    for row in game_rows(checkpoints, game["game_id"]):
         if str(row.get("canonical_game_id")) != str(game["game_id"]):
             continue
         if row.get("market_type") != "spread" or row.get("checkpoint") != "CLOSE" or row.get("selection_status") != "OFFICIAL":
@@ -392,13 +408,18 @@ def accepted_frozen_inputs(previous_home):
             "source_artifacts": previous_home.get("source_artifacts") or [],
         }
     if market_margin is not None:
+        close_provenance = previous_home.get("close_provenance")
         market = {
             "market_margin_home": market_margin,
             "close_book": previous_home.get("close_book"),
             "close_provider": previous_home.get("close_provider"),
             "close_timestamp": previous_home.get("close_timestamp"),
-            "close_provenance": previous_home.get("close_provenance"),
-            "market_source_artifact": "data/model_tracking/v2/checkpoint_observations.jsonl",
+            "close_provenance": close_provenance,
+            "market_source_artifact": (
+                "data/model_tracking/v2/checkpoint_observations.jsonl"
+                if close_provenance == "CAPTURED"
+                else "data/odds/game_book_line_history.csv"
+            ),
         }
     return model, market
 
@@ -602,18 +623,48 @@ def main():
     parser.add_argument("--previous", help="accepted prior artifact used for immutable carry-forward; defaults to output")
     parser.add_argument("--as-of", help="UTC timestamp used for deterministic lifecycle aging tests")
     parser.add_argument("--fbs-universe", default="data/ratings/ratings_preseason_2026.csv")
+    parser.add_argument(
+        "--hot-path", action="store_true",
+        help="reuse accepted immutable pregame inputs and load historical ledgers only for unresolved games",
+    )
     parser.add_argument("--allow-empty-output", action="store_true", help="explicitly permit replacing a populated artifact with zero team-game rows")
     args = parser.parse_args()
-    results = load_json(args.results).get("games", []); observations = load_jsonl(args.predictions); markets = read_market(args.market_history); checkpoints = load_jsonl(args.checkpoints)
-    pgwe = pgwe_index(load_json(args.pgwe)) if Path(args.pgwe).exists() else {}
-    eligible_games = [game for game in results if num(game.get("closing_home_spread")) is not None]
-    sp_plus, sp_plus_audit = sp_plus_index(load_json(args.sp_plus_postgame), eligible_games) if Path(args.sp_plus_postgame).exists() else ({}, {"source_team_rows": 0, "matched_games": 0, "matched_team_rows": 0, "unmatched": [], "ambiguous": []})
-    reconstructed_contract = load_json(args.reconstructed_contract) if Path(args.reconstructed_contract).exists() else {"games": []}
-    component_snapshots = load_json(args.component_snapshots) if Path(args.component_snapshots).exists() else {"games": []}
+    results = load_json(args.results).get("games", [])
     output = Path(args.output)
     previous_path = Path(args.previous) if args.previous else output
     previous_payload = load_json(previous_path) if previous_path.exists() else {"team_games": []}
     previous_rows = {(str(row.get("game_id")), row.get("team")): row for row in previous_payload.get("team_games", [])}
+    eligible_games = [game for game in results if num(game.get("closing_home_spread")) is not None]
+    prior_inputs = {
+        str(game["game_id"]): accepted_frozen_inputs(
+            previous_rows.get((str(game["game_id"]), game["home_team"]))
+        )
+        for game in eligible_games
+    }
+    unresolved_models = {
+        game_id for game_id, (model, _) in prior_inputs.items() if model is None
+    }
+    observations = (
+        index_by_game(load_jsonl(args.predictions), "canonical_game_id")
+        if not args.hot_path or unresolved_models else {}
+    )
+    checkpoints = index_by_game(load_jsonl(args.checkpoints), "canonical_game_id")
+    captured_markets = {
+        str(game["game_id"]): captured_close(game, checkpoints)
+        for game in eligible_games
+    }
+    unresolved_markets = {
+        game_id for game_id, (_, market) in prior_inputs.items()
+        if market is None and captured_markets.get(game_id) is None
+    }
+    markets = (
+        index_by_game(read_market(args.market_history), "canonical_game_id")
+        if not args.hot_path or unresolved_markets else {}
+    )
+    pgwe = pgwe_index(load_json(args.pgwe)) if Path(args.pgwe).exists() else {}
+    sp_plus, sp_plus_audit = sp_plus_index(load_json(args.sp_plus_postgame), eligible_games) if Path(args.sp_plus_postgame).exists() else ({}, {"source_team_rows": 0, "matched_games": 0, "matched_team_rows": 0, "unmatched": [], "ambiguous": []})
+    reconstructed_contract = load_json(args.reconstructed_contract) if (not args.hot_path or unresolved_models) and Path(args.reconstructed_contract).exists() else {"games": []}
+    component_snapshots = load_json(args.component_snapshots) if (not args.hot_path or unresolved_models) and Path(args.component_snapshots).exists() else {"games": []}
     as_of = dt(args.as_of) if args.as_of else datetime.now(timezone.utc)
     rows = []; gaps = []; coverage = defaultdict(lambda: {"eligible": 0, "model_reconstructable": 0, "market_reconstructable": 0, "result_available": 0, "all_three": 0, "sp_plus_available": 0, "cfbd_pgwe_available": 0})
     # A non-null result closing spread defines the established 51-game FBS-v-FBS evaluation universe; it is never used as close lifecycle proof.
@@ -621,13 +672,18 @@ def main():
         if num(game.get("closing_home_spread")) is None:
             continue
         week = str(game["week"]); coverage[week]["eligible"] += 1; coverage[week]["result_available"] += 1
-        model, model_gap = recover_model(game, observations, reconstructed_contract, component_snapshots)
-        market = captured_close(game, checkpoints)
+        prior_model, prior_market = prior_inputs[str(game["game_id"])]
+        if args.hot_path and prior_model:
+            model, model_gap = prior_model, None
+        else:
+            model, model_gap = recover_model(game, observations, reconstructed_contract, component_snapshots)
+        market = captured_markets[str(game["game_id"])]
         market_gap = None
         if not market:
-            market, market_gap = market_close(game, markets)
-        prior_home = previous_rows.get((str(game["game_id"]), game["home_team"]))
-        prior_model, prior_market = accepted_frozen_inputs(prior_home)
+            if args.hot_path and prior_market:
+                market = prior_market
+            else:
+                market, market_gap = market_close(game, markets)
         if not model and prior_model:
             model, model_gap = prior_model, None
         if not market and prior_market:

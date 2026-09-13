@@ -273,6 +273,11 @@ class PostgameOperationalServiceTests(unittest.TestCase):
             [Path(command[1]).name for command in prepared].index("pull_cfbd_postgame_2026.py"),
             [Path(command[1]).name for command in prepared].index("build_team_game_evaluations_2026.py"),
         )
+        model_fit = next(
+            command for command in prepared
+            if Path(command[1]).name == "build_team_game_evaluations_2026.py"
+        )
+        self.assertIn("--hot-path", model_fit)
         dispatcher = (ROOT / "scripts/control/run_war_room_service.py").read_text()
         self.assertIn('command = [*command, "--postgame-skip-schedule"]', dispatcher)
 

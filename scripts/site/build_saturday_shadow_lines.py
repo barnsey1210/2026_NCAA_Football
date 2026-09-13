@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import csv
 import json
 import math
 import re
@@ -162,6 +163,21 @@ def market_total_baseline(game):
         if v is not None:
             return v, "market_offense_defense_model"
     return None, "missing"
+
+def append_snapshot(path, snap):
+    """Append one immutable snapshot batch without rewriting prior history."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists() and path.stat().st_size:
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            existing_header = next(csv.reader(handle))
+        if set(existing_header) != set(snap.columns):
+            raise SystemExit(
+                "refusing to append Saturday Shadow snapshot with incompatible columns"
+            )
+        snap = snap[existing_header]
+        snap.to_csv(path, mode="a", header=False, index=False)
+    else:
+        snap.to_csv(path, index=False)
 
 def main():
     for p in (INDEX, MARKET, PROJECTION_CONTRACT):
@@ -387,11 +403,9 @@ def main():
     if snapshot_written:
         snap = pd.DataFrame(rows)
         snap["snapshot_timestamp"] = built_at
-        SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
-        if SNAPSHOT.exists():
-            old = pd.read_csv(SNAPSHOT, low_memory=False)
-            snap = pd.concat([old, snap], ignore_index=True)
-        snap.to_csv(SNAPSHOT, index=False)
+        # This is an append-only ledger. Rewriting all prior snapshots made
+        # every postgame refresh scale with the full historical file.
+        append_snapshot(SNAPSHOT, snap)
 
     print(json.dumps({
         "games": len(rows),

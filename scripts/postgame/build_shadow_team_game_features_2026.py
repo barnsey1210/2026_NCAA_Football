@@ -159,6 +159,16 @@ def norm_id(value: Any) -> str:
     return s[:-2] if s.endswith(".0") else s
 
 
+def timestamp_utc(value):
+    if value is None or value == "":
+        return pd.NaT
+    try:
+        parsed = value if isinstance(value, pd.Timestamp) else pd.Timestamp(value)
+        return parsed.tz_localize("UTC") if parsed.tzinfo is None else parsed.tz_convert("UTC")
+    except (TypeError, ValueError):
+        return pd.NaT
+
+
 def atomic_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -385,12 +395,10 @@ def next_game_map(schedule: list[dict]):
         except Exception:
             continue
 
-        date = pd.to_datetime(
+        date = timestamp_utc(
             g.get("cfbd_start_date")
             or g.get("start_date")
-            or g.get("date"),
-            errors="coerce",
-            utc=True,
+            or g.get("date")
         )
 
         for side in ("home", "away"):
@@ -455,7 +463,7 @@ def find_next_game(
     return None
 
 
-def load_entering_sp_plus():
+def load_entering_ratings():
     if not RATINGS_HISTORY.exists():
         raise SystemExit(f"Missing {RATINGS_HISTORY}")
 
@@ -464,17 +472,9 @@ def load_entering_sp_plus():
         low_memory=False,
     )
 
-    frame = frame[
-        pd.to_numeric(
-            frame["season"],
-            errors="coerce",
-        ).eq(2026)
-        & frame["source"]
-        .astype(str)
-        .str.strip()
-        .str.casefold()
-        .eq("sp+")
-    ].copy()
+    season = pd.to_numeric(frame["season"], errors="coerce").eq(2026)
+    source = frame["source"].astype(str).str.strip().str.casefold()
+    frame = frame[season & source.isin({"sp+", "sagarin predictor"})].copy()
 
     frame["_pulled"] = pd.to_datetime(
         frame["pulled_at"],
@@ -486,57 +486,40 @@ def load_entering_sp_plus():
         frame["_pulled"].notna()
     ].copy()
 
-    return frame
+    source = frame["source"].astype(str).str.strip().str.casefold()
+    return (
+        index_rating_rows(frame[source.eq("sp+")].copy()),
+        index_rating_rows(frame[source.eq("sagarin predictor")].copy()),
+    )
+
+
+def index_rating_rows(frame):
+    if frame.empty:
+        return {}
+    ordered = frame.sort_values(["team", "_pulled", "snapshot_date"])
+    return {team: rows for team, rows in ordered.groupby("team", sort=False)}
+
+
+def load_entering_sp_plus():
+    return load_entering_ratings()[0]
 
 
 def load_entering_sagarin():
-    if not RATINGS_HISTORY.exists():
-        raise SystemExit(f"Missing {RATINGS_HISTORY}")
-
-    frame = pd.read_csv(
-        RATINGS_HISTORY,
-        low_memory=False,
-    )
-
-    frame = frame[
-        pd.to_numeric(
-            frame["season"],
-            errors="coerce",
-        ).eq(2026)
-        & frame["source"]
-        .astype(str)
-        .str.strip()
-        .str.casefold()
-        .eq("sagarin predictor")
-    ].copy()
-
-    frame["_pulled"] = pd.to_datetime(
-        frame["pulled_at"],
-        errors="coerce",
-        utc=True,
-    )
-
-    frame = frame[
-        frame["_pulled"].notna()
-    ].copy()
-
-    return frame
+    return load_entering_ratings()[1]
 
 
 def pregame_sagarin(
-    sag: pd.DataFrame,
+    sag,
     team: str,
     kickoff,
 ):
     if pd.isna(kickoff):
         return None
 
-    rows = sag[
-        sag["team"].eq(team)
-        & (sag["_pulled"] < kickoff)
-    ].sort_values(
-        ["_pulled", "snapshot_date"]
-    )
+    team_rows = sag.get(team) if isinstance(sag, dict) else sag[sag["team"].eq(team)]
+    if team_rows is None or team_rows.empty:
+        return None
+    rows = team_rows[team_rows["_pulled"] < kickoff]
 
     if rows.empty:
         return None
@@ -546,19 +529,17 @@ def pregame_sagarin(
 
 
 def pregame_sp_plus(
-    sp: pd.DataFrame,
+    sp,
     team: str,
     kickoff,
 ):
     if pd.isna(kickoff):
         return None
 
-    rows = sp[
-        sp["team"].eq(team)
-        & (sp["_pulled"] < kickoff)
-    ].sort_values(
-        ["_pulled", "snapshot_date"]
-    )
+    team_rows = sp.get(team) if isinstance(sp, dict) else sp[sp["team"].eq(team)]
+    if team_rows is None or team_rows.empty:
+        return None
+    rows = team_rows[team_rows["_pulled"] < kickoff]
 
     if rows.empty:
         return None
@@ -584,17 +565,48 @@ def load_market_history():
         errors="coerce",
     )
 
-    return d[d["season"].eq(2026)].copy()
+    d = d[d["season"].eq(2026)].copy()
+    accepted = d.get("accepted_for_shadow", False)
+    if not isinstance(accepted, pd.Series):
+        accepted = pd.Series(False, index=d.index)
+    state_kind = d.get("state_kind", pd.Series(None, index=d.index))
+    d = d[
+        accepted.astype(str).str.lower().isin({"true", "1"})
+        & state_kind.eq("COMPLETED_WEEK_FROZEN_CLOSES")
+    ].copy()
+    d["_state_cutoff"] = pd.to_datetime(
+        d.get("state_cutoff", d.get("snapshot_timestamp")), errors="coerce", utc=True
+    )
+    d = d[d["_state_cutoff"].notna()].sort_values(
+        ["team", "through_week", "_state_cutoff", "snapshot_timestamp"]
+    )
+    return {
+        (team, int(week)): rows
+        for (team, week), rows in d.groupby(["team", "through_week"], sort=False)
+    }
 
 
 def entering_market_rating(
-    market: pd.DataFrame,
+    market,
     team: str,
     week: int,
     inference_time=None,
 ):
-    if market.empty:
+    if (isinstance(market, dict) and not market) or (
+        isinstance(market, pd.DataFrame) and market.empty
+    ):
         return None
+
+    if isinstance(market, dict):
+        rows = market.get((team, int(week)), pd.DataFrame())
+        if rows.empty:
+            return None
+        inference = timestamp_utc(inference_time)
+        if pd.notna(inference):
+            rows = rows[rows["_state_cutoff"].le(inference)]
+        if rows.empty:
+            return None
+        return finite(rows.iloc[-1].get("market_implied_rating"))
 
     accepted = market.get("accepted_for_shadow", False)
     if not isinstance(accepted, pd.Series):
@@ -629,11 +641,9 @@ def entering_market_rating(
 
 
 def feature_cutoff_for_result(result: dict):
-    return pd.to_datetime(
+    return timestamp_utc(
         result.get("start_date")
-        or result.get("date"),
-        errors="coerce",
-        utc=True,
+        or result.get("date")
     )
 
 
@@ -648,7 +658,7 @@ def combine_team_games(
     schedule_by_team,
     inference_time=None,
 ):
-    inference_time = inference_time or now_iso()
+    inference_time = timestamp_utc(inference_time or now_iso())
     pbp_idx = {
         (
             norm_id(r.game_id),
@@ -1488,8 +1498,7 @@ def main():
             "game_id"
         ].map(norm_id)
 
-    sp = load_entering_sp_plus()
-    sag = load_entering_sagarin()
+    sp, sag = load_entering_ratings()
     market_history = load_market_history()
 
     schedule_by_team = next_game_map(

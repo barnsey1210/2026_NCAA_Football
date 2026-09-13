@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,6 +22,14 @@ MARKET = load(
     "performance_market_contract",
     "scripts/markets/build_current_market_contract.py",
 )
+MODEL_FIT = load(
+    "performance_model_fit",
+    "scripts/model_fit/build_team_game_evaluations_2026.py",
+)
+SHADOW_LINES = load(
+    "performance_shadow_lines",
+    "scripts/site/build_saturday_shadow_lines.py",
+)
 MATRIX = load(
     "performance_market_matrix",
     "scripts/war_room/build_war_room_market_matrix.py",
@@ -27,6 +37,32 @@ MATRIX = load(
 
 
 class PipelinePerformanceIndexTests(unittest.TestCase):
+    def test_shadow_snapshot_appends_without_loading_history(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "snapshots.csv"
+            first = pd.DataFrame([{"game_id": "g1", "value": 1.0}])
+            second = pd.DataFrame([{"value": 2.0, "game_id": "g2"}])
+            SHADOW_LINES.append_snapshot(path, first)
+            with patch.object(
+                SHADOW_LINES.pd, "read_csv", side_effect=AssertionError("history loaded")
+            ):
+                SHADOW_LINES.append_snapshot(path, second)
+            self.assertEqual(pd.read_csv(path).game_id.tolist(), ["g1", "g2"])
+
+    def test_model_fit_game_index_preserves_candidate_rows(self):
+        rows = [
+            {"canonical_game_id": "g1", "value": 1},
+            {"canonical_game_id": "g2", "value": 2},
+            {"canonical_game_id": "g1", "value": 3},
+            {"value": 4},
+        ]
+        indexed = MODEL_FIT.index_by_game(rows, "canonical_game_id")
+        self.assertEqual(
+            list(MODEL_FIT.game_rows(indexed, "g1")),
+            [rows[0], rows[2]],
+        )
+        self.assertIs(MODEL_FIT.game_rows(rows, "g1"), rows)
+
     def test_pregame_close_cache_preserves_pairs_and_skips_rescan(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
