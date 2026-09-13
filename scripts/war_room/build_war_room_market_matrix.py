@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
@@ -3720,13 +3721,11 @@ def main():
         exist_ok=True,
     )
 
-    OUT.write_text(
-        json.dumps(
-            payload,
-            indent=2,
-        )
-        + "\n"
-    )
+    if os.environ.get("NCAAF_LEAN_MARKET_OUTPUT") == "1":
+        serialized = json.dumps(payload, separators=(",", ":"))
+    else:
+        serialized = json.dumps(payload, indent=2)
+    OUT.write_text(serialized + "\n")
 
     print("WAR ROOM MARKET MATRIX")
     print("=" * 72)

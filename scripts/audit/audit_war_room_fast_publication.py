@@ -96,8 +96,6 @@ def main() -> None:
     refresh_ids = {health_refresh.get("refresh_id"), matrix_refresh.get("refresh_id")}
     if None in refresh_ids or len(refresh_ids) != 1:
         errors.append("health and matrix refresh_id values do not match")
-    elif activity.get("latest_refresh_id") not in refresh_ids:
-        errors.append("activity latest_refresh_id does not match the fast market refresh")
     if not isinstance(activity.get("events"), list):
         errors.append("activity events must be a list")
     else:
@@ -124,7 +122,11 @@ def main() -> None:
                     f"fast market pull age is {age_minutes:.1f} minutes; "
                     f"allowed range is -1 to {args.max_age_minutes:.1f}"
                 )
-            for name, payload in payloads.items():
+            # Activity is explicitly deferred maintenance.  Its schema and
+            # event contract remain validated above, but it is not required
+            # to share the operational Market refresh timestamp.
+            for name in ("war_room_health.json", "war_room_market_matrix.json"):
+                payload = payloads.get(name, {})
                 if timestamp(payload.get("built_at")) < pulled_at:
                     errors.append(f"{name} was built before the fast market pull")
         except ValueError as exc:

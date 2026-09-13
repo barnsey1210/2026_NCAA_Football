@@ -81,6 +81,8 @@ def main():
 
     stages = []
 
+    matrix_env = env.copy()
+    matrix_env["NCAAF_LEAN_MARKET_OUTPUT"] = "1"
     stages.append(
         run_stage(
             "the_odds_api_pull_and_normalize",
@@ -131,7 +133,7 @@ def main():
                 sys.executable,
                 "scripts/war_room/build_war_room_market_matrix.py",
             ],
-            env,
+            matrix_env,
         )
     )
 
