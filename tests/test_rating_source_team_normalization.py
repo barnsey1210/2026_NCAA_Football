@@ -13,6 +13,10 @@ SPEC.loader.exec_module(PARSER)
 
 
 class RatingSourceTeamNormalizationTests(unittest.TestCase):
+    def test_spplus_acronyms_are_canonicalized_upstream(self):
+        self.assertEqual(PARSER.canonical("KSU"), "Kennesaw State")
+        self.assertEqual(PARSER.canonical("SHSU"), "Sam Houston")
+
     def test_fpi_fcs_mascot_names_are_canonicalized_upstream(self):
         self.assertEqual(
             PARSER.canonical("North Dakota State Bison"), "North Dakota State"
