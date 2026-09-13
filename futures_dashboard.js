@@ -12,12 +12,88 @@ function quoteFor(quotes,book){return quotes?.[book]||null}function isBestBook(r
 function resolveSchedule(row,scheduleGames){return(row?.schedule_game_ids||[]).map(id=>{const g=scheduleGames?.[id];if(!g)return null;const isHome=row.team===g.home_team,own=isHome?g.home_score:g.away_score,opp=isHome?g.away_score:g.home_score,win=g.home_win_probability;return{game_id:id,week:g.week,date:g.date,opponent:isHome?g.away_team:g.home_team,site:g.neutral_site?'N':isHome?'HOME':'AWAY',completed:Boolean(g.completed),team_score:own,opponent_score:opp,result:g.completed&&hasNumber(own)&&hasNumber(opp)&&Number(own)!==Number(opp)?(Number(own)>Number(opp)?'W':'L'):null,win_probability:g.completed?null:isHome?win:hasNumber(win)?1-Number(win):null}}).filter(Boolean)}
 function historySlots(row,domain,axis,baselineDate,currentWeek){const keys={win:['model_projected_wins','market_win_total'],conference_title:['conference_title_model_prob','conference_title_market_prob'],make_cfp:['cfp_model_prob','cfp_market_prob'],national_title:['national_title_model_prob','national_title_market_prob']}[domain],slots=(axis||[]).map(label=>({label,model:null,market:null}));for(const p of row.history||[]){const label=p.checkpoint_date===baselineDate?'Pre-W1':null,i=slots.findIndex(x=>x.label===label);if(i>=0){slots[i].model=hasNumber(p[keys[0]])?Number(p[keys[0]]):null;slots[i].market=hasNumber(p[keys[1]])?Number(p[keys[1]]):null}}const c=domain==='win'?[row.projected_wins,row.market_win_total]:domain==='conference_title'?[row.title_model_prob,row.title_market_prob]:domain==='make_cfp'?[row.playoff_model_prob,row.playoff_market_prob]:[row.national_title_model_prob,row.national_title_market_prob],i=slots.findIndex(x=>x.label===`W${currentWeek}`);if(i>=0){slots[i].model=hasNumber(c[0])?Number(c[0]):null;slots[i].market=hasNumber(c[1])?Number(c[1]):null}return slots}
 function qualifies(row,state){const mode=focusMode(state),edge=currentEdge(row,mode),change=delta(row,mode,state.period),prior=priorEdge(row,mode,state.period);if(state.view==='growing'&&!(change>0))return false;if(state.view==='shrinking'&&!(change<0))return false;if(state.view==='crossed'&&!(prior!==null&&prior<=0&&edge>0))return false;if(state.edgeStatus==='positive'&&!(edge>0))return false;if(state.edgeStatus==='negative'&&!(edge<0))return false;if(state.edgeStatus==='growing'&&!(change>0))return false;if(state.edgeStatus==='shrinking'&&!(change<0))return false;if(state.edgeStatus==='crossed_positive'&&!(prior!==null&&prior<=0&&edge>0))return false;if(state.edgeStatus==='crossed_negative'&&!(prior!==null&&prior>=0&&edge<0))return false;return true}
-function queryRows(rows,state){const q=String(state.search||'').trim().toLowerCase(),mode=focusMode(state),result=rows.filter(row=>(state.mode!=='bets'||(row.open_wagers||[]).length)&&(state.conference==='all'||row.conference===state.conference)&&(!q||String(row.team||'').toLowerCase().includes(q))&&(state.mode==='bets'||qualifies(row,state)));const metric=row=>state.sort==='team'?row.team:state.sort==='conference'?row.conference:state.sort==='edge_change'?delta(row,mode,state.period):state.sort==='model_change'?delta(row,mode,state.period,'model'):state.sort==='market_change'?delta(row,mode,state.period,'market'):currentEdge(row,mode);result.sort((a,b)=>{let av=metric(a),bv=metric(b);if(typeof av==='string'||typeof bv==='string')return String(av||'').localeCompare(String(bv||''));if(state.view==='movers'&&state.sort==='edge_change'){av=hasNumber(av)?Math.abs(av):null;bv=hasNumber(bv)?Math.abs(bv):null}if(av===null&&bv===null)return String(a.team).localeCompare(String(b.team));if(av===null)return 1;if(bv===null)return-1;return(bv-av)||String(a.team).localeCompare(String(b.team))});return result}
+function queryRows(rows,state){
+  const q=String(state.search||'').trim().toLowerCase(),
+        mode=focusMode(state),
+        result=rows.filter(row=>
+          (state.mode!=='bets'||(row.open_wagers||[]).length)&&
+          (state.conference==='all'||row.conference===state.conference)&&
+          (!q||String(row.team||'').toLowerCase().includes(q))&&
+          (state.mode==='bets'||qualifies(row,state))
+        );
+
+  const metric=row=>{
+    if(state.sort==='team')return row.team;
+    if(state.sort==='conference')return row.conference;
+    if(state.sort==='rating')return hasNumber(row.team_rating)?Number(row.team_rating):null;
+
+    if(state.sort==='model'){
+      const v=mode==='wins'?row.projected_wins:
+              mode==='title'?row.title_model_prob:
+              mode==='cfp'?row.playoff_model_prob:
+              row.national_title_model_prob;
+      return hasNumber(v)?Number(v):null;
+    }
+
+    if(state.sort.startsWith('book:')){
+      const book=state.sort.slice(5);
+      const field=mode==='wins'?'win_quotes':
+                  mode==='title'?'title_quotes':
+                  mode==='cfp'?'playoff_quotes':
+                  'national_title_quotes';
+      const quote=quoteFor(row[field],book);
+      if(!quote)return null;
+      const v=mode==='wins'?quote.number:quote.implied_probability;
+      return hasNumber(v)?Number(v):null;
+    }
+
+    if(state.sort==='wager')return (row.open_wagers||[]).length;
+    if(state.sort==='edge_change')return delta(row,mode,state.period);
+    if(state.sort==='model_change')return delta(row,mode,state.period,'model');
+    if(state.sort==='market_change')return delta(row,mode,state.period,'market');
+
+    return currentEdge(row,mode);
+  };
+
+  const direction=state.sortDir||
+    (state.sort==='team'||state.sort==='conference'?'asc':'desc');
+
+  result.sort((a,b)=>{
+    let av=metric(a),bv=metric(b);
+
+    if(state.view==='movers'&&state.sort==='edge_change'){
+      av=hasNumber(av)?Math.abs(av):null;
+      bv=hasNumber(bv)?Math.abs(bv):null;
+    }
+
+    const aMissing=av===null||av===undefined||
+      (typeof av==='number'&&!Number.isFinite(av));
+    const bMissing=bv===null||bv===undefined||
+      (typeof bv==='number'&&!Number.isFinite(bv));
+
+    if(aMissing&&bMissing)
+      return String(a.team).localeCompare(String(b.team));
+    if(aMissing)return 1;
+    if(bMissing)return -1;
+
+    if(typeof av==='string'||typeof bv==='string'){
+      const cmp=String(av).localeCompare(String(bv));
+      return (direction==='asc'?cmp:-cmp)||
+        String(a.team).localeCompare(String(b.team));
+    }
+
+    const cmp=Number(av)-Number(bv);
+    return (direction==='asc'?cmp:-cmp)||
+      String(a.team).localeCompare(String(b.team));
+  });
+
+  return result
+}
 function summary(rows,state){const mode=focusMode(state),numeric=rows.filter(r=>currentEdge(r,mode)!==null),gains=rows.filter(r=>delta(r,mode,state.period)!==null).sort((a,b)=>delta(b,mode,state.period)-delta(a,mode,state.period));return{shown:rows.length,positive:numeric.filter(r=>currentEdge(r,mode)>0).length,biggest:numeric.sort((a,b)=>currentEdge(b,mode)-currentEdge(a,mode))[0]||null,biggestGain:gains[0]||null}}
 return{BOOKS,hasNumber,spec,focusMode,currentEdge,delta,deltas,metric,priorEdge,quoteFor,isBestBook,resolveSchedule,historySlots,qualifies,queryRows,summary};
 });
 
-(function(){'use strict';if(typeof document==='undefined')return;const F=window.FuturesDashboard,BOOKS=F.BOOKS;let state={conference:'all',view:'all',period:'week',search:'',sort:'edge',edgeStatus:'all',mode:'wins',playoffFocus:'cfp',team:null,railTab:'overview',historyMetric:'futures'},originalRender=null,activeTeam=null;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>F.hasNumber(x)?Number(x).toFixed(d):'—',percent=x=>F.hasNumber(x)?`${(Number(x)*100).toFixed(1)}%`:'—',odds=x=>F.hasNumber(x)?`${Number(x)>0?'+':''}${Math.round(Number(x))}`:'—';
+(function(){'use strict';if(typeof document==='undefined')return;const F=window.FuturesDashboard,BOOKS=F.BOOKS;let state={conference:'all',view:'all',period:'week',search:'',sort:'edge',sortDir:'desc',edgeStatus:'all',mode:'wins',playoffFocus:'cfp',team:null,railTab:'overview',historyMetric:'futures'},originalRender=null,activeTeam=null;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=(x,d=1)=>F.hasNumber(x)?Number(x).toFixed(d):'—',percent=x=>F.hasNumber(x)?`${(Number(x)*100).toFixed(1)}%`:'—',odds=x=>F.hasNumber(x)?`${Number(x)>0?'+':''}${Math.round(Number(x))}`:'—';
 function controls(){const cs=[...new Set(D.rows.map(r=>r.conference).filter(Boolean))].sort(),s=document.createElement('section');s.className='dashboardControls';s.id='dashboardControls';s.innerHTML=`<label>Conference<select id="dashConference"><option value="all">All</option>${cs.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label><label>View<select id="dashView"><option value="all">All</option><option value="best">Best Edges</option><option value="movers">Biggest Movers</option><option value="growing">Growing</option><option value="shrinking">Shrinking</option><option value="crossed">Crossed Positive</option></select></label><label>Change<select id="dashPeriod"><option value="week">Week</option><option value="day">Day</option></select></label><label>Edge status<select id="dashEdgeStatus"><option value="all">All</option><option value="positive">Positive</option><option value="negative">Negative</option><option value="growing">Growing</option><option value="shrinking">Shrinking</option><option value="crossed_positive">Crossed +</option><option value="crossed_negative">Crossed −</option></select></label><label>Sort<select id="dashSort"><option value="edge">Edge</option><option value="edge_change">Edge Change</option><option value="model_change">Model Change</option><option value="market_change">Market Change</option><option value="team">Team</option><option value="conference">Conference</option></select></label><label class="searchControl">Team search<input id="dashSearch" type="search" placeholder="Find a team"></label><button id="dashReset" class="resetButton">Reset</button>`;return s}
 const modeKey=()=>F.focusMode(state),kindPrefix=k=>k==='wins'?'win':k==='title'?'title':k==='cfp'?'playoff':'national_title';
 function move(v,prob=false){if(!F.hasNumber(v))return'<span class="dashDelta unavailable">—</span>';v=Number(v)*(prob?100:1);return`<span class="dashDelta ${v>0?'moveUp':v<0?'moveDown':'neutral'}">${v>0?'↑':v<0?'↓':'→'} ${v>0?'+':''}${v.toFixed(1)}${prob?' pts':''}</span>`}
@@ -28,7 +104,48 @@ function modelValue(x,k){return k==='wins'?num(x.projected_wins):k==='title'?per
 function edgeValue(x,k){const v=F.currentEdge(x,k),d=F.delta(x,k,state.period),side=k==='wins'?(x.win_direction==='Over'?'O ':x.win_direction==='Under'?'U ':''):'';return`<span class="${v===null?'neutral':v>=0?'good':'bad'}">${side}${v!==null&&v>0?'+':''}${k==='wins'?num(v):`${v===null?'—':(v*100).toFixed(1)} pts`}</span>${move(d,k!=='wins')}`}
 const wager=x=>x.open_wagers?.length?`<span class="bet">BET ${x.open_wagers.length}</span>`:'<span class="bet betEmpty">BET</span>';
 function focus(){return`<div id="playoffFocus" class="focus"><button data-focus="cfp" class="${state.playoffFocus==='cfp'?'active':''}">CFP</button><button data-focus="title" class="${state.playoffFocus==='title'?'active':''}">TITLE</button><button disabled title="Focused mode preserves readable columns at 1280px">BOTH</button><small>BOTH deferred: focused mode keeps four books readable.</small></div>`}
-function renderTable(a){if(state.mode==='bets'){originalRender();return}const k=modeKey();head.innerHTML=`<tr><th>Team</th><th>Rating</th><th>Model</th>${BOOKS.map(b=>`<th class="bookHead">${b==='DraftKings'?'DK':b==='FanDuel'?'FD':b==='BetMGM'?'MGM':'CZR'}</th>`).join('')}<th>Edge</th>${state.mode==='playoff'?'<th>Path</th>':''}<th class="wagerHead">Wager</th></tr>`;rows.innerHTML=a.map(x=>`<tr data-row-team="${esc(x.team)}">${teamCell(x)}<td data-label="Rating" class="ratingCell">${rating(x)}</td><td data-label="Model" class="modelCell"><b>${modelValue(x,k)}</b></td>${BOOKS.map(b=>quoteCell(x,b,k)).join('')}<td data-label="Edge" class="edgeCell">${edgeValue(x,k)}</td>${state.mode==='playoff'?`<td data-label="Path">${pathButton(x)}</td>`:''}<td data-label="Wager" class="wagerCell">${wager(x)}</td></tr>`).join('')}
+function columnSortButton(label,key){
+  const active=state.sort===key;
+  const arrow=active?(state.sortDir==='asc'?' ▲':' ▼'):'';
+  return `<button type="button" class="columnSort${active?' active':''}" data-column-sort="${esc(key)}" aria-label="Sort by ${esc(label)}">${esc(label)}${arrow}</button>`
+}
+function bindColumnSort(){
+  head.querySelectorAll('[data-column-sort]').forEach(button=>{
+    button.onclick=()=>{
+      const key=button.dataset.columnSort;
+      if(state.sort===key){
+        state.sortDir=state.sortDir==='asc'?'desc':'asc';
+      }else{
+        state.sort=key;
+        state.sortDir=key==='team'?'asc':'desc';
+      }
+      const dashSort=document.getElementById('dashSort');
+      if(dashSort&&[...dashSort.options].some(o=>o.value===state.sort))
+        dashSort.value=state.sort;
+      renderDashboard();
+    };
+  });
+}
+function renderTable(a){
+  if(state.mode==='bets'){originalRender();return}
+  const k=modeKey();
+  head.innerHTML=`<tr>
+    <th>${columnSortButton('Team','team')}</th>
+    <th>${columnSortButton('Rating','rating')}</th>
+    <th>${columnSortButton('Model','model')}</th>
+    ${BOOKS.map(b=>`<th class="bookHead">${columnSortButton(
+      b==='DraftKings'?'DK':b==='FanDuel'?'FD':b==='BetMGM'?'MGM':'CZR',
+      `book:${b}`
+    )}</th>`).join('')}
+    <th>${columnSortButton('Edge','edge')}</th>
+    ${state.mode==='playoff'?'<th>Path</th>':''}
+    <th class="wagerHead">${columnSortButton('Wager','wager')}</th>
+  </tr>`;
+
+  rows.innerHTML=a.map(x=>`<tr data-row-team="${esc(x.team)}">${teamCell(x)}<td data-label="Rating" class="ratingCell">${rating(x)}</td><td data-label="Model" class="modelCell"><b>${modelValue(x,k)}</b></td>${BOOKS.map(b=>quoteCell(x,b,k)).join('')}<td data-label="Edge" class="edgeCell">${edgeValue(x,k)}</td>${state.mode==='playoff'?`<td data-label="Path">${pathButton(x)}</td>`:''}<td data-label="Wager" class="wagerCell">${wager(x)}</td></tr>`).join('');
+
+  bindColumnSort();
+}
 function marketRow(label,model,market,edge){return`<div><span>${label}</span><b>${model}</b><b>${market}</b><b class="${edge>=0?'good':'bad'}">${F.hasNumber(edge)?`${edge>0?'+':''}${label==='Win total'?num(edge):`${(edge*100).toFixed(1)} pts`}`:'—'}</b></div>`}
 function overview(x){return`<div class="overviewHead"><span>Market</span><b>Model</b><b>Market</b><b>Edge</b></div>${marketRow('Win total',num(x.projected_wins),num(x.market_win_total),x.win_edge)}${marketRow('Conference',percent(x.title_model_prob),percent(x.title_market_prob),x.title_edge)}${marketRow('CFP',percent(x.playoff_model_prob),percent(x.playoff_market_prob),x.playoff_edge)}${marketRow('National title',percent(x.national_title_model_prob),percent(x.national_title_market_prob),x.national_title_edge)}`}
 function schedule(x){const games=F.resolveSchedule(x,D.schedule_games);return`<div class="scheduleHeader"><span>WK</span><span>DATE</span><span>OPP / SITE</span><span>STATUS</span><span>WIN %</span></div>${games.map(g=>`<div class="scheduleRow"><b>${g.week??'—'}</b><span>${esc(g.date?.slice(5)||'—')}</span><span><b>${esc(g.opponent)}</b><small>${g.site}</small></span><span>${g.completed?`${g.result||'F'} ${num(g.team_score,0)}-${num(g.opponent_score,0)}`:'UPCOMING'}</span><b>${g.completed?'—':percent(g.win_probability)}</b></div>`).join('')||'<p class="railEmpty">Schedule unavailable.</p>'}`}
@@ -38,6 +155,60 @@ function renderRail(){const x=activeTeam;if(!x)return;rail.innerHTML=`<div class
 function openRail(team){activeTeam=D.rows.find(r=>r.team===team);if(activeTeam){state.team=team;renderRail()}}function closeRail(){rail.hidden=true;document.body.classList.remove('railOpen');state.team=null;activeTeam=null}
 function renderDashboard(){if(!D)return;state.mode=mode;if(state.mode==='bets'){closeRail();document.getElementById('playoffFocus')?.remove();dashboardControls.hidden=true;dashboardHelp.hidden=true;originalRender();return}dashboardControls.hidden=false;dashboardHelp.hidden=false;let f=document.getElementById('playoffFocus');if(state.mode==='playoff'){if(!f){document.querySelector('.tabs').insertAdjacentHTML('afterend',focus());bindFocus()}}else f?.remove();const a=F.queryRows(D.rows,state);renderTable(a);if(!a.length)rows.innerHTML='<tr><td colspan="11" class="empty">No matching markets.</td></tr>';document.querySelectorAll('.teamOpen').forEach(b=>b.onclick=()=>openRail(b.dataset.team));bindPanels();document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));if(activeTeam)renderRail()}
 function bindFocus(){document.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{state.playoffFocus=b.dataset.focus;document.getElementById('playoffFocus').outerHTML=focus();bindFocus();renderDashboard()})}
-function bindControls(){const map={dashConference:'conference',dashView:'view',dashPeriod:'period',dashEdgeStatus:'edgeStatus',dashSort:'sort',dashSearch:'search'};Object.entries(map).forEach(([id,key])=>{const el=document.getElementById(id);el.addEventListener(key==='search'?'input':'change',()=>{state[key]=el.value;if(key==='view')state.sort=['movers','growing','shrinking'].includes(el.value)?'edge_change':'edge';dashSort.value=state.sort;renderDashboard()})});dashReset.onclick=()=>{state={...state,conference:'all',view:'all',period:'week',search:'',sort:'edge',edgeStatus:'all'};Object.entries(map).forEach(([id,key])=>document.getElementById(id).value=state[key]);renderDashboard()}}
-function enhance(){if(typeof D==='undefined'||!D){setTimeout(enhance,30);return}originalRender=render;const old=document.querySelector('.filters');old.hidden=true;highlights.hidden=true;old.before(controls());dashboardControls.insertAdjacentHTML('afterend','<p id="dashboardHelp" class="dashboardHelp">Best price and edge semantics are unchanged. ● marks the canonical selected executable quote. Missing books remain —.</p>');document.querySelector('.card').insertAdjacentHTML('beforebegin','<aside id="rail" class="activityRail" hidden aria-live="polite"></aside>');window.rail=document.getElementById('rail');bindControls();render=renderDashboard;document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;state.mode=mode;closeRail();renderDashboard()});renderDashboard()}enhance();
+function bindControls(){
+  const map={dashConference:'conference',dashView:'view',dashPeriod:'period',dashEdgeStatus:'edgeStatus',dashSort:'sort',dashSearch:'search'};
+  Object.entries(map).forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    el.addEventListener(key==='search'?'input':'change',()=>{
+      state[key]=el.value;
+
+      if(key==='view'){
+        state.sort=['movers','growing','shrinking'].includes(el.value)?'edge_change':'edge';
+        state.sortDir='desc';
+      }
+
+      if(key==='sort'){
+        state.sortDir=['team','conference'].includes(state.sort)?'asc':'desc';
+      }
+
+      dashSort.value=state.sort;
+      renderDashboard();
+    })
+  });
+
+  dashReset.onclick=()=>{
+    state={...state,conference:'all',view:'all',period:'week',search:'',sort:'edge',sortDir:'desc',edgeStatus:'all'};
+    Object.entries(map).forEach(([id,key])=>document.getElementById(id).value=state[key]);
+    renderDashboard()
+  }
+}
+function enhance(){if(typeof D==='undefined'||!D){setTimeout(enhance,30);return}
+if(!document.getElementById('futuresColumnSortStyles')){
+  const style=document.createElement('style');
+  style.id='futuresColumnSortStyles';
+  style.textContent=`
+    .columnSort{
+      appearance:none;
+      background:none;
+      border:0;
+      color:inherit;
+      cursor:pointer;
+      font:inherit;
+      font-weight:inherit;
+      letter-spacing:inherit;
+      padding:0;
+      text-transform:inherit;
+      white-space:nowrap;
+    }
+    .columnSort:hover,
+    .columnSort:focus-visible{
+      color:#fff;
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+    .columnSort.active{color:#fff}
+  `;
+  document.head.appendChild(style);
+}
+originalRender=render;const old=document.querySelector('.filters');old.hidden=true;highlights.hidden=true;old.before(controls());dashboardControls.insertAdjacentHTML('afterend','<p id="dashboardHelp" class="dashboardHelp">Best price and edge semantics are unchanged. ● marks the canonical selected executable quote. Missing books remain —.</p>');document.querySelector('.card').insertAdjacentHTML('beforebegin','<aside id="rail" class="activityRail" hidden aria-live="polite"></aside>');window.rail=document.getElementById('rail');bindControls();render=renderDashboard;document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;state.mode=mode;closeRail();renderDashboard()});renderDashboard()}enhance();
 })();
