@@ -42,8 +42,12 @@ class FastRatingsStandardSourceTests(unittest.TestCase):
         self.assertIn("--start-date", commands["dratings"])
         self.assertIn("--end-date", commands["dratings"])
         self.assertIn("--days", commands["massey"])
-        self.assertIn("7", commands["massey"])
+        self.assertIn("10", commands["massey"])
         self.assertIn("--start-date", commands["sagarin"])
+
+    def test_all_independent_providers_are_attempted(self):
+        source = (ROOT / "scripts/ratings/run_fast_standard_source_refresh.py").read_text()
+        self.assertNotIn("if result.returncode:\n            break", source)
 
     def test_out_of_window_rows_are_preserved_for_each_matchup_source(self):
         existing = pd.DataFrame([

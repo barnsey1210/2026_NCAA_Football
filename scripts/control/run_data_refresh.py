@@ -141,12 +141,21 @@ def matchup_source_refresh_status() -> tuple[bool, dict[str, Any]]:
     return changed, report
 
 
-def ratings_acquisition_commands(sources: str = "spplus,fpi,teamrankings") -> list[list[str]]:
-    return [
-        [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", sources],
+DEFAULT_RATING_PANEL = "spplus,fpi,teamrankings"
+FULL_RATING_PROVIDERS = ["spplus", "fpi", "teamrankings", "sagarin", "dratings", "massey"]
+
+
+def ratings_acquisition_commands(sources: str = "") -> list[list[str]]:
+    """Return the full scheduled acquisition plan or one operator fast path."""
+    panel = sources or DEFAULT_RATING_PANEL
+    commands = [
+        [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", panel],
         [sys.executable, "scripts/ratings/parse_rating_source_tables.py"],
         [sys.executable, "scripts/ratings/accept_live_rating_candidates_with_status.py"],
     ]
+    if not sources:
+        commands.append([sys.executable, "scripts/ratings/run_fast_standard_source_refresh.py"])
+    return commands
 
 
 def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> list[list[str]]:
@@ -221,7 +230,7 @@ def execute_postgame_service(
 
 def execute_ratings_service(
     run: dict[str, Any], cfg: dict[str, Any], confirm: bool,
-    sources: str = "spplus,fpi,teamrankings",
+    sources: str = "",
 ) -> None:
     """Execute only the bounded Ratings service contract."""
     service_allowed = cfg.get("publication_policy", {}).get("ratings", False)
@@ -240,7 +249,10 @@ def execute_ratings_service(
     global_changed, statuses = accepted_ratings_changed()
     matchup_changed, matchup_report = matchup_source_refresh_status()
     changed = global_changed or matchup_changed
-    run["providers_called"] = [value for value in sources.split(",") if value]
+    run["providers_called"] = (
+        [value for value in sources.split(",") if value]
+        if sources else list(FULL_RATING_PROVIDERS)
+    )
     # Free webpage activity is distinct from quota-bearing provider credits.
     run["api"]["calls_consumed"] = 0
     run["api"]["credits_consumed"] = 0
@@ -630,7 +642,7 @@ def main() -> int:
             elif args.mode == "ratings":
                 execute_ratings_service(
                     run, cfg, args.confirm_publish,
-                    ",".join(resolved_providers) or "spplus,fpi,teamrankings",
+                    ",".join(resolved_providers),
                 )
 
             elif args.mode == "pregame":

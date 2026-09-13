@@ -12,7 +12,7 @@ class FinalWatcherTests(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory(); self.root=Path(self.temp.name); self.db=self.root/"preseason.json"
   self.db.write_text(json.dumps({"games":[{"season":2026,"game_id":"g1","cfbd_game_id":99,"cfbd_start_date":"2026-08-29T16:00:00Z","cfbd_start_time_tbd":False,"cfbd_kickoff_status":"VERIFIED_KICKOFF","date":"2026-08-29","away_team":"Away","home_team":"Home"}]}))
-  self.patches=[patch.object(watcher,"DB",self.db),patch.object(watcher,"SCOREBOARD",self.root/"scoreboard.json"),patch.object(watcher,"RESULTS",self.root/"results.json"),patch.object(watcher,"STATE_DIR",self.root/"state"),patch.object(watcher,"STATE",self.root/"state/state.json"),patch.dict(os.environ,{"CFBD_API_KEY":"fixture-only"},clear=False)]
+  self.patches=[patch.object(watcher,"DB",self.db),patch.object(watcher,"SCOREBOARD",self.root/"scoreboard.json"),patch.object(watcher,"RESULTS",self.root/"results.json"),patch.object(watcher,"TEAM_GAME_EVALUATIONS",self.root/"evaluations.json"),patch.object(watcher,"STATE_DIR",self.root/"state"),patch.object(watcher,"STATE",self.root/"state/state.json"),patch.dict(os.environ,{"CFBD_API_KEY":"fixture-only"},clear=False)]
   for item in self.patches:item.start()
   self.cfg={"enabled":True,"monthly_call_limit":5000,"protected_reserve_calls":500,"monitor_window":{"minutes_before_first_kickoff":30,"hours_after_last_kickoff":5},"retry_policy":{"delays_minutes":[5,10,30],"max_attempts":4}}
  def tearDown(self):
@@ -49,6 +49,17 @@ class FinalWatcherTests(unittest.TestCase):
   code,r=self.execute(fetch=lambda *_:self.score("final"),runner=runner); self.assertEqual((code,r["status"]),(2,"POSTGAME_FAILED"))
   commands.clear(); code,r=self.execute(now=datetime(2026,8,29,16,2,tzinfo=timezone.utc),fetch=lambda *_:self.score("final"),runner=lambda c:(commands.append(c) or ok(c)))
   self.assertEqual(r["status"],"POSTGAME_FAILED"); self.assertEqual(len(commands),1); self.assertIn("build_schedule_live_enrichment.py",commands[0][1])
+ def test_accepted_final_drains_after_scoreboard_drops_it_and_after_retry_ceiling(self):
+  (self.root/"results.json").write_text(json.dumps({"games":[{"game_id":"g1","cfbd_game_id":99,"completed":True,"home_score":14,"away_score":7}]}))
+  state=self.root/"state/state.json"; state.parent.mkdir(); state.write_text(json.dumps({"schema_version":1,"candidates":{},"accepted":{"g1":{"accepted_at":"2026-08-29T15:00:00Z","cfbd_game_id":99,"postgame_attempts":4,"postgame_next_retry_at":"2026-08-29T15:30:00Z"}},"dispatched":{}}))
+  commands=[]; code,r=self.execute(fetch=lambda *_:[],runner=lambda c:(commands.append(c) or ok(c)))
+  self.assertEqual((code,r["status"]),(0,"POSTGAME_DISPATCHED")); self.assertIn("--prepared-results",commands[-1]); self.assertIn("g1",json.loads(state.read_text())["dispatched"])
+ def test_processed_accepted_final_is_reconciled_without_duplicate_postgame(self):
+  (self.root/"results.json").write_text(json.dumps({"games":[{"game_id":"g1","cfbd_game_id":99,"completed":True,"home_score":14,"away_score":7}]}))
+  (self.root/"evaluations.json").write_text(json.dumps({"team_games":[{"game_id":"g1","team":"Away","game_final":True},{"game_id":"g1","team":"Home","game_final":True}]}))
+  state=self.root/"state/state.json"; state.parent.mkdir(); state.write_text(json.dumps({"schema_version":1,"candidates":{},"accepted":{"g1":{"accepted_at":"2026-08-29T15:00:00Z","cfbd_game_id":99}},"dispatched":{}}))
+  commands=[]; code,r=self.execute(fetch=lambda *_:[],runner=lambda c:(commands.append(c) or ok(c)))
+  self.assertEqual((code,r["status"]),(0,"NO_NEW_FINALS")); self.assertEqual(r["reconciled_game_ids"],["g1"]); self.assertFalse(any("run_war_room_service.py" in x for c in commands for x in c))
  def test_market_priority_deferral_does_not_consume_postgame_retry(self):
   def runner(command):
    if command[1].endswith("build_game_results_2026.py"):watcher.RESULTS.write_text(json.dumps({"games":[{"game_id":"g1","cfbd_game_id":99,"home_score":14,"away_score":7}]}))

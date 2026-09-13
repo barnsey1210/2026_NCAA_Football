@@ -135,8 +135,9 @@ def main():
             "returncode": result.returncode,
             "output_tail": ((result.stdout or "") + (result.stderr or ""))[-4000:],
         })
-        if result.returncode:
-            break
+        # Providers are independent. A failed/no-release source retains its
+        # last-known-good artifact and must not prevent later sources from
+        # being checked and accepted.
     after = {name: digest(path) for name, path in OUTPUTS.items()}
     changed_components = [name for name in OUTPUTS if before[name] != after[name]]
     previous_state = {}
@@ -192,10 +193,13 @@ def main():
         "stages": stages,
         "elapsed_seconds": round(time.monotonic() - started, 3),
         "success": len(stages) == 3 and all(row["returncode"] == 0 for row in stages),
+        "partial_failure": any(row["returncode"] != 0 for row in stages),
     }
     atomic_json(REPORT, payload)
     print(json.dumps(payload, indent=2))
-    return 0 if payload["success"] else 2
+    # A complete independent evaluation is a successful orchestration run.
+    # Individual failures remain explicit in the report and preserve LKG.
+    return 0 if len(stages) == 3 else 2
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ CONFIG = ROOT / "config/cfbd_final_watcher.json"
 DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 SCOREBOARD = ROOT / "data/canonical/cfbd_scoreboard_live_2026.json"
 RESULTS = ROOT / "data/canonical/game_results_2026.json"
+TEAM_GAME_EVALUATIONS = ROOT / "data/site/team_game_evaluations_2026.json"
 STATE_DIR = ROOT / "data/control/cfbd_final_watcher"
 LATEST, STATE = STATE_DIR / "latest.json", STATE_DIR / "state.json"
 API_BASE = "https://api.collegefootballdata.com"
@@ -174,6 +175,22 @@ def accepted_result_ids(path: Path | None = None) -> set[str]:
     return {str(row[key]) for row in rows if isinstance(row, dict) for key in ("game_id", "cfbd_game_id") if row.get(key) not in (None, "")}
 
 
+def accepted_result_rows(path: Path | None = None) -> dict[str, dict[str, Any]]:
+    payload = load_json(path or RESULTS, {}); rows = payload.get("games") or payload.get("results") or []
+    return {str(row.get("game_id")): row for row in rows if isinstance(row, dict) and row.get("game_id") not in (None, "") and row.get("completed") is True}
+
+
+def processed_final_ids(path: Path | None = None) -> set[str]:
+    """Require both completed team evaluations before ledger reconciliation."""
+    payload = load_json(path or TEAM_GAME_EVALUATIONS, {})
+    counts: dict[str, set[str]] = {}
+    for row in payload.get("team_games") or []:
+        if not isinstance(row, dict) or row.get("game_final") is not True: continue
+        gid, team = str(row.get("game_id") or ""), str(row.get("team") or "")
+        if gid and team: counts.setdefault(gid, set()).add(team)
+    return {gid for gid, teams in counts.items() if len(teams) >= 2}
+
+
 class Budget:
     def __init__(self, cfg: dict[str, Any], now: datetime):
         self.limit = int(cfg.get("monthly_call_limit", 5000)); self.reserve = int(cfg.get("protected_reserve_calls", 500))
@@ -224,8 +241,25 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
     if live_build.returncode != 0:
         report.update(status="SCHEDULE_BUILD_FAILED", error="live Schedule enrichment build failed")
         return 2, report
-    state = load_json(STATE, {"schema_version": 1, "candidates": {}, "accepted": {}, "dispatched": {}})
-    pending = [r for r in normalized if is_final(r) and r["game_id"] not in state.get("dispatched", {})]
+    state = load_json(STATE, {"schema_version": 1, "candidates": {}, "accepted": {}, "dispatched": {}, "dispositions": []})
+    accepted_rows = accepted_result_rows()
+    processed = processed_final_ids()
+    reconciled = []
+    for gid, meta in state.get("accepted", {}).items():
+        if gid in state.get("dispatched", {}) or gid not in accepted_rows or gid not in processed: continue
+        disposition = {"game_id": gid, "at": pulled_at, "status": "RECONCILED_ALREADY_PROCESSED", "evidence": "canonical completed result plus two completed team evaluations"}
+        state.setdefault("dispositions", []).append(disposition)
+        state.setdefault("dispatched", {})[gid] = {"task_id": None, "completed_at": pulled_at, "disposition": disposition["status"]}
+        reconciled.append(gid)
+    pending_by_id = {r["game_id"]: r for r in normalized if is_final(r) and r["game_id"] not in state.get("dispatched", {})}
+    # Accepted finals remain drainable after the live scoreboard drops them.
+    for gid, meta in state.get("accepted", {}).items():
+        if gid in state.get("dispatched", {}) or gid in pending_by_id or gid not in accepted_rows: continue
+        result_row = accepted_rows[gid]
+        pending_by_id[gid] = {"game_id": gid, "cfbd_game_id": meta.get("cfbd_game_id") or result_row.get("cfbd_game_id"), "status": "PERSISTED_ACCEPTED_FINAL", "home_points": result_row.get("home_score"), "away_points": result_row.get("away_score")}
+    pending = list(pending_by_id.values())
+    atomic_json(STATE, state)
+    report["reconciled_game_ids"] = reconciled
     if not pending: report.update(status="NO_NEW_FINALS", relevant_games=len(normalized)); return 0, report
     retry_cfg = cfg.get("retry_policy", {}); max_attempts = int(retry_cfg.get("max_attempts", 4))
     for row in pending: state.setdefault("candidates", {}).setdefault(row["game_id"], {"first_seen_at": pulled_at, "attempts": 0})
@@ -237,7 +271,7 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
         if not meta: continue
         retry_at = parse_dt(meta.get("postgame_next_retry_at"))
         attempts = int(meta.get("postgame_attempts", 0))
-        if attempts < max_attempts and (not retry_at or now.astimezone(ET) >= retry_at): already_accepted.append(row)
+        if not retry_at or now.astimezone(ET) >= retry_at: already_accepted.append(row)
         else: waiting_accepted.append(row)
     validate = []
     for row in pending:
@@ -290,7 +324,7 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
             meta = state["accepted"][row["game_id"]]
             attempts = int(meta.get("postgame_attempts", 0)) + 1
             delay = delays[min(attempts-1, len(delays)-1)] if delays else 5
-            meta.update(postgame_attempts=attempts, postgame_last_attempt_at=pulled_at, postgame_next_retry_at=iso(now + timedelta(minutes=float(delay))))
+            meta.update(postgame_attempts=attempts, postgame_last_attempt_at=pulled_at, postgame_next_retry_at=iso(now + timedelta(minutes=float(delay))), retry_ceiling_reached=attempts >= max_attempts)
     atomic_json(STATE, state)
     report.update(
         status=(
