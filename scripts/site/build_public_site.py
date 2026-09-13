@@ -126,6 +126,13 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
             '<td><span class="team">${logo(x)}<span>${e(x.team)}<span class="sub">#${x.rank} · ${e(x.conference)}</span></span></span></td>',
             '<td><a class="team" href="team.html?team=${e(x.slug)}">${logo(x)}<span>${e(x.team)}<span class="sub">#${x.rank} · ${e(x.conference)}</span></span></a></td>')
         text=text.replace('</head>','<style>.team{text-decoration:none;color:inherit}</style></head>')
+
+        # futures.html loads this client-side dashboard controller directly.
+        # Keep the public bundle self-contained and in parity with the page.
+        futures_dashboard = ROOT / 'futures_dashboard.js'
+        if not futures_dashboard.is_file():
+            raise FileNotFoundError(f"missing Futures dashboard asset: {futures_dashboard}")
+        shutil.copy2(futures_dashboard, OUT / 'futures_dashboard.js')
     if target == 'ratings.html':
         text=text.replace('teams=[...m.values()];conf.innerHTML', 'teams=[...m.values()].filter(t=>t.rating!=null&&t.overall_rank!=null);conf.innerHTML')
         text=text.replace('</head>','<style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style></head>',1)
