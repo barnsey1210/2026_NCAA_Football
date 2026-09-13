@@ -49,6 +49,18 @@ class FinalWatcherTests(unittest.TestCase):
   code,r=self.execute(fetch=lambda *_:self.score("final"),runner=runner); self.assertEqual((code,r["status"]),(2,"POSTGAME_FAILED"))
   commands.clear(); code,r=self.execute(now=datetime(2026,8,29,16,2,tzinfo=timezone.utc),fetch=lambda *_:self.score("final"),runner=lambda c:(commands.append(c) or ok(c)))
   self.assertEqual(r["status"],"POSTGAME_FAILED"); self.assertEqual(len(commands),1); self.assertIn("build_schedule_live_enrichment.py",commands[0][1])
+ def test_market_priority_deferral_does_not_consume_postgame_retry(self):
+  def runner(command):
+   if command[1].endswith("build_game_results_2026.py"):watcher.RESULTS.write_text(json.dumps({"games":[{"game_id":"g1","cfbd_game_id":99,"home_score":14,"away_score":7}]}))
+   if "run_war_room_service.py" in command[1]:
+    return subprocess.CompletedProcess(command,2,json.dumps({"status":"DEFERRED_BY_MARKET_PRIORITY"}),"")
+   return ok(command)
+  code,r=self.execute(fetch=lambda *_:self.score("final"),runner=runner)
+  self.assertEqual((code,r["status"]),(0,"POSTGAME_DEFERRED_BY_MARKET"))
+  state=json.loads(watcher.STATE.read_text())
+  accepted=state["accepted"]["g1"]
+  self.assertEqual(accepted.get("postgame_attempts",0),0)
+  self.assertIn("postgame_next_retry_at",accepted)
  def test_budget_reserve_blocks_before_provider(self):
   usage=self.root/"state/usage_2026-08.json"; usage.parent.mkdir(); usage.write_text(json.dumps({"calls_used":4500,"operations":[]})); calls=[]; code,r=self.execute(fetch=lambda *a:calls.append(a),runner=ok); self.assertEqual((code,r["status"],calls),(2,"BUDGET_BLOCKED",[]))
  def test_schedule_windows_cover_weekday_and_cross_midnight(self):

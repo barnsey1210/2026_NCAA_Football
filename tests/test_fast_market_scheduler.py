@@ -106,18 +106,23 @@ class FastMarketSchedulerTests(unittest.TestCase):
                 self.assertEqual((report["status"], len(calls)), (status, 1))
                 self.assertNotIn("last_due_handled_at", updated)
 
-    def test_scheduled_market_defers_while_postgame_has_priority(self):
+    def test_scheduled_market_dispatches_even_while_postgame_is_pending(self):
         now = datetime(2026, 9, 6, 10, 0, tzinfo=ET)
+        calls = []
+        def runner(command):
+            calls.append(command)
+            return subprocess.CompletedProcess(
+                command, 0, json.dumps({"status": "COMPLETED"}), ""
+            )
         code, report, updated = SCHEDULER.execute(
             now=now,
             state={},
             market_success_at=None,
-            runner=lambda command: self.fail(f"Market dispatched unexpectedly: {command}"),
+            runner=runner,
             postgame_pending=lambda: True,
         )
-        self.assertEqual((code, report["status"]), (0, "DEFERRED_BY_POSTGAME"))
-        self.assertEqual(report["deferred_reason"], "Postgame is pending or running")
-        self.assertNotIn("last_due_handled_at", updated)
+        self.assertEqual((code, report["status"], len(calls)), (0, "COMPLETED", 1))
+        self.assertIn("last_due_handled_at", updated)
 
     def test_postgame_priority_requires_a_live_dispatcher(self):
         with tempfile.TemporaryDirectory() as tmp:

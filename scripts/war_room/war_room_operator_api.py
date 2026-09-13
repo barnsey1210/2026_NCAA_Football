@@ -219,6 +219,7 @@ def request_action(action: str, requester: str, request: Request) -> JSONRespons
         "COMPLETED_WITH_WARNINGS",
         "FAILED",
         "BLOCKED_BY_OVERLAP",
+        "DEFERRED_BY_MARKET_PRIORITY",
         "DEFERRED_BY_DAILY_BACKBONE",
     }
     if not known_status:
@@ -518,7 +519,7 @@ let ACTIVE_TARGET_ORIGIN=null;
 const CHANNEL='ncaaf-war-room-control-v1';
 const CHANNEL_NONCE={nonce_json};
 const ACTION_ROUTES=Object.freeze({{market:'/war-room/market',ratings:'/war-room/ratings',postgame:'/war-room/postgame','model-override':'/war-room/model-override'}});
-const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
+const TERMINAL=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE','DEFERRED_BY_MARKET_PRIORITY']);
 function send(message){{
   if(!window.opener)return;
   const targets=ACTIVE_TARGET_ORIGIN?[ACTIVE_TARGET_ORIGIN]:TARGET_ORIGINS;

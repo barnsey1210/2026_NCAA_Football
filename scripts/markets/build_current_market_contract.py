@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import csv
 import datetime as dt
+import hashlib
 import json
 import math
 import os
@@ -43,6 +44,9 @@ ACTION = ROOT / "data/odds/actionnetwork_ncaaf_game_lines_2026.csv"
 BOOK_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
 OUT = ROOT / "data/site/current_market_contract.json"
 AUDIT = ROOT / "data/audits/current_market_contract_build_audit.json"
+CLOSE_CACHE = (
+    ROOT / "data/control/current_market/pregame_close_pairs_cache.json"
+)
 
 TARGET_BOOKS = (
     "Pinnacle",
@@ -435,12 +439,44 @@ def reference_pair(quotes: dict, market: str):
 
 
 
-def load_pregame_close_pairs(path: Path, kickoff_by_gid: dict) -> dict:
+def pregame_close_cache_key(path: Path, kickoff_by_gid: dict) -> str:
+    """Fingerprint every input that can affect frozen pregame close selection."""
+    stat = path.stat()
+    kickoff_rows = sorted(
+        (str(gid), kickoff.isoformat())
+        for gid, kickoff in kickoff_by_gid.items()
+    )
+    payload = {
+        "schema_version": 1,
+        "history_size": stat.st_size,
+        "history_mtime_ns": stat.st_mtime_ns,
+        "kickoffs": kickoff_rows,
+    }
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def load_pregame_close_pairs(
+    path: Path, kickoff_by_gid: dict, cache_path: Path = CLOSE_CACHE,
+) -> dict:
     """Latest complete historical pair strictly before canonical kickoff."""
     result = defaultdict(lambda: defaultdict(dict))
 
     if not path.exists() or path.stat().st_size == 0:
         return result
+
+    cache_key = pregame_close_cache_key(path, kickoff_by_gid)
+    try:
+        cached = json.loads(cache_path.read_text())
+        if (
+            cached.get("schema_version") == 1
+            and cached.get("cache_key") == cache_key
+            and isinstance(cached.get("pairs"), dict)
+        ):
+            return cached["pairs"]
+    except (OSError, TypeError, ValueError):
+        pass
 
     grouped = defaultdict(lambda: defaultdict(dict))
 
@@ -529,6 +565,12 @@ def load_pregame_close_pairs(path: Path, kickoff_by_gid: dict) -> dict:
             _, latest = max(valid, key=lambda item: item[0])
             result[gid][book][market] = latest
 
+    cache_payload = {
+        "schema_version": 1,
+        "cache_key": cache_key,
+        "pairs": result,
+    }
+    atomic_json(cache_path, cache_payload)
     return result
 
 
@@ -977,7 +1019,7 @@ def main() -> None:
         for book in TARGET_BOOKS:
             for market in ("spread", "total", "moneyline"):
                 historical_sides = dict(
-                    historical_close[gid][book].get(market, {}) or {}
+                    historical_close.get(gid, {}).get(book, {}).get(market, {}) or {}
                 )
 
                 if not pair_is_valid(market, historical_sides):

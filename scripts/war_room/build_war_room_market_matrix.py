@@ -372,25 +372,65 @@ def compact_model_fit(row):
     return {field: row.get(field) for field in MODEL_FIT_DISPLAY_FIELDS}
 
 
-def selected_week_model_fit(row, team, target_week, projection_games, results_by_gid, evaluation_rows, fbs_teams, now=None):
+def build_selected_week_model_fit_indexes(
+    projection_games, evaluation_rows, fbs_teams,
+):
+    """Index immutable inputs once instead of rescanning them per team/game."""
+    evaluation_index = {
+        (str(item.get("game_id")), normalize_team(item.get("team"))): item
+        for item in evaluation_rows
+    }
+    expected_by_week_team = defaultdict(list)
+    target_weeks = sorted({
+        int(game.get("week"))
+        for game in projection_games
+        if str(game.get("week") or "").isdigit()
+    })
+    for game in projection_games:
+        try:
+            game_week = int(game.get("week"))
+        except (TypeError, ValueError):
+            continue
+        participants = {
+            normalize_team(game.get("away_team")),
+            normalize_team(game.get("home_team")),
+        }
+        if not participants <= fbs_teams:
+            continue
+        for target_week in target_weeks:
+            if game_week >= target_week:
+                continue
+            for team_key in participants:
+                expected_by_week_team[(str(target_week), team_key)].append(game)
+    return expected_by_week_team, evaluation_index
+
+
+def selected_week_model_fit(
+    row, team, target_week, projection_games, results_by_gid, evaluation_rows,
+    fbs_teams, now=None, *, expected_by_week_team=None,
+    evaluation_index=None,
+):
     """Make health answer whether all history expected before target_week is processed."""
     current = dict(row)
     if target_week is None:
         return current
     team_key = normalize_team(team)
-    expected = []
-    for game in projection_games:
-        try:
-            prior = int(game.get("week")) < int(target_week)
-        except (TypeError, ValueError):
-            prior = False
-        participants = {normalize_team(game.get("away_team")), normalize_team(game.get("home_team"))}
-        if prior and team_key in participants and participants <= fbs_teams:
-            expected.append(game)
+    if expected_by_week_team is None:
+        expected = []
+        for game in projection_games:
+            try:
+                prior = int(game.get("week")) < int(target_week)
+            except (TypeError, ValueError):
+                prior = False
+            participants = {normalize_team(game.get("away_team")), normalize_team(game.get("home_team"))}
+            if prior and team_key in participants and participants <= fbs_teams:
+                expected.append(game)
+    else:
+        expected = expected_by_week_team.get((str(target_week), team_key), [])
     if not expected:
         current.update({"model_fit_health": "NO_SAMPLE", "model_fit_status": "GRAY", "selected_week_expected_games": 0})
         return current
-    eval_keys = {
+    eval_keys = evaluation_index if evaluation_index is not None else {
         (str(item.get("game_id")), normalize_team(item.get("team"))): item
         for item in evaluation_rows
     }
@@ -2677,6 +2717,13 @@ def main():
     betting_signal_map = load_team_betting_signals()
 
     projection_games = projection_payload.get("games", [])
+    model_fit_expected_by_week_team, model_fit_evaluation_index = (
+        build_selected_week_model_fit_indexes(
+            projection_games,
+            team_model_fit["team_games"],
+            fbs_teams,
+        )
+    )
 
     identity = {}
     key_to_game_id = {}
@@ -3272,11 +3319,15 @@ def main():
                     model_fit_for_week.get(normalize_team(game.get("away_team")), unavailable_model_fit(game.get("away_team"))),
                     game.get("away_team"), target_week, projection_games, results_by_gid,
                     team_model_fit["team_games"], fbs_teams,
+                    expected_by_week_team=model_fit_expected_by_week_team,
+                    evaluation_index=model_fit_evaluation_index,
                 )),
                 "home": compact_model_fit(selected_week_model_fit(
                     model_fit_for_week.get(normalize_team(game.get("home_team")), unavailable_model_fit(game.get("home_team"))),
                     game.get("home_team"), target_week, projection_games, results_by_gid,
                     team_model_fit["team_games"], fbs_teams,
+                    expected_by_week_team=model_fit_expected_by_week_team,
+                    evaluation_index=model_fit_evaluation_index,
                 )),
                 "source": "team_game_evaluations_2026.team_aggregates",
                 "display_only": True,

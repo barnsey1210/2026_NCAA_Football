@@ -313,6 +313,19 @@ class OperatorContractTests(unittest.TestCase):
         self.assertNotIn("--push",schedule["entrypoint"])
         self.assertIn('"war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"]',dispatcher)
 
+    def test_market_publication_warning_is_structured_separately(self):
+        output = (
+            'details\nFAST_MARKET_RESULT={"acquisition_status":"SUCCEEDED",'
+            '"publication_validation_status":"FAILED"}\n'
+        )
+        self.assertEqual(
+            service.fast_market_result(output),
+            {
+                "acquisition_status": "SUCCEEDED",
+                "publication_validation_status": "FAILED",
+            },
+        )
+
     def test_ratings_registry_and_dispatcher_use_bounded_ratings_mode(self):
         registry=json.loads((api.ROOT/"scripts/control/refresh_stage_registry.json").read_text())
         self.assertEqual(registry["actions"]["RATINGS_REFRESH"]["controller_mode"],"ratings")

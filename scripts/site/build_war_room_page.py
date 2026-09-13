@@ -5116,7 +5116,7 @@ addEventListener('message',event=>{
     status.textContent=`Task ${message.payload.task_id} · ${message.payload.status || 'REQUESTED'}`;
   }else if(message.type==='TASK'){
     status.textContent=operationDetail(message.task||{});
-    const terminal=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE']);
+    const terminal=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE','DEFERRED_BY_MARKET_PRIORITY']);
     if(terminal.has(message.task?.status)){
       if(message.task.status==='COMPLETED' || message.task.status==='COMPLETED_WITH_WARNINGS')loadData();
       RELAY_REQUESTS.delete(message.requestId);

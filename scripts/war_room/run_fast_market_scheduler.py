@@ -152,16 +152,6 @@ def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime
         report["duration_seconds"] = round(time.monotonic() - started, 3)
         return 0, report, new_state
 
-    if postgame_pending():
-        new_state.update(schema_version=1, last_status="DEFERRED_BY_POSTGAME")
-        report.update(
-            status="DEFERRED_BY_POSTGAME",
-            deferred_reason="Postgame is pending or running",
-            next_due_at=iso(now_utc),
-            duration_seconds=round(time.monotonic() - started, 3),
-        )
-        return 0, report, new_state
-
     if (band == "ROUTINE_HOURLY" and market_success_at
             and 0 <= (now_utc - market_success_at).total_seconds() < ROUTINE_SUPPRESSION_SECONDS):
         new_state.update(schema_version=1, last_due_handled_at=iso(now),
@@ -200,7 +190,7 @@ def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime
                   duration_seconds=round(time.monotonic() - started, 3))
     code = 0 if status in {"COMPLETED", "COMPLETED_WITH_WARNINGS",
                            "DEFERRED_BY_DAILY_BACKBONE", "BLOCKED_BY_OVERLAP",
-                           "BLOCKED_BY_QUOTA", "DEFERRED_BY_POSTGAME"} else 2
+                           "BLOCKED_BY_QUOTA"} else 2
     return code, report, new_state
 
 

@@ -30,6 +30,9 @@ DEFAULT_OUT = ROOT / "data/site/war_room_activity.json"
 DEFAULT_LINE_HISTORY = ROOT / "data/site/matchup_line_history.json"
 DEFAULT_GAME_INDEX = ROOT / "data/war_room/history/war_room_game_activity_index.json"
 DEFAULT_BOOK_HISTORY = ROOT / "data/odds/game_book_line_history.csv"
+DEFAULT_PINNACLE_OPENER_CACHE = (
+    ROOT / "data/control/current_market/pinnacle_opener_cache.json"
+)
 
 BOOKS = (
     "DraftKings", "FanDuel", "BetMGM", "Caesars",
@@ -817,8 +820,22 @@ def first_tracked_opener(rows: list[dict[str, Any]], market: str, *, book: str |
     }
 
 
-def load_pinnacle_openers(path: Path) -> dict[str, dict[str, Any]]:
+def load_pinnacle_openers(
+    path: Path, cache_path: Path = DEFAULT_PINNACLE_OPENER_CACHE,
+) -> dict[str, dict[str, Any]]:
     """Read only Pinnacle's first accepted spread/total observations."""
+    try:
+        stat = path.stat()
+        cache_key = f"{stat.st_size}:{stat.st_mtime_ns}"
+        cached = load_json(cache_path, {})
+        if (
+            cached.get("schema_version") == 1
+            and cached.get("cache_key") == cache_key
+            and isinstance(cached.get("openers"), dict)
+        ):
+            return cached["openers"]
+    except OSError:
+        return {}
     candidates: dict[tuple[str, str], tuple[datetime, dict[str, Any]]] = {}
     try:
         with path.open(newline="", encoding="utf-8-sig") as handle:
@@ -856,6 +873,11 @@ def load_pinnacle_openers(path: Path) -> dict[str, dict[str, Any]]:
     grouped: dict[str, dict[str, Any]] = {}
     for (gid, market), (_, record) in candidates.items():
         grouped.setdefault(gid, {})[market] = record
+    atomic_json(cache_path, {
+        "schema_version": 1,
+        "cache_key": cache_key,
+        "openers": grouped,
+    })
     return grouped
 
 

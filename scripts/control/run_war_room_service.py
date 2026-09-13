@@ -19,6 +19,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTROL = ROOT / "data/control/war_room_services"
@@ -29,6 +30,8 @@ DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
 REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
 POSTGAME_LOCK_WAIT_SECONDS = 180
 POSTGAME_LOCK_POLL_SECONDS = 1.0
+MARKET_LOCK_WAIT_SECONDS = 900
+ET = ZoneInfo("America/New_York")
 
 ACTION_REGISTRY_KEYS = {
     "market": "MARKET_REFRESH",
@@ -75,6 +78,18 @@ def resolve_command(action: str) -> list[str]:
     return list(MODE_COMMANDS[mode])
 
 
+def fast_market_result(output: str) -> dict:
+    for line in reversed(output.splitlines()):
+        if not line.startswith("FAST_MARKET_RESULT="):
+            continue
+        try:
+            value = json.loads(line.split("=", 1)[1])
+            return value if isinstance(value, dict) else {}
+        except (TypeError, ValueError):
+            return {}
+    return {}
+
+
 def daily_running() -> bool:
     state = read_json(DAILY_STATUS, {})
     return str(state.get("status", "")).upper() in {"RUNNING", "STARTED", "IN_PROGRESS"}
@@ -116,9 +131,11 @@ def acquire_with_priority(
     waiting=None,
     sleeper=time.sleep,
 ) -> Path:
-    """Let Postgame wait safely while future scheduled Market cycles defer."""
-    if action != "postgame":
+    """Queue Market/Postgame visibly instead of rejecting an accepted task."""
+    if action not in {"market", "postgame"}:
         return acquire(action, identity)
+    if action == "market":
+        timeout_seconds = max(timeout_seconds, MARKET_LOCK_WAIT_SECONDS)
     deadline = time.monotonic() + max(0.0, timeout_seconds)
     while True:
         try:
@@ -129,6 +146,17 @@ def acquire_with_priority(
             if waiting is not None:
                 waiting(str(exc))
             sleeper(max(0.01, poll_seconds))
+
+
+def high_frequency_market_band(now: datetime | None = None) -> bool:
+    """Whether live cadence owns the canonical writer ahead of Postgame."""
+    local = (now or datetime.now(timezone.utc)).astimezone(ET)
+    seconds = local.hour * 3600 + local.minute * 60 + local.second
+    if local.weekday() == 5:
+        return seconds >= 22 * 3600
+    if local.weekday() == 6:
+        return seconds < 23 * 3600
+    return False
 
 
 def main() -> int:
@@ -163,6 +191,7 @@ def main() -> int:
         "FAILED",
         "BLOCKED_BY_OVERLAP",
         "DEFERRED_BY_DAILY_BACKBONE",
+        "DEFERRED_BY_MARKET_PRIORITY",
         "DRY_RUN",
     }:
         print(json.dumps(prior, indent=2))
@@ -183,6 +212,14 @@ def main() -> int:
     atomic_json(LATEST, task)
     if daily_running():
         task.update(status="DEFERRED_BY_DAILY_BACKBONE", completed_at=utc_now())
+        atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
+        print(json.dumps(task, indent=2)); return 2
+    if args.action == "postgame" and high_frequency_market_band():
+        task.update(
+            status="DEFERRED_BY_MARKET_PRIORITY",
+            completed_at=utc_now(),
+            error="Postgame deferred during high-frequency Market cadence",
+        )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         print(json.dumps(task, indent=2)); return 2
     if args.dry_run:
@@ -212,12 +249,21 @@ def main() -> int:
         if args.prepared_results:
             command = [*command, "--postgame-skip-schedule"]
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
+        output = (result.stdout or "") + (result.stderr or "")
+        market_result = fast_market_result(output) if args.action == "market" else {}
+        completed_status = (
+            "COMPLETED_WITH_WARNINGS"
+            if market_result.get("publication_validation_status") == "FAILED"
+            else "COMPLETED"
+        )
         task.update(
-            status="COMPLETED" if result.returncode == 0 else "FAILED",
+            status=completed_status if result.returncode == 0 else "FAILED",
             completed_at=utc_now(),
             returncode=result.returncode,
-            output_tail=((result.stdout or "") + (result.stderr or ""))[-8000:],
+            output_tail=output[-8000:],
         )
+        if market_result:
+            task.update(market_result)
     except RuntimeError as exc:
         task.update(status="BLOCKED_BY_OVERLAP", completed_at=utc_now(), error=str(exc))
     except subprocess.TimeoutExpired:

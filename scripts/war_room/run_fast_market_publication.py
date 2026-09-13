@@ -17,9 +17,9 @@ HEALTH = ROOT / "data/site/war_room_health.json"
 MAIN_REPO = Path.home() / "NCAAF_MAIN_REPO"
 
 
-def run(*parts: str) -> None:
+def run(*parts: str) -> subprocess.CompletedProcess[str]:
     print("+", " ".join(parts))
-    subprocess.run(parts, cwd=ROOT, check=True)
+    return subprocess.run(parts, cwd=ROOT, check=True)
 
 
 def quota_preflight() -> None:
@@ -56,7 +56,7 @@ def build_bundle() -> None:
         shutil.copy2(source, BUNDLE / relative)
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--push",
@@ -75,17 +75,32 @@ def main() -> None:
         run(sys.executable, "scripts/war_room/run_fast_market_refresh.py")
 
     build_bundle()
-    run(
-        sys.executable,
-        "scripts/audit/audit_war_room_fast_publication.py",
-        "--bundle",
-        str(BUNDLE),
-    )
+    try:
+        run(
+            sys.executable,
+            "scripts/audit/audit_war_room_fast_publication.py",
+            "--bundle",
+            str(BUNDLE),
+        )
+    except subprocess.CalledProcessError as exc:
+        # Acquisition and live-artifact generation have already succeeded.
+        # Preserve that fact while surfacing publication validation separately.
+        print("FAST_MARKET_RESULT=" + json.dumps({
+            "acquisition_status": "SUCCEEDED" if not args.skip_refresh else "SKIPPED",
+            "publication_validation_status": "FAILED",
+            "publication_validation_returncode": exc.returncode,
+        }, sort_keys=True))
+        return 0
     if args.push:
         run("bash", "scripts/publish/publish_site.sh", "--war-room-push")
     else:
         print("LIVE WAR ROOM ARTIFACTS READY; repository publication deferred")
+    print("FAST_MARKET_RESULT=" + json.dumps({
+        "acquisition_status": "SUCCEEDED" if not args.skip_refresh else "SKIPPED",
+        "publication_validation_status": "PASSED",
+    }, sort_keys=True))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

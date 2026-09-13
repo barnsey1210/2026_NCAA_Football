@@ -3,8 +3,10 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -219,6 +221,44 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertIs(result, lock)
         self.assertEqual(len(calls), 2)
         self.assertEqual(waiting, ["overlap blocked by running task market-auto-test"])
+
+    def test_market_waits_visibly_for_existing_writer(self):
+        calls = []
+        lock = object()
+        dispatcher = load(
+            "market_dispatcher_priority",
+            "scripts/control/run_war_room_service.py",
+        )
+        def acquire(action, identity):
+            calls.append((action, identity))
+            if len(calls) == 1:
+                raise RuntimeError("overlap blocked by running task postgame-test")
+            return lock
+        waiting = []
+        with patch.object(dispatcher, "acquire", side_effect=acquire):
+            result = dispatcher.acquire_with_priority(
+                "market", "market-test", timeout_seconds=0.01,
+                poll_seconds=0.01, waiting=waiting.append,
+                sleeper=lambda _: None,
+            )
+        self.assertIs(result, lock)
+        self.assertEqual(waiting, ["overlap blocked by running task postgame-test"])
+
+    def test_postgame_defers_through_high_frequency_market_band(self):
+        dispatcher = load(
+            "postgame_dispatcher_band",
+            "scripts/control/run_war_room_service.py",
+        )
+        et = ZoneInfo("America/New_York")
+        self.assertTrue(dispatcher.high_frequency_market_band(
+            datetime(2026, 9, 12, 22, 0, tzinfo=et)
+        ))
+        self.assertTrue(dispatcher.high_frequency_market_band(
+            datetime(2026, 9, 13, 10, 0, tzinfo=et)
+        ))
+        self.assertFalse(dispatcher.high_frequency_market_band(
+            datetime(2026, 9, 13, 23, 0, tzinfo=et)
+        ))
 
     def test_prepared_results_skips_only_schedule_and_results(self):
         full = CONTROL.postgame_commands()

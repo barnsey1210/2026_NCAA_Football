@@ -692,6 +692,64 @@ def main():
         "total": {},
     }
 
+    # These immutable ledgers can contain hundreds of thousands of rows. The
+    # tracker previously rescanned each full list for every market/week/model/
+    # checkpoint cell, turning normal in-season growth into quadratic work.
+    predictions_by_model = {}
+    available_predictions = {}
+    scores_index = {}
+    accuracy_index = {}
+    official_checkpoints = {}
+    schedule_ids = {}
+    for prediction in predictions:
+        model_key = (
+            prediction.get("model_id"), prediction.get("model_version")
+        )
+        predictions_by_model.setdefault(model_key, []).append(prediction)
+        if prediction.get("availability_status") == "AVAILABLE":
+            key = (
+                prediction.get("market_type"), prediction.get("week"),
+                *model_key,
+            )
+            available_predictions.setdefault(key, []).append(prediction)
+            available_predictions.setdefault(
+                (prediction.get("market_type"), None, *model_key), []
+            ).append(prediction)
+    for score in scores:
+        key = (
+            score.get("market_type"), score.get("week"),
+            score.get("model_id"), score.get("model_version"),
+            score.get("checkpoint"),
+        )
+        scores_index.setdefault(key, []).append(score)
+        scores_index.setdefault(
+            (key[0], None, *key[2:]), []
+        ).append(score)
+    for score in prediction_scores:
+        key = (
+            score.get("market_type"), score.get("week"),
+            score.get("model_id"), score.get("model_version"),
+        )
+        accuracy_index.setdefault(key, []).append(score)
+        accuracy_index.setdefault(
+            (key[0], None, *key[2:]), []
+        ).append(score)
+    for checkpoint_row in checkpoints:
+        if checkpoint_row.get("selection_status") != "OFFICIAL":
+            continue
+        key = (
+            checkpoint_row.get("market_type"), checkpoint_row.get("week"),
+            checkpoint_row.get("model_id"),
+            checkpoint_row.get("model_version"), checkpoint_row.get("checkpoint"),
+        )
+        official_checkpoints.setdefault(key, []).append(checkpoint_row)
+        official_checkpoints.setdefault(
+            (key[0], None, *key[2:]), []
+        ).append(checkpoint_row)
+    for game in schedule_games:
+        if game.get("game_id"):
+            schedule_ids.setdefault(game.get("week"), set()).add(str(game["game_id"]))
+
     for market_type in ["spread", "total"]:
         market_specs = [
             spec
@@ -732,11 +790,9 @@ def main():
             for spec in market_specs:
                 model_id = spec["model_id"]
                 model_version = spec["model_version"]
-                model_prediction_rows = [
-                    prediction for prediction in predictions
-                    if prediction.get("model_id") == model_id
-                    and prediction.get("model_version") == model_version
-                ]
+                model_prediction_rows = predictions_by_model.get(
+                    (model_id, model_version), []
+                )
                 formula_versions = sorted({
                     str(prediction.get("formula_version"))
                     for prediction in model_prediction_rows
@@ -767,27 +823,30 @@ def main():
                 }
 
                 for checkpoint in checkpoint_order:
-                    selected_rows = [
-                        score
-                        for score in period_rows
-                        if score.get("model_id") == model_id
-                        and score.get("model_version") == model_version
-                        and score.get("checkpoint") == checkpoint
-                    ]
-                    selected_accuracy_rows = [
-                        score for score in period_accuracy_rows
-                        if score.get("model_id") == model_id
-                        and score.get("model_version") == model_version
-                    ]
+                    index_week = None if period == "Season" else week
+                    selected_rows = scores_index.get(
+                        (market_type, index_week, model_id, model_version, checkpoint), []
+                    )
+                    selected_accuracy_rows = accuracy_index.get(
+                        (market_type, index_week, model_id, model_version), []
+                    )
 
                     if period == "Season":
-                        schedule_n = len({str(game.get("game_id")) for game in schedule_games if game.get("game_id")})
-                        prediction_rows = [p for p in predictions if p.get("model_id") == model_id and p.get("model_version") == model_version and p.get("market_type") == market_type and p.get("availability_status") == "AVAILABLE"]
-                        captured_rows = [c for c in checkpoints if c.get("model_id") == model_id and c.get("model_version") == model_version and c.get("market_type") == market_type and c.get("checkpoint") == checkpoint and c.get("selection_status") == "OFFICIAL"]
+                        schedule_n = len(set().union(*schedule_ids.values())) if schedule_ids else 0
+                        prediction_rows = available_predictions.get(
+                            (market_type, None, model_id, model_version), []
+                        )
+                        captured_rows = official_checkpoints.get(
+                            (market_type, None, model_id, model_version, checkpoint), []
+                        )
                     else:
-                        schedule_n = len({str(game.get("game_id")) for game in schedule_games if game.get("week") == week and game.get("game_id")})
-                        prediction_rows = [p for p in predictions if p.get("week") == week and p.get("model_id") == model_id and p.get("model_version") == model_version and p.get("market_type") == market_type and p.get("availability_status") == "AVAILABLE"]
-                        captured_rows = [c for c in checkpoints if c.get("week") == week and c.get("model_id") == model_id and c.get("model_version") == model_version and c.get("market_type") == market_type and c.get("checkpoint") == checkpoint and c.get("selection_status") == "OFFICIAL"]
+                        schedule_n = len(schedule_ids.get(week, set()))
+                        prediction_rows = available_predictions.get(
+                            (market_type, week, model_id, model_version), []
+                        )
+                        captured_rows = official_checkpoints.get(
+                            (market_type, week, model_id, model_version, checkpoint), []
+                        )
 
                     row["checkpoints"][checkpoint] = coverage_metrics(
                         selected_rows, accuracy_rows=selected_accuracy_rows,
