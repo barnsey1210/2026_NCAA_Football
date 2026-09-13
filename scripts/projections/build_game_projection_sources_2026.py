@@ -104,27 +104,38 @@ def norm(x):
 
 
 def resolve_dratings_game(idx, game_date, away, home):
-    """Exact date/team first; then unique exact team pair within +/-1 day."""
+    """
+    Resolve DRatings to the canonical schedule.
+
+    Exact away/home orientation is preferred. For canonical neutral-site
+    games only, DRatings may list the teams in the opposite orientation;
+    allow that reversed pair when it resolves uniquely.
+    """
     if not game_date or not away or not home:
         return None
 
     away_n = norm(away)
     home_n = norm(home)
 
+    # Normal exact orientation.
     exact = idx.get((str(game_date), away_n, home_n))
     if exact:
         return exact
+
+    # Neutral-site games can be presented in either orientation by DRatings.
+    reversed_exact = idx.get((str(game_date), home_n, away_n))
+    if reversed_exact and bool(reversed_exact.get("neutral_site")):
+        return reversed_exact
 
     try:
         source_date = datetime.strptime(str(game_date), "%Y-%m-%d").date()
     except ValueError:
         return None
 
-    candidates = []
-    for (canonical_date, canonical_away, canonical_home), game in idx.items():
-        if canonical_away != away_n or canonical_home != home_n:
-            continue
+    normal_candidates = []
+    reversed_candidates = []
 
+    for (canonical_date, canonical_away, canonical_home), game in idx.items():
         try:
             candidate_date = datetime.strptime(
                 str(canonical_date), "%Y-%m-%d"
@@ -132,10 +143,28 @@ def resolve_dratings_game(idx, game_date, away, home):
         except ValueError:
             continue
 
-        if abs((candidate_date - source_date).days) <= 1:
-            candidates.append(game)
+        if abs((candidate_date - source_date).days) > 1:
+            continue
 
-    return candidates[0] if len(candidates) == 1 else None
+        if canonical_away == away_n and canonical_home == home_n:
+            normal_candidates.append(game)
+            continue
+
+        if (
+            bool(game.get("neutral_site"))
+            and canonical_away == home_n
+            and canonical_home == away_n
+        ):
+            reversed_candidates.append(game)
+
+    if len(normal_candidates) == 1:
+        return normal_candidates[0]
+
+    if len(reversed_candidates) == 1:
+        return reversed_candidates[0]
+
+    return None
+
 
 def massey_match_key(x):
     """
@@ -428,26 +457,74 @@ def load_dratings(idx):
     rows, audit = [], []
     if not DRATINGS.exists():
         return rows, [{"source":"DRatings Predictions","status":"missing/inactive","rows":0}]
+
     for _, r in pd.read_csv(DRATINGS).iterrows():
         source_date = (
             r.get("canonical_game_date")
             if "canonical_game_date" in r.index and pd.notna(r.get("canonical_game_date"))
             else r.get("game_date")
         )
+
         g = resolve_dratings_game(
             idx,
             source_date,
             r.get("away_team"),
             r.get("home_team"),
         )
-        audit.append({"source":"DRatings Predictions","date":r.get("game_date"),"away":r.get("away_team"),
-                      "home":r.get("home_team"),"matched":bool(g),"game_id":g.get("game_id") if g else ""})
-        if g:
-            rows.append(add_common(r,"DRatings Predictions",g,r.get("projected_spread_home"),r.get("projected_total"),
-                                   r.get("away_projected_points"),r.get("home_projected_points"),
-                                   r.get("home_win_prob"),r.get("source_url","https://www.dratings.com/predictor/ncaa-football-predictions/"),
-                                   "DRatings live NCAA football game prediction."))
+
+        audit.append({
+            "source": "DRatings Predictions",
+            "date": r.get("game_date"),
+            "away": r.get("away_team"),
+            "home": r.get("home_team"),
+            "matched": bool(g),
+            "game_id": g.get("game_id") if g else "",
+        })
+
+        if not g:
+            continue
+
+        spread_home = r.get("projected_spread_home")
+        away_score = r.get("away_projected_points")
+        home_score = r.get("home_projected_points")
+        home_win_prob = r.get("home_win_prob")
+        notes = "DRatings live NCAA football game prediction."
+
+        reversed_orientation = (
+            norm(r.get("away_team")) == norm(g.get("home_team"))
+            and norm(r.get("home_team")) == norm(g.get("away_team"))
+        )
+
+        if reversed_orientation:
+            # Convert source orientation back to canonical away/home orientation.
+            if pd.notna(spread_home):
+                spread_home = -float(spread_home)
+
+            away_score, home_score = home_score, away_score
+
+            if pd.notna(home_win_prob):
+                home_win_prob = 1.0 - float(home_win_prob)
+
+            notes += " Neutral-site source orientation reversed to canonical away/home."
+
+        rows.append(add_common(
+            r,
+            "DRatings Predictions",
+            g,
+            spread_home,
+            r.get("projected_total"),
+            away_score,
+            home_score,
+            home_win_prob,
+            r.get(
+                "source_url",
+                "https://www.dratings.com/predictor/ncaa-football-predictions/",
+            ),
+            notes,
+        ))
+
     return rows, audit
+
 
 def load_sagarin(idx):
     rows, audit = [], []
