@@ -103,6 +103,16 @@ def main():
         )
     )
 
+    current_market_env = env.copy()
+    current_market_env["NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY"] = "1"
+    stages.append(
+        run_stage(
+            "canonical_current_market_overlay",
+            [sys.executable, "scripts/markets/build_current_market_contract.py"],
+            current_market_env,
+        )
+    )
+
     stages.append(
         run_stage(
             "war_room_health",
@@ -125,83 +135,12 @@ def main():
         )
     )
 
-    # Activity consumes the newly resolved matrix directly. Durable per-book
-    # and matchup-line-history maintenance remains in the canonical daily
-    # pipeline and must not delay live fast-market availability.
-    stages.append(
-        run_stage(
-            "war_room_activity",
-            [
-                sys.executable,
-                "scripts/war_room/build_war_room_activity.py",
-            ],
-            env,
-        )
-    )
-    stages.append(
-        run_stage(
-            "war_room_market_activity_enrichment",
-            [
-                sys.executable,
-                "scripts/war_room/build_war_room_market_matrix.py",
-                "--activity-enrichment-only",
-            ],
-            env,
-        )
-    )
-    # The War Room critical path is complete at this point.
-    # Shared current-state refreshes below are deliberately non-critical:
-    # no provider calls, no durable line-history writes, and no full-site publish.
+    # The live Command Center matrix is the hot-path publication boundary.
+    # Activity, historical ledgers, Odds/Matchups overlays, and other broad
+    # current-state views are maintained by the deferred daily pipeline.
     war_room_ready_ms = round(
         (perf_counter() - start) * 1000,
         1,
-    )
-
-    current_market_env = env.copy()
-    current_market_env["NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY"] = "1"
-
-    stages.append(
-        run_stage(
-            "canonical_current_market_overlay",
-            [
-                sys.executable,
-                "scripts/markets/build_current_market_contract.py",
-            ],
-            current_market_env,
-        )
-    )
-
-    stages.append(
-        run_stage(
-            "odds_screen_v2_rebuild",
-            [
-                sys.executable,
-                "scripts/site/build_odds_screen_v2.py",
-            ],
-            current_market_env,
-        )
-    )
-
-    stages.append(
-        run_stage(
-            "matchups_current_market_overlay",
-            [
-                sys.executable,
-                "scripts/markets/apply_current_market_to_matchups.py",
-            ],
-            current_market_env,
-        )
-    )
-
-    stages.append(
-        run_stage(
-            "refresh_history",
-            [
-                sys.executable,
-                "scripts/war_room/record_fast_refresh_history.py",
-            ],
-            env,
-        )
     )
 
     total_ms = round(
@@ -218,6 +157,11 @@ def main():
         "total_duration_ms": total_ms,
         "critical_path_duration_ms": war_room_ready_ms,
         "deferred_to_daily_maintenance": [
+            "war_room_activity",
+            "war_room_market_activity_enrichment",
+            "odds_screen_v2_rebuild",
+            "matchups_current_market_overlay",
+            "record_fast_refresh_history",
             "append_current_market_book_history",
             "build_matchup_line_history_clean",
             "inject_matchup_line_history_asset",

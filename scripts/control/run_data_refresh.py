@@ -141,12 +141,11 @@ def matchup_source_refresh_status() -> tuple[bool, dict[str, Any]]:
     return changed, report
 
 
-def ratings_acquisition_commands() -> list[list[str]]:
+def ratings_acquisition_commands(sources: str = "spplus,fpi,teamrankings") -> list[list[str]]:
     return [
-        [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", "spplus,fpi,teamrankings"],
+        [sys.executable, "scripts/ratings/test_rating_sources.py", "--sources", sources],
         [sys.executable, "scripts/ratings/parse_rating_source_tables.py"],
         [sys.executable, "scripts/ratings/accept_live_rating_candidates_with_status.py"],
-        [sys.executable, "scripts/ratings/run_fast_standard_source_refresh.py"],
     ]
 
 
@@ -160,35 +159,13 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
         [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
         [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
-        [sys.executable, "ratings/append_ratings_history.py"],
-        [sys.executable, "ratings/build_ratings_movement.py"],
         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
         # Acquisition/source refresh remains bounded, but canonical projection
         # resolution uses every valid game already returned by providers.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
-        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
-        [sys.executable, "scripts/site/build_matchups_view.py"],
-        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
-        [sys.executable, "scripts/model_tracking/v2/capture_current_contracts.py", "--accept"],
-        [
-            sys.executable,
-            "scripts/model_tracking/v2/capture_official_checkpoints.py",
-            "--normalized-authority",
-            "--accept",
-        ],
-        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
+        [sys.executable, "scripts/site/build_ratings_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
-        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
-        [sys.executable, "scripts/war_room/build_war_room_page.py"],
-        [sys.executable, "scripts/site/build_ratings_view.py"],
-        [sys.executable, "scripts/site/build_public_site.py"],
-        [sys.executable, "scripts/site/build_war_room_home.py"],
-        [sys.executable, "scripts/site/inject_market_presentation_fixes.py"],
-        [sys.executable, "scripts/site/compact_matchups_payload.py"],
-        [sys.executable, "scripts/site/apply_shared_war_room_shell.py"],
-        [sys.executable, "scripts/publish/check_public_site.py"],
-        [sys.executable, "scripts/audit/audit_publication_parity.py"],
     ]
 
 
@@ -205,23 +182,14 @@ def ratings_no_change_commands(
         # Keep downstream canonical artifacts synchronized even when provider
         # values are unchanged but reconciliation/parser behavior changed.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
-        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
-        [sys.executable, "scripts/model_tracking/v2/capture_current_contracts.py", "--accept"],
-        [
-            sys.executable,
-            "scripts/model_tracking/v2/capture_official_checkpoints.py",
-            "--normalized-authority",
-            "--accept",
-        ],
-        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
+        [sys.executable, "scripts/site/build_ratings_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
-        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
     ]
 
 
 def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
-    """Bounded runtime-only Postgame propagation; never publishes the site."""
+    """Lean runtime Postgame propagation; broad maintenance is deferred."""
     commands = [
         [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
         [sys.executable, "scripts/results/build_game_results_2026.py"],
@@ -230,26 +198,12 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
         [sys.executable, "scripts/postgame/build_postgame_features_2026.py"],
         [sys.executable, "scripts/model_fit/build_team_game_evaluations_2026.py", "--hot-path"],
         [sys.executable, "scripts/site/build_postgame_shadow_updates.py"],
-        [sys.executable, "scripts/research/build_market_implied_power_ratings.py", "--production-2026"],
         [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
-        [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/site/build_saturday_shadow_lines.py"],
-        [sys.executable, "scripts/audit/validate_projection_resolver.py"],
-        [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
-        [sys.executable, "scripts/model_tracking/v2/capture_close_checkpoints.py", "--accept"],
-        [sys.executable, "scripts/model_tracking/settle_model_tracking.py", "--accept"],
-        [
-            sys.executable,
-            "scripts/model_tracking/v2/settle_accepted_observations.py",
-            "--normalized-market-authority",
-            "--accept",
-        ],
-        [sys.executable, "scripts/model_tracking/build_model_performance_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
-        [sys.executable, "scripts/war_room/build_war_room_activity.py"],
     ]
     return commands[2:] if skip_schedule else commands
 
@@ -266,7 +220,8 @@ def execute_postgame_service(
 
 
 def execute_ratings_service(
-    run: dict[str, Any], cfg: dict[str, Any], confirm: bool
+    run: dict[str, Any], cfg: dict[str, Any], confirm: bool,
+    sources: str = "spplus,fpi,teamrankings",
 ) -> None:
     """Execute only the bounded Ratings service contract."""
     service_allowed = cfg.get("publication_policy", {}).get("ratings", False)
@@ -278,16 +233,14 @@ def execute_ratings_service(
         run["status"] = "BLOCKED_BY_CONFIGURATION"
         run["errors"].append("ratings service policy is disabled")
         return
-    if not run_commands(run, ratings_acquisition_commands()):
+    if not run_commands(run, ratings_acquisition_commands(sources)):
         run["status"] = "FAILED"
         return
 
     global_changed, statuses = accepted_ratings_changed()
     matchup_changed, matchup_report = matchup_source_refresh_status()
     changed = global_changed or matchup_changed
-    run["providers_called"] = [
-        "spplus", "fpi", "teamrankings", "sagarin", "dratings", "massey"
-    ]
+    run["providers_called"] = [value for value in sources.split(",") if value]
     # Free webpage activity is distinct from quota-bearing provider credits.
     run["api"]["calls_consumed"] = 0
     run["api"]["credits_consumed"] = 0
@@ -316,22 +269,10 @@ def execute_ratings_service(
         run["status"] = "NO_CHANGES"
         return
 
-    pub = shell(["bash", "scripts/publish/publish_site.sh", "--push"])
-    run["publication"] = {
-        "status": "COMPLETED" if pub["returncode"] == 0 else "FAILED",
-        **pub,
-    }
-    run["stages"].append({
-        "name": "canonical_publish",
-        "status": "PASSED" if pub["returncode"] == 0 else "FAILED",
-        **pub,
-    })
-
-    if pub["returncode"] == 0:
-        run["status"] = "COMPLETED"
-    else:
-        run["status"] = "FAILED"
-        run["errors"].append("ratings publication failed")
+    # AUTO's validated Command Center artifacts are served live through the
+    # tunnel. Static repository publication is deferred maintenance.
+    run["publication"] = {"status": "LIVE_RUNTIME_READY"}
+    run["status"] = "COMPLETED"
 
 
 def deployed_commit() -> str | None:
@@ -687,7 +628,10 @@ def main() -> int:
                         else:
                             run["status"] = "FAILED"
             elif args.mode == "ratings":
-                execute_ratings_service(run, cfg, args.confirm_publish)
+                execute_ratings_service(
+                    run, cfg, args.confirm_publish,
+                    ",".join(resolved_providers) or "spplus,fpi,teamrankings",
+                )
 
             elif args.mode == "pregame":
                 publish_allowed = (

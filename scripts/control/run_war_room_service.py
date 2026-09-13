@@ -19,7 +19,6 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTROL = ROOT / "data/control/war_room_services"
@@ -27,16 +26,9 @@ LOCKS = CONTROL / "locks"
 TASKS = CONTROL / "tasks"
 LATEST = CONTROL / "latest.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
-MARKET_SCHEDULER_LATEST = ROOT / "data/control/market_scheduler/latest.json"
 REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
-POSTGAME_LOCK_WAIT_SECONDS = 900
-POSTGAME_LOCK_POLL_SECONDS = 1.0
-POSTGAME_TARGET_SECONDS = 30
-POSTGAME_SAFETY_SECONDS = 15
-POSTGAME_REQUIRED_GAP_SECONDS = POSTGAME_TARGET_SECONDS + POSTGAME_SAFETY_SECONDS
-MARKET_SCHEDULER_STALE_SECONDS = 45
-MARKET_LOCK_WAIT_SECONDS = 900
-ET = ZoneInfo("America/New_York")
+WRITER_QUEUE_WAIT_SECONDS = 900
+WRITER_QUEUE_POLL_SECONDS = 0.1
 
 ACTION_REGISTRY_KEYS = {
     "market": "MARKET_REFRESH",
@@ -127,115 +119,13 @@ def acquire(action: str, identity: str) -> Path:
     return global_lock
 
 
-def acquire_with_priority(
-    action: str,
-    identity: str,
-    *,
-    timeout_seconds: float = POSTGAME_LOCK_WAIT_SECONDS,
-    poll_seconds: float = POSTGAME_LOCK_POLL_SECONDS,
-    waiting=None,
-    sleeper=time.sleep,
-) -> Path:
-    """Queue Market/Postgame visibly instead of rejecting an accepted task."""
-    if action not in {"market", "postgame"}:
-        return acquire(action, identity)
-    if action == "market":
-        timeout_seconds = max(timeout_seconds, MARKET_LOCK_WAIT_SECONDS)
-    deadline = time.monotonic() + max(0.0, timeout_seconds)
-    while True:
-        try:
-            return acquire(action, identity)
-        except RuntimeError as exc:
-            if time.monotonic() >= deadline:
-                raise
-            if waiting is not None:
-                waiting(str(exc))
-            sleeper(max(0.01, poll_seconds))
-
-
-def high_frequency_market_band(now: datetime | None = None) -> bool:
-    """Whether live cadence owns the canonical writer ahead of Postgame."""
-    local = (now or datetime.now(timezone.utc)).astimezone(ET)
-    seconds = local.hour * 3600 + local.minute * 60 + local.second
-    if local.weekday() == 5:
-        return seconds >= 22 * 3600
-    if local.weekday() == 6:
-        return seconds < 23 * 3600
-    return False
-
-
-def parse_utc(value) -> datetime | None:
-    if not value:
-        return None
-    try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
-        return parsed.astimezone(timezone.utc)
-    except (TypeError, ValueError):
-        return None
-
-
-def postgame_market_gap(
-    now: datetime | None = None,
-    latest_path: Path = MARKET_SCHEDULER_LATEST,
-) -> dict:
-    """Return conservative Postgame admission state for the live Market cadence."""
-    current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    if not high_frequency_market_band(current):
-        return {
-            "allowed": True,
-            "reason": "outside high-frequency Market cadence",
-            "next_market_due_at": None,
-            "market_gap_seconds": None,
-            "required_gap_seconds": POSTGAME_REQUIRED_GAP_SECONDS,
-        }
-    latest = read_json(latest_path, {})
-    checked_at = parse_utc(latest.get("checked_at"))
-    next_due = parse_utc(latest.get("next_due_at"))
-    if checked_at is None or next_due is None:
-        return {
-            "allowed": False,
-            "reason": "Market scheduler deadline is unavailable",
-            "next_market_due_at": None,
-            "market_gap_seconds": None,
-            "required_gap_seconds": POSTGAME_REQUIRED_GAP_SECONDS,
-        }
-    scheduler_age = max(0.0, (current - checked_at).total_seconds())
-    gap = (next_due - current).total_seconds()
-    allowed = (
-        scheduler_age <= MARKET_SCHEDULER_STALE_SECONDS
-        and gap >= POSTGAME_REQUIRED_GAP_SECONDS
-        and str(latest.get("status")) == "NOT_DUE"
-    )
-    if scheduler_age > MARKET_SCHEDULER_STALE_SECONDS:
-        reason = "Market scheduler deadline is stale"
-    elif str(latest.get("status")) != "NOT_DUE":
-        reason = f"Market scheduler status is {latest.get('status') or 'UNKNOWN'}"
-    elif gap < POSTGAME_REQUIRED_GAP_SECONDS:
-        reason = "insufficient slack before next Market due time"
-    else:
-        reason = "safe Market gap is open"
-    return {
-        "allowed": allowed,
-        "reason": reason,
-        "next_market_due_at": next_due.isoformat(),
-        "market_gap_seconds": round(gap, 3),
-        "required_gap_seconds": POSTGAME_REQUIRED_GAP_SECONDS,
-        "market_scheduler_checked_at": checked_at.isoformat(),
-    }
-
-
-def live_market_request_pending(tasks_dir: Path = TASKS) -> bool:
-    """Give a live Market dispatcher admission priority over Postgame."""
-    try:
-        paths = tasks_dir.glob("*.json")
-    except OSError:
-        return False
-    for path in paths:
+def live_queue(tasks_dir: Path = TASKS) -> list[dict]:
+    """Return live writer requests in durable FIFO order."""
+    queued = []
+    for path in tasks_dir.glob("*.json"):
         task = read_json(path, {})
-        if task.get("action") != "market" or task.get("status") not in {
-            "REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "RUNNING",
+        if task.get("action") not in ACTION_REGISTRY_KEYS or task.get("status") not in {
+            "REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "QUEUED_FOR_MARKET_GAP",
         }:
             continue
         pid = task.get("dispatcher_pid")
@@ -243,55 +133,36 @@ def live_market_request_pending(tasks_dir: Path = TASKS) -> bool:
             continue
         try:
             os.kill(pid, 0)
-            return True
         except OSError:
             continue
-    return False
+        queued.append(task)
+    return sorted(queued, key=lambda row: (str(row.get("requested_at") or ""), str(row.get("task_id") or "")))
 
 
-def acquire_postgame_in_market_gap(
+def acquire_fifo(
+    action: str,
     identity: str,
     *,
-    timeout_seconds: float = POSTGAME_LOCK_WAIT_SECONDS,
-    poll_seconds: float = POSTGAME_LOCK_POLL_SECONDS,
+    timeout_seconds: float = WRITER_QUEUE_WAIT_SECONDS,
+    poll_seconds: float = WRITER_QUEUE_POLL_SECONDS,
     waiting=None,
-    gap_reader=postgame_market_gap,
-    market_pending=live_market_request_pending,
     sleeper=time.sleep,
-) -> tuple[Path, dict]:
-    """Admit Postgame only while its reserved runtime fits before Market is due."""
+) -> Path:
+    """Acquire the single writer lock in durable request-time FIFO order."""
     deadline = time.monotonic() + max(0.0, timeout_seconds)
     while True:
-        gap = gap_reader()
-        if market_pending():
-            gap = {**gap, "allowed": False, "reason": "live Market request has admission priority"}
-        if gap.get("allowed"):
+        queue = live_queue()
+        if queue and queue[0].get("task_id") == identity:
             try:
-                lock = acquire("postgame", identity)
+                return acquire(action, identity)
             except RuntimeError as exc:
-                gap = {**gap, "allowed": False, "reason": str(exc)}
-            else:
-                # Close the check/acquire race: never start from a deadline that
-                # became unsafe while the canonical writer lock was contended.
-                confirmed = gap_reader()
-                if market_pending():
-                    confirmed = {
-                        **confirmed,
-                        "allowed": False,
-                        "reason": "live Market request has admission priority",
-                    }
-                if confirmed.get("allowed"):
-                    return lock, confirmed
-                if lock.exists():
-                    shutil.rmtree(lock)
-                gap = confirmed
+                reason = str(exc)
+        else:
+            reason = f"FIFO queue position {next((i + 1 for i, row in enumerate(queue) if row.get('task_id') == identity), 1)}"
         if waiting is not None:
-            waiting(gap)
+            waiting(reason)
         if time.monotonic() >= deadline:
-            raise RuntimeError(
-                "no safe Market gap opened before Postgame queue timeout: "
-                + str(gap.get("reason") or "unknown reason")
-            )
+            raise RuntimeError(f"writer queue timeout: {reason}")
         sleeper(max(0.01, poll_seconds))
 
 
@@ -301,6 +172,11 @@ def main() -> int:
     parser.add_argument("--trigger", default="manual")
     parser.add_argument("--requester", default="scheduler")
     parser.add_argument("--task-id", default=None)
+    parser.add_argument(
+        "--rating-source",
+        choices=["spplus", "fpi", "teamrankings"],
+        help="Ratings only: refresh one accepted source without unrelated providers.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
         "--prepared-results",
@@ -311,6 +187,8 @@ def main() -> int:
 
     if args.prepared_results and args.action != "postgame":
         parser.error("--prepared-results is valid only for postgame")
+    if args.rating_source and args.action != "ratings":
+        parser.error("--rating-source is valid only for ratings")
     if args.action == "status":
         print(json.dumps(read_json(LATEST, {"status": "NEVER_RUN"}), indent=2))
         return 0
@@ -367,37 +245,16 @@ def main() -> int:
             atomic_json(TASKS / f"{identity}.json", task)
             atomic_json(LATEST, task)
 
-        if args.action == "postgame":
-            def record_gap_wait(gap: dict) -> None:
-                task.update(
-                    status="QUEUED_FOR_MARKET_GAP",
-                    queued_since=task.get("queued_since", utc_now()),
-                    queue_reason=gap.get("reason"),
-                    next_market_due_at=gap.get("next_market_due_at"),
-                    market_gap_seconds=gap.get("market_gap_seconds"),
-                    required_gap_seconds=gap.get("required_gap_seconds"),
-                )
-                atomic_json(TASKS / f"{identity}.json", task)
-                atomic_json(LATEST, task)
-
-            lock, admitted_gap = acquire_postgame_in_market_gap(
-                identity,
-                waiting=record_gap_wait,
-            )
-        else:
-            lock = acquire_with_priority(
-                args.action,
-                identity,
-                waiting=record_waiting,
-            )
-            admitted_gap = {}
+        lock = acquire_fifo(args.action, identity, waiting=record_waiting)
         task.update(
             status="RUNNING",
             started_at=utc_now(),
-            admitted_market_gap=admitted_gap or None,
+            queue_policy="FIFO_EQUAL_PRIORITY",
         )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         command = resolve_command(args.action)
+        if args.rating_source:
+            command = [*command, "--providers", args.rating_source]
         if args.prepared_results:
             command = [*command, "--postgame-skip-schedule"]
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False)
