@@ -592,6 +592,11 @@ def main() -> None:
         for game in previous_payload.get("games", [])
         if game.get("game_id") is not None
     }
+    frozen_game_ids = {
+        gid
+        for gid, game in previous_by_gid.items()
+        if game.get("availability_status") == "CLOSING"
+    }
 
     kickoff_by_gid = {}
 
@@ -714,7 +719,7 @@ def main() -> None:
         commence_time = row.get("commence_time")
         kickoff = parse_time(commence_time)
 
-        if kickoff is not None:
+        if kickoff is not None and gid not in frozen_game_ids:
             kickoff_by_gid[gid] = kickoff
 
         if post_kickoff_quote(updated_at, commence_time):
@@ -819,7 +824,7 @@ def main() -> None:
             commence_time = row.get("commence_time")
             kickoff = parse_time(commence_time)
 
-            if kickoff is not None:
+            if kickoff is not None and gid not in frozen_game_ids:
                 kickoff_by_gid[gid] = kickoff
 
             if post_kickoff_quote(updated_at, commence_time):
