@@ -634,6 +634,24 @@ def main() -> None:
         }
         key_to_game_id[game_key(game.get("date"), game.get("away_team"), game.get("home_team"))] = gid
 
+    # Provider files contain one row per book/market/side, so the same event
+    # identity is normally resolved dozens of times.  The compatibility
+    # fallback can scan the full schedule; memoizing the deterministic result
+    # avoids repeating that scan in every newly spawned hot-path process.
+    resolution_cache = {}
+
+    def cached_resolve(date_candidates, away, home):
+        key = (
+            tuple(str(value or "")[:10] for value in date_candidates),
+            str(away or ""),
+            str(home or ""),
+        )
+        if key not in resolution_cache:
+            resolution_cache[key] = resolve_game_id(
+                date_candidates, away, home, identity, key_to_game_id,
+            )
+        return resolution_cache[key]
+
     candidates = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     excluded = []
     source_counts = Counter()
@@ -645,12 +663,10 @@ def main() -> None:
             local_date,
             str(row.get("commence_time") or "")[:10],
         ]
-        gid, match_method, reversed_orientation = resolve_game_id(
+        gid, match_method, reversed_orientation = cached_resolve(
             date_candidates,
             row.get("away_team"),
             row.get("home_team"),
-            identity,
-            key_to_game_id,
         )
         if not gid:
             excluded.append({
@@ -748,12 +764,10 @@ def main() -> None:
                 str(row.get("commence_time") or "")[:10],
             ]
 
-            gid, _match_method, reversed_orientation = resolve_game_id(
+            gid, _match_method, reversed_orientation = cached_resolve(
                 date_candidates,
                 row.get("away_team"),
                 row.get("home_team"),
-                identity,
-                key_to_game_id,
             )
 
             if not gid:
@@ -892,12 +906,10 @@ def main() -> None:
         ]
 
         if "resolve_game_id" in globals():
-            gid, _method, reversed_orientation = resolve_game_id(
+            gid, _method, reversed_orientation = cached_resolve(
                 date_candidates,
                 row.get("away_team"),
                 row.get("home_team"),
-                identity,
-                key_to_game_id,
             )
         else:
             gid = next(
