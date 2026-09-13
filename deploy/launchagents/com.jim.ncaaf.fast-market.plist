@@ -5,7 +5,9 @@
   <key>ProgramArguments</key><array><string>/bin/zsh</string><string>/Users/jameslindesmith/NCAAF_AUTO/scripts/war_room/start_fast_market_scheduler.sh</string></array>
   <key>WorkingDirectory</key><string>/Users/jameslindesmith/NCAAF_AUTO</string>
   <key>StartInterval</key><integer>30</integer>
-  <key>ProcessType</key><string>Background</string>
+  <!-- Market remains FIFO-equal at the application writer. Interactive only
+       prevents macOS background I/O throttling on the latency-critical path. -->
+  <key>ProcessType</key><string>Interactive</string>
   <key>StandardOutPath</key><string>/Users/jameslindesmith/Scripts/NCAAF/fast_market_scheduler.stdout.log</string>
   <key>StandardErrorPath</key><string>/Users/jameslindesmith/Scripts/NCAAF/fast_market_scheduler.stderr.log</string>
 </dict></plist>
