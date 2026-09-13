@@ -132,6 +132,18 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         futures_dashboard = ROOT / 'futures_dashboard.js'
         if not futures_dashboard.is_file():
             raise FileNotFoundError(f"missing Futures dashboard asset: {futures_dashboard}")
+
+        # Fingerprint the dashboard asset so browsers/CDN never reuse stale JS.
+        import hashlib
+        dashboard_version = hashlib.sha256(
+            futures_dashboard.read_bytes()
+        ).hexdigest()[:12]
+
+        text = text.replace(
+            'src="futures_dashboard.js"',
+            f'src="futures_dashboard.js?v={dashboard_version}"',
+        )
+
         shutil.copy2(futures_dashboard, OUT / 'futures_dashboard.js')
     if target == 'ratings.html':
         text=text.replace('teams=[...m.values()];conf.innerHTML', 'teams=[...m.values()].filter(t=>t.rating!=null&&t.overall_rank!=null);conf.innerHTML')
