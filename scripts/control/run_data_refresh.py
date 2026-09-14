@@ -173,6 +173,7 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         # resolution uses every valid game already returned by providers.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         [sys.executable, "scripts/site/build_ratings_view.py"],
+        [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
     ]
@@ -192,6 +193,7 @@ def ratings_no_change_commands(
         # values are unchanged but reconciliation/parser behavior changed.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         [sys.executable, "scripts/site/build_ratings_view.py"],
+        [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
     ]

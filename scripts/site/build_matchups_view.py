@@ -31,6 +31,7 @@ from scripts.projections.projection_resolver import (
 INDEX = ROOT / "v1.html"
 PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
+RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
 OUT = ROOT / "data/site/matchups_view.json"
 AUDIT = ROOT / "data/audits/matchups_view_audit.json"
 
@@ -127,6 +128,33 @@ def extract_index_data():
 
 def canonical_map(rows, key="team"):
     return {canonical_team(row.get(key)): row for row in rows if clean(row.get(key))}
+
+
+def apply_canonical_composite_ratings(teams, ratings_path=RATINGS_VIEW):
+    """Use the Ratings view as the sole current composite rating/rank authority."""
+    if not ratings_path.exists():
+        raise SystemExit(f"Missing canonical ratings view: {ratings_path}")
+
+    payload = json.loads(ratings_path.read_text())
+    ratings = {
+        canonical_team(row.get("team")): row
+        for row in payload.get("teams", [])
+        if clean(row.get("team"))
+    }
+    if len(ratings) < 130:
+        raise SystemExit(
+            f"Canonical ratings view coverage below 130: {len(ratings)}"
+        )
+
+    merged = []
+    for source_row in teams:
+        row = dict(source_row)
+        canonical = ratings.get(canonical_team(row.get("team")))
+        if canonical:
+            row["rank"] = integer(canonical.get("overall_rank"))
+            row["combo"] = number(canonical.get("rating"))
+        merged.append(row)
+    return merged
 
 
 def team_ranks(teams):
@@ -438,7 +466,7 @@ def main():
         raise SystemExit(f"Missing canonical projection contract: {PROJECTION_CONTRACT}")
     projection_contract = load_contract(PROJECTION_CONTRACT)
     projection_index = index_contract(projection_contract)
-    teams = db.get("teams", [])
+    teams = apply_canonical_composite_ratings(db.get("teams", []))
     games = db.get("games", [])
 
     live_schedule_path = ROOT / "data/site/schedule_live_enrichment.json"

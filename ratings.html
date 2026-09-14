@@ -501,9 +501,10 @@ function initRatingsTips(){
 }
 
 async function init(){
+  const version=Date.now();
   const [matchups,ratingView]=await Promise.all([
-    fetch('data/site/matchups_view.json?v=20260913T131300Z').then(x=>x.json()),
-    fetch('data/site/ratings_view.json?v=20260913T131300Z').then(x=>x.json())
+    fetch(`data/site/matchups_view.json?v=${version}`,{cache:'no-store'}).then(x=>x.json()),
+    fetch(`data/site/ratings_view.json?v=${version}`,{cache:'no-store'}).then(x=>x.json())
   ]);
 
   const meta=new Map();
