@@ -2045,7 +2045,7 @@ def model_freshness(
         accepted_update = has_accepted_source_update(
             meta,
             week_cutoff_at,
-            watermark_date if is_team_rating_source else None,
+            watermark_date,
         )
 
         authority_current = (
@@ -2053,8 +2053,7 @@ def model_freshness(
             and (
                 state in ("PRE_GAME", "UPDATED")
                 or (
-                    is_team_rating_source
-                    and week_cutoff_at is None
+                    week_cutoff_at is None
                     and watermark_date is not None
                 )
             )

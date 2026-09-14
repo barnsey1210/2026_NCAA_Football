@@ -98,19 +98,19 @@ class AuthorityCurrentFallbackTest(unittest.TestCase):
             })
         )
 
-class TeamRatingFallbackScopeTest(unittest.TestCase):
+class AcceptedProviderFallbackScopeTest(unittest.TestCase):
 
-    def test_game_feed_does_not_get_date_only_fallback(self):
+    def test_game_feed_can_use_date_only_fallback(self):
         meta={
             "latest_accepted_update_at":
                 "2026-09-06T16:52:11Z"
         }
 
-        self.assertFalse(
+        self.assertTrue(
             mod.has_accepted_source_update(
                 meta,
                 None,
-                None,
+                "2026-09-05",
             )
         )
 
@@ -127,3 +127,86 @@ class TeamRatingFallbackScopeTest(unittest.TestCase):
                 "2026-09-05",
             )
         )
+
+class GameFeedAuthorityFallbackIntegrationTest(unittest.TestCase):
+
+    def test_game_feed_accepted_after_watermark_counts_current(self):
+        game = {
+            "game_id": "test-game",
+            "resolved_projections": {
+                mod.STANDARD_SPREAD: {
+                    "selection_status": "AVAILABLE",
+                    "component_status": {
+                        "DRatings": "PRESENT",
+                    },
+                },
+            },
+        }
+
+        result = mod.model_freshness(
+            game,
+            mod.STANDARD_SPREAD,
+            {
+                "watermark_date": "2026-09-05",
+                "week_cutoff_at": None,
+            },
+            {},
+            {
+                "DRatings Predictions": {
+                    "snapshot_date": "2026-09-06",
+                    "pulled_at": "2026-09-06T17:00:00Z",
+                    "latest_check_status": "NO_CHANGE",
+                    "latest_accepted_update_at":
+                        "2026-09-06T16:52:11Z",
+                    "comparison_available": True,
+                },
+            },
+        )
+
+        source = result["sources"]["DRatings"]
+
+        self.assertTrue(source["accepted_update"])
+        self.assertTrue(source["authority_current"])
+        self.assertEqual(result["updated_sources"], 1)
+        self.assertEqual(result["temporal_status"], "UPDATED")
+
+    def test_game_feed_accepted_on_watermark_date_still_fails_closed(self):
+        game = {
+            "game_id": "test-game",
+            "resolved_projections": {
+                mod.STANDARD_SPREAD: {
+                    "selection_status": "AVAILABLE",
+                    "component_status": {
+                        "DRatings": "PRESENT",
+                    },
+                },
+            },
+        }
+
+        result = mod.model_freshness(
+            game,
+            mod.STANDARD_SPREAD,
+            {
+                "watermark_date": "2026-09-05",
+                "week_cutoff_at": None,
+            },
+            {},
+            {
+                "DRatings Predictions": {
+                    "snapshot_date": "2026-09-05",
+                    "pulled_at": "2026-09-05T23:59:00Z",
+                    "latest_check_status": "NO_CHANGE",
+                    "latest_accepted_update_at":
+                        "2026-09-05T23:59:00Z",
+                    "comparison_available": True,
+                },
+            },
+        )
+
+        self.assertFalse(
+            result["sources"]["DRatings"]["accepted_update"]
+        )
+        self.assertFalse(
+            result["sources"]["DRatings"]["authority_current"]
+        )
+        self.assertEqual(result["updated_sources"], 0)
