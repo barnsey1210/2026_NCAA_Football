@@ -1914,7 +1914,7 @@ tr:hover td.context-group{background:#202d39}
         <button class="activity-filter active" data-filter="MARKET">MARKET</button>
         <button class="activity-filter" data-filter="MODEL">MODEL</button>
         <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
-        <button class="activity-filter" data-filter="SIGNALS">SIGNALS</button>
+        <button class="activity-filter" data-filter="SIGNALS">COACHES</button>
         <button class="activity-filter" data-filter="TEAMS">TEAMS</button>
       </div>
       <div class="activity-snapshot" id="activitySnapshot"></div>
@@ -3455,6 +3455,49 @@ function movementTitle(game,move){
   return `${game.away_team} @ ${game.home_team}\n${move.book} ${move.market}\n${transition}\n${magnitude}\nDetected ${fmtDateTimeET(move.detected_at)} · ${ageLabel(move.detected_at)}\nDetected refresh: ${move.detected_refresh_id || 'unavailable'}\nProvider quote time: ${move.quote_timestamp ? fmtDateTimeET(move.quote_timestamp) : 'unavailable'}${previous}`;
 }
 
+const BEST_TOOLTIP_BOOKS = [
+  ['DraftKings','DK'],
+  ['FanDuel','FD'],
+  ['BetMGM','MGM'],
+  ['Caesars','CZR'],
+  ['Pinnacle','PINN']
+];
+
+function bestBookTooltip(game,market,side,bestQuote){
+  if(!bestQuote) return '—';
+
+  const rows=BEST_TOOLTIP_BOOKS.map(([book,label])=>{
+    const bundle=quoteBundle(game,book);
+    const q=bundle?.[market]?.[side];
+
+    let shown='—';
+
+    if(q){
+      if(market==='spread'){
+        shown=`${fmtLine(q.line)} ${fmtPrice(q.price) || '—'}`;
+      }else{
+        const prefix=side==='under'?'U':'O';
+        const line=Number(q.line);
+        shown=`${prefix}${Number.isFinite(line)?line:'—'} ${fmtPrice(q.price) || '—'}`;
+      }
+    }
+
+    return `<span class="model-component ${q?'available':'unavailable'}">
+      <span>${esc(label)}</span>
+      <span>${esc(shown)}</span>
+    </span>`;
+  }).join('');
+
+  return `<span class="model-tooltip" data-no-game-select tabindex="0"
+    onmouseenter="positionModelTooltip(this)"
+    onmouseleave="closeModelTooltip(this)"
+    onfocus="positionModelTooltip(this)"
+    onblur="closeModelTooltip(this)">
+      ${compactQuote(bestQuote,market,game,true)}
+      <span class="model-tooltip-panel" role="tooltip">${rows}</span>
+    </span>`;
+}
+
 function compactQuote(q, market, game, highlightFirst=false){
   if(!q) return '—';
 
@@ -3584,7 +3627,7 @@ function renderMobileMatrix(rows){
           )}
           ${mobileMetric(
             'BEST',
-            `${recentBestBadge(game,'spread')}${compactQuote(sprBest,'spread',game,true)}`,
+            `${recentBestBadge(game,'spread')}${bestBookTooltip(game,'spread',sprSide,sprBest)}`,
             recentBestCellClass(game,'spread')
           )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
@@ -3601,7 +3644,7 @@ function renderMobileMatrix(rows){
           )}
           ${mobileMetric(
             'BEST',
-            `${recentBestBadge(game,'total')}${compactQuote(totBest,'total',game,true)}`,
+            `${recentBestBadge(game,'total')}${bestBookTooltip(game,'total',totSide,totBest)}`,
             recentBestCellClass(game,'total')
           )}
           ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
@@ -3718,7 +3761,7 @@ function renderMatrix(){
 
         <td class="best-col spread-group ${recentBestCellClass(game,'spread')}">
           ${recentBestBadge(game,'spread')}
-          ${compactQuote(sprBest, 'spread', game, true)}
+          ${bestBookTooltip(game,'spread',sprSide,sprBest)}
         </td>
 
         <td class="edge-col spread-group edge-focus ${recentEdgeCellClass(game,'spread')}">
@@ -3738,7 +3781,7 @@ function renderMatrix(){
 
         <td class="best-col total-group ${recentBestCellClass(game,'total')}">
           ${recentBestBadge(game,'total')}
-          ${compactQuote(totBest, 'total', game, true)}
+          ${bestBookTooltip(game,'total',totSide,totBest)}
         </td>
 
         <td class="edge-col total-group edge-focus ${recentEdgeCellClass(game,'total')}">
@@ -5011,7 +5054,7 @@ document.querySelectorAll('.activity-filter').forEach(button=>button.addEventLis
 
   if(['SIGNALS','TEAMS'].includes(ACTIVITY_FILTER) && !MATCHUPS_CONTEXT){
     const label=ACTIVITY_FILTER==='SIGNALS'
-      ? 'Loading coaching & betting signals…'
+      ? 'Loading coaches…'
       : 'Loading team schedules…';
     document.getElementById('activityList').innerHTML=`<div class="context-empty">${label}</div>`;
     await ensureMatchupsContext();
