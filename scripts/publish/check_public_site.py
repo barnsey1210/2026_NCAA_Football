@@ -273,6 +273,31 @@ def validate(root: Path, out: Path) -> list[str]:
             )
         if filename == "war_room_market_matrix.json" and not isinstance(payload.get("games"), list):
             errors.append("War Room market matrix games must be a list")
+        if filename == "war_room_market_matrix.json":
+            if path.stat().st_size > 31 * 512 * 1024:
+                errors.append(
+                    "public War Room matrix exceeds 15.5 MiB headroom target: "
+                    f"{path.stat().st_size}"
+                )
+            if "audit" in payload:
+                errors.append("public War Room matrix retains internal builder audit")
+            for index, game in enumerate(payload.get("games") or []):
+                if not isinstance(game, dict):
+                    errors.append(f"War Room market matrix game {index} must be an object")
+                    continue
+                for field in (
+                    "game_id", "away_team", "home_team", "authority", "models",
+                    "market", "standard_freshness", "operator_model",
+                ):
+                    if field not in game:
+                        errors.append(
+                            f"War Room market matrix game {index} missing {field}"
+                        )
+                operator_model = game.get("operator_model")
+                if isinstance(operator_model, dict) and "auto_authority" in operator_model:
+                    errors.append(
+                        f"War Room market matrix game {index} retains duplicate auto_authority"
+                    )
         if filename == "war_room_health.json":
             if not isinstance(payload.get("fast_market_refresh"), dict):
                 errors.append("War Room health fast_market_refresh must be an object")

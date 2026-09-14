@@ -36,6 +36,26 @@ ROOT_PUBLICATION_PAGES = (
     "war-room.html",
     "coaches.html",
 )
+PUBLIC_JSON_MAX_BYTES = 16 * 1024 * 1024
+PUBLIC_WAR_ROOM_TARGET_BYTES = 31 * 512 * 1024  # 15.5 MiB
+
+
+def compact_public_war_room_matrix(payload):
+    """Remove internal-only diagnostics from the public matrix copy.
+
+    The runtime matrix remains the complete operational/audit contract.  The
+    public page reads the canonical per-game ``authority`` object; the repeated
+    ``operator_model.auto_authority`` copy and root builder audit are not read
+    by the page and do not belong in its static fallback payload.
+    """
+    payload.pop('audit', None)
+    for game in payload.get('games', []):
+        if not isinstance(game, dict):
+            continue
+        operator_model = game.get('operator_model')
+        if isinstance(operator_model, dict):
+            operator_model.pop('auto_authority', None)
+    return payload
 
 
 def cache_bust_site_json(text):
@@ -281,7 +301,7 @@ def main():
         )
 
         size = public_matchups.stat().st_size
-        limit = 16 * 1024 * 1024
+        limit = PUBLIC_JSON_MAX_BYTES
         print(
             f'Public matchup payload: '
             f'{size / 1024 / 1024:.2f} MiB'
@@ -292,12 +312,14 @@ def main():
                 f'{size} > {limit}'
             )
 
-    # Preserve the complete War Room matrix contract while compacting only its
-    # public serialization. The runtime artifact remains unchanged and retains
-    # all model, freshness, market, provenance, Shadow, injury, and signal data.
+    # Preserve the complete user-facing War Room contract while compacting only
+    # its public serialization. The runtime artifact remains unchanged and
+    # retains internal builder audit data and the duplicate AUTO authority copy.
     public_war_room_matrix = public_site_data / 'war_room_market_matrix.json'
     if public_war_room_matrix.exists():
-        matrix_payload = json.loads(public_war_room_matrix.read_text())
+        matrix_payload = compact_public_war_room_matrix(
+            json.loads(public_war_room_matrix.read_text())
+        )
         public_war_room_matrix.write_text(
             json.dumps(
                 matrix_payload,
@@ -307,7 +329,7 @@ def main():
         )
 
         matrix_size = public_war_room_matrix.stat().st_size
-        matrix_limit = 16 * 1024 * 1024
+        matrix_limit = PUBLIC_JSON_MAX_BYTES
         print(
             f'Public War Room matrix: '
             f'{matrix_size / 1024 / 1024:.2f} MiB'
@@ -316,6 +338,11 @@ def main():
             raise RuntimeError(
                 f'public War Room matrix exceeds 16 MiB: '
                 f'{matrix_size} > {matrix_limit}'
+            )
+        if matrix_size > PUBLIC_WAR_ROOM_TARGET_BYTES:
+            raise RuntimeError(
+                f'public War Room matrix lacks size headroom: '
+                f'{matrix_size} > {PUBLIC_WAR_ROOM_TARGET_BYTES}'
             )
 
     # Logos and helmets remain local-preview symlinks. Publication copies those
