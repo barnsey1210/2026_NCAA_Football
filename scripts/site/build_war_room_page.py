@@ -1212,6 +1212,11 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
+.best-tooltip-value{
+  color:var(--green)!important;
+  font-weight:950;
+}
+
 .model-tooltip-panel{
   display:none;
   position:fixed;
@@ -3482,9 +3487,16 @@ function bestBookTooltip(game,market,side,bestQuote){
       }
     }
 
+    const isBest=Boolean(
+      q &&
+      String(q.book || '')===String(bestQuote.book || '') &&
+      Number(q.line)===Number(bestQuote.line) &&
+      Number(q.price)===Number(bestQuote.price)
+    );
+
     return `<span class="model-component ${q?'available':'unavailable'}">
       <span>${esc(label)}</span>
-      <span>${esc(shown)}</span>
+      <span class="${isBest?'best-tooltip-value':''}">${esc(shown)}</span>
     </span>`;
   }).join('');
 
