@@ -90,13 +90,18 @@ if not INFILE.exists():
 
 df = pd.read_csv(INFILE)
 
-df["stake"] = df.get("Bet Amount", "").apply(money_to_float)
-df["bet_price"] = df.get("Bet Price", "").apply(num)
-df["bet_line"] = df.get("Bet Line", "").apply(num)
-df["closing_line"] = df.get("Closing Line", "").apply(num)
-df["closing_price"] = df.get("Closing Price", "").apply(num)
-df["profit_num"] = df.get("Profit", "").apply(money_to_float)
-df["status"] = df.get("Result", "").apply(clean_status)
+def optional_apply(column, func):
+    if column in df.columns:
+        return df[column].apply(func)
+    return pd.Series([None] * len(df), index=df.index, dtype="object").apply(func)
+
+df["stake"] = optional_apply("Bet Amount", money_to_float)
+df["bet_price"] = optional_apply("Bet Price", num)
+df["bet_line"] = optional_apply("Bet Line", num)
+df["closing_line"] = optional_apply("Closing Line", num)
+df["closing_price"] = optional_apply("Closing Price", num)
+df["profit_num"] = optional_apply("Profit", money_to_float)
+df["status"] = optional_apply("Result", clean_status)
 df["is_open"] = df["status"].eq("Open")
 
 # Sheet Profit may show pending risk as negative on open bets.
