@@ -683,7 +683,11 @@ fi
   wait_for_network "api.actionnetwork.com"
   run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
   run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
-  run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture
+  if run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture; then
+    :
+  else
+    warn "Playoff futures reliability audit failed; stale or unavailable playoff markets will remain explicitly degraded"
+  fi
   if run_py "scripts/site/build_futures_view.py" "build_futures_view.py"; then
     run_py "scripts/markets/capture_futures_checkpoint.py" "capture_futures_checkpoint.py" || warn "Futures checkpoint capture failed"
   else
