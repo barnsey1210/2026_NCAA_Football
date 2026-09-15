@@ -38,6 +38,7 @@ RESULTS_PATH = DATA_ROOT / "data/canonical/game_results_2026.json"
 PRESEASON_DB_PATH = DATA_ROOT / "data/snapshots/preseason/preseason_db.json"
 RATINGS_MASTER_PATH = DATA_ROOT / "data/ratings/ratings_master_latest.csv"
 RATINGS_HISTORY_PATH = DATA_ROOT / "data/ratings/ratings_history.csv"
+RATINGS_VIEW_PATH = DATA_ROOT / "data/site/ratings_view.json"
 PROJECTION_BLEND_PATH = DATA_ROOT / "data/projections/game_projection_blend_2026.csv"
 WIN_PROB_LOGISTIC_SCALE = 6.5
 
@@ -139,8 +140,14 @@ def number(value):
         return None
 
 
-def build_schedule_index(schedule_games, projection_rows, fbs_teams):
+def build_schedule_index(
+    schedule_games,
+    projection_rows,
+    fbs_teams,
+    conference_by_matchup=None,
+):
     """Store each canonical game once and return chronological team references."""
+    conference_by_matchup = conference_by_matchup or {}
     projections = {}
     for row in projection_rows:
         key = (
@@ -175,6 +182,12 @@ def build_schedule_index(schedule_games, projection_rows, fbs_teams):
             "away_team": away,
             "home_team": home,
             "neutral_site": bool(game.get("neutral_site")),
+            "is_conference_game": bool(
+                conference_by_matchup.get(
+                    (date, away, home),
+                    game.get("is_conference_game", False),
+                )
+            ),
             "completed": bool(game.get("completed")),
             "away_score": number(game.get("away_points")),
             "home_score": number(game.get("home_points")),
@@ -191,6 +204,150 @@ def build_schedule_index(schedule_games, projection_rows, fbs_teams):
         game_ids.sort(key=order)
     schedule_index = dict(sorted(schedule_index.items(), key=lambda item: order(item[0])))
     return schedule_index, team_game_ids
+
+def load_canonical_ratings_view(path):
+    if not path.exists():
+        return {}
+
+    payload = json.loads(path.read_text())
+    return {
+        canonical_team(row.get("team")): {
+            "rating": number(row.get("rating")),
+            "overall_rank": row.get("overall_rank"),
+            "snapshot_date": payload.get("snapshot_date"),
+        }
+        for row in payload.get("teams", [])
+        if row.get("team")
+    }
+
+
+def team_schedule_summary(team_name, record, game_ids, schedule_index):
+    games = [schedule_index[x] for x in game_ids if x in schedule_index]
+    remaining = [x for x in games if not x.get("completed")]
+    remaining_with_prob = [
+        x for x in remaining
+        if number(x.get("home_win_probability")) is not None
+    ]
+
+    expected_remaining_wins = 0.0
+    for game in remaining_with_prob:
+        home_prob = number(game.get("home_win_probability"))
+        team_prob = (
+            home_prob
+            if canonical_team(game.get("home_team")) == team_name
+            else 1.0 - home_prob
+        )
+        expected_remaining_wins += team_prob
+
+    complete = len(remaining_with_prob) == len(remaining)
+
+    wins = int(record.get("wins") or 0)
+    losses = int(record.get("losses") or 0)
+
+    projected_wins = (
+        wins + expected_remaining_wins
+        if complete
+        else None
+    )
+    projected_losses = (
+        losses + len(remaining) - expected_remaining_wins
+        if complete
+        else None
+    )
+
+    next_game = None
+    if remaining:
+        game = remaining[0]
+        home_prob = number(game.get("home_win_probability"))
+        is_home = canonical_team(game.get("home_team")) == team_name
+        team_prob = (
+            home_prob
+            if home_prob is not None and is_home
+            else 1.0 - home_prob
+            if home_prob is not None
+            else None
+        )
+        next_game = {
+            "game_id": next(
+                (
+                    game_id for game_id in game_ids
+                    if schedule_index.get(game_id) is game
+                ),
+                None,
+            ),
+            "week": game.get("week"),
+            "date": game.get("date"),
+            "opponent": (
+                game.get("away_team")
+                if is_home
+                else game.get("home_team")
+            ),
+            "site": (
+                "N"
+                if game.get("neutral_site")
+                else "HOME"
+                if is_home
+                else "AWAY"
+            ),
+            "win_probability": team_prob,
+            "is_conference_game": bool(game.get("is_conference_game")),
+        }
+
+    conf_remaining = [
+        x for x in remaining
+        if x.get("is_conference_game")
+    ]
+    conf_with_prob = [
+        x for x in conf_remaining
+        if number(x.get("home_win_probability")) is not None
+    ]
+
+    expected_conf_wins = 0.0
+    for game in conf_with_prob:
+        home_prob = number(game.get("home_win_probability"))
+        team_prob = (
+            home_prob
+            if canonical_team(game.get("home_team")) == team_name
+            else 1.0 - home_prob
+        )
+        expected_conf_wins += team_prob
+
+    conf_complete = len(conf_with_prob) == len(conf_remaining)
+    conf_wins = int(record.get("conf_wins") or 0)
+    conf_losses = int(record.get("conf_losses") or 0)
+
+    return {
+        "games_remaining": len(remaining),
+        "win_probability_games_remaining": len(remaining_with_prob),
+        "expected_remaining_wins": (
+            expected_remaining_wins if complete else None
+        ),
+        "projected_record": {
+            "wins": projected_wins,
+            "losses": projected_losses,
+            "complete": complete,
+        },
+        "next_game": next_game,
+        "conference_games_remaining": len(conf_remaining),
+        "conference_win_probability_games_remaining": len(conf_with_prob),
+        "expected_remaining_conference_wins": (
+            expected_conf_wins if conf_complete else None
+        ),
+        "projected_conference_record": {
+            "wins": (
+                conf_wins + expected_conf_wins
+                if conf_complete
+                else None
+            ),
+            "losses": (
+                conf_losses + len(conf_remaining) - expected_conf_wins
+                if conf_complete
+                else None
+            ),
+            "complete": conf_complete,
+        },
+    }
+
 
 def implied(odds):
     odds = number(odds)
@@ -664,8 +821,26 @@ def main():
         for x in season_model.get("teams", [])
     }
     projection_rows = read_csv_rows(PROJECTION_BLEND_PATH)
+
+    conference_by_matchup = {
+        (
+            str(game.get("date") or game.get("start_date") or "")[:10],
+            canonical_team(game.get("away_team")),
+            canonical_team(game.get("home_team")),
+        ): bool(game.get("is_conference_game"))
+        for game in preseason_db.get("games", [])
+        if game.get("away_team") and game.get("home_team")
+    }
+
     schedule_index, team_schedule_game_ids = build_schedule_index(
-        schedule.get("games", []), projection_rows, set(teams)
+        schedule.get("games", []),
+        projection_rows,
+        set(teams),
+        conference_by_matchup,
+    )
+
+    canonical_ratings = load_canonical_ratings_view(
+        RATINGS_VIEW_PATH
     )
     regular_weeks = [
         int(game.get("week"))
@@ -736,7 +911,6 @@ def main():
     )
 
     records = {key: {"wins": 0, "losses": 0, "conf_wins": 0, "conf_losses": 0} for key in teams}
-    conference_by_game = {str(game.get("game_id")): bool(game.get("is_conference_game")) for game in preseason_db.get("games", [])}
     for game in results.get("games", []):
         if not game.get("completed"):
             continue
@@ -746,8 +920,14 @@ def main():
             continue
         winner, loser = (away, home) if ap > hp else (home, away)
         records[winner]["wins"] += 1; records[loser]["losses"] += 1
-        if conference_by_game.get(str(game.get("game_id")), False):
-            records[winner]["conf_wins"] += 1; records[loser]["conf_losses"] += 1
+        matchup_key = (
+            str(game.get("date") or game.get("start_date") or "")[:10],
+            away,
+            home,
+        )
+        if conference_by_matchup.get(matchup_key, False):
+            records[winner]["conf_wins"] += 1
+            records[loser]["conf_losses"] += 1
 
     baseline_rows = {
         canonical_team(x.get("team")): x
@@ -776,6 +956,14 @@ def main():
         cfp = cfp_market.get(key, {})
         national = national_market.get(key, {})
         rating = weekly_ratings.get(key, {})
+        canonical_rating = canonical_ratings.get(key, {})
+
+        schedule_summary = team_schedule_summary(
+            key,
+            records.get(key, {}),
+            team_schedule_game_ids.get(key, []),
+            schedule_index,
+        )
 
         projected_wins = number(team.get("avg_total_wins"))
         title_prob = number(team.get("conference_title_pct"))
@@ -831,15 +1019,44 @@ def main():
             "team": team.get("team"),
             "slug": team.get("slug"),
             "conference": team.get("conference"),
-            "rank": team.get("rank"),
+            "rank": canonical_rating.get("overall_rank") or team.get("rank"),
+            "overall_rank": canonical_rating.get("overall_rank"),
             "record": records.get(key),
-            "team_rating": rating.get("current"),
-            "team_rating_date": rating.get("current_date"),
+            "team_rating": (
+                canonical_rating.get("rating")
+                if canonical_rating.get("rating") is not None
+                else rating.get("current")
+            ),
+            "team_rating_date": (
+                canonical_rating.get("snapshot_date")
+                or rating.get("current_date")
+            ),
             "team_rating_prior_week": rating.get("prior"),
             "team_rating_prior_week_date": rating.get("prior_date"),
             "team_rating_delta_week": rating.get("delta"),
             "team_rating_history": rating.get("history", []),
             "schedule_game_ids": team_schedule_game_ids.get(key, []),
+            "games_remaining": schedule_summary["games_remaining"],
+            "win_probability_games_remaining": schedule_summary[
+                "win_probability_games_remaining"
+            ],
+            "expected_remaining_wins": schedule_summary[
+                "expected_remaining_wins"
+            ],
+            "projected_record": schedule_summary["projected_record"],
+            "next_game": schedule_summary["next_game"],
+            "conference_games_remaining": schedule_summary[
+                "conference_games_remaining"
+            ],
+            "conference_win_probability_games_remaining": schedule_summary[
+                "conference_win_probability_games_remaining"
+            ],
+            "expected_remaining_conference_wins": schedule_summary[
+                "expected_remaining_conference_wins"
+            ],
+            "projected_conference_record": schedule_summary[
+                "projected_conference_record"
+            ],
 
             "projected_wins": projected_wins,
             "market_win_total": total,
@@ -1203,7 +1420,7 @@ def main():
     QA_PATH.write_text(json.dumps(qa, indent=2) + "\n")
 
     payload = {
-        "schema_version": "futures-view-v5",
+        "schema_version": "futures-view-v6",
         "built_at": build_generated_at,
 
         # Backward compatibility for current UI.
