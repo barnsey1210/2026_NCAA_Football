@@ -215,11 +215,18 @@ PYNET
 
 run_py() {
   local primary="$1"
-  local fallback="$2"
+  local fallback=""
+  shift
+
+  if [ "$#" -gt 0 ]; then
+    fallback="$1"
+    shift
+  fi
+
   if [ -f "$primary" ]; then
-    python3 "$primary"
+    python3 "$primary" "$@"
   elif [ -n "$fallback" ] && [ -f "$fallback" ]; then
-    python3 "$fallback"
+    python3 "$fallback" "$@"
   else
     echo "WARNING: missing script: $primary${fallback:+ or $fallback}"
     return 1
