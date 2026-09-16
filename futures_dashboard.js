@@ -16,7 +16,18 @@ let state={
   sortKey:'rank',
   sortDir:'asc',
   selectedTeam:null,
-  railTab:'overview'
+  railTab:'overview',
+  scenario:{
+    loaded:false,
+    loading:false,
+    error:null,
+    universe:null,
+    selections:{},
+    openGames:[],
+    baseline:null,
+    current:null,
+    leverageByTeam:null
+  }
 };
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
@@ -29,6 +40,676 @@ const hasNumber=v=>
 const num=(v,d=1)=>hasNumber(v)?Number(v).toFixed(d):'—';
 const pct=v=>hasNumber(v)?`${(Number(v)*100).toFixed(1)}%`:'—';
 const odds=v=>hasNumber(v)?`${Number(v)>0?'+':''}${Math.round(Number(v))}`:'—';
+
+
+const SCENARIO_UNIVERSE_URL='data/site/futures_scenario_universe_2026.json';
+
+function decodeB64(value){
+  const raw=atob(value||'');
+  const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+
+function scenarioBit(buffer,offset,index){
+  return Boolean(
+    buffer[offset+(index>>3)] & (1<<(index&7))
+  );
+}
+
+function scenarioSelectionCount(){
+  return Object.keys(state.scenario.selections||{}).length;
+}
+
+function scenarioActive(){
+  return Boolean(
+    state.scenario.loaded &&
+    state.scenario.current &&
+    scenarioSelectionCount()
+  );
+}
+
+function scenarioSampleLabel(count){
+  if(count<=0)return'NO MATCH';
+  if(count<100)return'VERY THIN';
+  if(count<500)return'THIN';
+  if(count<2000)return'GOOD';
+  return'STRONG';
+}
+
+function scenarioTeamGame(team){
+  return state.scenario.universe?.teamGame?.[team]||null;
+}
+
+function decodeScenarioUniverse(raw){
+  const maskBytes=Number(raw.encoding?.mask_bytes||0);
+  const teams=raw.teams||[];
+  const games=raw.games||[];
+
+  const universe={
+    raw,
+    trials:Number(raw.trials||0),
+    validTrials:Number(raw.valid_trials||0),
+    week:Number(raw.week||0),
+    maskBytes,
+    teams,
+    teamIndex:Object.fromEntries(teams.map((team,i)=>[team,i])),
+    games,
+    gameById:Object.fromEntries(games.map(g=>[g.game_id,g])),
+    teamGame:{},
+    gameMasks:decodeB64(raw.home_win_masks_b64),
+    regularWins:decodeB64(raw.regular_wins_u8_b64),
+    confMasks:decodeB64(raw.conference_champion_masks_b64),
+    cfpMasks:decodeB64(raw.cfp_masks_b64),
+    champions:decodeB64(raw.national_champion_u8_b64),
+    validMask:decodeB64(raw.valid_trial_mask_b64)
+  };
+
+  for(const game of games){
+    if(game.away_is_fbs)universe.teamGame[game.away_team]=game;
+    if(game.home_is_fbs)universe.teamGame[game.home_team]=game;
+  }
+
+  return universe;
+}
+
+function trialIsValid(u,trial){
+  return scenarioBit(u.validMask,0,trial);
+}
+
+function gameHomeWon(u,game,trial){
+  return scenarioBit(
+    u.gameMasks,
+    Number(game.home_win_mask_index)*u.maskBytes,
+    trial
+  );
+}
+
+function trialMatchesScenario(u,trial,selections){
+  for(const [gameId,choice] of Object.entries(selections||{})){
+    const game=u.gameById[gameId];
+    if(!game)return false;
+
+    const homeWon=gameHomeWon(u,game,trial);
+
+    if(choice==='home'&&!homeWon)return false;
+    if(choice==='away'&&homeWon)return false;
+  }
+
+  return true;
+}
+
+function computeScenarioStats(u,selections){
+  const nTeams=u.teams.length;
+  const winsSum=new Float64Array(nTeams);
+  const confCount=new Uint32Array(nTeams);
+  const cfpCount=new Uint32Array(nTeams);
+  const natCount=new Uint32Array(nTeams);
+  let matches=0;
+
+  for(let trial=0;trial<u.trials;trial++){
+    if(!trialIsValid(u,trial))continue;
+    if(!trialMatchesScenario(u,trial,selections))continue;
+
+    matches++;
+    const base=trial*nTeams;
+
+    for(let ti=0;ti<nTeams;ti++){
+      winsSum[ti]+=u.regularWins[base+ti];
+
+      if(scenarioBit(u.confMasks,ti*u.maskBytes,trial)){
+        confCount[ti]++;
+      }
+
+      if(scenarioBit(u.cfpMasks,ti*u.maskBytes,trial)){
+        cfpCount[ti]++;
+      }
+    }
+
+    const champion=u.champions[trial];
+    if(champion!==255&&champion<nTeams){
+      natCount[champion]++;
+    }
+  }
+
+  const byTeam={};
+
+  for(let ti=0;ti<nTeams;ti++){
+    const team=u.teams[ti];
+
+    byTeam[team]={
+      projected_wins:matches?winsSum[ti]/matches:null,
+      conference_title_prob:matches?confCount[ti]/matches:null,
+      playoff_prob:matches?cfpCount[ti]/matches:null,
+      national_title_prob:matches?natCount[ti]/matches:null
+    };
+  }
+
+  return {matches,byTeam};
+}
+
+function scenarioConditionalForTeam(u,team,game,choice){
+  const ti=u.teamIndex[team];
+  if(ti===undefined||!game)return null;
+
+  let n=0;
+  let wins=0;
+  let conf=0;
+  let cfp=0;
+  let nat=0;
+
+  for(let trial=0;trial<u.trials;trial++){
+    if(!trialIsValid(u,trial))continue;
+
+    const homeWon=gameHomeWon(u,game,trial);
+    if(choice==='home'&&!homeWon)continue;
+    if(choice==='away'&&homeWon)continue;
+
+    n++;
+    wins+=u.regularWins[trial*u.teams.length+ti];
+
+    if(scenarioBit(u.confMasks,ti*u.maskBytes,trial))conf++;
+    if(scenarioBit(u.cfpMasks,ti*u.maskBytes,trial))cfp++;
+    if(u.champions[trial]===ti)nat++;
+  }
+
+  if(!n)return null;
+
+  return {
+    n,
+    projected_wins:wins/n,
+    conference_title_prob:conf/n,
+    playoff_prob:cfp/n,
+    national_title_prob:nat/n
+  };
+}
+
+function leveragePercentileLabel(value,values){
+  if(!Number.isFinite(value)||!values.length)return'—';
+
+  const sorted=[...values].sort((a,b)=>a-b);
+  let rank=0;
+
+  for(const candidate of sorted){
+    if(candidate<=value)rank++;
+  }
+
+  const pctile=rank/sorted.length;
+
+  if(pctile>=.90)return'EXTREME';
+  if(pctile>=.70)return'HIGH';
+  if(pctile>=.30)return'MED';
+  return'LOW';
+}
+
+function buildScenarioLeverage(u){
+  const out={};
+
+  for(const team of u.teams){
+    const game=u.teamGame[team];
+    if(!game)continue;
+
+    const home=game.home_team===team;
+    const p=home
+      ? Number(game.home_win_probability)
+      : 1-Number(game.home_win_probability);
+
+    const winChoice=home?'home':'away';
+    const lossChoice=home?'away':'home';
+
+    const win=scenarioConditionalForTeam(u,team,game,winChoice);
+    const loss=scenarioConditionalForTeam(u,team,game,lossChoice);
+
+    if(!win||!loss)continue;
+
+    const uncertainty=2*p*(1-p);
+
+    out[team]={
+      game_id:game.game_id,
+      win_probability:p,
+      win_branch:win,
+      loss_branch:loss,
+      projected_wins_leverage:uncertainty,
+      conference_leverage:
+        uncertainty*Math.abs(
+          win.conference_title_prob-loss.conference_title_prob
+        ),
+      cfp_leverage:
+        uncertainty*Math.abs(
+          win.playoff_prob-loss.playoff_prob
+        ),
+      national_title_leverage:
+        uncertainty*Math.abs(
+          win.national_title_prob-loss.national_title_prob
+        ),
+      cfp_loss_downside:Math.max(
+        0,
+        (state.scenario.baseline?.byTeam?.[team]?.playoff_prob||0)-
+        loss.playoff_prob
+      )
+    };
+  }
+
+  const winValues=Object.values(out)
+    .map(x=>x.projected_wins_leverage)
+    .filter(Number.isFinite);
+
+  const confValues=Object.values(out)
+    .map(x=>x.conference_leverage)
+    .filter(Number.isFinite);
+
+  const cfpValues=Object.values(out)
+    .map(x=>x.cfp_leverage)
+    .filter(Number.isFinite);
+
+  const favoriteDownsides=Object.values(out)
+    .filter(x=>x.win_probability>=.80)
+    .map(x=>x.cfp_loss_downside)
+    .filter(Number.isFinite)
+    .sort((a,b)=>a-b);
+
+  const downsideCutoff=favoriteDownsides.length
+    ? favoriteDownsides[
+        Math.floor(.75*(favoriteDownsides.length-1))
+      ]
+    : Infinity;
+
+  for(const item of Object.values(out)){
+    item.win_label=leveragePercentileLabel(
+      item.projected_wins_leverage,
+      winValues
+    );
+
+    item.conference_label=leveragePercentileLabel(
+      item.conference_leverage,
+      confValues
+    );
+
+    item.cfp_label=leveragePercentileLabel(
+      item.cfp_leverage,
+      cfpValues
+    );
+
+    item.upset_risk=Boolean(
+      item.win_probability>=.80 &&
+      item.cfp_loss_downside>0.005 &&
+      item.cfp_loss_downside>=downsideCutoff
+    );
+  }
+
+  return out;
+}
+
+async function ensureScenarioUniverse(){
+  if(state.scenario.loaded||state.scenario.loading)return;
+
+  state.scenario.loading=true;
+  state.scenario.error=null;
+  renderRail();
+
+  try{
+    const version=encodeURIComponent(
+      String(D?.built_at||D?.summary?.built_at||'current')
+    );
+
+    const response=await fetch(
+      `${SCENARIO_UNIVERSE_URL}?v=${version}`
+    );
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const raw=await response.json();
+    const universe=decodeScenarioUniverse(raw);
+
+    state.scenario.universe=universe;
+    state.scenario.baseline=computeScenarioStats(universe,{});
+    state.scenario.current=state.scenario.baseline;
+    state.scenario.leverageByTeam=buildScenarioLeverage(universe);
+    state.scenario.loaded=true;
+    state.scenario.loading=false;
+  }catch(error){
+    state.scenario.loading=false;
+    state.scenario.error=String(error?.message||error);
+  }
+
+  renderCommandCenter();
+}
+
+function recomputeScenario(){
+  if(!state.scenario.loaded)return;
+
+  state.scenario.current=computeScenarioStats(
+    state.scenario.universe,
+    state.scenario.selections
+  );
+
+  renderCommandCenter();
+}
+
+function scenarioCanonicalValue(row,metric){
+  if(metric==='wins')return hasNumber(row.projected_wins)
+    ? Number(row.projected_wins)
+    : null;
+
+  if(metric==='conf')return hasNumber(row.title_model_prob)
+    ? Number(row.title_model_prob)
+    : null;
+
+  if(metric==='cfp')return hasNumber(row.playoff_model_prob)
+    ? Number(row.playoff_model_prob)
+    : null;
+
+  if(metric==='nat')return hasNumber(row.national_title_model_prob)
+    ? Number(row.national_title_model_prob)
+    : null;
+
+  return null;
+}
+
+function scenarioUniverseValue(stats,team,metric){
+  const row=stats?.byTeam?.[team];
+  if(!row)return null;
+
+  if(metric==='wins')return row.projected_wins;
+  if(metric==='conf')return row.conference_title_prob;
+  if(metric==='cfp')return row.playoff_prob;
+  if(metric==='nat')return row.national_title_prob;
+
+  return null;
+}
+
+function scenarioAdjustedValue(row,metric){
+  if(!scenarioActive())return null;
+
+  const canonical=scenarioCanonicalValue(row,metric);
+  const conditional=scenarioUniverseValue(
+    state.scenario.current,
+    row.team,
+    metric
+  );
+  const baseline=scenarioUniverseValue(
+    state.scenario.baseline,
+    row.team,
+    metric
+  );
+
+  if(
+    !Number.isFinite(canonical)||
+    !Number.isFinite(conditional)||
+    !Number.isFinite(baseline)
+  )return null;
+
+  let value=canonical+(conditional-baseline);
+
+  if(metric!=='wins'){
+    value=Math.max(0,Math.min(1,value));
+  }
+
+  return value;
+}
+
+function scenarioMetricDelta(row,metric){
+  const scenario=scenarioAdjustedValue(row,metric);
+  const canonical=scenarioCanonicalValue(row,metric);
+
+  if(
+    !Number.isFinite(scenario)||
+    !Number.isFinite(canonical)
+  )return null;
+
+  return scenario-canonical;
+}
+
+function scenarioGameLabel(game){
+  return `${game.away_team} @ ${game.home_team}`;
+}
+
+function scenarioGameCard(game){
+  if(!game)return'';
+
+  const choice=state.scenario.selections[game.game_id]||'unset';
+
+  return `<div class="scenarioGameCard">
+    <div class="scenarioGameTitle">
+      <b>${esc(scenarioGameLabel(game))}</b>
+      <small>
+        ${pct(game.home_win_probability)} ${esc(game.home_team)}
+      </small>
+    </div>
+
+    <div class="scenarioChoiceGrid">
+      <button
+        type="button"
+        data-scenario-game="${esc(game.game_id)}"
+        data-scenario-choice="unset"
+        class="${choice==='unset'?'active':''}"
+      >UNSET</button>
+
+      <button
+        type="button"
+        data-scenario-game="${esc(game.game_id)}"
+        data-scenario-choice="away"
+        class="${choice==='away'?'active':''}"
+      >${esc(game.away_team)} W</button>
+
+      <button
+        type="button"
+        data-scenario-game="${esc(game.game_id)}"
+        data-scenario-choice="home"
+        class="${choice==='home'?'active':''}"
+      >${esc(game.home_team)} W</button>
+    </div>
+  </div>`;
+}
+
+function scenarioVisibleGameIds(row){
+  const ids=[];
+  const own=scenarioTeamGame(row.team);
+
+  if(own)ids.push(own.game_id);
+
+  for(const id of Object.keys(state.scenario.selections||{})){
+    if(!ids.includes(id))ids.push(id);
+  }
+
+  for(const id of state.scenario.openGames||[]){
+    if(!ids.includes(id))ids.push(id);
+  }
+
+  return ids;
+}
+
+function scenarioCandidateGames(){
+  const u=state.scenario.universe;
+  if(!u)return[];
+
+  if(state.conference==='all'){
+    return u.games;
+  }
+
+  return u.games.filter(game=>{
+    const away=rowForTeam(game.away_team);
+    const home=rowForTeam(game.home_team);
+
+    return away?.conference===state.conference ||
+      home?.conference===state.conference;
+  });
+}
+
+function renderRailScenario(row){
+  if(state.scenario.loading){
+    return `<div class="scenarioLoading">
+      <b>Loading Week 3 scenario universe…</b>
+      <small>20,000 precomputed simulations</small>
+    </div>`;
+  }
+
+  if(state.scenario.error){
+    return `<div class="scenarioLoading scenarioError">
+      <b>Scenario universe unavailable</b>
+      <small>${esc(state.scenario.error)}</small>
+      <button type="button" id="scenarioRetry">Retry</button>
+    </div>`;
+  }
+
+  if(!state.scenario.loaded){
+    return `<div class="scenarioLoading">
+      <b>Scenario Builder</b>
+      <small>
+        Loads the 20,000-trial universe once, then every scenario
+        is calculated instantly in your browser.
+      </small>
+      <button type="button" id="scenarioLoad">Load Scenario Builder</button>
+    </div>`;
+  }
+
+  const u=state.scenario.universe;
+  const ids=scenarioVisibleGameIds(row);
+  const candidates=scenarioCandidateGames()
+    .filter(g=>!ids.includes(g.game_id));
+
+  const matches=state.scenario.current?.matches??u.validTrials;
+  const active=scenarioSelectionCount();
+
+  return `<div class="scenarioSummary">
+    <span>WEEK ${u.week}</span>
+    <b>${matches.toLocaleString()} / ${u.validTrials.toLocaleString()}</b>
+    <strong>${scenarioSampleLabel(matches)}</strong>
+  </div>
+
+  ${ids.map(id=>scenarioGameCard(u.gameById[id])).join('')}
+
+  <div class="scenarioAdd">
+    <label for="scenarioAddGame">ADD ANOTHER GAME</label>
+    <select id="scenarioAddGame">
+      <option value="">Choose a Week ${u.week} game…</option>
+      ${candidates.map(g=>
+        `<option value="${esc(g.game_id)}">${esc(scenarioGameLabel(g))}</option>`
+      ).join('')}
+    </select>
+  </div>
+
+  <div class="scenarioActions">
+    <span>${active} active outcome${active===1?'':'s'}</span>
+    <button type="button" id="scenarioClearAll">CLEAR ALL</button>
+  </div>
+
+  <div class="scenarioImpactPanel">
+    <h3>${esc(row.team)} · SCENARIO IMPACT</h3>
+    <div class="scenarioImpactRow">
+      <span>Projected wins</span>
+      <b>${num(row.projected_wins)}</b>
+      <strong>${num(scenarioAdjustedValue(row,'wins'))}</strong>
+      <em>${scenarioMetricDelta(row,'wins')===null?'—':`${scenarioMetricDelta(row,'wins')>=0?'+':''}${num(scenarioMetricDelta(row,'wins'),2)}`}</em>
+    </div>
+    <div class="scenarioImpactRow">
+      <span>Conference</span>
+      <b>${pct(row.title_model_prob)}</b>
+      <strong>${pct(scenarioAdjustedValue(row,'conf'))}</strong>
+      <em>${scenarioMetricDelta(row,'conf')===null?'—':`${scenarioMetricDelta(row,'conf')>=0?'+':''}${(scenarioMetricDelta(row,'conf')*100).toFixed(1)} pp`}</em>
+    </div>
+    <div class="scenarioImpactRow">
+      <span>Make CFP</span>
+      <b>${pct(row.playoff_model_prob)}</b>
+      <strong>${pct(scenarioAdjustedValue(row,'cfp'))}</strong>
+      <em>${scenarioMetricDelta(row,'cfp')===null?'—':`${scenarioMetricDelta(row,'cfp')>=0?'+':''}${(scenarioMetricDelta(row,'cfp')*100).toFixed(1)} pp`}</em>
+    </div>
+    <div class="scenarioImpactRow">
+      <span>National title</span>
+      <b>${pct(row.national_title_model_prob)}</b>
+      <strong>${pct(scenarioAdjustedValue(row,'nat'))}</strong>
+      <em>${scenarioMetricDelta(row,'nat')===null?'—':`${scenarioMetricDelta(row,'nat')>=0?'+':''}${(scenarioMetricDelta(row,'nat')*100).toFixed(1)} pp`}</em>
+    </div>
+    <div class="scenarioImpactHead">
+      <span></span><b>BASE</b><b>SCENARIO</b><b>Δ</b>
+    </div>
+  </div>`;
+}
+
+function bindScenarioRail(){
+  const rail=document.getElementById('futuresRail');
+  if(!rail)return;
+
+  rail.querySelector('#scenarioLoad')?.addEventListener('click',()=>{
+    ensureScenarioUniverse();
+  });
+
+  rail.querySelector('#scenarioRetry')?.addEventListener('click',()=>{
+    state.scenario.error=null;
+    ensureScenarioUniverse();
+  });
+
+  rail.querySelectorAll('[data-scenario-game]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const gameId=button.dataset.scenarioGame;
+      const choice=button.dataset.scenarioChoice;
+
+      if(choice==='unset'){
+        delete state.scenario.selections[gameId];
+      }else{
+        state.scenario.selections[gameId]=choice;
+      }
+
+      recomputeScenario();
+    });
+  });
+
+  rail.querySelector('#scenarioAddGame')?.addEventListener('change',event=>{
+    const id=event.target.value;
+    if(!id)return;
+
+    if(!state.scenario.openGames.includes(id)){
+      state.scenario.openGames.push(id);
+    }
+
+    renderRail();
+  });
+
+  rail.querySelector('#scenarioClearAll')?.addEventListener('click',()=>{
+    state.scenario.selections={};
+    state.scenario.openGames=[];
+    recomputeScenario();
+  });
+}
+
+function renderScenarioBanner(){
+  let banner=document.getElementById('futuresScenarioBanner');
+
+  if(!banner){
+    banner=document.createElement('section');
+    banner.id='futuresScenarioBanner';
+    banner.className='futuresScenarioBanner';
+
+    const controls=document.getElementById('futuresCommandControls');
+    controls?.insertAdjacentElement('afterend',banner);
+  }
+
+  if(!scenarioActive()){
+    banner.hidden=true;
+    return;
+  }
+
+  const count=scenarioSelectionCount();
+  const matches=state.scenario.current?.matches||0;
+  const total=state.scenario.universe?.validTrials||0;
+
+  banner.hidden=false;
+  banner.innerHTML=`
+    <b>SCENARIO ACTIVE</b>
+    <span>${count} game${count===1?'':'s'}</span>
+    <span>${matches.toLocaleString()} / ${total.toLocaleString()} SIMS</span>
+    <strong>${scenarioSampleLabel(matches)}</strong>
+    <button type="button" id="scenarioBannerClear">CLEAR</button>
+  `;
+
+  banner.querySelector('#scenarioBannerClear')?.addEventListener('click',()=>{
+    state.scenario.selections={};
+    state.scenario.openGames=[];
+    recomputeScenario();
+  });
+}
 
 function fairOdds(p){
   if(!hasNumber(p))return'—';
@@ -796,6 +1477,7 @@ function renderRail(){
 
   const content=
     state.railTab==='schedule'?renderRailSchedule(row):
+    state.railTab==='scenario'?renderRailScenario(row):
     state.railTab==='market'?renderRailMarket(row):
     state.railTab==='history'?renderRailHistory(row):
     renderRailOverview(row);
@@ -815,7 +1497,7 @@ function renderRail(){
   </div>
 
   <nav class="futuresRailTabs">
-    ${['overview','schedule','market','history'].map(tab=>
+    ${['overview','schedule','scenario','market','history'].map(tab=>
       `<button data-rail-tab="${tab}" class="${state.railTab===tab?'active':''}">${tab.toUpperCase()}</button>`
     ).join('')}
   </nav>
@@ -826,8 +1508,16 @@ function renderRail(){
     button.onclick=()=>{
       state.railTab=button.dataset.railTab;
       renderRail();
+
+      if(state.railTab==='scenario'&&!state.scenario.loaded){
+        ensureScenarioUniverse();
+      }
     };
   });
+
+  if(state.railTab==='scenario'){
+    bindScenarioRail();
+  }
 }
 
 function renderFourBookTooltip(button){
@@ -1012,6 +1702,7 @@ function renderCommandCenter(){
   bindSorting();
   bindSelection();
   bindFourBookTooltips();
+  renderScenarioBanner();
   renderRail();
 }
 
@@ -2474,4 +3165,199 @@ installSortControl();
   `;
 
   document.head.appendChild(style);
+(function installScenarioBuilderStyles(){
+  if(document.getElementById('futuresScenarioBuilderStyles'))return;
+
+  const style=document.createElement('style');
+  style.id='futuresScenarioBuilderStyles';
+  style.textContent=`
+    .futuresRailTabs{
+      grid-template-columns:repeat(5,1fr)!important;
+    }
+    .futuresScenarioBanner{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      flex-wrap:wrap;
+      margin:8px 0;
+      padding:7px 10px;
+      border:1px solid #3f78ad;
+      border-radius:8px;
+      background:#0c2945;
+      font-size:10px;
+      font-weight:900;
+    }
+    .futuresScenarioBanner[hidden]{display:none!important}
+    .futuresScenarioBanner>b{color:#fff}
+    .futuresScenarioBanner span{color:#cfe4ff}
+    .futuresScenarioBanner strong{
+      color:var(--green);
+      margin-left:auto;
+    }
+    .futuresScenarioBanner button,
+    .scenarioActions button,
+    .scenarioLoading button{
+      border:1px solid var(--line);
+      background:#102949;
+      color:#d7e9ff;
+      border-radius:6px;
+      padding:6px 8px;
+      font-size:9px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .scenarioLoading{
+      display:grid;
+      gap:7px;
+      border:1px solid #21466d;
+      background:#0b1c35;
+      border-radius:8px;
+      padding:12px;
+    }
+    .scenarioLoading small{color:var(--muted)}
+    .scenarioError b{color:var(--red)}
+    .scenarioSummary{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:7px;
+      align-items:center;
+      margin-bottom:8px;
+      padding:8px;
+      border:1px solid #31537b;
+      background:#0b1c35;
+      border-radius:7px;
+      font-size:9px;
+    }
+    .scenarioSummary span{color:var(--muted);font-weight:950}
+    .scenarioSummary b{text-align:center}
+    .scenarioSummary strong{
+      color:var(--green);
+      text-align:right;
+    }
+    .scenarioGameCard{
+      border:1px solid #21466d;
+      background:#0b1c35;
+      border-radius:8px;
+      padding:8px;
+      margin-top:7px;
+    }
+    .scenarioGameTitle{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      margin-bottom:7px;
+      font-size:10px;
+    }
+    .scenarioGameTitle small{
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .scenarioChoiceGrid{
+      display:grid;
+      grid-template-columns:.7fr 1fr 1fr;
+      gap:4px;
+    }
+    .scenarioChoiceGrid button{
+      min-width:0;
+      border:1px solid #31537b;
+      background:#091a34;
+      color:#b8cce4;
+      border-radius:6px;
+      padding:7px 3px;
+      font-size:8px;
+      font-weight:950;
+      cursor:pointer;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .scenarioChoiceGrid button.active{
+      background:#fff;
+      color:#07172d;
+      border-color:#fff;
+    }
+    .scenarioAdd{
+      display:grid;
+      gap:4px;
+      margin-top:9px;
+    }
+    .scenarioAdd label{
+      color:var(--muted);
+      font-size:8px;
+      font-weight:950;
+      letter-spacing:.05em;
+    }
+    .scenarioAdd select{
+      width:100%;
+      background:#091a34;
+      border:1px solid #31537b;
+      color:#fff;
+      border-radius:6px;
+      padding:8px;
+      font-size:10px;
+    }
+    .scenarioActions{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      margin-top:8px;
+      color:var(--muted);
+      font-size:9px;
+      font-weight:900;
+    }
+    .scenarioImpactPanel{
+      margin-top:10px;
+      border:1px solid #31537b;
+      background:#081a31;
+      border-radius:8px;
+      padding:8px;
+    }
+    .scenarioImpactPanel h3{
+      margin:0 0 6px;
+      font-size:9px;
+      color:#cfe4ff;
+    }
+    .scenarioImpactHead,
+    .scenarioImpactRow{
+      display:grid;
+      grid-template-columns:1fr 52px 62px 55px;
+      gap:5px;
+      align-items:center;
+      padding:5px 0;
+      border-top:1px solid #17345c;
+      font-size:9px;
+    }
+    .scenarioImpactHead{
+      color:var(--muted);
+      font-size:7px;
+      font-weight:950;
+      border-top:0;
+      padding-bottom:2px;
+    }
+    .scenarioImpactRow span{color:var(--muted)}
+    .scenarioImpactRow b,
+    .scenarioImpactRow strong,
+    .scenarioImpactRow em{
+      text-align:right;
+      font-style:normal;
+    }
+    .scenarioImpactRow strong{color:#fff}
+    .scenarioImpactRow em{color:#a9df6a}
+
+    @media(max-width:900px){
+      .futuresScenarioBanner strong{margin-left:0}
+      .scenarioChoiceGrid{
+        grid-template-columns:1fr;
+      }
+      .scenarioChoiceGrid button{
+        min-height:38px;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
 })();
