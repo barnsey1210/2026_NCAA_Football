@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Build the standalone Futures data contract and daily market QA artifact."""
 from pathlib import Path
+
+try:
+    from team_identity import canonical_team_name, canonical_team_slug
+except ImportError:
+    from scripts.site.team_identity import canonical_team_name, canonical_team_slug
 from datetime import datetime, timezone
 import csv, json, math, os, re, sys
 
@@ -140,6 +145,10 @@ def number(value):
         return None
 
 
+def canonical_schedule_team(value):
+    raw = str(value or "").strip()
+    return canonical_team_name(raw) or raw or None
+
 def build_schedule_index(
     schedule_games,
     projection_rows,
@@ -152,28 +161,64 @@ def build_schedule_index(
     for row in projection_rows:
         key = (
             str(row.get("date") or "")[:10],
-            canonical_team(row.get("away_team")),
-            canonical_team(row.get("home_team")),
+            canonical_schedule_team(row.get("away_team")),
+            canonical_schedule_team(row.get("home_team")),
         )
-        projections[key] = number(row.get("site_spread_home"))
+        projections[key] = {
+            "margin_home": number(row.get("blend_spread_home")),
+            "neutral_site": str(row.get("neutral_site") or "").strip().lower()
+            in {"true", "1", "yes"},
+        }
 
     schedule_index = {}
     team_game_ids = {team: [] for team in fbs_teams}
     for game in schedule_games or []:
         if str(game.get("season_type") or "regular").lower() != "regular":
             continue
-        away = canonical_team(game.get("away_team"))
-        home = canonical_team(game.get("home_team"))
+        away = canonical_schedule_team(game.get("away_team"))
+        home = canonical_schedule_team(game.get("home_team"))
         participants = [team for team in (away, home) if team in team_game_ids]
         if not participants:
             continue
         date = str(game.get("date") or game.get("start_date") or "")[:10]
-        margin_home = projections.get((date, away, home))
-        home_win_prob = (
-            1.0 / (1.0 + math.exp(-margin_home / WIN_PROB_LOGISTIC_SCALE))
-            if margin_home is not None and not game.get("completed")
+
+        projection = projections.get((date, away, home))
+        margin_home = (
+            projection.get("margin_home")
+            if projection
             else None
         )
+
+        # Neutral-site providers may disagree on which participant is labeled
+        # home/away. When the exact orientation is absent, allow the reversed
+        # projection only when both records identify the matchup as neutral.
+        if margin_home is None and bool(game.get("neutral_site")):
+            reversed_projection = projections.get((date, home, away))
+            if (
+                reversed_projection
+                and reversed_projection.get("neutral_site")
+                and reversed_projection.get("margin_home") is not None
+            ):
+                margin_home = -reversed_projection["margin_home"]
+
+        away_is_fbs = away in fbs_teams
+        home_is_fbs = home in fbs_teams
+        fbs_vs_fcs = away_is_fbs ^ home_is_fbs
+
+        if game.get("completed"):
+            home_win_prob = None
+            probability_source = None
+        elif margin_home is not None:
+            home_win_prob = 1.0 / (
+                1.0 + math.exp(-margin_home / WIN_PROB_LOGISTIC_SCALE)
+            )
+            probability_source = "GAME_PROJECTION"
+        elif fbs_vs_fcs:
+            home_win_prob = 0.98 if home_is_fbs else 0.02
+            probability_source = "FCS_FALLBACK_98"
+        else:
+            home_win_prob = None
+            probability_source = None
         provider_id = game.get("cfbd_game_id") or game.get("game_id")
         game_id = str(provider_id or f"{date}:{away}:{home}")
         schedule_index[game_id] = {
@@ -192,6 +237,7 @@ def build_schedule_index(
             "away_score": number(game.get("away_points")),
             "home_score": number(game.get("home_points")),
             "home_win_probability": home_win_prob,
+            "win_probability_source": probability_source,
         }
         for team in participants:
             team_game_ids[team].append(game_id)
@@ -911,22 +957,53 @@ def main():
     )
 
     records = {key: {"wins": 0, "losses": 0, "conf_wins": 0, "conf_losses": 0} for key in teams}
-    for game in results.get("games", []):
+
+
+    for game in schedule_index.values():
+
         if not game.get("completed"):
+
             continue
-        away, home = canonical_team(game.get("away_team")), canonical_team(game.get("home_team"))
-        ap, hp = number(game.get("away_score")), number(game.get("home_score"))
-        if ap is None or hp is None or away not in records or home not in records or ap == hp:
+
+
+        away = game.get("away_team")
+
+        home = game.get("home_team")
+
+        ap = number(game.get("away_score"))
+
+        hp = number(game.get("home_score"))
+
+
+        if ap is None or hp is None or ap == hp:
+
             continue
+
+
         winner, loser = (away, home) if ap > hp else (home, away)
-        records[winner]["wins"] += 1; records[loser]["losses"] += 1
-        matchup_key = (
-            str(game.get("date") or game.get("start_date") or "")[:10],
-            away,
-            home,
-        )
-        if conference_by_matchup.get(matchup_key, False):
+
+
+        if winner in records:
+
+            records[winner]["wins"] += 1
+
+        if loser in records:
+
+            records[loser]["losses"] += 1
+
+
+        if (
+
+            game.get("is_conference_game")
+
+            and winner in records
+
+            and loser in records
+
+        ):
+
             records[winner]["conf_wins"] += 1
+
             records[loser]["conf_losses"] += 1
 
     baseline_rows = {
@@ -1017,7 +1094,7 @@ def main():
 
         rows.append({
             "team": team.get("team"),
-            "slug": team.get("slug"),
+            "slug": canonical_team_slug(team.get("team")),
             "conference": team.get("conference"),
             "rank": canonical_rating.get("overall_rank") or team.get("rank"),
             "overall_rank": canonical_rating.get("overall_rank"),

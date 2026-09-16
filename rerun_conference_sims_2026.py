@@ -176,20 +176,39 @@ def apply_current_simulation_inputs(
     projected = 0
     missing_remaining = []
     for game in db.get("games", []):
-        if game.get("away_team") not in valid_teams or game.get("home_team") not in valid_teams:
+        if game.get("away_team") not in valid_teams and game.get("home_team") not in valid_teams:
             continue
         if to_int(game.get("week"), 0) == 14 or completed_game_winner(game) is not None:
             continue
         row = by_id.get(str(game.get("game_id") or ""))
         margin = fnum(row.get("blend_spread_home"), float("nan")) if row else float("nan")
-        if not math.isfinite(margin):
-            missing_remaining.append(str(game.get("game_id") or "unknown"))
+
+        away = game.get("away_team")
+        home = game.get("home_team")
+        away_is_fbs = away in valid_teams
+        home_is_fbs = home in valid_teams
+        fbs_vs_fcs = away_is_fbs ^ home_is_fbs
+
+        if math.isfinite(margin):
+            game["projected_margin_home"] = margin
+            game["win_prob_home"] = canonical_home_prob_from_margin(margin)
+            game["projection_spread_model_version"] = "spread_consensus_equal_available_v1"
+            game["projection_spread_sources"] = str(row.get("spread_sources_used") or "")
+            projected += 1
             continue
-        game["projected_margin_home"] = margin
-        game["win_prob_home"] = canonical_home_prob_from_margin(margin)
-        game["projection_spread_model_version"] = "spread_consensus_equal_available_v1"
-        game["projection_spread_sources"] = str(row.get("spread_sources_used") or "")
-        projected += 1
+
+        if fbs_vs_fcs:
+            # Backup only when no game-level projection exists. FCS teams are
+            # outside the 138-team ratings universe, but these games still count
+            # toward FBS season win totals.
+            p_home = 0.98 if home_is_fbs else 0.02
+            game["win_prob_home"] = p_home
+            game["projection_spread_model_version"] = "fcs_fallback_98_v1"
+            game["projection_spread_sources"] = "FCS_FALLBACK"
+            projected += 1
+            continue
+
+        missing_remaining.append(str(game.get("game_id") or "unknown"))
 
     if missing_remaining:
         raise SystemExit(
@@ -397,11 +416,17 @@ def build_regular_games(db: Dict[str, Any]) -> List[Dict[str, Any]]:
         week = to_int(g.get("week"), 0)
         away = g.get("away_team")
         home = g.get("home_team")
-        # Exclude placeholder championship templates. Keep Army-Navy week 15 because real teams.
-        if away not in valid_teams or home not in valid_teams:
+
+        # Keep every regular-season game involving at least one modeled FBS
+        # team. FBS-vs-FCS games count toward season win totals even though the
+        # FCS participant is not part of conference standings or the 138-team
+        # simulation universe.
+        if away not in valid_teams and home not in valid_teams:
             continue
+
         if week == 14:
             continue
+
         games.append(g)
     return games
 

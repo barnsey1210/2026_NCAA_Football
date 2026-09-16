@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json, os, sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from zoneinfo import ZoneInfo
 from pathlib import Path
 import requests
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
 from scripts.schedule.kickoff_quality import classify_kickoff
+from scripts.site.team_identity import canonical_team_name
 
 YEAR = 2026
 BASE_URL = "https://api.collegefootballdata.com/games"
@@ -15,6 +16,186 @@ OUT_DIR = Path("data/canonical")
 RAW_JSON = OUT_DIR / "cfbd_schedule_2026_raw.json"
 OUT_JSON = OUT_DIR / "cfbd_schedule_2026.json"
 AUDIT_JSON = Path("data/audits/cfbd_schedule_2026_audit.json")
+PRESEASON_DB = Path("data/snapshots/preseason/preseason_db.json")
+
+def schedule_team(value):
+    raw = str(value or "").strip()
+    return canonical_team_name(raw) or raw or None
+
+
+def normalized_pair(game):
+    return (
+        schedule_team(game.get("away_team")),
+        schedule_team(game.get("home_team")),
+    )
+
+
+def parse_game_date(game):
+    raw = str(game.get("date") or game.get("start_date") or "")[:10]
+    try:
+        return date.fromisoformat(raw)
+    except Exception:
+        return None
+
+
+def merge_preseason_fallbacks(games):
+    """Preserve only unambiguous future preseason games omitted by CFBD."""
+    if not PRESEASON_DB.exists():
+        return games, []
+
+    db = json.loads(PRESEASON_DB.read_text())
+
+    modeled_teams = {
+        schedule_team(team.get("team"))
+        for team in db.get("teams", [])
+        if team.get("team")
+    }
+
+    preseason_counts = {}
+    current_counts = {}
+
+    for team in modeled_teams:
+        preseason_counts[team] = 0
+        current_counts[team] = 0
+
+    for game in db.get("games", []):
+        if game.get("week") == 14:
+            continue
+        away, home = normalized_pair(game)
+        if away in modeled_teams:
+            preseason_counts[away] += 1
+        if home in modeled_teams:
+            preseason_counts[home] += 1
+
+    for game in games:
+        away, home = normalized_pair(game)
+        if away in modeled_teams:
+            current_counts[away] += 1
+        if home in modeled_teams:
+            current_counts[home] += 1
+
+    by_pair = {}
+    for game in games:
+        by_pair.setdefault(normalized_pair(game), []).append(game)
+
+    today = datetime.now(timezone.utc).date()
+    fallback_rows = []
+
+    for game in sorted(
+        db.get("games", []),
+        key=lambda g: (
+            str(g.get("date") or ""),
+            int(g.get("week") or 99),
+            str(g.get("away_team") or ""),
+            str(g.get("home_team") or ""),
+        ),
+    ):
+        week = game.get("week")
+        away, home = normalized_pair(game)
+
+        if week == 14:
+            continue
+
+        modeled = [team for team in (away, home) if team in modeled_teams]
+        if not modeled:
+            continue
+
+        preseason_date = parse_game_date(game)
+        if preseason_date is None or preseason_date <= today:
+            continue
+
+        # Exact canonicalized matchup already exists.
+        if by_pair.get((away, home)):
+            continue
+
+        # Safe reversed-orientation match near the same date.
+        reversed_candidates = by_pair.get((home, away), [])
+        reversed_match = False
+        for candidate in reversed_candidates:
+            candidate_date = parse_game_date(candidate)
+            if (
+                candidate_date is not None
+                and abs((candidate_date - preseason_date).days) <= 2
+            ):
+                reversed_match = True
+                break
+        if reversed_match:
+            continue
+
+        # Generic FCS-name-change protection:
+        # if CFBD already has a game on the same date involving the same
+        # modeled FBS participant, treat it as the same scheduled game.
+        same_date_modeled_match = False
+        for candidate in games:
+            candidate_date = parse_game_date(candidate)
+            if candidate_date != preseason_date:
+                continue
+
+            ca, ch = normalized_pair(candidate)
+            candidate_modeled = {
+                team for team in (ca, ch) if team in modeled_teams
+            }
+
+            if candidate_modeled.intersection(modeled):
+                same_date_modeled_match = True
+                break
+
+        if same_date_modeled_match:
+            continue
+
+        # Every modeled FBS participant must currently have a genuine deficit.
+        if not all(
+            current_counts.get(team, 0) < preseason_counts.get(team, 0)
+            for team in modeled
+        ):
+            continue
+
+        fallback = {
+            "cfbd_game_id": None,
+            "season": YEAR,
+            "week": week,
+            "provider_week": None,
+            "season_type": "regular",
+            "date": str(game.get("date") or "")[:10] or None,
+            "start_date": game.get("cfbd_start_date"),
+            "start_time_tbd": True,
+            "kickoff_status": "UNRESOLVED",
+            "kickoff_time_verified": False,
+            "completed": bool(
+                game.get("cfbd_completed") or game.get("completed")
+            ),
+            "neutral_site": bool(game.get("neutral_site")),
+            "conference_game": bool(game.get("is_conference_game")),
+            "home_team": game.get("home_team"),
+            "away_team": game.get("away_team"),
+            "home_points": game.get("home_points"),
+            "away_points": game.get("away_points"),
+            "home_postgame_win_probability": None,
+            "away_postgame_win_probability": None,
+            "pgwe_status": "missing",
+            "status": game.get("cfbd_status"),
+            "cfbd_last_updated": None,
+            "pulled_at": None,
+            "schedule_source": "PRESEASON_FALLBACK",
+            "preseason_game_id": game.get("game_id"),
+        }
+
+        games.append(fallback)
+        by_pair.setdefault((away, home), []).append(fallback)
+
+        for team in modeled:
+            current_counts[team] += 1
+
+        fallback_rows.append({
+            "preseason_game_id": game.get("game_id"),
+            "week": week,
+            "date": fallback["date"],
+            "away_team": game.get("away_team"),
+            "home_team": game.get("home_team"),
+            "reason": "FUTURE_SCHEDULE_DEFICIT",
+        })
+
+    return games, fallback_rows
 
 def pgwe_pair(g):
     """Return the provider PGWE pair only when it is valid and complementary."""
@@ -109,7 +290,8 @@ def main():
             "cfbd_last_updated": g.get("lastUpdated"),
             "pulled_at": pulled_at,
         })
-    games = [g for g in games if g["cfbd_game_id"] and g["home_team"] and g["away_team"]]
+    games = [g for g in games if g["home_team"] and g["away_team"]]
+    games, preseason_fallbacks = merge_preseason_fallbacks(games)
     games.sort(key=lambda g: (g["date"] or "", g["week"] or 0, g["away_team"], g["home_team"]))
 
     OUT_JSON.write_text(json.dumps({
@@ -125,6 +307,8 @@ def main():
         "pulled_at": pulled_at,
         "raw_rows": len(raw),
         "normalized_rows": len(games),
+        "preseason_fallback_rows": len(preseason_fallbacks),
+        "preseason_fallbacks": preseason_fallbacks,
         "dated_rows": sum(bool(g["date"]) for g in games),
         "tbd_rows": sum(bool(g["start_time_tbd"]) for g in games),
         "kickoff_quality": {
