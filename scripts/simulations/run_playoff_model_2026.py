@@ -280,7 +280,13 @@ def simulate_bracket(field: List[str], teams: Dict[str, dict], rng: random.Rando
     counters["champion"][champion] += 1
 
 
-def run_model(db: dict, sims: int, seed: int, sigma: float) -> dict:
+def run_model(
+    db: dict,
+    sims: int,
+    seed: int,
+    sigma: float,
+    forced_results: dict[str, str] | None = None,
+) -> dict:
     rng = random.Random(seed)
     teams = {t["team"]: t for t in db.get("teams", [])}
     games = CONF.build_regular_games(db)
@@ -342,6 +348,12 @@ def run_model(db: dict, sims: int, seed: int, sigma: float) -> dict:
                     rng,
                     sigma,
                 )
+
+                forced_winner = CONF.forced_winner_for_game(g, forced_results)
+                if forced_winner is not None:
+                    magnitude = max(0.01, abs(margin_home))
+                    margin_home = magnitude if forced_winner == home else -magnitude
+
             winner, loser = (home, away) if margin_home > 0 else (away, home)
             margin = abs(margin_home)
             wins[winner] += 1

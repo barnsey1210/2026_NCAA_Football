@@ -451,6 +451,30 @@ def apply_canonical_results(db: Dict[str, Any], results: Iterable[Dict[str, Any]
     return changed
 
 
+def scenario_game_key(game: Dict[str, Any]) -> str:
+    game_id = str(game.get("game_id") or game.get("id") or "").strip()
+    if game_id:
+        return f"id:{game_id}"
+
+    date = str(game.get("date") or game.get("game_date") or "").strip()
+    away = str(game.get("away_team") or "").strip()
+    home = str(game.get("home_team") or "").strip()
+    return f"match:{date}|{away}|{home}"
+
+
+def forced_winner_for_game(
+    game: Dict[str, Any],
+    forced_results: Optional[Dict[str, str]],
+) -> Optional[str]:
+    if not forced_results:
+        return None
+
+    winner = forced_results.get(scenario_game_key(game))
+    if winner in {game.get("away_team"), game.get("home_team")}:
+        return winner
+    return None
+
+
 def completed_game_winner(game: Dict[str, Any]) -> Optional[str]:
     if not (game.get("cfbd_completed") or game.get("completed")):
         return None
@@ -496,7 +520,14 @@ def audit_conference_counts(db: Dict[str, Any], out_path: Path) -> None:
         w.writeheader(); w.writerows(rows)
 
 
-def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sigma: float) -> Dict[str, Any]:
+def rerun_sims(
+    db: Dict[str, Any],
+    sims: int,
+    seed: int,
+    sigma: float,
+    title_sigma: float,
+    forced_results: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
     rng = random.Random(seed)
     teams = db.get("teams", [])
     team_by_name = {t.get("team"): t for t in teams}
@@ -539,10 +570,12 @@ def rerun_sims(db: Dict[str, Any], sims: int, seed: int, sigma: float, title_sig
             actual_winner = completed_game_winner(g)
             if actual_winner is not None:
                 winner = actual_winner
-            elif rng.random() < p_home:
-                winner = home
             else:
-                winner = away
+                # Always consume the canonical random draw so paired WIN/LOSS
+                # scenarios preserve common random numbers downstream.
+                simulated_winner = home if rng.random() < p_home else away
+                forced_winner = forced_winner_for_game(g, forced_results)
+                winner = forced_winner if forced_winner is not None else simulated_winner
             simulated_results[(away, home)] = winner
             total_wins[winner] += 1
 
