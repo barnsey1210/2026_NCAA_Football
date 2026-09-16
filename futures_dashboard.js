@@ -911,6 +911,80 @@ function bindFourBookTooltips(){
   };
 }
 
+function applyMobileMetricLabels(){
+  const labels=[...head.querySelectorAll('th')].map(th=>
+    String(th.textContent||'')
+      .replace(/[▲▼↕]/g,'')
+      .replace(/\s+/g,' ')
+      .trim()
+  );
+
+  rows.querySelectorAll('tr').forEach(tr=>{
+    [...tr.children].forEach((cell,index)=>{
+      cell.dataset.label=index===0?'':(labels[index]||'');
+    });
+  });
+}
+
+function sortControlEdgeKey(){
+  if(state.mode==='title')return 'title_edge';
+  if(state.mode==='playoff')return 'cfp_edge';
+  return 'win_edge';
+}
+
+function syncSortControl(){
+  const select=document.getElementById('futSort');
+  if(!select)return;
+
+  if(state.sortKey==='rank'&&state.sortDir==='asc'){
+    select.value='default';
+  }else if(state.sortKey==='model_wins'&&state.sortDir==='desc'){
+    select.value='model_wins';
+  }else if(state.sortKey===sortControlEdgeKey()&&state.sortDir==='desc'){
+    select.value='edge';
+  }else{
+    select.value='custom';
+  }
+}
+
+function installSortControl(){
+  const controls=document.getElementById('futuresCommandControls');
+  if(!controls||document.getElementById('futSort'))return;
+
+  const label=document.createElement('label');
+  label.className='futSortControl';
+  label.innerHTML=`<span>Sort</span>
+    <select id="futSort">
+      <option value="default">Default</option>
+      <option value="edge">Edge</option>
+      <option value="model_wins">Model Wins</option>
+      <option value="custom" hidden>Column Sort</option>
+    </select>`;
+
+  const reset=controls.querySelector('button');
+  if(reset)reset.before(label);
+  else controls.appendChild(label);
+
+  label.querySelector('select').onchange=event=>{
+    const value=event.target.value;
+
+    if(value==='edge'){
+      state.sortKey=sortControlEdgeKey();
+      state.sortDir='desc';
+    }else if(value==='model_wins'){
+      state.sortKey='model_wins';
+      state.sortDir='desc';
+    }else{
+      state.sortKey='rank';
+      state.sortDir='asc';
+    }
+
+    renderCommandCenter();
+  };
+
+  syncSortControl();
+}
+
 function renderCommandCenter(){
   if(!D)return;
 
@@ -931,6 +1005,9 @@ function renderCommandCenter(){
   if(!data.length){
     rows.innerHTML='<tr><td colspan="10" class="empty">No matching futures markets.</td></tr>';
   }
+
+  applyMobileMetricLabels();
+  syncSortControl();
 
   bindSorting();
   bindSelection();
@@ -1653,6 +1730,7 @@ window.FuturesDashboard={
 };
 
 enhance();
+installSortControl();
 
 (function installCompactFuturesTable(){
   const style=document.createElement('style');
@@ -2206,6 +2284,191 @@ enhance();
 
       .railOpponent b{
         font-size:8.5px!important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
+
+/* FUTURES_DENSITY_FINISH_V2 */
+(function installFuturesDensityFinishV2(){
+  if(typeof document==='undefined')return;
+
+  const style=document.createElement('style');
+  style.id='futuresDensityFinishV2';
+  style.textContent=`
+    @media (min-width:901px){
+      .freshnessGrid{
+        grid-template-columns:minmax(300px,.72fr) minmax(620px,1.28fr)!important;
+        align-items:stretch!important;
+        gap:6px!important;
+        margin:2px 0 4px!important;
+      }
+
+      .freshCard{
+        padding:3px 7px!important;
+        min-height:0!important;
+      }
+
+      .freshHead{
+        min-height:17px!important;
+        margin:0 0 1px!important;
+      }
+
+      #modelFreshRows{
+        display:grid!important;
+        grid-template-columns:repeat(3,minmax(0,1fr))!important;
+        gap:4px!important;
+        align-items:start!important;
+      }
+
+      #modelFreshRows .freshRow{
+        display:grid!important;
+        grid-template-columns:1fr!important;
+        gap:0!important;
+        padding:1px 3px!important;
+        min-height:0!important;
+        line-height:1.02!important;
+      }
+
+      #modelFreshRows .freshRow span:first-child{
+        font-size:7px!important;
+        line-height:1!important;
+      }
+
+      #modelFreshRows .freshRow span:last-child{
+        font-size:8.5px!important;
+        line-height:1.05!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+      }
+
+      .bookFreshHeader{
+        min-height:14px!important;
+        padding:0!important;
+        font-size:8px!important;
+        line-height:1!important;
+      }
+
+      .bookFreshRow{
+        min-height:17px!important;
+        padding:0!important;
+      }
+
+      .bookFreshCell{
+        min-height:0!important;
+      }
+
+      .bookFreshCell small{
+        font-size:7px!important;
+        line-height:1!important;
+      }
+
+      .bookFreshCell b{
+        font-size:10.5px!important;
+        line-height:1!important;
+      }
+
+      .bookFreshLogo img,
+      .bookFreshLogo .futBookLogo{
+        width:19px!important;
+        height:14px!important;
+      }
+
+      #marketQaRow .freshRow{
+        padding:1px 0 0!important;
+        min-height:12px!important;
+        font-size:8px!important;
+        line-height:1!important;
+      }
+
+      .futuresCommandControls{
+        display:grid!important;
+        grid-template-columns:155px minmax(240px,1fr) 145px 70px!important;
+        align-items:end!important;
+        gap:6px!important;
+        margin:4px 0 5px!important;
+      }
+
+      .futuresCommandControls label{
+        display:grid!important;
+        gap:2px!important;
+        margin:0!important;
+        font-size:8px!important;
+      }
+
+      .futuresCommandControls label>span{
+        font-size:8px!important;
+        line-height:1!important;
+      }
+
+      .futuresCommandControls select,
+      .futuresCommandControls input{
+        height:32px!important;
+        padding:5px 8px!important;
+        font-size:11px!important;
+      }
+
+      .futuresCommandControls button{
+        height:32px!important;
+        min-height:32px!important;
+        margin:0!important;
+      }
+
+      .futuresRail{
+        width:370px!important;
+        min-width:370px!important;
+      }
+    }
+
+    @media (max-width:900px){
+      .futuresCommandControls{
+        display:grid!important;
+        grid-template-columns:1fr 1fr!important;
+        gap:6px!important;
+        margin:6px 0!important;
+      }
+
+      .futuresCommandControls .searchControl{
+        grid-column:1/-1!important;
+      }
+
+      .futuresCommandControls .futSortControl{
+        grid-column:auto!important;
+      }
+
+      .futuresCommandControls button{
+        grid-column:1/-1!important;
+      }
+
+      .futuresWorkspace tbody td[data-label]{
+        position:relative!important;
+      }
+
+      .futuresWorkspace tbody td[data-label]:not([data-label=""])::before{
+        content:attr(data-label)!important;
+        display:block!important;
+        margin-bottom:2px!important;
+        color:var(--muted)!important;
+        font-size:7px!important;
+        font-weight:900!important;
+        letter-spacing:.35px!important;
+        line-height:1!important;
+        text-transform:uppercase!important;
+      }
+
+      .futuresWorkspace tbody td[data-label=""]::before{
+        content:none!important;
+        display:none!important;
+      }
+    }
+
+    @media (max-width:560px){
+      .futuresWorkspace tbody td[data-label]:not([data-label=""])::before{
+        font-size:6.5px!important;
       }
     }
   `;
