@@ -725,11 +725,6 @@ function renderRailSchedule(row){
     </div>`;
   }).join('');
 
-  const coverage=`${row.win_probability_games_remaining??0}/${row.games_remaining??0}`;
-  const scheduleProjection=row.projected_record?.complete
-    ? `${num(row.projected_record.wins)}-${num(row.projected_record.losses)}`
-    : 'INCOMPLETE';
-
   const season=seasonProjectedRecord(row);
 
   return `<div class="railScheduleHead">
@@ -737,12 +732,9 @@ function renderRailSchedule(row){
   </div>
   ${body||'<p class="railEmpty">Schedule unavailable.</p>'}
 
-  <div class="scheduleTotals">
+  <div class="scheduleTotals compactScheduleTotals">
     <div><span>CURRENT RECORD</span><b>${row.record?.wins??0}-${row.record?.losses??0}</b></div>
-    <div><span>GAME PROB COVERAGE</span><b>${coverage}</b></div>
-    <div><span>SCHEDULE PROJECTION</span><b>${scheduleProjection}</b></div>
-    <div><span>MODEL PROJECTED RECORD</span><b>${season?`${num(season.wins)}-${num(season.losses)}`:'—'}</b></div>
-    <div class="scheduleTotalWins"><span>MODEL PROJECTED WINS</span><b>${num(row.projected_wins)}</b></div>
+    <div><span>PROJECTED RECORD</span><b>${season?`${num(season.wins)}-${num(season.losses)}`:'—'}</b></div>
   </div>`;
 }
 
@@ -808,20 +800,26 @@ function renderRail(){
     state.railTab==='history'?renderRailHistory(row):
     renderRailOverview(row);
 
-  rail.innerHTML=`<div class="futuresRailHead">
-    <div>
-      ${teamLogo(row,'railTeamLogo')}
-      <span>
-        <b>${esc(row.team)}</b>
-        <small>${esc(row.conference||'IND')} · <span class="${rankClass(row.overall_rank??row.rank)}">#${row.overall_rank??row.rank??'—'}</span> · Rating ${num(row.team_rating)}</small>
-      </span>
+  const rank=row.overall_rank??row.rank;
+  const record=`${row.record?.wins??0}-${row.record?.losses??0}`;
+
+  rail.innerHTML=`<div class="futuresRailHead compactRailHead">
+    ${teamLogo(row,'railTeamLogo')}
+    <div class="compactTeamIdentity">
+      <span class="compactTeamRank ${rankClass(rank)}">#${rank??'—'}</span>
+      <b class="compactTeamName">${esc(row.team)}</b>
+      <span>${esc(row.conference||'IND')}</span>
+      <span>Rating ${num(row.team_rating)}</span>
+      <span>Record ${record}</span>
     </div>
   </div>
+
   <nav class="futuresRailTabs">
     ${['overview','schedule','market','history'].map(tab=>
       `<button data-rail-tab="${tab}" class="${state.railTab===tab?'active':''}">${tab.toUpperCase()}</button>`
     ).join('')}
   </nav>
+
   <section class="futuresRailBody">${content}</section>`;
 
   rail.querySelectorAll('[data-rail-tab]').forEach(button=>{
@@ -1779,4 +1777,438 @@ enhance();
   document.head.appendChild(style);
 })();
 
+})();
+
+
+/* FUTURES_DENSITY_RESPONSIVE_V1 */
+(function installFuturesDensityResponsive(){
+  if(typeof document==='undefined')return;
+
+  const style=document.createElement('style');
+  style.id='futuresDensityResponsiveV1';
+  style.textContent=`
+    @media (min-width:901px){
+      .shell{
+        padding-top:10px!important;
+      }
+
+      .hero{
+        margin:7px 0 5px!important;
+        align-items:center!important;
+      }
+
+      .hero h1{
+        font-size:29px!important;
+        line-height:1.05!important;
+      }
+
+      .hero p{
+        margin:1px 0 0!important;
+        font-size:12px!important;
+        line-height:1.2!important;
+      }
+
+      .summary{
+        gap:5px!important;
+      }
+
+      .tile{
+        padding:4px 8px!important;
+        border-radius:7px!important;
+      }
+
+      .tile span{
+        font-size:8px!important;
+      }
+
+      .tile b{
+        font-size:16px!important;
+        line-height:1.1!important;
+      }
+
+      .freshnessGrid{
+        gap:6px!important;
+        margin:3px 0 6px!important;
+      }
+
+      .freshCard{
+        padding:4px 8px!important;
+        border-radius:8px!important;
+      }
+
+      .freshHead{
+        margin-bottom:1px!important;
+      }
+
+      .freshHead strong{
+        font-size:9px!important;
+      }
+
+      .freshStatus{
+        font-size:9px!important;
+      }
+
+      #modelFreshRows .freshRow{
+        font-size:9px!important;
+        line-height:1.12!important;
+      }
+
+      .bookFreshHeader,
+      .bookFreshRow{
+        min-height:20px!important;
+        padding:1px 0!important;
+      }
+
+      .bookFreshHeader{
+        font-size:9px!important;
+      }
+
+      .bookFreshCell small{
+        font-size:8px!important;
+        line-height:1!important;
+      }
+
+      .bookFreshCell b{
+        font-size:10.5px!important;
+        line-height:1.05!important;
+      }
+
+      .bookFreshLogo img,
+      .bookFreshLogo .futBookLogo{
+        width:20px!important;
+        height:15px!important;
+      }
+
+      #marketQaRow .freshRow{
+        font-size:9px!important;
+        line-height:1.1!important;
+      }
+
+      .tabs{
+        margin:6px 0!important;
+      }
+
+      .tabs button{
+        padding:7px 13px!important;
+        font-size:12px!important;
+      }
+
+      .dashboardControls{
+        margin:5px 0 6px!important;
+        gap:6px!important;
+      }
+
+      .dashboardControls label{
+        gap:2px!important;
+        font-size:9px!important;
+      }
+
+      .dashboardControls select,
+      .dashboardControls input{
+        padding:7px 9px!important;
+        font-size:12px!important;
+      }
+
+      .resetButton{
+        height:34px!important;
+      }
+
+      .dashboardHelp,
+      .dashboardSummary{
+        margin-top:4px!important;
+        margin-bottom:5px!important;
+      }
+
+      .futuresWorkspace .wrap,
+      .card .wrap{
+        max-height:none!important;
+        overflow-y:visible!important;
+      }
+
+      .futuresWorkspace{
+        align-items:start!important;
+      }
+
+      .futuresRail{
+        width:390px!important;
+        min-width:390px!important;
+      }
+
+      .compactRailHead{
+        display:flex!important;
+        align-items:center!important;
+        gap:8px!important;
+        padding:6px 0!important;
+        min-height:46px!important;
+      }
+
+      .compactRailHead .railTeamLogo{
+        width:30px!important;
+        height:30px!important;
+        flex:0 0 auto!important;
+      }
+
+      .compactTeamIdentity{
+        display:flex!important;
+        align-items:center!important;
+        flex-wrap:wrap!important;
+        gap:3px 8px!important;
+        min-width:0!important;
+        line-height:1.1!important;
+      }
+
+      .compactTeamRank{
+        font-size:13px!important;
+        font-weight:950!important;
+      }
+
+      .compactTeamName{
+        font-size:15px!important;
+        white-space:nowrap!important;
+      }
+
+      .compactTeamIdentity>span:not(.compactTeamRank){
+        color:var(--muted)!important;
+        font-size:9px!important;
+        font-weight:850!important;
+        white-space:nowrap!important;
+      }
+
+      .futuresRailTabs{
+        margin:4px 0!important;
+        gap:4px!important;
+      }
+
+      .futuresRailTabs button{
+        padding:5px 4px!important;
+        font-size:8px!important;
+      }
+
+      .railScheduleHead,
+      .railScheduleRow{
+        grid-template-columns:25px minmax(135px,1fr) 72px 48px!important;
+        gap:4px!important;
+      }
+
+      .railScheduleHead{
+        padding:2px 0!important;
+        font-size:7px!important;
+      }
+
+      .railScheduleRow{
+        padding:4px 0!important;
+        min-height:38px!important;
+        font-size:9px!important;
+      }
+
+      .railOpponent{
+        gap:5px!important;
+      }
+
+      .railOppLogo{
+        width:21px!important;
+        height:21px!important;
+      }
+
+      .railOpponent b{
+        font-size:9px!important;
+      }
+
+      .railOpponent small{
+        font-size:7.5px!important;
+      }
+
+      .compactScheduleTotals{
+        margin-top:5px!important;
+        padding-top:4px!important;
+      }
+
+      .compactScheduleTotals>div{
+        padding:4px 0!important;
+      }
+
+      .compactScheduleTotals span{
+        font-size:8px!important;
+      }
+
+      .compactScheduleTotals b{
+        font-size:12px!important;
+      }
+    }
+
+    @media (max-width:900px){
+      .shell{
+        padding:8px!important;
+      }
+
+      .hero{
+        margin:8px 0 6px!important;
+        display:block!important;
+      }
+
+      .hero h1{
+        font-size:25px!important;
+      }
+
+      .hero p{
+        font-size:11px!important;
+        line-height:1.25!important;
+      }
+
+      .freshnessGrid{
+        grid-template-columns:1fr!important;
+        gap:5px!important;
+        margin:5px 0!important;
+      }
+
+      .freshCard{
+        padding:5px 7px!important;
+      }
+
+      .bookFreshHeader,
+      .bookFreshRow{
+        grid-template-columns:34px repeat(4,minmax(52px,1fr))!important;
+      }
+
+      .bookFreshCell b{
+        font-size:9px!important;
+      }
+
+      .bookFreshCell small{
+        font-size:7px!important;
+      }
+
+      .tabs{
+        gap:5px!important;
+        margin:6px 0!important;
+      }
+
+      .tabs button{
+        flex:1 1 auto!important;
+        padding:8px 9px!important;
+        font-size:11px!important;
+      }
+
+      .dashboardControls{
+        grid-template-columns:1fr 1fr!important;
+        margin:6px 0!important;
+        gap:6px!important;
+      }
+
+      .searchControl{
+        grid-column:1/-1!important;
+      }
+
+      .resetButton{
+        grid-column:1/-1!important;
+      }
+
+      .futuresWorkspace .wrap,
+      .card .wrap{
+        max-height:none!important;
+        overflow:visible!important;
+      }
+
+      .futuresWorkspace table{
+        min-width:0!important;
+      }
+
+      .futuresRail{
+        width:100%!important;
+        min-width:0!important;
+        position:relative!important;
+        max-height:none!important;
+        overflow:visible!important;
+      }
+
+      .compactRailHead{
+        display:flex!important;
+        align-items:center!important;
+        gap:8px!important;
+        padding:7px 0!important;
+      }
+
+      .compactRailHead .railTeamLogo{
+        width:30px!important;
+        height:30px!important;
+      }
+
+      .compactTeamIdentity{
+        display:flex!important;
+        align-items:center!important;
+        flex-wrap:wrap!important;
+        gap:3px 7px!important;
+      }
+
+      .compactTeamName{
+        font-size:15px!important;
+      }
+
+      .compactTeamIdentity>span{
+        font-size:9px!important;
+      }
+
+      .futuresRailTabs{
+        position:sticky!important;
+        top:0!important;
+        z-index:5!important;
+        background:#07172d!important;
+        padding:4px 0!important;
+        margin:2px 0 4px!important;
+      }
+
+      .futuresRailTabs button{
+        padding:7px 3px!important;
+        font-size:8px!important;
+      }
+
+      .railScheduleHead,
+      .railScheduleRow{
+        grid-template-columns:25px minmax(120px,1fr) 70px 48px!important;
+        gap:4px!important;
+      }
+
+      .railScheduleRow{
+        padding:5px 0!important;
+      }
+
+      .railOpponent b{
+        white-space:normal!important;
+      }
+
+      .compactScheduleTotals{
+        margin-bottom:8px!important;
+      }
+    }
+
+    @media (max-width:560px){
+      .bookFreshHeader,
+      .bookFreshRow{
+        grid-template-columns:28px repeat(4,minmax(46px,1fr))!important;
+      }
+
+      .bookFreshHeader{
+        font-size:7px!important;
+      }
+
+      .bookFreshCell b{
+        font-size:8px!important;
+      }
+
+      .railScheduleHead,
+      .railScheduleRow{
+        grid-template-columns:23px minmax(105px,1fr) 62px 45px!important;
+      }
+
+      .railScheduleRow{
+        font-size:8px!important;
+      }
+
+      .railOpponent b{
+        font-size:8.5px!important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
 })();
