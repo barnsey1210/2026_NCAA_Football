@@ -415,7 +415,7 @@ function edgeMarkup(v,kind){
 function wagerMarkup(row){
   const n=(row.open_wagers||[]).length;
   return n
-    ? `<span class="bet">BET ${n}</span>`
+    ? `<span class="bet" title="${n} open wager${n===1?'':'s'}">YES</span>`
     : '<span class="muted">—</span>';
 }
 
@@ -1679,119 +1679,100 @@ enhance();
 
       .futuresWorkspace th,
       .futuresWorkspace td{
-        padding-left:3px!important;
-        padding-right:3px!important;
-        font-size:10px!important;
-        overflow:hidden;
-        text-overflow:ellipsis;
+        padding-left:5px!important;
+        padding-right:5px!important;
+        font-size:12px!important;
         white-space:nowrap;
       }
 
       .futuresWorkspace th{
-        font-size:9px!important;
+        font-size:10px!important;
         letter-spacing:0!important;
       }
 
       .futuresWorkspace th:nth-child(1),
       .futuresWorkspace td:nth-child(1){
-        width:19%!important;
+        width:16%!important;
       }
 
       .futuresWorkspace th:nth-child(2),
       .futuresWorkspace td:nth-child(2){
-        width:16%!important;
+        width:19%!important;
       }
 
       .futuresWorkspace th:nth-child(3),
       .futuresWorkspace td:nth-child(3){
-        width:5%!important;
+        width:6%!important;
       }
 
       .futuresWorkspace th:nth-child(4),
       .futuresWorkspace td:nth-child(4){
-        width:7%!important;
+        width:8%!important;
       }
 
       .futTeamButton{
-        gap:4px!important;
+        gap:5px!important;
         min-width:0!important;
       }
 
       .futTeamLogo{
-        width:22px!important;
-        height:22px!important;
-        flex:0 0 22px!important;
+        width:23px!important;
+        height:23px!important;
+        flex:0 0 23px!important;
       }
 
       .teamRankBadge{
-        width:20px!important;
-        min-width:20px!important;
-        font-size:9px!important;
+        width:19px!important;
+        min-width:19px!important;
       }
 
       .futTeamIdentity{
         min-width:0!important;
       }
 
-      .futTeamIdentity b,
-      .futTeamIdentity small{
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-      }
-
-      .futTeamIdentity b{
-        font-size:10px!important;
-      }
-
-      .futTeamIdentity small{
-        font-size:8px!important;
-      }
-
-      .nextGameCell,
-      .nextGameCell b,
-      .nextGameCell small{
-        min-width:0!important;
-      }
-
       .metricMove{
-        gap:2px!important;
-        font-size:9px!important;
+        gap:3px!important;
+        white-space:nowrap!important;
       }
 
       .moveUp,
       .moveDown,
       .moveFlat{
-        font-size:8px!important;
-        white-space:nowrap!important;
+        font-size:10px!important;
       }
 
       .bestMarketButton{
-        gap:3px!important;
-        padding:1px!important;
+        gap:4px!important;
+        padding:1px 2px!important;
       }
 
       .futBookLogo{
-        width:20px!important;
-        height:15px!important;
+        width:21px!important;
+        height:16px!important;
       }
 
       .bestPrimary{
-        font-size:10px!important;
+        font-size:11px!important;
       }
 
       .bestSecondary{
-        font-size:8px!important;
+        font-size:9px!important;
       }
 
-      .projWinStack b,
-      .sosStack b{
-        font-size:10px!important;
+      .futuresWorkspace th:nth-last-child(2),
+      .futuresWorkspace td:nth-last-child(2){
+        width:7%!important;
       }
 
-      .projWinStack small,
-      .sosStack small{
-        font-size:7px!important;
+      .futuresWorkspace th:last-child,
+      .futuresWorkspace td:last-child{
+        width:5%!important;
+        text-align:center!important;
+      }
+
+      .bet{
+        padding:2px 5px!important;
+        font-size:9px!important;
       }
     }
   `;
