@@ -334,11 +334,22 @@ def run_model(
             else:
                 expected = g.get("projected_margin_home")
                 if expected is None:
-                    expected = CONF.estimate_margin_home(
-                        teams[home],
-                        teams[away],
-                        bool(g.get("neutral_site")),
-                    )
+                    if away in teams and home in teams:
+                        expected = CONF.estimate_margin_home(
+                            teams[home],
+                            teams[away],
+                            bool(g.get("neutral_site")),
+                        )
+                    else:
+                        # FBS-v-FCS games already receive their canonical
+                        # probability from CONF.game_home_prob(), including the
+                        # explicit 98/2 fallback when no projection exists.
+                        # Convert that probability back to the equivalent
+                        # logistic margin solely for resume-margin simulation.
+                        clipped_p = max(1e-6, min(1.0 - 1e-6, p_home))
+                        expected = WIN_PROB_LOGISTIC_SCALE * math.log(
+                            clipped_p / (1.0 - clipped_p)
+                        )
 
                 # game_probs is sourced from CONF.game_home_prob(), which uses
                 # the canonical logistic /6.5 probability for consensus games.
@@ -359,9 +370,16 @@ def run_model(
             wins[winner] += 1
             losses[loser] += 1
             results[(away, home)] = winner
-            opponents[away].append(home); opponents[home].append(away)
-            venue = 0.0 if g.get("neutral_site") else 0.025
-            sos_opponents[away].append((home, venue)); sos_opponents[home].append((away, -venue))
+            # CFP opponent-WP/SOS is defined over the modeled FBS universe.
+            # FBS-v-FCS games still count toward record, margin, Game Control,
+            # quality/bad-loss logic, etc., but an unmodeled FCS participant
+            # must not enter the 138-team SOS graph.
+            if away in teams and home in teams:
+                opponents[away].append(home)
+                opponents[home].append(away)
+                venue = 0.0 if g.get("neutral_site") else 0.025
+                sos_opponents[away].append((home, venue))
+                sos_opponents[home].append((away, -venue))
             defeated[winner].append(loser); lost_to[loser].append(winner)
             mov_values[winner].append(min(21.0, margin))
             game_id = str(g.get("game_id") or g.get("id") or "")
@@ -420,7 +438,12 @@ def run_model(
             opp_vals = [max(0.0, min(1.0, win_pct[o] + venue_adj)) for o, venue_adj in sos_opponents[t]]
             opp_opp_vals = [opp_wp[o] for o in opponents[t]]
             sos_value = (2 / 3) * (sum(opp_vals) / len(opp_vals) if opp_vals else 0.0) + (1 / 3) * (sum(opp_opp_vals) / len(opp_opp_vals) if opp_opp_vals else 0.0)
-            weighted_mol = [margin * (0.6 + 0.8 * (1 - win_pct[opp])) for winner, loser, margin in played if loser == t for opp in [winner]]
+            weighted_mol = [
+                margin * (0.6 + 0.8 * (1 - win_pct.get(opp, 0.0)))
+                for winner, loser, margin in played
+                if loser == t
+                for opp in [winner]
+            ]
             m = {
                 # Future games do not have a play-state curve.  Their raw GC is a
                 # calibrated margin proxy; the season value is then SOS-adjusted.
@@ -429,12 +452,12 @@ def run_model(
                     + 0.35 * (sos_value - 0.5))),
                 "power_championship_wins": 1.0 if t in power_champs else 0.0,
                 "g6_championship_wins": 1.0 if t in g6_champs else 0.0,
-                "quality_wins": float(sum(1 for o in defeated[t] if win_pct[o] > 0.5)),
+                "quality_wins": float(sum(1 for o in defeated[t] if win_pct.get(o, 0.0) > 0.5)),
                 "top25_wins": 0.0,
                 "losses": float(losses[t]),
                 "avg_capped_mov": sum(mov_values[t]) / len(mov_values[t]) if mov_values[t] else 0.0,
                 "avg_weighted_mol": sum(weighted_mol) / len(weighted_mol) if weighted_mol else 0.0,
-                "bad_losses": float(sum(1 for o in lost_to[t] if win_pct[o] <= 0.5)),
+                "bad_losses": float(sum(1 for o in lost_to[t] if win_pct.get(o, 0.0) <= 0.5)),
                 "sos": sos_value,
             }
             metrics[t] = m
