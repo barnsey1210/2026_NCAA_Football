@@ -159,7 +159,6 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
             futures_dashboard.read_bytes()
         ).hexdigest()[:12]
 
-        import re
         text = re.sub(
             r'src="futures_dashboard\.js(?:\?v=[^"]*)?"',
             f'src="futures_dashboard.js?v={dashboard_version}"',
