@@ -96,17 +96,45 @@ function movementArrow(delta,invert=false){
     : '<span class="moveDown" title="Declined">↓</span>';
 }
 
+function movementWithAmount(delta,invert=false,digits=1){
+  if(!hasNumber(delta))return'';
+
+  delta=Number(delta);
+
+  if(Math.abs(delta)<0.0001){
+    return '<span class="moveFlat" title="No movement">→</span>';
+  }
+
+  const improved=invert ? delta<0 : delta>0;
+  const cls=improved?'moveUp':'moveDown';
+  const arrow=improved?'↑':'↓';
+  const amount=Math.abs(delta).toFixed(digits);
+
+  return `<span class="${cls}" title="${improved?'Improved':'Declined'}">${arrow} ${amount}</span>`;
+}
+
 function ratingMovement(row){
   const base=l2BaselineRating(row);
   if(!hasNumber(base)||!hasNumber(row?.team_rating))return'';
-  return movementArrow(Number(row.team_rating)-Number(base));
+
+  return movementWithAmount(
+    Number(row.team_rating)-Number(base),
+    false,
+    1
+  );
 }
 
 function rankMovement(row){
   const prior=priorRankMap()[row.team];
   const current=Number(row.overall_rank??row.rank);
+
   if(!Number.isFinite(current)||!Number.isFinite(Number(prior)))return'';
-  return movementArrow(current-Number(prior),true);
+
+  return movementWithAmount(
+    current-Number(prior),
+    true,
+    0
+  );
 }
 
 function conferenceSOS(row){
@@ -484,9 +512,9 @@ function renderWins(data){
     <th>${sortable('Rating','rating')}</th>
     <th>${sortable('Record','record')}</th>
     <th>${sortable('Left','left')}</th>
-    <th>${sortable('Projected Record','projected')}</th>
+    <th>${sortable('Proj Record','projected')}</th>
     <th>${sortable('Model Wins','model_wins')}</th>
-    <th class="marketCol">${sortable('Best Line','win_market')}</th>
+    <th class="marketCol">${sortable('Best','win_market')}</th>
     <th>${sortable('Edge','win_edge')}</th>
     <th>${sortable('Wager','wager')}</th>
   </tr>`;
@@ -512,12 +540,12 @@ function renderConference(data){
     <th>${sortable('Next Game','next')}</th>
     <th>${sortable('Rank','rank')}</th>
     <th>${sortable('Rating','rating')}</th>
-    <th>${sortable('Conf Record','conf_record')}</th>
-    <th>${sortable('Conf Left','conf_left')}</th>
-    <th>${sortable('Projected Conf','conf_projected')}</th>
+    <th>${sortable('Conf Rec','conf_record')}</th>
+    <th>${sortable('Left','conf_left')}</th>
+    <th>${sortable('Proj Conf','conf_projected')}</th>
     <th>${sortable('Rem SOS','conf_sos')}</th>
     <th>${sortable('Proj Win %','title_model')}</th>
-    <th class="marketCol">${sortable('Best Line','title_price')}</th>
+    <th class="marketCol">${sortable('Best','title_price')}</th>
     <th>${sortable('Edge','title_edge')}</th>
     <th>${sortable('Wager','wager')}</th>
   </tr>`;
@@ -1627,5 +1655,147 @@ window.FuturesDashboard={
 };
 
 enhance();
+
+(function installCompactFuturesTable(){
+  const style=document.createElement('style');
+  style.id='futuresCompactTableV2';
+  style.textContent=`
+    @media (min-width:901px){
+      .futuresWorkspace{
+        min-width:0!important;
+      }
+
+      .futuresWorkspace .card,
+      .futuresWorkspace .wrap{
+        min-width:0!important;
+        overflow-x:hidden!important;
+      }
+
+      .futuresWorkspace table{
+        width:100%!important;
+        min-width:0!important;
+        table-layout:fixed!important;
+      }
+
+      .futuresWorkspace th,
+      .futuresWorkspace td{
+        padding-left:3px!important;
+        padding-right:3px!important;
+        font-size:10px!important;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+
+      .futuresWorkspace th{
+        font-size:9px!important;
+        letter-spacing:0!important;
+      }
+
+      .futuresWorkspace th:nth-child(1),
+      .futuresWorkspace td:nth-child(1){
+        width:19%!important;
+      }
+
+      .futuresWorkspace th:nth-child(2),
+      .futuresWorkspace td:nth-child(2){
+        width:16%!important;
+      }
+
+      .futuresWorkspace th:nth-child(3),
+      .futuresWorkspace td:nth-child(3){
+        width:5%!important;
+      }
+
+      .futuresWorkspace th:nth-child(4),
+      .futuresWorkspace td:nth-child(4){
+        width:7%!important;
+      }
+
+      .futTeamButton{
+        gap:4px!important;
+        min-width:0!important;
+      }
+
+      .futTeamLogo{
+        width:22px!important;
+        height:22px!important;
+        flex:0 0 22px!important;
+      }
+
+      .teamRankBadge{
+        width:20px!important;
+        min-width:20px!important;
+        font-size:9px!important;
+      }
+
+      .futTeamIdentity{
+        min-width:0!important;
+      }
+
+      .futTeamIdentity b,
+      .futTeamIdentity small{
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+
+      .futTeamIdentity b{
+        font-size:10px!important;
+      }
+
+      .futTeamIdentity small{
+        font-size:8px!important;
+      }
+
+      .nextGameCell,
+      .nextGameCell b,
+      .nextGameCell small{
+        min-width:0!important;
+      }
+
+      .metricMove{
+        gap:2px!important;
+        font-size:9px!important;
+      }
+
+      .moveUp,
+      .moveDown,
+      .moveFlat{
+        font-size:8px!important;
+        white-space:nowrap!important;
+      }
+
+      .bestMarketButton{
+        gap:3px!important;
+        padding:1px!important;
+      }
+
+      .futBookLogo{
+        width:20px!important;
+        height:15px!important;
+      }
+
+      .bestPrimary{
+        font-size:10px!important;
+      }
+
+      .bestSecondary{
+        font-size:8px!important;
+      }
+
+      .projWinStack b,
+      .sosStack b{
+        font-size:10px!important;
+      }
+
+      .projWinStack small,
+      .sosStack small{
+        font-size:7px!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+})();
 
 })();
