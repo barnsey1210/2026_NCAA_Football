@@ -262,6 +262,7 @@ required = [
     Path("data/site/odds_screen_v2.json"),
     Path("data/site/odds_futures_v2.json"),
     Path("data/site/futures_view.json"),
+    Path("data/site/futures_scenario_universe_2026.json"),
     Path("data/site/matchups_view.json"),
     Path("data/site/model_performance_view.json"),
     Path("data/site/historical_betting_analytics_v2.json"),

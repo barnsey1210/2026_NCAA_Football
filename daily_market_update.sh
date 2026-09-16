@@ -585,7 +585,8 @@ fi
 if stage_enabled "playoff_simulations"; then
 
 stage_start "playoff_simulations"
-run_py "scripts/simulations/run_playoff_model_2026.py" "run_playoff_model_2026.py"
+python3 scripts/simulations/run_playoff_model_2026.py \
+  --scenario-output data/site/futures_scenario_universe_2026.json
 run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
 stage_pass "playoff_simulations"
 

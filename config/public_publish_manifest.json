@@ -1,14 +1,30 @@
 {
   "schema_version": 1,
   "description": "Explicit public publish allowlist for War Room",
-  "top_level_extensions": [".html", ".js", ".css", ".json", ".png", ".svg", ".ico"],
-  "directories": ["logos", "assets", "data/site"],
-  "excluded_files": ["index.html", "coaches.html"],
+  "top_level_extensions": [
+    ".html",
+    ".js",
+    ".css",
+    ".json",
+    ".png",
+    ".svg",
+    ".ico"
+  ],
+  "directories": [
+    "logos",
+    "assets",
+    "data/site"
+  ],
+  "excluded_files": [
+    "index.html",
+    "coaches.html"
+  ],
   "required_files": [
     "war-room.html",
     "data/site/war_room_market_matrix.json",
     "data/site/war_room_health.json",
-    "data/site/war_room_activity.json"
+    "data/site/war_room_activity.json",
+    "data/site/futures_scenario_universe_2026.json"
   ],
   "max_file_bytes": 26214400,
   "max_total_bytes": 262144000
