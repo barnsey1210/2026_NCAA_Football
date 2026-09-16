@@ -19,6 +19,7 @@ All assumptions are written to DB.playoff_model.metadata.
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import importlib.util
 import json
@@ -278,6 +279,15 @@ def simulate_bracket(field: List[str], teams: Dict[str, dict], rng: random.Rando
         finalists.append(winner)
     champion = game_winner(finalists[0], finalists[1], teams, rng, sigma)
     counters["champion"][champion] += 1
+    return champion
+
+
+def _set_bit(mask: bytearray, index: int) -> None:
+    mask[index >> 3] |= 1 << (index & 7)
+
+
+def _b64(data: bytes | bytearray) -> str:
+    return base64.b64encode(bytes(data)).decode("ascii")
 
 
 def run_model(
@@ -286,6 +296,8 @@ def run_model(
     seed: int,
     sigma: float,
     forced_results: dict[str, str] | None = None,
+    capture_scenarios: bool = False,
+    scenario_week: int | None = None,
 ) -> dict:
     rng = random.Random(seed)
     teams = {t["team"]: t for t in db.get("teams", [])}
@@ -308,6 +320,52 @@ def run_model(
 
     title_rules = CONF.load_eligibility_rules(ROOT / "conference_eligibility_rules_2026.csv")
     game_probs = [(g, CONF.game_home_prob(g, teams, sigma)) for g in games]
+
+    scenario = None
+    if capture_scenarios:
+        team_order = sorted(teams)
+        team_index = {team: i for i, team in enumerate(team_order)}
+
+        incomplete_weeks = sorted({
+            int(g.get("week") or 0)
+            for g, _ in game_probs
+            if CONF.completed_game_winner(g) is None and int(g.get("week") or 0) > 0
+        })
+
+        capture_week = scenario_week
+        if capture_week is None:
+            if not incomplete_weeks:
+                raise RuntimeError("Scenario capture requested but no upcoming week exists.")
+            capture_week = incomplete_weeks[0]
+
+        target_games = [
+            (g, p_home)
+            for g, p_home in game_probs
+            if CONF.completed_game_winner(g) is None
+            and int(g.get("week") or 0) == capture_week
+        ]
+
+        mask_bytes = (sims + 7) // 8
+
+        scenario = {
+            "week": capture_week,
+            "team_order": team_order,
+            "team_index": team_index,
+            "target_games": target_games,
+            "mask_bytes": mask_bytes,
+            "home_win_masks": [bytearray(mask_bytes) for _ in target_games],
+            "regular_wins": bytearray(sims * len(team_order)),
+            "conference_champion_masks": [
+                bytearray(mask_bytes) for _ in team_order
+            ],
+            "cfp_masks": [
+                bytearray(mask_bytes) for _ in team_order
+            ],
+            "national_champion": bytearray([255]) * sims,
+            "valid_trial_mask": bytearray(mask_bytes),
+            "valid_trials": 0,
+        }
+
     metric_names = [
         "game_control", "power_championship_wins", "g6_championship_wins", "quality_wins",
         "top25_wins", "losses", "avg_capped_mov", "avg_weighted_mol", "bad_losses",
@@ -321,7 +379,7 @@ def run_model(
         "champion": Counter(), "seed": defaultdict(Counter), "field": Counter(),
     }
 
-    for _ in range(sims):
+    for trial_idx in range(sims):
         wins, losses, conf_wins = Counter(), Counter(), Counter()
         results, played = {}, []
         opponents, sos_opponents = defaultdict(list), defaultdict(list)
@@ -396,6 +454,27 @@ def run_model(
             if g.get("is_conference_game") and ac == hc:
                 conf_wins[winner] += 1
 
+        if scenario is not None:
+            team_count = len(scenario["team_order"])
+            base_offset = trial_idx * team_count
+
+            for team_idx, team in enumerate(scenario["team_order"]):
+                scenario["regular_wins"][base_offset + team_idx] = min(
+                    255,
+                    int(wins.get(team, 0)),
+                )
+
+            for game_idx, (target_game, _) in enumerate(
+                scenario["target_games"]
+            ):
+                away = target_game.get("away_team")
+                home = target_game.get("home_team")
+                if results.get((away, home)) == home:
+                    _set_bit(
+                        scenario["home_win_masks"][game_idx],
+                        trial_idx,
+                    )
+
         champs, power_champs, g6_champs = {}, set(), set()
         for conf, names in conf_teams.items():
             eligible = [t for t in names if CONF.eligible_for_title(conf, t, title_rules)]
@@ -426,6 +505,15 @@ def run_model(
             raw_game_control[champ].append(champ_gc); raw_game_control[runner].append(1.0 - champ_gc)
             if conf in POWER_CONFS: power_champs.add(champ)
             elif conf in G6_CONFS: g6_champs.add(champ)
+
+        if scenario is not None:
+            for champ in champs.values():
+                team_idx = scenario["team_index"].get(champ)
+                if team_idx is not None:
+                    _set_bit(
+                        scenario["conference_champion_masks"][team_idx],
+                        trial_idx,
+                    )
 
         games_played = {t: wins[t] + losses[t] for t in teams}
         win_pct = {t: wins[t] / games_played[t] if games_played[t] else 0.0 for t in teams}
@@ -477,7 +565,31 @@ def run_model(
             counters["playoff"][t] += 1
         for t in auto:
             counters["auto"][t] += 1
-        simulate_bracket(field, teams, rng, sigma, counters)
+
+        if scenario is not None:
+            _set_bit(scenario["valid_trial_mask"], trial_idx)
+            scenario["valid_trials"] += 1
+
+            for team in field:
+                team_idx = scenario["team_index"].get(team)
+                if team_idx is not None:
+                    _set_bit(
+                        scenario["cfp_masks"][team_idx],
+                        trial_idx,
+                    )
+
+        champion = simulate_bracket(
+            field,
+            teams,
+            rng,
+            sigma,
+            counters,
+        )
+
+        if scenario is not None:
+            champion_idx = scenario["team_index"].get(champion)
+            if champion_idx is not None:
+                scenario["national_champion"][trial_idx] = champion_idx
 
     rows = []
     for team, t in teams.items():
@@ -560,6 +672,66 @@ def run_model(
     }
     db.setdefault("meta", {})["playoff_model_built_at"] = db["playoff_model"]["built_at"]
     db["meta"]["playoff_model_trials"] = sims
+
+    if scenario is not None:
+        games_payload = []
+        for game_idx, (game, p_home) in enumerate(scenario["target_games"]):
+            games_payload.append({
+                "scenario_key": CONF.scenario_game_key(game),
+                "game_id": str(game.get("game_id") or game.get("id") or ""),
+                "week": int(game.get("week") or 0),
+                "date": str(game.get("date") or game.get("game_date") or "")[:10],
+                "away_team": game.get("away_team"),
+                "home_team": game.get("home_team"),
+                "away_is_fbs": game.get("away_team") in teams,
+                "home_is_fbs": game.get("home_team") in teams,
+                "is_conference_game": bool(game.get("is_conference_game")),
+                "home_win_probability": round(float(p_home), 8),
+                "home_win_mask_index": game_idx,
+            })
+
+        db["scenario_universe"] = {
+            "schema_version": "futures-scenario-universe-2026-v1",
+            "built_at": datetime.now(timezone.utc).isoformat(),
+            "season": 2026,
+            "week": scenario["week"],
+            "trials": sims,
+            "valid_trials": scenario["valid_trials"],
+            "seed": seed,
+            "sigma": sigma,
+            "win_probability_model_version": WIN_PROB_MODEL_VERSION,
+            "win_probability_logistic_scale": WIN_PROB_LOGISTIC_SCALE,
+            "encoding": {
+                "bit_order": "little_endian_within_byte",
+                "mask_bytes": scenario["mask_bytes"],
+                "regular_wins": "uint8_trial_major",
+                "national_champion": "uint8_team_index_255_missing",
+                "home_win_masks": "team_game_major_bitset",
+                "conference_champion_masks": "team_major_bitset",
+                "cfp_masks": "team_major_bitset",
+            },
+            "teams": scenario["team_order"],
+            "games": games_payload,
+            "home_win_masks_b64": _b64(
+                b"".join(scenario["home_win_masks"])
+            ),
+            "regular_wins_u8_b64": _b64(
+                scenario["regular_wins"]
+            ),
+            "conference_champion_masks_b64": _b64(
+                b"".join(scenario["conference_champion_masks"])
+            ),
+            "cfp_masks_b64": _b64(
+                b"".join(scenario["cfp_masks"])
+            ),
+            "national_champion_u8_b64": _b64(
+                scenario["national_champion"]
+            ),
+            "valid_trial_mask_b64": _b64(
+                scenario["valid_trial_mask"]
+            ),
+        }
+
     return db
 
 
@@ -575,6 +747,17 @@ def main():
         help="Margin-magnitude sigma for validated CFP resume metrics only",
     )
     ap.add_argument("--output", default="data/site/playoff_model_2026.json")
+    ap.add_argument(
+        "--scenario-output",
+        default=None,
+        help="Optional compact trial universe for instant Futures scenarios.",
+    )
+    ap.add_argument(
+        "--scenario-week",
+        type=int,
+        default=None,
+        help="Week to capture. Defaults to the earliest incomplete regular-season week.",
+    )
     args = ap.parse_args()
 
     db_path = ROOT / args.db
@@ -588,7 +771,14 @@ def main():
     db.setdefault("meta", {})["results_source"] = "data/canonical/game_results_2026.json"
     db["meta"]["completed_finals_frozen"] = finals_applied
     db["meta"]["current_simulation_inputs"] = current_inputs
-    db = run_model(db, args.sims, args.seed, args.sigma)
+    db = run_model(
+        db,
+        args.sims,
+        args.seed,
+        args.sigma,
+        capture_scenarios=bool(args.scenario_output),
+        scenario_week=args.scenario_week,
+    )
 
     out = ROOT / args.output
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -596,6 +786,28 @@ def main():
         json.dumps(db["playoff_model"], indent=2) + "\n",
         encoding="utf-8",
     )
+
+    if args.scenario_output:
+        scenario_out = Path(args.scenario_output)
+        if not scenario_out.is_absolute():
+            scenario_out = ROOT / scenario_out
+        scenario_out.parent.mkdir(parents=True, exist_ok=True)
+        scenario_out.write_text(
+            json.dumps(
+                db["scenario_universe"],
+                separators=(",", ":"),
+            ) + "\n",
+            encoding="utf-8",
+        )
+        print(
+            f"Scenario universe: week {db['scenario_universe']['week']} · "
+            f"{db['scenario_universe']['trials']} trials · "
+            f"{len(db['scenario_universe']['games'])} games"
+        )
+        print(
+            f"Scenario artifact: {scenario_out} "
+            f"({scenario_out.stat().st_size / 1024 / 1024:.2f} MiB)"
+        )
 
     print(f"Playoff model: {args.sims} trials")
     print(f"Source DB: {db_path}")
