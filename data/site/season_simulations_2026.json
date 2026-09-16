@@ -1,6 +1,6 @@
 {
   "schema_version": "season-simulations-2026-v1",
-  "built_at": "2026-09-16T02:06:14.193161+00:00",
+  "built_at": "2026-09-16T12:02:41.702240+00:00",
   "season": 2026,
   "trials": 20000,
   "seed": 20260511,
@@ -10,7 +10,7 @@
   "results_source": "data/canonical/game_results_2026.json",
   "ratings_source": "data/ratings/ratings_master_latest.csv",
   "projection_source": "data/projections/game_projection_blend_2026.csv",
-  "simulation_input_rating_date": "2026-09-15",
+  "simulation_input_rating_date": "2026-09-16",
   "current_ratings_applied": 138,
   "remaining_projections_applied": 707,
   "completed_finals_frozen": 185,
@@ -57,7 +57,7 @@
       "Sagarin Predictor Prediction"
     ],
     "total_fallback": "equal weight across available eligible production sources",
-    "updated_at": "2026-09-16T02:05:27.007493+00:00"
+    "updated_at": "2026-09-16T12:01:48.508394+00:00"
   },
   "simulation_model": "Completed games are frozen to canonical final scores. Remaining games use Monte Carlo from canonical Game Projection Consensus margins/probabilities, and hypothetical conference title games; all model margins convert to win probability with logistic scale 6.5.",
   "teams": [
@@ -179,9 +179,9 @@
       "avg_total_wins": 10.6562,
       "avg_conference_wins": 7.6677,
       "bowl_eligibility_pct": 1.0,
-      "make_title_game_pct": 0.6337,
-      "conference_title_pct": 0.3146,
-      "lose_title_game_pct": 0.3191,
+      "make_title_game_pct": 0.6338,
+      "conference_title_pct": 0.3147,
+      "lose_title_game_pct": 0.319,
       "win_distribution": [
         {
           "wins": 6,
@@ -259,7 +259,7 @@
       "avg_total_wins": 10.2746,
       "avg_conference_wins": 7.2839,
       "bowl_eligibility_pct": 1.0,
-      "make_title_game_pct": 0.5548,
+      "make_title_game_pct": 0.5547,
       "conference_title_pct": 0.3214,
       "lose_title_game_pct": 0.2334,
       "win_distribution": [
@@ -296,16 +296,16 @@
     {
       "team": "Texas Tech",
       "conference": "B12",
-      "avg_total_wins": 10.3889,
-      "avg_conference_wins": 7.3927,
+      "avg_total_wins": 10.3874,
+      "avg_conference_wins": 7.3911,
       "bowl_eligibility_pct": 1.0,
-      "make_title_game_pct": 0.6604,
-      "conference_title_pct": 0.3704,
-      "lose_title_game_pct": 0.2901,
+      "make_title_game_pct": 0.6598,
+      "conference_title_pct": 0.3699,
+      "lose_title_game_pct": 0.29,
       "win_distribution": [
         {
           "wins": 6,
-          "probability": 0.001
+          "probability": 0.0011
         },
         {
           "wins": 7,
@@ -317,27 +317,27 @@
         },
         {
           "wins": 9,
-          "probability": 0.1522
+          "probability": 0.1523
         },
         {
           "wins": 10,
-          "probability": 0.2909
+          "probability": 0.2912
         },
         {
           "wins": 11,
-          "probability": 0.3345
+          "probability": 0.3344
         },
         {
           "wins": 12,
-          "probability": 0.1655
+          "probability": 0.1651
         }
       ]
     },
     {
       "team": "Miami-FL",
       "conference": "ACC",
-      "avg_total_wins": 10.9797,
-      "avg_conference_wins": 8.6613,
+      "avg_total_wins": 10.9795,
+      "avg_conference_wins": 8.6611,
       "bowl_eligibility_pct": 1.0,
       "make_title_game_pct": 0.9613,
       "conference_title_pct": 0.8404,
@@ -420,10 +420,10 @@
     {
       "team": "LSU",
       "conference": "SEC",
-      "avg_total_wins": 9.6477,
-      "avg_conference_wins": 6.6666,
+      "avg_total_wins": 9.6471,
+      "avg_conference_wins": 6.6661,
       "bowl_eligibility_pct": 0.9992,
-      "make_title_game_pct": 0.3136,
+      "make_title_game_pct": 0.3135,
       "conference_title_pct": 0.1568,
       "lose_title_game_pct": 0.1568,
       "win_distribution": [
@@ -441,11 +441,11 @@
         },
         {
           "wins": 7,
-          "probability": 0.0347
+          "probability": 0.0348
         },
         {
           "wins": 8,
-          "probability": 0.1301
+          "probability": 0.1302
         },
         {
           "wins": 9,
@@ -453,7 +453,7 @@
         },
         {
           "wins": 10,
-          "probability": 0.3145
+          "probability": 0.3144
         },
         {
           "wins": 11,
@@ -461,7 +461,7 @@
         },
         {
           "wins": 12,
-          "probability": 0.0526
+          "probability": 0.0524
         }
       ]
     },
@@ -668,7 +668,7 @@
     {
       "team": "Tennessee",
       "conference": "SEC",
-      "avg_total_wins": 8.2416,
+      "avg_total_wins": 8.2415,
       "avg_conference_wins": 5.2477,
       "bowl_eligibility_pct": 0.9887,
       "make_title_game_pct": 0.0486,
@@ -685,7 +685,7 @@
         },
         {
           "wins": 6,
-          "probability": 0.0635
+          "probability": 0.0636
         },
         {
           "wins": 7,
@@ -716,8 +716,8 @@
     {
       "team": "Ole Miss",
       "conference": "SEC",
-      "avg_total_wins": 6.9319,
-      "avg_conference_wins": 3.9516,
+      "avg_total_wins": 6.9325,
+      "avg_conference_wins": 3.9521,
       "bowl_eligibility_pct": 0.8675,
       "make_title_game_pct": 0.0062,
       "conference_title_pct": 0.001,
@@ -741,19 +741,19 @@
         },
         {
           "wins": 6,
-          "probability": 0.2382
+          "probability": 0.2379
         },
         {
           "wins": 7,
-          "probability": 0.3016
+          "probability": 0.3018
         },
         {
           "wins": 8,
-          "probability": 0.2144
+          "probability": 0.2145
         },
         {
           "wins": 9,
-          "probability": 0.0912
+          "probability": 0.0913
         },
         {
           "wins": 10,
@@ -821,7 +821,7 @@
       "bowl_eligibility_pct": 0.9986,
       "make_title_game_pct": 0.4732,
       "conference_title_pct": 0.2407,
-      "lose_title_game_pct": 0.2325,
+      "lose_title_game_pct": 0.2326,
       "win_distribution": [
         {
           "wins": 4,
@@ -864,8 +864,8 @@
     {
       "team": "Florida",
       "conference": "SEC",
-      "avg_total_wins": 8.0307,
-      "avg_conference_wins": 5.2252,
+      "avg_total_wins": 8.0298,
+      "avg_conference_wins": 5.2242,
       "bowl_eligibility_pct": 0.9715,
       "make_title_game_pct": 0.0357,
       "conference_title_pct": 0.0117,
@@ -885,23 +885,23 @@
         },
         {
           "wins": 6,
-          "probability": 0.0953
+          "probability": 0.0955
         },
         {
           "wins": 7,
-          "probability": 0.2132
+          "probability": 0.2134
         },
         {
           "wins": 8,
-          "probability": 0.2931
+          "probability": 0.293
         },
         {
           "wins": 9,
-          "probability": 0.2382
+          "probability": 0.2381
         },
         {
           "wins": 10,
-          "probability": 0.1095
+          "probability": 0.1094
         },
         {
           "wins": 11,
@@ -1183,9 +1183,9 @@
       "avg_total_wins": 9.8958,
       "avg_conference_wins": 6.9165,
       "bowl_eligibility_pct": 0.9995,
-      "make_title_game_pct": 0.4451,
-      "conference_title_pct": 0.2386,
-      "lose_title_game_pct": 0.2065,
+      "make_title_game_pct": 0.4452,
+      "conference_title_pct": 0.2389,
+      "lose_title_game_pct": 0.2064,
       "win_distribution": [
         {
           "wins": 3,
@@ -1228,12 +1228,12 @@
     {
       "team": "Auburn",
       "conference": "SEC",
-      "avg_total_wins": 6.4264,
-      "avg_conference_wins": 3.4471,
-      "bowl_eligibility_pct": 0.7788,
-      "make_title_game_pct": 0.0013,
+      "avg_total_wins": 6.4273,
+      "avg_conference_wins": 3.448,
+      "bowl_eligibility_pct": 0.7789,
+      "make_title_game_pct": 0.0014,
       "conference_title_pct": 0.0,
-      "lose_title_game_pct": 0.0013,
+      "lose_title_game_pct": 0.0014,
       "win_distribution": [
         {
           "wins": 2,
@@ -1249,19 +1249,19 @@
         },
         {
           "wins": 5,
-          "probability": 0.1801
+          "probability": 0.18
         },
         {
           "wins": 6,
-          "probability": 0.318
+          "probability": 0.3177
         },
         {
           "wins": 7,
-          "probability": 0.2803
+          "probability": 0.2804
         },
         {
           "wins": 8,
-          "probability": 0.1366
+          "probability": 0.1368
         },
         {
           "wins": 9,
@@ -1283,7 +1283,7 @@
       "avg_total_wins": 8.4213,
       "avg_conference_wins": 6.7149,
       "bowl_eligibility_pct": 0.9814,
-      "make_title_game_pct": 0.2082,
+      "make_title_game_pct": 0.2081,
       "conference_title_pct": 0.0262,
       "lose_title_game_pct": 0.1819,
       "win_distribution": [
@@ -1376,12 +1376,12 @@
     {
       "team": "Kansas State",
       "conference": "B12",
-      "avg_total_wins": 9.6373,
+      "avg_total_wins": 9.6372,
       "avg_conference_wins": 6.6836,
       "bowl_eligibility_pct": 0.9983,
-      "make_title_game_pct": 0.2389,
+      "make_title_game_pct": 0.2391,
       "conference_title_pct": 0.0948,
-      "lose_title_game_pct": 0.1441,
+      "lose_title_game_pct": 0.1443,
       "win_distribution": [
         {
           "wins": 4,
@@ -1397,7 +1397,7 @@
         },
         {
           "wins": 7,
-          "probability": 0.0441
+          "probability": 0.0442
         },
         {
           "wins": 8,
@@ -1528,12 +1528,12 @@
     {
       "team": "Virginia Tech",
       "conference": "ACC",
-      "avg_total_wins": 8.3626,
+      "avg_total_wins": 8.3637,
       "avg_conference_wins": 5.7905,
       "bowl_eligibility_pct": 0.9872,
-      "make_title_game_pct": 0.0993,
+      "make_title_game_pct": 0.0992,
       "conference_title_pct": 0.0158,
-      "lose_title_game_pct": 0.0834,
+      "lose_title_game_pct": 0.0833,
       "win_distribution": [
         {
           "wins": 3,
@@ -1553,19 +1553,19 @@
         },
         {
           "wins": 7,
-          "probability": 0.1724
+          "probability": 0.1721
         },
         {
           "wins": 8,
-          "probability": 0.2878
+          "probability": 0.2877
         },
         {
           "wins": 9,
-          "probability": 0.2846
+          "probability": 0.2848
         },
         {
           "wins": 10,
-          "probability": 0.1454
+          "probability": 0.1456
         },
         {
           "wins": 11,
@@ -1580,9 +1580,9 @@
     {
       "team": "Illinois",
       "conference": "B1G",
-      "avg_total_wins": 5.0815,
+      "avg_total_wins": 5.0819,
       "avg_conference_wins": 3.1054,
-      "bowl_eligibility_pct": 0.3629,
+      "bowl_eligibility_pct": 0.363,
       "make_title_game_pct": 0.0001,
       "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0001,
@@ -1597,11 +1597,11 @@
         },
         {
           "wins": 3,
-          "probability": 0.0906
+          "probability": 0.0904
         },
         {
           "wins": 4,
-          "probability": 0.2327
+          "probability": 0.2328
         },
         {
           "wins": 5,
@@ -1609,7 +1609,7 @@
         },
         {
           "wins": 6,
-          "probability": 0.2291
+          "probability": 0.2292
         },
         {
           "wins": 7,
@@ -1632,12 +1632,12 @@
     {
       "team": "TCU",
       "conference": "B12",
-      "avg_total_wins": 6.149,
+      "avg_total_wins": 6.1492,
       "avg_conference_wins": 4.1969,
       "bowl_eligibility_pct": 0.6765,
       "make_title_game_pct": 0.0277,
-      "conference_title_pct": 0.0074,
-      "lose_title_game_pct": 0.0203,
+      "conference_title_pct": 0.0075,
+      "lose_title_game_pct": 0.0202,
       "win_distribution": [
         {
           "wins": 1,
@@ -1653,7 +1653,7 @@
         },
         {
           "wins": 4,
-          "probability": 0.0954
+          "probability": 0.0953
         },
         {
           "wins": 5,
@@ -1740,11 +1740,11 @@
     {
       "team": "Houston",
       "conference": "B12",
-      "avg_total_wins": 8.27,
-      "avg_conference_wins": 5.3402,
+      "avg_total_wins": 8.2715,
+      "avg_conference_wins": 5.3417,
       "bowl_eligibility_pct": 0.9787,
-      "make_title_game_pct": 0.0771,
-      "conference_title_pct": 0.029,
+      "make_title_game_pct": 0.0774,
+      "conference_title_pct": 0.0292,
       "lose_title_game_pct": 0.0481,
       "win_distribution": [
         {
@@ -1757,19 +1757,19 @@
         },
         {
           "wins": 5,
-          "probability": 0.0176
+          "probability": 0.0175
         },
         {
           "wins": 6,
-          "probability": 0.0701
+          "probability": 0.0699
         },
         {
           "wins": 7,
-          "probability": 0.1772
+          "probability": 0.1769
         },
         {
           "wins": 8,
-          "probability": 0.2913
+          "probability": 0.2914
         },
         {
           "wins": 9,
@@ -1777,7 +1777,7 @@
         },
         {
           "wins": 10,
-          "probability": 0.1333
+          "probability": 0.1336
         },
         {
           "wins": 11,
@@ -1844,9 +1844,9 @@
     {
       "team": "Oklahoma State",
       "conference": "B12",
-      "avg_total_wins": 5.6804,
+      "avg_total_wins": 5.6803,
       "avg_conference_wins": 3.6857,
-      "bowl_eligibility_pct": 0.5476,
+      "bowl_eligibility_pct": 0.5475,
       "make_title_game_pct": 0.0056,
       "conference_title_pct": 0.0014,
       "lose_title_game_pct": 0.0042,
@@ -1896,7 +1896,7 @@
     {
       "team": "Boise State",
       "conference": "PAC12",
-      "avg_total_wins": 9.6449,
+      "avg_total_wins": 9.6443,
       "avg_conference_wins": 6.9592,
       "bowl_eligibility_pct": 0.9993,
       "make_title_game_pct": 0.9464,
@@ -1917,23 +1917,23 @@
         },
         {
           "wins": 7,
-          "probability": 0.027
+          "probability": 0.0271
         },
         {
           "wins": 8,
-          "probability": 0.1051
+          "probability": 0.1052
         },
         {
           "wins": 9,
-          "probability": 0.2647
+          "probability": 0.2649
         },
         {
           "wins": 10,
-          "probability": 0.3777
+          "probability": 0.3774
         },
         {
           "wins": 11,
-          "probability": 0.2208
+          "probability": 0.2207
         }
       ]
     },
@@ -1945,7 +1945,7 @@
       "bowl_eligibility_pct": 0.9991,
       "make_title_game_pct": 0.2779,
       "conference_title_pct": 0.0471,
-      "lose_title_game_pct": 0.2307,
+      "lose_title_game_pct": 0.2308,
       "win_distribution": [
         {
           "wins": 4,
@@ -1988,8 +1988,8 @@
     {
       "team": "Pittsburgh",
       "conference": "ACC",
-      "avg_total_wins": 8.8003,
-      "avg_conference_wins": 5.8194,
+      "avg_total_wins": 8.7997,
+      "avg_conference_wins": 5.8188,
       "bowl_eligibility_pct": 0.9967,
       "make_title_game_pct": 0.0464,
       "conference_title_pct": 0.008,
@@ -2013,7 +2013,7 @@
         },
         {
           "wins": 8,
-          "probability": 0.2532
+          "probability": 0.2534
         },
         {
           "wins": 9,
@@ -2021,7 +2021,7 @@
         },
         {
           "wins": 10,
-          "probability": 0.2216
+          "probability": 0.2214
         },
         {
           "wins": 11,
@@ -2039,9 +2039,9 @@
       "avg_total_wins": 6.1505,
       "avg_conference_wins": 4.2035,
       "bowl_eligibility_pct": 0.6809,
-      "make_title_game_pct": 0.0168,
+      "make_title_game_pct": 0.0167,
       "conference_title_pct": 0.0046,
-      "lose_title_game_pct": 0.0122,
+      "lose_title_game_pct": 0.0121,
       "win_distribution": [
         {
           "wins": 1,
@@ -2092,9 +2092,9 @@
     {
       "team": "Georgia Tech",
       "conference": "ACC",
-      "avg_total_wins": 4.1292,
+      "avg_total_wins": 4.1301,
       "avg_conference_wins": 3.1441,
-      "bowl_eligibility_pct": 0.1235,
+      "bowl_eligibility_pct": 0.1236,
       "make_title_game_pct": 0.0002,
       "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0002,
@@ -2109,19 +2109,19 @@
         },
         {
           "wins": 2,
-          "probability": 0.0744
+          "probability": 0.0741
         },
         {
           "wins": 3,
-          "probability": 0.22
+          "probability": 0.2201
         },
         {
           "wins": 4,
-          "probability": 0.3214
+          "probability": 0.3215
         },
         {
           "wins": 5,
-          "probability": 0.251
+          "probability": 0.2511
         },
         {
           "wins": 6,
@@ -2140,9 +2140,9 @@
     {
       "team": "Duke",
       "conference": "ACC",
-      "avg_total_wins": 7.5768,
-      "avg_conference_wins": 4.5976,
-      "bowl_eligibility_pct": 0.9515,
+      "avg_total_wins": 7.5775,
+      "avg_conference_wins": 4.5983,
+      "bowl_eligibility_pct": 0.9516,
       "make_title_game_pct": 0.005,
       "conference_title_pct": 0.0003,
       "lose_title_game_pct": 0.0047,
@@ -2165,15 +2165,15 @@
         },
         {
           "wins": 7,
-          "probability": 0.2769
+          "probability": 0.2768
         },
         {
           "wins": 8,
-          "probability": 0.2954
+          "probability": 0.2955
         },
         {
           "wins": 9,
-          "probability": 0.1727
+          "probability": 0.1728
         },
         {
           "wins": 10,
@@ -2296,8 +2296,8 @@
     {
       "team": "Arkansas",
       "conference": "SEC",
-      "avg_total_wins": 2.3075,
-      "avg_conference_wins": 0.6043,
+      "avg_total_wins": 2.3074,
+      "avg_conference_wins": 0.6042,
       "bowl_eligibility_pct": 0.0009,
       "make_title_game_pct": 0.0,
       "conference_title_pct": 0.0,
@@ -2496,9 +2496,9 @@
     {
       "team": "Cincinnati",
       "conference": "B12",
-      "avg_total_wins": 6.5409,
+      "avg_total_wins": 6.5407,
       "avg_conference_wins": 3.6031,
-      "bowl_eligibility_pct": 0.7737,
+      "bowl_eligibility_pct": 0.7736,
       "make_title_game_pct": 0.0103,
       "conference_title_pct": 0.0027,
       "lose_title_game_pct": 0.0076,
@@ -2517,11 +2517,11 @@
         },
         {
           "wins": 5,
-          "probability": 0.1625
+          "probability": 0.1626
         },
         {
           "wins": 6,
-          "probability": 0.2662
+          "probability": 0.2661
         },
         {
           "wins": 7,
@@ -2537,7 +2537,7 @@
         },
         {
           "wins": 10,
-          "probability": 0.0129
+          "probability": 0.0128
         },
         {
           "wins": 11,
@@ -2648,9 +2648,9 @@
     {
       "team": "Maryland",
       "conference": "B1G",
-      "avg_total_wins": 6.8073,
+      "avg_total_wins": 6.8062,
       "avg_conference_wins": 4.3795,
-      "bowl_eligibility_pct": 0.8484,
+      "bowl_eligibility_pct": 0.8482,
       "make_title_game_pct": 0.003,
       "conference_title_pct": 0.0003,
       "lose_title_game_pct": 0.0027,
@@ -2665,11 +2665,11 @@
         },
         {
           "wins": 5,
-          "probability": 0.1188
+          "probability": 0.119
         },
         {
           "wins": 6,
-          "probability": 0.2556
+          "probability": 0.2558
         },
         {
           "wins": 7,
@@ -2677,7 +2677,7 @@
         },
         {
           "wins": 8,
-          "probability": 0.2035
+          "probability": 0.2032
         },
         {
           "wins": 9,
@@ -2685,7 +2685,7 @@
         },
         {
           "wins": 10,
-          "probability": 0.0132
+          "probability": 0.0131
         },
         {
           "wins": 11,
@@ -2848,8 +2848,8 @@
     {
       "team": "Wake Forest",
       "conference": "ACC",
-      "avg_total_wins": 6.0978,
-      "avg_conference_wins": 3.1183,
+      "avg_total_wins": 6.0979,
+      "avg_conference_wins": 3.1185,
       "bowl_eligibility_pct": 0.6805,
       "make_title_game_pct": 0.0004,
       "conference_title_pct": 0.0001,
@@ -2877,7 +2877,7 @@
         },
         {
           "wins": 7,
-          "probability": 0.2402
+          "probability": 0.2404
         },
         {
           "wins": 8,
@@ -3048,9 +3048,9 @@
     {
       "team": "Wisconsin",
       "conference": "B1G",
-      "avg_total_wins": 5.3661,
+      "avg_total_wins": 5.3662,
       "avg_conference_wins": 3.3958,
-      "bowl_eligibility_pct": 0.4497,
+      "bowl_eligibility_pct": 0.4499,
       "make_title_game_pct": 0.0003,
       "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0003,
@@ -3065,7 +3065,7 @@
         },
         {
           "wins": 3,
-          "probability": 0.0491
+          "probability": 0.049
         },
         {
           "wins": 4,
@@ -3073,7 +3073,7 @@
         },
         {
           "wins": 5,
-          "probability": 0.3131
+          "probability": 0.313
         },
         {
           "wins": 6,
@@ -3152,7 +3152,7 @@
     {
       "team": "Iowa State",
       "conference": "B12",
-      "avg_total_wins": 4.4935,
+      "avg_total_wins": 4.4932,
       "avg_conference_wins": 2.5223,
       "bowl_eligibility_pct": 0.2073,
       "make_title_game_pct": 0.0004,
@@ -3169,11 +3169,11 @@
         },
         {
           "wins": 3,
-          "probability": 0.1739
+          "probability": 0.1741
         },
         {
           "wins": 4,
-          "probability": 0.3011
+          "probability": 0.301
         },
         {
           "wins": 5,
@@ -3396,9 +3396,9 @@
     {
       "team": "Syracuse",
       "conference": "ACC",
-      "avg_total_wins": 4.1188,
-      "avg_conference_wins": 2.3149,
-      "bowl_eligibility_pct": 0.1358,
+      "avg_total_wins": 4.1193,
+      "avg_conference_wins": 2.3155,
+      "bowl_eligibility_pct": 0.1359,
       "make_title_game_pct": 0.0003,
       "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0003,
@@ -3413,11 +3413,11 @@
         },
         {
           "wins": 3,
-          "probability": 0.2296
+          "probability": 0.2294
         },
         {
           "wins": 4,
-          "probability": 0.3105
+          "probability": 0.3106
         },
         {
           "wins": 5,
@@ -3425,7 +3425,7 @@
         },
         {
           "wins": 6,
-          "probability": 0.1024
+          "probability": 0.1026
         },
         {
           "wins": 7,
@@ -3676,8 +3676,8 @@
     {
       "team": "Stanford",
       "conference": "ACC",
-      "avg_total_wins": 3.237,
-      "avg_conference_wins": 1.2544,
+      "avg_total_wins": 3.2363,
+      "avg_conference_wins": 1.2536,
       "bowl_eligibility_pct": 0.0192,
       "make_title_game_pct": 0.0,
       "conference_title_pct": 0.0,
@@ -3689,19 +3689,19 @@
         },
         {
           "wins": 2,
-          "probability": 0.2444
+          "probability": 0.2445
         },
         {
           "wins": 3,
-          "probability": 0.3865
+          "probability": 0.3867
         },
         {
           "wins": 4,
-          "probability": 0.2582
+          "probability": 0.258
         },
         {
           "wins": 5,
-          "probability": 0.0868
+          "probability": 0.0867
         },
         {
           "wins": 6,
@@ -3816,7 +3816,7 @@
     {
       "team": "Fresno State",
       "conference": "PAC12",
-      "avg_total_wins": 7.4433,
+      "avg_total_wins": 7.4439,
       "avg_conference_wins": 4.7203,
       "bowl_eligibility_pct": 0.9156,
       "make_title_game_pct": 0.352,
@@ -3833,7 +3833,7 @@
         },
         {
           "wins": 4,
-          "probability": 0.0172
+          "probability": 0.0171
         },
         {
           "wins": 5,
@@ -3841,19 +3841,19 @@
         },
         {
           "wins": 6,
-          "probability": 0.1644
+          "probability": 0.1643
         },
         {
           "wins": 7,
-          "probability": 0.2576
+          "probability": 0.2575
         },
         {
           "wins": 8,
-          "probability": 0.2622
+          "probability": 0.2624
         },
         {
           "wins": 9,
-          "probability": 0.1658
+          "probability": 0.1659
         },
         {
           "wins": 10,
@@ -3968,9 +3968,9 @@
     {
       "team": "Miami-OH",
       "conference": "MAC",
-      "avg_total_wins": 7.1764,
+      "avg_total_wins": 7.1767,
       "avg_conference_wins": 5.5496,
-      "bowl_eligibility_pct": 0.9037,
+      "bowl_eligibility_pct": 0.9038,
       "make_title_game_pct": 0.2114,
       "conference_title_pct": 0.0546,
       "lose_title_game_pct": 0.1568,
@@ -3989,19 +3989,19 @@
         },
         {
           "wins": 5,
-          "probability": 0.076
+          "probability": 0.0759
         },
         {
           "wins": 6,
-          "probability": 0.1862
+          "probability": 0.1863
         },
         {
           "wins": 7,
-          "probability": 0.3024
+          "probability": 0.3023
         },
         {
           "wins": 8,
-          "probability": 0.2726
+          "probability": 0.2727
         },
         {
           "wins": 9,
@@ -4268,7 +4268,7 @@
     {
       "team": "Tulane",
       "conference": "American",
-      "avg_total_wins": 6.1606,
+      "avg_total_wins": 6.1607,
       "avg_conference_wins": 4.2728,
       "bowl_eligibility_pct": 0.6848,
       "make_title_game_pct": 0.0988,
@@ -4301,11 +4301,11 @@
         },
         {
           "wins": 7,
-          "probability": 0.2445
+          "probability": 0.2444
         },
         {
           "wins": 8,
-          "probability": 0.1194
+          "probability": 0.1195
         },
         {
           "wins": 9,
@@ -4544,9 +4544,9 @@
     {
       "team": "Liberty",
       "conference": "CUSA",
-      "avg_total_wins": 7.6097,
+      "avg_total_wins": 7.6104,
       "avg_conference_wins": 5.3091,
-      "bowl_eligibility_pct": 0.9354,
+      "bowl_eligibility_pct": 0.9357,
       "make_title_game_pct": 0.3917,
       "conference_title_pct": 0.1921,
       "lose_title_game_pct": 0.1996,
@@ -4565,11 +4565,11 @@
         },
         {
           "wins": 5,
-          "probability": 0.0515
+          "probability": 0.0512
         },
         {
           "wins": 6,
-          "probability": 0.1409
+          "probability": 0.1411
         },
         {
           "wins": 7,
@@ -4577,11 +4577,11 @@
         },
         {
           "wins": 8,
-          "probability": 0.2818
+          "probability": 0.2816
         },
         {
           "wins": 9,
-          "probability": 0.1883
+          "probability": 0.1885
         },
         {
           "wins": 10,
@@ -4700,7 +4700,7 @@
     {
       "team": "Western Michigan",
       "conference": "MAC",
-      "avg_total_wins": 8.9821,
+      "avg_total_wins": 8.9816,
       "avg_conference_wins": 6.8925,
       "bowl_eligibility_pct": 0.999,
       "make_title_game_pct": 0.8188,
@@ -4713,23 +4713,23 @@
         },
         {
           "wins": 6,
-          "probability": 0.0114
+          "probability": 0.0115
         },
         {
           "wins": 7,
-          "probability": 0.0667
+          "probability": 0.0665
         },
         {
           "wins": 8,
-          "probability": 0.2243
+          "probability": 0.2244
         },
         {
           "wins": 9,
-          "probability": 0.3761
+          "probability": 0.3762
         },
         {
           "wins": 10,
-          "probability": 0.2636
+          "probability": 0.2634
         },
         {
           "wins": 11,
@@ -4792,9 +4792,9 @@
     {
       "team": "Jacksonville State",
       "conference": "CUSA",
-      "avg_total_wins": 6.8652,
+      "avg_total_wins": 6.8665,
       "avg_conference_wins": 5.2893,
-      "bowl_eligibility_pct": 0.8484,
+      "bowl_eligibility_pct": 0.8485,
       "make_title_game_pct": 0.4311,
       "conference_title_pct": 0.2119,
       "lose_title_game_pct": 0.2192,
@@ -4805,7 +4805,7 @@
         },
         {
           "wins": 3,
-          "probability": 0.0063
+          "probability": 0.0062
         },
         {
           "wins": 4,
@@ -4817,7 +4817,7 @@
         },
         {
           "wins": 6,
-          "probability": 0.2299
+          "probability": 0.2295
         },
         {
           "wins": 7,
@@ -4825,11 +4825,11 @@
         },
         {
           "wins": 8,
-          "probability": 0.2189
+          "probability": 0.2192
         },
         {
           "wins": 9,
-          "probability": 0.0905
+          "probability": 0.0907
         },
         {
           "wins": 10,
@@ -4996,7 +4996,7 @@
     {
       "team": "Arkansas State",
       "conference": "Sun Belt",
-      "avg_total_wins": 6.1479,
+      "avg_total_wins": 6.1478,
       "avg_conference_wins": 4.4149,
       "bowl_eligibility_pct": 0.6852,
       "make_title_game_pct": 0.0655,
@@ -5017,11 +5017,11 @@
         },
         {
           "wins": 4,
-          "probability": 0.0892
+          "probability": 0.0893
         },
         {
           "wins": 5,
-          "probability": 0.2021
+          "probability": 0.202
         },
         {
           "wins": 6,
@@ -5029,11 +5029,11 @@
         },
         {
           "wins": 7,
-          "probability": 0.2423
+          "probability": 0.2424
         },
         {
           "wins": 8,
-          "probability": 0.1204
+          "probability": 0.1203
         },
         {
           "wins": 9,
@@ -5108,9 +5108,9 @@
     {
       "team": "Georgia Southern",
       "conference": "Sun Belt",
-      "avg_total_wins": 5.2967,
+      "avg_total_wins": 5.2954,
       "avg_conference_wins": 3.8024,
-      "bowl_eligibility_pct": 0.438,
+      "bowl_eligibility_pct": 0.4377,
       "make_title_game_pct": 0.0514,
       "conference_title_pct": 0.0137,
       "lose_title_game_pct": 0.0377,
@@ -5121,7 +5121,7 @@
         },
         {
           "wins": 2,
-          "probability": 0.0198
+          "probability": 0.02
         },
         {
           "wins": 3,
@@ -5129,11 +5129,11 @@
         },
         {
           "wins": 4,
-          "probability": 0.1914
+          "probability": 0.1917
         },
         {
           "wins": 5,
-          "probability": 0.2668
+          "probability": 0.2666
         },
         {
           "wins": 6,
@@ -5141,7 +5141,7 @@
         },
         {
           "wins": 7,
-          "probability": 0.1402
+          "probability": 0.1399
         },
         {
           "wins": 8,
@@ -5216,7 +5216,7 @@
     {
       "team": "Kennesaw State",
       "conference": "CUSA",
-      "avg_total_wins": 5.8053,
+      "avg_total_wins": 5.8054,
       "avg_conference_wins": 4.4844,
       "bowl_eligibility_pct": 0.5887,
       "make_title_game_pct": 0.2293,
@@ -5245,11 +5245,11 @@
         },
         {
           "wins": 6,
-          "probability": 0.2695
+          "probability": 0.2694
         },
         {
           "wins": 7,
-          "probability": 0.1983
+          "probability": 0.1984
         },
         {
           "wins": 8,
@@ -5576,9 +5576,9 @@
     {
       "team": "Nevada",
       "conference": "MW",
-      "avg_total_wins": 5.3453,
+      "avg_total_wins": 5.3442,
       "avg_conference_wins": 3.6117,
-      "bowl_eligibility_pct": 0.4572,
+      "bowl_eligibility_pct": 0.4571,
       "make_title_game_pct": 0.0291,
       "conference_title_pct": 0.0037,
       "lose_title_game_pct": 0.0254,
@@ -5589,27 +5589,27 @@
         },
         {
           "wins": 2,
-          "probability": 0.013
+          "probability": 0.0131
         },
         {
           "wins": 3,
-          "probability": 0.0648
+          "probability": 0.0649
         },
         {
           "wins": 4,
-          "probability": 0.1816
+          "probability": 0.1817
         },
         {
           "wins": 5,
-          "probability": 0.2822
+          "probability": 0.2819
         },
         {
           "wins": 6,
-          "probability": 0.269
+          "probability": 0.2691
         },
         {
           "wins": 7,
-          "probability": 0.1411
+          "probability": 0.1408
         },
         {
           "wins": 8,
@@ -5617,7 +5617,7 @@
         },
         {
           "wins": 9,
-          "probability": 0.0065
+          "probability": 0.0064
         },
         {
           "wins": 10,
@@ -5736,7 +5736,7 @@
     {
       "team": "Bowling Green",
       "conference": "MAC",
-      "avg_total_wins": 2.8471,
+      "avg_total_wins": 2.8473,
       "avg_conference_wins": 2.7538,
       "bowl_eligibility_pct": 0.0113,
       "make_title_game_pct": 0.0012,
@@ -5757,15 +5757,15 @@
         },
         {
           "wins": 3,
-          "probability": 0.3242
+          "probability": 0.3243
         },
         {
           "wins": 4,
-          "probability": 0.2072
+          "probability": 0.2071
         },
         {
           "wins": 5,
-          "probability": 0.0672
+          "probability": 0.0673
         },
         {
           "wins": 6,
@@ -5780,9 +5780,9 @@
     {
       "team": "South Alabama",
       "conference": "Sun Belt",
-      "avg_total_wins": 5.7499,
+      "avg_total_wins": 5.7514,
       "avg_conference_wins": 4.0185,
-      "bowl_eligibility_pct": 0.5668,
+      "bowl_eligibility_pct": 0.5669,
       "make_title_game_pct": 0.0515,
       "conference_title_pct": 0.0092,
       "lose_title_game_pct": 0.0423,
@@ -5797,7 +5797,7 @@
         },
         {
           "wins": 3,
-          "probability": 0.0445
+          "probability": 0.0442
         },
         {
           "wins": 4,
@@ -5805,23 +5805,23 @@
         },
         {
           "wins": 5,
-          "probability": 0.249
+          "probability": 0.2492
         },
         {
           "wins": 6,
-          "probability": 0.2747
+          "probability": 0.2742
         },
         {
           "wins": 7,
-          "probability": 0.186
+          "probability": 0.1863
         },
         {
           "wins": 8,
-          "probability": 0.0814
+          "probability": 0.0815
         },
         {
           "wins": 9,
-          "probability": 0.0216
+          "probability": 0.0217
         },
         {
           "wins": 10,
@@ -5836,7 +5836,7 @@
     {
       "team": "Ohio",
       "conference": "MAC",
-      "avg_total_wins": 7.4478,
+      "avg_total_wins": 7.4463,
       "avg_conference_wins": 5.1313,
       "bowl_eligibility_pct": 0.9276,
       "make_title_game_pct": 0.1477,
@@ -5861,19 +5861,19 @@
         },
         {
           "wins": 6,
-          "probability": 0.1585
+          "probability": 0.1587
         },
         {
           "wins": 7,
-          "probability": 0.2752
+          "probability": 0.2753
         },
         {
           "wins": 8,
-          "probability": 0.283
+          "probability": 0.2833
         },
         {
           "wins": 9,
-          "probability": 0.1573
+          "probability": 0.1568
         },
         {
           "wins": 10,
@@ -5881,7 +5881,7 @@
         },
         {
           "wins": 11,
-          "probability": 0.0068
+          "probability": 0.0066
         }
       ]
     },
@@ -5992,32 +5992,32 @@
     {
       "team": "Rice",
       "conference": "American",
-      "avg_total_wins": 2.6302,
+      "avg_total_wins": 2.6307,
       "avg_conference_wins": 1.3921,
-      "bowl_eligibility_pct": 0.0122,
+      "bowl_eligibility_pct": 0.0123,
       "make_title_game_pct": 0.0002,
       "conference_title_pct": 0.0,
       "lose_title_game_pct": 0.0002,
       "win_distribution": [
         {
           "wins": 1,
-          "probability": 0.1638
+          "probability": 0.1636
         },
         {
           "wins": 2,
-          "probability": 0.3331
+          "probability": 0.3332
         },
         {
           "wins": 3,
-          "probability": 0.2893
+          "probability": 0.2892
         },
         {
           "wins": 4,
-          "probability": 0.1512
+          "probability": 0.1515
         },
         {
           "wins": 5,
-          "probability": 0.0504
+          "probability": 0.0503
         },
         {
           "wins": 6,
@@ -6036,9 +6036,9 @@
     {
       "team": "Eastern Michigan",
       "conference": "MAC",
-      "avg_total_wins": 4.5895,
+      "avg_total_wins": 4.5893,
       "avg_conference_wins": 3.5791,
-      "bowl_eligibility_pct": 0.2055,
+      "bowl_eligibility_pct": 0.2054,
       "make_title_game_pct": 0.0134,
       "conference_title_pct": 0.0019,
       "lose_title_game_pct": 0.0115,
@@ -6084,7 +6084,7 @@
     {
       "team": "San Jose State",
       "conference": "MW",
-      "avg_total_wins": 5.7623,
+      "avg_total_wins": 5.7618,
       "avg_conference_wins": 3.4093,
       "bowl_eligibility_pct": 0.5667,
       "make_title_game_pct": 0.0141,
@@ -6105,19 +6105,19 @@
         },
         {
           "wins": 5,
-          "probability": 0.266
+          "probability": 0.2659
         },
         {
           "wins": 6,
-          "probability": 0.2868
+          "probability": 0.287
         },
         {
           "wins": 7,
-          "probability": 0.1847
+          "probability": 0.1846
         },
         {
           "wins": 8,
-          "probability": 0.0747
+          "probability": 0.0746
         },
         {
           "wins": 9,
@@ -6660,7 +6660,7 @@
     {
       "team": "Ball State",
       "conference": "MAC",
-      "avg_total_wins": 4.3454,
+      "avg_total_wins": 4.3446,
       "avg_conference_wins": 3.2144,
       "bowl_eligibility_pct": 0.1878,
       "make_title_game_pct": 0.0069,
@@ -6673,27 +6673,27 @@
         },
         {
           "wins": 2,
-          "probability": 0.0661
+          "probability": 0.0662
         },
         {
           "wins": 3,
-          "probability": 0.1913
+          "probability": 0.1914
         },
         {
           "wins": 4,
-          "probability": 0.2892
+          "probability": 0.2894
         },
         {
           "wins": 5,
-          "probability": 0.2571
+          "probability": 0.2569
         },
         {
           "wins": 6,
-          "probability": 0.1358
+          "probability": 0.1359
         },
         {
           "wins": 7,
-          "probability": 0.044
+          "probability": 0.0438
         },
         {
           "wins": 8,
@@ -6712,36 +6712,36 @@
     {
       "team": "Middle Tennessee",
       "conference": "CUSA",
-      "avg_total_wins": 3.7462,
+      "avg_total_wins": 3.7473,
       "avg_conference_wins": 2.4187,
-      "bowl_eligibility_pct": 0.094,
+      "bowl_eligibility_pct": 0.0941,
       "make_title_game_pct": 0.0109,
       "conference_title_pct": 0.0026,
       "lose_title_game_pct": 0.0084,
       "win_distribution": [
         {
           "wins": 1,
-          "probability": 0.0318
+          "probability": 0.0317
         },
         {
           "wins": 2,
-          "probability": 0.1422
+          "probability": 0.1421
         },
         {
           "wins": 3,
-          "probability": 0.2665
+          "probability": 0.2663
         },
         {
           "wins": 4,
-          "probability": 0.2863
+          "probability": 0.2865
         },
         {
           "wins": 5,
-          "probability": 0.1792
+          "probability": 0.1793
         },
         {
           "wins": 6,
-          "probability": 0.0721
+          "probability": 0.0722
         },
         {
           "wins": 7,
