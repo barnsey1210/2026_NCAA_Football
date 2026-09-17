@@ -1549,7 +1549,7 @@ tr:hover td.context-group{background:#202d39}
   font-weight:700;
   text-align:left;
 }
-.model-tooltip.open .model-tooltip-panel{display:block}
+.model-tooltip.open .model-tooltip-panel{display:none}
 .model-component{display:grid;grid-template-columns:minmax(78px,1fr) auto;gap:10px;padding:1px 0}
 .model-component.updated{color:var(--green)}
 .model-component.stale{color:var(--yellow)}
@@ -2041,6 +2041,65 @@ tr:hover td.context-group{background:#202d39}
 
   .model-health-label{
     min-width:145px;
+  }
+}
+
+@media (max-width:900px){
+  .ratings-health-strip{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    flex-wrap:wrap;
+    overflow:hidden;
+  }
+
+  .ratings-health-content{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .ratings-model-mode{
+    width:100%;
+    max-width:100%;
+    margin-left:0!important;
+    box-sizing:border-box;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:7px;
+  }
+
+  .ratings-model-notes{
+    order:1;
+    flex:1 1 100%;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    margin:4px 0 2px;
+  }
+
+  .ratings-model-note{
+    white-space:normal!important;
+    overflow-wrap:anywhere;
+    font-size:9px;
+    line-height:1.25;
+  }
+
+  .ratings-model-note-label{
+    font-size:9px;
+  }
+
+  .model-mode-control{
+    order:2;
+    flex:0 1 auto;
+    max-width:100%;
+  }
+
+  .ratings-model-mode .hfa-note{
+    order:3;
+    margin-left:auto;
   }
 }
 </style>
@@ -4010,9 +4069,29 @@ function updateMatrixRecencyMarkers(){
   });
 }
 
+function recentChangeTimestamp(event){
+  return (
+    event?.detected_at ||
+    event?.created_at ||
+    event?.observed_at ||
+    event?.timestamp ||
+    null
+  );
+}
+
+function recentChangeWithinMinutes(event,minutes=30){
+  const raw=recentChangeTimestamp(event);
+  const ts=Date.parse(raw || '');
+  if(!Number.isFinite(ts)) return false;
+
+  const ageMs=Date.now()-ts;
+  return ageMs>=0 && ageMs<=minutes*60*1000;
+}
+
 function mobileRecentChangeCount(game){
   return (ACTIVITY?.recent_change_events || []).filter(event=>
-    String(event.game_id || '')===String(game?.game_id || '')
+    String(event.game_id || '')===String(game?.game_id || '') &&
+    recentChangeWithinMinutes(event,30)
   ).length;
 }
 
@@ -4263,7 +4342,8 @@ function recentChangeEvent(game,market,eventTypes){
   return (ACTIVITY?.recent_change_events || []).find(event=>
     String(event.game_id || '')===String(game?.game_id || '') &&
     (!market || event.market===market) &&
-    eventTypes.includes(event.event_type)
+    eventTypes.includes(event.event_type) &&
+    recentChangeWithinMinutes(event,30)
   ) || null;
 }
 
