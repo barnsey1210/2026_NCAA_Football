@@ -67,9 +67,7 @@ def run(name: str, command: list[str], required: bool = True) -> bool:
         print(f"{name}: PASS")
         return True
     print(f"{name}: FAILED ({result.returncode})")
-    if required:
-        return False
-    return True
+    return False
 
 
 def backup_files(paths: list[Path], directory: Path) -> dict[Path, Path]:
