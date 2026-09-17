@@ -1301,8 +1301,7 @@ function scenarioTableDeltaMarkup(row){
 function scenarioExtraHeaders(){
   const active=scenarioActive();
   const showSwing=
-    state.scenario.loaded &&
-    (state.mode==='title'||state.mode==='playoff');
+    state.mode==='title'||state.mode==='playoff';
 
   const swingLabel=state.mode==='title'
     ? 'Conf Swing'
@@ -1310,12 +1309,12 @@ function scenarioExtraHeaders(){
 
   return `${
     active
-      ? `<th>${sortable('Scenario','scenario_value')}</th>
-         <th>${sortable('Δ','scenario_delta')}</th>`
+      ? `<th class="colScenario">${sortable('Scenario','scenario_value')}</th>
+         <th class="colDelta">${sortable('Δ','scenario_delta')}</th>`
       : ''
   }${
     showSwing
-      ? `<th>${sortable(swingLabel,'swing')}</th>`
+      ? `<th class="colSwing">${sortable(swingLabel,'swing')}</th>`
       : ''
   }`;
 }
@@ -1323,8 +1322,7 @@ function scenarioExtraHeaders(){
 function scenarioExtraCells(row){
   const active=scenarioActive();
   const showSwing=
-    state.scenario.loaded &&
-    (state.mode==='title'||state.mode==='playoff');
+    state.mode==='title'||state.mode==='playoff';
 
   return `${
     active
@@ -1340,18 +1338,18 @@ function scenarioExtraCells(row){
 
 function renderWins(data){
   head.innerHTML=`<tr>
-    <th>${sortable('Team','team')}</th>
-    <th>${sortable('Next Game','next')}</th>
-    <th>${sortable('Rank','rank')}</th>
-    <th>${sortable('Rating','rating')}</th>
-    <th>${sortable('Record','record')}</th>
-    <th>${sortable('Left','left')}</th>
-    <th>${sortable('Proj Record','projected')}</th>
-    <th>${sortable('Model Wins','model_wins')}</th>
+    <th class="colTeam">${sortable('Team','team')}</th>
+    <th class="colNext">${sortable('Next Game','next')}</th>
+    <th class="colRank">${sortable('Rank','rank')}</th>
+    <th class="colRating">${sortable('Rating','rating')}</th>
+    <th class="colRecord">${sortable('Record','record')}</th>
+    <th class="colTiny">${sortable('Left','left')}</th>
+    <th class="colProjected">${sortable('Proj Record','projected')}</th>
+    <th class="colModel">${sortable('Model Wins','model_wins')}</th>
     ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best','win_market')}</th>
-    <th>${sortable('Edge','win_edge')}</th>
-    <th>${sortable('Wager','wager')}</th>
+    <th class="colEdge">${sortable('Edge','win_edge')}</th>
+    <th class="colWager">${sortable('Wager','wager')}</th>
   </tr>`;
 
   rows.innerHTML=data.map(row=>`<tr data-fut-team="${esc(row.team)}" class="${row.team===state.selectedTeam?'selectedRow':''}">
@@ -1372,19 +1370,19 @@ function renderWins(data){
 
 function renderConference(data){
   head.innerHTML=`<tr>
-    <th>${sortable('Team','team')}</th>
-    <th>${sortable('Next Game','next')}</th>
-    <th>${sortable('Rank','rank')}</th>
-    <th>${sortable('Rating','rating')}</th>
-    <th>${sortable('Conf Rec','conf_record')}</th>
-    <th>${sortable('Left','conf_left')}</th>
-    <th>${sortable('Proj Conf','conf_projected')}</th>
-    <th>${sortable('Rem SOS','conf_sos')}</th>
-    <th>${sortable('Proj Win %','title_model')}</th>
+    <th class="colTeam">${sortable('Team','team')}</th>
+    <th class="colNext">${sortable('Next Game','next')}</th>
+    <th class="colRank">${sortable('Rank','rank')}</th>
+    <th class="colRating">${sortable('Rating','rating')}</th>
+    <th class="colRecord">${sortable('Conf Rec','conf_record')}</th>
+    <th class="colTiny">${sortable('Left','conf_left')}</th>
+    <th class="colProjected">${sortable('Proj Conf','conf_projected')}</th>
+    <th class="colSos">${sortable('Rem SOS','conf_sos')}</th>
+    <th class="colModel">${sortable('Proj Win %','title_model')}</th>
     ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best','title_price')}</th>
-    <th>${sortable('Edge','title_edge')}</th>
-    <th>${sortable('Wager','wager')}</th>
+    <th class="colEdge">${sortable('Edge','title_edge')}</th>
+    <th class="colWager">${sortable('Wager','wager')}</th>
   </tr>`;
 
   rows.innerHTML=data.map(row=>`<tr data-fut-team="${esc(row.team)}" class="${row.team===state.selectedTeam?'selectedRow':''}">
@@ -1406,18 +1404,18 @@ function renderConference(data){
 
 function renderPlayoffs(data){
   head.innerHTML=`<tr>
-    <th>${sortable('Team','team')}</th>
-    <th>${sortable('Next Game','next')}</th>
-    <th>${sortable('Rank','rank')}</th>
-    <th>${sortable('Rating','rating')}</th>
-    <th>${sortable('Projected Record','projected')}</th>
-    <th>${sortable('CFP Model','cfp_model')}</th>
+    <th class="colTeam">${sortable('Team','team')}</th>
+    <th class="colNext">${sortable('Next Game','next')}</th>
+    <th class="colRank">${sortable('Rank','rank')}</th>
+    <th class="colRating">${sortable('Rating','rating')}</th>
+    <th class="colProjected">${sortable('Projected Record','projected')}</th>
+    <th class="colModel">${sortable('CFP Model','cfp_model')}</th>
     ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best CFP','cfp_price')}</th>
-    <th>${sortable('CFP Edge','cfp_edge')}</th>
-    <th>${sortable('Title Model','national_model')}</th>
+    <th class="colEdge">${sortable('CFP Edge','cfp_edge')}</th>
+    <th class="colModel">${sortable('Title Model','national_model')}</th>
     <th class="marketCol">${sortable('Best Title','national_price')}</th>
-    <th>${sortable('Title Edge','national_edge')}</th>
+    <th class="colEdge">${sortable('Title Edge','national_edge')}</th>
   </tr>`;
 
   rows.innerHTML=data.map(row=>`<tr data-fut-team="${esc(row.team)}" class="${row.team===state.selectedTeam?'selectedRow':''}">
@@ -1846,6 +1844,9 @@ function installSortControl(){
 }
 
 function renderCommandCenter(){
+  if(!state.scenario.loaded&&!state.scenario.loading){
+    void ensureScenarioUniverse();
+  }
   if(!D)return;
 
   let data=sortedVisibleRows();
@@ -3590,6 +3591,95 @@ installSortControl();
     }
     .swingUnavailable{
       color:var(--muted);
+    }
+
+    @media(min-width:901px){
+      .futuresWorkspace table{
+        width:100%!important;
+        min-width:0!important;
+        table-layout:fixed!important;
+      }
+
+      .futuresWorkspace th,
+      .futuresWorkspace td{
+        padding-left:7px!important;
+        padding-right:7px!important;
+      }
+
+      .futuresWorkspace .colTeam{
+        width:205px!important;
+      }
+
+      .futuresWorkspace .colNext{
+        width:170px!important;
+      }
+
+      .futuresWorkspace .colRank{
+        width:58px!important;
+      }
+
+      .futuresWorkspace .colRating{
+        width:72px!important;
+      }
+
+      .futuresWorkspace .colRecord{
+        width:68px!important;
+      }
+
+      .futuresWorkspace .colTiny{
+        width:45px!important;
+      }
+
+      .futuresWorkspace .colProjected{
+        width:94px!important;
+      }
+
+      .futuresWorkspace .colSos{
+        width:70px!important;
+      }
+
+      .futuresWorkspace .colModel{
+        width:82px!important;
+      }
+
+      .futuresWorkspace .colScenario{
+        width:82px!important;
+      }
+
+      .futuresWorkspace .colDelta{
+        width:66px!important;
+      }
+
+      .futuresWorkspace .colSwing,
+      .futuresWorkspace .swingTableCell{
+        width:82px!important;
+        min-width:0!important;
+      }
+
+      .futuresWorkspace .marketCol{
+        width:98px!important;
+      }
+
+      .futuresWorkspace .colEdge{
+        width:76px!important;
+      }
+
+      .futuresWorkspace .colWager{
+        width:62px!important;
+      }
+
+      .futuresWorkspace th.colTeam,
+      .futuresWorkspace th.colNext,
+      .futuresWorkspace td:first-child,
+      .futuresWorkspace td:nth-child(2){
+        overflow:hidden;
+      }
+
+      .futuresWorkspace td:first-child>*,
+      .futuresWorkspace td:nth-child(2)>*{
+        max-width:100%;
+        min-width:0;
+      }
     }
 
     @media(max-width:900px){
