@@ -598,6 +598,9 @@ function renderRailScenario(row){
 
   <div class="scenarioImpactPanel">
     <h3>${esc(row.team)} · SCENARIO IMPACT</h3>
+    <div class="scenarioImpactHead">
+      <span></span><b>BASE</b><b>SCENARIO</b><b>Δ</b>
+    </div>
     <div class="scenarioImpactRow">
       <span>Projected wins</span>
       <b>${num(row.projected_wins)}</b>
@@ -621,9 +624,6 @@ function renderRailScenario(row){
       <b>${pct(row.national_title_model_prob)}</b>
       <strong>${pct(scenarioAdjustedValue(row,'nat'))}</strong>
       <em>${scenarioMetricDelta(row,'nat')===null?'—':`${scenarioMetricDelta(row,'nat')>=0?'+':''}${(scenarioMetricDelta(row,'nat')*100).toFixed(1)} pp`}</em>
-    </div>
-    <div class="scenarioImpactHead">
-      <span></span><b>BASE</b><b>SCENARIO</b><b>Δ</b>
     </div>
   </div>`;
 }
@@ -1107,6 +1107,20 @@ function sortable(label,key){
 }
 
 function sortValue(row,key){
+
+  if(key==='scenario_value'){
+    return scenarioTableValue(row);
+  }
+
+  if(key==='scenario_delta'){
+    return scenarioTableDelta(row);
+  }
+
+  if(key==='leverage'){
+    return leverageForRow(row)?.value??null;
+  }
+
+
   const projected=seasonProjectedRecord(row);
   const confProjected=row.projected_conference_record||{};
 
@@ -1185,6 +1199,138 @@ function sortedVisibleRows(){
   return data;
 }
 
+
+function scenarioMetricForMode(){
+  if(state.mode==='title')return'conf';
+  if(state.mode==='playoff')return'cfp';
+  return'wins';
+}
+
+function leverageForRow(row){
+  const item=state.scenario.leverageByTeam?.[row.team];
+  if(!item)return null;
+
+  if(state.mode==='title'){
+    return {
+      value:item.conference_leverage,
+      label:item.conference_label,
+      display:`${(item.conference_leverage*100).toFixed(1)} pp`,
+      upset:item.upset_risk
+    };
+  }
+
+  if(state.mode==='playoff'){
+    return {
+      value:item.cfp_leverage,
+      label:item.cfp_label,
+      display:`${(item.cfp_leverage*100).toFixed(1)} pp`,
+      upset:item.upset_risk
+    };
+  }
+
+  return {
+    value:item.projected_wins_leverage,
+    label:item.win_label,
+    display:`${item.projected_wins_leverage.toFixed(3)} W`,
+    upset:item.upset_risk
+  };
+}
+
+function leverageMarkup(row){
+  const item=leverageForRow(row);
+
+  if(!item)return'<span class="leverageUnavailable">—</span>';
+
+  const cls=String(item.label||'').toLowerCase();
+
+  return `<div class="leverageCell">
+    <b class="leverageBadge leverage-${cls}">
+      ${esc(item.label)}
+    </b>
+    <small>${esc(item.display)}</small>
+    ${item.upset
+      ? '<strong class="upsetRiskBadge">UPSET RISK</strong>'
+      : ''}
+  </div>`;
+}
+
+function scenarioTableValue(row){
+  return scenarioAdjustedValue(
+    row,
+    scenarioMetricForMode()
+  );
+}
+
+function scenarioTableDelta(row){
+  return scenarioMetricDelta(
+    row,
+    scenarioMetricForMode()
+  );
+}
+
+function scenarioTableValueMarkup(row){
+  const value=scenarioTableValue(row);
+  if(!Number.isFinite(value))return'—';
+
+  if(state.mode==='wins'){
+    return `<b>${num(value)}</b>`;
+  }
+
+  return `<b>${pct(value)}</b>`;
+}
+
+function scenarioTableDeltaMarkup(row){
+  const delta=scenarioTableDelta(row);
+  if(!Number.isFinite(delta))return'—';
+
+  const positive=delta>0;
+  const negative=delta<0;
+  const cls=positive?'scenarioDeltaUp':
+    negative?'scenarioDeltaDown':'scenarioDeltaFlat';
+
+  if(state.mode==='wins'){
+    return `<b class="${cls}">
+      ${delta>0?'+':''}${num(delta,2)}
+    </b>`;
+  }
+
+  return `<b class="${cls}">
+    ${delta>0?'+':''}${(delta*100).toFixed(1)} pp
+  </b>`;
+}
+
+function scenarioExtraHeaders(){
+  const active=scenarioActive();
+  const leverage=state.scenario.loaded;
+
+  return `${
+    active
+      ? `<th>${sortable('Scenario','scenario_value')}</th>
+         <th>${sortable('Δ','scenario_delta')}</th>`
+      : ''
+  }${
+    leverage
+      ? `<th>${sortable('Leverage','leverage')}</th>`
+      : ''
+  }`;
+}
+
+function scenarioExtraCells(row){
+  const active=scenarioActive();
+  const leverage=state.scenario.loaded;
+
+  return `${
+    active
+      ? `<td class="scenarioValueCell">${scenarioTableValueMarkup(row)}</td>
+         <td class="scenarioDeltaCell">${scenarioTableDeltaMarkup(row)}</td>`
+      : ''
+  }${
+    leverage
+      ? `<td class="leverageTableCell">${leverageMarkup(row)}</td>`
+      : ''
+  }`;
+}
+
 function renderWins(data){
   head.innerHTML=`<tr>
     <th>${sortable('Team','team')}</th>
@@ -1195,6 +1341,7 @@ function renderWins(data){
     <th>${sortable('Left','left')}</th>
     <th>${sortable('Proj Record','projected')}</th>
     <th>${sortable('Model Wins','model_wins')}</th>
+    ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best','win_market')}</th>
     <th>${sortable('Edge','win_edge')}</th>
     <th>${sortable('Wager','wager')}</th>
@@ -1209,6 +1356,7 @@ function renderWins(data){
     <td><b>${row.games_remaining??'—'}</b></td>
     <td>${projectedRecordMarkup(row)}</td>
     <td><b>${num(row.projected_wins)}</b></td>
+    ${scenarioExtraCells(row)}
     <td class="marketCol">${bestMarketMarkup(row,'wins')}</td>
     <td>${edgeMarkup(row.win_edge,'wins')}</td>
     <td>${wagerMarkup(row)}</td>
@@ -1226,6 +1374,7 @@ function renderConference(data){
     <th>${sortable('Proj Conf','conf_projected')}</th>
     <th>${sortable('Rem SOS','conf_sos')}</th>
     <th>${sortable('Proj Win %','title_model')}</th>
+    ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best','title_price')}</th>
     <th>${sortable('Edge','title_edge')}</th>
     <th>${sortable('Wager','wager')}</th>
@@ -1241,6 +1390,7 @@ function renderConference(data){
     <td>${projectedConferenceMarkup(row)}</td>
     <td>${sosMarkup(row)}</td>
     <td>${projectedWinMarkup(row)}</td>
+    ${scenarioExtraCells(row)}
     <td class="marketCol">${bestMarketMarkup(row,'title')}</td>
     <td>${edgeMarkup(row.title_edge,'title')}</td>
     <td>${wagerMarkup(row)}</td>
@@ -1255,6 +1405,7 @@ function renderPlayoffs(data){
     <th>${sortable('Rating','rating')}</th>
     <th>${sortable('Projected Record','projected')}</th>
     <th>${sortable('CFP Model','cfp_model')}</th>
+    ${scenarioExtraHeaders()}
     <th class="marketCol">${sortable('Best CFP','cfp_price')}</th>
     <th>${sortable('CFP Edge','cfp_edge')}</th>
     <th>${sortable('Title Model','national_model')}</th>
@@ -1269,6 +1420,7 @@ function renderPlayoffs(data){
     <td>${ratingMarkup(row)}</td>
     <td>${projectedRecordMarkup(row)}</td>
     <td><b>${pct(row.playoff_model_prob)}</b></td>
+    ${scenarioExtraCells(row)}
     <td class="marketCol">${bestMarketMarkup(row,'cfp')}</td>
     <td>${edgeMarkup(row.playoff_edge,'cfp')}</td>
     <td><b>${pct(row.national_title_model_prob)}</b></td>
@@ -1632,6 +1784,8 @@ function syncSortControl(){
     select.value='model_wins';
   }else if(state.sortKey===sortControlEdgeKey()&&state.sortDir==='desc'){
     select.value='edge';
+  }else if(state.sortKey==='leverage'&&state.sortDir==='desc'){
+    select.value='leverage';
   }else{
     select.value='custom';
   }
@@ -1648,6 +1802,7 @@ function installSortControl(){
       <option value="default">Default</option>
       <option value="edge">Edge</option>
       <option value="model_wins">Model Wins</option>
+      <option value="leverage">Leverage</option>
       <option value="custom" hidden>Column Sort</option>
     </select>`;
 
@@ -1663,6 +1818,9 @@ function installSortControl(){
       state.sortDir='desc';
     }else if(value==='model_wins'){
       state.sortKey='model_wins';
+      state.sortDir='desc';
+    }else if(value==='leverage'){
+      state.sortKey='leverage';
       state.sortDir='desc';
     }else{
       state.sortKey='rank';
@@ -3353,6 +3511,99 @@ installSortControl();
       }
       .scenarioChoiceGrid button{
         min-height:38px;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
+(function installScenarioTableStyles(){
+  if(document.getElementById('futuresScenarioTableStyles'))return;
+
+  const style=document.createElement('style');
+  style.id='futuresScenarioTableStyles';
+  style.textContent=`
+    .scenarioValueCell{
+      background:#0d2944!important;
+    }
+    .scenarioValueCell>b{
+      color:#fff;
+      font-size:12px;
+    }
+    .scenarioDeltaCell{
+      min-width:66px;
+    }
+    .scenarioDeltaUp{color:var(--green)!important}
+    .scenarioDeltaDown{color:var(--red)!important}
+    .scenarioDeltaFlat{color:var(--muted)!important}
+    .leverageTableCell{
+      min-width:92px;
+    }
+    .leverageCell{
+      display:grid;
+      justify-items:center;
+      gap:2px;
+      line-height:1.05;
+    }
+    .leverageCell small{
+      color:#c1d2e6;
+      font-size:8px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .leverageBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:52px;
+      border:1px solid #31537b;
+      border-radius:999px;
+      padding:3px 6px;
+      font-size:8px;
+      font-weight:950;
+      letter-spacing:.04em;
+    }
+    .leverage-low{
+      color:#8ea7c3;
+      background:#0b1c35;
+    }
+    .leverage-med{
+      color:#f4cd4b;
+      background:#2b2715;
+      border-color:#6d6024;
+    }
+    .leverage-high{
+      color:#7df1bd;
+      background:#102d35;
+      border-color:#26755d;
+    }
+    .leverage-extreme{
+      color:#fff;
+      background:#8b2440;
+      border-color:#ff6686;
+    }
+    .upsetRiskBadge{
+      margin-top:2px;
+      color:#ffb467;
+      background:#3a2412;
+      border:1px solid #805329;
+      border-radius:4px;
+      padding:2px 4px;
+      font-size:7px;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .leverageUnavailable{
+      color:var(--muted);
+    }
+
+    @media(max-width:900px){
+      .leverageTableCell{
+        min-width:0;
+      }
+      .leverageCell{
+        justify-items:end;
       }
     }
   `;
