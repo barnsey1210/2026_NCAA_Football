@@ -5,6 +5,8 @@ MODE="${1:---check}"
 RUNTIME_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PUBLIC_DIR="$RUNTIME_ROOT/build/public_site"
 WAR_ROOM_PUBLIC_DIR="$RUNTIME_ROOT/build/war_room_public"
+FUTURES_VIEW="$RUNTIME_ROOT/data/site/futures_view.json"
+ODDS_FUTURES="$RUNTIME_ROOT/data/site/odds_futures_v2.json"
 MAIN_REPO="${NCAAF_MAIN_REPO:-/Users/jameslindesmith/NCAAF_MAIN_REPO}"
 MAX_ODDS_AGE_HOURS="${NCAAF_MAX_ODDS_AGE_HOURS:-18}"
 
@@ -12,8 +14,70 @@ log(){ printf '[canonical-publish] %s\n' "$*"; }
 die(){ printf '[canonical-publish] ERROR: %s\n' "$*" >&2; exit 1; }
 
 [[ "$MODE" == "--check" || "$MODE" == "--push" || \
-   "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" ]] || \
-  die "usage: $0 --check|--push|--war-room-check|--war-room-push"
+   "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" || \
+   "$MODE" == "--futures-check" || "$MODE" == "--futures-push" ]] || \
+  die "usage: $0 --check|--push|--war-room-check|--war-room-push|--futures-check|--futures-push"
+
+if [[ "$MODE" == "--futures-check" || "$MODE" == "--futures-push" ]]; then
+  [[ -s "$FUTURES_VIEW" ]] || die "missing Futures view: $FUTURES_VIEW"
+  [[ -s "$ODDS_FUTURES" ]] || die "missing Odds Futures payload: $ODDS_FUTURES"
+
+  python3 - "$FUTURES_VIEW" "$ODDS_FUTURES" <<'PYVALIDATE'
+import json
+import sys
+from pathlib import Path
+
+for raw in sys.argv[1:]:
+    path = Path(raw)
+    try:
+        payload = json.loads(path.read_text())
+    except Exception as exc:
+        raise SystemExit(f"invalid JSON {path}: {exc}")
+    if not isinstance(payload, dict):
+        raise SystemExit(f"expected JSON object: {path}")
+    print(f"[canonical-publish] validated Futures artifact: {path}")
+PYVALIDATE
+
+  log "fast Futures artifact validation passed"
+  [[ "$MODE" == "--futures-push" ]] || exit 0
+
+  [[ -d "$MAIN_REPO/.git" ]] || die "canonical repository not found: $MAIN_REPO"
+  [[ -z "$(git -C "$MAIN_REPO" status --porcelain --untracked-files=no)" ]] || \
+    die "canonical repository has tracked local changes; refusing fast Futures publication"
+
+  git -C "$MAIN_REPO" fetch origin main
+  git -C "$MAIN_REPO" checkout main
+  git -C "$MAIN_REPO" pull --ff-only origin main
+
+  mkdir -p "$MAIN_REPO/data/site"
+
+  cp -p "$FUTURES_VIEW" \
+    "$MAIN_REPO/data/site/futures_view.json"
+
+  cp -p "$ODDS_FUTURES" \
+    "$MAIN_REPO/data/site/odds_futures_v2.json"
+
+  git -C "$MAIN_REPO" add -- \
+    data/site/futures_view.json \
+    data/site/odds_futures_v2.json
+
+  if git -C "$MAIN_REPO" diff --cached --quiet; then
+    log "no fast Futures changes to commit"
+    exit 0
+  fi
+
+  STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  git -C "$MAIN_REPO" commit -m "Refresh Futures markets ${STAMP}"
+
+  if ! git -C "$MAIN_REPO" push origin main; then
+    log "remote main moved during fast Futures publication; rebasing once"
+    git -C "$MAIN_REPO" pull --rebase origin main
+    git -C "$MAIN_REPO" push origin main
+  fi
+
+  log "published fast Futures artifacts at $(git -C "$MAIN_REPO" rev-parse --short HEAD)"
+  exit 0
+fi
 
 if [[ "$MODE" == "--war-room-check" || "$MODE" == "--war-room-push" ]]; then
   [[ -d "$WAR_ROOM_PUBLIC_DIR" ]] || die "missing fast War Room bundle: $WAR_ROOM_PUBLIC_DIR"

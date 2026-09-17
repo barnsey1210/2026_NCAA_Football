@@ -56,14 +56,8 @@ def main() -> int:
         print("FAST_FUTURES_PUBLICATION_RESULT=" + json.dumps(payload, sort_keys=True))
         return 0
 
-    build = run_capture(
-        [sys.executable, "scripts/site/build_public_site.py"]
-    )
-    if build.returncode != 0:
-        return build.returncode
-
     publish = run_capture(
-        ["bash", "scripts/publish/publish_site.sh", "--push"]
+        ["bash", "scripts/publish/publish_site.sh", "--futures-push"]
     )
     if publish.returncode != 0:
         return publish.returncode
