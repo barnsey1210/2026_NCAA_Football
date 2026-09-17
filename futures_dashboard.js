@@ -968,11 +968,15 @@ function nextGameMarkup(row){
 
   const opp=rowForTeam(g.opponent);
   const site=g.site==='AWAY'?'@':g.site==='N'?'vs*':'vs';
+  const oppRank=opp?.overall_rank??opp?.rank;
+  const rankLabel=hasNumber(oppRank)
+    ? `<span class="nextOppRank">#${Number(oppRank)}</span> `
+    : '';
 
   return `<div class="nextGameCell">
     ${teamLogo(opp,'oppLogo')}
-    <span>
-      <b>${site} ${esc(g.opponent)}</b>
+    <span class="nextGameIdentity">
+      <b>${site} ${rankLabel}${esc(g.opponent)}</b>
       <small class="${probabilityClass(g.win_probability)}">${pct(g.win_probability)} win</small>
     </span>
   </div>`;
@@ -3694,5 +3698,225 @@ installSortControl();
 
   document.head.appendChild(style);
 })();
+
+(function installFuturesDesktopWidthFinal(){
+  if(document.getElementById('futuresDesktopWidthFinal'))return;
+
+  const style=document.createElement('style');
+  style.id='futuresDesktopWidthFinal';
+  style.textContent=`
+    @media (min-width:901px){
+
+      .futuresWorkspace{
+        grid-template-columns:minmax(0,1fr) 310px!important;
+        gap:10px!important;
+      }
+
+      .futuresRail{
+        width:310px!important;
+        min-width:310px!important;
+        max-width:310px!important;
+      }
+
+      .compactRailHead{
+        gap:5px!important;
+        padding:4px 0!important;
+        min-height:40px!important;
+      }
+
+      .compactRailHead .railTeamLogo{
+        width:27px!important;
+        height:27px!important;
+      }
+
+      .compactTeamName{
+        font-size:14px!important;
+      }
+
+      .compactTeamRank{
+        font-size:12px!important;
+      }
+
+      .compactTeamIdentity{
+        gap:2px 5px!important;
+      }
+
+      .compactTeamIdentity>span:not(.compactTeamRank){
+        font-size:8px!important;
+      }
+
+      .futuresRailTabs{
+        gap:3px!important;
+        margin:3px 0!important;
+      }
+
+      .futuresRailTabs button{
+        padding:6px 3px!important;
+        font-size:7.5px!important;
+        letter-spacing:.02em!important;
+      }
+
+      .scenarioGameCard{
+        padding:7px!important;
+      }
+
+      .scenarioChoiceGrid{
+        gap:3px!important;
+      }
+
+      .scenarioChoiceGrid button{
+        padding:6px 2px!important;
+        font-size:7.5px!important;
+      }
+
+      .scenarioAdd{
+        margin-top:7px!important;
+      }
+
+      .scenarioAdd select{
+        padding:6px!important;
+        font-size:9px!important;
+      }
+
+      .scenarioActions{
+        margin-top:6px!important;
+      }
+
+      .scenarioImpactPanel{
+        margin-top:7px!important;
+        padding:6px!important;
+      }
+
+      .futuresWorkspace table{
+        width:100%!important;
+        min-width:0!important;
+        table-layout:fixed!important;
+      }
+
+      .futuresWorkspace th,
+      .futuresWorkspace td{
+        padding-left:5px!important;
+        padding-right:5px!important;
+      }
+
+      .futuresWorkspace th:nth-child(1),
+      .futuresWorkspace td:nth-child(1){
+        width:180px!important;
+      }
+
+      .futuresWorkspace th:nth-child(2),
+      .futuresWorkspace td:nth-child(2){
+        width:160px!important;
+      }
+
+      .futuresWorkspace th:nth-child(3),
+      .futuresWorkspace td:nth-child(3){
+        width:54px!important;
+      }
+
+      .futuresWorkspace th:nth-child(4),
+      .futuresWorkspace td:nth-child(4){
+        width:68px!important;
+      }
+
+      .futTeamButton{
+        width:100%!important;
+        min-width:0!important;
+        max-width:100%!important;
+        overflow:hidden!important;
+      }
+
+      .futTeamIdentity{
+        min-width:0!important;
+        overflow:hidden!important;
+        flex:1 1 auto!important;
+      }
+
+      .futTeamIdentity>b{
+        display:block!important;
+        max-width:100%!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+      }
+
+      .futTeamIdentity small{
+        display:block!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+      }
+
+      .nextGameCell{
+        width:100%!important;
+        min-width:0!important;
+        gap:5px!important;
+      }
+
+      .nextGameIdentity{
+        display:block!important;
+        min-width:0!important;
+        overflow:hidden!important;
+      }
+
+      .nextGameIdentity>b{
+        display:block!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+      }
+
+      .nextGameIdentity small{
+        display:block!important;
+        white-space:nowrap!important;
+      }
+
+      .nextOppRank{
+        font-weight:950!important;
+        color:#dbeaff!important;
+      }
+
+      .futuresWorkspace .colProjected{
+        width:88px!important;
+      }
+
+      .futuresWorkspace .colSos{
+        width:66px!important;
+      }
+
+      .futuresWorkspace .colModel{
+        width:78px!important;
+      }
+
+      .futuresWorkspace .colScenario{
+        width:78px!important;
+      }
+
+      .futuresWorkspace .colDelta{
+        width:62px!important;
+      }
+
+      .futuresWorkspace .colSwing,
+      .futuresWorkspace .swingTableCell{
+        width:86px!important;
+      }
+
+      .futuresWorkspace .marketCol{
+        width:96px!important;
+      }
+
+      .futuresWorkspace .colEdge{
+        width:72px!important;
+      }
+
+      .futuresWorkspace .colWager{
+        width:58px!important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
 
 })();
