@@ -689,6 +689,115 @@ td.cell-hot-edge-lost{
 .cell-change-badge.lost{background:#ff6969;color:#150606}
 .activity-snapshot{display:none;padding:5px 8px;border-bottom:1px solid var(--line);background:rgba(66,217,255,.035);font-size:9px;line-height:1.28}
 .activity-snapshot.active{display:block}
+
+
+.snapshot-opener-box{
+  margin:4px 0 7px;
+  padding:7px 8px;
+  border:1px solid rgba(66,217,255,.30);
+  background:rgba(35,91,122,.22);
+  border-radius:4px;
+}
+.snapshot-market-section{
+  padding:6px 0 8px;
+  border-bottom:1px solid rgba(104,132,157,.22);
+}
+.snapshot-market-section-title{
+  color:#59dfff;
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.08em;
+  margin-bottom:5px;
+}
+.snapshot-open-row{
+  padding:3px 0 5px;
+}
+.snapshot-open-row+.snapshot-open-row{
+  border-top:1px solid rgba(115,174,204,.16);
+  padding-top:6px;
+}
+.snapshot-open-kind,
+.snapshot-current-kind{
+  color:#87a7bd;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+.snapshot-open-value,
+.snapshot-current-value,
+.snapshot-book-value{
+  color:#edf5fb;
+  font-size:10px;
+  font-weight:900;
+  line-height:1.25;
+}
+.snapshot-open-meta,
+.snapshot-current-meta,
+.snapshot-book-time{
+  color:#91a6b7;
+  font-size:8px;
+  font-weight:750;
+  line-height:1.3;
+  margin-top:1px;
+}
+.snapshot-book-row{
+  padding:5px 0 6px;
+  border-bottom:1px solid rgba(104,132,157,.13);
+}
+.snapshot-book-row:last-child{
+  border-bottom:0;
+}
+.snapshot-book-top{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.snapshot-book-name{
+  color:#67e0ff;
+  font-size:9px;
+  font-weight:950;
+}
+.snapshot-book-market{
+  color:#7f94a6;
+  font-size:8px;
+  font-weight:850;
+}
+.snapshot-current-box{
+  border-bottom:0;
+}
+.snapshot-current-row{
+  padding:3px 0 5px;
+}
+.snapshot-market-block{
+  padding:6px 0 7px;
+  border-bottom:1px solid rgba(104,132,157,.22);
+}
+.snapshot-market-block:last-child{
+  border-bottom:0;
+}
+.snapshot-market-label{
+  color:#59dfff;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.06em;
+  margin-bottom:2px;
+}
+.snapshot-market-line{
+  color:#e8f0f8;
+  font-size:10px;
+  font-weight:850;
+  line-height:1.25;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.snapshot-market-meta{
+  color:#92a7b9;
+  font-size:9px;
+  font-weight:700;
+  line-height:1.25;
+  margin:1px 0 3px;
+  white-space:normal;
+}
 .snapshot-title{color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.7px;margin-bottom:3px}
 .snapshot-row{display:grid;grid-template-columns:48px minmax(0,1fr);gap:5px;align-items:baseline;margin-top:2px}
 .snapshot-key{color:var(--cyan);font-size:8px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1870,11 +1979,10 @@ tr:hover td.context-group{background:#202d39}
       <div class="activity-summary" id="activitySummary">Loading activity…</div>
       <div class="activity-focus" id="activityFocus"></div>
       <div class="activity-filters" id="activityFilters">
-        <button class="activity-filter active" data-filter="MARKET">MARKET</button>
-        <button class="activity-filter" data-filter="MODEL">MODEL</button>
-        <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
-        <button class="activity-filter" data-filter="SIGNALS">COACHES</button>
         <button class="activity-filter" data-filter="TEAMS">TEAMS</button>
+        <button class="activity-filter" data-filter="SIGNALS">COACHES</button>
+        <button class="activity-filter active" data-filter="MARKET">MARKET</button>
+        <button class="activity-filter" data-filter="POSTGAME">POSTGAME</button>
       </div>
       <div class="activity-snapshot" id="activitySnapshot"></div>
       <div class="activity-list" id="activityList"></div>
@@ -1892,10 +2000,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260917T145719Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260917T145719Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260917T145719Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260917T145719Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260917T154926Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260917T154926Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260917T154926Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260917T154926Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -4069,8 +4177,7 @@ function activityDetail(event){
 function activityRefreshTimestamp(){
   const refreshes=ACTIVITY?.pipeline_refreshes || {};
   if(ACTIVITY_FILTER==='MARKET' || ACTIVITY_FILTER==='EDGE') return refreshes.market || HEALTH?.fast_market_refresh?.last_fast_pull_at;
-  if(ACTIVITY_FILTER==='MODEL') return refreshes.model || HEALTH?.ratings_health?.generated_at;
-  if(ACTIVITY_FILTER==='POSTGAME') return refreshes.postgame;
+    if(ACTIVITY_FILTER==='POSTGAME') return refreshes.postgame;
   return [refreshes.market,refreshes.model,refreshes.postgame]
     .filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0] || ACTIVITY?.built_at;
 }
@@ -4592,7 +4699,7 @@ function visibleActivity(){
 
   const source=SELECTED_GAME_ID
     ? (ACTIVITY_FILTER==='POSTGAME'
-      ? [...selectedEvents.filter(event=>activityCategory(event)==='POSTGAME' || (selectedHasFinal && activityCategory(event)==='MODEL')),...priorEvents]
+      ? [...selectedEvents.filter(event=>activityCategory(event)==='POSTGAME'),...priorEvents]
       : selectedEvents)
     : (ACTIVITY?.events || []);
   const deduped=new Set();
@@ -4603,7 +4710,6 @@ function visibleActivity(){
     const category = activityCategory(event);
     if(SELECTED_GAME_ID && event.event_type==='RATINGS_UPDATED') return false;
     if(ACTIVITY_FILTER === 'MARKET' && !['OPEN','MARKET'].includes(category)) return false;
-    if(ACTIVITY_FILTER === 'MODEL' && category !== 'MODEL') return false;
     if(ACTIVITY_FILTER === 'POSTGAME' && category !== 'POSTGAME') return false;
     if(SELECTED_GAME_ID) return event.prior_context || String(event.game_id)===String(SELECTED_GAME_ID);
     if(ACTIVE_WEEK === 'ALL') return true;
@@ -4680,15 +4786,157 @@ function componentText(model,names,market,game){
 
 function renderMarketSnapshot(game,gameData){
   const openers=gameData?.openers || {};
+  const timeline=Array.isArray(gameData?.market_timeline) ? gameData.market_timeline : [];
+
   const spreadOpen=openers.spread;
   const totalOpen=openers.total;
   const spreadCurrent=game?.market?.best_sportsbook?.spread?.home;
   const totalCurrent=game?.market?.best_sportsbook?.total?.over;
-  const openSpread=spreadOpen?`${esc(game.home_team)} ${fmtLine(spreadOpen.line)} ${snapshotBook(spreadOpen.book)}`:'NOT TRACKED';
-  const openTotal=totalOpen?`${Number(totalOpen.line).toFixed(1)} ${snapshotBook(totalOpen.book)}`:'NOT TRACKED';
-  return `<div class="snapshot-title">MARKET SNAPSHOT</div>
-    <div class="snapshot-row"><span class="snapshot-key">SPREAD</span><span class="snapshot-value" title="${spreadOpen?.observed_at?`Opened ${esc(fmtDateTimeET(spreadOpen.observed_at))}`:'Opening timestamp unavailable'}">OPEN ${openSpread} · CURRENT ${spreadCurrent?`${esc(game.home_team)} ${fmtLine(spreadCurrent.line)}`:'—'}</span></div>
-    <div class="snapshot-row"><span class="snapshot-key">TOTAL</span><span class="snapshot-value" title="${totalOpen?.observed_at?`Opened ${esc(fmtDateTimeET(totalOpen.observed_at))}`:'Opening timestamp unavailable'}">OPEN ${openTotal} · CURRENT ${totalCurrent?Number(totalCurrent.line).toFixed(1):'—'}</span></div>`;
+
+  const priceText=(price)=>{
+    if(price===null || price===undefined || price==='') return '';
+    const n=Number(price);
+    return ` (${n>0?'+':''}${n})`;
+  };
+
+  const bookText=(book)=>book ? snapshotBook(book) : '—';
+
+  const byBookMarket=new Map();
+
+  timeline.forEach(row=>{
+    if(!row?.book || !['spread','total'].includes(row.market)) return;
+    const key=`${row.book}|${row.market}`;
+    if(!byBookMarket.has(key)) byBookMarket.set(key,[]);
+    byBookMarket.get(key).push(row);
+  });
+
+  const bookNames=[...new Set(
+    timeline.filter(row=>row?.book).map(row=>row.book)
+  )];
+
+  const preferredOrder=[
+    'DraftKings','FanDuel','BetMGM','Caesars','Pinnacle',
+    'Hard Rock Bet','ESPN BET'
+  ];
+
+  bookNames.sort((a,b)=>{
+    const ai=preferredOrder.indexOf(a);
+    const bi=preferredOrder.indexOf(b);
+    if(ai>=0 || bi>=0){
+      if(ai<0) return 1;
+      if(bi<0) return -1;
+      return ai-bi;
+    }
+    return a.localeCompare(b);
+  });
+
+  const openerLine=(label,opener,market)=>{
+    if(!opener){
+      return `<div class="snapshot-open-row">
+        <div class="snapshot-open-kind">${label}</div>
+        <div class="snapshot-open-value">OPENING LINE NOT CAPTURED</div>
+      </div>`;
+    }
+
+    const line=market==='spread'
+      ? `${esc(game.home_team)} ${fmtLine(opener.line)}${priceText(opener.price)}`
+      : `${Number(opener.line).toFixed(1)}${priceText(opener.price)}`;
+
+    return `<div class="snapshot-open-row">
+      <div class="snapshot-open-kind">${label}</div>
+      <div class="snapshot-open-value">${line}</div>
+      <div class="snapshot-open-meta">${bookText(opener.book)} · ${fmtDateTimeET(opener.observed_at)}</div>
+    </div>`;
+  };
+
+  const movementRows=[];
+
+  bookNames.forEach(book=>{
+    ['spread','total'].forEach(market=>{
+      const rows=(byBookMarket.get(`${book}|${market}`) || [])
+        .slice()
+        .sort((a,b)=>String(a.observed_at||'').localeCompare(String(b.observed_at||'')));
+
+      if(!rows.length) return;
+
+      const first=rows[0];
+      const last=rows[rows.length-1];
+      const changed=
+        Number(first.line)!==Number(last.line) ||
+        Number(first.price)!==Number(last.price);
+
+      const marketLabel=market==='spread'?'SPREAD':'TOTAL';
+
+      let value;
+      if(changed && Number(first.line)!==Number(last.line)){
+        value=market==='spread'
+          ? `${fmtLine(first.line)} → ${fmtLine(last.line)}${priceText(last.price)}`
+          : `${Number(first.line).toFixed(1)} → ${Number(last.line).toFixed(1)}${priceText(last.price)}`;
+      }else{
+        value=market==='spread'
+          ? `${fmtLine(last.line)}${priceText(last.price)}`
+          : `${Number(last.line).toFixed(1)}${priceText(last.price)}`;
+      }
+
+      movementRows.push({
+        book,
+        market,
+        marketLabel,
+        value,
+        observed_at:last.observed_at,
+      });
+    });
+  });
+
+  const movementHtml=movementRows.length
+    ? `<div class="snapshot-market-section">
+         <div class="snapshot-market-section-title">BOOK MOVEMENT</div>
+         ${movementRows.map(row=>`
+           <div class="snapshot-book-row">
+             <div class="snapshot-book-top">
+               <span class="snapshot-book-name">${bookText(row.book)}</span>
+               <span class="snapshot-book-market">${row.marketLabel}</span>
+             </div>
+             <div class="snapshot-book-value">${row.value}</div>
+             <div class="snapshot-book-time">${fmtDateTimeET(row.observed_at)}</div>
+           </div>
+         `).join('')}
+       </div>`
+    : '';
+
+  const currentSpread=spreadCurrent
+    ? `${esc(game.home_team)} ${fmtLine(spreadCurrent.line)}${priceText(spreadCurrent.price)}`
+    : '—';
+
+  const currentTotal=totalCurrent
+    ? `${Number(totalCurrent.line).toFixed(1)}${priceText(totalCurrent.price)}`
+    : '—';
+
+  return `<div class="snapshot-title">MARKET HISTORY</div>
+
+    <div class="snapshot-opener-box">
+      <div class="snapshot-market-section-title">OPENERS</div>
+      ${openerLine('SPREAD',spreadOpen,'spread')}
+      ${openerLine('TOTAL',totalOpen,'total')}
+    </div>
+
+    ${movementHtml}
+
+    <div class="snapshot-market-section snapshot-current-box">
+      <div class="snapshot-market-section-title">CURRENT</div>
+
+      <div class="snapshot-current-row">
+        <div class="snapshot-current-kind">SPREAD</div>
+        <div class="snapshot-current-value">${currentSpread}</div>
+        <div class="snapshot-current-meta">${bookText(spreadCurrent?.book)}</div>
+      </div>
+
+      <div class="snapshot-current-row">
+        <div class="snapshot-current-kind">TOTAL</div>
+        <div class="snapshot-current-value">${currentTotal}</div>
+        <div class="snapshot-current-meta">${bookText(totalCurrent?.book)}</div>
+      </div>
+    </div>`;
 }
 
 function renderModelSnapshot(game){
@@ -4701,20 +4949,36 @@ function renderModelSnapshot(game){
 
 function priorStatusLine(prior){
   if(!prior?.game_id) return 'NO PRIOR GAME';
-  const finalEvent=(prior.events || []).find(event=>event.event_type==='FINAL_POSTED');
-  const opponent=prior.selected_team===prior.home_team?prior.away_team:prior.home_team;
-  let result='';
-  if(finalEvent){
-    const p=finalEvent.payload || finalEvent.metadata || {};
-    const selectedScore=prior.selected_team===prior.home_team?p.home_score:p.away_score;
-    const opponentScore=prior.selected_team===prior.home_team?p.away_score:p.home_score;
-    if(selectedScore!==null && selectedScore!==undefined && opponentScore!==null && opponentScore!==undefined){
-      const outcome=Number(selectedScore)>Number(opponentScore)?'W':Number(selectedScore)<Number(opponentScore)?'L':'T';
-      result=`${outcome} ${selectedScore}-${opponentScore}`;
-    }
+
+  const opponent=prior.selected_team===prior.home_team
+    ? prior.away_team
+    : prior.home_team;
+
+  const result=prior.result || {};
+  const awayScore=result.away_score;
+  const homeScore=result.home_score;
+
+  if(
+    prior.status!=='FINAL_POSTED' ||
+    awayScore===null || awayScore===undefined ||
+    homeScore===null || homeScore===undefined
+  ){
+    return `${opponent?`vs ${opponent}`:'OPPONENT UNAVAILABLE'} · RESULT UNAVAILABLE`;
   }
-  const status=String(prior.status || 'STATUS UNAVAILABLE').replaceAll('_',' ');
-  return `${opponent?`vs ${opponent}`:'OPPONENT UNAVAILABLE'}${result?` · ${result}`:''} · ${status}`;
+
+  const selectedScore=prior.selected_team===prior.home_team ? homeScore : awayScore;
+  const opponentScore=prior.selected_team===prior.home_team ? awayScore : homeScore;
+
+  const outcome=Number(selectedScore)>Number(opponentScore)
+    ? 'W'
+    : Number(selectedScore)<Number(opponentScore)
+      ? 'L'
+      : 'T';
+
+  const date=prior.date || prior.kickoff_time;
+  const dateText=date ? ` · ${fmtKickoffDateET(date)}` : '';
+
+  return `${opponent?`vs ${opponent}`:'OPPONENT UNAVAILABLE'} · ${outcome} ${selectedScore}-${opponentScore} · FINAL${dateText}`;
 }
 
 function currentGameStatus(game,gameData){
@@ -4730,10 +4994,9 @@ function currentGameStatus(game,gameData){
 
 function renderPostgameSnapshot(game,gameData){
   const prior=gameData?.prior_games || {};
-  return `<div class="snapshot-title">POSTGAME STATUS</div>
-    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.away_team)} PRIOR">${esc(game.away_team)} PRIOR</span><span class="snapshot-value">${esc(priorStatusLine(prior.away))}</span></div>
-    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.home_team)} PRIOR">${esc(game.home_team)} PRIOR</span><span class="snapshot-value">${esc(priorStatusLine(prior.home))}</span></div>
-    <div class="snapshot-row"><span class="snapshot-key">CURRENT</span><span class="snapshot-value">${esc(game.away_team)} @ ${esc(game.home_team)} · ${esc(currentGameStatus(game,gameData))}</span></div>`;
+  return `<div class="snapshot-title">PRIOR GAME RESULTS</div>
+    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.away_team)} PRIOR">${esc(game.away_team)}</span><span class="snapshot-value">${esc(priorStatusLine(prior.away))}</span></div>
+    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.home_team)} PRIOR">${esc(game.home_team)}</span><span class="snapshot-value">${esc(priorStatusLine(prior.home))}</span></div>`;
 }
 
 function renderSelectedSnapshot(){
@@ -4742,16 +5005,14 @@ function renderSelectedSnapshot(){
   if(
     !game ||
     !SELECTED_GAME_ID ||
-    !['MARKET','MODEL','POSTGAME'].includes(ACTIVITY_FILTER)
+    !['MARKET','POSTGAME'].includes(ACTIVITY_FILTER)
   ){
     snapshot.classList.remove('active');snapshot.innerHTML='';return;
   }
   const gameData=SELECTED_GAME_ACTIVITY || fallbackGameActivity(game);
   snapshot.innerHTML=ACTIVITY_FILTER==='MARKET'
     ? renderMarketSnapshot(game,gameData)
-    : ACTIVITY_FILTER==='MODEL'
-      ? renderModelSnapshot(game)
-      : renderPostgameSnapshot(game,gameData);
+    : renderPostgameSnapshot(game,gameData);
   snapshot.classList.add('active');
 }
 
@@ -4782,7 +5043,6 @@ function renderActivity(){
     else if(event.event_type==='EDGE_ACTIONABLE_CHANGED') since.edgeChanged++;
     else if(event.event_type==='EDGE_LOST_ACTIONABLE') since.edgeLost++;
     else if(event.event_type==='RATINGS_UPDATED') since.ratings++;
-    else if(['MODEL_STATE_CHANGED','SHADOW_SPREAD_READY','SHADOW_TOTAL_READY'].includes(event.event_type)) since.model++;
     else if(['FINAL_POSTED','POSTGAME_REFRESHED'].includes(event.event_type)) since.final++;
   });
   const summaryRows = [
@@ -4793,7 +5053,6 @@ function renderActivity(){
     ['EDGE MOVES',since.edgeChanged,'edge'],
     ['EDGES LOST',since.edgeLost,'lost'],
     ['RATINGS',since.ratings,''],
-    ['MODEL',since.model,''],
     ['FINAL',since.final,'']
   ].filter(([,count])=>Number(count)>0);
   const activityRefresh=activityRefreshTimestamp();
@@ -4820,6 +5079,14 @@ function renderActivity(){
   renderSelectedSnapshot();
 
   const activityList=document.getElementById('activityList');
+
+  if(
+    SELECTED_GAME_ID &&
+    ['MARKET','POSTGAME'].includes(ACTIVITY_FILTER)
+  ){
+    activityList.innerHTML='';
+    return;
+  }
 
   if(ACTIVITY_FILTER==='SIGNALS'){
     activityList.innerHTML=renderSignalsPanel(selectedGame());
@@ -4899,6 +5166,7 @@ async function switchMatrixWeek(week){
 }
 
 async function loadData(){
+  GAME_ACTIVITY_CACHE.clear();
   const priorActivityVersion=ACTIVITY_VERSION;
 
   [MATRIX,HEALTH,ACTIVITY]=await Promise.all([
