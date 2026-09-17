@@ -2091,8 +2091,8 @@ function renderSportsbookFreshness(){
 
   const status=document.getElementById('marketFreshStatus');
   if(status){
-    status.textContent=qaClass==='current'?'CURRENT':qaClass==='warn'?'CHECK':'STALE';
-    status.className=`freshStatus ${qaClass}`;
+    status.textContent=errorCount>0?'STALE':'CURRENT';
+    status.className=`freshStatus ${errorCount>0?'stale':'current'}`;
   }
 
   const compactEvidence=(field,book)=>{
@@ -2151,12 +2151,6 @@ function renderSportsbookFreshness(){
       `).join('')}
     </div>
 
-    <div
-      class="compactMarketQa ${qaClass}"
-      title="${esc((qa.warnings||[]).join(' | ') || 'No market QA warnings')}"
-    >
-      QA ${qaText}
-    </div>
   `;
 
   const legacyQa=document.getElementById('marketQaRow');
@@ -3115,12 +3109,12 @@ installSortControl();
 
     .modelMovementInline{
       grid-column:3 / 5!important;
-      color:#8195ae!important;
-      font-size:8px!important;
-      font-weight:750!important;
-      line-height:1.15!important;
+      color:#aebed2!important;
+      font-size:9px!important;
+      font-weight:800!important;
+      line-height:1.2!important;
       white-space:normal!important;
-      max-width:210px!important;
+      max-width:235px!important;
       padding-top:1px!important;
     }
 
