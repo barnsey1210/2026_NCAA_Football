@@ -818,6 +818,92 @@ td.cell-hot-edge-lost{
   font-size:8px;
   font-weight:850;
 }
+
+
+.snapshot-postgame-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding-top:4px;
+}
+.snapshot-postgame-card{
+  padding:7px;
+  border-radius:4px;
+  border:1px solid rgba(120,145,165,.25);
+  min-width:0;
+}
+.snapshot-postgame-card.win{
+  background:rgba(23,126,85,.18);
+  border-color:rgba(57,220,153,.35);
+}
+.snapshot-postgame-card.loss{
+  background:rgba(145,55,61,.18);
+  border-color:rgba(255,95,105,.32);
+}
+.snapshot-postgame-card.unknown{
+  background:rgba(85,101,116,.14);
+}
+.snapshot-postgame-team{
+  color:#eef6fb;
+  font-size:9px;
+  font-weight:950;
+  margin-bottom:4px;
+}
+.snapshot-postgame-result{
+  color:#aebdca;
+  font-size:8px;
+  font-weight:750;
+  line-height:1.35;
+}
+.snapshot-postgame-card.win .snapshot-postgame-result{color:#72e6b0}
+.snapshot-postgame-card.loss .snapshot-postgame-result{color:#ff9199}
+.snapshot-book-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:4px;
+}
+.snapshot-book-card{
+  padding:6px 7px;
+  border:1px solid rgba(130,150,168,.22);
+  border-radius:4px;
+}
+.snapshot-book-card.dk{background:rgba(42,92,58,.20)}
+.snapshot-book-card.fd{background:rgba(36,85,137,.20)}
+.snapshot-book-card.mgm{background:rgba(115,91,38,.20)}
+.snapshot-book-card.czr{background:rgba(67,85,105,.24)}
+.snapshot-book-card.pinn{background:rgba(108,55,92,.20)}
+.snapshot-book-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:6px;
+  margin-bottom:4px;
+  color:#eaf4fb;
+  font-size:9px;
+  font-weight:950;
+}
+.snapshot-book-card-head time{
+  color:#8298aa;
+  font-size:8px;
+  font-weight:700;
+}
+.snapshot-book-card-market{
+  display:grid;
+  grid-template-columns:48px 1fr;
+  gap:5px;
+  align-items:center;
+  line-height:1.25;
+}
+.snapshot-book-card-market span{
+  color:#7890a4;
+  font-size:8px;
+  font-weight:900;
+}
+.snapshot-book-card-market strong{
+  color:#edf5fb;
+  font-size:9px;
+  font-weight:900;
+}
 .snapshot-current-box{
   border-bottom:0;
 }
@@ -4856,25 +4942,17 @@ function renderMarketSnapshot(game,gameData){
     byBookMarket.get(key).push(row);
   });
 
-  const bookNames=[...new Set(
-    timeline.filter(row=>row?.book).map(row=>row.book)
-  )];
-
-  const preferredOrder=[
-    'DraftKings','FanDuel','BetMGM','Caesars','Pinnacle',
-    'Hard Rock Bet','ESPN BET'
+  const preferredBooks=[
+    'DraftKings',
+    'FanDuel',
+    'BetMGM',
+    'Caesars',
+    'Pinnacle'
   ];
 
-  bookNames.sort((a,b)=>{
-    const ai=preferredOrder.indexOf(a);
-    const bi=preferredOrder.indexOf(b);
-    if(ai>=0 || bi>=0){
-      if(ai<0) return 1;
-      if(bi<0) return -1;
-      return ai-bi;
-    }
-    return a.localeCompare(b);
-  });
+  const bookNames=preferredBooks.filter(book=>
+    timeline.some(row=>row?.book===book)
+  );
 
   const openerLine=(label,opener,market)=>{
     if(!opener){
@@ -4897,56 +4975,86 @@ function renderMarketSnapshot(game,gameData){
 
   const movementRows=[];
 
+  const latestBookMarket=(book,market)=>{
+    const rows=(byBookMarket.get(`${book}|${market}`) || [])
+      .slice()
+      .sort((a,b)=>String(a.observed_at||'').localeCompare(String(b.observed_at||'')));
+
+    if(!rows.length) return null;
+
+    const first=rows[0];
+    const last=rows[rows.length-1];
+
+    const lineChanged=Number(first.line)!==Number(last.line);
+
+    let value;
+    if(lineChanged){
+      value=market==='spread'
+        ? `${fmtLine(first.line)} → ${fmtLine(last.line)}${priceText(last.price)}`
+        : `${Number(first.line).toFixed(1)} → ${Number(last.line).toFixed(1)}${priceText(last.price)}`;
+    }else{
+      value=market==='spread'
+        ? `${fmtLine(last.line)}${priceText(last.price)}`
+        : `${Number(last.line).toFixed(1)}${priceText(last.price)}`;
+    }
+
+    return {
+      first,
+      last,
+      value,
+      observed_at:last.observed_at
+    };
+  };
+
   bookNames.forEach(book=>{
-    ['spread','total'].forEach(market=>{
-      const rows=(byBookMarket.get(`${book}|${market}`) || [])
-        .slice()
-        .sort((a,b)=>String(a.observed_at||'').localeCompare(String(b.observed_at||'')));
+    const spread=latestBookMarket(book,'spread');
+    const total=latestBookMarket(book,'total');
 
-      if(!rows.length) return;
+    if(!spread && !total) return;
 
-      const first=rows[0];
-      const last=rows[rows.length-1];
-      const changed=
-        Number(first.line)!==Number(last.line) ||
-        Number(first.price)!==Number(last.price);
-
-      const marketLabel=market==='spread'?'SPREAD':'TOTAL';
-
-      let value;
-      if(changed && Number(first.line)!==Number(last.line)){
-        value=market==='spread'
-          ? `${fmtLine(first.line)} → ${fmtLine(last.line)}${priceText(last.price)}`
-          : `${Number(first.line).toFixed(1)} → ${Number(last.line).toFixed(1)}${priceText(last.price)}`;
-      }else{
-        value=market==='spread'
-          ? `${fmtLine(last.line)}${priceText(last.price)}`
-          : `${Number(last.line).toFixed(1)}${priceText(last.price)}`;
-      }
-
-      movementRows.push({
-        book,
-        market,
-        marketLabel,
-        value,
-        observed_at:last.observed_at,
-      });
+    movementRows.push({
+      book,
+      spread,
+      total,
+      observed_at:
+        [spread?.observed_at,total?.observed_at]
+          .filter(Boolean)
+          .sort()
+          .slice(-1)[0] || null
     });
   });
 
   const movementHtml=movementRows.length
     ? `<div class="snapshot-market-section">
          <div class="snapshot-market-section-title">BOOK MOVEMENT</div>
-         ${movementRows.map(row=>`
-           <div class="snapshot-book-row">
-             <div class="snapshot-book-top">
-               <span class="snapshot-book-name">${bookText(row.book)}</span>
-               <span class="snapshot-book-market">${row.marketLabel}</span>
-             </div>
-             <div class="snapshot-book-value">${row.value}</div>
-             <div class="snapshot-book-time">${fmtDateTimeET(row.observed_at)}</div>
-           </div>
-         `).join('')}
+         <div class="snapshot-book-grid">
+           ${movementRows.map(row=>{
+             const cls={
+               'DraftKings':'dk',
+               'FanDuel':'fd',
+               'BetMGM':'mgm',
+               'Caesars':'czr',
+               'Pinnacle':'pinn'
+             }[row.book] || 'other';
+
+             return `<div class="snapshot-book-card ${cls}">
+               <div class="snapshot-book-card-head">
+                 <span>${bookText(row.book)}</span>
+                 <time>${row.observed_at?fmtDateTimeET(row.observed_at):'—'}</time>
+               </div>
+
+               <div class="snapshot-book-card-market">
+                 <span>SPREAD</span>
+                 <strong>${row.spread?.value || '—'}</strong>
+               </div>
+
+               <div class="snapshot-book-card-market">
+                 <span>TOTAL</span>
+                 <strong>${row.total?.value || '—'}</strong>
+               </div>
+             </div>`;
+           }).join('')}
+         </div>
        </div>`
     : '';
 
@@ -5038,11 +5146,43 @@ function currentGameStatus(game,gameData){
   return 'STATUS UNAVAILABLE';
 }
 
+function priorResultClass(prior){
+  const result=prior?.result || {};
+  if(prior?.status!=='FINAL_POSTED') return 'unknown';
+
+  const selectedScore=
+    prior.selected_team===prior.home_team
+      ? result.home_score
+      : result.away_score;
+
+  const opponentScore=
+    prior.selected_team===prior.home_team
+      ? result.away_score
+      : result.home_score;
+
+  if(selectedScore===null || selectedScore===undefined ||
+     opponentScore===null || opponentScore===undefined) return 'unknown';
+
+  if(Number(selectedScore)>Number(opponentScore)) return 'win';
+  if(Number(selectedScore)<Number(opponentScore)) return 'loss';
+  return 'unknown';
+}
+
 function renderPostgameSnapshot(game,gameData){
   const prior=gameData?.prior_games || {};
+
   return `<div class="snapshot-title">PRIOR GAME RESULTS</div>
-    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.away_team)} PRIOR">${esc(game.away_team)}</span><span class="snapshot-value">${esc(priorStatusLine(prior.away))}</span></div>
-    <div class="snapshot-row"><span class="snapshot-key" title="${esc(game.home_team)} PRIOR">${esc(game.home_team)}</span><span class="snapshot-value">${esc(priorStatusLine(prior.home))}</span></div>`;
+    <div class="snapshot-postgame-grid">
+      <div class="snapshot-postgame-card ${priorResultClass(prior.away)}">
+        <div class="snapshot-postgame-team">${esc(game.away_team)}</div>
+        <div class="snapshot-postgame-result">${esc(priorStatusLine(prior.away))}</div>
+      </div>
+
+      <div class="snapshot-postgame-card ${priorResultClass(prior.home)}">
+        <div class="snapshot-postgame-team">${esc(game.home_team)}</div>
+        <div class="snapshot-postgame-result">${esc(priorStatusLine(prior.home))}</div>
+      </div>
+    </div>`;
 }
 
 function renderSelectedSnapshot(){
