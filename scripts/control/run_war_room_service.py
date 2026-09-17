@@ -32,6 +32,7 @@ WRITER_QUEUE_POLL_SECONDS = 0.1
 
 ACTION_REGISTRY_KEYS = {
     "market": "MARKET_REFRESH",
+    "futures": "FUTURES_REFRESH",
     "ratings": "RATINGS_REFRESH",
     "postgame": "POSTGAME_REFRESH",
     "war-room-rebuild": "WAR_ROOM_REBUILD",
@@ -41,6 +42,7 @@ ACTION_REGISTRY_KEYS = {
 # never supply an executable, path, or arbitrary argument.
 MODE_COMMANDS = {
     "war-room-market": [sys.executable, "scripts/war_room/run_fast_market_publication.py"],
+    "futures-fast": [sys.executable, "scripts/futures/run_fast_futures_publication.py"],
     "ratings": [sys.executable, "scripts/control/run_data_refresh.py", "ratings", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "postgame": [sys.executable, "scripts/control/run_data_refresh.py", "postgame", "--execute", "--confirm-publish", "--trigger-source", "war-room-service"],
     "war-room-rebuild": [sys.executable, "scripts/war_room/run_fast_market_publication.py", "--skip-refresh", "--push"],

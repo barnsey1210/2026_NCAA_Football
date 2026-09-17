@@ -14,7 +14,14 @@
     },
     "RATINGS_REFRESH": {
       "controller_mode": "ratings",
-      "providers": ["spplus", "fpi", "teamrankings", "sagarin", "massey", "dratings"],
+      "providers": [
+        "spplus",
+        "fpi",
+        "teamrankings",
+        "sagarin",
+        "massey",
+        "dratings"
+      ],
       "owner": "scripts/control/run_data_refresh.py",
       "bounded_publication": true
     },
@@ -28,6 +35,12 @@
       "controller_mode": "war-room-rebuild",
       "owner": "existing War Room builders and bounded publisher",
       "provider_calls": false
+    },
+    "FUTURES_REFRESH": {
+      "controller_mode": "futures-fast",
+      "provider": "action_network_futures",
+      "owner": "scripts/futures/run_fast_futures_publication.py",
+      "bounded_publication": true
     }
   },
   "retired": {

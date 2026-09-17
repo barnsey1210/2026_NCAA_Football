@@ -214,7 +214,21 @@ def main() -> int:
     args = parser.parse_args()
     code, report, state = execute(now=utc_now(), state=read_json(STATE, {}),
                                   market_success_at=latest_market_success(), trigger=args.trigger)
-    persist(report, state); print(json.dumps(report, indent=2, sort_keys=True)); return code
+    persist(report, state)
+    print(json.dumps(report, indent=2, sort_keys=True))
+
+    futures = run_command([
+        sys.executable,
+        "scripts/futures/run_fast_futures_scheduler.py",
+        "--trigger",
+        "futures-scheduler",
+    ])
+    if futures.stdout:
+        print(futures.stdout, end="" if futures.stdout.endswith("\n") else "\n")
+    if futures.stderr:
+        print(futures.stderr, file=sys.stderr, end="" if futures.stderr.endswith("\n") else "\n")
+
+    return code
 
 
 if __name__ == "__main__":
