@@ -964,20 +964,28 @@ function scheduleFor(row){
 
 function nextGameMarkup(row){
   const g=row.next_game;
-  if(!g)return'<span class="muted">Season complete</span>';
+  if(!g)return '<span class="neutral">—</span>';
 
   const opp=rowForTeam(g.opponent);
   const site=g.site==='AWAY'?'@':g.site==='N'?'vs*':'vs';
-  const oppRank=opp?.overall_rank??opp?.rank;
-  const rankLabel=hasNumber(oppRank)
-    ? `<span class="nextOppRank ${rankClass(oppRank)}">#${Number(oppRank)}</span> `
-    : '';
+  const opponentRank=opp&&hasNumber(opp.rank)?Number(opp.rank):null;
+  const rankLabel=opponentRank!=null?`<span class="${rankClass(opponentRank)}">${opponentRank}</span> `:'';
+
+  const rowProb=hasNumber(g.win_probability)?Number(g.win_probability):null;
+  const probabilityText=rowProb!=null
+    ? `${esc(row.team||'Team')} win %: ${pct(rowProb)}`
+    : 'Win probability unavailable';
+  const probabilityStyle=rowProb==null
+    ? 'neutral'
+    : rowProb>=0.5
+      ? 'good'
+      : 'teamUnderdogProbability';
 
   return `<div class="nextGameCell">
     ${teamLogo(opp,'oppLogo')}
     <span class="nextGameIdentity">
       <b>${site} ${rankLabel}${esc(g.opponent)}</b>
-      <small class="${probabilityClass(g.win_probability)}">${pct(g.win_probability)} win</small>
+      <small class="${probabilityStyle}">${probabilityText}</small>
     </span>
   </div>`;
 }
@@ -1931,45 +1939,228 @@ function freshnessCell(field,book,label){
   const evidence=latestBookEvidence(field,book);
 
   if(!evidence){
-    return `<span class="bookFreshCell stale"><small>${label}</small><b>—</b></span>`;
+    return `<span class="bookFreshCell stale"><b>—</b></span>`;
   }
 
-  return `<span class="bookFreshCell current">
-    <small>${label}</small>
-    <b>${evidence.kind==='exact'?fmtExact(evidence.value):fmtObserved(evidence.value)}</b>
-  </span>`;
+  let display='—';
+
+  if(evidence.kind==='exact'){
+    const d=new Date(evidence.value);
+    display=Number.isNaN(d.getTime())
+      ? '—'
+      : d.toLocaleTimeString('en-US',{
+          hour:'numeric',
+          minute:'2-digit',
+          timeZone:'America/New_York'
+        });
+  }else{
+    const d=new Date(`${evidence.value}T12:00:00`);
+    display=Number.isNaN(d.getTime())
+      ? esc(evidence.value)
+      : d.toLocaleDateString('en-US',{
+          month:'short',
+          day:'numeric'
+        });
+  }
+
+  return `<span class="bookFreshCell current"><b>${display}</b></span>`;
 }
 
+
+function compactFreshTime(value){
+  if(!value)return '—';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return '—';
+  return d.toLocaleString('en-US',{
+    month:'short',
+    day:'numeric',
+    hour:'numeric',
+    minute:'2-digit',
+    timeZone:'America/New_York'
+  }).replace(',', ' ·')+' ET';
+}
+
+function latestFuturesMarketTime(){
+  const exact=[];
+  const dated=[];
+
+  ['win_quotes','title_quotes','playoff_quotes','national_title_quotes'].forEach(field=>{
+    BOOKS.forEach(book=>{
+      const evidence=latestBookEvidence(field,book);
+      if(!evidence)return;
+
+      if(evidence.kind==='exact'){
+        const ms=new Date(evidence.value).getTime();
+        if(Number.isFinite(ms))exact.push(ms);
+      }else if(evidence.kind==='date'){
+        const ms=new Date(`${evidence.value}T00:00:00-04:00`).getTime();
+        if(Number.isFinite(ms))dated.push(ms);
+      }
+    });
+  });
+
+  const values=exact.length?exact:dated;
+  return values.length?new Date(Math.max(...values)).toISOString():null;
+}
+
+function compactModelStatus(){
+  const holder=document.getElementById('modelFreshRows');
+  if(!holder)return;
+
+  const mf=D?.model_freshness||{};
+  const season=mf.season_simulation||{};
+  const cfp=mf.playoff_simulation||{};
+  const baseline=D?.weekly_baseline||{};
+
+  const shortTime=value=>{
+    if(!value)return '—';
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime()))return '—';
+    return d.toLocaleTimeString('en-US',{
+      hour:'numeric',
+      minute:'2-digit',
+      timeZone:'America/New_York'
+    });
+  };
+
+  const baselineDate=baseline.checkpoint_date
+    ? new Date(`${baseline.checkpoint_date}T12:00:00`).toLocaleDateString('en-US',{
+        month:'short',
+        day:'numeric'
+      }).toUpperCase()
+    : '';
+
+  const baselineText=baseline.status==='available'
+    ? `W${baseline.prior_week}${baselineDate?` · ${baselineDate}`:''}`
+    : 'Unavailable';
+
+  holder.innerHTML=`
+    <div class="compactModelTable">
+      <div class="compactModelHeader">
+        <span>SOURCE</span>
+        <span>WEIGHT</span>
+        <span>MODEL RUN</span>
+        <span>TIME</span>
+      </div>
+
+      <div class="compactModelRow">
+        <span>SP+</span>
+        <b>25%</b>
+        <span>SEASON SIM</span>
+        <b>${shortTime(season.built_at)}</b>
+      </div>
+
+      <div class="compactModelRow">
+        <span>FPI</span>
+        <b>25%</b>
+        <span>CFP SIM</span>
+        <b>${shortTime(cfp.built_at)}</b>
+      </div>
+
+      <div class="compactModelRow">
+        <span>TEAMRANKINGS</span>
+        <b>25%</b>
+        <span></span>
+        <b></b>
+      </div>
+
+      <div class="compactModelRow sagarinNoteRow">
+        <span>SAGARIN</span>
+        <b>25%</b>
+        <span class="modelMovementInline">
+          Ratings/rank movement compares current values with the post–Week ${baseline.prior_week ?? '—'} reference baseline${baselineDate ? ` captured ${baselineDate}` : ''}.
+        </span>
+        <b></b>
+      </div>
+    </div>
+  `;
+}
 function renderSportsbookFreshness(){
   const holder=document.getElementById('marketFreshRows');
   if(!holder)return;
 
-  holder.innerHTML=`<div class="bookFreshHeader">
-    <span>BOOK</span><span>WIN TOTAL</span><span>CONF</span><span>CFP</span><span>TITLE</span>
-  </div>
-  ${BOOKS.map(book=>`<div class="bookFreshRow">
-    <span class="bookFreshLogo">${bookLogo(book)}</span>
-    ${freshnessCell('win_quotes',book,'WT')}
-    ${freshnessCell('title_quotes',book,'CONF')}
-    ${freshnessCell('playoff_quotes',book,'CFP')}
-    ${freshnessCell('national_title_quotes',book,'TITLE')}
-  </div>`).join('')}`;
+  const latest=latestFuturesMarketTime();
+  const qa=D?.market_qa||{};
+  const qaStatus=String(qa.status||'unknown').toUpperCase();
+  const warningCount=Array.isArray(qa.warnings)?qa.warnings.length:0;
+  const errorCount=Array.isArray(qa.errors)?qa.errors.length:0;
 
-  const qa=D.market_qa||{};
+  let qaClass='current';
+  if(errorCount>0 || qaStatus==='FAIL' || qaStatus==='FAILED')qaClass='stale';
+  else if(warningCount>0 || qaStatus==='WARN' || qaStatus==='WARNING')qaClass='warn';
+
   const status=document.getElementById('marketFreshStatus');
-
   if(status){
-    status.textContent=qa.status==='pass'?'CURRENT':qa.status==='warn'?'CHECK':'STALE';
-    status.className=`freshStatus ${qa.status==='pass'?'current':qa.status==='warn'?'warn':'stale'}`;
+    status.textContent=qaClass==='current'?'CURRENT':qaClass==='warn'?'CHECK':'STALE';
+    status.className=`freshStatus ${qaClass}`;
   }
 
-  const qaRow=document.getElementById('marketQaRow');
-  if(qaRow){
-    qaRow.innerHTML=`<div class="freshRow">
-      <span>MARKET QA</span>
-      <span>${esc(String(qa.status||'unknown').toUpperCase())}${qa.warnings?.length?` · ${qa.warnings.length} warning${qa.warnings.length===1?'':'s'}`:' · no warnings'}</span>
-    </div>`;
-  }
+  const compactEvidence=(field,book)=>{
+    const evidence=latestBookEvidence(field,book);
+    if(!evidence)return '—';
+
+    let value=evidence.value;
+
+    if(
+      evidence.kind!=='exact' &&
+      (field==='title_quotes' || field==='win_quotes') &&
+      qa.generated_at
+    ){
+      value=qa.generated_at;
+    }
+
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime()))return '—';
+
+    return d.toLocaleTimeString('en-US',{
+      hour:'numeric',
+      minute:'2-digit',
+      timeZone:'America/New_York'
+    });
+  };
+
+  const qaText=errorCount
+    ? `FAIL ${errorCount}`
+    : warningCount
+      ? `WARN ${warningCount}`
+      : 'PASS';
+
+  holder.innerHTML=`
+    <div class="compactMarketLead">
+      <span>LAST MARKET REFRESH</span>
+      <b>${latest?compactFreshTime(latest):'—'}</b>
+    </div>
+
+    <div class="compactMarketTable">
+      <div class="compactMarketHeader">
+        <span>BOOK</span>
+        <span>WIN TOTAL</span>
+        <span>CONF TITLE</span>
+        <span>CFP</span>
+        <span>NAT TITLE</span>
+      </div>
+
+      ${BOOKS.map(book=>`
+        <div class="compactMarketRow">
+          <span class="compactMarketBook">${bookLogo(book)}</span>
+          <b>${compactEvidence('win_quotes',book)}</b>
+          <b>${compactEvidence('title_quotes',book)}</b>
+          <b>${compactEvidence('playoff_quotes',book)}</b>
+          <b>${compactEvidence('national_title_quotes',book)}</b>
+        </div>
+      `).join('')}
+    </div>
+
+    <div
+      class="compactMarketQa ${qaClass}"
+      title="${esc((qa.warnings||[]).join(' | ') || 'No market QA warnings')}"
+    >
+      QA ${qaText}
+    </div>
+  `;
+
+  const legacyQa=document.getElementById('marketQaRow');
+  if(legacyQa)legacyQa.innerHTML='';
 }
 
 function installControls(){
@@ -2148,7 +2339,22 @@ function installStyles(){
       text-align:left;
       width:100%;
     }
-    .futTeamLogo{
+
+    .futTeamLogo,
+    .oppLogo{
+      background:#fff;
+      border-radius:7px;
+      padding:3px;
+      box-sizing:border-box;
+      box-shadow:0 0 0 1px rgba(255,255,255,.16);
+    }
+
+    .teamUnderdogProbability{
+      color:#ffd166!important;
+      font-weight:900!important;
+    }
+
+.futTeamLogo{
       width:30px;
       height:30px;
       object-fit:contain;
@@ -2482,7 +2688,7 @@ function installStyles(){
     .bookFreshHeader,
     .bookFreshRow{
       display:grid;
-      grid-template-columns:42px repeat(4,1fr);
+      grid-template-columns:44px repeat(4,minmax(0,1fr));
       gap:5px;
       align-items:center;
     }
@@ -2581,6 +2787,7 @@ function enhance(){
     };
   });
 
+  compactModelStatus();
   renderSportsbookFreshness();
 
   render=renderCommandCenter;
@@ -2770,7 +2977,574 @@ installSortControl();
         line-height:1.1!important;
       }
 
-      .freshnessGrid{
+
+
+    .freshnessGrid{
+      display:grid!important;
+      grid-template-columns:minmax(620px,1fr) minmax(650px,820px)!important;
+      gap:6px!important;
+      margin:3px 0 6px!important;
+      align-items:start!important;
+    }
+
+    .freshCard{
+      display:grid!important;
+      grid-template-columns:150px minmax(0,1fr)!important;
+      align-items:center!important;
+      min-height:32px!important;
+      padding:3px 8px!important;
+      border-radius:4px!important;
+      background:#0b1725!important;
+    }
+
+    .freshHead{
+      display:flex!important;
+      align-items:center!important;
+      justify-content:flex-start!important;
+      gap:8px!important;
+      margin:0!important;
+      min-width:0;
+    }
+
+    .freshHead strong{
+      font-size:11px!important;
+      letter-spacing:.06em!important;
+      white-space:nowrap;
+      color:#aebcd0;
+    }
+
+    .freshStatus{
+      font-size:10px!important;
+      font-weight:950!important;
+      white-space:nowrap;
+    }
+
+    .freshRows{
+      display:block!important;
+      min-width:0;
+    }
+
+
+    .compactModelAuthority{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:20px;
+      white-space:nowrap;
+      overflow:hidden;
+      margin-bottom:1px;
+    }
+
+    .compactModelAuthority span{
+      color:#8195ae;
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.05em;
+    }
+
+    .compactModelAuthority b{
+      color:#f3f7fc;
+      font-size:11px;
+      font-weight:950;
+    }
+
+    .compactMarketLead{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:18px;
+      margin-bottom:2px;
+    }
+
+    .compactMarketLead span{
+      color:#8195ae;
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.05em;
+    }
+
+    .compactMarketLead b{
+      color:#fff;
+      font-size:11px;
+      font-weight:950;
+    }
+
+
+    .compactModelTable{
+      display:grid;
+      gap:0;
+      width:max-content;
+    }
+
+    .compactModelHeader,
+    .compactModelRow{
+      display:grid;
+      grid-template-columns:105px 55px 105px 92px;
+      align-items:center;
+      gap:7px;
+      min-height:17px;
+      width:max-content;
+    }
+
+    .compactModelHeader{
+      color:#8195ae;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
+    .compactModelRow{
+      border-top:1px solid #203a55;
+      font-size:10px;
+    }
+
+    .compactModelRow>span{
+      color:#dce7f5;
+      font-weight:850;
+    }
+
+    .compactModelRow>b{
+      color:#fff;
+      font-size:10px;
+      font-weight:950;
+    }
+
+    .sagarinNoteRow{
+      align-items:start!important;
+    }
+
+    .modelMovementInline{
+      grid-column:3 / 5!important;
+      color:#8195ae!important;
+      font-size:8px!important;
+      font-weight:750!important;
+      line-height:1.15!important;
+      white-space:normal!important;
+      max-width:210px!important;
+      padding-top:1px!important;
+    }
+
+    .modelMovementNote{
+      margin-top:5px;
+      padding-top:4px;
+      border-top:1px solid #203a55;
+      color:#8195ae;
+      font-size:9px;
+      font-weight:750;
+      line-height:1.2;
+      white-space:nowrap;
+    }
+
+    .compactMarketTable{
+      display:grid;
+      gap:0;
+    }
+
+    .compactMarketHeader,
+    .compactMarketRow{
+      display:grid;
+      grid-template-columns:38px repeat(4,minmax(76px,1fr));
+      align-items:center;
+      gap:5px;
+      min-height:17px;
+    }
+
+    .compactMarketHeader{
+      color:#8195ae;
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
+    .compactMarketRow{
+      border-top:1px solid #203a55;
+    }
+
+    .compactMarketRow b{
+      color:#eef5ff;
+      font-size:10px;
+      font-weight:900;
+    }
+
+    .compactMarketBook{
+      display:flex;
+      align-items:center;
+    }
+
+    .compactMarketBook .futBookLogo{
+      width:19px!important;
+      height:15px!important;
+      padding:1px!important;
+    }
+
+    .compactMarketQa{
+      position:absolute;
+      right:9px;
+      top:5px;
+      font-size:9px;
+      font-weight:950;
+    }
+
+    .marketStatusCard{
+      position:relative;
+    }
+
+    .compactMarketQa.current{color:var(--green)}
+    .compactMarketQa.warn{color:#ffd166}
+
+    .compactMarketQa.stale{color:var(--red)}
+
+    .freshnessGrid{
+      display:grid!important;
+      grid-template-columns:660px max-content!important;
+      gap:6px!important;
+      align-items:stretch!important;
+      justify-content:start!important;
+      margin:3px 0 6px!important;
+    }
+
+    .modelStatusCard,
+    .marketStatusCard{
+      box-sizing:border-box!important;
+      height:112px!important;
+      min-height:112px!important;
+      max-height:112px!important;
+      align-self:stretch!important;
+    }
+
+    .modelStatusCard{
+      display:grid!important;
+      grid-template-columns:142px auto!important;
+      align-items:start!important;
+      width:max-content!important;
+      min-width:0!important;
+    }
+
+    .modelStatusCard .freshHead{
+      padding-top:3px!important;
+    }
+
+    #modelFreshRows{
+      display:block!important;
+      min-width:0!important;
+      overflow:visible!important;
+    }
+
+    .modelSourceGrid{
+      display:grid!important;
+      grid-template-columns:72px 72px 118px 78px!important;
+      gap:8px!important;
+      align-items:center!important;
+      justify-content:start!important;
+      min-width:0!important;
+    }
+
+    .modelSourceGrid>span,
+    .modelTimingGrid>span{
+      display:flex!important;
+      align-items:baseline!important;
+      gap:5px!important;
+      white-space:nowrap!important;
+      min-width:0!important;
+    }
+
+    .modelSourceGrid small,
+    .modelTimingGrid small{
+      color:#8195ae!important;
+      font-size:9px!important;
+      font-weight:900!important;
+      letter-spacing:.04em!important;
+    }
+
+    .modelSourceGrid b{
+      color:#f4f7fb!important;
+      font-size:12px!important;
+      font-weight:950!important;
+    }
+
+    .modelTimingGrid{
+      display:grid!important;
+      grid-template-columns:145px 135px 170px!important;
+      gap:8px!important;
+      align-items:center!important;
+      justify-content:start!important;
+      border-top:1px solid #29435e!important;
+      padding-top:6px!important;
+    }
+
+    .modelTimingGrid b{
+      color:#fff!important;
+      font-size:11px!important;
+      font-weight:950!important;
+    }
+
+    .marketStatusCard{
+      width:max-content!important;
+      min-width:0!important;
+      max-width:none!important;
+      grid-template-columns:142px auto!important;
+    }
+
+    .marketStatusCard #marketFreshRows{
+      width:auto!important;
+      min-width:0!important;
+    }
+
+    .compactMarketTable{
+      width:max-content!important;
+    }
+
+    .compactMarketHeader,
+    .compactMarketRow{
+      grid-template-columns:32px 74px 76px 66px 74px!important;
+      gap:6px!important;
+      width:max-content!important;
+    }
+
+    .compactMarketLead{
+      width:max-content!important;
+      min-width:0!important;
+    }
+
+    .compactMarketLead b{
+      margin-right:4px!important;
+    }
+
+    .compactMarketQa{
+      right:7px!important;
+      top:5px!important;
+    }
+
+
+    .compactModelStrip,
+    .compactMarketStrip{
+      display:flex;
+      align-items:center;
+      gap:0;
+      min-height:24px;
+      overflow:hidden;
+    }
+
+    .compactStatusItem{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      min-height:22px;
+      padding:0 12px;
+      border-left:1px solid #29435e;
+      white-space:nowrap;
+    }
+
+    .compactStatusItem:first-child{
+      border-left:0;
+    }
+
+    .compactStatusItem small{
+      color:#8195ae;
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.05em;
+    }
+
+    .compactStatusItem b{
+      color:#eef5ff;
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .compactPrimary b{
+      color:#fff;
+    }
+
+    .compactBook{
+      display:inline-flex;
+      align-items:center;
+    }
+
+    .compactBook .futBookLogo{
+      width:20px!important;
+      height:16px!important;
+      padding:2px!important;
+      border-radius:4px!important;
+    }
+
+    .compactStatusItem b.current{
+      color:var(--green);
+    }
+
+    .compactStatusItem b.warn{
+      color:#ffd166;
+    }
+
+    .compactQa.current b{
+      color:var(--green);
+    }
+
+    .compactQa.warn b{
+      color:#ffd166;
+    }
+
+    .compactQa.stale b{
+      color:var(--red);
+    }
+
+    .freshnessGrid{
+      grid-template-columns:minmax(360px,.62fr) minmax(700px,1.38fr)!important;
+      align-items:start!important;
+      gap:7px!important;
+      margin:4px 0 7px!important;
+    }
+
+    .freshCard{
+      padding:7px 9px!important;
+      align-self:start!important;
+    }
+
+    .modelStatusCard{
+      min-height:0!important;
+    }
+
+    .marketStatusCard{
+      min-height:0!important;
+    }
+
+    #modelFreshRows{
+      display:grid!important;
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:9px!important;
+    }
+
+    #modelFreshRows .freshRow{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:1px!important;
+      align-content:start!important;
+      min-height:0!important;
+      font-size:11px!important;
+      line-height:1.2!important;
+    }
+
+    #modelFreshRows .freshRow span:first-child{
+      font-size:9px!important;
+      color:#91a8c5!important;
+      font-weight:900!important;
+    }
+
+    #modelFreshRows .freshRow span:last-child{
+      text-align:left!important;
+      white-space:normal!important;
+      overflow:visible!important;
+      font-size:11px!important;
+      color:#fff!important;
+      font-weight:900!important;
+    }
+
+    .freshHead{
+      margin-bottom:7px!important;
+    }
+
+    .freshHead strong{
+      font-size:11px!important;
+      letter-spacing:.07em!important;
+    }
+
+    .freshStatus{
+      font-size:10px!important;
+    }
+
+    .freshRows{
+      gap:5px!important;
+    }
+
+    .freshRow{
+      min-height:22px;
+      font-size:12px!important;
+      line-height:1.3!important;
+    }
+
+    .freshRow span:first-child{
+      color:#9fb1ca!important;
+      font-weight:800!important;
+    }
+
+    .freshRow span:last-child{
+      color:#f2f6fb!important;
+      font-weight:850!important;
+    }
+
+    .marketFreshnessLead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin:0 0 5px;
+      padding:4px 7px;
+      border:1px solid #315c88;
+      border-radius:7px;
+      background:#102949;
+    }
+
+    .marketFreshnessLead span{
+      color:#9fb1ca;
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.07em;
+      text-transform:uppercase;
+    }
+
+    .marketFreshnessLead b{
+      color:#fff;
+      font-size:11px;
+      font-weight:950;
+    }
+
+    .bookFreshRow{
+      min-height:21px!important;
+      border-top:1px solid #17345c;
+    }
+
+    .bookFreshLogo{
+      min-width:40px!important;
+    }
+
+    .bookFreshLogo img,
+    .bookFreshLogo .futBookLogo{
+      width:21px!important;
+      height:17px!important;
+    }
+
+    .freshTime,
+    .bookFreshTime{
+      color:#f2f6fb!important;
+    }
+
+    .marketQaRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-top:1px solid #17345c;
+      margin-top:4px;
+      padding-top:5px;
+      color:#9fb1ca;
+      font-size:11px;
+      font-weight:850;
+    }
+
+    .marketQaBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border:1px solid #755f26;
+      border-radius:999px;
+      padding:3px 8px;
+      color:#ffd166;
+      background:#ffd16612;
+      font-size:10px;
+      font-weight:950;
+    }
+
+.freshnessGrid{
         gap:6px!important;
         margin:3px 0 6px!important;
       }
