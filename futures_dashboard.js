@@ -1116,8 +1116,8 @@ function sortValue(row,key){
     return scenarioTableDelta(row);
   }
 
-  if(key==='leverage'){
-    return leverageForRow(row)?.value??null;
+  if(key==='swing'){
+    return swingForRow(row)?.value??null;
   }
 
 
@@ -1206,51 +1206,50 @@ function scenarioMetricForMode(){
   return'wins';
 }
 
-function leverageForRow(row){
+function swingForRow(row){
   const item=state.scenario.leverageByTeam?.[row.team];
   if(!item)return null;
 
-  if(state.mode==='title'){
-    return {
-      value:item.conference_leverage,
-      label:item.conference_label,
-      display:`${(item.conference_leverage*100).toFixed(1)} pp`,
-      upset:item.upset_risk
-    };
-  }
+  let value=null;
 
-  if(state.mode==='playoff'){
-    return {
-      value:item.cfp_leverage,
-      label:item.cfp_label,
-      display:`${(item.cfp_leverage*100).toFixed(1)} pp`,
-      upset:item.upset_risk
-    };
+  if(state.mode==='title'){
+    value=Math.abs(
+      item.win_branch.conference_title_prob-
+      item.loss_branch.conference_title_prob
+    );
+  }else if(state.mode==='playoff'){
+    value=Math.abs(
+      item.win_branch.playoff_prob-
+      item.loss_branch.playoff_prob
+    );
+  }else{
+    return null;
   }
 
   return {
-    value:item.projected_wins_leverage,
-    label:item.win_label,
-    display:`${item.projected_wins_leverage.toFixed(3)} W`,
-    upset:item.upset_risk
+    value,
+    display:`${(value*100).toFixed(1)}%`
   };
 }
 
-function leverageMarkup(row){
-  const item=leverageForRow(row);
+function swingClass(value){
+  const pctValue=Number(value)*100;
 
-  if(!item)return'<span class="leverageUnavailable">—</span>';
+  if(pctValue>=20)return'swing-red';
+  if(pctValue>=10)return'swing-yellow';
+  if(pctValue>=5)return'swing-green';
+  return'swing-muted';
+}
 
-  const cls=String(item.label||'').toLowerCase();
+function swingMarkup(row){
+  const item=swingForRow(row);
 
-  return `<div class="leverageCell">
-    <b class="leverageBadge leverage-${cls}">
-      ${esc(item.label)}
+  if(!item)return'<span class="swingUnavailable">—</span>';
+
+  return `<div class="swingCell">
+    <b class="swingValue ${swingClass(item.value)}">
+      ${esc(item.display)}
     </b>
-    <small>${esc(item.display)}</small>
-    ${item.upset
-      ? '<strong class="upsetRiskBadge">UPSET RISK</strong>'
-      : ''}
   </div>`;
 }
 
@@ -1301,7 +1300,13 @@ function scenarioTableDeltaMarkup(row){
 
 function scenarioExtraHeaders(){
   const active=scenarioActive();
-  const leverage=state.scenario.loaded;
+  const showSwing=
+    state.scenario.loaded &&
+    (state.mode==='title'||state.mode==='playoff');
+
+  const swingLabel=state.mode==='title'
+    ? 'Conf Swing'
+    : 'CFP Swing';
 
   return `${
     active
@@ -1309,15 +1314,17 @@ function scenarioExtraHeaders(){
          <th>${sortable('Δ','scenario_delta')}</th>`
       : ''
   }${
-    leverage
-      ? `<th>${sortable('Leverage','leverage')}</th>`
+    showSwing
+      ? `<th>${sortable(swingLabel,'swing')}</th>`
       : ''
   }`;
 }
 
 function scenarioExtraCells(row){
   const active=scenarioActive();
-  const leverage=state.scenario.loaded;
+  const showSwing=
+    state.scenario.loaded &&
+    (state.mode==='title'||state.mode==='playoff');
 
   return `${
     active
@@ -1325,8 +1332,8 @@ function scenarioExtraCells(row){
          <td class="scenarioDeltaCell">${scenarioTableDeltaMarkup(row)}</td>`
       : ''
   }${
-    leverage
-      ? `<td class="leverageTableCell">${leverageMarkup(row)}</td>`
+    showSwing
+      ? `<td class="swingTableCell">${swingMarkup(row)}</td>`
       : ''
   }`;
 }
@@ -1784,8 +1791,8 @@ function syncSortControl(){
     select.value='model_wins';
   }else if(state.sortKey===sortControlEdgeKey()&&state.sortDir==='desc'){
     select.value='edge';
-  }else if(state.sortKey==='leverage'&&state.sortDir==='desc'){
-    select.value='leverage';
+  }else if(state.sortKey==='swing'&&state.sortDir==='desc'){
+    select.value='swing';
   }else{
     select.value='custom';
   }
@@ -1802,7 +1809,7 @@ function installSortControl(){
       <option value="default">Default</option>
       <option value="edge">Edge</option>
       <option value="model_wins">Model Wins</option>
-      <option value="leverage">Leverage</option>
+      <option value="swing">Postseason Swing</option>
       <option value="custom" hidden>Column Sort</option>
     </select>`;
 
@@ -1819,9 +1826,14 @@ function installSortControl(){
     }else if(value==='model_wins'){
       state.sortKey='model_wins';
       state.sortDir='desc';
-    }else if(value==='leverage'){
-      state.sortKey='leverage';
-      state.sortDir='desc';
+    }else if(value==='swing'){
+      if(state.mode==='wins'){
+        state.sortKey='rank';
+        state.sortDir='asc';
+      }else{
+        state.sortKey='swing';
+        state.sortDir='desc';
+      }
     }else{
       state.sortKey='rank';
       state.sortDir='asc';
@@ -3537,73 +3549,55 @@ installSortControl();
     .scenarioDeltaUp{color:var(--green)!important}
     .scenarioDeltaDown{color:var(--red)!important}
     .scenarioDeltaFlat{color:var(--muted)!important}
-    .leverageTableCell{
-      min-width:92px;
+    .swingTableCell{
+      min-width:86px;
     }
-    .leverageCell{
-      display:grid;
-      justify-items:center;
-      gap:2px;
-      line-height:1.05;
+    .swingCell{
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
-    .leverageCell small{
-      color:#c1d2e6;
-      font-size:8px;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .leverageBadge{
+    .swingValue{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-width:52px;
-      border:1px solid #31537b;
+      min-width:58px;
       border-radius:999px;
-      padding:3px 6px;
-      font-size:8px;
-      font-weight:950;
-      letter-spacing:.04em;
-    }
-    .leverage-low{
-      color:#8ea7c3;
-      background:#0b1c35;
-    }
-    .leverage-med{
-      color:#f4cd4b;
-      background:#2b2715;
-      border-color:#6d6024;
-    }
-    .leverage-high{
-      color:#7df1bd;
-      background:#102d35;
-      border-color:#26755d;
-    }
-    .leverage-extreme{
-      color:#fff;
-      background:#8b2440;
-      border-color:#ff6686;
-    }
-    .upsetRiskBadge{
-      margin-top:2px;
-      color:#ffb467;
-      background:#3a2412;
-      border:1px solid #805329;
-      border-radius:4px;
-      padding:2px 4px;
-      font-size:7px;
+      padding:4px 7px;
+      font-size:9px;
       font-weight:950;
       white-space:nowrap;
     }
-    .leverageUnavailable{
+    .swing-muted{
+      color:#8ea7c3;
+      background:#0b1c35;
+      border:1px solid #31537b;
+    }
+    .swing-green{
+      color:#7df1bd;
+      background:#102d35;
+      border:1px solid #26755d;
+    }
+    .swing-yellow{
+      color:#f4cd4b;
+      background:#2b2715;
+      border:1px solid #6d6024;
+    }
+    .swing-red{
+      color:#fff;
+      background:#8b2440;
+      border:1px solid #ff6686;
+    }
+    .swingUnavailable{
       color:var(--muted);
     }
 
     @media(max-width:900px){
-      .leverageTableCell{
+      .swingTableCell{
         min-width:0;
       }
-      .leverageCell{
-        justify-items:end;
+      .swingCell{
+        justify-content:flex-end;
       }
     }
   `;
