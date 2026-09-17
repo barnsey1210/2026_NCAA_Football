@@ -147,6 +147,34 @@ button,select{
   flex:0 0 auto;
 }
 
+
+.ratings-model-notes{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+  max-width:760px;
+  min-width:0;
+  margin-right:2px;
+}
+.ratings-model-note{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  color:#8ea2b4;
+  font-size:8px;
+  font-weight:750;
+  line-height:1.15;
+  white-space:nowrap;
+}
+.ratings-model-note-label{
+  flex:0 0 auto;
+  color:#59dfff;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.06em;
+}
 .ratings-model-mode .hfa-note{
   white-space:nowrap;
 }
@@ -801,6 +829,44 @@ td.cell-hot-edge-lost{
 }
 .snapshot-postgame-card.win .snapshot-postgame-result{color:#72e6b0}
 .snapshot-postgame-card.loss .snapshot-postgame-result{color:#ff9199}
+
+.snapshot-latest-move-card{
+  margin:0 0 7px;
+  padding:7px 8px;
+  border:1px solid rgba(255,190,75,.38);
+  background:rgba(128,86,24,.18);
+  border-radius:4px;
+}
+.snapshot-latest-move-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:3px;
+}
+.snapshot-latest-move-head span{
+  color:#ffd166;
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.07em;
+}
+.snapshot-latest-move-head time{
+  color:#aab7c3;
+  font-size:8px;
+  font-weight:700;
+}
+.snapshot-latest-move-meta{
+  color:#66dcff;
+  font-size:8px;
+  font-weight:900;
+  margin-bottom:2px;
+}
+.snapshot-latest-move-value{
+  color:#ffffff;
+  font-size:10px;
+  font-weight:950;
+  line-height:1.25;
+}
 .snapshot-book-grid{
   display:grid;
   grid-template-columns:1fr;
@@ -928,7 +994,7 @@ td.cell-hot-edge-lost{
     inset 0 2px rgba(66,217,255,.82),
     inset 0 -2px rgba(66,217,255,.82);
 }
-.game-start.game-selected{filter:brightness(1.10)}
+.game-start.game-selected{}
 
 .matrix-scroll{
   flex:1;
@@ -1351,6 +1417,59 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .model-tooltip{position:relative;display:inline-flex;justify-content:center;cursor:help}
+
+
+.viewport-tooltip-panel{
+  display:block!important;
+  position:fixed!important;
+  visibility:visible;
+  opacity:1!important;
+  pointer-events:none!important;
+  z-index:10000!important;
+}
+.best-col:hover,
+.best-col:focus-within{
+  position:relative;
+  z-index:250!important;
+}
+.best-col:hover .model-tooltip,
+.best-col:focus-within .model-tooltip{
+  position:relative;
+  z-index:260!important;
+}
+.best-col .model-tooltip-panel{
+  z-index:300!important;
+}
+.best-latest-move{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(105,145,173,.28);
+}
+.best-latest-move-label{
+  color:#59dfff;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.best-latest-move-book{
+  color:#dce8f0;
+  font-size:8px;
+  font-weight:850;
+}
+.best-latest-move-value{
+  color:#ffffff;
+  font-size:9px;
+  font-weight:950;
+  white-space:nowrap;
+}
+.best-latest-move-time{
+  color:#8da3b4;
+  font-size:8px;
+  font-weight:700;
+}
 .best-tooltip-value{
   color:var(--green)!important;
   font-weight:950;
@@ -1990,6 +2109,17 @@ tr:hover td.context-group{background:#202d39}
     </div>
 
     <div class="ratings-model-mode">
+      <div class="ratings-model-notes">
+        <div class="ratings-model-note">
+          <span class="ratings-model-note-label">BEST MOVE ALERT</span>
+          <span>Red Spread/Total Best = change detected within last 30 min</span>
+        </div>
+        <div class="ratings-model-note">
+          <span class="ratings-model-note-label">AUTO MODEL</span>
+          <span>Spread: SP+ 25% · FPI 25% · TR 25% · DRatings 25% · Total: SP+ 40% · Massey 40% · DRatings 20%</span>
+        </div>
+      </div>
+
       <div class="model-mode-control">
         <span class="model-mode-label">MODEL</span>
         <button class="model-mode-btn operator-control active" id="modelAutoBtn" type="button" disabled>AUTO</button>
@@ -2086,10 +2216,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260917T160721Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260917T160721Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260917T160721Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260917T160721Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260917T165046Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260917T165046Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260917T165046Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json?v=20260917T165046Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -3213,32 +3343,75 @@ function modelTooltip(game, model, market){
 }
 
 function positionModelTooltip(trigger){
-  const panel = trigger?.querySelector('.model-tooltip-panel');
-  if(!panel) return;
+  const source=trigger?.querySelector('.model-tooltip-panel');
+  if(!source) return;
+
+  closeModelTooltip(trigger);
   trigger.classList.add('open');
-  panel.style.visibility = 'hidden';
-  panel.style.left = '0px';
-  panel.style.top = '0px';
-  const rect = trigger.getBoundingClientRect();
-  const width = panel.offsetWidth;
-  const height = panel.offsetHeight;
-  const gap = 7;
-  const margin = 8;
-  let left = rect.left + (rect.width - width) / 2;
-  left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
-  let top = rect.top - height - gap;
-  if(top < margin){
-    top = rect.bottom + gap;
+
+  const panel=source.cloneNode(true);
+  panel.classList.add('viewport-tooltip-panel');
+
+  document.body.appendChild(panel);
+  trigger._viewportTooltip=panel;
+
+  panel.style.position='fixed';
+  panel.style.display='block';
+  panel.style.visibility='hidden';
+  panel.style.opacity='1';
+  panel.style.left='0px';
+  panel.style.top='0px';
+  panel.style.right='auto';
+  panel.style.bottom='auto';
+  panel.style.transform='none';
+  panel.style.zIndex='10000';
+  panel.style.pointerEvents='none';
+
+  const rect=trigger.getBoundingClientRect();
+  const width=panel.offsetWidth;
+  const height=panel.offsetHeight;
+  const gap=8;
+  const margin=8;
+
+  let left=rect.left+(rect.width-width)/2;
+  left=Math.max(
+    margin,
+    Math.min(left,window.innerWidth-width-margin)
+  );
+
+  const roomAbove=rect.top-margin;
+  const roomBelow=window.innerHeight-rect.bottom-margin;
+
+  let top;
+
+  // Prefer below for top rows; otherwise use whichever side fully fits.
+  if(roomBelow>=height+gap){
+    top=rect.bottom+gap;
+  }else if(roomAbove>=height+gap){
+    top=rect.top-height-gap;
+  }else{
+    top=Math.max(
+      margin,
+      Math.min(
+        rect.bottom+gap,
+        window.innerHeight-height-margin
+      )
+    );
   }
-  top = Math.max(margin, Math.min(top, window.innerHeight - height - margin));
-  panel.style.left = `${Math.round(left)}px`;
-  panel.style.top = `${Math.round(top)}px`;
-  panel.style.visibility = 'visible';
+
+  panel.style.left=`${Math.round(left)}px`;
+  panel.style.top=`${Math.round(top)}px`;
+  panel.style.visibility='visible';
 }
 
 function closeModelTooltip(trigger){
-  const panel = trigger?.querySelector('.model-tooltip-panel');
-  if(panel) panel.style.visibility = '';
+  const panel=trigger?._viewportTooltip;
+
+  if(panel){
+    panel.remove();
+    trigger._viewportTooltip=null;
+  }
+
   trigger?.classList.remove('open');
 }
 
@@ -3616,6 +3789,64 @@ const BEST_TOOLTIP_BOOKS = [
   ['Pinnacle','PINN']
 ];
 
+function recentBestMovePanel(game,market){
+  const event=recentBestEvent(game,market);
+  if(!event) return '';
+
+  const p=event.payload || {};
+  const oldBest=p.old_best || {};
+  const newBest=p.new_best || {};
+
+  const oldBook=p.old_book || oldBest.book || null;
+  const newBook=p.new_book || newBest.book || event.book || null;
+
+  const oldLine=Number(event.old_line);
+  const newLine=Number(event.new_line);
+  const oldPrice=Number(event.old_price);
+  const newPrice=Number(event.new_price);
+
+  const haveOldLine=Number.isFinite(oldLine);
+  const haveNewLine=Number.isFinite(newLine);
+  const haveOldPrice=Number.isFinite(oldPrice);
+  const haveNewPrice=Number.isFinite(newPrice);
+
+  if(!haveOldLine && !haveNewLine && !haveOldPrice && !haveNewPrice) return '';
+
+  const lineText=(line)=>{
+    if(!Number.isFinite(line)) return '—';
+    return market==='spread' ? fmtLine(line) : Number(line).toFixed(1);
+  };
+
+  const priceText=(price)=>{
+    if(!Number.isFinite(price)) return '';
+    return ` ${fmtPrice(price) || ''}`;
+  };
+
+  const oldQuote=`${lineText(oldLine)}${priceText(oldPrice)}`.trim();
+  const newQuote=`${lineText(newLine)}${priceText(newPrice)}`.trim();
+
+  const oldLabel=oldBook ? (BOOK_ABBR[oldBook] || oldBook) : '';
+  const newLabel=newBook ? (BOOK_ABBR[newBook] || newBook) : '';
+
+  const bookLine=
+    oldLabel && newLabel && oldLabel!==newLabel
+      ? `${oldLabel} → ${newLabel}`
+      : (newLabel || oldLabel || '');
+
+  const timestamp=
+    event.observed_at ||
+    event.detected_at ||
+    event.created_at ||
+    '';
+
+  return `<span class="best-latest-move">
+    <span class="best-latest-move-label">LATEST MOVE</span>
+    ${bookLine ? `<span class="best-latest-move-book">${esc(bookLine)}</span>` : ''}
+    <span class="best-latest-move-value">${esc(oldQuote)} → ${esc(newQuote)}</span>
+    ${timestamp ? `<span class="best-latest-move-time">${esc(fmtDateTimeET(timestamp))}</span>` : ''}
+  </span>`;
+}
+
 function bestBookTooltip(game,market,side,bestQuote){
   if(!bestQuote) return '—';
 
@@ -3648,13 +3879,15 @@ function bestBookTooltip(game,market,side,bestQuote){
     </span>`;
   }).join('');
 
+  const latestMove=recentBestMovePanel(game,market);
+
   return `<span class="model-tooltip" data-no-game-select tabindex="0"
     onmouseenter="positionModelTooltip(this)"
     onmouseleave="closeModelTooltip(this)"
     onfocus="positionModelTooltip(this)"
     onblur="closeModelTooltip(this)">
       ${compactQuote(bestQuote,market,game,true)}
-      <span class="model-tooltip-panel" role="tooltip">${rows}</span>
+      <span class="model-tooltip-panel" role="tooltip">${rows}${latestMove}</span>
     </span>`;
 }
 
@@ -4066,6 +4299,57 @@ function bestChangeState(event){
   }
 
   return {kind:'OTHER',label:'BEST CHANGE',arrow:''};
+}
+
+function bestChangeTooltip(game,market){
+  const event=recentBestEvent(game,market);
+  if(!event) return '';
+
+  const p=event.payload || {};
+  const oldBest=p.old_best || {};
+  const newBest=p.new_best || {};
+
+  const oldBook=p.old_book || oldBest.book || null;
+  const newBook=p.new_book || newBest.book || event.book || null;
+
+  const oldLine=Number(event.old_line);
+  const newLine=Number(event.new_line);
+  const oldPrice=Number(event.old_price);
+  const newPrice=Number(event.new_price);
+
+  const lineText=(line)=>{
+    if(!Number.isFinite(line)) return '—';
+    return market==='spread'
+      ? fmtLine(line)
+      : Number(line).toFixed(1);
+  };
+
+  const priceText=(price)=>{
+    if(!Number.isFinite(price)) return '';
+    return ` (${price>0?'+':''}${price})`;
+  };
+
+  const oldQuote=`${lineText(oldLine)}${priceText(oldPrice)}`;
+  const newQuote=`${lineText(newLine)}${priceText(newPrice)}`;
+
+  const bookText=
+    oldBook && newBook && oldBook!==newBook
+      ? `${oldBook} → ${newBook}`
+      : (newBook || oldBook || 'Sportsbook unavailable');
+
+  const label=market==='spread'
+    ? 'LATEST SPREAD MOVE'
+    : 'LATEST TOTAL MOVE';
+
+  const timestamp=
+    event.observed_at || event.detected_at || event.created_at;
+
+  return [
+    label,
+    bookText,
+    `${oldQuote} → ${newQuote}`,
+    timestamp ? fmtDateTimeET(timestamp) : ''
+  ].filter(Boolean).join(' · ');
 }
 
 function bestSideText(event,side){
@@ -4936,25 +5220,35 @@ function renderMarketSnapshot(game,gameData){
 
     if(!rows.length) return null;
 
-    const first=rows[0];
-    const last=rows[rows.length-1];
+    const distinct=[];
+    for(const row of rows){
+      const prev=distinct[distinct.length-1];
+      const same=
+        prev &&
+        Number(prev.line)===Number(row.line) &&
+        Number(prev.price)===Number(row.price);
 
-    const lineChanged=Number(first.line)!==Number(last.line);
-
-    let value;
-    if(lineChanged){
-      value=market==='spread'
-        ? `${fmtLine(first.line)} → ${fmtLine(last.line)}${priceText(last.price)}`
-        : `${Number(first.line).toFixed(1)} → ${Number(last.line).toFixed(1)}${priceText(last.price)}`;
-    }else{
-      value=market==='spread'
-        ? `${fmtLine(last.line)}${priceText(last.price)}`
-        : `${Number(last.line).toFixed(1)}${priceText(last.price)}`;
+      if(!same) distinct.push(row);
     }
 
+    const last=distinct[distinct.length-1];
+    const previous=distinct.length>1 ? distinct[distinct.length-2] : null;
+
+    const quote=(row)=>{
+      if(!row) return '';
+      return market==='spread'
+        ? `${fmtLine(row.line)}${priceText(row.price)}`
+        : `${Number(row.line).toFixed(1)}${priceText(row.price)}`;
+    };
+
+    const value=previous
+      ? `${quote(previous)} → ${quote(last)}`
+      : quote(last);
+
     return {
-      first,
+      previous,
       last,
+      moved:Boolean(previous),
       value,
       observed_at:last.observed_at
     };
@@ -4978,8 +5272,50 @@ function renderMarketSnapshot(game,gameData){
     });
   });
 
+  const latestMoves=[];
+
+  movementRows.forEach(row=>{
+    if(row.spread?.moved){
+      latestMoves.push({
+        book:row.book,
+        market:'SPREAD',
+        value:row.spread.value,
+        observed_at:row.spread.observed_at
+      });
+    }
+
+    if(row.total?.moved){
+      latestMoves.push({
+        book:row.book,
+        market:'TOTAL',
+        value:row.total.value,
+        observed_at:row.total.observed_at
+      });
+    }
+  });
+
+  latestMoves.sort((a,b)=>
+    String(b.observed_at || '').localeCompare(String(a.observed_at || ''))
+  );
+
+  const mostRecentMove=latestMoves[0] || null;
+
+  const mostRecentMoveHtml=mostRecentMove
+    ? `<div class="snapshot-latest-move-card">
+         <div class="snapshot-latest-move-head">
+           <span>MOST RECENT MOVE</span>
+           <time>${fmtDateTimeET(mostRecentMove.observed_at)}</time>
+         </div>
+         <div class="snapshot-latest-move-meta">
+           ${bookText(mostRecentMove.book)} · ${mostRecentMove.market}
+         </div>
+         <div class="snapshot-latest-move-value">${mostRecentMove.value}</div>
+       </div>`
+    : '';
+
   const movementHtml=movementRows.length
     ? `<div class="snapshot-market-section">
+         ${mostRecentMoveHtml}
          <div class="snapshot-market-section-title">BOOK MOVEMENT</div>
          <div class="snapshot-book-grid">
            ${movementRows.map(row=>{
