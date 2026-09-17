@@ -970,7 +970,7 @@ function nextGameMarkup(row){
   const site=g.site==='AWAY'?'@':g.site==='N'?'vs*':'vs';
   const oppRank=opp?.overall_rank??opp?.rank;
   const rankLabel=hasNumber(oppRank)
-    ? `<span class="nextOppRank">#${Number(oppRank)}</span> `
+    ? `<span class="nextOppRank ${rankClass(oppRank)}">#${Number(oppRank)}</span> `
     : '';
 
   return `<div class="nextGameCell">
@@ -3873,7 +3873,6 @@ installSortControl();
 
       .nextOppRank{
         font-weight:950!important;
-        color:#dbeaff!important;
       }
 
       .futuresWorkspace .colProjected{
