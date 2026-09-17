@@ -881,6 +881,77 @@ def load_pinnacle_openers(
     return grouped
 
 
+
+def load_book_market_timeline(path: Path) -> dict[str, list[dict[str, Any]]]:
+    """Compact canonical sportsbook history into actual line/price changes."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+
+    try:
+        with path.open(newline="", encoding="utf-8-sig") as handle:
+            for row in csv.DictReader(handle):
+                if str(row.get("available") or "true").strip().lower() in {"false", "0", "no"}:
+                    continue
+
+                gid = str(row.get("canonical_game_id") or "").strip()
+                book = str(row.get("book") or "").strip()
+                market = str(row.get("market") or "").strip().lower()
+                side = str(row.get("side") or "").strip().lower()
+
+                if not gid or not book:
+                    continue
+                if (market, side) not in {("spread", "home"), ("total", "over")}:
+                    continue
+                if row.get("line") in (None, ""):
+                    continue
+
+                timestamp = (
+                    row.get("source_updated_at")
+                    or row.get("book_last_updated")
+                    or row.get("snapshot_ts")
+                )
+                if not timestamp:
+                    continue
+
+                try:
+                    line = float(row["line"])
+                    price = float(row["price"]) if row.get("price") not in (None, "") else None
+                    parsed = parsed_timestamp(timestamp)
+                except (TypeError, ValueError):
+                    continue
+
+                grouped.setdefault(gid, []).append({
+                    "observed_at": normalized_timestamp(timestamp, str(timestamp)),
+                    "_parsed": parsed,
+                    "book": book,
+                    "market": market,
+                    "line": line,
+                    "price": price,
+                    "source": row.get("source"),
+                })
+    except OSError:
+        return {}
+
+    output: dict[str, list[dict[str, Any]]] = {}
+
+    for gid, rows in grouped.items():
+        rows.sort(key=lambda row: (row["_parsed"], row["book"], row["market"]))
+        previous: dict[tuple[str, str], tuple[float, float | None]] = {}
+        timeline = []
+
+        for row in rows:
+            key = (row["book"], row["market"])
+            state = (row["line"], row["price"])
+
+            if previous.get(key) == state:
+                continue
+
+            previous[key] = state
+            timeline.append({k: v for k, v in row.items() if k != "_parsed"})
+
+        output[gid] = timeline
+
+    return output
+
 def game_openers(
     line_history: dict[str, Any], game_id: str,
     pinnacle_openers: dict[str, dict[str, Any]] | None = None,
@@ -935,48 +1006,125 @@ def opener_events(game_id: str, meta: dict[str, Any], openers: dict[str, Any]) -
     return sorted(projected, key=lambda row: (row.get("event_timestamp") or "", row["event_id"]), reverse=True)
 
 
+def canonical_results_by_game(results_payload: Any) -> dict[str, dict[str, Any]]:
+    """Normalize canonical game results into a game_id keyed mapping."""
+    if not isinstance(results_payload, dict):
+        return {}
+
+    games = results_payload.get("games")
+    if isinstance(games, dict):
+        return {
+            str(gid): row
+            for gid, row in games.items()
+            if isinstance(row, dict)
+        }
+
+    if isinstance(games, list):
+        output = {}
+        for row in games:
+            if not isinstance(row, dict):
+                continue
+            gid = str(row.get("game_id") or "")
+            if gid:
+                output[gid] = row
+        return output
+
+    return {}
+
+
 def prior_game_for_team(
     selected_id: str, selected_meta: dict[str, Any], team: str,
-    games_meta: dict[str, Any], events_by_game: dict[str, list[dict[str, Any]]],
+    games_meta: dict[str, Any], canonical_results: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     selected_kickoff = parsed_timestamp(selected_meta.get("kickoff_time"))
+
     candidates = []
     for gid, meta in games_meta.items():
-        if gid == selected_id or team not in {meta.get("away_team"), meta.get("home_team")}:
+        if gid == selected_id:
             continue
+        if team not in {meta.get("away_team"), meta.get("home_team")}:
+            continue
+
         kickoff = meta.get("kickoff_time")
         if not kickoff:
             continue
+
         try:
             parsed = parsed_timestamp(kickoff)
         except (TypeError, ValueError):
             continue
+
         if parsed < selected_kickoff:
             candidates.append((parsed, gid, meta))
+
     if not candidates:
-        return {"selected_team": team, "status": "NO_PRIOR_GAME", "game_id": None, "events": []}
+        return {
+            "selected_team": team,
+            "status": "NO_PRIOR_GAME",
+            "game_id": None,
+            "result": None,
+        }
+
     _, gid, meta = max(candidates, key=lambda item: (item[0], item[1]))
-    meaningful_types = {"FINAL_POSTED", "MODEL_STATE_CHANGED", "SHADOW_SPREAD_READY", "SHADOW_TOTAL_READY"}
-    rows = [row for row in events_by_game.get(gid, []) if row.get("event_type") in meaningful_types]
-    deduped = {row.get("event_id"): row for row in rows if row.get("event_id")}
-    events = sorted(deduped.values(), key=lambda row: (row.get("event_timestamp") or "", row.get("event_id") or ""), reverse=True)
-    has_final = any(row.get("event_type") == "FINAL_POSTED" for row in events)
-    has_shadow = any(str(row.get("event_type") or "").startswith("SHADOW_") for row in events)
-    has_processed = has_shadow or any(row.get("event_type") == "MODEL_STATE_CHANGED" for row in events)
-    status = "SHADOW_READY" if has_shadow else "POSTGAME_PROCESSED" if has_processed else "FINAL_POSTED" if has_final else "NOT_YET_FINAL"
+    result = canonical_results.get(str(gid))
+
+    if not isinstance(result, dict):
+        return {
+            "selected_team": team,
+            "status": "RESULT_UNAVAILABLE",
+            "game_id": gid,
+            "season": meta.get("season"),
+            "week": meta.get("week"),
+            "kickoff_time": meta.get("kickoff_time"),
+            "away_team": meta.get("away_team"),
+            "home_team": meta.get("home_team"),
+            "result": None,
+        }
+
+    completed = result.get("completed")
+    status = str(result.get("status") or "").lower()
+
+    if completed is not True and status != "completed":
+        return {
+            "selected_team": team,
+            "status": "RESULT_UNAVAILABLE",
+            "game_id": gid,
+            "season": meta.get("season"),
+            "week": meta.get("week"),
+            "kickoff_time": meta.get("kickoff_time"),
+            "away_team": meta.get("away_team"),
+            "home_team": meta.get("home_team"),
+            "result": None,
+        }
+
+    away_score = result.get("away_score")
+    home_score = result.get("home_score")
+
     return {
-        "selected_team": team, "status": status, "game_id": gid,
-        "season": meta.get("season"), "week": meta.get("week"),
-        "kickoff_time": meta.get("kickoff_time"), "neutral_site": meta.get("neutral_site"),
-        "away_team": meta.get("away_team"), "home_team": meta.get("home_team"),
-        "events": events,
+        "selected_team": team,
+        "status": "FINAL_POSTED",
+        "game_id": gid,
+        "season": result.get("season") or meta.get("season"),
+        "week": result.get("week") if result.get("week") is not None else meta.get("week"),
+        "kickoff_time": result.get("start_date") or meta.get("kickoff_time"),
+        "date": result.get("date"),
+        "away_team": result.get("away_team") or meta.get("away_team"),
+        "home_team": result.get("home_team") or meta.get("home_team"),
+        "result": {
+            "away_score": away_score,
+            "home_score": home_score,
+            "completed": True,
+        },
     }
+
 
 
 def build_game_index(
     public_events: list[dict[str, Any]], line_history: dict[str, Any],
     games_meta: dict[str, Any], built_at: str, refresh_id: str | None,
     max_events: int = 100, pinnacle_openers: dict[str, dict[str, Any]] | None = None,
+    book_timeline: dict[str, list[dict[str, Any]]] | None = None,
+    canonical_results: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build a bounded derived lookup; the append-only JSONL remains authority."""
     events_by_game: dict[str, list[dict[str, Any]]] = {}
@@ -1004,14 +1152,21 @@ def build_game_index(
             "away_team": meta.get("away_team") or (rows[0].get("away_team") if rows else None),
             "home_team": meta.get("home_team") or (rows[0].get("home_team") if rows else None),
             "openers": openers,
+            "market_timeline": (book_timeline or {}).get(gid, [])[-80:],
             "events": rows[:max(1, max_events)],
             "event_count": min(len(rows), max(1, max_events)),
         }
     for gid, row in games.items():
         meta = games_meta.get(gid) or row
         row["prior_games"] = {
-            "away": prior_game_for_team(gid, meta, str(row.get("away_team") or ""), games_meta, events_by_game),
-            "home": prior_game_for_team(gid, meta, str(row.get("home_team") or ""), games_meta, events_by_game),
+            "away": prior_game_for_team(
+                gid, meta, str(row.get("away_team") or ""),
+                games_meta, canonical_results or {},
+            ),
+            "home": prior_game_for_team(
+                gid, meta, str(row.get("home_team") or ""),
+                games_meta, canonical_results or {},
+            ),
         }
     return {
         "schema_version": "war-room-game-activity-index-v1",
@@ -1112,10 +1267,13 @@ def main() -> None:
             "events": newest[:max(1, args.max_public_events)],
         }
         line_history = load_json(args.line_history, {})
+        results_payload = load_json(args.results, {})
         game_index = build_game_index(
             newest, line_history if isinstance(line_history, dict) else {},
             current.get("games_meta") or {}, detected_at, current.get("refresh_id"),
             args.max_game_events, load_pinnacle_openers(args.book_history),
+            load_book_market_timeline(args.book_history),
+            canonical_results_by_game(results_payload),
         )
         # Static fallback includes only opener summaries and the already-bounded
         # public tape; full per-game history remains lazy through the live API.
