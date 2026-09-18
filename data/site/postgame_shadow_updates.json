@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-17T12:08:49.803668+00:00",
+  "built_at": "2026-09-18T12:01:56.578456+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -4958,6 +4958,34 @@
       "next_opponent": null,
       "total_estimate_status": "pending_current_season_pbp",
       "synthetic_input": false
+    },
+    {
+      "team": "Pittsburgh",
+      "opponent": "Syracuse",
+      "completed_game_id": "g186",
+      "completed_date": "2026-09-17",
+      "team_margin": 14.0,
+      "team_closing_spread": -10.0,
+      "team_ats_margin": 4.0,
+      "estimated_spread_rating_innovation": 2.96,
+      "next_game_id": "g308",
+      "next_opponent": "Bucknell",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Syracuse",
+      "opponent": "Pittsburgh",
+      "completed_game_id": "g186",
+      "completed_date": "2026-09-17",
+      "team_margin": -14.0,
+      "team_closing_spread": 10.0,
+      "team_ats_margin": -4.0,
+      "estimated_spread_rating_innovation": -2.98,
+      "next_game_id": "g349",
+      "next_opponent": "Connecticut",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
     }
   ],
   "warnings": [
@@ -4973,7 +5001,7 @@
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 352,
+    "completed_team_updates": 354,
     "warnings": 9
   }
 }
