@@ -106,6 +106,9 @@
     "ratings": {"required_dates": ["source_updated_at", "pulled_at", "status_built_at", "applied_snapshot_date"]},
     "model_performance": {
       "standard_artifact": "data/site/model_performance_view.json",
+      "standard_builder": "scripts/model_tracking/build_model_performance_view.py",
+      "standard_schema_version": "model-performance-view-v8",
+      "opener_contract": "earliest accepted line in data/site/matchup_line_history.json; explicit provider opener preferred; CLV vs Open is opener-to-checkpoint movement aligned to the immutable checkpoint prediction",
       "historical_standard_artifacts": ["data/site/historical_model_performance_2021_2025.json", "data/site/historical_totals_model_performance_2021_2025.json"],
       "shadow_artifact": "data/site/shadow_model_performance.json",
       "shadow_builder": "scripts/site/build_shadow_model_performance.py",

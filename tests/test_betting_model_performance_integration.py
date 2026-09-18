@@ -77,25 +77,25 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         if not path.exists():
             self.skipTest("generated runtime view is not versioned in the source worktree")
         data = json.loads(path.read_text())
-        self.assertIn(data["schema_version"], {"model-performance-view-v6", "model-performance-view-v7"})
+        self.assertIn(data["schema_version"], {"model-performance-view-v6", "model-performance-view-v7", "model-performance-view-v8"})
         source = (ROOT / "scripts/model_tracking/build_model_performance_view.py").read_text()
-        self.assertIn('"schema_version": "model-performance-view-v7"', source)
+        self.assertIn('"schema_version": "model-performance-view-v8"', source)
         self.assertEqual(data["methodology"]["source"], "immutable-model-tracking-v2")
         self.assertEqual(data["ranking_minimum"], 30)
 
-    def test_week_15_is_in_the_isolated_tracker_period_contract(self):
+    def test_tracker_period_contract_is_week_zero_through_week_fourteen(self):
         source = (
             ROOT / "scripts/model_tracking/build_model_performance_view.py"
         ).read_text()
-        self.assertEqual(source.count("range(1, 16)"), 2)
-        self.assertNotIn("range(1, 15)", source)
+        self.assertEqual(source.count("range(1, 15)"), 2)
+        self.assertNotIn("range(1, 16)", source)
 
     def test_tracker_ui_exposes_truthful_coverage_and_reference_status(self):
         text = (ROOT / "betting_v2.html").read_text()
         for marker in (
-            "projection_eligible_n", "schedule_eligible_n", "clv_n",
-            "CLV N/A", "Reference only", "displayed models have graded observations",
-            "Historical coverage is partial", "market_timestamp_semantics",
+            "average_clv_vs_open", "positive_clv", "clv_n",
+            "Avg CLV vs Open", "Reference only", "models graded",
+            "Historical coverage is evidence-gated", "market_timestamp_semantics",
         ):
             self.assertIn(marker, text)
         self.assertNotIn("models with results", text)

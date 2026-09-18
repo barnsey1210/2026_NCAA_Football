@@ -58,15 +58,28 @@ def test_w1_spread_population_and_metric_specific_denominators():
     assert metrics["omission_reasons"]["market_checkpoint_missing"] == 6
 
 
-def test_close_clv_is_explicitly_unavailable():
+def test_close_clv_vs_open_is_zero_sample_without_opener_comparisons():
     metrics = MODULE.coverage_metrics(
-        [score("g1")], checkpoint="CLOSE", schedule_n=91,
+        [score("g1")], opener_clv_rows=[], checkpoint="CLOSE", schedule_n=91,
         projection_n=43, captured_rows=checkpoints(1, "CLOSE"),
         model_id="fpi_spread", market_type="spread", period="W1",
     )
-    assert metrics["clv_n"] is None
+    assert metrics["clv_n"] == 0
     assert metrics["average_point_clv"] is None
     assert metrics["provenance"]["market_timestamp_semantics"] == "EXACT_FROZEN_CLOSE"
+
+
+def test_checkpoint_clv_vs_open_uses_model_selected_direction():
+    predictions = {"p-home": {"projection": 7.0}, "p-over": {"projection": 55.0}}
+    openers = {"g1": {"spread": {"line": -3.0}}, "g2": {"total": {"line": 50.0}}}
+    spread = MODULE.checkpoint_clv_vs_open([
+        {"checkpoint_id": "c1", "canonical_game_id": "g1", "prediction_observation_id": "p-home", "bet_side": "home", "market_line": -4.5}
+    ], predictions, openers, "spread")
+    total = MODULE.checkpoint_clv_vs_open([
+        {"checkpoint_id": "c2", "canonical_game_id": "g2", "prediction_observation_id": "p-over", "bet_side": "over", "market_line": 52.0}
+    ], predictions, openers, "total")
+    assert spread[0]["clv_vs_open"] == 1.5
+    assert total[0]["clv_vs_open"] == 2.0
 
 
 def test_known_historical_absence_reasons_are_precise():
@@ -163,3 +176,14 @@ def test_schedule_denominators_are_fbs_vs_fbs_only():
     assert 'game.get("home_team") in fbs_teams' in source
     assert 'str(row.get("canonical_game_id")) in fbs_game_ids' in source
     assert 'str(row.get("prediction_observation_id")) in fbs_prediction_ids' in source
+
+
+def test_week_zero_standard_spread_recovery_is_commit_gated_and_complete():
+    schedule = json.loads((ROOT / "data/site/current_game_projection_contract.json").read_text())["games"]
+    fbs = {row["team"] for row in json.loads((ROOT / "data/snapshots/preseason/preseason_db.json").read_text())["teams"]}
+    schedule = [row for row in schedule if row.get("away_team") in fbs and row.get("home_team") in fbs]
+    results = json.loads((ROOT / "data/canonical/game_results_2026.json").read_text())
+    predictions, scores = MODULE.reconstructed_w0_standard_spread_scores(schedule, results)
+    assert len(predictions) == len(scores) == 8
+    assert {row["model_id"] for row in predictions} == {"standard_spread_4src_equal_v1"}
+    assert all(row["scoring_version"] == "reconstructed_prediction_accuracy_v1" for row in scores)
