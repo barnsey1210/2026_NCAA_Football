@@ -302,7 +302,7 @@ img[src$="west-virginia.webp"] {
 .trackerTable{
   width:100%;
   border-collapse:collapse;
-  min-width:920px;
+  min-width:1180px;
 }
 .trackerTable th,
 .trackerTable td{
@@ -4426,6 +4426,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
   let MP=null;
   let trackerMarket='spread';
   let trackerPeriod='W0';
+  let trackerCheckpoint='SUNDAY_9PM_ET';
 
   const $=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({
@@ -4500,21 +4501,20 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
         <button data-tracker-market="total">Totals</button>
       </div>
 
+      <div class="trackerControlRow" id="trackerCheckpointTabs">
+        <button class="active" data-tracker-checkpoint="SUNDAY_9PM_ET">Sunday 9 PM ET</button>
+        <button data-tracker-checkpoint="TUESDAY_9PM_ET">Tuesday 9 PM ET</button>
+        <button data-tracker-checkpoint="CLOSE">Close</button>
+      </div>
+
       <div class="trackerControlRow" id="trackerPeriods"></div>
 
       <div class="trackerTableWrap">
         <table class="trackerTable">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Sunday 9 PM ET</th>
-              <th>Tuesday 9 PM ET</th>
-              <th>Close</th>
-            </tr>
-          </thead>
+          <thead id="trackerHead"></thead>
           <tbody id="trackerRows">
             <tr>
-              <td colspan="4" class="trackerEmpty">Loading model performance…</td>
+              <td colspan="12" class="trackerEmpty">Loading model performance…</td>
             </tr>
           </tbody>
         </table>
@@ -4596,7 +4596,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     return 20;
   }
 
-  function cell(metrics,checkpoint,row){
+  function metricContext(metrics,checkpoint,row){
     const reasonLabels={
       model_projection_not_historically_captured:'Model projection was not historically captured',
       model_source_missing:'Model source unavailable',
@@ -4622,41 +4622,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
       ...(provenance.market_sources||[]),
       ...reasons
     ].filter(Boolean).join(' · ');
-    if(!metrics||!metrics.games){
-      const note=reasons[0]||'No official sample yet';
-
-      return `
-        <div class="trackerEmpty" title="${esc(provenanceTitle)}">—</div>
-        <div class="trackerCellSub">${note}</div>
-      `;
-    }
-
-    const resultLabel=trackerMarket==='spread'?'ATS':'O/U';
-
-    const secondary=[
-      `${metrics.settled_prediction_n} / ${metrics.prediction_n} predictions settled`,
-      `${metrics.projection_eligible_n} / ${metrics.schedule_eligible_n} schedule`,
-      `ROI ${signedPct(metrics.roi)}`,
-      `MAE ${num1(metrics.mae)}`
-    ];
-
-    if(checkpoint!=='CLOSE'){
-      secondary.push(
-        `CLV ${signedNum(metrics.average_point_clv)} (N ${metrics.clv_n})`
-      );
-    }else{
-      secondary.push('CLV N/A');
-    }
-
-    return `
-      <div class="trackerCellMain" title="${esc(provenanceTitle)}">
-        ${esc(metrics.record)} · ${pct(metrics.ats_or_ou_pct)}
-      </div>
-      <div class="trackerCellSub">
-        ${resultLabel} · ${secondary.join(' · ')}
-        ${metrics.schedule_eligible_n&&metrics.settled_prediction_n/metrics.schedule_eligible_n<.5?' · ⚠ Low sample':''}
-      </div>
-    `;
+    return {title:provenanceTitle,note:reasons[0]||'No official sample yet'};
   }
 
   function currentRows(){
@@ -4666,17 +4632,11 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
       ? MP.spread_checkpoint_tracker
       : MP.total_checkpoint_tracker;
 
-    return [...(contract?.[trackerPeriod]||[])]
-      .filter(row=>
-        row.role!=='legacy_comparison' &&
-        !String(row.role||'').toLowerCase().includes('shadow') &&
-        !String(row.model_id||'').includes('_legacy_')
-      )
-      .sort((a,b)=>{
-        const rank=roleRank(a)-roleRank(b);
-        if(rank)return rank;
-        return displayName(a).localeCompare(displayName(b));
-      });
+    const ids=trackerMarket==='spread'
+      ? ['standard_spread_4src_equal_v1','sp_plus_spread','fpi_spread','teamrankings_spread','dratings_spread']
+      : ['standard_total_sp_massey_dratings_v1','sp_plus_total','massey_dual_total','dratings_total'];
+    const byId=new Map((contract?.[trackerPeriod]||[]).map(row=>[row.model_id,row]));
+    return ids.map(id=>byId.get(id)).filter(Boolean);
   }
 
   function renderTracker(){
@@ -4684,48 +4644,52 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 
     const rows=currentRows();
 
+    const spread=trackerMarket==='spread';
+    const headers=spread
+      ? ['Model','Games','SU W-L','Win %','ATS W-L-P','ATS %','MAE','Bias','Avg CLV vs Open','CLV N','+CLV','+CLV %']
+      : ['Model','Games','O/U W-L-P','O/U %','MAE','Bias','Avg CLV vs Open','CLV N','+CLV','+CLV %'];
+    $('trackerHead').innerHTML=`<tr>${headers.map(label=>`<th>${label}</th>`).join('')}</tr>`;
+
     $('trackerRows').innerHTML=rows.map(row=>{
-      const c=row.checkpoints||{};
+      const metrics=(row.checkpoints||{})[trackerCheckpoint]||{};
+      const context=metricContext(metrics,trackerCheckpoint,row);
+      const metricCells=spread
+        ? [metrics.games,metrics.su_record,pct(metrics.su_pct),metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)]
+        : [metrics.games,metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)];
 
       return `
-        <tr>
+        <tr title="${esc(context.title)}">
           <td>
             <div class="trackerModelName">${esc(displayName(row))}</div>
             <div class="trackerModelMeta">
-              ${esc(roleLabel(row))}
+              ${esc(roleLabel(row))}${!Number(metrics.games)&&context.note?` · ${esc(context.note)}`:''}
             </div>
           </td>
-          <td>${cell(c.SUNDAY_9PM_ET,'SUNDAY_9PM_ET',row)}</td>
-          <td>${cell(c.TUESDAY_9PM_ET,'TUESDAY_9PM_ET',row)}</td>
-          <td>${cell(c.CLOSE,'CLOSE',row)}</td>
+          ${metricCells.map(value=>`<td>${value??'—'}</td>`).join('')}
         </tr>
       `;
     }).join('') || `
       <tr>
-        <td colspan="4" class="trackerEmpty">
+        <td colspan="${headers.length}" class="trackerEmpty">
           No official observations for this market and period.
         </td>
       </tr>
     `;
 
-    const modelsWithResults=rows.filter(row=>
-      Object.values(row.checkpoints||{}).some(
-        metrics=>Number(metrics?.games||0)>0
-      )
-    ).length;
+    const modelsWithResults=rows.filter(row=>Number(row.checkpoints?.[trackerCheckpoint]?.games||0)>0).length;
 
     $('trackerStatus').textContent=
-      `${trackerPeriod} · ${modelsWithResults} of ${rows.length} displayed models have graded observations`;
+      `${trackerPeriod} · ${trackerCheckpoint.replaceAll('_',' ')} · ${modelsWithResults} of ${rows.length} models graded`;
 
     const method=MP.methodology||{};
 
     $('trackerMethod').innerHTML=`
       <b>Checkpoint contract:</b>
       ${esc(method.checkpoint_contract||'one game × one model × checkpoint')}
-      · <b>Closing authority:</b>
-      ${esc(method.closing_authority||'canonical FROZEN_CLOSE')}
-      · Close CLV is intentionally unavailable.
-      ${['W0','W1'].includes(trackerPeriod)?' · Historical coverage is partial; missing rows are not backfilled.':''}
+      · <b>Opener authority:</b> ${esc(method.opener_authority||'canonical opening-line history')}
+      · <b>CLV vs Open:</b> ${esc(method.clv||'opener-to-checkpoint movement in the model-selected direction')}
+      · <b>Standard Total:</b> 40% SP+ Total / 40% Massey Dual / 20% DRatings Total.
+      ${['W0','W1'].includes(trackerPeriod)?' · Historical coverage is evidence-gated; unavailable rows remain explicit.':''}
     `;
   }
 
@@ -4750,6 +4714,13 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
           x.classList.toggle('active',x===button);
         });
 
+        renderTracker();
+      };
+    });
+    document.querySelectorAll('[data-tracker-checkpoint]').forEach(button=>{
+      button.onclick=()=>{
+        trackerCheckpoint=button.dataset.trackerCheckpoint;
+        document.querySelectorAll('[data-tracker-checkpoint]').forEach(x=>x.classList.toggle('active',x===button));
         renderTracker();
       };
     });

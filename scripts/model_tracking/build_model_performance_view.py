@@ -15,6 +15,13 @@ STORE = ROOT / "data/model_tracking/v2"
 OUT = ROOT / "data/site/model_performance_view.json"
 PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
+MATCHUP_LINE_HISTORY = ROOT / "data/site/matchup_line_history.json"
+RESULTS_CONTRACT = ROOT / "data/canonical/game_results_2026.json"
+W0_STANDARD_SPREAD_COMPONENTS = (
+    ROOT / "data/model_tracking/reconstructed/"
+    "week0_standard_spread_component_snapshots_2026.json"
+)
+PREDICTIONTRACKER_REFERENCE = ROOT / "data/model_tracking/predictiontracker_reference_2026.json"
 
 SCORE_PRIORITY = {
     "settlement_v4_frozen_close": 4,
@@ -62,7 +69,7 @@ def omission_reasons(*, schedule_n, projection_n, captured_n, settled_n,
                      market_n, period, checkpoint, model_id, market_type):
     reasons = {}
     historical = period in {"W0", "W1"}
-    known_uncaptured_history = historical and captured_n == 0 and (
+    known_uncaptured_history = historical and projection_n == 0 and captured_n == 0 and (
         model_id.startswith("standard_")
         or model_id.startswith("dratings_")
         or market_type == "total"
@@ -86,16 +93,41 @@ def omission_reasons(*, schedule_n, projection_n, captured_n, settled_n,
     return reasons
 
 
-def coverage_metrics(rows, *, accuracy_rows=None, checkpoint, schedule_n, projection_n,
-                     captured_rows, model_id, market_type, period):
+def coverage_metrics(rows, *, accuracy_rows=None, opener_clv_rows=None, checkpoint,
+                     schedule_n, projection_n, captured_rows, model_id,
+                     market_type, period):
     accuracy_rows = rows if accuracy_rows is None else accuracy_rows
+    if opener_clv_rows is None:
+        opener_clv_rows = [
+            {"clv_vs_open": row.get("clv")}
+            for row in rows
+            if row.get("clv") is not None
+        ]
     wins = sum(row.get("result") == 1 for row in rows)
     losses = sum(row.get("result") == -1 for row in rows)
     pushes = sum(row.get("result") == 0 for row in rows)
     ae = [float(row["absolute_error"]) for row in accuracy_rows if row.get("absolute_error") is not None]
     signed = [float(row["signed_error"]) for row in accuracy_rows if row.get("signed_error") is not None]
     squared = [float(row["squared_error"]) for row in accuracy_rows if row.get("squared_error") is not None]
-    clv = [float(row["clv"]) for row in rows if row.get("clv") is not None]
+    clv = [
+        float(row["clv_vs_open"])
+        for row in opener_clv_rows
+        if row.get("clv_vs_open") is not None
+    ]
+    su_wins = su_losses = 0
+    if market_type == "spread":
+        for row in accuracy_rows:
+            try:
+                projection = float(row["projection"])
+                actual = float(row["actual"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if projection == 0 or actual == 0:
+                continue
+            if (projection > 0) == (actual > 0):
+                su_wins += 1
+            else:
+                su_losses += 1
     captured_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows})
     market_n = len({row.get("checkpoint_id") or row.get("checkpoint_observation_id") for row in captured_rows if row.get("market_line") is not None or row.get("market_observation_id")})
     settled_n = len(rows)
@@ -104,10 +136,16 @@ def coverage_metrics(rows, *, accuracy_rows=None, checkpoint, schedule_n, projec
     market_books = sorted({str(row.get("market_book")) for row in provenance_rows if row.get("market_book")})
     market_sources = sorted({str(row.get("market_source")) for row in provenance_rows if row.get("market_source")})
     target_times = sorted({str(row.get("checkpoint_at")) for row in provenance_rows if row.get("checkpoint_at")})
-    close = checkpoint == "CLOSE"
     return {
         "games": len(accuracy_rows), "record": f"{wins}-{losses}-{pushes}",
         "wins": wins, "losses": losses, "pushes": pushes,
+        "su_record": f"{su_wins}-{su_losses}" if market_type == "spread" else None,
+        "su_wins": su_wins if market_type == "spread" else None,
+        "su_losses": su_losses if market_type == "spread" else None,
+        "su_pct": (
+            su_wins / (su_wins + su_losses)
+            if market_type == "spread" and su_wins + su_losses else None
+        ),
         "schedule_eligible_n": schedule_n, "projection_eligible_n": projection_n,
         "prediction_n": projection_n, "settled_prediction_n": len(accuracy_rows),
         "market_n": market_n, "market_eligible_n": market_n, "captured_n": captured_n,
@@ -115,30 +153,176 @@ def coverage_metrics(rows, *, accuracy_rows=None, checkpoint, schedule_n, projec
         "ats_n": wins + losses if market_type == "spread" else None,
         "ou_n": wins + losses if market_type == "total" else None,
         "roi_n": settled_n, "mae_n": len(ae), "rmse_n": len(squared),
-        "bias_n": len(signed), "clv_n": None if close else len(clv),
+        "bias_n": len(signed), "clv_n": len(clv),
         "ats_or_ou_pct": wins / (wins + losses) if wins + losses else None,
         "roi": sum(float(row.get("profit") or 0) for row in rows) / settled_n if settled_n else None,
         "mae": sum(ae) / len(ae) if ae else None,
         "bias": sum(signed) / len(signed) if signed else None,
         "rmse": math.sqrt(sum(squared) / len(squared)) if squared else None,
-        "average_point_clv": None if close else (sum(clv) / len(clv) if clv else None),
-        "median_clv": None if close else median(clv),
-        "positive_clv_pct": None if close else (sum(value > 0 for value in clv) / len(clv) if clv else None),
-        "beat_close_pct": None if close else (
-            sum(bool(row.get("beat_close")) for row in rows if row.get("beat_close") is not None)
-            / sum(row.get("beat_close") is not None for row in rows)
-            if any(row.get("beat_close") is not None for row in rows) else None
-        ),
+        "average_point_clv": sum(clv) / len(clv) if clv else None,
+        "average_clv_vs_open": sum(clv) / len(clv) if clv else None,
+        "median_clv": median(clv),
+        "positive_clv": sum(value > 0 for value in clv),
+        "positive_clv_pct": sum(value > 0 for value in clv) / len(clv) if clv else None,
+        "beat_close_pct": None,
         "omission_reasons": omission_reasons(schedule_n=schedule_n, projection_n=projection_n, captured_n=captured_n, settled_n=settled_n, market_n=market_n, period=period, checkpoint=checkpoint, model_id=model_id, market_type=market_type),
         "provenance": {
             "checkpoint": checkpoint,
             "checkpoint_target_timestamps": target_times,
-            "market_timestamp_semantics": "EXACT_FROZEN_CLOSE" if close else "LATEST_VALID_AT_OR_BEFORE_TARGET",
+            "market_timestamp_semantics": "EXACT_FROZEN_CLOSE" if checkpoint == "CLOSE" else "LATEST_VALID_AT_OR_BEFORE_TARGET",
+            "opener_timestamp_semantics": "EARLIEST_ACCEPTED_CANONICAL_LINE_HISTORY",
             "market_books": market_books,
             "market_sources": market_sources,
             "evidence_status": "AVAILABLE" if provenance_rows else "UNAVAILABLE",
         },
     }
+
+
+def canonical_openers(line_history):
+    """Select the earliest accepted canonical spread/total line per game."""
+    output = {}
+    for game_id, rows in line_history.items():
+        if not isinstance(rows, list):
+            continue
+        game = {}
+        for market_type, explicit_field, observed_field, update_field in (
+            ("spread", "market_spread_open_home", "market_spread_home", "market_spread_last_update"),
+            ("total", "market_total_open", "market_total", "market_total_last_update"),
+        ):
+            candidates = []
+            for row in rows:
+                raw = row.get(explicit_field)
+                explicit = raw is not None
+                if raw is None:
+                    raw = row.get(observed_field)
+                stamp = row.get(update_field) or row.get("snapshot_ts") or row.get("snapshot_date")
+                try:
+                    line = float(raw)
+                except (TypeError, ValueError):
+                    continue
+                if not stamp:
+                    continue
+                try:
+                    parsed = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+                    if parsed.tzinfo is None:
+                        parsed = parsed.replace(tzinfo=timezone.utc)
+                    sort_key = parsed.astimezone(timezone.utc).timestamp()
+                except (TypeError, ValueError):
+                    continue
+                candidates.append((sort_key, str(stamp), row, line, explicit))
+            if candidates:
+                _, stamp, row, line, explicit = min(candidates, key=lambda item: item[0])
+                game[market_type] = {
+                    "line": line,
+                    "observed_at": stamp,
+                    "book": row.get("market_spread_book" if market_type == "spread" else "market_total_book"),
+                    "source": row.get("source") or row.get("market_line_source"),
+                    "authority": "PROVIDER_OPEN" if explicit else "FIRST_TRACKED_ACCEPTED",
+                }
+        if game:
+            output[str(game_id)] = game
+    return output
+
+
+def checkpoint_clv_vs_open(captured_rows, predictions_by_id, openers, market_type):
+    """Measure opener-to-checkpoint movement in the model-selected direction."""
+    comparisons = []
+    for checkpoint in captured_rows:
+        prediction = predictions_by_id.get(str(checkpoint.get("prediction_observation_id")))
+        opener = openers.get(str(checkpoint.get("canonical_game_id")), {}).get(market_type)
+        if not prediction or not opener or checkpoint.get("market_line") is None:
+            continue
+        try:
+            projection = float(prediction["projection"])
+            opener_line = float(opener["line"])
+            checkpoint_line = float(checkpoint["market_line"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        side = checkpoint.get("bet_side")
+        if market_type == "spread":
+            selected_side = "home" if projection + opener_line >= 0 else "away"
+            if side not in {"home", "away"}:
+                continue
+            checkpoint_home = checkpoint_line if side == "home" else -checkpoint_line
+            checkpoint_selected = checkpoint_home if selected_side == "home" else -checkpoint_home
+            opener_selected = opener_line if selected_side == "home" else -opener_line
+            clv = opener_selected - checkpoint_selected
+        else:
+            selected_side = "over" if projection >= opener_line else "under"
+            if side not in {"over", "under"}:
+                continue
+            clv = checkpoint_line - opener_line if selected_side == "over" else opener_line - checkpoint_line
+        comparisons.append({
+            "canonical_game_id": checkpoint.get("canonical_game_id"),
+            "clv_vs_open": clv,
+            "opener": opener,
+            "checkpoint_id": checkpoint.get("checkpoint_id"),
+        })
+    return comparisons
+
+
+def reconstructed_w0_standard_spread_scores(schedule_games, results_payload):
+    """Score only commit-proven, pre-kickoff Week 0 Standard components."""
+    artifact = load_json(W0_STANDARD_SPREAD_COMPONENTS, {})
+    if artifact.get("schema_version") != "reconstructed-standard-spread-component-snapshots-v1":
+        return [], []
+    schedule = {str(row.get("game_id")): row for row in schedule_games}
+    results = {
+        str(row.get("game_id")): row
+        for row in results_payload.get("games", [])
+        if row.get("completed") is True
+    }
+    predictions = []
+    scores = []
+    required = {"SP+", "FPI", "TeamRankings", "DRatings"}
+    for row in artifact.get("games", []):
+        game_id = str(row.get("game_id") or "")
+        game = schedule.get(game_id)
+        result = results.get(game_id)
+        values = row.get("component_values") or {}
+        if not game or not result or set(values) != required:
+            continue
+        try:
+            commit_at = datetime.fromisoformat(str(row["source_commit_timestamp"]).replace("Z", "+00:00"))
+            kickoff_at = datetime.fromisoformat(str(result["start_date"]).replace("Z", "+00:00"))
+            projection = sum(float(values[key]) for key in required) / 4
+            actual = float(result["home_margin_actual"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if commit_at >= kickoff_at:
+            continue
+        observation_id = f"reconstructed-w0-standard-spread-{game_id}"
+        predictions.append({
+            "observation_id": observation_id,
+            "canonical_game_id": game_id,
+            "model_id": "standard_spread_4src_equal_v1",
+            "model_version": "v1",
+            "market_type": "spread",
+            "week": 0,
+            "projection": projection,
+            "observed_at": row.get("observed_at"),
+            "availability_status": "AVAILABLE",
+            "formula_version": "standard_spread_4src_equal_v1",
+            "provenance_flags": ["RECONSTRUCTED_FROM_PREKICKOFF_COMPONENT_SNAPSHOTS"],
+        })
+        error = projection - actual
+        scores.append({
+            "prediction_score_id": f"reconstructed-w0-standard-spread-score-{game_id}",
+            "prediction_observation_id": observation_id,
+            "canonical_game_id": game_id,
+            "model_id": "standard_spread_4src_equal_v1",
+            "model_version": "v1",
+            "market_type": "spread",
+            "week": 0,
+            "projection": projection,
+            "actual": actual,
+            "absolute_error": abs(error),
+            "signed_error": error,
+            "squared_error": error * error,
+            "scoring_version": "reconstructed_prediction_accuracy_v1",
+            "frozen_at": row.get("observed_at"),
+        })
+    return predictions, scores
 
 
 def atomic(payload):
@@ -302,6 +486,24 @@ def main():
         for game in schedule_games
         if game.get("game_id")
     }
+    reconstructed_predictions, reconstructed_scores = reconstructed_w0_standard_spread_scores(
+        schedule_games, load_json(RESULTS_CONTRACT, {})
+    )
+    existing_prediction_keys = {
+        (str(row.get("canonical_game_id")), row.get("model_id"), row.get("model_version"), row.get("market_type"))
+        for row in prediction_scores
+    }
+    reconstructed_scores = [
+        row for row in reconstructed_scores
+        if (str(row.get("canonical_game_id")), row.get("model_id"), row.get("model_version"), row.get("market_type"))
+        not in existing_prediction_keys
+    ]
+    reconstructed_ids = {row["prediction_observation_id"] for row in reconstructed_scores}
+    predictions.extend(
+        row for row in reconstructed_predictions
+        if row["observation_id"] in reconstructed_ids
+    )
+    prediction_scores.extend(reconstructed_scores)
     predictions = [row for row in predictions if str(row.get("canonical_game_id")) in fbs_game_ids]
     fbs_prediction_ids = {str(row.get("observation_id")) for row in predictions}
     checkpoints = [row for row in checkpoints if str(row.get("canonical_game_id")) in fbs_game_ids]
@@ -320,9 +522,11 @@ def main():
         ] = prediction
 
     predictions_by_id = {
-        row["observation_id"]: row
+        str(row["observation_id"]): row
         for row in predictions
     }
+    openers = canonical_openers(load_json(MATCHUP_LINE_HISTORY, {}))
+    predictiontracker_reference = load_json(PREDICTIONTRACKER_REFERENCE, {})
 
     grouped = defaultdict(list)
     accuracy_grouped = defaultdict(list)
@@ -683,7 +887,7 @@ def main():
 
     periods = (
         ["W0"]
-        + [f"W{i}" for i in range(1, 16)]
+        + [f"W{i}" for i in range(1, 15)]
         + ["Season"]
     )
 
@@ -802,11 +1006,17 @@ def main():
                 row = {
                     "model_id": model_id,
                     "model_version": model_version,
-                    "display_name": (
-                        model_id
-                        .replace("_", " ")
-                        .title()
-                    ),
+                    "display_name": {
+                        "standard_spread_4src_equal_v1": "Standard Spread",
+                        "sp_plus_spread": "SP+",
+                        "fpi_spread": "FPI",
+                        "teamrankings_spread": "TeamRankings",
+                        "dratings_spread": "DRatings",
+                        "standard_total_sp_massey_dratings_v1": "Standard Total",
+                        "sp_plus_total": "SP+ Total",
+                        "massey_dual_total": "Massey Dual",
+                        "dratings_total": "DRatings Total",
+                    }.get(model_id, model_id.replace("_", " ").title()),
                     "role": spec.get("role"),
                     "formula_version": formula_versions[-1] if len(formula_versions) == 1 else None,
                     "formula_versions": formula_versions,
@@ -821,6 +1031,21 @@ def main():
                     "historical_status": "HISTORICAL_PARTIAL" if period in {"W0", "W1"} else "PROSPECTIVE",
                     "checkpoints": {},
                 }
+                reference = (
+                    predictiontracker_reference.get("periods", {})
+                    .get(period, {})
+                    .get(model_id)
+                )
+                if reference:
+                    row["predictiontracker_reference"] = {
+                        **reference,
+                        "source_url": predictiontracker_reference.get("source_url"),
+                        "source_as_of": predictiontracker_reference.get("source_as_of"),
+                        "universe_reconciled": len(accuracy_index.get(
+                            (market_type, None if period == "Season" else week, model_id, model_version), []
+                        )) == reference.get("games"),
+                        "local_checkpoint_ats_preserved": True,
+                    }
 
                 for checkpoint in checkpoint_order:
                     index_week = None if period == "Season" else week
@@ -850,6 +1075,9 @@ def main():
 
                     row["checkpoints"][checkpoint] = coverage_metrics(
                         selected_rows, accuracy_rows=selected_accuracy_rows,
+                        opener_clv_rows=checkpoint_clv_vs_open(
+                            captured_rows, predictions_by_id, openers, market_type
+                        ),
                         checkpoint=checkpoint,
                         schedule_n=schedule_n,
                         projection_n=len({p.get("canonical_game_id") for p in prediction_rows}),
@@ -862,7 +1090,7 @@ def main():
             tracker[market_type][period] = model_rows
 
     payload = {
-        "schema_version": "model-performance-view-v7",
+        "schema_version": "model-performance-view-v8",
         "built_at": datetime.now(
             timezone.utc
         ).isoformat(),
@@ -934,6 +1162,11 @@ def main():
                 "game_results_2026.json"
             ),
             "no_fake_backfill": True,
+            "w0_standard_spread_reconstruction": {
+                "source": "data/model_tracking/reconstructed/week0_standard_spread_component_snapshots_2026.json",
+                "policy": "four complete component values from a git commit strictly before verified kickoff; never current ratings",
+                "accepted_games": len(reconstructed_scores),
+            },
             "score_authority": (
                 "prediction accuracy uses the latest valid pre-kickoff observation per game/model; betting metrics use the newest scoring version per official checkpoint"
             ),
@@ -945,12 +1178,14 @@ def main():
                 "one game x one model x checkpoint; "
                 "SUNDAY_9PM_ET, TUESDAY_9PM_ET, CLOSE"
             ),
-            "close_clv_policy": (
-                "not applicable; CLOSE checkpoint CLV metrics are null"
-            ),
             "clv": (
-                "checkpoint line versus canonical "
-                "FROZEN_CLOSE; null when unavailable"
+                "canonical opener to checkpoint movement in the side selected by the immutable checkpoint prediction; positive means the opener beat the checkpoint line"
+            ),
+            "opener_authority": (
+                "earliest accepted canonical matchup line history; explicit provider opener preferred when present"
+            ),
+            "benchmark_reconciliation": (
+                "PredictionTracker NCAA IA reference counts and prediction metrics are retained on applicable W2 benchmark rows; local checkpoint ATS and opener CLV remain project-owned metrics"
             ),
             "spread_projection_formula": (
                 "named canonical projection "
@@ -987,15 +1222,8 @@ def main():
         },
         "periods": (
             ["W0"]
-            + [
-                f"W{i}"
-                for i in range(1, 16)
-            ]
-            + [
-                "Conference Championships",
-                "Bowl / Playoff",
-                "All",
-            ]
+            + [f"W{i}" for i in range(1, 15)]
+            + ["Season"]
         ),
     }
 
