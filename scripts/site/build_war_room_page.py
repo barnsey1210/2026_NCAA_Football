@@ -209,7 +209,7 @@ button,select{
   flex-direction:column;
   justify-content:center;
   gap:2px;
-  max-width:760px;
+  max-width:590px;
   min-width:0;
   margin-right:2px;
 }
@@ -224,6 +224,18 @@ button,select{
   line-height:1.15;
   white-space:nowrap;
 }
+.auto-model-copy{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  min-width:0;
+  line-height:1.1;
+}
+
+.auto-model-copy > span{
+  white-space:nowrap;
+}
+
 .ratings-model-note-label{
   flex:0 0 auto;
   color:#59dfff;
@@ -410,10 +422,31 @@ button,select{
 
 .ratings-health-strip{
   margin-top:0;
-  display:grid;
-  grid-template-columns:max-content minmax(0, 1fr) max-content;
-  align-items:start;
-  gap:3px 8px;
+  display:flex;
+  align-items:flex-start;
+  gap:6px 10px;
+  min-width:0;
+  width:100%;
+}
+
+.ratings-health-strip > .health-title{
+  flex:0 0 auto;
+}
+
+.ratings-health-content{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+}
+
+.ratings-health-content .model-health-row{
+  flex-wrap:wrap;
+}
+
+.ratings-model-mode{
+  flex:0 0 auto;
+  margin-left:auto;
+  white-space:nowrap;
 }
 
 .hfa-note{
@@ -447,14 +480,14 @@ button,select{
 }
 
 .model-health-label{
-  min-width:154px;
-  font-size:10px;
+  min-width:132px;
+  font-size:9px;
   font-weight:900;
   letter-spacing:.3px;
 }
 
 .health-status{
-  font-size:10px;
+  font-size:9px;
   font-weight:900;
   margin-left:3px;
 }
@@ -2225,7 +2258,10 @@ tr:hover td.context-group{background:#202d39}
         </div>
         <div class="ratings-model-note">
           <span class="ratings-model-note-label">AUTO MODEL</span>
-          <span>Spread: SP+ 25% · FPI 25% · TR 25% · DRatings 25% · Total: SP+ 40% · Massey 40% · DRatings 20%</span>
+          <span><span class="auto-model-copy">
+          <span>Spread: SP+ 25% · FPI 25% · TR 25% · DRatings 25%</span>
+          <span>Total: SP+ 40% · Massey 40% · DRatings 20%</span>
+        </span></span>
         </div>
       </div>
 
@@ -3041,7 +3077,7 @@ function renderHealth(){
               <span class="health-status ${esc(m.color || 'GRAY')}">${esc(m.status || 'NEVER_RUN')}</span>
             </span>
             <span class="health-detail" title="${esc(title)}">
-              CHECKED ${esc(checked)} · CHANGED ${esc(changed)} · APPLIED ${esc(applied)}
+              CK ${esc(checked)} · CHG ${esc(changed)} · APPLIED ${esc(applied)}
             </span>`;
           })()}
         </div>
@@ -5954,7 +5990,7 @@ const CONTROL_BASE_URL = __CONTROL_BASE_URL__;
 const VERSION_POLL_MS = __VERSION_POLL_MS__;
 const CONTROL_ORIGIN = CONTROL_BASE_URL ? new URL(CONTROL_BASE_URL).origin : '';
 const CONTROL_CHANNEL = 'ncaaf-war-room-control-v1';
-const CONTROL_ACTIONS = new Set(['market','ratings','postgame','model-override']);
+const CONTROL_ACTIONS = new Set(['market','ratings','massey','postgame','model-override']);
 const RELAY_REQUESTS = new Map();
 let CONTROL_WINDOW = null;
 const CONTROL_NONCE_KEY = 'ncaaf-war-room-control-nonce-v1';
