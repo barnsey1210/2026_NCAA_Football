@@ -179,6 +179,12 @@ def choose_reference_fallback(
         if not market or market.get("line") is None:
             continue
 
+        decision_side = row.get("bet_side")
+        market_side = market.get("side")
+
+        if decision_side and market_side and decision_side != market_side:
+            continue
+
         candidates.append((stamp, row, market))
 
     if not candidates:

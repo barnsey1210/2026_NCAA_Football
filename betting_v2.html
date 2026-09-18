@@ -4653,16 +4653,54 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     $('trackerRows').innerHTML=rows.map(row=>{
       const metrics=(row.checkpoints||{})[trackerCheckpoint]||{};
       const context=metricContext(metrics,trackerCheckpoint,row);
-      const metricCells=spread
-        ? [metrics.games,metrics.su_record,pct(metrics.su_pct),metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)]
-        : [metrics.games,metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)];
+      const ref=row.predictiontracker_reference||null;
+
+      let metricCells;
+
+      if(spread&&ref){
+        const refGames=ref.games;
+        const refSuRecord=
+          ref.su_wins!=null&&ref.su_losses!=null
+            ? `${ref.su_wins}-${ref.su_losses}`
+            : '—';
+        const refSuPct=
+          ref.su_wins!=null&&ref.su_losses!=null&&Number(ref.su_wins)+Number(ref.su_losses)>0
+            ? Number(ref.su_wins)/(Number(ref.su_wins)+Number(ref.su_losses))
+            : null;
+        const refAtsRecord=
+          ref.ats_wins!=null&&ref.ats_losses!=null&&ref.ats_pushes!=null
+            ? `${ref.ats_wins}-${ref.ats_losses}-${ref.ats_pushes}`
+            : '—';
+        const refAtsPct=
+          ref.ats_wins!=null&&ref.ats_losses!=null&&Number(ref.ats_wins)+Number(ref.ats_losses)>0
+            ? Number(ref.ats_wins)/(Number(ref.ats_wins)+Number(ref.ats_losses))
+            : null;
+
+        metricCells=[
+          refGames,
+          refSuRecord,
+          pct(refSuPct),
+          refAtsRecord,
+          pct(refAtsPct),
+          num1(ref.mae),
+          signedNum(ref.bias),
+          signedNum(metrics.average_clv_vs_open),
+          metrics.clv_n,
+          metrics.positive_clv,
+          pct(metrics.positive_clv_pct),
+        ];
+      }else{
+        metricCells=spread
+          ? [metrics.games,metrics.su_record,pct(metrics.su_pct),metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)]
+          : [metrics.games,metrics.record,pct(metrics.ats_or_ou_pct),num1(metrics.mae),signedNum(metrics.bias),signedNum(metrics.average_clv_vs_open),metrics.clv_n,metrics.positive_clv,pct(metrics.positive_clv_pct)];
+      }
 
       return `
         <tr title="${esc(context.title)}">
           <td>
             <div class="trackerModelName">${esc(displayName(row))}</div>
             <div class="trackerModelMeta">
-              ${esc(roleLabel(row))}${!Number(metrics.games)&&context.note?` · ${esc(context.note)}`:''}
+              ${esc(roleLabel(row))}${ref?' · PredictionTracker reference':''}${!Number(metrics.games)&&context.note?` · ${esc(context.note)}`:''}
             </div>
           </td>
           ${metricCells.map(value=>`<td>${value??'—'}</td>`).join('')}

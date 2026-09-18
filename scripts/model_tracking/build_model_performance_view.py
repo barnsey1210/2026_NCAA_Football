@@ -224,11 +224,35 @@ def canonical_openers(line_history):
     return output
 
 
-def checkpoint_clv_vs_open(captured_rows, predictions_by_id, openers, market_type):
+def checkpoint_clv_vs_open(
+    captured_rows,
+    predictions_by_id,
+    openers,
+    market_type,
+    legacy_markets_by_id=None,
+):
     """Measure opener-to-checkpoint movement in the model-selected direction."""
+    legacy_markets_by_id = legacy_markets_by_id or {}
     comparisons = []
     for checkpoint in captured_rows:
         prediction = predictions_by_id.get(str(checkpoint.get("prediction_observation_id")))
+
+        market_observation_id = str(
+            checkpoint.get("market_observation_id") or ""
+        )
+        legacy_market = legacy_markets_by_id.get(market_observation_id)
+
+        if legacy_market:
+            checkpoint_side = checkpoint.get("bet_side")
+            market_side = legacy_market.get("side")
+
+            if (
+                checkpoint_side in {"home", "away", "over", "under"}
+                and market_side in {"home", "away", "over", "under"}
+                and checkpoint_side != market_side
+            ):
+                continue
+
         opener = openers.get(str(checkpoint.get("canonical_game_id")), {}).get(market_type)
         if not prediction or not opener or checkpoint.get("market_line") is None:
             continue
@@ -524,6 +548,11 @@ def main():
     predictions_by_id = {
         str(row["observation_id"]): row
         for row in predictions
+    }
+    legacy_markets_by_id = {
+        str(row.get("observation_id")): row
+        for row in load("market_observations.jsonl")
+        if row.get("observation_id")
     }
     openers = canonical_openers(load_json(MATCHUP_LINE_HISTORY, {}))
     predictiontracker_reference = load_json(PREDICTIONTRACKER_REFERENCE, {})
@@ -1044,7 +1073,8 @@ def main():
                         "universe_reconciled": len(accuracy_index.get(
                             (market_type, None if period == "Season" else week, model_id, model_version), []
                         )) == reference.get("games"),
-                        "local_checkpoint_ats_preserved": True,
+                        "display_metrics_source": "PREDICTIONTRACKER_REFERENCE",
+                        "local_checkpoint_clv_preserved": True,
                     }
 
                 for checkpoint in checkpoint_order:
@@ -1076,7 +1106,11 @@ def main():
                     row["checkpoints"][checkpoint] = coverage_metrics(
                         selected_rows, accuracy_rows=selected_accuracy_rows,
                         opener_clv_rows=checkpoint_clv_vs_open(
-                            captured_rows, predictions_by_id, openers, market_type
+                            captured_rows,
+                            predictions_by_id,
+                            openers,
+                            market_type,
+                            legacy_markets_by_id,
                         ),
                         checkpoint=checkpoint,
                         schedule_n=schedule_n,
