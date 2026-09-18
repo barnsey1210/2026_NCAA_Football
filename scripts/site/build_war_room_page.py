@@ -2135,6 +2135,142 @@ tr:hover td.context-group{background:#202d39}
     margin-left:auto;
   }
 }
+
+/* 2026-09-18 Command Center compact health + desktop focus scroll */
+.ratings-health-strip{
+  align-items:center !important;
+  gap:3px 7px !important;
+  padding-top:2px !important;
+  padding-bottom:2px !important;
+  flex-wrap:nowrap !important;
+}
+
+.ratings-health-content{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  min-width:0 !important;
+  overflow:visible !important;
+}
+
+.ratings-health-content .model-health-row{
+  flex-wrap:nowrap !important;
+}
+
+.model-health-rows{
+  gap:1px !important;
+}
+
+.model-health-row{
+  gap:5px !important;
+  flex-wrap:nowrap !important;
+}
+
+.ratings-model-notes{
+  gap:0 !important;
+  margin-right:0 !important;
+  max-width:560px !important;
+}
+
+.ratings-model-note{
+  line-height:1.05 !important;
+}
+
+.auto-model-copy{
+  gap:0 !important;
+  line-height:1.05 !important;
+}
+
+.ratings-model-mode{
+  align-items:center !important;
+  align-self:center !important;
+  gap:5px !important;
+  margin-left:auto !important;
+}
+
+.model-mode-control{
+  gap:3px !important;
+  padding:1px 3px !important;
+}
+
+.model-mode-label{
+  font-size:9px !important;
+}
+
+.model-mode-btn{
+  min-width:54px !important;
+  min-height:22px !important;
+  padding:2px 7px !important;
+  font-size:9px !important;
+}
+
+.ratings-model-mode .hfa-note{
+  font-size:9px !important;
+  padding-right:1px !important;
+}
+
+.ratings-model-mode .hfa-note strong{
+  font-size:10px !important;
+}
+
+@media(min-width:901px){
+  html,
+  body{
+    height:auto !important;
+    min-height:100% !important;
+  }
+
+  body{
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+
+  .command-grid{
+    align-items:start !important;
+    min-height:100vh !important;
+  }
+
+  .main-panel{
+    display:flex !important;
+    flex-direction:column !important;
+    height:100vh !important;
+    min-height:0 !important;
+  }
+
+  .main-panel > .panel-head{
+    position:sticky !important;
+    top:0 !important;
+    z-index:35 !important;
+    flex:0 0 auto !important;
+    background:#08121b !important;
+    box-shadow:0 4px 10px rgba(0,0,0,.28);
+  }
+
+  .matrix-scroll{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow:auto !important;
+  }
+
+  .right-rail{
+    position:sticky !important;
+    top:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    height:100vh !important;
+    max-height:100vh !important;
+    min-height:0 !important;
+  }
+
+  .right-rail .activity-list{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    overflow-y:auto !important;
+  }
+}
+
 </style>
 </head>
 
