@@ -50,6 +50,11 @@ PROJECTION_SOURCE_STATUS = (
     / "data/site/projection_source_status_view.json"
 )
 
+MASSEY_REFRESH = (
+    ROOT
+    / "data/control/massey_background_refresh.json"
+)
+
 POSTGAME_SHADOW = (
     ROOT
     / "data/site/postgame_shadow_updates.json"
@@ -945,6 +950,36 @@ def main():
     shadow_health = build_shadow_health()
     projection_health = build_projection_health(latest_rows)
 
+    try:
+        massey_report = json.loads(MASSEY_REFRESH.read_text()) if MASSEY_REFRESH.exists() else {}
+    except Exception:
+        massey_report = {}
+
+    massey_status = str(massey_report.get("status") or "NEVER_RUN")
+
+    if massey_status == "UPDATED_AND_PROPAGATED":
+        massey_color = "GREEN"
+    elif massey_status in {"NO_CHANGE", "ALREADY_RUNNING"}:
+        massey_color = "GREEN"
+    elif massey_status in {"UPDATED_PENDING_PROPAGATION", "UPDATED_PROPAGATION_DEFERRED"}:
+        massey_color = "YELLOW"
+    elif massey_status in {"CRAWL_FAILED", "UPDATED_PROPAGATION_FAILED"}:
+        massey_color = "RED"
+    else:
+        massey_color = "GRAY"
+
+    massey_refresh = {
+        "status": massey_status,
+        "color": massey_color,
+        "last_checked_at": massey_report.get("completed_at"),
+        "last_changed_at": massey_report.get("last_changed_at"),
+        "last_model_applied_at": massey_report.get("last_model_applied_at"),
+        "changed_on_last_check": bool(massey_report.get("changed")),
+        "ratings_triggered_on_last_check": bool(massey_report.get("ratings_triggered")),
+        "ratings_status": massey_report.get("ratings_status"),
+        "elapsed_seconds": massey_report.get("elapsed_seconds"),
+    }
+
     books = {}
 
     for book in WATCHED:
@@ -1072,6 +1107,7 @@ def main():
         },
         "api_quota": api_quota,
         "ratings_health": ratings_health,
+        "massey_refresh": massey_refresh,
         "shadow_health": shadow_health,
         "projection_health": projection_health,
         "market_groups": {

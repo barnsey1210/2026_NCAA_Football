@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import csv
 import hashlib
 import json
@@ -110,7 +111,6 @@ def commands(start_date, end_date, as_of_date=None):
     return {
         "sagarin": [sys.executable, "ratings/pull_sagarin_ratings.py", *bounds, *clock],
         "dratings": [sys.executable, "scripts/projections/pull_dratings_ncaaf_predictions.py", *bounds, *clock],
-        "massey": [sys.executable, "scripts/projections/refresh_massey_game_projections_2026.py", "--days", "10", *clock],
     }
 
 
@@ -125,21 +125,44 @@ def main():
     before = {name: digest(path) for name, path in OUTPUTS.items()}
     stages = []
     started = time.monotonic()
-    for provider, command in commands(start_date, end_date, args.as_of_date).items():
+    provider_commands = commands(start_date, end_date, args.as_of_date)
+
+    def run_provider(provider, command):
         stage_started = time.monotonic()
-        result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=300)
-        stages.append({
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            timeout=300,
+        )
+        return {
             "provider": provider,
             "status": "PASSED" if result.returncode == 0 else "FAILED",
             "duration_seconds": round(time.monotonic() - stage_started, 3),
             "returncode": result.returncode,
             "output_tail": ((result.stdout or "") + (result.stderr or ""))[-4000:],
-        })
-        # Providers are independent. A failed/no-release source retains its
-        # last-known-good artifact and must not prevent later sources from
-        # being checked and accepted.
+        }
+
+    with ThreadPoolExecutor(max_workers=len(provider_commands)) as pool:
+        futures = {
+            pool.submit(run_provider, provider, command): provider
+            for provider, command in provider_commands.items()
+        }
+        results = {
+            futures[future]: future.result()
+            for future in as_completed(futures)
+        }
+
+    stages = [
+        results[provider]
+        for provider in provider_commands
+    ]
+
+    # Providers are independent. A failed/no-release source retains its
+    # last-known-good artifact and must not prevent later sources from
+    # being checked and accepted.
     after = {name: digest(path) for name, path in OUTPUTS.items()}
-    changed_components = [name for name in OUTPUTS if before[name] != after[name]]
     previous_state = {}
     if CHANGE_STATE.exists():
         try:
@@ -153,12 +176,36 @@ def main():
         "sagarin": "Sagarin Game Total",
     }
     prior_sources = previous_state.get("sources") or {}
+
+    changed_components = []
+
+    for component in OUTPUTS:
+        source = source_names[component]
+        prior = prior_sources.get(source) or {}
+        prior_fingerprint = prior.get("accepted_fingerprint")
+
+        if component == "massey":
+            if prior_fingerprint is not None and after.get(component) != prior_fingerprint:
+                changed_components.append(component)
+        elif before.get(component) != after.get(component):
+            changed_components.append(component)
+
     next_sources = dict(prior_sources)
     checked_at = utc_now()
     for component, source in source_names.items():
-        stage = next((row for row in stages if row.get("provider") == component.split("_", 1)[0]), None)
-        if not stage or stage.get("status") != "PASSED":
+        stage = next(
+            (row for row in stages if row.get("provider") == component.split("_", 1)[0]),
+            None,
+        )
+
+        snapshot_only = component == "massey"
+
+        if not snapshot_only and (not stage or stage.get("status") != "PASSED"):
             continue
+
+        if snapshot_only and after.get(component) is None:
+            continue
+
         changed = component in changed_components
         prior = prior_sources.get(source) or {}
         next_sources[source] = {
@@ -187,19 +234,24 @@ def main():
         "canonical_game_ids": [row["game_id"] for row in games],
         "providers_checked": ["sagarin", "dratings", "massey"],
         "providers_contacted": [row["provider"] for row in stages],
+        "snapshot_only_providers": ["massey"],
         "changed_components": changed_components,
         "changed_providers": sorted({name.split("_", 1)[0] for name in changed_components}),
         "coverage": coverage,
         "stages": stages,
         "elapsed_seconds": round(time.monotonic() - started, 3),
-        "success": len(stages) == 3 and all(row["returncode"] == 0 for row in stages),
+        "success": (
+            len(stages) == len(provider_commands)
+            and all(row["returncode"] == 0 for row in stages)
+            and after.get("massey") is not None
+        ),
         "partial_failure": any(row["returncode"] != 0 for row in stages),
     }
     atomic_json(REPORT, payload)
     print(json.dumps(payload, indent=2))
     # A complete independent evaluation is a successful orchestration run.
     # Individual failures remain explicit in the report and preserve LKG.
-    return 0 if len(stages) == 3 else 2
+    return 0 if payload["success"] else 2
 
 
 if __name__ == "__main__":

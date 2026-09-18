@@ -2140,6 +2140,10 @@ tr:hover td.context-group{background:#202d39}
         ↻ REFRESH RATINGS
       </button>
 
+      <button class="wr-btn operator-control" id="masseyBtn" disabled title="Run independent Massey Safari crawl; if changed, automatically propagate the Total model">
+        ↻ REFRESH MASSEY
+      </button>
+
       <button class="wr-btn operator-control" id="postgameBtn" disabled>
         ↻ REFRESH POSTGAME
       </button>
@@ -3016,6 +3020,30 @@ function renderHealth(){
         <div class="model-health-row">
           ${overall('TOTAL',weekProjectionHealth?.total)}
           ${totalSources}
+        </div>
+        <div class="model-health-row">
+          ${(()=>{
+            const m=HEALTH?.massey_refresh || {};
+            const checked=m.last_checked_at ? fmtStatusTimeET(m.last_checked_at) : '—';
+            const changed=m.last_changed_at ? fmtStatusTimeET(m.last_changed_at) : '—';
+            const applied=m.last_model_applied_at ? fmtStatusTimeET(m.last_model_applied_at) : '—';
+            const title=[
+              `Status: ${m.status || 'NEVER_RUN'}`,
+              `Last checked: ${m.last_checked_at ? fmtDateTimeET(m.last_checked_at) : '—'}`,
+              `Last changed: ${m.last_changed_at ? fmtDateTimeET(m.last_changed_at) : '—'}`,
+              `Model applied: ${m.last_model_applied_at ? fmtDateTimeET(m.last_model_applied_at) : '—'}`,
+              m.elapsed_seconds != null ? `Last crawl: ${Number(m.elapsed_seconds).toFixed(1)} sec` : null
+            ].filter(Boolean).join('\n');
+
+            return `<span class="model-health-label" title="${esc(title)}">
+              ${healthDot(m.color || 'GRAY')}
+              MASSEY SYNC
+              <span class="health-status ${esc(m.color || 'GRAY')}">${esc(m.status || 'NEVER_RUN')}</span>
+            </span>
+            <span class="health-detail" title="${esc(title)}">
+              CHECKED ${esc(checked)} · CHANGED ${esc(changed)} · APPLIED ${esc(applied)}
+            </span>`;
+          })()}
         </div>
       </div>
     `;
@@ -6035,6 +6063,12 @@ function operationDetail(task){
   if(task.credits_consumed != null) parts.push(`${task.credits_consumed} credits`);
   if(task.provider_result) parts.push(String(task.provider_result));
   if(task.publication_result) parts.push(String(task.publication_result));
+  if(task.action==='massey'){
+    if(task.massey_status) parts.push(`Massey ${String(task.massey_status).replaceAll('_',' ')}`);
+    if(task.massey_changed === true) parts.push('UPDATED');
+    if(task.massey_changed === false) parts.push('NO CHANGE');
+    if(task.ratings_triggered) parts.push(`Ratings ${task.ratings_status || 'triggered'}`);
+  }
   if(task.error) parts.push(String(task.error));
   return parts.filter(Boolean).join(' · ');
 }
@@ -6167,6 +6201,7 @@ document.getElementById('acquireBtn').addEventListener(
 );
 
 document.getElementById('ratingsBtn').addEventListener('click', e=>requestOperation('ratings',e.currentTarget,'↻ REQUESTING RATINGS…'));
+document.getElementById('masseyBtn').addEventListener('click', e=>requestOperation('massey',e.currentTarget,'↻ REQUESTING MASSEY…'));
 document.getElementById('postgameBtn').addEventListener('click', e=>requestOperation('postgame',e.currentTarget,'↻ REQUESTING POSTGAME…'));
 
 let LAST_BUILD_ID = null;
