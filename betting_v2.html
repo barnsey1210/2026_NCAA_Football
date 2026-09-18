@@ -4419,6 +4419,16 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 </script>
 <!-- V2_DARK_LOGO_BADGES_END -->
 <script defer src="betting_analytics.js"></script>
+<style>
+.trackerTable th.trackerSortable{
+  cursor:pointer;
+  user-select:none;
+  white-space:nowrap;
+}
+.trackerTable th.trackerSortable:hover{
+  text-decoration:underline;
+}
+</style>
 <script id="model-performance-preview-js">
 (function(){
   'use strict';
@@ -4427,6 +4437,8 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
   let trackerMarket='spread';
   let trackerPeriod='W0';
   let trackerCheckpoint='SUNDAY_9PM_ET';
+  let trackerSortColumn=null;
+  let trackerSortDirection='desc';
 
   const $=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({
@@ -4639,16 +4651,112 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     return ids.map(id=>byId.get(id)).filter(Boolean);
   }
 
+  function trackerSortValue(row,column,spread){
+    const metrics=(row.checkpoints||{})[trackerCheckpoint]||{};
+    const ref=row.predictiontracker_reference||null;
+
+    const games=spread&&ref ? ref.games : metrics.games;
+    const suPct=spread&&ref&&ref.su_wins!=null&&ref.su_losses!=null
+      ? Number(ref.su_wins)/(Number(ref.su_wins)+Number(ref.su_losses)||1)
+      : metrics.su_pct;
+    const atsPct=spread&&ref&&ref.ats_wins!=null&&ref.ats_losses!=null
+      ? Number(ref.ats_wins)/(Number(ref.ats_wins)+Number(ref.ats_losses)||1)
+      : metrics.ats_or_ou_pct;
+    const mae=spread&&ref ? ref.mae : metrics.mae;
+    const bias=spread&&ref ? ref.bias : metrics.bias;
+
+    if(column===0)return displayName(row).toLowerCase();
+
+    if(spread){
+      const values=[
+        null,
+        games,
+        suPct,
+        suPct,
+        atsPct,
+        atsPct,
+        mae,
+        bias,
+        metrics.average_clv_vs_open,
+        metrics.clv_n,
+        metrics.positive_clv,
+        metrics.positive_clv_pct
+      ];
+      return values[column];
+    }
+
+    const values=[
+      null,
+      games,
+      metrics.ats_or_ou_pct,
+      metrics.ats_or_ou_pct,
+      mae,
+      bias,
+      metrics.average_clv_vs_open,
+      metrics.clv_n,
+      metrics.positive_clv,
+      metrics.positive_clv_pct
+    ];
+    return values[column];
+  }
+
+  function sortTrackerRows(rows,spread){
+    if(trackerSortColumn==null)return rows;
+
+    const direction=trackerSortDirection==='asc' ? 1 : -1;
+
+    return [...rows].sort((a,b)=>{
+      const av=trackerSortValue(a,trackerSortColumn,spread);
+      const bv=trackerSortValue(b,trackerSortColumn,spread);
+
+      const aMissing=av==null||Number.isNaN(av);
+      const bMissing=bv==null||Number.isNaN(bv);
+
+      if(aMissing&&bMissing)return 0;
+      if(aMissing)return 1;
+      if(bMissing)return -1;
+
+      if(typeof av==='string'||typeof bv==='string'){
+        return String(av).localeCompare(String(bv))*direction;
+      }
+
+      if(Number(av)===Number(bv))return 0;
+      return (Number(av)-Number(bv))*direction;
+    });
+  }
+
   function renderTracker(){
     if(!MP)return;
 
-    const rows=currentRows();
+    let rows=currentRows();
 
     const spread=trackerMarket==='spread';
+    rows=sortTrackerRows(rows,spread);
     const headers=spread
       ? ['Model','Games','SU W-L','Win %','ATS W-L-P','ATS %','MAE','Bias','Avg CLV vs Open','CLV N','+CLV','+CLV %']
       : ['Model','Games','O/U W-L-P','O/U %','MAE','Bias','Avg CLV vs Open','CLV N','+CLV','+CLV %'];
-    $('trackerHead').innerHTML=`<tr>${headers.map(label=>`<th>${label}</th>`).join('')}</tr>`;
+    $('trackerHead').innerHTML=`<tr>${headers.map((label,index)=>{
+      const active=trackerSortColumn===index;
+      const arrow=active
+        ? (trackerSortDirection==='asc'?' ▲':' ▼')
+        : '';
+      return `<th class="trackerSortable" data-tracker-sort="${index}" title="Click to sort">${label}${arrow}</th>`;
+    }).join('')}</tr>`;
+
+    $('trackerHead').querySelectorAll('[data-tracker-sort]').forEach(th=>{
+      th.onclick=()=>{
+        const column=Number(th.dataset.trackerSort);
+
+        if(trackerSortColumn===column){
+          trackerSortDirection=trackerSortDirection==='asc'?'desc':'asc';
+        }else{
+          trackerSortColumn=column;
+          trackerSortDirection=column===0?'asc':'desc';
+        }
+
+        renderTracker();
+      };
+    });
 
     $('trackerRows').innerHTML=rows.map(row=>{
       const metrics=(row.checkpoints||{})[trackerCheckpoint]||{};
