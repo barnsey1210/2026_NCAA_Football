@@ -1,9 +1,9 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-09-18T14:47:02.128492+00:00",
+  "built_at": "2026-09-18T15:43:03.749621+00:00",
   "fast_market_refresh": {
-    "refresh_id": "theodds_20260918T142330Z",
-    "last_fast_pull_at": "2026-09-18T14:23:30.719605+00:00",
+    "refresh_id": "theodds_20260918T152354Z",
+    "last_fast_pull_at": "2026-09-18T15:23:54.547657+00:00",
     "source": "The Odds API",
     "upcoming_games_in_pull": 90,
     "participation_policy": "Book participation remains tied to the most recent fast market pull until another fast pull occurs. No elapsed-time cutoff changes participation.",
@@ -17,23 +17,23 @@
     "status": "HEALTHY",
     "color": "GREEN",
     "monthly_limit_configured": 20000,
-    "credits_used": 2772,
-    "credits_remaining": 17228,
+    "credits_used": 2774,
+    "credits_remaining": 17226,
     "last_call_cost": 2,
     "emergency_reserve": 2000,
-    "available_operating_credits": 15228,
-    "estimated_fast_pulls_remaining": 8614,
-    "estimated_operating_pulls_before_reserve": 7614,
+    "available_operating_credits": 15226,
+    "estimated_fast_pulls_remaining": 8613,
+    "estimated_operating_pulls_before_reserve": 7613,
     "calendar_month": "2026-09",
     "period_timezone": "UTC",
-    "quota_observed_at": "2026-09-18T14:23:30.719605+00:00",
+    "quota_observed_at": "2026-09-18T15:23:54.547657+00:00",
     "quota_observed_period": "2026-09",
     "rollover_reconciliation_required": false,
     "prior_period_credits_remaining": null,
     "reset_at_utc": "2026-10-01T00:00:00+00:00",
     "days_until_reset": 13,
-    "daily_operating_credit_budget": 1171.4,
-    "daily_operating_pull_budget": 585.7,
+    "daily_operating_credit_budget": 1171.2,
+    "daily_operating_pull_budget": 585.6,
     "scheduled_refresh_allowed": true,
     "policy": "Command Center quota is budgeted by UTC calendar month. Scheduled fast refreshes protect the configured emergency reserve. A prior-period header permits one normal guarded request to reconcile the new period; its response headers then become the runtime source of truth."
   },
@@ -264,8 +264,8 @@
         "SportsGameOdds": 2,
         "Action Network": 2
       },
-      "quote_age_median_seconds": 15.7,
-      "quote_age_p90_seconds": 16.7
+      "quote_age_median_seconds": 65.5,
+      "quote_age_p90_seconds": 65.5
     },
     "FanDuel": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -284,8 +284,8 @@
       "canonical_source_counts": {
         "The Odds API": 1498
       },
-      "quote_age_median_seconds": 14.7,
-      "quote_age_p90_seconds": 15.7
+      "quote_age_median_seconds": 39.5,
+      "quote_age_p90_seconds": 39.5
     },
     "BetMGM": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -305,8 +305,8 @@
         "The Odds API": 1062,
         "Action Network": 10
       },
-      "quote_age_median_seconds": 37.7,
-      "quote_age_p90_seconds": 37.7
+      "quote_age_median_seconds": 15.5,
+      "quote_age_p90_seconds": 15.5
     },
     "Caesars": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -327,8 +327,8 @@
         "Action Network": 1168,
         "SportsGameOdds": 2
       },
-      "quote_age_median_seconds": 415.7,
-      "quote_age_p90_seconds": 415.7
+      "quote_age_median_seconds": 26.5,
+      "quote_age_p90_seconds": 26.5
     },
     "Novig": {
       "group": "EXCHANGE",
@@ -367,8 +367,8 @@
       "canonical_source_counts": {
         "The Odds API": 1434
       },
-      "quote_age_median_seconds": 14.7,
-      "quote_age_p90_seconds": 15.7
+      "quote_age_median_seconds": 40.5,
+      "quote_age_p90_seconds": 40.5
     },
     "Kalshi": {
       "group": "EXCHANGE",
@@ -387,8 +387,8 @@
       "canonical_source_counts": {
         "The Odds API": 788
       },
-      "quote_age_median_seconds": 13.7,
-      "quote_age_p90_seconds": 14.7
+      "quote_age_median_seconds": 38.5,
+      "quote_age_p90_seconds": 39.5
     },
     "Pinnacle": {
       "group": "SHARP_REFERENCE",
@@ -407,8 +407,8 @@
       "canonical_source_counts": {
         "The Odds API": 1308
       },
-      "quote_age_median_seconds": 17.7,
-      "quote_age_p90_seconds": 17.7
+      "quote_age_median_seconds": 40.5,
+      "quote_age_p90_seconds": 40.5
     }
   }
 }
