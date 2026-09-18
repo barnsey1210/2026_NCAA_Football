@@ -3003,9 +3003,22 @@ function renderHealth(){
         fallback.latest_pulled_at ||
         fallback.last_changed_at ||
         null;
-      const title = sourceHealthTooltip(
+      let title = sourceHealthTooltip(
         label,status,coverage,fallback
       );
+
+      if(healthKey === 'MAS'){
+        const m=HEALTH?.massey_refresh || {};
+        const details=[
+          title,
+          '',
+          `Massey refresh: ${m.status || 'NEVER_RUN'}`,
+          `Last checked: ${m.last_checked_at ? fmtDateTimeET(m.last_checked_at) : '—'}`,
+          `Last changed: ${m.last_changed_at ? fmtDateTimeET(m.last_changed_at) : '—'}`,
+          `Model applied: ${m.last_model_applied_at ? fmtDateTimeET(m.last_model_applied_at) : '—'}`
+        ];
+        title=details.join('\n');
+      }
 
       return `
         <span class="health-book" title="${esc(title)}">
@@ -3057,30 +3070,7 @@ function renderHealth(){
           ${overall('TOTAL',weekProjectionHealth?.total)}
           ${totalSources}
         </div>
-        <div class="model-health-row">
-          ${(()=>{
-            const m=HEALTH?.massey_refresh || {};
-            const checked=m.last_checked_at ? fmtStatusTimeET(m.last_checked_at) : '—';
-            const changed=m.last_changed_at ? fmtStatusTimeET(m.last_changed_at) : '—';
-            const applied=m.last_model_applied_at ? fmtStatusTimeET(m.last_model_applied_at) : '—';
-            const title=[
-              `Status: ${m.status || 'NEVER_RUN'}`,
-              `Last checked: ${m.last_checked_at ? fmtDateTimeET(m.last_checked_at) : '—'}`,
-              `Last changed: ${m.last_changed_at ? fmtDateTimeET(m.last_changed_at) : '—'}`,
-              `Model applied: ${m.last_model_applied_at ? fmtDateTimeET(m.last_model_applied_at) : '—'}`,
-              m.elapsed_seconds != null ? `Last crawl: ${Number(m.elapsed_seconds).toFixed(1)} sec` : null
-            ].filter(Boolean).join('\n');
 
-            return `<span class="model-health-label" title="${esc(title)}">
-              ${healthDot(m.color || 'GRAY')}
-              MASSEY SYNC
-              <span class="health-status ${esc(m.color || 'GRAY')}">${esc(m.status || 'NEVER_RUN')}</span>
-            </span>
-            <span class="health-detail" title="${esc(title)}">
-              CK ${esc(checked)} · CHG ${esc(changed)} · APPLIED ${esc(applied)}
-            </span>`;
-          })()}
-        </div>
       </div>
     `;
   }
