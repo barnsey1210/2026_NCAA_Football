@@ -227,15 +227,23 @@ fi
 TMP_MANIFEST="$(mktemp)"
 PUBLISH_COMMITTED=0
 DOC_STASHED=0
+PUBLISH_START_HEAD="$(git -C "$MAIN_REPO" rev-parse HEAD)"
 
 cleanup(){
   rc=$?
-  rm -f "$TMP_MANIFEST"
-
   if [[ $rc -ne 0 && "$PUBLISH_COMMITTED" = "0" ]]; then
-    log "publish failed before commit; restoring tracked canonical worktree"
-    git -C "$MAIN_REPO" reset --hard origin/main >/dev/null 2>&1 || true
+    log "publish failed before commit; preserving branch history and restoring publisher-owned paths"
+    if [[ -s "$TMP_MANIFEST" ]]; then
+      git -C "$MAIN_REPO" restore --staged --worktree \
+        --pathspec-from-file="$TMP_MANIFEST" >/dev/null 2>&1 || true
+    fi
+    git -C "$MAIN_REPO" restore --staged --worktree -- index.html >/dev/null 2>&1 || true
+    if [[ "$(git -C "$MAIN_REPO" rev-parse HEAD 2>/dev/null || true)" != "$PUBLISH_START_HEAD" ]]; then
+      log "WARNING: repository HEAD changed during publish; leaving history intact for review"
+    fi
   fi
+
+  rm -f "$TMP_MANIFEST"
 
   if [[ "$DOC_STASHED" = "1" ]]; then
     log "restoring tracked documentation edits"

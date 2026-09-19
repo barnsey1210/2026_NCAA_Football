@@ -64,6 +64,9 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         self.assertIn('Path("data/site/matchups_view.json"),', publisher)
         self.assertIn('Path("data/site/matchups_public_view.json"),', publisher)
         self.assertIn("public build exposes the internal rich matchup artifact", validator)
+        self.assertNotIn("reset --hard origin/main", publisher)
+        self.assertIn("preserving branch history", publisher)
+        self.assertIn("--pathspec-from-file=\"$TMP_MANIFEST\"", publisher)
 
     def test_optional_model_open_tab_is_null_safe(self):
         for name in ("betting.html", "betting_v2.html"):

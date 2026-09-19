@@ -22,7 +22,7 @@ def main():
   'war_room_components':"const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','DRatings']" in war and "const TOTAL_COMPONENTS = ['SP+','Massey Dual','DRatings Total']" in war,
   'war_room_contract':wm['model_policy']['standard_spread_model']==SPREAD and wm['model_policy']['standard_total_model']==TOTAL,
   'matchups_contract':all(g['model']['spread_official_version']==SPREAD and g['model']['total_official_version']==TOTAL and g['model']['spread_sources']==list(es) and g['model']['total_sources']==list(et) for g in mv['games']),
-  'openers_shared_contract':"data/site/matchups_view.json" in openers and 'standard_spread_five_source_v1' not in openers and 'standard_total_sp_massey_sagarin_v1' not in openers,
+  'openers_shared_contract':any(x in openers for x in ('data/site/matchups_view.json','data/site/matchups_public_view.json')) and 'standard_spread_five_source_v1' not in openers and 'standard_total_sp_massey_sagarin_v1' not in openers,
   'public_authority_contract':cfg['contracts']['game_projections']['active_standard_authority']=={'spread_model_id':SPREAD,'spread_sources':list(es),'total_model_id':TOTAL,'total_sources':list(et)},
   'legacy_registered':LEGACY<=set(reg),'challenger_registered':CHALLENGER in reg,
   'authority_separate_from_registration':reg[SPREAD]['role']=='active_standard_authority' and reg[TOTAL]['role']=='active_standard_authority' and reg[CHALLENGER]['role']=='prospective_challenger',
