@@ -231,6 +231,20 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("Mode unchanged", submit)
         self.assertIn("panel.hidden=mode!=='MANUAL'", builder)
 
+    def test_successful_apply_manual_closes_panel_but_failure_keeps_it_open(self):
+        builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
+        submit = builder.split("function submitModelOverride(mode,button){", 1)[1].split(
+            "document.getElementById('modelAutoBtn').addEventListener", 1
+        )[0]
+        success = submit.split("onSuccess:()=>{", 1)[1].split("onError:error=>", 1)[0]
+        failure = submit.split("onError:error=>{", 1)[1]
+
+        self.assertIn("button?.id==='manualApplyBtn'", submit)
+        self.assertIn("if(panel && closeManualPanelOnSuccess) panel.hidden=true", success)
+        self.assertNotIn("closeManualPanelOnSuccess", failure)
+        self.assertIn("panel.hidden=persistedMode!=='MANUAL'", failure)
+        self.assertIn("Mode unchanged", failure)
+
     def test_model_override_accepts_auto_manual_auto_transition(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

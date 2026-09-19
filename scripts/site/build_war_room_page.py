@@ -6406,6 +6406,7 @@ function syncModelModeControls(){
 function submitModelOverride(mode,button){
   const spread=selectedManualSources('.manual-spread-source');
   const total=selectedManualSources('.manual-total-source');
+  const closeManualPanelOnSuccess=mode==='MANUAL' && button?.id==='manualApplyBtn';
 
   if(mode==='MANUAL' && spread.length===0 && total.length===0){
     document.getElementById('manualSourceStatus').textContent='Select at least one source';
@@ -6437,6 +6438,7 @@ function submitModelOverride(mode,button){
     {
       onSuccess:()=>{
         if(status) status.textContent=mode==='MANUAL' ? 'Manual mode active · equal-weight selected sources' : 'Automatic model active';
+        if(panel && closeManualPanelOnSuccess) panel.hidden=true;
       },
       onError:error=>{
         if(auto) auto.classList.toggle('active',persistedMode==='AUTO');
