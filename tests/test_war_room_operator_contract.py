@@ -229,7 +229,8 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("persistedMode", submit)
         self.assertIn("onError:error=>", submit)
         self.assertIn("Mode unchanged", submit)
-        self.assertIn("panel.hidden=mode!=='MANUAL'", builder)
+        self.assertIn("if(panel && mode==='AUTO') panel.hidden=true", builder)
+        self.assertIn("manualSourcePanel').hidden=false", manual_handler)
 
     def test_successful_apply_manual_closes_panel_but_failure_keeps_it_open(self):
         builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
@@ -242,8 +243,59 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("button?.id==='manualApplyBtn'", submit)
         self.assertIn("if(panel && closeManualPanelOnSuccess) panel.hidden=true", success)
         self.assertNotIn("closeManualPanelOnSuccess", failure)
-        self.assertIn("panel.hidden=persistedMode!=='MANUAL'", failure)
+        self.assertIn("panel.hidden=mode==='MANUAL' ? false", failure)
         self.assertIn("Mode unchanged", failure)
+
+    def test_manual_panel_stays_closed_through_reconciliation_and_refresh(self):
+        builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
+        sync = "function syncModelModeControls(){" + builder.split(
+            "function syncModelModeControls(){", 1
+        )[1].split("function submitModelOverride", 1)[0]
+        submit = "function submitModelOverride(mode,button){" + builder.split(
+            "function submitModelOverride(mode,button){", 1
+        )[1].split("document.getElementById('modelAutoBtn').addEventListener", 1)[0]
+        node = Path("/Users/jameslindesmith/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node")
+        script = f"""
+          const panel={{hidden:true}};
+          const status={{textContent:''}};
+          const klass=()=>({{active:false,toggle(_name,value){{this.active=value}}}});
+          const auto={{id:'modelAutoBtn',classList:klass()}};
+          const manual={{id:'modelManualBtn',classList:klass()}};
+          const apply={{id:'manualApplyBtn'}};
+          const inputs=[{{value:'SP+',checked:true}}];
+          const elements={{modelAutoBtn:auto,modelManualBtn:manual,manualSourcePanel:panel,manualSourceStatus:status}};
+          global.document={{
+            getElementById:id=>elements[id],
+            querySelectorAll:_selector=>inputs
+          }};
+          let MATRIX={{games:[{{operator_model:{{mode:'MANUAL',spread_sources:['SP+'],total_sources:['SP+']}}}}]}};
+          function currentOperatorModel(){{return MATRIX.games[0].operator_model}}
+          function selectedManualSources(selector){{
+            return Array.from(document.querySelectorAll(selector)).filter(input=>input.checked).map(input=>input.value);
+          }}
+          function setManualCheckboxes(_selector,selected){{inputs.forEach(input=>input.checked=new Set(selected||[]).has(input.value))}}
+          function requestOperation(_action,_button,_label,_payload,lifecycle){{
+            syncModelModeControls(); // loadData reconciliation completes before onSuccess
+            lifecycle.onSuccess();
+          }}
+          {sync}
+          {submit}
+          syncModelModeControls();
+          const refreshStayedClosed=panel.hidden;
+          panel.hidden=false;
+          submitModelOverride('MANUAL',apply);
+          const applyStayedClosed=panel.hidden;
+          syncModelModeControls();
+          console.log(JSON.stringify({{refreshStayedClosed,applyStayedClosed,afterLaterRefresh:panel.hidden,manualActive:manual.classList.active}}));
+        """
+        completed = subprocess.run([str(node), "-e", script], text=True, capture_output=True, check=True)
+        result = json.loads(completed.stdout)
+        self.assertEqual(result, {
+            "refreshStayedClosed": True,
+            "applyStayedClosed": True,
+            "afterLaterRefresh": True,
+            "manualActive": True,
+        })
 
     def test_model_override_accepts_auto_manual_auto_transition(self):
         with tempfile.TemporaryDirectory() as temporary:

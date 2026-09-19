@@ -6400,7 +6400,10 @@ function syncModelModeControls(){
     setManualCheckboxes('.manual-total-source',config.total_sources);
   }
 
-  if(panel) panel.hidden=mode!=='MANUAL';
+  // Mode reconciliation must not open the editor. The active MANUAL button and
+  // the editor's disclosure state are separate: refreshes/reloads reconcile the
+  // former while only an explicit MANUAL click opens the latter.
+  if(panel && mode==='AUTO') panel.hidden=true;
 }
 
 function submitModelOverride(mode,button){
@@ -6443,7 +6446,7 @@ function submitModelOverride(mode,button){
       onError:error=>{
         if(auto) auto.classList.toggle('active',persistedMode==='AUTO');
         if(manual) manual.classList.toggle('active',persistedMode==='MANUAL');
-        if(panel) panel.hidden=persistedMode!=='MANUAL';
+        if(panel) panel.hidden=mode==='MANUAL' ? false : persistedMode!=='MANUAL';
         if(status) status.textContent=`Mode unchanged · ${error}`;
       }
     }
@@ -6456,6 +6459,7 @@ document.getElementById('modelAutoBtn').addEventListener('click',e=>{
 });
 
 document.getElementById('modelManualBtn').addEventListener('click',()=>{
+  document.getElementById('manualSourcePanel').hidden=false;
   submitModelOverride('MANUAL',document.getElementById('modelManualBtn'));
 });
 
