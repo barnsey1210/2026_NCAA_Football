@@ -47,6 +47,18 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("positionModelTooltip(this)", block)
         self.assertIn("quoteBundle(game,book)", block)
 
+    def test_mobile_health_notes_and_game_footer_stack_without_overlap(self):
+        mobile = self.source.rsplit("@media(max-width:900px){", 1)[1].split(
+            "@media(min-width:901px){", 1
+        )[0]
+
+        self.assertIn("grid-template-columns:minmax(0,1fr) auto !important", mobile)
+        self.assertIn("grid-column:1 / -1", mobile)
+        self.assertIn("grid-template-columns:94px minmax(0,1fr)", mobile)
+        self.assertIn(".mobile-game-foot{", mobile)
+        self.assertIn("grid-template-columns:minmax(0,1fr)", mobile)
+        self.assertIn(".mobile-foot-injury + .mobile-foot-injury", mobile)
+
 
 if __name__ == "__main__":
     unittest.main()

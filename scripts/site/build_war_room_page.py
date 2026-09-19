@@ -1589,6 +1589,18 @@ tr:hover td.context-group{background:#202d39}
 .model-component.unavailable{color:var(--red)}
 .model-component.available{color:#a8b6c3}
 .model-component.missing{color:#718393}
+.model-component.excluded{color:#8b98a4}
+.model-tooltip-authority{
+  display:block;
+  margin-bottom:5px;
+  padding-bottom:5px;
+  border-bottom:1px solid rgba(105,145,173,.28);
+  color:#8da3b4;
+  font-size:8px;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+.model-tooltip-authority strong{color:#59dfff}
 
 .header-tooltip{position:relative;display:inline-flex;align-items:center;cursor:help}
 .header-tooltip-panel{
@@ -2211,6 +2223,77 @@ tr:hover td.context-group{background:#202d39}
 
 .ratings-model-mode .hfa-note strong{
   font-size:10px !important;
+}
+
+@media(max-width:900px){
+  .ratings-health-strip{
+    align-items:stretch !important;
+    flex-wrap:wrap !important;
+  }
+
+  .ratings-health-content{
+    flex:1 1 100% !important;
+    width:100% !important;
+    overflow:hidden !important;
+  }
+
+  .ratings-model-mode{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:start !important;
+    width:100% !important;
+    margin-left:0 !important;
+    white-space:normal !important;
+  }
+
+  .ratings-model-notes{
+    grid-column:1 / -1;
+    display:grid !important;
+    gap:5px !important;
+    width:100% !important;
+    max-width:none !important;
+    margin:4px 0 !important;
+  }
+
+  .ratings-model-note{
+    display:grid !important;
+    grid-template-columns:94px minmax(0,1fr);
+    align-items:start !important;
+    gap:7px !important;
+    white-space:normal !important;
+    line-height:1.25 !important;
+  }
+
+  .auto-model-copy > span{white-space:normal !important}
+  .model-mode-control{justify-self:start}
+  .ratings-model-mode .hfa-note{justify-self:end;margin-left:0 !important}
+
+  .mobile-game-foot{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+    gap:0;
+    padding:3px 8px;
+  }
+
+  .mobile-foot-injury{
+    display:grid;
+    grid-template-columns:84px minmax(0,1fr);
+    align-items:center;
+    gap:8px;
+    width:100%;
+    padding:5px 0;
+  }
+
+  .mobile-foot-injury + .mobile-foot-injury{
+    border-top:1px solid rgba(51,73,92,.55);
+  }
+
+  .mobile-foot-injury .injury-stack{
+    min-width:0;
+    flex-wrap:wrap;
+    row-gap:4px;
+  }
 }
 
 @media(min-width:901px){
@@ -3554,7 +3637,6 @@ function totalDecision(side, edge){
 
 const SPREAD_COMPONENTS = ['SP+','FPI','TeamRankings','DRatings'];
 const TOTAL_COMPONENTS = ['SP+','Massey Dual','DRatings Total'];
-const STANDARD_COMPONENT_WEIGHTS = {spread:{'SP+':25,'FPI':25,'TeamRankings':25,'DRatings':25},total:{'SP+':40,'Massey Dual':40,'DRatings Total':20}};
 
 function spreadComponentDisplay(value, game){
   const n = Number(value);
@@ -3572,10 +3654,20 @@ function spreadFavoriteLogo(game,value){
   return `<span class="team-logo-holder" title="${esc(team)} projected favorite"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
 }
 
-function modelTooltip(game, model, market){
+function modelTooltip(game, market){
+  const model = market === 'spread'
+    ? game?.models?.standard_spread
+    : game?.models?.standard_total;
+  const authority = game?.authority?.[market] || {};
   const components = market === 'spread' ? SPREAD_COMPONENTS : TOTAL_COMPONENTS;
   const values = model?.component_values || {};
   const freshness = game?.standard_freshness?.[market]?.sources || {};
+  const projectionAuthority = String(authority.projection_authority || model?.authority || 'UNAVAILABLE');
+  const hybridActive = projectionAuthority === 'HYBRID_REFRESHED_SOURCES';
+  const hybridComponents = new Set(authority.hybrid_components || []);
+  const authorityWeights = hybridActive
+    ? (authority.hybrid_weights_used || {})
+    : (model?.weights_used || {});
   const rows = components.map(name=>{
     const value = values[name];
     const missing = value === null || value === undefined || value === '' || !Number.isFinite(Number(value));
@@ -3585,9 +3677,22 @@ function modelTooltip(game, model, market){
       freshnessRow.state ||
       ''
     ).toUpperCase();
+    const manual=manualDisplayActive(game)
+      ? game?.operator_model?.manual?.[market]
+      : null;
+    const manualWeight=Number(manual?.weights_used?.[name]);
 
+    const authorityWeight = Number(authorityWeights[name]);
+    const authorityParticipating = hybridActive
+      ? hybridComponents.has(name) && Number.isFinite(authorityWeight)
+      : Number.isFinite(authorityWeight);
+    const displayParticipating = manual
+      ? Number.isFinite(manualWeight)
+      : authorityParticipating;
     const freshnessClass = missing
       ? 'unavailable'
+      : !displayParticipating
+        ? 'excluded'
       : freshnessRow.participating !== true
         ? 'missing'
         : ['CURRENT','UPDATED','PRE_GAME'].includes(freshnessState)
@@ -3598,16 +3703,9 @@ function modelTooltip(game, model, market){
     const shown = missing ? '—' : market === 'spread' ? spreadComponentDisplay(value,game) : Number(value).toFixed(1);
     const label = market === 'total' && name === 'SP+' ? 'SP+ Total' : name;
     const timestamp = freshnessRow.snapshot_date || freshnessRow.pulled_at || model?.freshness_timestamp || '';
-    const manual=manualDisplayActive(game)
-      ? game?.operator_model?.manual?.[market]
-      : null;
 
     const requested=new Set(
       manual?.requested_sources || []
-    );
-
-    const manualWeight=Number(
-      manual?.weights_used?.[name]
     );
 
     let weightText;
@@ -3620,8 +3718,13 @@ function modelTooltip(game, model, market){
       }else{
         weightText='OFF';
       }
+    }else if(authorityParticipating){
+      weightText=`${(authorityWeight*100).toFixed(1)}% · ACTIVE`;
+    }else if(missing){
+      weightText='MISSING';
     }else{
-      weightText=`${STANDARD_COMPONENT_WEIGHTS[market]?.[name]}%`;
+      const stale = ['STALE','CARRY_FORWARD','DEGRADED'].includes(freshnessState);
+      weightText=`EXCLUDED · NOT ACTIVE${stale?' · STALE':''}`;
     }
 
     return `<span class="model-component ${freshnessClass}" title="${timestamp ? `Source timestamp ${esc(timestamp)}` : 'Source timestamp unavailable'}"><span>${esc(label)} · ${weightText}</span><span>${shown}</span></span>`;
@@ -3634,7 +3737,10 @@ function modelTooltip(game, model, market){
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
   const modeLabel=manualModelLabel(game,market);
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel)}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  const modelId=authority.model_id || model?.model_id || 'unavailable';
+  const officialModelId=authority.official_model_id || model?.official_model_id || 'unavailable';
+  const provenance=`${projectionAuthority} · model ${modelId} · official ${officialModelId}`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel || provenance)}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip"><span class="model-tooltip-authority"><strong>${esc(projectionAuthority)}</strong><br>model: ${esc(modelId)}<br>official: ${esc(officialModelId)}</span>${rows}</span></span>`;
 }
 
 function positionModelTooltip(trigger){
@@ -4338,7 +4444,7 @@ function renderMobileMatrix(rows){
             `${recentBestBadge(game,'spread')}${bestBookTooltip(game,'spread',sprSide,sprBest)}`,
             recentBestCellClass(game,'spread')
           )}
-          ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_spread,'spread'))}
+          ${mobileMetric('MODEL',modelTooltip(game,'spread'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
           </div>
       </div>
@@ -4355,7 +4461,7 @@ function renderMobileMatrix(rows){
             `${recentBestBadge(game,'total')}${bestBookTooltip(game,'total',totSide,totBest)}`,
             recentBestCellClass(game,'total')
           )}
-          ${mobileMetric('MODEL',modelTooltip(game,game.models?.standard_total,'total'))}
+          ${mobileMetric('MODEL',modelTooltip(game,'total'))}
           ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
           </div>
       </div>
@@ -4460,7 +4566,7 @@ function renderMatrix(){
         </td>
 
         <td class="model-col spread-group">
-          ${modelTooltip(game, game.models?.standard_spread, 'spread')}
+          ${modelTooltip(game, 'spread')}
         </td>
 
         <td class="shadow-col spread-group">
@@ -4480,7 +4586,7 @@ function renderMatrix(){
         </td>
 
         <td class="model-col total-group">
-          ${modelTooltip(game, game.models?.standard_total, 'total')}
+          ${modelTooltip(game, 'total')}
         </td>
 
         <td class="shadow-col total-group">

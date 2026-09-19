@@ -19,17 +19,35 @@ def load_builder():
 
 
 class WarRoomModelTooltipContractTests(unittest.TestCase):
-    def test_render_path_consumes_passed_component_values(self):
+    def test_render_paths_resolve_one_authoritative_model_value(self):
         source = PAGE_BUILDER.read_text(encoding="utf-8")
+        tooltip = source.split("function modelTooltip(game, market){", 1)[1].split(
+            "function positionModelTooltip", 1
+        )[0]
+
         self.assertIn("const values = model?.component_values || {};", source)
-        self.assertIn(
-            "modelTooltip(game, game.models?.standard_spread, 'spread')",
-            source,
-        )
-        self.assertIn(
-            "modelTooltip(game, game.models?.standard_total, 'total')",
-            source,
-        )
+        self.assertEqual(source.count("modelTooltip(game,'spread')"), 1)
+        self.assertEqual(source.count("modelTooltip(game,'total')"), 1)
+        self.assertEqual(source.count("modelTooltip(game, 'spread')"), 1)
+        self.assertEqual(source.count("modelTooltip(game, 'total')"), 1)
+        self.assertIn("const value = displayedModelValue(game,market);", tooltip)
+        self.assertNotIn("model?.value_home_line", tooltip)
+        self.assertNotIn("model?.value_total", tooltip)
+
+    def test_hybrid_tooltip_uses_authority_weights_and_marks_exclusions(self):
+        source = PAGE_BUILDER.read_text(encoding="utf-8")
+        tooltip = source.split("function modelTooltip(game, market){", 1)[1].split(
+            "function positionModelTooltip", 1
+        )[0]
+
+        self.assertIn("projectionAuthority === 'HYBRID_REFRESHED_SOURCES'", tooltip)
+        self.assertIn("authority.hybrid_components || []", tooltip)
+        self.assertIn("authority.hybrid_weights_used || {}", tooltip)
+        self.assertIn("% · ACTIVE", tooltip)
+        self.assertIn("EXCLUDED · NOT ACTIVE", tooltip)
+        self.assertIn("weightText='MISSING'", tooltip)
+        self.assertIn("authority.official_model_id", tooltip)
+        self.assertNotIn("STANDARD_COMPONENT_WEIGHTS", source)
 
     def test_selected_operational_model_exposes_existing_components(self):
         module = load_builder()

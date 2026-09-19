@@ -124,7 +124,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIn("status:'AVAILABLE',color:'YELLOW'", status.group(1))
 
     def test_model_tooltip_consumes_backend_freshness(self):
-        block = self.source.split("function modelTooltip(game, model, market){", 1)[1].split(
+        block = self.source.split("function modelTooltip(game, market){", 1)[1].split(
             "function positionModelTooltip", 1
         )[0]
         self.assertIn("game?.standard_freshness?.[market]?.sources", block)
