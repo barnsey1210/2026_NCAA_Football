@@ -1255,7 +1255,7 @@ function coachCard(x){
 async function init(){
   const performancePanel=document.getElementById('performance');
   const [M,B,F,P,C,H,K]=await Promise.all([
-    opt('data/site/matchups_view.json',{games:[]}),
+    opt('data/site/matchups_public_view.json',{games:[]}),
     opt('data/site/betting_activity_view.json',{records:[],summary:{},strategy_metrics:{}}),
     opt('data/site/futures_view.json',{rows:[]}),
     opt('data/site/model_performance_view.json',{}),
@@ -1564,7 +1564,7 @@ def main() -> None:
         "Viewer’s Guide",
         "Actionable Board",
         "Explore Every Tool",
-        "data/site/matchups_view.json",
+        "data/site/matchups_public_view.json",
         "data/site/matchup_line_history.json",
         "data/site/current_market_contract.json",
         'href="ratings.html"',
