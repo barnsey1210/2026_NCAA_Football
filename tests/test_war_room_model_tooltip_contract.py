@@ -46,8 +46,19 @@ class WarRoomModelTooltipContractTests(unittest.TestCase):
         self.assertIn("% · ACTIVE", tooltip)
         self.assertIn("EXCLUDED · NOT ACTIVE", tooltip)
         self.assertIn("weightText='MISSING'", tooltip)
-        self.assertIn("authority.official_model_id", tooltip)
         self.assertNotIn("STANDARD_COMPONENT_WEIGHTS", source)
+
+    def test_tooltip_presents_component_rows_without_provenance_header(self):
+        source = PAGE_BUILDER.read_text(encoding="utf-8")
+        tooltip = source.split("function modelTooltip(game, market){", 1)[1].split(
+            "function positionModelTooltip", 1
+        )[0]
+
+        self.assertIn('role="tooltip">${rows}</span>', tooltip)
+        self.assertIn("modeLabel || 'Model components'", tooltip)
+        self.assertNotIn("model-tooltip-authority", tooltip)
+        self.assertNotIn("official_model_id", tooltip)
+        self.assertNotIn("official:", tooltip)
 
     def test_selected_operational_model_exposes_existing_components(self):
         module = load_builder()

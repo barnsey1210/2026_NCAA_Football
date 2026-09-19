@@ -3691,10 +3691,7 @@ function modelTooltip(game, market){
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
   const modeLabel=manualModelLabel(game,market);
-  const modelId=authority.model_id || model?.model_id || 'unavailable';
-  const officialModelId=authority.official_model_id || model?.official_model_id || 'unavailable';
-  const provenance=`${projectionAuthority} · model ${modelId} · official ${officialModelId}`;
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel || provenance)}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip"><span class="model-tooltip-authority"><strong>${esc(projectionAuthority)}</strong><br>model: ${esc(modelId)}<br>official: ${esc(officialModelId)}</span>${rows}</span></span>`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel || 'Model components')}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
 
 function positionModelTooltip(trigger){
