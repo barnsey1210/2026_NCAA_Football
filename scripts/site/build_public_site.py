@@ -38,6 +38,17 @@ ROOT_PUBLICATION_PAGES = (
 )
 PUBLIC_JSON_MAX_BYTES = 16 * 1024 * 1024
 PUBLIC_WAR_ROOM_TARGET_BYTES = 31 * 512 * 1024  # 15.5 MiB
+PUBLIC_QUOTE_INTERNAL_FIELDS = (
+    'game_id',
+    'provider_game_id',
+    'book_key',
+    'venue_type',
+    'market',
+    'selection_source',
+    'freshness_status',
+    'market_lifecycle_state',
+    'kickoff_at',
+)
 CANONICAL_MATCHUPS_NAME = 'matchups_view.json'
 PUBLIC_MATCHUPS_NAME = 'matchups_public_view.json'
 
@@ -48,8 +59,26 @@ def compact_public_war_room_matrix(payload):
     The runtime matrix remains the complete operational/audit contract.  The
     public page reads the canonical per-game ``authority`` object; the repeated
     ``operator_model.auto_authority`` copy and root builder audit are not read
-    by the page and do not belong in its static fallback payload.
+    by the page and do not belong in its static fallback payload. Sportsbook
+    quote transport fields are also redundant with their enclosing game,
+    market, book, and side paths. Keep the displayed quote and timestamp fields
+    so table, tooltip, freshness, and coverage behavior remains unchanged.
     """
+    def compact_market_quotes(value):
+        if isinstance(value, dict):
+            if (
+                'line' in value
+                and 'price' in value
+                and ('book' in value or 'side' in value)
+            ):
+                for field in PUBLIC_QUOTE_INTERNAL_FIELDS:
+                    value.pop(field, None)
+            for nested in value.values():
+                compact_market_quotes(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                compact_market_quotes(nested)
+
     payload.pop('audit', None)
     for game in payload.get('games', []):
         if not isinstance(game, dict):
@@ -57,6 +86,7 @@ def compact_public_war_room_matrix(payload):
         operator_model = game.get('operator_model')
         if isinstance(operator_model, dict):
             operator_model.pop('auto_authority', None)
+        compact_market_quotes(game.get('market'))
     return payload
 
 

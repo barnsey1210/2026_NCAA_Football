@@ -29,7 +29,24 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
                 "week": 3,
                 "authority": {"spread": {"value": 7.5}},
                 "models": {"standard_spread": {"value": 7.5}},
-                "market": {"best_sportsbook": {"spread": {"away": {"line": 7.5}}}},
+                "market": {"best_sportsbook": {"spread": {"away": {
+                    "game_id": "g186",
+                    "provider_game_id": "provider-186",
+                    "book": "Pinnacle",
+                    "book_key": "pinnacle",
+                    "venue_type": "sportsbook",
+                    "market": "spread",
+                    "side": "away",
+                    "line": 7.5,
+                    "price": -110,
+                    "last_update": "2026-09-14T22:29:00Z",
+                    "pulled_at": "2026-09-14T22:30:00Z",
+                    "source": "The Odds API",
+                    "selection_source": "CURRENT",
+                    "freshness_status": "CURRENT",
+                    "market_lifecycle_state": "PREGAME",
+                    "kickoff_at": "2026-09-19T19:30:00Z",
+                }}}},
                 "standard_freshness": {"spread": {"sources": {"SP+": {"status": "FRESH"}}}},
                 "operator_model": {
                     "mode": "AUTO",
@@ -51,7 +68,7 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertNotIn("audit", public)
         self.assertNotIn("auto_authority", public["games"][0]["operator_model"])
         for field in (
-            "authority", "models", "market", "standard_freshness",
+            "authority", "models", "standard_freshness",
             "shadow_readiness", "injury_rank", "betting_signals",
         ):
             self.assertEqual(public["games"][0][field], original["games"][0][field])
@@ -60,6 +77,13 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
             public["games"][0]["operator_model"]["manual"],
             original["games"][0]["operator_model"]["manual"],
         )
+        runtime_quote = original["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
+        public_quote = public["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
+        for field in BUILDER.PUBLIC_QUOTE_INTERNAL_FIELDS:
+            self.assertIn(field, runtime_quote)
+            self.assertNotIn(field, public_quote)
+        for field in ("book", "side", "line", "price", "last_update", "pulled_at", "source"):
+            self.assertEqual(public_quote[field], runtime_quote[field])
 
     def test_internal_only_growth_does_not_consume_public_size_budget(self):
         runtime = self.fixture()
