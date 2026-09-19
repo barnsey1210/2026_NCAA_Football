@@ -38,6 +38,8 @@ ROOT_PUBLICATION_PAGES = (
 )
 PUBLIC_JSON_MAX_BYTES = 16 * 1024 * 1024
 PUBLIC_WAR_ROOM_TARGET_BYTES = 31 * 512 * 1024  # 15.5 MiB
+CANONICAL_MATCHUPS_NAME = 'matchups_view.json'
+PUBLIC_MATCHUPS_NAME = 'matchups_public_view.json'
 
 
 def compact_public_war_room_matrix(payload):
@@ -60,6 +62,12 @@ def compact_public_war_room_matrix(payload):
 
 def cache_bust_site_json(text):
     """Version published data/site JSON URLs so browsers/CDNs fetch each build."""
+    # Browser pages must never request the canonical rich artifact.  It is an
+    # internal runtime/audit contract and can exceed the static-hosting limit.
+    text = text.replace(
+        f'data/site/{CANONICAL_MATCHUPS_NAME}',
+        f'data/site/{PUBLIC_MATCHUPS_NAME}',
+    )
     return re.sub(
         r'(data/site/[A-Za-z0-9_./-]+\.json)(?!\?v=\$\{)(?:\?v=[^\'"` )}>]+)?',
         lambda m: f"{m.group(1)}?v={BUILD_VERSION}",
@@ -265,9 +273,10 @@ def main():
     # The internal Matchups artifact intentionally contains rich provenance and
     # research context. Public consumers need only the operative model values;
     # rank_basis is internal provenance and is repeated for every schedule row.
-    public_matchups = public_site_data / 'matchups_view.json'
-    if public_matchups.exists():
-        payload = json.loads(public_matchups.read_text())
+    canonical_matchups_copy = public_site_data / CANONICAL_MATCHUPS_NAME
+    public_matchups = public_site_data / PUBLIC_MATCHUPS_NAME
+    if canonical_matchups_copy.exists():
+        payload = json.loads(canonical_matchups_copy.read_text())
         for game in payload.get('games', []):
             model = game.get('model')
             if isinstance(model, dict):
@@ -313,6 +322,10 @@ def main():
                 f'public matchup payload exceeds 16 MiB: '
                 f'{size} > {limit}'
             )
+
+        # The public bundle has its own deliberately reduced contract.  Do not
+        # leave the rich canonical artifact in the browser publication tree.
+        canonical_matchups_copy.unlink()
 
     # Preserve the complete user-facing War Room contract while compacting only
     # its public serialization. The runtime artifact remains unchanged and

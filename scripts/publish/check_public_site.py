@@ -173,9 +173,33 @@ def validate(root: Path, out: Path) -> list[str]:
         if (out / retired).exists():
             errors.append(f"retired public artifact returned: {retired}")
 
-    matchup_payload = out / "data/site/matchups_view.json"
+    matchup_payload = out / "data/site/matchups_public_view.json"
+    canonical_matchup_payload = out / "data/site/matchups_view.json"
+    if canonical_matchup_payload.exists():
+        errors.append("public build exposes the internal rich matchup artifact")
+    if not matchup_payload.is_file():
+        errors.append("public matchup payload missing: data/site/matchups_public_view.json")
     if matchup_payload.is_file() and matchup_payload.stat().st_size > 16 * 1024 * 1024:
         errors.append(f"public matchup payload exceeds 16 MiB: {matchup_payload.stat().st_size}")
+    if matchup_payload.is_file():
+        try:
+            public_matchups = json.loads(matchup_payload.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"public matchup payload malformed: {exc}")
+        else:
+            forbidden = {
+                "spread_official_version", "spread_sources",
+                "total_official_version", "total_sources", "resolver",
+            }
+            for game in public_matchups.get("games", []):
+                model = game.get("model") or {}
+                leaked = forbidden.intersection(model)
+                if leaked:
+                    errors.append(
+                        "public matchup payload leaked internal model fields: "
+                        + ", ".join(sorted(leaked))
+                    )
+                    break
 
     for asset in ("page_health.js", "page_health.css"):
         path = out / asset

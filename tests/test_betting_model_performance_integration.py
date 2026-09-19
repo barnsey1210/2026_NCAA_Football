@@ -55,6 +55,16 @@ class BettingModelPerformanceIntegrationTests(unittest.TestCase):
         self.assertIn("model_performance_view.json", validator)
         self.assertIn("shadow_model_performance.json", validator)
 
+    def test_publication_cannot_replace_canonical_matchups_schema(self):
+        builder = (ROOT / "scripts/site/build_public_site.py").read_text()
+        publisher = (ROOT / "scripts/publish/publish_site.sh").read_text()
+        validator = (ROOT / "scripts/publish/check_public_site.py").read_text()
+        self.assertIn("PUBLIC_MATCHUPS_NAME = 'matchups_public_view.json'", builder)
+        self.assertIn("canonical_matchups_copy.unlink()", builder)
+        self.assertIn('Path("data/site/matchups_view.json"),', publisher)
+        self.assertIn('Path("data/site/matchups_public_view.json"),', publisher)
+        self.assertIn("public build exposes the internal rich matchup artifact", validator)
+
     def test_optional_model_open_tab_is_null_safe(self):
         for name in ("betting.html", "betting_v2.html"):
             page = (ROOT / name).read_text()

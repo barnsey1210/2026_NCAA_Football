@@ -134,7 +134,7 @@ fi
 [[ -s "$PUBLIC_DIR/odds.html" ]] || die "missing public Odds page"
 [[ -s "$PUBLIC_DIR/matchups.html" ]] || die "missing public Matchups page"
 [[ -s "$PUBLIC_DIR/data/site/odds_screen_v2.json" ]] || die "missing public odds payload"
-[[ -s "$PUBLIC_DIR/data/site/matchups_view.json" ]] || die "missing public matchup payload"
+[[ -s "$PUBLIC_DIR/data/site/matchups_public_view.json" ]] || die "missing public matchup payload"
 [[ -s "$PUBLIC_DIR/data/site/model_performance_view.json" ]] || die "missing public model performance payload"
 [[ -s "$PUBLIC_DIR/data/site/historical_betting_analytics_v2.json" ]] || die "missing public historical betting analytics payload"
 [[ -s "$PUBLIC_DIR/data/site/historical_betting_explorer_v1.json" ]] || die "missing public historical betting explorer payload"
@@ -289,6 +289,9 @@ manifest = Path(sys.argv[3])
 excluded = {
     Path("index.html"),      # locked War Room homepage
     Path("coaches.html"),    # reserved Coaches landing page
+    # Internal rich schema. The browser-sized copy has a distinct filename so
+    # publication can never replace the canonical authority/provenance data.
+    Path("data/site/matchups_view.json"),
 }
 changed = []
 
@@ -327,7 +330,7 @@ required = [
     Path("data/site/odds_futures_v2.json"),
     Path("data/site/futures_view.json"),
     Path("data/site/futures_scenario_universe_2026.json"),
-    Path("data/site/matchups_view.json"),
+    Path("data/site/matchups_public_view.json"),
     Path("data/site/model_performance_view.json"),
     Path("data/site/historical_betting_analytics_v2.json"),
     Path("data/site/historical_betting_explorer_v1.json"),
@@ -362,7 +365,7 @@ PY
 
 grep -q 'data-war-room-home-release=' "$MAIN_REPO/index.html" || \
   die "locked War Room homepage marker disappeared"
-grep -q 'data/site/matchups_view.json' "$MAIN_REPO/index.html" || \
+grep -q 'data/site/matchups_public_view.json' "$MAIN_REPO/index.html" || \
   die "War Room homepage no longer references the matchup market payload"
 grep -q 'data/site/matchup_line_history.json' "$MAIN_REPO/index.html" || \
   die "War Room homepage no longer references line history"
