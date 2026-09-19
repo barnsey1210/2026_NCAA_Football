@@ -11,7 +11,7 @@ PAGES = {
     "matchups.html":"matchups.html",
     "matchup.html":"matchup.html",
     "futures.html":"futures.html",
-    "betting.html":"betting.html",
+    "betting_v2.html":"betting.html",
     "team.html":"team.html",
     "ratings_v2.html":"ratings.html",
     "simulations_v2.html":"simulations.html",
