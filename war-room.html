@@ -2534,10 +2534,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260919T162547Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260919T162547Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260919T162547Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260919T162547Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260919T163211Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260919T163211Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260919T163211Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260919T163211Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -6202,10 +6202,10 @@ function connectOperator(){
   status.textContent='Waiting for operator authentication…';
 }
 
-function requestViaRelay(action, button, old, payload=null){
+function requestViaRelay(action, button, old, payload=null, lifecycle={}){
   if(!CONTROL_ACTIONS.has(action) || !CONTROL_WINDOW || CONTROL_WINDOW.closed) throw new Error('Operator session is not connected');
   const requestId=crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-  RELAY_REQUESTS.set(requestId,{button,old});
+  RELAY_REQUESTS.set(requestId,{button,old,lifecycle});
   CONTROL_WINDOW.postMessage(
     {
       channel:CONTROL_CHANNEL,
@@ -6244,7 +6244,12 @@ addEventListener('message',event=>{
     status.textContent=operationDetail(message.task||{});
     const terminal=new Set(['COMPLETED','COMPLETED_WITH_WARNINGS','FAILED','BLOCKED_BY_OVERLAP','DEFERRED_BY_DAILY_BACKBONE','DEFERRED_BY_MARKET_PRIORITY']);
     if(terminal.has(message.task?.status)){
-      if(message.task.status==='COMPLETED' || message.task.status==='COMPLETED_WITH_WARNINGS')loadData();
+      const succeeded=message.task.status==='COMPLETED' || message.task.status==='COMPLETED_WITH_WARNINGS';
+      if(succeeded){
+        Promise.resolve(loadData()).then(()=>pending.lifecycle.onSuccess?.(message.task));
+      }else{
+        pending.lifecycle.onError?.(message.task?.error || message.task?.status || 'Task failed');
+      }
       RELAY_REQUESTS.delete(message.requestId);
       setTimeout(()=>{pending.button.textContent=pending.old;pending.button.disabled=false},2500);
     }
@@ -6255,24 +6260,27 @@ addEventListener('message',event=>{
     connect.hidden=false;
     connect.disabled=false;
     status.textContent='Operator session expired · reconnect required';
+    pending.lifecycle.onError?.(message.message || 'Operator session expired');
     CONTROL_WINDOW=null;
   }else if(message.type==='ERROR'){
     pending.button.textContent='⚠ REQUEST FAILED';
     status.textContent=`Request failed · ${message.message}`;
     RELAY_REQUESTS.delete(message.requestId);
+    pending.lifecycle.onError?.(message.message || 'Request failed');
     setTimeout(()=>{pending.button.textContent=pending.old;pending.button.disabled=false},2500);
   }
 });
 
-function requestOperation(action, button, runningLabel, payload=null){
+function requestOperation(action, button, runningLabel, payload=null, lifecycle={}){
   const old = button.textContent;
   button.disabled = true;
   button.textContent = runningLabel;
   const status = document.getElementById('operatorStatus');
   status.textContent = 'Submitting authenticated request…';
-  try{requestViaRelay(action,button,old,payload)}catch(err){
+  try{requestViaRelay(action,button,old,payload,lifecycle)}catch(err){
     button.textContent='⚠ REQUEST FAILED';
     status.textContent = `Request failed · ${err.message}`;
+    lifecycle.onError?.(err.message);
     setTimeout(()=>{button.textContent=old;button.disabled=false},2500);
   }
 }
@@ -6346,9 +6354,7 @@ function syncModelModeControls(){
     setManualCheckboxes('.manual-total-source',config.total_sources);
   }
 
-  if(panel && mode==='AUTO'){
-    panel.hidden=true;
-  }
+  if(panel) panel.hidden=mode!=='MANUAL';
 }
 
 function submitModelOverride(mode,button){
@@ -6367,14 +6373,32 @@ function submitModelOverride(mode,button){
   };
 
   const panel=document.getElementById('manualSourcePanel');
+  const persistedMode=String(currentOperatorModel().mode || 'AUTO').toUpperCase();
+  const auto=document.getElementById('modelAutoBtn');
+  const manual=document.getElementById('modelManualBtn');
+  const status=document.getElementById('manualSourceStatus');
 
-  if(panel) panel.hidden=true;
+  if(auto) auto.classList.toggle('active',mode==='AUTO');
+  if(manual) manual.classList.toggle('active',mode==='MANUAL');
+  if(panel) panel.hidden=mode!=='MANUAL';
+  if(status) status.textContent=mode==='MANUAL' ? 'Applying selected sources…' : 'Switching to automatic model…';
 
   requestOperation(
     'model-override',
     button,
     mode==='AUTO' ? 'AUTO…' : 'APPLYING…',
-    payload
+    payload,
+    {
+      onSuccess:()=>{
+        if(status) status.textContent=mode==='MANUAL' ? 'Manual mode active · equal-weight selected sources' : 'Automatic model active';
+      },
+      onError:error=>{
+        if(auto) auto.classList.toggle('active',persistedMode==='AUTO');
+        if(manual) manual.classList.toggle('active',persistedMode==='MANUAL');
+        if(panel) panel.hidden=persistedMode!=='MANUAL';
+        if(status) status.textContent=`Mode unchanged · ${error}`;
+      }
+    }
   );
 }
 
@@ -6384,8 +6408,7 @@ document.getElementById('modelAutoBtn').addEventListener('click',e=>{
 });
 
 document.getElementById('modelManualBtn').addEventListener('click',()=>{
-  const panel=document.getElementById('manualSourcePanel');
-  panel.hidden=!panel.hidden;
+  submitModelOverride('MANUAL',document.getElementById('modelManualBtn'));
 });
 
 document.getElementById('manualCancelBtn').addEventListener('click',()=>{

@@ -121,11 +121,10 @@ class OperatorContractTests(unittest.TestCase):
                 self.assertEqual(popen.call_count, 1)
 
     def test_fixed_route_contract_has_no_legacy_acquire(self):
-        methods_by_path = {
-            route.path: set(route.methods or [])
-            for route in api.app.routes
-            if hasattr(route, "methods")
-        }
+        methods_by_path = {}
+        for route in api.app.routes:
+            if hasattr(route, "methods"):
+                methods_by_path.setdefault(route.path, set()).update(route.methods or [])
         self.assertIn("POST", methods_by_path["/war-room/market"])
         self.assertNotIn("GET", methods_by_path["/war-room/market"])
         self.assertIn("GET", methods_by_path["/war-room/bootstrap"])
@@ -134,6 +133,18 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("GET", methods_by_path["/war-room/live/market-matrix"])
         self.assertIn("GET", methods_by_path["/war-room/live/activity"])
         self.assertNotIn("/war-room/acquire", methods_by_path)
+
+    def test_model_override_routes_and_declared_control_plane_match(self):
+        methods_by_path = {}
+        for route in api.app.routes:
+            if hasattr(route, "methods"):
+                methods_by_path.setdefault(route.path, set()).update(route.methods or [])
+        config = json.loads((api.ROOT / "config/war_room_control_plane.json").read_text())
+        self.assertIn("POST", methods_by_path["/war-room/model-override"])
+        self.assertIn("GET", methods_by_path["/war-room/model-override"])
+        self.assertIn("/war-room/model-override", config["allowed_routes"]["POST"])
+        self.assertIn("/war-room/model-override", config["allowed_routes"]["GET"])
+        self.assertIn("/war-room/massey", config["allowed_routes"]["POST"])
 
     def test_game_activity_live_read_is_bounded_to_requested_game(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -201,8 +212,59 @@ class OperatorContractTests(unittest.TestCase):
         self.assertNotIn("fetch('/war-room/acquire'", builder)
         self.assertNotIn("headers:{'Content-Type':'application/json'}", builder)
         self.assertIn("LIVE_VERSION_URL", builder)
-        self.assertIn("fetchDataBundle(LIVE_MATRIX_URL,LIVE_HEALTH_URL,LIVE_ACTIVITY_URL)", builder)
+        self.assertIn("fetchMatrixForWeek(ACTIVE_WEEK)", builder)
+        self.assertIn("fetchJsonWithFallback(LIVE_HEALTH_URL,HEALTH_URL,'Health')", builder)
+        self.assertIn("fetchJsonWithFallback(LIVE_ACTIVITY_URL,ACTIVITY_URL,'Activity')", builder)
         self.assertIn('POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))', builder)
+
+    def test_manual_toggle_submits_and_failed_change_restores_persisted_mode(self):
+        builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
+        manual_handler = builder.split(
+            "document.getElementById('modelManualBtn').addEventListener", 1
+        )[1].split("document.getElementById('manualCancelBtn')", 1)[0]
+        submit = builder.split("function submitModelOverride(mode,button){", 1)[1].split(
+            "document.getElementById('modelAutoBtn').addEventListener", 1
+        )[0]
+        self.assertIn("submitModelOverride('MANUAL'", manual_handler)
+        self.assertIn("persistedMode", submit)
+        self.assertIn("onError:error=>", submit)
+        self.assertIn("Mode unchanged", submit)
+        self.assertIn("panel.hidden=mode!=='MANUAL'", builder)
+
+    def test_model_override_accepts_auto_manual_auto_transition(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(api, "TASKS", root / "tasks"), patch.object(
+                api, "LATEST", root / "latest.json"
+            ), patch("scripts.war_room.war_room_operator_api.subprocess.Popen") as popen:
+                popen.return_value.pid = 4321
+                transitions = [
+                    api.ModelOverrideRequest(
+                        mode="AUTO",
+                        spread_sources=["SP+", "FPI"],
+                        total_sources=["SP+"],
+                    ),
+                    api.ModelOverrideRequest(
+                        mode="MANUAL",
+                        spread_sources=["SP+", "FPI"],
+                        total_sources=["SP+"],
+                    ),
+                    api.ModelOverrideRequest(
+                        mode="AUTO",
+                        spread_sources=["SP+", "FPI"],
+                        total_sources=["SP+"],
+                    ),
+                ]
+                for payload in transitions:
+                    response = api.model_override(
+                        payload,
+                        request(api.CONTROL_ORIGIN, path="/war-room/model-override"),
+                        "operator@example.invalid",
+                    )
+                    self.assertEqual(response["status"], "RUNNING")
+                commands = [call.args[0] for call in popen.call_args_list]
+                modes = [command[command.index("--mode") + 1] for command in commands]
+                self.assertEqual(modes, ["AUTO", "MANUAL", "AUTO"])
 
     def test_public_live_read_origin_is_exact(self):
         for origin in api.PUBLIC_ORIGINS:

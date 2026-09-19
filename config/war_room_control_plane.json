@@ -30,8 +30,8 @@
     ]
   },
   "allowed_routes": {
-    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}", "/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/activity", "/war-room/live/schedule"],
-    "POST": ["/war-room/market", "/war-room/ratings", "/war-room/postgame"]
+    "GET": ["/war-room/status", "/war-room/bootstrap", "/war-room/task/{task_id}", "/war-room/model-override", "/war-room/live/version", "/war-room/live/health", "/war-room/live/market-matrix", "/war-room/live/activity", "/war-room/live/schedule"],
+    "POST": ["/war-room/market", "/war-room/ratings", "/war-room/massey", "/war-room/postgame", "/war-room/model-override"]
   },
   "public_live_reads": {
     "authentication": "CLOUDFLARE_ACCESS_BYPASS_ON_EXACT_PATH_ONLY",
