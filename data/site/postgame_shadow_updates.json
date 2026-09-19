@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-18T12:01:56.578456+00:00",
+  "built_at": "2026-09-19T12:02:08.516235+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -4986,6 +4986,62 @@
       "next_opponent": "Connecticut",
       "total_estimate_status": "pending_current_season_pbp",
       "synthetic_input": false
+    },
+    {
+      "team": "Texas Tech",
+      "opponent": "Houston",
+      "completed_game_id": "g187",
+      "completed_date": "2026-09-18",
+      "team_margin": 2.0,
+      "team_closing_spread": -7.5,
+      "team_ats_margin": -5.5,
+      "estimated_spread_rating_innovation": 1.38,
+      "next_game_id": "g317",
+      "next_opponent": "Sam Houston",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Houston",
+      "opponent": "Texas Tech",
+      "completed_game_id": "g187",
+      "completed_date": "2026-09-18",
+      "team_margin": -2.0,
+      "team_closing_spread": 7.5,
+      "team_ats_margin": 5.5,
+      "estimated_spread_rating_innovation": -1.35,
+      "next_game_id": "g284",
+      "next_opponent": "Georgia Southern",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Wake Forest",
+      "opponent": "Miami-FL",
+      "completed_game_id": "g188",
+      "completed_date": "2026-09-18",
+      "team_margin": -13.0,
+      "team_closing_spread": 21.0,
+      "team_ats_margin": 8.0,
+      "estimated_spread_rating_innovation": -4.7,
+      "next_game_id": "g292",
+      "next_opponent": "Louisville",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Miami-FL",
+      "opponent": "Wake Forest",
+      "completed_game_id": "g188",
+      "completed_date": "2026-09-18",
+      "team_margin": 13.0,
+      "team_closing_spread": -21.0,
+      "team_ats_margin": -8.0,
+      "estimated_spread_rating_innovation": 4.46,
+      "next_game_id": "g295",
+      "next_opponent": "Central Michigan",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
     }
   ],
   "warnings": [
@@ -4997,11 +5053,12 @@
     "Unmatched result: Richmond at NC State",
     "Unmatched result: Norfolk State at Virginia",
     "Missing canonical close/score: ETSU at North Carolina",
-    "Missing canonical close/score: CCSU at Toledo"
+    "Missing canonical close/score: CCSU at Toledo",
+    "Unmatched result: Portland State at Oregon"
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 354,
-    "warnings": 9
+    "completed_team_updates": 358,
+    "warnings": 10
   }
 }
