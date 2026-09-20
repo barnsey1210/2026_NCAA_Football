@@ -5624,12 +5624,10 @@ function componentText(model,names,market,game){
 
 function renderMarketSnapshot(game,gameData){
   const openers=gameData?.openers || {};
-  const timeline=Array.isArray(gameData?.market_timeline) ? gameData.market_timeline : [];
+  const events=Array.isArray(gameData?.events) ? gameData.events : [];
 
   const spreadOpen=openers.spread;
   const totalOpen=openers.total;
-  const spreadCurrent=game?.market?.best_sportsbook?.spread?.home;
-  const totalCurrent=game?.market?.best_sportsbook?.total?.over;
 
   const priceText=(price)=>{
     if(price===null || price===undefined || price==='') return '';
@@ -5674,15 +5672,6 @@ function renderMarketSnapshot(game,gameData){
     return {book,spread,total,observed_at};
   }).filter(row=>row.spread || row.total);
 
-  const byBookMarket=new Map();
-
-  timeline.forEach(row=>{
-    if(!row?.book || !['spread','total'].includes(row.market)) return;
-    const key=`${row.book}|${row.market}`;
-    if(!byBookMarket.has(key)) byBookMarket.set(key,[]);
-    byBookMarket.get(key).push(row);
-  });
-
   const preferredBooks=[
     'DraftKings',
     'FanDuel',
@@ -5691,9 +5680,11 @@ function renderMarketSnapshot(game,gameData){
     'Pinnacle'
   ];
 
-  const bookNames=preferredBooks.filter(book=>
-    timeline.some(row=>row?.book===book)
-  );
+  currentBookRows.sort((a,b)=>{
+    const ai=preferredBooks.indexOf(a.book);
+    const bi=preferredBooks.indexOf(b.book);
+    return (ai<0?preferredBooks.length:ai)-(bi<0?preferredBooks.length:bi) || a.book.localeCompare(b.book);
+  });
 
   const openerLine=(label,opener,market)=>{
     if(!opener){
@@ -5714,142 +5705,48 @@ function renderMarketSnapshot(game,gameData){
     </div>`;
   };
 
-  const movementRows=[];
-
-  const latestBookMarket=(book,market)=>{
-    const rows=(byBookMarket.get(`${book}|${market}`) || [])
-      .slice()
-      .sort((a,b)=>String(a.observed_at||'').localeCompare(String(b.observed_at||'')));
-
-    if(!rows.length) return null;
-
-    const distinct=[];
-    for(const row of rows){
-      const prev=distinct[distinct.length-1];
-      const same=
-        prev &&
-        Number(prev.line)===Number(row.line) &&
-        Number(prev.price)===Number(row.price);
-
-      if(!same) distinct.push(row);
-    }
-
-    const last=distinct[distinct.length-1];
-    const previous=distinct.length>1 ? distinct[distinct.length-2] : null;
-
-    const quote=(row)=>{
-      if(!row) return '';
-      return market==='spread'
-        ? `${esc(row.side==='away' ? game.away_team : game.home_team)} ${fmtLine(row.line)}${priceText(row.price)}`
-        : `${Number(row.line).toFixed(1)}${priceText(row.price)}`;
+  const bestMoveEvents=events.filter(event=>
+    ['BEST_SPREAD_CHANGED','BEST_TOTAL_CHANGED'].includes(event?.event_type)
+  ).sort((a,b)=>{
+    const timestampOrder=String(recentChangeTimestamp(b)||'').localeCompare(String(recentChangeTimestamp(a)||''));
+    if(timestampOrder) return timestampOrder;
+    return a.event_type==='BEST_SPREAD_CHANGED' ? -1 : b.event_type==='BEST_SPREAD_CHANGED' ? 1 : 0;
+  });
+  const mostRecentMove=bestMoveEvents[0] || null;
+  const moveValue=(event)=>{
+    if(!event) return '';
+    const payload=event.payload || event.metadata || {};
+    const oldBest=payload.old_best || {};
+    const newBest=payload.new_best || {};
+    const oldSide=oldBest.best_side || event.side;
+    const newSide=newBest.best_side || event.side;
+    const sideTeam=(side)=>side==='away'?game.away_team:side==='home'?game.home_team:'';
+    const quote=(line,price,side)=>{
+      if(event.market==='spread'){
+        const team=sideTeam(side);
+        return `${team?`${esc(team)} `:''}${fmtLine(line)}${priceText(price)}`;
+      }
+      const prefix=String(side||'').toLowerCase()==='under'?'U':'O';
+      return `${prefix}${Number(line).toFixed(1)}${priceText(price)}`;
     };
-
-    const value=previous
-      ? `${quote(previous)} → ${quote(last)}`
-      : quote(last);
-
-    return {
-      previous,
-      last,
-      moved:Boolean(previous),
-      value,
-      observed_at:last.observed_at
-    };
+    return `${quote(event.old_line,event.old_price,oldSide)} → ${quote(event.new_line,event.new_price,newSide)}`;
   };
-
-  bookNames.forEach(book=>{
-    const spread=latestBookMarket(book,'spread');
-    const total=latestBookMarket(book,'total');
-
-    if(!spread && !total) return;
-
-    movementRows.push({
-      book,
-      spread,
-      total,
-      observed_at:
-        [spread?.observed_at,total?.observed_at]
-          .filter(Boolean)
-          .sort()
-          .slice(-1)[0] || null
-    });
-  });
-
-  const latestMoves=[];
-
-  movementRows.forEach(row=>{
-    if(row.spread?.moved){
-      latestMoves.push({
-        book:row.book,
-        market:'SPREAD',
-        value:row.spread.value,
-        observed_at:row.spread.observed_at
-      });
-    }
-
-    if(row.total?.moved){
-      latestMoves.push({
-        book:row.book,
-        market:'TOTAL',
-        value:row.total.value,
-        observed_at:row.total.observed_at
-      });
-    }
-  });
-
-  latestMoves.sort((a,b)=>
-    String(b.observed_at || '').localeCompare(String(a.observed_at || ''))
-  );
-
-  const mostRecentMove=latestMoves[0] || null;
 
   const mostRecentMoveHtml=mostRecentMove
     ? `<div class="snapshot-latest-move-card">
          <div class="snapshot-latest-move-head">
            <span>MOST RECENT MOVE</span>
-           <time>${fmtDateTimeET(mostRecentMove.observed_at)}</time>
+           <time>${fmtDateTimeET(recentChangeTimestamp(mostRecentMove))}</time>
          </div>
          <div class="snapshot-latest-move-meta">
-           ${bookText(mostRecentMove.book)} · ${mostRecentMove.market}
+           ${bookText(mostRecentMove.book)} · ${esc(String(mostRecentMove.market || '').toUpperCase())}
          </div>
-         <div class="snapshot-latest-move-value">${mostRecentMove.value}</div>
+         <div class="snapshot-latest-move-value">${moveValue(mostRecentMove)}</div>
        </div>`
-    : '';
-
-  const movementHtml=movementRows.length
-    ? `<div class="snapshot-market-section">
-         ${mostRecentMoveHtml}
-         <div class="snapshot-market-section-title">BOOK MOVEMENT</div>
-         <div class="snapshot-book-grid">
-           ${movementRows.map(row=>{
-             const cls={
-               'DraftKings':'dk',
-               'FanDuel':'fd',
-               'BetMGM':'mgm',
-               'Caesars':'czr',
-               'Pinnacle':'pinn'
-             }[row.book] || 'other';
-
-             return `<div class="snapshot-book-card ${cls}">
-               <div class="snapshot-book-card-head">
-                 <span>${bookText(row.book)}</span>
-                 <time>${row.observed_at?fmtDateTimeET(row.observed_at):'—'}</time>
-               </div>
-
-               <div class="snapshot-book-card-market">
-                 <span>SPREAD</span>
-                 <strong>${row.spread?.value || '—'}</strong>
-               </div>
-
-               <div class="snapshot-book-card-market">
-                 <span>TOTAL</span>
-                 <strong>${row.total?.value || '—'}</strong>
-               </div>
-             </div>`;
-           }).join('')}
-         </div>
-       </div>`
-    : '';
+    : `<div class="snapshot-latest-move-card">
+         <div class="snapshot-latest-move-head"><span>MOST RECENT MOVE</span></div>
+         <div class="snapshot-latest-move-value">NO BEST-LINE MOVE CAPTURED</div>
+       </div>`;
 
   const currentBooksHtml=currentBookRows.length
     ? `<div class="snapshot-market-section">
@@ -5873,16 +5770,6 @@ function renderMarketSnapshot(game,gameData){
        </div>`
     : '';
 
-  const currentSpread=spreadCurrent
-    ? `${esc(game.home_team)} ${fmtLine(spreadCurrent.line)}${priceText(spreadCurrent.price)}`
-    : '—';
-
-  const currentTotal=totalCurrent
-    ? `${Number(totalCurrent.line).toFixed(1)}${priceText(totalCurrent.price)}`
-    : '—';
-  const currentSpreadTimestamp=quoteTimestamp(spreadCurrent);
-  const currentTotalTimestamp=quoteTimestamp(totalCurrent);
-
   return `<div class="snapshot-title">MARKET HISTORY</div>
 
     <div class="snapshot-opener-box">
@@ -5891,25 +5778,9 @@ function renderMarketSnapshot(game,gameData){
       ${openerLine('TOTAL',totalOpen,'total')}
     </div>
 
-    ${movementHtml}
+    ${mostRecentMoveHtml}
 
-    ${currentBooksHtml}
-
-    <div class="snapshot-market-section snapshot-current-box">
-      <div class="snapshot-market-section-title">CURRENT</div>
-
-      <div class="snapshot-current-row">
-        <div class="snapshot-current-kind">SPREAD</div>
-        <div class="snapshot-current-value">${currentSpread}</div>
-        <div class="snapshot-current-meta">${bookText(spreadCurrent?.book)}${currentSpreadTimestamp?` · ${fmtDateTimeET(currentSpreadTimestamp)}`:''}</div>
-      </div>
-
-      <div class="snapshot-current-row">
-        <div class="snapshot-current-kind">TOTAL</div>
-        <div class="snapshot-current-value">${currentTotal}</div>
-        <div class="snapshot-current-meta">${bookText(totalCurrent?.book)}${currentTotalTimestamp?` · ${fmtDateTimeET(currentTotalTimestamp)}`:''}</div>
-      </div>
-    </div>`;
+    ${currentBooksHtml}`;
 }
 
 function renderModelSnapshot(game){

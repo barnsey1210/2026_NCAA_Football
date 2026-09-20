@@ -404,9 +404,33 @@ class WarRoomActivityTest(unittest.TestCase):
         self.assertIn("quote?.last_update || quote?.pulled_at", block)
         self.assertIn("favored.quote.line", block)
         self.assertIn("favored.team", block)
-        self.assertIn("currentSpreadTimestamp", block)
-        self.assertIn("currentTotalTimestamp", block)
         self.assertIn(".filter(row=>row.spread || row.total)", block)
+
+    def test_market_snapshot_has_only_requested_three_sections(self):
+        source = (ROOT / "scripts/site/build_war_room_page.py").read_text()
+        block = source[
+            source.index("function renderMarketSnapshot"):
+            source.index("function renderModelSnapshot")
+        ]
+        self.assertIn("OPENERS", block)
+        self.assertIn("MOST RECENT MOVE", block)
+        self.assertIn("CURRENT BY BOOK", block)
+        self.assertNotIn("BOOK MOVEMENT", block)
+        self.assertNotIn('snapshot-market-section-title\">CURRENT<', block)
+        self.assertNotIn("market_timeline", block)
+
+    def test_most_recent_move_uses_activity_event_timestamp_contract(self):
+        source = (ROOT / "scripts/site/build_war_room_page.py").read_text()
+        block = source[
+            source.index("function renderMarketSnapshot"):
+            source.index("function renderModelSnapshot")
+        ]
+        self.assertIn("gameData?.events", block)
+        self.assertIn("BEST_SPREAD_CHANGED", block)
+        self.assertIn("BEST_TOTAL_CHANGED", block)
+        self.assertIn("recentChangeTimestamp(b)", block)
+        self.assertIn("a.event_type==='BEST_SPREAD_CHANGED'", block)
+        self.assertIn("fmtDateTimeET(recentChangeTimestamp(mostRecentMove))", block)
 
 
 if __name__ == "__main__":
