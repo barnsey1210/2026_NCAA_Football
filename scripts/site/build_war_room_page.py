@@ -3737,14 +3737,20 @@ function modelTooltip(game, market){
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
   const modeLabel=manualModelLabel(game,market);
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" title="${esc(modeLabel || 'Model components')}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" aria-label="${esc(modeLabel || 'Model components')}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)" onpointerdown="handleModelTooltipPointer(event,this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
+
+let activeModelTooltipTrigger=null;
 
 function positionModelTooltip(trigger){
   const source=trigger?.querySelector('.model-tooltip-panel');
   if(!source) return;
 
+  if(activeModelTooltipTrigger && activeModelTooltipTrigger!==trigger){
+    closeModelTooltip(activeModelTooltipTrigger);
+  }
   closeModelTooltip(trigger);
+  activeModelTooltipTrigger=trigger;
   trigger.classList.add('open');
 
   const panel=source.cloneNode(true);
@@ -3811,7 +3817,33 @@ function closeModelTooltip(trigger){
   }
 
   trigger?.classList.remove('open');
+  if(activeModelTooltipTrigger===trigger){
+    activeModelTooltipTrigger=null;
+  }
 }
+
+function handleModelTooltipPointer(event,trigger){
+  if(event.pointerType==='mouse') return;
+  event.preventDefault();
+  event.stopPropagation();
+  if(activeModelTooltipTrigger===trigger){
+    closeModelTooltip(trigger);
+  }else{
+    positionModelTooltip(trigger);
+  }
+}
+
+document.addEventListener('pointerdown',event=>{
+  if(activeModelTooltipTrigger && !activeModelTooltipTrigger.contains(event.target)){
+    closeModelTooltip(activeModelTooltipTrigger);
+  }
+},true);
+window.addEventListener('scroll',()=>{
+  if(activeModelTooltipTrigger) closeModelTooltip(activeModelTooltipTrigger);
+},true);
+window.addEventListener('resize',()=>{
+  if(activeModelTooltipTrigger) closeModelTooltip(activeModelTooltipTrigger);
+});
 
 
 const TEAM_LOGO_SLUGS = {
@@ -4108,7 +4140,7 @@ function shadowDisplay(game, model, market){
     ? `<span class="shadow-value-line">${spreadFavoriteLogo(game,value)}<span>${label}</span></span>`
     : label;
   const tooltip=shadowTooltipText(game,market,readyCount);
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)"><span class="shadow-team-state"><span class="shadow-team-icons">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}</span><span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${valueMarkup}</span></span><span class="model-tooltip-panel shadow-tooltip-panel" role="tooltip">${esc(tooltip)}</span></span>`;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)" onpointerdown="handleModelTooltipPointer(event,this)"><span class="shadow-team-state"><span class="shadow-team-icons">${shadowTeamChip(game.away_team,awayReady)}${shadowTeamChip(game.home_team,homeReady)}</span><span class="shadow-state-label ${available?'shadow-ready':'shadow-wait'}">${valueMarkup}</span></span><span class="model-tooltip-panel shadow-tooltip-panel" role="tooltip">${esc(tooltip)}</span></span>`;
 }
 
 const BOOK_LOGOS = {
@@ -4283,7 +4315,8 @@ function bestBookTooltip(game,market,side,bestQuote){
     onmouseenter="positionModelTooltip(this)"
     onmouseleave="closeModelTooltip(this)"
     onfocus="positionModelTooltip(this)"
-    onblur="closeModelTooltip(this)">
+    onblur="closeModelTooltip(this)"
+    onpointerdown="handleModelTooltipPointer(event,this)">
       ${compactQuote(bestQuote,market,game,true)}
       <span class="model-tooltip-panel" role="tooltip">${rows}${latestMove}</span>
     </span>`;

@@ -60,6 +60,31 @@ class WarRoomModelTooltipContractTests(unittest.TestCase):
         self.assertNotIn("official_model_id", tooltip)
         self.assertNotIn("official:", tooltip)
 
+    def test_first_tooltip_is_dismissed_when_second_tooltip_opens(self):
+        source = PAGE_BUILDER.read_text(encoding="utf-8")
+        lifecycle = source.split("let activeModelTooltipTrigger=null;", 1)[1].split(
+            "const TEAM_LOGO_SLUGS", 1
+        )[0]
+
+        self.assertIn("activeModelTooltipTrigger!==trigger", lifecycle)
+        self.assertIn("closeModelTooltip(activeModelTooltipTrigger);", lifecycle)
+        self.assertIn("activeModelTooltipTrigger=trigger;", lifecycle)
+        self.assertIn("activeModelTooltipTrigger=null;", lifecycle)
+
+    def test_tooltip_dismisses_on_outside_pointer_scroll_and_resize(self):
+        source = PAGE_BUILDER.read_text(encoding="utf-8")
+        lifecycle = source.split("let activeModelTooltipTrigger=null;", 1)[1].split(
+            "const TEAM_LOGO_SLUGS", 1
+        )[0]
+
+        self.assertIn("function handleModelTooltipPointer(event,trigger)", lifecycle)
+        self.assertIn("document.addEventListener('pointerdown'", lifecycle)
+        self.assertIn("!activeModelTooltipTrigger.contains(event.target)", lifecycle)
+        self.assertIn("window.addEventListener('scroll'", lifecycle)
+        self.assertIn("window.addEventListener('resize'", lifecycle)
+        self.assertNotIn('title="${esc(modeLabel', source)
+        self.assertIn('aria-label="${esc(modeLabel', source)
+
     def test_selected_operational_model_exposes_existing_components(self):
         module = load_builder()
         game = {
