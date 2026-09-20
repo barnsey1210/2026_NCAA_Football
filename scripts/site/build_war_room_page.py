@@ -4414,6 +4414,22 @@ function recentChangeWithinMinutes(event,minutes=30){
   return ageMs>=0 && ageMs<=minutes*60*1000;
 }
 
+function refreshRecentChangeHighlights(){
+  let expired=false;
+  document.querySelectorAll('.cell-hot-market').forEach(cell=>{
+    const container=cell.closest('[data-game-id]');
+    const game=(MATRIX?.games || []).find(row=>
+      String(row.game_id || '')===String(container?.dataset.gameId || '')
+    );
+    const market=cell.classList.contains('spread-group') ? 'spread' : 'total';
+    if(game && recentBestEvent(game,market)) return;
+    cell.classList.remove('cell-hot-market');
+    cell.querySelectorAll('.cell-change-badge.market').forEach(badge=>badge.remove());
+    expired=true;
+  });
+  return expired;
+}
+
 function mobileRecentChangeCount(game){
   return (ACTIVITY?.recent_change_events || []).filter(event=>
     String(event.game_id || '')===String(game?.game_id || '') &&
@@ -5623,6 +5639,41 @@ function renderMarketSnapshot(game,gameData){
 
   const bookText=(book)=>book ? snapshotBook(book) : '—';
 
+  const quoteTimestamp=(quote)=>quote?.last_update || quote?.pulled_at || null;
+  const spreadLabel=(sides)=>{
+    const away=sides?.away;
+    const home=sides?.home;
+    if(!away && !home) return null;
+    const candidates=[
+      away ? {team:game.away_team,quote:away} : null,
+      home ? {team:game.home_team,quote:home} : null
+    ].filter(Boolean);
+    const favored=candidates.find(row=>Number(row.quote?.line)<0) || candidates[0];
+    return {
+      value:`${esc(favored.team)} ${fmtLine(favored.quote.line)}${priceText(favored.quote.price)}`,
+      observed_at:quoteTimestamp(favored.quote)
+    };
+  };
+  const totalLabel=(sides)=>{
+    const quote=sides?.over || sides?.under;
+    if(!quote) return null;
+    return {
+      value:`${Number(quote.line).toFixed(1)}${priceText(quote.price)}`,
+      observed_at:quoteTimestamp(quote)
+    };
+  };
+
+  const currentBookBundles={...(game?.market?.primary_sportsbooks || {})};
+  if(game?.market?.pinnacle && !currentBookBundles.Pinnacle){
+    currentBookBundles.Pinnacle=game.market.pinnacle;
+  }
+  const currentBookRows=Object.entries(currentBookBundles).map(([book,bundle])=>{
+    const spread=spreadLabel(bundle?.spread);
+    const total=totalLabel(bundle?.total);
+    const observed_at=[spread?.observed_at,total?.observed_at].filter(Boolean).sort().slice(-1)[0] || null;
+    return {book,spread,total,observed_at};
+  }).filter(row=>row.spread || row.total);
+
   const byBookMarket=new Map();
 
   timeline.forEach(row=>{
@@ -5689,7 +5740,7 @@ function renderMarketSnapshot(game,gameData){
     const quote=(row)=>{
       if(!row) return '';
       return market==='spread'
-        ? `${fmtLine(row.line)}${priceText(row.price)}`
+        ? `${esc(row.side==='away' ? game.away_team : game.home_team)} ${fmtLine(row.line)}${priceText(row.price)}`
         : `${Number(row.line).toFixed(1)}${priceText(row.price)}`;
     };
 
@@ -5800,6 +5851,28 @@ function renderMarketSnapshot(game,gameData){
        </div>`
     : '';
 
+  const currentBooksHtml=currentBookRows.length
+    ? `<div class="snapshot-market-section">
+         <div class="snapshot-market-section-title">CURRENT BY BOOK</div>
+         <div class="snapshot-book-grid">
+           ${currentBookRows.map(row=>{
+             const cls={
+               'DraftKings':'dk','FanDuel':'fd','BetMGM':'mgm',
+               'Caesars':'czr','Pinnacle':'pinn'
+             }[row.book] || 'other';
+             return `<div class="snapshot-book-card ${cls}">
+               <div class="snapshot-book-card-head">
+                 <span>${bookText(row.book)}</span>
+                 <time>${row.observed_at?fmtDateTimeET(row.observed_at):'—'}</time>
+               </div>
+               ${row.spread ? `<div class="snapshot-book-card-market"><span>SPREAD</span><strong>${row.spread.value}</strong></div>` : ''}
+               ${row.total ? `<div class="snapshot-book-card-market"><span>TOTAL</span><strong>${row.total.value}</strong></div>` : ''}
+             </div>`;
+           }).join('')}
+         </div>
+       </div>`
+    : '';
+
   const currentSpread=spreadCurrent
     ? `${esc(game.home_team)} ${fmtLine(spreadCurrent.line)}${priceText(spreadCurrent.price)}`
     : '—';
@@ -5807,6 +5880,8 @@ function renderMarketSnapshot(game,gameData){
   const currentTotal=totalCurrent
     ? `${Number(totalCurrent.line).toFixed(1)}${priceText(totalCurrent.price)}`
     : '—';
+  const currentSpreadTimestamp=quoteTimestamp(spreadCurrent);
+  const currentTotalTimestamp=quoteTimestamp(totalCurrent);
 
   return `<div class="snapshot-title">MARKET HISTORY</div>
 
@@ -5818,19 +5893,21 @@ function renderMarketSnapshot(game,gameData){
 
     ${movementHtml}
 
+    ${currentBooksHtml}
+
     <div class="snapshot-market-section snapshot-current-box">
       <div class="snapshot-market-section-title">CURRENT</div>
 
       <div class="snapshot-current-row">
         <div class="snapshot-current-kind">SPREAD</div>
         <div class="snapshot-current-value">${currentSpread}</div>
-        <div class="snapshot-current-meta">${bookText(spreadCurrent?.book)}</div>
+        <div class="snapshot-current-meta">${bookText(spreadCurrent?.book)}${currentSpreadTimestamp?` · ${fmtDateTimeET(currentSpreadTimestamp)}`:''}</div>
       </div>
 
       <div class="snapshot-current-row">
         <div class="snapshot-current-kind">TOTAL</div>
         <div class="snapshot-current-value">${currentTotal}</div>
-        <div class="snapshot-current-meta">${bookText(totalCurrent?.book)}</div>
+        <div class="snapshot-current-meta">${bookText(totalCurrent?.book)}${currentTotalTimestamp?` · ${fmtDateTimeET(currentTotalTimestamp)}`:''}</div>
       </div>
     </div>`;
 }
@@ -6543,7 +6620,10 @@ async function pollPublishedVersion(){
   }catch(_err){ /* preserve the last valid rendered state */ }
 }
 setInterval(pollPublishedVersion, VERSION_POLL_MS);
-setInterval(updateMatrixRecencyMarkers, 30000);
+setInterval(()=>{
+  updateMatrixRecencyMarkers();
+  refreshRecentChangeHighlights();
+}, 30000);
 detectOperator();
 
 loadData().catch(err=>{

@@ -145,6 +145,31 @@ def main():
         1,
     )
 
+    # Detect accepted BEST/EDGE transitions on every fast cycle so the public
+    # 30-minute alert window is anchored to the cycle that actually changed the
+    # resolved matrix. This is local contract work and makes no provider call.
+    stages.append(
+        run_stage(
+            "war_room_activity",
+            [
+                sys.executable,
+                "scripts/war_room/build_war_room_activity.py",
+            ],
+            env,
+        )
+    )
+    stages.append(
+        run_stage(
+            "war_room_market_activity_enrichment",
+            [
+                sys.executable,
+                "scripts/war_room/build_war_room_market_matrix.py",
+                "--activity-enrichment-only",
+            ],
+            matrix_env,
+        )
+    )
+
     total_ms = round(
         (perf_counter() - start) * 1000,
         1,
@@ -159,8 +184,6 @@ def main():
         "total_duration_ms": total_ms,
         "critical_path_duration_ms": war_room_ready_ms,
         "deferred_to_daily_maintenance": [
-            "war_room_activity",
-            "war_room_market_activity_enrichment",
             "odds_screen_v2_rebuild",
             "matchups_current_market_overlay",
             "record_fast_refresh_history",

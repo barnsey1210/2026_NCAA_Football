@@ -924,6 +924,7 @@ def load_book_market_timeline(path: Path) -> dict[str, list[dict[str, Any]]]:
                     "_parsed": parsed,
                     "book": book,
                     "market": market,
+                    "side": side,
                     "line": line,
                     "price": price,
                     "source": row.get("source"),

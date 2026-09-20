@@ -194,17 +194,18 @@ class WarRoomMatrixPhase2Test(unittest.TestCase):
         self.assertNotIn("compactQuote(sprEx, 'spread', game)", rows)
         self.assertNotIn("compactQuote(totEx, 'total', game)", rows)
         self.assertIn("const move=q.last_material_move", source)
-        self.assertIn("setInterval(updateMatrixRecencyMarkers, 30000)", source)
+        self.assertIn("refreshRecentChangeHighlights();", source)
         self.assertIn("minutes>90", source)
 
-    def test_fast_refresh_builds_matrix_once_and_defers_history_maintenance(self):
+    def test_fast_refresh_builds_matrix_then_activity_and_enrichment(self):
         source = (ROOT / "scripts/war_room/run_fast_market_refresh.py").read_text()
         self.assertEqual(source.count('"war_room_market_matrix"'), 1)
-        self.assertNotIn('"war_room_market_matrix_enriched"', source)
         self.assertNotIn('run_stage(\n            "append_current_market_book_history"', source)
         self.assertNotIn('run_stage(\n            "build_matchup_line_history"', source)
         self.assertIn('"deferred_to_daily_maintenance"', source)
-        self.assertIn('"war_room_market_activity_enrichment"', source)
+        deferred = source.split('"deferred_to_daily_maintenance"', 1)[1]
+        self.assertNotIn('"war_room_activity"', deferred)
+        self.assertNotIn('"war_room_market_activity_enrichment"', deferred)
         self.assertIn('"--activity-enrichment-only"', source)
         self.assertLess(
             source.index('"war_room_market_matrix"'),

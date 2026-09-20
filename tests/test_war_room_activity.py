@@ -379,6 +379,35 @@ class WarRoomActivityTest(unittest.TestCase):
         direct_refs = set(re.findall(r"getElementById\(['\"]([^'\"]+)", source))
         self.assertEqual(direct_refs - ids, set())
 
+    def test_recent_change_window_uses_absolute_time_and_expires(self):
+        source = (ROOT / "scripts/site/build_war_room_page.py").read_text()
+        block = source[
+            source.index("function recentChangeTimestamp"):
+            source.index("function refreshRecentChangeHighlights")
+        ]
+        self.assertIn("Date.parse(raw || '')", block)
+        self.assertIn("const ageMs=Date.now()-ts", block)
+        self.assertIn("ageMs>=0 && ageMs<=minutes*60*1000", block)
+        timer = source[source.index("setInterval(()=>{"):source.index("detectOperator();")]
+        self.assertIn("refreshRecentChangeHighlights();", timer)
+        self.assertIn("}, 30000);", timer)
+
+    def test_market_snapshot_has_current_book_cards_timestamps_and_spread_team(self):
+        source = (ROOT / "scripts/site/build_war_room_page.py").read_text()
+        block = source[
+            source.index("function renderMarketSnapshot"):
+            source.index("function renderModelSnapshot")
+        ]
+        self.assertIn("CURRENT BY BOOK", block)
+        self.assertIn("game?.market?.primary_sportsbooks", block)
+        self.assertIn("currentBookBundles.Pinnacle", block)
+        self.assertIn("quote?.last_update || quote?.pulled_at", block)
+        self.assertIn("favored.quote.line", block)
+        self.assertIn("favored.team", block)
+        self.assertIn("currentSpreadTimestamp", block)
+        self.assertIn("currentTotalTimestamp", block)
+        self.assertIn(".filter(row=>row.spread || row.total)", block)
+
 
 if __name__ == "__main__":
     unittest.main()
