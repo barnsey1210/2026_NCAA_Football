@@ -112,6 +112,7 @@ ALIASES = {
     "ksu": "Kennesaw State",
     "kansas st": "Kansas State",
     "kansas state": "Kansas State",
+    "kennesaw": "Kennesaw State",
     "kennesaw st": "Kennesaw State",
     "kennesaw state": "Kennesaw State",
     "kent st": "Kent State",
