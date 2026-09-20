@@ -1,14 +1,14 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-09-19T15:31:05.926626+00:00",
+  "generated_at": "2026-09-20T17:33:55.298207+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_4src_equal_v1",
     "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
-    "full_available": 157,
-    "degraded_available": 608,
+    "full_available": 215,
+    "degraded_available": 550,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -46,9 +46,9 @@
       {
         "key": "DRatings",
         "name": "DRatings Game Predictions",
-        "games_available": 157,
+        "games_available": 215,
         "production_games": 765,
-        "coverage_pct": 20.5,
+        "coverage_pct": 28.1,
         "state": "PARTIAL"
       }
     ],
@@ -59,7 +59,7 @@
           "FPI",
           "TeamRankings"
         ],
-        "games": 608,
+        "games": 550,
         "effective_weights": {
           "SP+": 0.333333,
           "FPI": 0.333333,
@@ -73,7 +73,7 @@
           "TeamRankings",
           "DRatings Game Predictions"
         ],
-        "games": 157,
+        "games": 215,
         "effective_weights": {
           "SP+": 0.25,
           "FPI": 0.25,
@@ -87,8 +87,8 @@
     "model_id": "standard_total_sp_massey_dratings_v1",
     "degraded_model_id": "standard_total_degraded_v1",
     "production_games": 765,
-    "full_available": 157,
-    "degraded_available": 608,
+    "full_available": 215,
+    "degraded_available": 550,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -117,9 +117,9 @@
       {
         "key": "DRatings Total",
         "name": "DRatings Total",
-        "games_available": 157,
+        "games_available": 215,
         "production_games": 765,
-        "coverage_pct": 20.5,
+        "coverage_pct": 28.1,
         "state": "PARTIAL"
       }
     ],
@@ -139,22 +139,11 @@
           "Massey Dual",
           "DRatings Total"
         ],
-        "games": 157,
+        "games": 215,
         "effective_weights": {
           "SP+": 0.4,
           "Massey Dual": 0.4,
           "DRatings Total": 0.2
-        }
-      },
-      {
-        "components": [
-          "SP+",
-          "Massey Dual"
-        ],
-        "games": 58,
-        "effective_weights": {
-          "SP+": 0.5,
-          "Massey Dual": 0.5
         }
       }
     ]
@@ -164,17 +153,17 @@
       "name": "DRatings Game Predictions",
       "source_key": "DRatings Predictions",
       "role": "Standard Spread game-prediction input",
-      "games_available": 157,
+      "games_available": 215,
       "production_games": 765,
-      "coverage_pct": 20.5,
+      "coverage_pct": 28.1,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-09-19T12:01:57.574310+00:00",
-      "latest_snapshot_date": "2026-09-19",
+      "latest_pulled_at": "2026-09-20T17:22:32.201557+00:00",
+      "latest_snapshot_date": "2026-09-20",
       "latest_check_status": "UPDATED",
-      "latest_accepted_update_at": "2026-09-18T13:35:13.506841+00:00",
+      "latest_accepted_update_at": "2026-09-20T17:22:33.421268+00:00",
       "comparison_available": true,
       "first_game_date": "2026-08-29",
-      "last_game_date": "2026-09-19"
+      "last_game_date": "2026-09-26"
     },
     {
       "name": "Massey Game Predictions",
@@ -184,10 +173,10 @@
       "production_games": 765,
       "coverage_pct": 28.1,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-09-18T13:35:04.841276+00:00",
-      "latest_snapshot_date": "2026-09-19",
-      "latest_check_status": "UPDATED",
-      "latest_accepted_update_at": "2026-09-18T13:35:13.506841+00:00",
+      "latest_pulled_at": "2026-09-20T14:01:06.611806+00:00",
+      "latest_snapshot_date": "2026-09-20",
+      "latest_check_status": "NO_CHANGE",
+      "latest_accepted_update_at": "2026-09-20T14:01:28.490059+00:00",
       "comparison_available": true,
       "first_game_date": "2026-08-29",
       "last_game_date": "2026-09-26"
