@@ -172,6 +172,10 @@ def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> lis
         # Acquisition/source refresh remains bounded, but canonical projection
         # resolution uses every valid game already returned by providers.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+        # The War Room reads matchup-feed acceptance evidence from this view.
+        # Rebuild it after the canonical sources/contract so a newly accepted
+        # Massey or DRatings snapshot cannot be masked by stale status metadata.
+        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/site/build_ratings_view.py"],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
@@ -203,6 +207,7 @@ def ratings_no_change_commands(
         # Keep downstream canonical artifacts synchronized even when provider
         # values are unchanged but reconciliation/parser behavior changed.
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
+        [sys.executable, "scripts/site/build_projection_source_status_view.py"],
         [sys.executable, "scripts/site/build_ratings_view.py"],
         [sys.executable, "scripts/site/build_matchups_view.py"],
         [sys.executable, "scripts/war_room/build_war_room_health.py"],

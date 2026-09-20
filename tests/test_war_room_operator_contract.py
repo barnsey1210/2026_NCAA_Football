@@ -498,6 +498,25 @@ class OperatorContractTests(unittest.TestCase):
             names.index("merge_live_rating_change_status.py"),
             names.index("build_war_room_health.py"),
         )
+        self.assertLess(
+            names.index("build_projection_source_status_view.py"),
+            names.index("build_war_room_health.py"),
+        )
+
+    def test_ratings_paths_refresh_projection_status_before_war_room(self):
+        for commands in (
+            refresh.ratings_change_commands(),
+            refresh.ratings_no_change_commands(),
+        ):
+            names = [Path(command[1]).name for command in commands]
+            self.assertLess(
+                names.index("build_current_game_projection_contract.py"),
+                names.index("build_projection_source_status_view.py"),
+            )
+            self.assertLess(
+                names.index("build_projection_source_status_view.py"),
+                names.index("build_war_room_market_matrix.py"),
+            )
 
     def test_ratings_change_detection(self):
         with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"NO_CHANGE"}}}):
