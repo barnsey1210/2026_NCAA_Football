@@ -1,6 +1,6 @@
 {
   "schema_version": "postgame-shadow-v1",
-  "built_at": "2026-09-20T05:57:56.854875+00:00",
+  "built_at": "2026-09-20T06:30:24.445548+00:00",
   "mode": "shadow_only",
   "applied_to_ratings": false,
   "applied_to_projections": false,
@@ -6276,6 +6276,34 @@
       "synthetic_input": false
     },
     {
+      "team": "Oregon State",
+      "opponent": "Montana",
+      "completed_game_id": "g234",
+      "completed_date": "2026-09-19",
+      "team_margin": 35.0,
+      "team_closing_spread": -17.0,
+      "team_ats_margin": 18.0,
+      "estimated_spread_rating_innovation": 6.11,
+      "next_game_id": "g322",
+      "next_opponent": "UTEP",
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
+      "team": "Montana",
+      "opponent": "Oregon State",
+      "completed_game_id": "g234",
+      "completed_date": "2026-09-19",
+      "team_margin": -35.0,
+      "team_closing_spread": 17.0,
+      "team_ats_margin": -18.0,
+      "estimated_spread_rating_innovation": -6.27,
+      "next_game_id": null,
+      "next_opponent": null,
+      "total_estimate_status": "pending_current_season_pbp",
+      "synthetic_input": false
+    },
+    {
       "team": "Penn State",
       "opponent": "Buffalo",
       "completed_game_id": "g235",
@@ -6962,7 +6990,7 @@
   ],
   "status": "live_shadow_ready",
   "summary": {
-    "completed_team_updates": 494,
+    "completed_team_updates": 496,
     "warnings": 10
   }
 }
