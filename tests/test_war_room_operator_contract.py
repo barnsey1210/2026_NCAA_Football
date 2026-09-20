@@ -480,6 +480,15 @@ class OperatorContractTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden,combined)
 
+    def test_ratings_no_change_merges_fresh_check_before_health_rebuild(self):
+        commands = refresh.ratings_no_change_commands()
+        names = [Path(command[1]).name for command in commands]
+        self.assertIn("merge_live_rating_change_status.py", names)
+        self.assertLess(
+            names.index("merge_live_rating_change_status.py"),
+            names.index("build_war_room_health.py"),
+        )
+
     def test_ratings_change_detection(self):
         with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"NO_CHANGE"}}}):
             self.assertFalse(refresh.accepted_ratings_changed()[0])

@@ -188,6 +188,11 @@ def ratings_no_change_commands(
     if window.get("start") and window.get("end"):
         bounds = ["--start-date", window["start"], "--end-date", window["end"]]
     return [
+        # Acceptance still advances provider observability on a successful
+        # no-change check. Merge that metadata before rebuilding the War Room
+        # so its health strip reflects the latest pull instead of the prior
+        # accepted-value timestamp.
+        [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
         [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
         # Keep downstream canonical artifacts synchronized even when provider
         # values are unchanged but reconciliation/parser behavior changed.
