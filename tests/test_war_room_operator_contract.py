@@ -483,7 +483,17 @@ class OperatorContractTests(unittest.TestCase):
     def test_ratings_no_change_merges_fresh_check_before_health_rebuild(self):
         commands = refresh.ratings_no_change_commands()
         names = [Path(command[1]).name for command in commands]
+        self.assertIn("build_all_ratings_latest.py", names)
+        self.assertIn("build_active_2026_ratings_master.py", names)
         self.assertIn("merge_live_rating_change_status.py", names)
+        self.assertLess(
+            names.index("build_all_ratings_latest.py"),
+            names.index("build_current_game_projection_contract.py"),
+        )
+        self.assertLess(
+            names.index("build_active_2026_ratings_master.py"),
+            names.index("build_current_game_projection_contract.py"),
+        )
         self.assertLess(
             names.index("merge_live_rating_change_status.py"),
             names.index("build_war_room_health.py"),

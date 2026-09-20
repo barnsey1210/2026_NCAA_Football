@@ -188,6 +188,12 @@ def ratings_no_change_commands(
     if window.get("start") and window.get("end"):
         bounds = ["--start-date", window["start"], "--end-date", window["end"]]
     return [
+        # A prior dispatcher can promote an accepted source and then stop
+        # before canonical propagation. A retry will truthfully compare as
+        # NO_CHANGE, so always reconcile accepted sources into the canonical
+        # ratings master before rebuilding projections.
+        [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
+        [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
         # Acceptance still advances provider observability on a successful
         # no-change check. Merge that metadata before rebuilding the War Room
         # so its health strip reflects the latest pull instead of the prior
