@@ -1993,8 +1993,11 @@ def model_freshness(
             game_row_meta.get("pulled_at")
             if is_game_feed_source
             else (
-                meta.get("pulled_at")
-                or meta.get("latest_pull_at")
+                # Team-rating health represents the latest successful source
+                # check. Keep the older accepted snapshot timestamp available
+                # as provenance, but do not let it mask a newer no-change pull.
+                meta.get("latest_pull_at")
+                or meta.get("pulled_at")
             )
         )
 
@@ -2068,8 +2071,8 @@ def model_freshness(
             "health_pulled_at": health_pulled_at,
             "health_state": health_state,
             "pulled_at": (
-                meta.get("pulled_at")
-                or meta.get("latest_pull_at")
+                meta.get("latest_pull_at")
+                or meta.get("pulled_at")
             ),
             "change_status": meta.get("change_status"),
             "last_changed_at": meta.get("last_changed_at"),

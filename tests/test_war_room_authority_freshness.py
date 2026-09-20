@@ -77,6 +77,21 @@ class AuthorityFreshnessTests(unittest.TestCase):
         self.assertEqual(result["updated_sources"], 0)
         self.assertEqual(result["sources"]["SP+"]["state"], "STALE")
 
+    def test_team_rating_health_uses_latest_successful_check(self):
+        metadata = self.unchanged()
+        metadata.update(
+            pulled_at="2026-08-25T05:00:00Z",
+            latest_pull_at="2026-09-20T06:04:45Z",
+        )
+        result = self.freshness(
+            self.module.STANDARD_SPREAD,
+            ["TeamRankings"],
+            {"TeamRankings": metadata},
+        )
+        source = result["sources"]["TeamRankings"]
+        self.assertEqual(source["health_pulled_at"], "2026-09-20T06:04:45Z")
+        self.assertEqual(source["pulled_at"], "2026-09-20T06:04:45Z")
+
     def test_one_accepted_change_does_not_activate_hybrid(self):
         result = self.freshness(
             self.module.STANDARD_SPREAD,
