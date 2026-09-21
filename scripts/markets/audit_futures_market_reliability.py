@@ -133,6 +133,35 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
         if material_drop(current_books.get(book, 0), count)
     }
 
+    # Win-total inventory is allowed to be incomplete: sportsbooks commonly
+    # remove individual team markets during the season. Missing teams should
+    # surface as unavailable rather than force stale quotes back into service.
+    #
+    # BetMGM may also intentionally disappear when the Action Network source
+    # is explicitly rejected for carrying a wrong-season fixture. Only that
+    # documented quarantine is exempt from provider-drop failure handling.
+    quarantined_books = set()
+    if name == "win_totals":
+        quarantine_path = current_path.parent / "actionnetwork_win_totals_raw.json"
+        try:
+            quarantine = json.loads(quarantine_path.read_text())
+        except Exception:
+            quarantine = {}
+
+        if quarantine.get("status") == "REJECTED_WRONG_SEASON_SOURCE":
+            quarantined_books.add("BetMGM")
+
+        if quarantined_books:
+            disappeared = [
+                book for book in disappeared
+                if book not in quarantined_books
+            ]
+            dropped_books = {
+                book: detail
+                for book, detail in dropped_books.items()
+                if book not in quarantined_books
+            }
+
     missing = sorted(set(expected_teams) - set(teams))
     errors = []
     warnings = []
@@ -143,7 +172,11 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     if invalid:
         errors.append(f"{name}: {len(invalid)} malformed prices")
     if missing:
-        errors.append(f"{name}: {len(missing)} expected teams have no quote")
+        message = f"{name}: {len(missing)} expected teams have no quote"
+        if name == "win_totals":
+            warnings.append(message)
+        else:
+            errors.append(message)
     if disappeared:
         errors.append(f"{name}: provider-wide disappearance: {', '.join(disappeared)}")
     if dropped_books:

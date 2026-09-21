@@ -22,15 +22,22 @@ if dk.empty:
 
 non_dk = imp[imp["book"].astype(str).str.lower() != "draftkings"].copy()
 
-snapshot_date = ""
-if "snapshot_date" in non_dk.columns and non_dk["snapshot_date"].notna().any():
-    snapshot_date = str(non_dk["snapshot_date"].dropna().astype(str).max())
-else:
-    snapshot_date = datetime.now(timezone.utc).date().isoformat()
+# Preserve the DraftKings scraper's own acquisition evidence.
+# Never borrow another provider's observation date.
+if "snapshot_date" not in dk.columns:
+    raise SystemExit("Visible DK file has no snapshot_date")
+if "season" not in dk.columns:
+    raise SystemExit("Visible DK file has no season")
 
-dk["snapshot_date"] = snapshot_date
-dk["season"] = 2026
+dk = dk[
+    pd.to_numeric(dk["season"], errors="coerce").eq(2026)
+].copy()
+
+if dk.empty:
+    raise SystemExit("Visible DK file has no validated 2026 rows")
+
 dk["book"] = "DraftKings"
+snapshot_date = str(dk["snapshot_date"].dropna().astype(str).max())
 
 needed_cols = list(imp.columns)
 for col in needed_cols:

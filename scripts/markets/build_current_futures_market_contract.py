@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import math
 import os
 import sys
@@ -116,7 +117,42 @@ def main():
     # ---------------- WIN TOTALS ----------------
     wins = defaultdict(dict)
 
-    for row in read_csv(WIN_CURRENT):
+    # market_win_totals_import.csv also retains historical observations for
+    # movement/history. Only rows observed today for the active season may
+    # enter the current executable contract.
+    active_season = 2026
+    current_date = datetime.now(timezone.utc).date().isoformat()
+
+    win_source_rows = read_csv(WIN_CURRENT)
+
+    for row in win_source_rows:
+        try:
+            row_season = int(float(str(row.get("season") or "").strip()))
+        except (TypeError, ValueError):
+            continue
+
+        observed_date = str(row.get("snapshot_date") or "").strip()
+        source_url = str(row.get("source_url") or "")
+
+        if row_season != active_season:
+            continue
+
+        if observed_date != current_date:
+            continue
+
+        # Defense in depth: do not permit a provider URL that explicitly
+        # identifies another season to masquerade as a 2026 quote.
+        source_season_match = re.search(
+            r"_([0-9]{4})_ncaaf_regular_season_total_wins",
+            source_url,
+            flags=re.I,
+        )
+        if (
+            source_season_match
+            and int(source_season_match.group(1)) != active_season
+        ):
+            continue
+
         team = resolve_market_team(row.get("team"), canonical_names)
         if not team:
             unmatched["win_totals"].append(row.get("team"))

@@ -345,6 +345,56 @@ def main() -> None:
     p.add_argument("--book-audit-csv", default="actionnetwork_book_id_mapping.csv")
     args = p.parse_args()
 
+    # Fail closed on a wrong-season Action futures fixture.
+    # The provider has previously exposed a 2027 fixture on the 2026 page;
+    # never relabel that payload as the requested season.
+    fixture_match = re.search(
+        r"_([0-9]{4})_ncaaf_regular_season_total_wins",
+        str(args.url),
+        flags=re.I,
+    )
+    fixture_season = int(fixture_match.group(1)) if fixture_match else None
+
+    if fixture_season != args.season:
+        cols = [
+            "snapshot_date", "season", "team", "conference", "book",
+            "win_total", "over_odds", "under_odds", "source_url", "notes",
+        ]
+
+        Path(args.raw_json).write_text(
+            json.dumps(
+                {
+                    "status": "REJECTED_WRONG_SEASON_SOURCE",
+                    "requested_season": args.season,
+                    "fixture_season": fixture_season,
+                    "source_url": args.url,
+                    "observed_at": datetime.now().isoformat(),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        pd.DataFrame(columns=cols).to_csv(args.output_csv, index=False)
+        pd.DataFrame(columns=cols).to_csv(args.all_brand_rows_csv, index=False)
+        pd.DataFrame(
+            [{
+                "status": "REJECTED_WRONG_SEASON_SOURCE",
+                "requested_season": args.season,
+                "fixture_season": fixture_season,
+                "source_url": args.url,
+            }]
+        ).to_csv(args.book_audit_csv, index=False)
+
+        print(
+            "REJECTED_WRONG_SEASON_SOURCE:",
+            f"requested={args.season}",
+            f"fixture={fixture_season}",
+            f"url={args.url}",
+        )
+        print("Wrote empty current win-total base; downstream validated providers may populate it.")
+        return
+
     data = fetch_json(args.url)
     books_map = build_books_map()
 

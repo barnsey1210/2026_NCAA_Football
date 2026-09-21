@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 from datetime import date
 from pathlib import Path
 
@@ -10,6 +11,7 @@ import pandas as pd
 
 
 OUT = Path("data/agents/daily_betting_angles.html")
+FUTURES_JSON = Path("data/site/futures_view.json")
 MOVES_CSV = Path("daily_market_movement_report.csv")
 ARBS_CSV = Path("market_arbitrage_opportunities.csv")
 GAME_LINE_MOVES_CSV = Path("data/odds/game_line_movement_report.csv")
@@ -438,6 +440,188 @@ def build_game_line_cards(angles: pd.DataFrame, limit: int = 18) -> str:
     return "\n".join(cards)
 
 
+
+def _as_float(value):
+    try:
+        if value is None or value == "":
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _fmt_pct(value) -> str:
+    value = _as_float(value)
+    if value is None:
+        return "—"
+    if abs(value) <= 1.0001:
+        value *= 100.0
+    return f"{value:.1f}%"
+
+
+def _fmt_edge_pp(value) -> str:
+    value = _as_float(value)
+    if value is None:
+        return "—"
+    if abs(value) <= 1.0001:
+        value *= 100.0
+    return f"{value:+.1f} pp"
+
+
+def _fmt_wins(value) -> str:
+    value = _as_float(value)
+    if value is None:
+        return "—"
+    return f"{value:.2f}"
+
+
+def load_futures_view() -> dict:
+    if not FUTURES_JSON.exists():
+        return {}
+    try:
+        payload = json.loads(FUTURES_JSON.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def build_futures_win_total_table(futures: dict, limit: int = 15) -> str:
+    candidates = []
+
+    for row in futures.get("rows", []):
+        if not isinstance(row, dict):
+            continue
+
+        edge = _as_float(row.get("win_edge"))
+        projected = _as_float(row.get("projected_wins"))
+        market = _as_float(row.get("market_win_total"))
+
+        if edge is None or projected is None or market is None:
+            continue
+
+        candidates.append((abs(edge), str(row.get("team", "")), row))
+
+    candidates.sort(key=lambda x: (-x[0], x[1]))
+
+    if not candidates:
+        return '<p class="muted">No current win-total edges available.</p>'
+
+    body = []
+    for _, _, row in candidates[:limit]:
+        edge = _as_float(row.get("win_edge"))
+        edge_class = "edge-positive" if edge is not None and edge >= 0 else "edge-negative"
+
+        body.append(f"""
+          <tr>
+            <td class="team">{esc(row.get("team", ""))}</td>
+            <td>{_fmt_wins(row.get("projected_wins"))}</td>
+            <td>{fmt_num(row.get("market_win_total"))}</td>
+            <td class="{edge_class}">{edge:+.2f}</td>
+            <td>{esc(row.get("win_direction", ""))}</td>
+            <td>{fmt_odds(row.get("win_price"))}</td>
+            <td>{esc(row.get("win_book", ""))}</td>
+          </tr>
+        """)
+
+    return f"""
+    <div class="table-wrap">
+      <table class="edge-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Model Wins</th>
+            <th>Market</th>
+            <th>Edge</th>
+            <th>Side</th>
+            <th>Price</th>
+            <th>Book</th>
+          </tr>
+        </thead>
+        <tbody>
+          {''.join(body)}
+        </tbody>
+      </table>
+    </div>
+    """
+
+
+def build_futures_probability_table(
+    futures: dict,
+    *,
+    model_field: str,
+    market_field: str,
+    edge_field: str,
+    price_field: str,
+    book_field: str,
+    empty_message: str,
+    limit: int = 15,
+    include_conference: bool = False,
+) -> str:
+    candidates = []
+
+    for row in futures.get("rows", []):
+        if not isinstance(row, dict):
+            continue
+
+        model = _as_float(row.get(model_field))
+        market = _as_float(row.get(market_field))
+        edge = _as_float(row.get(edge_field))
+
+        if model is None or market is None or edge is None:
+            continue
+
+        candidates.append((abs(edge), str(row.get("team", "")), row))
+
+    candidates.sort(key=lambda x: (-x[0], x[1]))
+
+    if not candidates:
+        return f'<p class="muted">{esc(empty_message)}</p>'
+
+    body = []
+    for _, _, row in candidates[:limit]:
+        edge = _as_float(row.get(edge_field))
+        edge_class = "edge-positive" if edge is not None and edge >= 0 else "edge-negative"
+
+        conference_cell = (
+            f'<td>{esc(row.get("conference", ""))}</td>'
+            if include_conference
+            else ""
+        )
+
+        body.append(f"""
+          <tr>
+            <td class="team">{esc(row.get("team", ""))}</td>
+            {conference_cell}
+            <td>{_fmt_pct(row.get(model_field))}</td>
+            <td>{_fmt_pct(row.get(market_field))}</td>
+            <td class="{edge_class}">{_fmt_edge_pp(edge)}</td>
+            <td>{fmt_odds(row.get(price_field))}</td>
+            <td>{esc(row.get(book_field, ""))}</td>
+          </tr>
+        """)
+
+    return f"""
+    <div class="table-wrap">
+      <table class="edge-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            {'<th>Conference</th>' if include_conference else ''}
+            <th>Model</th>
+            <th>Market</th>
+            <th>Edge</th>
+            <th>Price</th>
+            <th>Book</th>
+          </tr>
+        </thead>
+        <tbody>
+          {''.join(body)}
+        </tbody>
+      </table>
+    </div>
+    """
+
+
 def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
 
@@ -445,6 +629,32 @@ def main() -> None:
     arbs = load_csv(ARBS_CSV)
     angles = load_csv(ANGLES_CSV)
     game_line_moves = load_csv(GAME_LINE_MOVES_CSV)
+    futures = load_futures_view()
+
+    futures_win_total_table = build_futures_win_total_table(futures, limit=15)
+
+    futures_title_table = build_futures_probability_table(
+        futures,
+        model_field="title_model_prob",
+        market_field="title_market_prob",
+        edge_field="title_edge",
+        price_field="title_price",
+        book_field="title_book",
+        empty_message="No current conference-title edges available.",
+        limit=15,
+        include_conference=True,
+    )
+
+    futures_playoff_table = build_futures_probability_table(
+        futures,
+        model_field="playoff_model_prob",
+        market_field="playoff_market_prob",
+        edge_field="playoff_edge",
+        price_field="playoff_price",
+        book_field="playoff_book",
+        empty_message="No current CFP edges available.",
+        limit=15,
+    )
 
     latest_date = date.today().isoformat()
     moves = moves_all.copy()
@@ -623,22 +833,91 @@ def main() -> None:
     color: #64748b;
     font-size: 16px;
   }}
+  .table-wrap {{
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0 24px;
+  }}
+  .edge-table {{
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    font-size: 14px;
+  }}
+  .edge-table th {{
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: 9px 8px;
+    border: 1px solid #cbd5e1;
+    text-align: right;
+  }}
+  .edge-table th:first-child {{
+    text-align: left;
+  }}
+  .edge-table td {{
+    border: 1px solid #e2e8f0;
+    padding: 9px 8px;
+    text-align: right;
+    white-space: nowrap;
+  }}
+  .edge-table td.team {{
+    text-align: left;
+    font-weight: 750;
+    color: #0f172a;
+  }}
+  .edge-positive {{
+    color: #047857;
+    font-weight: 800;
+  }}
+  .edge-negative {{
+    color: #b91c1c;
+    font-weight: 800;
+  }}
+  .section-note {{
+    color: #64748b;
+    font-size: 14px;
+    margin: -4px 0 12px;
+  }}
 </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Daily NCAAF Market Alert — {latest_date}</h1>
     <div class="summary">
-      Daily market moves are listed first so you can quickly see what changed since the previous snapshot.
-      Game line edges and current arbitrage opportunities are included after the move section.
+      Futures model-vs-market edges are listed first so the largest current discrepancies are immediately visible.
+      Game line movement, current game-line edges, and arbitrage opportunities follow the Futures tables.
     </div>
     <div class="subline">
       Market moves in this report: {move_count} · Game line moves: {game_move_count} · Game line edges: {game_count} · Arbitrage opportunities: {arb_count}
     </div>
 
-    <h2>Daily Market Moves</h2>
-    <p class="muted">Top win total and conference futures moves from the latest daily report. Cards include the move date and snapshot window.</p>
-    {move_cards}
+    <h2>Futures Edge Summary</h2>
+    <p class="muted">
+      Current model-vs-market gaps from the canonical Futures view.
+      Tables are sorted by largest absolute edge. Confirm live availability and price before acting.
+    </p>
+
+    <h2>Win Totals</h2>
+    <p class="section-note">
+      Model projected regular-season wins versus the current market win total.
+      Direction identifies the side of the model discrepancy.
+    </p>
+    {futures_win_total_table}
+
+    <h2>Conference Titles</h2>
+    <p class="section-note">
+      Model conference-title probability versus current market implied probability.
+    </p>
+    {futures_title_table}
+
+    <h2>Playoff / CFP</h2>
+    <p class="section-note">
+      Model make-CFP probability versus current market implied probability.
+    </p>
+    {futures_playoff_table}
 
     <h2>Game Line Moves</h2>
     <p class="muted">Spread and total movement that matches a current actionable best-line edge.</p>

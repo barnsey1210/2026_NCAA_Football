@@ -76,6 +76,23 @@ def main() -> int:
     if NAN_RE.search(visible_text):
         fail("HTML contains a visible nan value")
 
+    for required_section in (
+        "Win Totals",
+        "Conference Titles",
+        "Playoff / CFP",
+    ):
+        if required_section not in email_html:
+            fail(f"HTML is missing Futures section: {required_section}")
+
+    if "<table" not in email_html:
+        fail("HTML is missing Futures edge tables")
+
+    if "<th>Conference</th>" not in email_html:
+        fail("Conference Titles table is missing Conference column")
+
+    if "Model Wins" not in email_html:
+        fail("HTML is missing win-total model column")
+
     if "Game Line Moves" not in email_html:
         fail("HTML is missing the Game Line Moves section")
 
