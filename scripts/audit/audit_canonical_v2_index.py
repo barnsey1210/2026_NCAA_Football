@@ -23,7 +23,7 @@ def validate(path: Path) -> list[str]:
         "Top Games lane": "This Week’s Top Games",
         "Viewer’s Guide lane": "Viewer’s Guide",
         "canonical current-market contract": "data/site/current_market_contract.json",
-        "canonical matchup payload": "data/site/matchups_view.json",
+        "public matchup payload": "data/site/matchups_public_view.json",
         "canonical Openers drawer route": "openers.html?game_id=",
     }
     for label, marker in required.items():
