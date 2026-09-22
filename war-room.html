@@ -1781,9 +1781,10 @@ tr:hover td.context-group{background:#202d39}
   .command-grid{height:auto!important}
   .matrix-scroll{display:none}
   .mobile-matrix{display:grid;gap:7px;min-width:0;padding:7px;box-sizing:border-box;background:#071019}
-  .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line2);border-radius:6px;overflow:visible;background:var(--panel)}
-  .mobile-command-row{display:grid;grid-template-columns:minmax(0,1.48fr) 50px minmax(68px,.72fr) minmax(68px,.72fr);min-width:0;border-top:1px solid var(--line)}
-  .mobile-command-head{position:sticky;top:91px;z-index:24;border-top:0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
+  .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box}
+  .mobile-command-body{display:grid;min-width:0;border:1px solid var(--line2);border-top:0;border-radius:0 0 6px 6px;overflow:visible;background:var(--panel)}
+  .mobile-command-row{display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);min-width:0;border-top:1px solid var(--line)}
+  .mobile-command-head{position:sticky;top:91px;z-index:24;border:1px solid var(--line2);border-radius:6px 6px 0 0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
   .mobile-command-head>span,.mobile-command-sort{min-width:0;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 5px;font:inherit;font-size:8px;font-weight:950;letter-spacing:.35px;text-align:center;text-transform:uppercase}
   .mobile-command-head>span:first-child{border-left:0;text-align:left;padding-left:8px}
   .mobile-command-sort{cursor:pointer}.mobile-command-sort.active{color:var(--green)}
@@ -1802,16 +1803,11 @@ tr:hover td.context-group{background:#202d39}
   .mobile-command-best{display:grid;gap:1px;place-content:center;min-width:0;border-left:1px solid var(--line);text-align:center}
   .mobile-command-best-value{color:var(--green);font-size:14px;font-weight:950;line-height:1}
   .mobile-command-best-market{color:var(--muted);font-size:6px;font-weight:950;letter-spacing:.35px}
-  .mobile-command-edge .decision-edge{min-width:0;max-width:100%}
-  .mobile-command-edge .decision-edge-main{display:grid;gap:1px;justify-items:center;max-width:100%}
-  .mobile-command-edge .decision-side{font-size:8px}
-  .mobile-command-edge .team-logo-holder{--team-logo-size:20px}
-  .mobile-command-edge .decision-team-name{max-width:72px;font-size:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mobile-command-edge .edge{font-size:inherit;font-weight:950}
-  .mobile-edge-display{display:grid;gap:1px;justify-items:center;min-width:0}
+  .mobile-command-edge .edge{width:100%;font-size:inherit;font-weight:950}
+  .mobile-edge-display{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}
   .mobile-edge-value{color:var(--green);font-size:17px;font-weight:950;line-height:1}
-  .mobile-edge-signal{max-width:66px;color:#dce7ef;font-size:7px;font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mobile-edge-model{color:var(--muted);font-size:6px;font-weight:850;white-space:nowrap}
+  .mobile-edge-display .team-logo-holder{--team-logo-size:21px}
+  .mobile-edge-direction{color:#dce7ef;font-size:8px;font-weight:950;white-space:nowrap}
   .mobile-command-row.game-selected{background:rgba(69,217,237,.07);box-shadow:inset 3px 0 0 var(--cyan)}
   .mobile-command-detail{position:fixed;left:7px;right:7px;bottom:max(7px,env(safe-area-inset-bottom,0px));z-index:60;min-width:0;max-height:72vh;overflow:hidden;border:1px solid var(--line2);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.62),0 12px 34px rgba(0,0,0,.62)}.mobile-command-detail:empty{display:none}
 
@@ -2567,10 +2563,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260922T155032Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260922T155032Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260922T155032Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260922T155032Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260922T161022Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260922T161022Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260922T161022Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260922T161022Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -4474,12 +4470,15 @@ function mobileBestEdge(spreadEdge,totalEdge){
 
 function mobileEdgeDisplay(game,market,side,edge){
   const value=numericSortValue(edge);
-  const model=displayedModelValue(game,market);
   const team=side==='away'?game.away_team:game.home_team;
-  const signal=value!==null && value>0
-    ? (market==='spread' ? `BET ${TEAM_ABBREVIATIONS[team] || team}` : `${side==='under'?'UNDER':'OVER'}`)
-    : 'NO EDGE';
-  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value">${edgeDisplay(edge)}</strong><span class="mobile-edge-signal" title="${esc(signal)}">${esc(signal)}</span><span class="mobile-edge-model">MODEL ${modelDisplay(model,market)}</span></span>`;
+  let recommendation='';
+  if(value!==null && value>0 && market==='spread' && side){
+    const slug=teamLogoSlug(team);
+    recommendation=`<span class="team-logo-holder" title="Bet ${esc(team)}"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
+  }else if(value!==null && value>0 && market==='total' && side){
+    recommendation=`<span class="mobile-edge-direction">${side==='under'?'UNDER':'OVER'}</span>`;
+  }
+  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value">${edgeDisplay(edge)}</strong>${recommendation}</span>`;
   return modelTooltip(game,market,shown);
 }
 
@@ -4492,10 +4491,10 @@ function renderMobileMatrix(rows){
   mobile.innerHTML=`<div class="mobile-command-table">
     <div class="mobile-command-row mobile-command-head">
       <span>GAME</span>
-      <button type="button" class="mobile-command-sort ${SORT_KEY==='best_edge'?'active':''}" onclick="setSort('best_edge')">EDGE ${sortArrow('best_edge') || '↕'}</button>
       <button type="button" class="mobile-command-sort ${SORT_KEY==='spread_edge'?'active':''}" onclick="setSort('spread_edge')">SPREAD EDGE ${sortArrow('spread_edge') || '↕'}</button>
       <button type="button" class="mobile-command-sort ${SORT_KEY==='total_edge'?'active':''}" onclick="setSort('total_edge')">TOTAL EDGE ${sortArrow('total_edge') || '↕'}</button>
     </div>
+    <div class="mobile-command-body">
     ${rows.map(game=>{
     const displayedSpreadEdge=displayedEdge(game,'spread');
     const displayedTotalEdge=displayedEdge(game,'total');
@@ -4516,12 +4515,12 @@ function renderMobileMatrix(rows){
         }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
         <div class="mobile-command-matchup">${mobileMatchupWithMarket(game,live,totSide)}</div>
       </button>
-      <div class="mobile-command-best">${mobileBestEdge(sprEdge,totEdge)}</div>
       <div class="mobile-command-edge spread-group ${recentEdgeCellClass(game,'spread')}">${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${mobileEdgeDisplay(game,'spread',sprSide,sprEdge)}</span></div>
       <div class="mobile-command-edge total-group ${recentEdgeCellClass(game,'total')}">${recentEdgeBadge(game,'total')}<span class="edge ${edgeClass(totEdge)}">${mobileEdgeDisplay(game,'total',totSide,totEdge)}</span></div>
       ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-command-detail mobile-activity-slot"></div>':''}
     </div>`;
   }).join('')}
+    </div>
   </div>`;
   mobile.querySelectorAll('.mobile-command-row[data-game-id]').forEach(card=>card.querySelector('[data-game-select]')?.addEventListener('click',()=>{
     const game=rows.find(item=>String(item.game_id)===String(card.dataset.gameId));
