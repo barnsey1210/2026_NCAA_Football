@@ -9,6 +9,7 @@ import os
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -121,7 +122,12 @@ def main():
     # movement/history. Only rows observed today for the active season may
     # enter the current executable contract.
     active_season = 2026
-    current_date = datetime.now(timezone.utc).date().isoformat()
+    current_date = (
+        datetime.now(timezone.utc)
+        .astimezone(ZoneInfo("America/New_York"))
+        .date()
+        .isoformat()
+    )
 
     win_source_rows = read_csv(WIN_CURRENT)
 
