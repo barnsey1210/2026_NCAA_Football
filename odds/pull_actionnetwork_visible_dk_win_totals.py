@@ -5,6 +5,7 @@ import os
 import re
 from pathlib import Path
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from playwright.async_api import async_playwright
@@ -207,8 +208,11 @@ async def scrape_rows(page):
 
 async def main():
     headless = os.environ.get("ACTION_HEADLESS", "1") != "0"
-    snapshot_date = datetime.now(timezone.utc).date().isoformat()
-    pulled_at = datetime.now(timezone.utc).isoformat()
+    now_utc = datetime.now(timezone.utc)
+    snapshot_date = now_utc.astimezone(
+        ZoneInfo("America/New_York")
+    ).date().isoformat()
+    pulled_at = now_utc.isoformat()
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=headless)
