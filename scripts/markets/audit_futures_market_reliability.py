@@ -165,8 +165,44 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     missing = sorted(set(expected_teams) - set(teams))
     errors = []
     warnings = []
+
+    # Exact acquisition freshness for normalized CSV-backed futures.
+    # snapshot_date protects Eastern market-date identity; pulled_at proves
+    # that today's rows were actually acquired recently.
+    now = datetime.now(timezone.utc)
+    pulled_timestamps = []
+    missing_pulled_at = []
+
+    for index, row in enumerate(current_rows, 2):
+        value = row.get("pulled_at")
+        parsed = parse_time(value)
+        if parsed is None:
+            missing_pulled_at.append({
+                "row": index,
+                "team": row.get("team"),
+                "book": row.get("book"),
+            })
+        else:
+            pulled_timestamps.append(parsed)
+
+    latest_pulled = max(pulled_timestamps) if pulled_timestamps else None
+    oldest_pulled = min(pulled_timestamps) if pulled_timestamps else None
+    max_age_hours = (
+        (now - oldest_pulled).total_seconds() / 3600
+        if oldest_pulled is not None
+        else None
+    )
+
     if today not in dates:
         errors.append(f"{name}: no normalized rows dated {today}")
+    if missing_pulled_at:
+        errors.append(
+            f"{name}: {len(missing_pulled_at)} current rows lack valid pulled_at"
+        )
+    if max_age_hours is None or max_age_hours > 26:
+        errors.append(
+            f"{name}: normalized market acquisition is stale or unavailable"
+        )
     if unmatched:
         errors.append(f"{name}: {len(unmatched)} unmatched team labels")
     if invalid:
@@ -192,6 +228,22 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
         "status": "fail" if errors else "warn" if warnings else "pass",
         "current_date": today,
         "current_rows": len(current_rows),
+        "pulled_at": (
+            latest_pulled.isoformat()
+            if latest_pulled is not None
+            else None
+        ),
+        "oldest_pulled_at": (
+            oldest_pulled.isoformat()
+            if oldest_pulled is not None
+            else None
+        ),
+        "max_age_hours": (
+            round(max_age_hours, 3)
+            if max_age_hours is not None
+            else None
+        ),
+        "rows_missing_pulled_at": missing_pulled_at,
         "expected_teams": len(expected_teams),
         "covered_teams": len(teams),
         "missing_teams": missing,
