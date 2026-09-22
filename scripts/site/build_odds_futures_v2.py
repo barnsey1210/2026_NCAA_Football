@@ -23,9 +23,10 @@ CONF_HISTORY = ROOT / "market_conference_futures_history.csv"
 WINS_CURRENT = ROOT / "market_win_totals_import.csv"
 WINS_HISTORY = ROOT / "market_win_totals_history.csv"
 TITLE_OPEN = ROOT / "actionnetwork_futures_raw_clean.csv"
+CONTRACT = ROOT / "data/markets/current_futures_market_2026.json"
 OUT = ROOT / "data/site/odds_futures_v2.json"
 AUDIT = ROOT / "data/audits/odds_futures_v2_build_audit.json"
-BOOKS = ("DraftKings", "FanDuel", "BetMGM", "Caesars")
+BOOKS = ("DraftKings", "FanDuel", "BetMGM", "Caesars", "Kalshi")
 
 
 def atomic_json(path: Path, value: dict) -> None:
@@ -303,8 +304,38 @@ def coverage(rows: list[dict]) -> dict:
     return {book: sum(book in row.get("quotes", {}) for row in rows) for book in BOOKS}
 
 
+def merge_kalshi(rows: list[dict], contract_rows: list[dict], win_totals=False) -> None:
+    targets = {(row.get("team"), row.get("outcome", "Yes")): row for row in rows}
+    for source in contract_rows:
+        quote = (source.get("quotes") or {}).get("Kalshi")
+        if not quote:
+            continue
+        key = (source.get("team"), source.get("outcome", "Yes"))
+        target = targets.get(key)
+        if target is None:
+            continue
+        target.setdefault("quotes", {})["Kalshi"] = quote
+        if win_totals:
+            over = [((-(q["number"]), q.get("over_price") or -1_000_000), b, q) for b, q in target["quotes"].items() if q.get("over_price") is not None]
+            under = [((q["number"], q.get("under_price") or -1_000_000), b, q) for b, q in target["quotes"].items() if q.get("under_price") is not None]
+            bo = max(over, default=(None, None, None)); bu = max(under, default=(None, None, None))
+            target["best_over"] = {"book": bo[1], **bo[2]} if bo[2] else None
+            target["best_under"] = {"book": bu[1], **bu[2]} if bu[2] else None
+            target["best_over_highlight_eligible"] = len(over) >= 2
+            target["best_under_highlight_eligible"] = len(under) >= 2
+        else:
+            best, book = best_price(target["quotes"])
+            target["best_price"] = best
+            target["best_book"] = book
+            target["best_highlight_eligible"] = len(target["quotes"]) >= 2
+            target["market_implied_probability"] = implied(best)
+            model = target.get("model_probability")
+            target["edge"] = model - implied(best) if model is not None and implied(best) is not None else None
+        target["last_updated"] = max(target.get("last_updated") or "", quote.get("pulled_at") or "")
+
+
 def main() -> None:
-    sources = [ACTION, FUTURES_VIEW, CONF_CURRENT, CONF_HISTORY, WINS_CURRENT, WINS_HISTORY, TITLE_OPEN]
+    sources = [ACTION, FUTURES_VIEW, CONF_CURRENT, CONF_HISTORY, WINS_CURRENT, WINS_HISTORY, TITLE_OPEN, CONTRACT]
     missing = [str(p.relative_to(ROOT)) for p in sources if not p.exists()]
     if missing:
         raise SystemExit("Missing read-only inputs: " + ", ".join(missing))
@@ -317,12 +348,17 @@ def main() -> None:
     title_open_count = attach_title_open(national, read_csv(TITLE_OPEN))
     conference, conference_audit = build_conference(read_csv(CONF_CURRENT), read_csv(CONF_HISTORY), by_norm)
     wins, wins_audit = build_wins(read_csv(WINS_CURRENT), read_csv(WINS_HISTORY), by_norm)
+    contract = json.loads(CONTRACT.read_text())
+    merge_kalshi(national, contract.get("national_title", {}).get("rows", []))
+    merge_kalshi(playoff, contract.get("make_cfp", {}).get("rows", []))
+    merge_kalshi(conference, contract.get("conference_titles", {}).get("rows", []))
+    merge_kalshi(wins, contract.get("win_totals", {}).get("rows", []), win_totals=True)
     heisman = {
         "available": False,
         "message": "Heisman odds are not yet available in the current normalized futures pipeline.",
         "required_pipeline": "Extend the Action Network futures reader from https://api.actionnetwork.com/web/v1/leagues/2/futures/available to ingest market ncaaf_futures_special_fixture_11016_2027_ncaaf_heisman_trophy_winner with player ID/name, team/position, book ID/name, American price, and pull timestamp. Historical audit-page text is not used as current odds.",
     }
-    built_at = source_build_time((ACTION, FUTURES_VIEW, CONF_CURRENT, CONF_HISTORY, WINS_CURRENT, WINS_HISTORY, TITLE_OPEN))
+    built_at = source_build_time((ACTION, FUTURES_VIEW, CONF_CURRENT, CONF_HISTORY, WINS_CURRENT, WINS_HISTORY, TITLE_OPEN, CONTRACT))
     payload = {
         "schema_version": "odds-futures-v2-production-1", "prototype_only": False, "built_at": built_at,
         "books": list(BOOKS), "history_scope": "Open is the earliest retained normalized local snapshot when available; full futures history is intentionally deferred.",

@@ -485,6 +485,28 @@ def load_futures_view() -> dict:
     return payload if isinstance(payload, dict) else {}
 
 
+def futures_price_display(row, price_field, book_field):
+    book = row.get(book_field)
+    price = row.get(price_field)
+    if book != "Kalshi":
+        return fmt_odds(price)
+    prefix = {
+        "win_price": "win",
+        "title_price": "title",
+        "playoff_price": "playoff",
+        "national_title_price": "national_title",
+    }.get(price_field)
+    quote = (row.get(f"{prefix}_quotes") or {}).get("Kalshi", {}) if prefix else {}
+    if price_field == "win_price":
+        side = str(row.get("win_direction") or "").lower()
+        native = quote.get(f"{side}_native_ask_cents")
+    else:
+        native = quote.get("native_ask_cents")
+    native = _as_float(native)
+    cents_text = f"{native:g}¢ " if native is not None else ""
+    return f"{cents_text}({fmt_odds(price)})"
+
+
 def build_futures_win_total_table(futures: dict, limit: int = 15) -> str:
     candidates = []
 
@@ -524,7 +546,7 @@ def build_futures_win_total_table(futures: dict, limit: int = 15) -> str:
             <td>{fmt_num(row.get("market_win_total"))}</td>
             <td class="{edge_class}">{edge:+.2f}</td>
             <td>{esc(row.get("win_direction", ""))}</td>
-            <td>{fmt_odds(row.get("win_price"))}</td>
+            <td>{futures_price_display(row, "win_price", "win_book")}</td>
             <td>{esc(row.get("win_book", ""))}</td>
             <td>{esc(row.get("win_market_authority", ""))}</td>
           </tr>
@@ -604,7 +626,7 @@ def build_futures_probability_table(
             <td>{_fmt_pct(row.get(model_field))}</td>
             <td>{_fmt_pct(row.get(market_field))}</td>
             <td class="{edge_class}">{_fmt_edge_pp(edge)}</td>
-            <td>{fmt_odds(row.get(price_field))}</td>
+            <td>{futures_price_display(row, price_field, book_field)}</td>
             <td>{esc(row.get(book_field, ""))}</td>
           </tr>
         """)
@@ -662,6 +684,17 @@ def main() -> None:
         price_field="playoff_price",
         book_field="playoff_book",
         empty_message="No current CFP edges available.",
+        limit=15,
+    )
+
+    futures_national_title_table = build_futures_probability_table(
+        futures,
+        model_field="national_title_model_prob",
+        market_field="national_title_market_prob",
+        edge_field="national_title_edge",
+        price_field="national_title_price",
+        book_field="national_title_book",
+        empty_message="No current national-title edges available.",
         limit=15,
     )
 
@@ -927,6 +960,12 @@ def main() -> None:
       Model make-CFP probability versus current market implied probability.
     </p>
     {futures_playoff_table}
+
+    <h2>National Championship</h2>
+    <p class="section-note">
+      Model national-title probability versus current market implied probability.
+    </p>
+    {futures_national_title_table}
 
     <h2>Game Line Moves</h2>
     <p class="muted">Spread and total movement that matches a current actionable best-line edge.</p>

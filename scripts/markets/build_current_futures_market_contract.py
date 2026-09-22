@@ -30,6 +30,7 @@ SEASON_SIM = DATA_ROOT / "data/site/season_simulations_2026.json"
 WIN_CURRENT = DATA_ROOT / "market_win_totals_import.csv"
 CONF_CURRENT = DATA_ROOT / "market_conference_futures_import.csv"
 PLAYOFF_CURRENT = DATA_ROOT / "data/markets/action/action_playoff_futures_2026.json"
+KALSHI_CURRENT = DATA_ROOT / "data/markets/kalshi/kalshi_futures_2026.json"
 POLICY_PATH = ROOT / "config/futures_market_policy.json"
 
 OUT = Path(
@@ -102,12 +103,52 @@ def newest(values):
     return max(good) if good else None
 
 
+def current_kalshi_payload(path: Path, now=None, max_hours=26):
+    """Return a fresh successful Kalshi payload, otherwise None (no carry-forward)."""
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text())
+        stamp = datetime.fromisoformat(str(payload.get("pulled_at") or "").replace("Z", "+00:00"))
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return None
+    now = now or datetime.now(timezone.utc)
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    age = (now - stamp.astimezone(timezone.utc)).total_seconds() / 3600
+    return payload if -0.25 <= age <= max_hours else None
+
+
+def kalshi_quote(row, side=None):
+    item = row.get(side) if side else row
+    if not isinstance(item, dict) or clean_price(item.get("american_odds")) is None:
+        return None
+    market = row.get("market") or {}
+    return {
+        "price": clean_price(item.get("american_odds")),
+        "implied_probability": implied(item.get("american_odds")),
+        "native_ask_cents": item.get("ask_cents"),
+        "entry_fee_cents": number(item.get("entry_fee")) * 100 if number(item.get("entry_fee")) is not None else None,
+        "effective_cost": item.get("effective_cost"),
+        "display": f"Kalshi {number(item.get('ask_cents')):g}¢ ({clean_price(item.get('american_odds')):+d})",
+        "provider_type": "exchange",
+        "ticker": market.get("ticker"),
+        "pulled_at": market.get("pulled_at"),
+        "source": market.get("source") or "Kalshi public market API",
+        "fee_type": market.get("fee_type"),
+        "fee_multiplier": market.get("fee_multiplier"),
+        "fee_schedule_url": market.get("fee_schedule_url"),
+    }
+
+
 def main():
     sim = json.loads(SEASON_SIM.read_text())
     canonical_names = [x["team"] for x in sim["teams"]]
 
     policy = json.loads(POLICY_PATH.read_text())
     approved_books = set(policy.get("approved_executable_books", []))
+    provider_types = policy.get("provider_types", {})
+    kalshi = current_kalshi_payload(KALSHI_CURRENT)
 
     unmatched = {
         "win_totals": [],
@@ -184,6 +225,51 @@ def main():
             "source_url": row.get("source_url") or None,
             "source": "normalized win totals import",
         }
+
+    if kalshi:
+        kalshi_win_rows = defaultdict(list)
+        for row in kalshi.get("win_totals", []):
+            team = resolve_market_team(row.get("team"), canonical_names)
+            if not team:
+                unmatched["win_totals"].append(row.get("team"))
+                continue
+            kalshi_win_rows[team].append(row)
+        for team, candidate_rows in kalshi_win_rows.items():
+            sportsbook_numbers = Counter(
+                quote.get("number") for book, quote in wins.get(team, {}).items()
+                if book != "Kalshi" and quote.get("number") is not None
+            )
+            if not sportsbook_numbers:
+                continue
+            reference_number = sportsbook_numbers.most_common(1)[0][0]
+            matches = [
+                row for row in candidate_rows
+                if number(row.get("sportsbook_line")) == reference_number
+            ]
+            # Never guess among thresholds or compare unlike win-total lines.
+            if len(matches) != 1:
+                unmatched["win_totals"].append(
+                    f"{team}: ambiguous Kalshi threshold for {reference_number}"
+                )
+                continue
+            row = matches[0]
+            over = kalshi_quote(row, "over")
+            under = kalshi_quote(row, "under")
+            if not over and not under:
+                continue
+            wins[team]["Kalshi"] = {
+                "number": number(row.get("sportsbook_line")),
+                "over_price": over.get("price") if over else None,
+                "under_price": under.get("price") if under else None,
+                "over_native_ask_cents": over.get("native_ask_cents") if over else None,
+                "under_native_ask_cents": under.get("native_ask_cents") if under else None,
+                "over_display": over.get("display") if over else None,
+                "under_display": under.get("display") if under else None,
+                "provider_type": "exchange",
+                "pulled_at": (row.get("market") or {}).get("pulled_at"),
+                "source": "Kalshi public market API",
+                "market": row.get("market"),
+            }
 
     win_rows = []
     for team in sorted(wins):
@@ -296,6 +382,15 @@ def main():
             "source_url": row.get("source_url") or None,
             "source": "normalized conference futures import",
         }
+
+    if kalshi:
+        for row in kalshi.get("conference_titles", []):
+            team = resolve_market_team(row.get("team"), canonical_names)
+            quote = kalshi_quote(row)
+            if team and quote:
+                conference[team]["Kalshi"] = quote
+            elif row.get("team"):
+                unmatched["conference_titles"].append(row.get("team"))
 
     conference_rows = []
     for team in sorted(conference):
@@ -426,6 +521,39 @@ def main():
                 "pulled_at": action.get("pulled_at"),
             })
 
+        if kalshi:
+            by_key = {(row["team"], row["outcome"]): row for row in rows}
+            for source_row in kalshi.get(market_key, []):
+                team = resolve_market_team(source_row.get("team"), canonical_names)
+                outcome = "Yes"
+                quote = kalshi_quote(source_row)
+                if not team or not quote:
+                    if source_row.get("team"):
+                        unmatched["playoff_futures"].append(source_row.get("team"))
+                    continue
+                target = by_key.get((team, outcome))
+                if target is None:
+                    target = {"team": team, "outcome": outcome, "quotes": {}}
+                    rows.append(target)
+                    by_key[(team, outcome)] = target
+                target["quotes"]["Kalshi"] = quote
+
+            for row in rows:
+                quotes = row["quotes"]
+                best_all_price, best_all_book = best_price(quotes)
+                best_exec_price, best_exec_book = best_price(quotes, approved_books)
+                row.update({
+                    "books": sorted(quotes),
+                    "book_count": len(quotes),
+                    "executable_books": sorted(b for b in quotes if b in approved_books),
+                    "executable_book_count": sum(1 for b in quotes if b in approved_books),
+                    "best_observed_price": best_all_price,
+                    "best_observed_book": best_all_book,
+                    "best_executable_price": best_exec_price,
+                    "best_executable_book": best_exec_book,
+                    "pulled_at": newest(q.get("pulled_at") for q in quotes.values()),
+                })
+
         playoff_domains[market_key] = {
             "source": "Action Network",
             "pull_succeeded": bool(action.get("pull_succeeded")),
@@ -441,6 +569,8 @@ def main():
         "market_policy": {
             "schema_version": policy.get("schema_version"),
             "approved_executable_books": sorted(approved_books),
+            "provider_types": provider_types,
+            "kalshi_status": "current" if kalshi else "unavailable_or_stale",
         },
         "win_totals": {
             "source": "normalized current win totals imports",

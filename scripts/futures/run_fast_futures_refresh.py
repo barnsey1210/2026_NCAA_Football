@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WIN = ROOT / "market_win_totals_import.csv"
 CONF = ROOT / "market_conference_futures_import.csv"
 PLAYOFF = ROOT / "data/markets/action/action_playoff_futures_2026.json"
+KALSHI = ROOT / "data/markets/kalshi/kalshi_futures_2026.json"
 CONTRACT = ROOT / "data/markets/current_futures_market_2026.json"
 FUTURES_VIEW = ROOT / "data/site/futures_view.json"
 ODDS_FUTURES = ROOT / "data/site/odds_futures_v2.json"
@@ -138,7 +139,7 @@ def main() -> int:
     prior_state = read_json(MARKET_STATE, {})
     prior_hash = prior_state.get("semantic_hash")
 
-    protected = [WIN, CONF, PLAYOFF, CONTRACT, FUTURES_VIEW, ODDS_FUTURES]
+    protected = [WIN, CONF, PLAYOFF, KALSHI, CONTRACT, FUTURES_VIEW, ODDS_FUTURES]
 
     with tempfile.TemporaryDirectory(prefix="ncaaf-futures-fast-") as tmp:
         saved = backup_files(protected, Path(tmp))
@@ -149,6 +150,16 @@ def main() -> int:
             "Action Network win totals",
             [sys.executable, "pull_actionnetwork_win_totals_api.py"],
         )
+
+        kalshi_ok = run(
+            "Kalshi NCAAF futures",
+            [sys.executable, "scripts/markets/pull_kalshi_futures.py"],
+            required=False,
+        )
+        if not kalshi_ok:
+            # A failed optional exchange pull must not reuse an earlier quote.
+            # The contract then rebuilds from current sportsbook inputs only.
+            KALSHI.unlink(missing_ok=True)
 
         dk_ok = run(
             "Visible DraftKings win totals",

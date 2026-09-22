@@ -4,7 +4,15 @@
     "DraftKings",
     "FanDuel",
     "BetMGM",
-    "Caesars"
+    "Caesars",
+    "Kalshi"
   ],
-  "notes": "Canonical futures market contract preserves all observed sportsbook quotes. Actionable BEST selections are restricted to DraftKings, FanDuel, BetMGM, and Caesars."
+  "provider_types": {
+    "DraftKings": "sportsbook",
+    "FanDuel": "sportsbook",
+    "BetMGM": "sportsbook",
+    "Caesars": "sportsbook",
+    "Kalshi": "exchange"
+  },
+  "notes": "Canonical futures market contract preserves sportsbook and exchange semantics. Actionable BEST selections use approved executable providers; Kalshi comparisons use its ask plus official taker entry fee."
 }

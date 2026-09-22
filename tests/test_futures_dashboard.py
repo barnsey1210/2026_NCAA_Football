@@ -101,7 +101,7 @@ class FuturesDashboardTests(unittest.TestCase):
             best:F.BOOKS.filter(book=>F.isBestBook(row,'wins',book))
           }}));
         """)
-        self.assertEqual(result["books"], ["DraftKings", "FanDuel", "BetMGM", "Caesars"])
+        self.assertEqual(result["books"], ["DraftKings", "FanDuel", "BetMGM", "Caesars", "Kalshi"])
         self.assertEqual(result["best"], [ohio["win_book"]])
         self.assertIsNone(result["quotes"][3])
 

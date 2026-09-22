@@ -5,6 +5,7 @@ Domains:
 - Win totals
 - Conference titles
 - Make CFP
+- National championship
 
 Kalshi remains a distinct provider internally.  Native ask prices are retained
 in dollars/cents and converted to American-equivalent odds for comparison with
@@ -17,6 +18,7 @@ private key is required.
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from datetime import datetime, timezone
@@ -43,6 +45,8 @@ OUT = ROOT / "data/markets/kalshi/kalshi_futures_2026.json"
 
 WIN_TOTAL_SERIES = "KXNCAAFWINS"
 CFP_SERIES = "KXNCAAFPLAYOFF"
+NATIONAL_TITLE_SERIES = "KXNCAAF"
+FEE_SCHEDULE_URL = "https://kalshi.com/docs/kalshi-fee-schedule.pdf"
 
 CONFERENCE_SERIES = {
     "ACC": "KXNCAAFACC",
@@ -66,6 +70,10 @@ def get_json(path: str, params: dict | None = None) -> dict:
     )
     r.raise_for_status()
     return r.json()
+
+
+def series_metadata(series_ticker: str) -> dict:
+    return (get_json(f"/series/{series_ticker}").get("series") or {})
 
 
 def event_pages(series_ticker: str) -> list[dict]:
@@ -105,9 +113,27 @@ def decimal_price(value):
     return x
 
 
-def american_from_probability(p):
-    """Convert an executable contract ask price to gross American-equivalent odds."""
-    p = decimal_price(p)
+def kalshi_taker_fee(price, fee_type="quadratic", fee_multiplier=1):
+    """Return the entry fee for one immediately matched contract.
+
+    The official schedule defines the general taker fee as the next whole cent
+    above 0.07 * C * P * (1-P).  We compare one contract because the UI quote
+    is a per-contract executable ask.  Flat-fee markets are deliberately
+    rejected rather than assigned an invented schedule.
+    """
+    p = decimal_price(price)
+    multiplier = decimal_price(fee_multiplier)
+    if p is None or multiplier is None:
+        return None
+    if fee_type not in {"quadratic", "quadratic_with_maker_fees"}:
+        return None
+    raw = 0.07 * multiplier * p * (1 - p)
+    return math.ceil((raw - 1e-12) * 100) / 100
+
+
+def american_from_cost(cost):
+    """Convert total entry cost to held-to-settlement American odds."""
+    p = decimal_price(cost)
 
     # 0¢ / 100¢ are not useful comparable executable return prices.
     if p is None or p <= 0 or p >= 1:
@@ -117,6 +143,14 @@ def american_from_probability(p):
         return int(round(100 * (1 - p) / p))
 
     return int(round(-100 * p / (1 - p)))
+
+
+def fee_terms(series: dict, event: dict) -> dict:
+    fee_type = event.get("fee_type_override") or series.get("fee_type")
+    multiplier = event.get("fee_multiplier_override")
+    if multiplier is None:
+        multiplier = series.get("fee_multiplier")
+    return {"fee_type": fee_type, "fee_multiplier": multiplier}
 
 
 def cents(p):
@@ -130,12 +164,28 @@ def canonical_team(raw, canonical_names):
     return resolve_market_team(str(raw).strip(), canonical_names)
 
 
-def base_quote(market: dict, pulled_at: str) -> dict:
+def side_quote(ask, fee_type, fee_multiplier):
+    ask = decimal_price(ask)
+    fee = kalshi_taker_fee(ask, fee_type, fee_multiplier)
+    cost = round(ask + fee, 10) if ask is not None and fee is not None else None
+    return {
+        "ask": ask,
+        "ask_cents": cents(ask),
+        "entry_fee": fee,
+        "entry_fee_cents": cents(fee),
+        "effective_cost": cost,
+        "american_odds": american_from_cost(cost),
+    }
+
+
+def base_quote(market: dict, pulled_at: str, terms: dict) -> dict:
     ya = decimal_price(market.get("yes_ask_dollars"))
     na = decimal_price(market.get("no_ask_dollars"))
     yb = decimal_price(market.get("yes_bid_dollars"))
     nb = decimal_price(market.get("no_bid_dollars"))
 
+    yes = side_quote(ya, terms["fee_type"], terms["fee_multiplier"])
+    no = side_quote(na, terms["fee_type"], terms["fee_multiplier"])
     return {
         "ticker": market.get("ticker"),
         "event_ticker": market.get("event_ticker"),
@@ -153,8 +203,15 @@ def base_quote(market: dict, pulled_at: str) -> dict:
         "no_ask_cents": cents(na),
         "no_bid": nb,
         "no_bid_cents": cents(nb),
-        "yes_american_odds": american_from_probability(ya),
-        "no_american_odds": american_from_probability(na),
+        "fee_type": terms["fee_type"],
+        "fee_multiplier": terms["fee_multiplier"],
+        "fee_schedule_url": FEE_SCHEDULE_URL,
+        "yes_entry_fee": yes["entry_fee"],
+        "yes_effective_cost": yes["effective_cost"],
+        "yes_american_odds": yes["american_odds"],
+        "no_entry_fee": no["entry_fee"],
+        "no_effective_cost": no["effective_cost"],
+        "no_american_odds": no["american_odds"],
         "pulled_at": pulled_at,
         "source": "Kalshi public market API",
     }
@@ -185,9 +242,14 @@ def pull_win_totals(canonical_names, pulled_at):
     unmatched = []
     rejected = []
 
+    series = series_metadata(WIN_TOTAL_SERIES)
     for event in event_pages(WIN_TOTAL_SERIES):
+        terms = fee_terms(series, event)
         for market in event.get("markets", []) or []:
             ticker = str(market.get("ticker") or "")
+
+            if market.get("status") != "active":
+                continue
 
             if "-26" not in ticker:
                 continue
@@ -211,7 +273,7 @@ def pull_win_totals(canonical_names, pulled_at):
                 })
                 continue
 
-            quote = base_quote(market, pulled_at)
+            quote = base_quote(market, pulled_at, terms)
 
             # "N+ wins" is equivalent to sportsbook Over (N - 0.5).
             # Buying NO is equivalent to Under (N - 0.5).
@@ -226,12 +288,16 @@ def pull_win_totals(canonical_names, pulled_at):
                     "kalshi_side": "YES",
                     "ask": quote["yes_ask"],
                     "ask_cents": quote["yes_ask_cents"],
+                    "entry_fee": quote["yes_entry_fee"],
+                    "effective_cost": quote["yes_effective_cost"],
                     "american_odds": quote["yes_american_odds"],
                 },
                 "under": {
                     "kalshi_side": "NO",
                     "ask": quote["no_ask"],
                     "ask_cents": quote["no_ask_cents"],
+                    "entry_fee": quote["no_entry_fee"],
+                    "effective_cost": quote["no_effective_cost"],
                     "american_odds": quote["no_american_odds"],
                 },
                 "market": quote,
@@ -251,11 +317,18 @@ def pull_binary_team_series(
     rows = []
     unmatched = []
 
+    series = series_metadata(series_ticker)
     for event in event_pages(series_ticker):
+        terms = fee_terms(series, event)
         for market in event.get("markets", []) or []:
             ticker = str(market.get("ticker") or "")
 
-            if "-26" not in ticker:
+            if market.get("status") != "active":
+                continue
+
+            if domain != "national_title" and "-26" not in ticker:
+                continue
+            if domain == "national_title" and not str(event.get("event_ticker") or "").endswith("-27"):
                 continue
 
             team_raw = (
@@ -274,7 +347,7 @@ def pull_binary_team_series(
                 })
                 continue
 
-            quote = base_quote(market, pulled_at)
+            quote = base_quote(market, pulled_at, terms)
 
             rows.append({
                 "domain": domain,
@@ -286,6 +359,8 @@ def pull_binary_team_series(
                 "kalshi_side": "YES",
                 "ask": quote["yes_ask"],
                 "ask_cents": quote["yes_ask_cents"],
+                "entry_fee": quote["yes_entry_fee"],
+                "effective_cost": quote["yes_effective_cost"],
                 "american_odds": quote["yes_american_odds"],
                 "market": quote,
             })
@@ -318,6 +393,13 @@ def main():
         pulled_at=pulled_at,
     )
 
+    national_rows, national_unmatched = pull_binary_team_series(
+        series_ticker=NATIONAL_TITLE_SERIES,
+        domain="national_title",
+        canonical_names=canonical_names,
+        pulled_at=pulled_at,
+    )
+
     conference_rows = []
     conference_unmatched = []
 
@@ -334,7 +416,7 @@ def main():
         conference_unmatched.extend(unmatched)
 
     payload = {
-        "schema_version": "kalshi-ncaaf-futures-v1",
+        "schema_version": "kalshi-ncaaf-futures-v2",
         "season": 2026,
         "pulled_at": pulled_at,
         "provider": "Kalshi",
@@ -342,25 +424,31 @@ def main():
             "executable_buy_price": "ask",
             "display": "native cents + American-equivalent odds",
             "bid_usage": "provenance/liquidity only",
-            "american_equivalent": "gross return before fees",
+            "american_equivalent": "one-contract ask plus official taker entry fee; held to settlement",
+            "fee_schedule_url": FEE_SCHEDULE_URL,
+            "exit_fee": "not included",
         },
         "series": {
             "win_totals": WIN_TOTAL_SERIES,
             "make_cfp": CFP_SERIES,
+            "national_title": NATIONAL_TITLE_SERIES,
             "conference_titles": CONFERENCE_SERIES,
         },
         "win_totals": win_rows,
         "conference_titles": conference_rows,
         "make_cfp": cfp_rows,
+        "national_title": national_rows,
         "audit": {
             "canonical_teams": len(canonical_names),
             "win_total_markets": len(win_rows),
             "conference_title_markets": len(conference_rows),
             "make_cfp_markets": len(cfp_rows),
+            "national_title_markets": len(national_rows),
             "win_total_unmatched": win_unmatched,
             "win_total_rejected": win_rejected,
             "conference_title_unmatched": conference_unmatched,
             "make_cfp_unmatched": cfp_unmatched,
+            "national_title_unmatched": national_unmatched,
         },
     }
 
@@ -372,10 +460,12 @@ def main():
     print("win totals:", len(win_rows))
     print("conference titles:", len(conference_rows))
     print("make CFP:", len(cfp_rows))
+    print("national title:", len(national_rows))
     print("unmatched win totals:", len(win_unmatched))
     print("rejected win totals:", len(win_rejected))
     print("unmatched conference titles:", len(conference_unmatched))
     print("unmatched CFP:", len(cfp_unmatched))
+    print("unmatched national title:", len(national_unmatched))
 
 
 if __name__ == "__main__":

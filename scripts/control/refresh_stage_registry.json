@@ -38,7 +38,7 @@
     },
     "FUTURES_REFRESH": {
       "controller_mode": "futures-fast",
-      "provider": "action_network_futures",
+      "providers": ["action_network_futures", "kalshi_public_market_api"],
       "owner": "scripts/futures/run_fast_futures_publication.py",
       "bounded_publication": true
     }

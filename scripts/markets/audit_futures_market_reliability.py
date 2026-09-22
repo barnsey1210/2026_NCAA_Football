@@ -34,6 +34,59 @@ EASTERN = ZoneInfo("America/New_York")
 APPROVED_BOOKS = {"DraftKings", "FanDuel", "BetMGM", "Caesars"}
 
 
+def audit_kalshi(path: Path, now: datetime):
+    if not path.exists():
+        return {
+            "domain": "kalshi",
+            "status": "warn",
+            "errors": [],
+            "warnings": ["Kalshi unavailable; current sportsbook data remains authoritative"],
+        }
+    errors = []
+    warnings = []
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        payload = {}
+        errors.append("kalshi: unreadable normalized payload")
+    pulled = parse_time(payload.get("pulled_at"))
+    age = (now - pulled).total_seconds() / 3600 if pulled else None
+    if age is None or age > 26:
+        errors.append("kalshi: normalized payload is stale or unavailable")
+    counts = {}
+    for key in ("win_totals", "conference_titles", "make_cfp", "national_title"):
+        rows = payload.get(key, [])
+        counts[key] = len(rows)
+        for row in rows:
+            market = row.get("market") or {}
+            if market.get("status") != "active":
+                errors.append(f"kalshi: {key} includes non-active market")
+                break
+            sides = (row.get("over"), row.get("under")) if key == "win_totals" else (row,)
+            for side in sides:
+                if side and side.get("ask") is not None and not valid_price(side.get("american_odds")):
+                    errors.append(f"kalshi: {key} lacks fee-adjusted American odds")
+                    break
+    rejected = sum(
+        len(payload.get("audit", {}).get(field, []) or [])
+        for field in (
+            "win_total_unmatched", "win_total_rejected", "conference_title_unmatched",
+            "make_cfp_unmatched", "national_title_unmatched",
+        )
+    )
+    if rejected:
+        warnings.append(f"kalshi: {rejected} ambiguous or unmatched markets excluded")
+    return {
+        "domain": "kalshi",
+        "status": "fail" if errors else "warn" if warnings else "pass",
+        "pulled_at": payload.get("pulled_at"),
+        "age_hours": round(age, 3) if age is not None else None,
+        "market_counts": counts,
+        "errors": errors,
+        "warnings": warnings,
+    }
+
+
 def read_csv(path: Path) -> list[dict]:
     if not path.exists():
         return []
@@ -405,6 +458,9 @@ def main():
             conference_teams, ("american_odds",), today,
         ),
     ]
+    domains.append(audit_kalshi(
+        runtime / "data/markets/kalshi/kalshi_futures_2026.json", now
+    ))
 
     capture = None
     if args.phase == "all":

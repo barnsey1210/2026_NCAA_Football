@@ -1,12 +1,13 @@
 (function(){
 'use strict';
 
-const BOOKS=['DraftKings','FanDuel','BetMGM','Caesars'];
+const BOOKS=['DraftKings','FanDuel','BetMGM','Caesars','Kalshi'];
 const BOOK_SLUG={
   DraftKings:'draftkings',
   FanDuel:'fanduel',
   BetMGM:'betmgm',
-  Caesars:'caesars'
+  Caesars:'caesars',
+  Kalshi:'kalshi'
 };
 
 let state={
@@ -40,6 +41,13 @@ const hasNumber=v=>
 const num=(v,d=1)=>hasNumber(v)?Number(v).toFixed(d):'—';
 const pct=v=>hasNumber(v)?`${(Number(v)*100).toFixed(1)}%`:'—';
 const odds=v=>hasNumber(v)?`${Number(v)>0?'+':''}${Math.round(Number(v))}`:'—';
+const quoteOdds=(q,side)=>{
+  const price=q?.price??(side==='Under'?q?.under_price:q?.over_price);
+  const native=q?.native_ask_cents??(side==='Under'?q?.under_native_ask_cents:q?.over_native_ask_cents);
+  return q?.provider_type==='exchange'&&hasNumber(native)
+    ? `${Number(native).toLocaleString('en-US',{maximumFractionDigits:2})}¢ (${odds(price)})`
+    : odds(price);
+};
 
 
 const SCENARIO_UNIVERSE_URL='data/site/futures_scenario_universe_2026.json';
@@ -1509,7 +1517,7 @@ function fourBookBoard(row,kind){
 
       return `<div class="railBookRow ${best?'bestBookRow':''}">
         <span>${bookLogo(book)}</span>
-        <b>${line?`${esc(line)} · `:''}${odds(price)}</b>
+        <b>${line?`${esc(line)} · `:''}${quoteOdds(q,data.side)}</b>
         <small>${best?'BEST':'AVAILABLE'}</small>
       </div>`;
     }).join('')}
@@ -1730,7 +1738,7 @@ function renderFourBookTooltip(button){
 
     return `<div class="fourBookTooltipRow ${best?'bestBookRow':''}">
       <span>${bookLogo(book)}</span>
-      <b>${line?`${esc(line)} · `:''}${odds(price)}</b>
+      <b>${line?`${esc(line)} · `:''}${quoteOdds(q,qd.side)}</b>
       <small>${best?'BEST · ':''}${esc(when)}</small>
     </div>`;
   }).join('')}`;
