@@ -341,13 +341,11 @@ trap on_exit EXIT
   # STAGE: futures_market_acquisition
   if stage_enabled "futures_market_acquisition"; then
   stage_start "futures_market_acquisition"
-  run_py "pull_actionnetwork_win_totals_api.py" || warn "Action Network win totals API pull unavailable; preserving cached data"
-  run_py "odds/pull_actionnetwork_visible_dk_win_totals.py" "pull_actionnetwork_visible_dk_win_totals.py" || warn "visible DK win totals pull failed"
-  run_py "odds/merge_visible_dk_win_totals.py" "merge_visible_dk_win_totals.py" || warn "visible DK win totals merge failed"
-  run_py "pull_fanduel_win_totals.py" || warn "FanDuel win totals pull unavailable; preserving cached data"
-  run_py "pull_bettingpros_caesars_win_totals.py" || warn "Caesars/BettingPros pull failed; preserving cached data"
-  run_py "pulls/pull_actionnetwork_conference_futures_api.py" || warn "Action Network conference futures pull failed; preserving cached data"
-  run_py "odds/quarantine_bad_draftkings_win_total_rows.py" "quarantine_bad_draftkings_win_total_rows.py" || warn "bad DraftKings win total quarantine failed"
+  # Run the same fail-closed Futures refresh used by the fast scheduler so the
+  # canonical contract and Futures view exist before the 8 AM email is built.
+  run_py "scripts/futures/run_fast_futures_refresh.py" "run_fast_futures_refresh.py"
+  # The fast refresh preserves prior accepted artifacts on provider failure;
+  # the scheduled daily run still requires today's acquisition to pass.
   run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase acquisition
   run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
   run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
@@ -681,8 +679,8 @@ fi
   # STAGE: playoff_futures
   if stage_enabled "playoff_futures"; then
   stage_start "playoff_futures"
-  wait_for_network "api.actionnetwork.com"
-  run_py "scripts/markets/pull_actionnetwork_playoff_futures.py" "pull_actionnetwork_playoff_futures.py" || warn "Action Network playoff futures pull failed; using cached data where available"
+  # Acquisition already ran in the early fast Futures stage. Rebuild after
+  # simulations so the public view reflects both fresh markets and fresh sims.
   run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
   if run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture; then
     :

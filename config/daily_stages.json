@@ -12,13 +12,7 @@
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#futures_market_acquisition",
       "scripts": [
-        "pull_actionnetwork_win_totals_api.py",
-        "odds/pull_actionnetwork_visible_dk_win_totals.py",
-        "odds/merge_visible_dk_win_totals.py",
-        "pull_fanduel_win_totals.py",
-        "pull_bettingpros_caesars_win_totals.py",
-        "pulls/pull_actionnetwork_conference_futures_api.py",
-        "odds/quarantine_bad_draftkings_win_total_rows.py",
+        "scripts/futures/run_fast_futures_refresh.py",
         "scripts/markets/audit_futures_market_reliability.py",
         "append_market_history.py",
         "build_daily_market_movement_report.py",
@@ -312,7 +306,6 @@
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#playoff_futures",
       "scripts": [
-        "scripts/markets/pull_actionnetwork_playoff_futures.py",
         "scripts/markets/build_current_futures_market_contract.py",
         "scripts/markets/audit_futures_market_reliability.py",
         "scripts/site/build_futures_view.py",
