@@ -1836,20 +1836,53 @@ tr:hover td.context-group{background:#202d39}
 
   .command-grid{height:auto!important}
   .matrix-scroll{display:none}
-  .mobile-matrix{display:grid;gap:7px;padding:7px;background:#071019}
+  .mobile-matrix{display:grid;gap:7px;min-width:0;padding:7px;box-sizing:border-box;background:#071019}
+  .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line2);border-radius:6px;overflow:visible;background:var(--panel)}
+  .mobile-command-row{display:grid;grid-template-columns:minmax(0,1.48fr) 50px minmax(68px,.72fr) minmax(68px,.72fr);min-width:0;border-top:1px solid var(--line)}
+  .mobile-command-head{position:sticky;top:91px;z-index:24;border-top:0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
+  .mobile-command-head>span,.mobile-command-sort{min-width:0;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 5px;font:inherit;font-size:8px;font-weight:950;letter-spacing:.35px;text-align:center;text-transform:uppercase}
+  .mobile-command-head>span:first-child{border-left:0;text-align:left;padding-left:8px}
+  .mobile-command-sort{cursor:pointer}.mobile-command-sort.active{color:var(--green)}
+  .mobile-command-game{min-width:0;border:0;background:transparent;color:inherit;padding:7px 6px;text-align:left;cursor:pointer}
+  .mobile-command-game:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+  .mobile-command-game-top{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:7px;font-weight:900;white-space:nowrap}
+  .mobile-command-game-top .badge{margin-left:auto;padding:1px 3px;font-size:6px}
+  .mobile-command-matchup{display:grid;gap:2px;margin-top:3px;min-width:0}
+  .mobile-command-team-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px;align-items:center;min-width:0}
+  .mobile-command-matchup .matchup-team{font-size:10px;line-height:1.1}
+  .mobile-command-market-line{display:inline-flex;align-items:center;justify-content:flex-end;gap:2px;color:#dfe9f3;font-size:8px;font-weight:950;white-space:nowrap}
+  .mobile-command-book-logo{width:14px;height:14px;object-fit:contain;border:1px solid rgba(255,255,255,.16);border-radius:3px;padding:1px;background:rgba(255,255,255,.09)}
+  .mobile-command-total{margin-top:3px;color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.2px;white-space:nowrap}
+  .mobile-command-total strong{color:#dfe9f3;font-size:8px}
+  .mobile-command-edge{display:flex;align-items:center;justify-content:center;min-width:0;padding:5px 2px;border-left:1px solid var(--line);text-align:center}
+  .mobile-command-best{display:grid;gap:1px;place-content:center;min-width:0;border-left:1px solid var(--line);text-align:center}
+  .mobile-command-best-value{color:var(--green);font-size:14px;font-weight:950;line-height:1}
+  .mobile-command-best-market{color:var(--muted);font-size:6px;font-weight:950;letter-spacing:.35px}
+  .mobile-command-edge .decision-edge{min-width:0;max-width:100%}
+  .mobile-command-edge .decision-edge-main{display:grid;gap:1px;justify-items:center;max-width:100%}
+  .mobile-command-edge .decision-side{font-size:8px}
+  .mobile-command-edge .team-logo-holder{--team-logo-size:20px}
+  .mobile-command-edge .decision-team-name{max-width:72px;font-size:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-command-edge .edge{font-size:inherit;font-weight:950}
+  .mobile-edge-display{display:grid;gap:1px;justify-items:center;min-width:0}
+  .mobile-edge-value{color:var(--green);font-size:17px;font-weight:950;line-height:1}
+  .mobile-edge-signal{max-width:66px;color:#dce7ef;font-size:7px;font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-edge-model{color:var(--muted);font-size:6px;font-weight:850;white-space:nowrap}
+  .mobile-command-row.game-selected{background:rgba(69,217,237,.07);box-shadow:inset 3px 0 0 var(--cyan)}
+  .mobile-command-detail{position:fixed;left:7px;right:7px;bottom:max(7px,env(safe-area-inset-bottom,0px));z-index:60;min-width:0;max-height:72vh;overflow:hidden;border:1px solid var(--line2);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.62),0 12px 34px rgba(0,0,0,.62)}.mobile-command-detail:empty{display:none}
 
   .right-rail{display:none}
   .mobile-activity-slot .right-rail{
     display:flex;
     width:100%;
     min-height:280px;
-    max-height:48vh;
+    max-height:72vh;
     margin-top:0;
     border-left:0;
     border-top:1px solid var(--line2);
     background:#08121c;
   }
-  .mobile-activity-slot{border-top:1px solid rgba(69,217,237,.28)}
+  .mobile-activity-slot{border-top:1px solid rgba(69,217,237,.28);background:#08121c}
 
   .mobile-sticky-bar{
     position:sticky;
@@ -3654,7 +3687,7 @@ function spreadFavoriteLogo(game,value){
   return `<span class="team-logo-holder" title="${esc(team)} projected favorite"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
 }
 
-function modelTooltip(game, market){
+function modelTooltip(game, market, shownOverride=null){
   const model = market === 'spread'
     ? game?.models?.standard_spread
     : game?.models?.standard_total;
@@ -3733,11 +3766,12 @@ function modelTooltip(game, market){
   // Keep the Standard model/component payload for tooltip diagnostics,
   // but use the resolved game authority value for the visible number.
   const value = displayedModelValue(game,market);
-  const shown=market==='spread'
+  const projectedShown=market==='spread'
     ? `<span class="projection-value">${spreadFavoriteLogo(game,value)}<span>${modelDisplay(value,market)}</span></span>`
     : `<span>${modelDisplay(value,market)}</span>`;
   const modeLabel=manualModelLabel(game,market);
-  return `<span class="model-tooltip" data-no-game-select tabindex="0" aria-label="${esc(modeLabel || 'Model components')}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)" onpointerdown="handleModelTooltipPointer(event,this)">${shown}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
+  const visible=shownOverride===null?projectedShown:shownOverride;
+  return `<span class="model-tooltip" data-no-game-select tabindex="0" aria-label="${esc(modeLabel || 'Model components')}" onmouseenter="positionModelTooltip(this)" onmouseleave="closeModelTooltip(this)" onfocus="positionModelTooltip(this)" onblur="closeModelTooltip(this)" onpointerdown="handleModelTooltipPointer(event,this)">${visible}<span class="model-tooltip-panel" role="tooltip">${rows}</span></span>`;
 }
 
 let activeModelTooltipTrigger=null;
@@ -4447,13 +4481,68 @@ function mobileMetric(label,content,extraClass=''){
   return `<div class="mobile-metric ${extraClass}"><span class="mobile-metric-label">${label}</span>${content}</div>`;
 }
 
+function mobileCurrentSpread(game,side){
+  const quote=game?.market?.best_sportsbook?.spread?.[side];
+  if(!quote) return '<span class="mobile-command-market-line">—</span>';
+  return `<span class="mobile-command-market-line">${mobileBookLogo(quote.book)}<span>${fmtLine(quote.line)} ${fmtPrice(quote.price) || ''}</span></span>`;
+}
+
+function mobileBookLogo(book){
+  const name=String(book || 'Sportsbook');
+  const logo=BOOK_LOGOS[book] || 'default';
+  const fallback=BOOK_ABBR[book] || name;
+  return `<span title="${esc(name)}" aria-label="${esc(name)}"><img class="mobile-command-book-logo" src="logos/books/${esc(logo)}.png" alt="${esc(name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="activity-book-fallback">${esc(fallback)}</span></span>`;
+}
+
+function mobileCurrentTotal(game,preferredSide){
+  const side=preferredSide==='under'?'under':'over';
+  const quote=game?.market?.best_sportsbook?.total?.[side] ||
+    game?.market?.best_sportsbook?.total?.over ||
+    game?.market?.best_sportsbook?.total?.under;
+  if(!quote) return '<span class="mobile-command-total">TOTAL —</span>';
+  return `<span class="mobile-command-total">TOTAL <strong>${Number(quote.line).toFixed(1)}</strong> · ${mobileBookLogo(quote.book)} ${fmtPrice(quote.price) || ''}</span>`;
+}
+
+function mobileMatchupWithMarket(game,live,totalSide){
+  const away=`<div class="mobile-command-team-line">${matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)}${mobileCurrentSpread(game,'away')}</div>`;
+  const home=`<div class="mobile-command-team-line">${matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)}${mobileCurrentSpread(game,'home')}</div>`;
+  return `${away}${home}${mobileCurrentTotal(game,totalSide)}`;
+}
+
+function mobileBestEdge(spreadEdge,totalEdge){
+  const spread=numericSortValue(spreadEdge);
+  const total=numericSortValue(totalEdge);
+  if(spread===null && total===null) return '<span class="mobile-command-best-value">—</span>';
+  const useSpread=total===null || (spread!==null && spread>=total);
+  const value=useSpread?spread:total;
+  return `<span class="mobile-command-best-value">${edgeDisplay(value)}</span><span class="mobile-command-best-market">${useSpread?'SPREAD':'TOTAL'}</span>`;
+}
+
+function mobileEdgeDisplay(game,market,side,edge){
+  const value=numericSortValue(edge);
+  const model=displayedModelValue(game,market);
+  const team=side==='away'?game.away_team:game.home_team;
+  const signal=value!==null && value>0
+    ? (market==='spread' ? `BET ${TEAM_ABBREVIATIONS[team] || team}` : `${side==='under'?'UNDER':'OVER'}`)
+    : 'NO EDGE';
+  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value">${edgeDisplay(edge)}</strong><span class="mobile-edge-signal" title="${esc(signal)}">${esc(signal)}</span><span class="mobile-edge-model">MODEL ${modelDisplay(model,market)}</span></span>`;
+  return modelTooltip(game,market,shown);
+}
+
 function renderMobileMatrix(rows){
   const mobile=document.getElementById('mobileMatrix');
   if(!mobile) return;
   const rail=document.querySelector('.right-rail');
   const grid=document.querySelector('.command-grid');
   if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);
-  mobile.innerHTML=rows.map(game=>{
+  mobile.innerHTML=`<div class="mobile-command-table">
+    <div class="mobile-command-row mobile-command-head">
+      <span>GAME</span>
+      <button type="button" class="mobile-command-sort ${SORT_KEY==='best_edge'?'active':''}" onclick="setSort('best_edge')">EDGE ${sortArrow('best_edge') || '↕'}</button>
+      <button type="button" class="mobile-command-sort ${SORT_KEY==='spread_edge'?'active':''}" onclick="setSort('spread_edge')">SPREAD EDGE ${sortArrow('spread_edge') || '↕'}</button>
+      <button type="button" class="mobile-command-sort ${SORT_KEY==='total_edge'?'active':''}" onclick="setSort('total_edge')">TOTAL EDGE ${sortArrow('total_edge') || '↕'}</button>
+    </div>
+    ${rows.map(game=>{
     const displayedSpreadEdge=displayedEdge(game,'spread');
     const displayedTotalEdge=displayedEdge(game,'total');
     const sprSide=displayedSpreadEdge?.best_side;
@@ -4465,58 +4554,22 @@ function renderMobileMatrix(rows){
     const sprShadow=game.models?.shadow_spread;
     const totShadow=game.models?.shadow_total;
     const live=liveGameDisplay(game);
-    return `<article class="mobile-game-card game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
-      <div class="mobile-game-head">
-        <div class="mobile-kickoff">${live.active
+    return `<div class="mobile-command-row game-start ${String(game.game_id)===String(SELECTED_GAME_ID)?'game-selected':''}" data-game-id="${esc(game.game_id)}">
+      <button type="button" class="mobile-command-game" data-game-select aria-label="Open ${esc(game.away_team)} at ${esc(game.home_team)} matchup activity">
+        <div class="mobile-command-game-top">${live.active
           ? `<span class="game-live-state">${esc(live.label)}</span>`
-          : `<span>${esc(fmtKickoffDateET(game.kickoff_time))}</span><span>${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
-        }${game.neutral_site?'<span class="neutral-marker">NEUTRAL</span>':''}</div>
-        <div class="mobile-matchup">${matchupTeam(game.away_team,game.team_composite_rank?.away,live.awayScore)}${matchupTeam(game.home_team,game.team_composite_rank?.home,live.homeScore)}</div>
-        <div class="mobile-card-state">
-          ${mobileRecentChangeBadge(game)}
-          <span class="badge ${esc(game.state)}">${esc(game.state)}</span>
-        </div>
-      </div>
-      <div class="mobile-market-band spread-group">
-        <div class="mobile-band-title">SPREAD</div>
-        <div class="mobile-band-grid">
-          ${mobileMetric(
-            'EDGE',
-            `${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${spreadDecision(game,sprSide,sprEdge,true)}</span>`,
-            `edge-focus ${recentEdgeCellClass(game,'spread')}`
-          )}
-          ${mobileMetric(
-            'BEST',
-            `${recentBestBadge(game,'spread')}${bestBookTooltip(game,'spread',sprSide,sprBest)}`,
-            recentBestCellClass(game,'spread')
-          )}
-          ${mobileMetric('MODEL',modelTooltip(game,'spread'))}
-          ${mobileMetric('SHADOW',shadowDisplay(game,sprShadow,'spread'))}
-          </div>
-      </div>
-      <div class="mobile-market-band total-group">
-        <div class="mobile-band-title">TOTAL</div>
-        <div class="mobile-band-grid">
-          ${mobileMetric(
-            'EDGE',
-            `${recentEdgeBadge(game,'total')}<span class="edge ${edgeClass(totEdge)}">${totalDecision(totSide,totEdge)}</span>`,
-            `edge-focus ${recentEdgeCellClass(game,'total')}`
-          )}
-          ${mobileMetric(
-            'BEST',
-            `${recentBestBadge(game,'total')}${bestBookTooltip(game,'total',totSide,totBest)}`,
-            recentBestCellClass(game,'total')
-          )}
-          ${mobileMetric('MODEL',modelTooltip(game,'total'))}
-          ${mobileMetric('SHADOW',shadowDisplay(game,totShadow,'total'))}
-          </div>
-      </div>
-      <div class="mobile-game-foot"><span class="mobile-foot-injury"><span class="mobile-foot-label">INJURY</span>${injuryCell(game)}</span><span class="mobile-foot-injury"><span class="mobile-foot-label">PERF VS MODEL</span>${modelFitCell(game)}</span></div>
-      ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-activity-slot"></div>':''}
-    </article>`;
-  }).join('');
-  mobile.querySelectorAll('.mobile-game-card[data-game-id]').forEach(card=>card.addEventListener('click',event=>{
-    if(event.target.closest('button,a,input,select,summary,[role="button"],[data-no-game-select]')) return;
+          : `<span>${esc(fmtKickoffDateET(game.kickoff_time))} · ${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
+        }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
+        <div class="mobile-command-matchup">${mobileMatchupWithMarket(game,live,totSide)}</div>
+      </button>
+      <div class="mobile-command-best">${mobileBestEdge(sprEdge,totEdge)}</div>
+      <div class="mobile-command-edge spread-group ${recentEdgeCellClass(game,'spread')}">${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${mobileEdgeDisplay(game,'spread',sprSide,sprEdge)}</span></div>
+      <div class="mobile-command-edge total-group ${recentEdgeCellClass(game,'total')}">${recentEdgeBadge(game,'total')}<span class="edge ${edgeClass(totEdge)}">${mobileEdgeDisplay(game,'total',totSide,totEdge)}</span></div>
+      ${String(game.game_id)===String(SELECTED_GAME_ID)?'<div class="mobile-command-detail mobile-activity-slot"></div>':''}
+    </div>`;
+  }).join('')}
+  </div>`;
+  mobile.querySelectorAll('.mobile-command-row[data-game-id]').forEach(card=>card.querySelector('[data-game-select]')?.addEventListener('click',()=>{
     const game=rows.find(item=>String(item.game_id)===String(card.dataset.gameId));
     if(game) selectActivityGame(game);
   }));
@@ -4532,7 +4585,7 @@ function placeActivityRail(){
   const grid=document.querySelector('.command-grid');
   if(!rail || !grid) return;
   if(isMobileView() && SELECTED_GAME_ID){
-    const selected=[...document.querySelectorAll('.mobile-game-card[data-game-id]')]
+    const selected=[...document.querySelectorAll('.mobile-command-row[data-game-id]')]
       .find(card=>String(card.dataset.gameId)===String(SELECTED_GAME_ID));
     const slot=selected?.querySelector('.mobile-activity-slot');
     if(slot && rail.parentElement!==slot) slot.appendChild(rail);
@@ -5072,7 +5125,7 @@ async function fetchGameActivity(game){
 }
 
 function applySelectedRow(){
-  document.querySelectorAll('tr[data-game-id],.mobile-game-card[data-game-id]').forEach(row=>{
+  document.querySelectorAll('tr[data-game-id],.mobile-command-row[data-game-id]').forEach(row=>{
     row.classList.toggle('game-selected',String(row.dataset.gameId)===String(SELECTED_GAME_ID));
   });
 }

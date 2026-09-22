@@ -59,6 +59,39 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("grid-template-columns:minmax(0,1fr)", mobile)
         self.assertIn(".mobile-foot-injury + .mobile-foot-injury", mobile)
 
+    def test_mobile_command_center_uses_condensed_sortable_edge_table(self):
+        source = self.source
+        self.assertIn('class="mobile-command-table"', source)
+        self.assertIn("SPREAD EDGE ${sortArrow('spread_edge')", source)
+        self.assertIn("TOTAL EDGE ${sortArrow('total_edge')", source)
+        self.assertIn("grid-template-columns:minmax(0,1.48fr) 50px", source)
+        self.assertIn("position:sticky", source)
+        self.assertIn('<span>GAME</span>', source)
+        self.assertIn(">EDGE ${sortArrow('best_edge')", source)
+        self.assertIn("mobile-command-detail mobile-activity-slot", source)
+        self.assertIn("mobileMatchupWithMarket(game,live,totSide)", source)
+        self.assertIn("mobileCurrentSpread(game,'away')", source)
+        self.assertIn("mobileCurrentSpread(game,'home')", source)
+        self.assertIn("mobileCurrentTotal(game,totalSide)", source)
+        self.assertIn("mobileBookLogo(quote.book)", source)
+        self.assertIn("mobileEdgeDisplay(game,'spread'", source)
+        self.assertIn("mobileEdgeDisplay(game,'total'", source)
+        self.assertIn('data-game-select aria-label=', source)
+        self.assertIn('box-shadow:0 0 0 9999px', source)
+        self.assertIn("function modelTooltip(game, market, shownOverride=null)", source)
+
+    def test_mobile_authority_tooltips_and_manual_controls_share_live_contract(self):
+        source = self.source
+        for token in (
+            "const authorityWeights = hybridActive",
+            "manual?.weights_used?.[name]",
+            "weightText=`${(authorityWeight*100).toFixed(1)}% · ACTIVE`",
+            "document.getElementById('modelManualBtn').addEventListener",
+            "document.getElementById('manualSourcePanel').hidden=false",
+            "submitModelOverride('MANUAL'",
+        ):
+            self.assertIn(token, source)
+
 
 if __name__ == "__main__":
     unittest.main()
