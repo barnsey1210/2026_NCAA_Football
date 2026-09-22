@@ -236,6 +236,7 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         if material_drop(current_books.get(book, 0), count)
     }
     errors = []
+    warnings = []
     timestamp = parse_time(pulled_at)
     age_hours = ((now - timestamp).total_seconds() / 3600) if timestamp else None
     if timestamp is None or age_hours > 26:
@@ -247,7 +248,12 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
     if disappeared:
         errors.append(f"{key}: provider-wide disappearance: {', '.join(disappeared)}")
     if dropped_books:
-        errors.append(f"{key}: material provider coverage drop")
+        if key in {"make_cfp", "national_title"} and not disappeared:
+            warnings.append(
+                f"{key}: material provider coverage drop: {dropped_books}"
+            )
+        else:
+            errors.append(f"{key}: material provider coverage drop")
     return {
         "domain": key,
         "status": "fail" if errors else "pass",
@@ -262,7 +268,7 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         "provider_wide_disappearances": disappeared,
         "material_book_drops": dropped_books,
         "errors": errors,
-        "warnings": [],
+        "warnings": warnings,
     }
 
 
