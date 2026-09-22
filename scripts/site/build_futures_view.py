@@ -1071,15 +1071,18 @@ def main():
             else win_offer.get("under_price")
         )
         book_name = win_offer.get("book")
-    win_source_url = str(win_offer.get("source_url") or "")
+        win_source_url = str(win_offer.get("source_url") or "")
 
-    # Provenance/authority of the selected win-total quote.
-    if book_name == "FanDuel" and "sportsbook.fanduel.com" in win_source_url:
-        win_market_authority = "Direct sportsbook"
-    elif book_name:
-        win_market_authority = "Action observed"
-    else:
-        win_market_authority = None
+        # Provenance/authority of the selected win-total quote.
+        if (
+            book_name == "FanDuel"
+            and "sportsbook.fanduel.com" in win_source_url
+        ):
+            win_market_authority = "Direct sportsbook"
+        elif book_name:
+            win_market_authority = "Action observed"
+        else:
+            win_market_authority = None
 
         title_price = title.get("best_executable_price")
         title_book = title.get("best_executable_book")
@@ -1154,8 +1157,8 @@ def main():
             "win_direction": direction,
             "win_price": price,
             "win_book": book_name,
-        "win_market_authority": win_market_authority,
-        "win_source_url": win_source_url or None,
+            "win_market_authority": win_market_authority,
+            "win_source_url": win_source_url or None,
 
             "title_model_prob": title_prob,
             "title_market_prob": title_market_prob,
@@ -1166,9 +1169,9 @@ def main():
             ),
             "title_price": title_price,
             "title_book": title_book,
-        "title_market_authority": (
-            "Action observed" if title_price is not None else None
-        ),
+            "title_market_authority": (
+                "Action observed" if title_price is not None else None
+            ),
 
             "playoff_model_prob": playoff_prob,
             "playoff_market_prob": cfp_prob,
@@ -1179,9 +1182,9 @@ def main():
             ),
             "playoff_price": cfp_price,
             "playoff_book": cfp_book,
-        "playoff_market_authority": (
-            "Action observed" if cfp_price is not None else None
-        ),
+            "playoff_market_authority": (
+                "Action observed" if cfp_price is not None else None
+            ),
 
             "quarterfinal_model_prob": number(
                 playoff.get("quarterfinal_pct")
