@@ -507,19 +507,26 @@ def build_futures_win_total_table(futures: dict, limit: int = 15) -> str:
         return '<p class="muted">No current win-total edges available.</p>'
 
     body = []
+
     for _, _, row in candidates[:limit]:
         edge = _as_float(row.get("win_edge"))
-        edge_class = "edge-positive" if edge is not None and edge >= 0 else "edge-negative"
+        edge_class = (
+            "edge-positive"
+            if edge is not None and edge >= 0
+            else "edge-negative"
+        )
 
         body.append(f"""
           <tr>
             <td class="team">{esc(row.get("team", ""))}</td>
+            <td>{esc(row.get("conference", ""))}</td>
             <td>{_fmt_wins(row.get("projected_wins"))}</td>
             <td>{fmt_num(row.get("market_win_total"))}</td>
             <td class="{edge_class}">{edge:+.2f}</td>
             <td>{esc(row.get("win_direction", ""))}</td>
             <td>{fmt_odds(row.get("win_price"))}</td>
             <td>{esc(row.get("win_book", ""))}</td>
+            <td>{esc(row.get("win_market_authority", ""))}</td>
           </tr>
         """)
 
@@ -529,12 +536,14 @@ def build_futures_win_total_table(futures: dict, limit: int = 15) -> str:
         <thead>
           <tr>
             <th>Team</th>
+            <th>Conference</th>
             <th>Model Wins</th>
             <th>Market</th>
             <th>Edge</th>
             <th>Side</th>
             <th>Price</th>
             <th>Book</th>
+            <th>Authority</th>
           </tr>
         </thead>
         <tbody>
