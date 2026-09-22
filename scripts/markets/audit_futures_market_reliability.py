@@ -65,7 +65,8 @@ def audit_kalshi(path: Path, now: datetime):
             sides = (row.get("over"), row.get("under")) if key == "win_totals" else (row,)
             for side in sides:
                 ask = side.get("ask") if side else None
-                if side and ask is not None and 0 < float(ask) < 1 and not valid_price(side.get("american_odds")):
+                cost = side.get("effective_cost") if side else None
+                if side and ask is not None and cost is not None and 0 < float(cost) < 1 and not valid_price(side.get("american_odds")):
                     errors.append(f"kalshi: {key} lacks fee-adjusted American odds")
                     break
     rejected = sum(
