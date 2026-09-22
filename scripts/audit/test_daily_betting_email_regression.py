@@ -88,7 +88,10 @@ def main() -> int:
         fail("HTML is missing Futures edge tables")
 
     if "<th>Conference</th>" not in email_html:
-        fail("Conference Titles table is missing Conference column")
+        fail("Futures tables are missing Conference column")
+
+    if "<th>Authority</th>" not in email_html:
+        fail("Win Totals table is missing Authority column")
 
     if "Model Wins" not in email_html:
         fail("HTML is missing win-total model column")
