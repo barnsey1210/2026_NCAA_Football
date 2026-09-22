@@ -1097,6 +1097,10 @@ td.cell-hot-edge-lost{
   display:none;
 }
 
+.mobile-matrix-shell{
+  display:none;
+}
+
 .mobile-sticky-bar{
   display:none;
 }
@@ -1836,7 +1840,8 @@ tr:hover td.context-group{background:#202d39}
 
   .command-grid{height:auto!important}
   .matrix-scroll{display:none}
-  .mobile-matrix{display:grid;gap:7px;min-width:0;padding:7px;box-sizing:border-box;background:#071019}
+  .mobile-matrix-shell{display:block;width:100%;min-width:0;max-width:100%;padding:7px;box-sizing:border-box;overflow:visible;background:#071019}
+  .mobile-matrix{display:grid;gap:7px;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
   .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box}
   .mobile-command-body{display:grid;min-width:0;border:1px solid var(--line2);border-top:0;border-radius:0 0 6px 6px;overflow:visible;background:var(--panel)}
   .mobile-command-row{display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);min-width:0;border-top:1px solid var(--line)}
@@ -2584,7 +2589,14 @@ tr:hover td.context-group{background:#202d39}
         </table>
       </div>
 
-      <div class="mobile-matrix" id="mobileMatrix" aria-label="Priority Market Matrix mobile view"></div>
+      <div class="mobile-matrix-shell" id="mobileMatrixShell">
+        <div class="mobile-command-header" id="mobileMatrixHeader" role="row" aria-label="Sortable mobile matrix columns">
+          <button type="button" class="mobile-command-sort" data-mobile-sort="home_team">GAME</button>
+          <button type="button" class="mobile-command-sort" data-mobile-sort="spread_edge">SPREAD EDGE</button>
+          <button type="button" class="mobile-command-sort" data-mobile-sort="total_edge">TOTAL EDGE</button>
+        </div>
+        <div class="mobile-matrix" id="mobileMatrix" aria-label="Priority Market Matrix mobile view"></div>
+      </div>
     </section>
 
     <aside class="right-rail" aria-label="War Room Activity">
@@ -4546,6 +4558,18 @@ function syncMobileHeaderOffset(){
   document.documentElement.style.setProperty('--mobile-controls-height',`${controls.getBoundingClientRect().height}px`);
 }
 
+function renderMobileMatrixHeader(){
+  const header=document.getElementById('mobileMatrixHeader');
+  if(!header) return;
+  header.querySelectorAll('[data-mobile-sort]').forEach(button=>{
+    const key=button.dataset.mobileSort;
+    const label=key==='home_team'?'GAME':key==='spread_edge'?'SPREAD EDGE':'TOTAL EDGE';
+    button.classList.toggle('active',SORT_KEY===key);
+    button.innerHTML=`${label} ${sortArrow(key) || '↕'}`;
+    button.onclick=()=>setSort(key);
+  });
+}
+
 function renderMobileMatrix(rows){
   const mobile=document.getElementById('mobileMatrix');
   if(!mobile) return;
@@ -4553,12 +4577,8 @@ function renderMobileMatrix(rows){
   const grid=document.querySelector('.command-grid');
   if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);
   syncMobileHeaderOffset();
-  mobile.innerHTML=`<div class="mobile-command-header" role="row">
-      <span>GAME</span>
-      <button type="button" class="mobile-command-sort ${SORT_KEY==='spread_edge'?'active':''}" onclick="setSort('spread_edge')">SPREAD EDGE ${sortArrow('spread_edge') || '↕'}</button>
-      <button type="button" class="mobile-command-sort ${SORT_KEY==='total_edge'?'active':''}" onclick="setSort('total_edge')">TOTAL EDGE ${sortArrow('total_edge') || '↕'}</button>
-    </div>
-    <div class="mobile-command-table">
+  renderMobileMatrixHeader();
+  mobile.innerHTML=`<div class="mobile-command-table">
     <div class="mobile-command-body">
     ${rows.map(game=>{
     const displayedSpreadEdge=displayedEdge(game,'spread');

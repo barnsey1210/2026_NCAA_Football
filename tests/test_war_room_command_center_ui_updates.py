@@ -62,12 +62,12 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
     def test_mobile_command_center_uses_condensed_sortable_edge_table(self):
         source = self.source
         self.assertIn('class="mobile-command-table"', source)
-        self.assertIn("SPREAD EDGE ${sortArrow('spread_edge')", source)
-        self.assertIn("TOTAL EDGE ${sortArrow('total_edge')", source)
+        self.assertIn('data-mobile-sort="spread_edge"', source)
+        self.assertIn('data-mobile-sort="total_edge"', source)
         self.assertIn("grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr)", source)
         self.assertIn(".mobile-command-header{position:sticky;top:var(--mobile-controls-height)", source)
         self.assertIn('class="mobile-command-body"', source)
-        self.assertIn('<span>GAME</span>', source)
+        self.assertIn('data-mobile-sort="home_team">GAME</button>', source)
         self.assertNotIn(">EDGE ${sortArrow('best_edge')", source)
         self.assertIn("mobile-command-detail mobile-activity-slot", source)
         self.assertIn("mobileMatchupWithMarket(game,live,totSide)", source)
@@ -88,13 +88,17 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
     def test_mobile_header_is_single_dedicated_container_before_rows(self):
         source = self.source
         self.assertEqual(source.count('class="mobile-command-header"'), 1)
+        markup = source.split('<div class="mobile-matrix-shell"', 1)[1].split(
+            "</section>", 1
+        )[0]
+        self.assertLess(
+            markup.index('class="mobile-command-header"'),
+            markup.index('id="mobileMatrix"'),
+        )
         render = source.split("function renderMobileMatrix(rows){", 1)[1].split(
             "function isMobileView(){", 1
         )[0]
-        self.assertLess(
-            render.index('class="mobile-command-header"'),
-            render.index('class="mobile-command-body"'),
-        )
+        self.assertNotIn('mobile-command-header', render)
         self.assertLess(
             render.index('class="mobile-command-body"'),
             render.index('class="mobile-command-row game-start'),
@@ -102,6 +106,47 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertNotIn("mobile-command-row mobile-command-head", source)
         self.assertIn("function syncMobileHeaderOffset(){", source)
         self.assertIn("controls.getBoundingClientRect().height", source)
+        self.assertIn(".mobile-matrix-shell{display:block;width:100%;min-width:0;max-width:100%;padding:7px;box-sizing:border-box;overflow:visible", source)
+        self.assertIn("body{overflow-x:hidden;overflow-y:auto}", source)
+
+    def test_mobile_game_sort_uses_canonical_home_team_and_toggles_direction(self):
+        source = self.source
+        sort_branch = source.split("else if(SORT_KEY === 'home_team'){", 1)[1].split(
+            "else if(SORT_KEY === 'spread_edge'){", 1
+        )[0]
+        self.assertIn("String(a.home_team || '')", sort_branch)
+        self.assertIn("String(b.home_team || '')", sort_branch)
+        for forbidden in ("away_team", "game_id", "rank", "display"):
+            self.assertNotIn(forbidden, sort_branch)
+
+        setter = source.split("function setSort(key){", 1)[1].split(
+            "function renderHealth(){", 1
+        )[0]
+        self.assertIn("if(SORT_KEY === key)", setter)
+        self.assertIn("SORT_DIR === 'asc'", setter)
+        self.assertIn("? 'desc'", setter)
+        self.assertIn("key === 'home_team'", setter)
+        self.assertIn("? 'asc' : 'desc'", setter)
+        self.assertIn("button.onclick=()=>setSort(key)", source)
+        self.assertIn("button.innerHTML=`${label} ${sortArrow(key) || '↕'}`", source)
+
+    def test_existing_mobile_edge_sort_keys_remain_supported(self):
+        source = self.source
+        self.assertIn("else if(SORT_KEY === 'spread_edge')", source)
+        self.assertIn("displayedEdge(a,'spread')?.best_edge", source)
+        self.assertIn("else if(SORT_KEY === 'total_edge')", source)
+        self.assertIn("displayedEdge(a,'total')?.best_edge", source)
+        self.assertIn('<option value="spread_edge">SPREAD EDGE</option>', source)
+        self.assertIn('<option value="total_edge">TOTAL EDGE</option>', source)
+
+    def test_mobile_390_layout_has_no_min_width_overflow_contract(self):
+        source = self.source
+        self.assertIn("body{overflow-x:hidden;overflow-y:auto}", source)
+        self.assertIn("width:100%;min-width:0;max-width:100%", source)
+        self.assertIn(
+            "grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr)",
+            source,
+        )
 
     def test_mobile_edge_color_threshold_boundaries(self):
         block = self.source.split(
