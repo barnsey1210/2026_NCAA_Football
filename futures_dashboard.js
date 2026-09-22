@@ -17,6 +17,7 @@ let state={
   sortKey:'rank',
   sortDir:'asc',
   selectedTeam:null,
+  mobileExpandedTeam:null,
   railTab:'overview',
   scenario:{
     loaded:false,
@@ -29,6 +30,13 @@ let state={
     current:null,
     leverageByTeam:null
   }
+};
+
+const mobileSortState={
+  wins:{key:'edge',dir:'desc'},
+  title:{key:'edge',dir:'desc'},
+  cfp:{key:'edge',dir:'desc'},
+  national:{key:'edge',dir:'desc'}
 };
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
@@ -1454,6 +1462,142 @@ function renderPlayoffs(data){
   </tr>`).join('');
 }
 
+function mobileMarketConfig(kind){
+  if(kind==='wins')return {
+    heading:'Win Totals',modelKey:'projected_wins',edgeKey:'win_edge',quoteKind:'wins'
+  };
+  if(kind==='title')return {
+    heading:'Conference Titles',modelKey:'title_model_prob',edgeKey:'title_edge',quoteKind:'title'
+  };
+  if(kind==='cfp')return {
+    heading:'Playoffs / CFP',modelKey:'playoff_model_prob',edgeKey:'playoff_edge',quoteKind:'cfp'
+  };
+  return {
+    heading:'National Title',modelKey:'national_title_model_prob',edgeKey:'national_title_edge',quoteKind:'national'
+  };
+}
+
+function mobileSortedRows(data,kind){
+  const cfg=mobileMarketConfig(kind);
+  const spec=mobileSortState[kind];
+  const dir=spec.dir==='asc'?1:-1;
+
+  return data.slice().sort((a,b)=>{
+    if(spec.key==='team'){
+      return String(a.team||'').localeCompare(String(b.team||''))*dir;
+    }
+
+    const av=a[cfg.edgeKey],bv=b[cfg.edgeKey];
+    const am=!hasNumber(av),bm=!hasNumber(bv);
+    if(am&&bm)return String(a.team||'').localeCompare(String(b.team||''));
+    if(am)return 1;
+    if(bm)return -1;
+    return (Number(av)-Number(bv))*dir||String(a.team||'').localeCompare(String(b.team||''));
+  });
+}
+
+function mobileSortButton(label,kind,key){
+  const spec=mobileSortState[kind];
+  const active=spec.key===key;
+  const arrow=active?(spec.dir==='asc'?' ▲':' ▼'):'';
+  return `<button type="button" class="mobileSortButton${active?' active':''}" data-mobile-sort="${kind}" data-mobile-key="${key}" aria-label="Sort ${label} ${active&&spec.dir==='asc'?'descending':'ascending'}">${label}${arrow}</button>`;
+}
+
+function mobileBestMarketMarkup(row,kind){
+  const d=quoteKind(row,kind);
+  const selected=d.quotes?.[d.bestBook]||null;
+  const price=quoteOdds(selected,d.side);
+  const line=price;
+  const secondary=esc(d.bestBook||'—');
+
+  return `<button type="button" class="mobileBestButton" data-four-quotes="${encodeURIComponent(JSON.stringify({team:row.team,kind}))}" aria-label="${esc(d.bestBook||'Best price')} ${esc(line)}; show all provider quotes">
+    ${bookLogo(d.bestBook)}
+    <span><b>${line}</b><small>${secondary}</small></span>
+  </button>`;
+}
+
+function mobileTeamMarkup(row){
+  return `<button type="button" class="mobileTeamButton" data-mobile-team="${esc(row.team)}" aria-expanded="${row.team===state.mobileExpandedTeam?'true':'false'}">
+    ${teamLogo(row,'mobileTeamLogo')}<span><b>${esc(row.team)}</b><small>${esc(row.conference||'IND')}</small></span>
+  </button>`;
+}
+
+function mobileDetailMarkup(row,kind){
+  if(row.team!==state.mobileExpandedTeam)return'';
+  const rank=row.overall_rank??row.rank;
+  const projected=seasonProjectedRecord(row);
+  return `<tr class="mobileDetailRow" data-mobile-detail="${esc(row.team)}"><td colspan="4"><div>
+    <span><small>Rank</small><b>${rank??'—'}</b></span>
+    <span><small>Rating</small><b>${num(row.team_rating)}</b></span>
+    <span><small>Record</small><b>${row.record?.wins??0}-${row.record?.losses??0}</b></span>
+    <span><small>Projected</small><b>${projected?`${num(projected.wins)}-${num(projected.losses)}`:'—'}</b></span>
+    <button type="button" data-mobile-full-detail="${esc(row.team)}">Full details</button>
+  </div></td></tr>`;
+}
+
+function mobileTableMarkup(data,kind){
+  const cfg=mobileMarketConfig(kind);
+  const sorted=mobileSortedRows(data,kind);
+  const modelLabel=kind==='wins'?'Total':'Model';
+
+  return `<section class="mobileFuturesSection" data-mobile-market="${kind}">
+    ${state.mode==='playoff'?`<h2>${cfg.heading}</h2>`:''}
+    <div class="mobileTableViewport">
+      <table class="mobileFuturesTable">
+        <thead><tr>
+          <th>${mobileSortButton('Team',kind,'team')}</th>
+          <th>${modelLabel}</th>
+          <th>Best</th>
+          <th>${mobileSortButton('Edge',kind,'edge')}</th>
+        </tr></thead>
+        <tbody>${sorted.map(row=>`<tr data-mobile-row="${esc(row.team)}">
+          <td>${mobileTeamMarkup(row)}</td>
+          <td><b>${kind==='wins'?`${esc((row.win_direction||'').slice(0,1).toUpperCase())} ${num(row.market_win_total)}`:pct(row[cfg.modelKey])}</b></td>
+          <td>${mobileBestMarketMarkup(row,cfg.quoteKind)}</td>
+          <td>${edgeMarkup(row[cfg.edgeKey],kind==='wins'?'wins':kind)}</td>
+        </tr>${mobileDetailMarkup(row,kind)}`).join('')||'<tr><td colspan="4" class="empty">No matching futures markets.</td></tr>'}</tbody>
+      </table>
+    </div>
+  </section>`;
+}
+
+function renderMobileTables(data){
+  const host=document.getElementById('mobileFuturesTables');
+  if(!host)return;
+  host.innerHTML=state.mode==='playoff'
+    ? mobileTableMarkup(data,'cfp')+mobileTableMarkup(data,'national')
+    : mobileTableMarkup(data,state.mode==='title'?'title':'wins');
+
+  host.querySelectorAll('[data-mobile-sort]').forEach(button=>{
+    button.onclick=event=>{
+      event.stopPropagation();
+      const kind=button.dataset.mobileSort;
+      const key=button.dataset.mobileKey;
+      const spec=mobileSortState[kind];
+      if(spec.key===key)spec.dir=spec.dir==='asc'?'desc':'asc';
+      else Object.assign(spec,{key,dir:key==='team'?'asc':'desc'});
+      renderCommandCenter();
+    };
+  });
+
+  host.querySelectorAll('[data-mobile-team]').forEach(button=>{
+    button.onclick=event=>{
+      event.stopPropagation();
+      state.mobileExpandedTeam=state.mobileExpandedTeam===button.dataset.mobileTeam?null:button.dataset.mobileTeam;
+      renderCommandCenter();
+    };
+  });
+
+  host.querySelectorAll('[data-mobile-full-detail]').forEach(button=>{
+    button.onclick=event=>{
+      event.stopPropagation();
+      state.selectedTeam=button.dataset.mobileFullDetail;
+      renderRail();
+      document.getElementById('futuresRail')?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+  });
+}
+
 function bindSorting(){
   document.querySelectorAll('[data-sort-key]').forEach(button=>{
     button.onclick=event=>{
@@ -1887,6 +2031,8 @@ function renderCommandCenter(){
     rows.innerHTML='<tr><td colspan="10" class="empty">No matching futures markets.</td></tr>';
   }
 
+  renderMobileTables(data);
+
   applyMobileMetricLabels();
   syncSortControl();
 
@@ -2242,6 +2388,11 @@ function installWorkspace(){
   card.parentNode.insertBefore(workspace,card);
   workspace.appendChild(card);
 
+  const mobileTables=document.createElement('div');
+  mobileTables.id='mobileFuturesTables';
+  mobileTables.className='mobileFuturesTables';
+  card.appendChild(mobileTables);
+
   const rail=document.createElement('aside');
   rail.id='futuresRail';
   rail.className='futuresRail';
@@ -2298,6 +2449,7 @@ function installStyles(){
       align-items:start;
     }
     .futuresWorkspace .card{min-width:0}
+    .mobileFuturesTables{display:none}
     .futuresWorkspace .wrap{
       max-height:calc(100vh - 255px);
       overflow:auto;
@@ -2746,10 +2898,40 @@ function installStyles(){
         max-height:none;
         order:1;
       }
-      .futuresWorkspace .card{order:2;width:100%}
-      .futuresWorkspace .wrap{max-height:none}
-      .futuresWorkspace table{min-width:1050px}
-      .card{overflow:auto!important}
+      .futuresWorkspace .card{order:1;width:100%;overflow:visible!important}
+      .futuresWorkspace .wrap{display:none!important}
+      .futuresRail{order:2}
+      .mobileFuturesTables{display:block;width:100%}
+      .mobileFuturesSection+ .mobileFuturesSection{margin-top:16px}
+      .mobileFuturesSection h2{margin:8px 2px 6px;font-size:15px;color:#dbeaff}
+      .mobileTableViewport{overflow:visible}
+      .mobileFuturesTable{display:table!important;width:100%!important;min-width:0!important;table-layout:fixed!important;border-collapse:separate;border-spacing:0;background:var(--panel);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+      .mobileFuturesTable thead{display:table-header-group!important}
+      .mobileFuturesTable tbody{display:table-row-group!important}
+      .mobileFuturesTable tr{display:table-row!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
+      .mobileFuturesTable th,.mobileFuturesTable td{display:table-cell!important;height:auto!important;min-height:0!important;padding:8px 5px!important;vertical-align:middle!important;white-space:normal!important;text-align:right!important;border-top:1px solid #17345c!important}
+      .mobileFuturesTable thead th{position:sticky!important;top:0!important;z-index:5!important;background:#132a50!important;border-top:0!important;font-size:9px!important}
+      .mobileFuturesTable th:first-child,.mobileFuturesTable td:first-child{width:34%!important;text-align:left!important}
+      .mobileFuturesTable th:nth-child(2),.mobileFuturesTable td:nth-child(2){width:16%!important}
+      .mobileFuturesTable th:nth-child(3),.mobileFuturesTable td:nth-child(3){width:31%!important}
+      .mobileFuturesTable th:nth-child(4),.mobileFuturesTable td:nth-child(4){width:19%!important}
+      .mobileSortButton{border:0;background:transparent;color:#afbfda;font:inherit;font-weight:950;text-transform:uppercase;padding:4px 0;cursor:pointer}
+      .mobileSortButton.active{color:#fff}
+      .mobileTeamButton,.mobileBestButton{display:flex;align-items:center;gap:5px;width:100%;min-width:0;border:0;background:transparent;color:inherit;padding:0;text-align:left;cursor:pointer}
+      .mobileTeamButton span,.mobileBestButton span{display:grid;min-width:0;line-height:1.1}
+      .mobileTeamButton b{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .mobileTeamButton small,.mobileBestButton small{font-size:8px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .mobileTeamLogo{width:23px;height:23px;object-fit:contain;background:#fff;border-radius:5px;padding:2px;flex:0 0 23px}
+      .mobileBestButton{justify-content:flex-end}
+      .mobileBestButton .futBookLogo{width:21px!important;height:16px!important;flex:0 0 21px}
+      .mobileBestButton b{font-size:10px;white-space:nowrap}
+      .mobileFuturesTable .good,.mobileFuturesTable .bad{font-size:10px;white-space:nowrap}
+      .mobileDetailRow>td{padding:7px!important;background:#091a34!important;border-top:1px solid #4777a8!important}
+      .mobileDetailRow>td>div{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+      .mobileDetailRow span{display:grid;text-align:center;padding:5px 2px;background:#0d2443;border-radius:5px}
+      .mobileDetailRow small{font-size:7px;color:var(--muted);text-transform:uppercase;font-weight:900}
+      .mobileDetailRow b{font-size:10px}
+      .mobileDetailRow button{grid-column:1/-1;border:1px solid #315c88;background:#102949;color:#cfe4ff;border-radius:6px;padding:7px;font-size:10px;font-weight:900}
     }
   `;
 

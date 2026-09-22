@@ -1,9 +1,12 @@
 import importlib.util
+import json
 from pathlib import Path
+import subprocess
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+NODE = Path("/Users/jameslindesmith/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node")
 SPEC = importlib.util.spec_from_file_location("build_futures_view", ROOT / "scripts/site/build_futures_view.py")
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
@@ -70,6 +73,66 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
         self.assertIn("data-quotes", html)
         self.assertIn("delta_week", html)
         self.assertNotIn("header('Quarterfinal'", html)
+
+    def test_mobile_futures_tables_are_compact_sortable_and_keep_desktop_matrix(self):
+        js = (ROOT / "futures_dashboard.js").read_text()
+        for token in (
+            "mobileFuturesTables",
+            "mobileFuturesTable",
+            "mobileSortState",
+            "data-mobile-sort",
+            "mobileSortButton('Team',kind,'team')",
+            "mobileSortButton('Edge',kind,'edge')",
+            "heading:'Playoffs / CFP'",
+            "heading:'National Title'",
+            "quoteOdds(selected,d.side)",
+            ".futuresWorkspace .wrap{display:none!important}",
+            "@media(max-width:900px)",
+        ):
+            self.assertIn(token, js)
+        self.assertIn("<th class=\"colNext\">", js)
+        self.assertIn("<th class=\"colRating\">", js)
+        self.assertIn("position:sticky!important", js)
+        self.assertIn("grid-template-columns:repeat(4,1fr)", js)
+
+    def test_mobile_team_and_edge_sorting_for_every_market_table(self):
+        script = r"""
+const fs=require('fs');
+const source=fs.readFileSync('futures_dashboard.js','utf8');
+const block=source.match(/function mobileMarketConfig[\s\S]*?(?=function mobileSortButton)/)[0];
+const hasNumber=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
+const mobileSortState={
+  wins:{key:'edge',dir:'desc'},title:{key:'edge',dir:'desc'},
+  cfp:{key:'edge',dir:'desc'},national:{key:'edge',dir:'desc'}
+};
+eval(block);
+const rows=[
+  {team:'Beta',win_edge:.2,title_edge:.02,playoff_edge:.12,national_title_edge:.04},
+  {team:'Alpha',win_edge:.8,title_edge:.08,playoff_edge:.02,national_title_edge:.14},
+  {team:'Zulu',win_edge:null,title_edge:null,playoff_edge:null,national_title_edge:null}
+];
+const out={};
+for(const kind of ['wins','title','cfp','national']){
+  out[kind]={edgeDesc:mobileSortedRows(rows,kind).map(x=>x.team)};
+  mobileSortState[kind]={key:'team',dir:'asc'};
+  out[kind].teamAsc=mobileSortedRows(rows,kind).map(x=>x.team);
+  mobileSortState[kind].dir='desc';
+  out[kind].teamDesc=mobileSortedRows(rows,kind).map(x=>x.team);
+  mobileSortState[kind]={key:'edge',dir:'asc'};
+  out[kind].edgeAsc=mobileSortedRows(rows,kind).map(x=>x.team);
+}
+console.log(JSON.stringify(out));
+"""
+        completed = subprocess.run(
+            [str(NODE), "-e", script], cwd=ROOT, text=True,
+            capture_output=True, check=True,
+        )
+        result = json.loads(completed.stdout)
+        for kind in ("wins", "title", "cfp", "national"):
+            self.assertEqual(result[kind]["edgeDesc"][-1], "Zulu")
+            self.assertEqual(result[kind]["teamAsc"], ["Alpha", "Beta", "Zulu"])
+            self.assertEqual(result[kind]["teamDesc"], ["Zulu", "Beta", "Alpha"])
+            self.assertEqual(result[kind]["edgeAsc"][-1], "Zulu")
 
     def test_inline_movement_and_consolidated_columns(self):
         html = (ROOT / "futures.html").read_text()
