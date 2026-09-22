@@ -1784,9 +1784,9 @@ tr:hover td.context-group{background:#202d39}
   .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box}
   .mobile-command-body{display:grid;min-width:0;border:1px solid var(--line2);border-top:0;border-radius:0 0 6px 6px;overflow:visible;background:var(--panel)}
   .mobile-command-row{display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);min-width:0;border-top:1px solid var(--line)}
-  .mobile-command-head{position:sticky;top:91px;z-index:24;border:1px solid var(--line2);border-radius:6px 6px 0 0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
-  .mobile-command-head>span,.mobile-command-sort{min-width:0;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 5px;font:inherit;font-size:8px;font-weight:950;letter-spacing:.35px;text-align:center;text-transform:uppercase}
-  .mobile-command-head>span:first-child{border-left:0;text-align:left;padding-left:8px}
+  .mobile-command-header{position:sticky;top:var(--mobile-controls-height);z-index:24;display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line2);border-radius:6px 6px 0 0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
+  .mobile-command-header>span,.mobile-command-sort{min-width:0;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 5px;font:inherit;font-size:8px;font-weight:950;letter-spacing:.35px;text-align:center;text-transform:uppercase}
+  .mobile-command-header>span:first-child{border-left:0;text-align:left;padding-left:8px}
   .mobile-command-sort{cursor:pointer}.mobile-command-sort.active{color:var(--green)}
   .mobile-command-game{min-width:0;border:0;background:transparent;color:inherit;padding:7px 6px;text-align:left;cursor:pointer}
   .mobile-command-game:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
@@ -1805,7 +1805,11 @@ tr:hover td.context-group{background:#202d39}
   .mobile-command-best-market{color:var(--muted);font-size:6px;font-weight:950;letter-spacing:.35px}
   .mobile-command-edge .edge{width:100%;font-size:inherit;font-weight:950}
   .mobile-edge-display{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}
-  .mobile-edge-value{color:var(--green);font-size:17px;font-weight:950;line-height:1}
+  .mobile-edge-value{font-size:17px;font-weight:950;line-height:1}
+  .mobile-edge-value.mobile-edge-green{color:var(--green)}
+  .mobile-edge-value.mobile-edge-yellow{color:var(--yellow)}
+  .mobile-edge-value.mobile-edge-red{color:var(--red)}
+  .mobile-edge-value.mobile-edge-unavailable{color:var(--muted)}
   .mobile-edge-display .team-logo-holder{--team-logo-size:21px}
   .mobile-edge-direction{color:#dce7ef;font-size:8px;font-weight:950;white-space:nowrap}
   .mobile-command-row.game-selected{background:rgba(69,217,237,.07);box-shadow:inset 3px 0 0 var(--cyan)}
@@ -2563,10 +2567,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260922T161428Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20260922T161428Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260922T161428Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260922T161428Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20260922T165700Z';
+const HEALTH_URL = 'data/site/war_room_health.json?v=20260922T165700Z';
+const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20260922T165700Z';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20260922T165700Z';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -4478,8 +4482,22 @@ function mobileEdgeDisplay(game,market,side,edge){
   }else if(value!==null && value>0 && market==='total' && side){
     recommendation=`<span class="mobile-edge-direction">${side==='under'?'UNDER':'OVER'}</span>`;
   }
-  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value">${edgeDisplay(edge)}</strong>${recommendation}</span>`;
+  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value ${mobileEdgeMagnitudeClass(edge)}">${edgeDisplay(edge)}</strong>${recommendation}</span>`;
   return modelTooltip(game,market,shown);
+}
+
+function mobileEdgeMagnitudeClass(edge){
+  const n=numericSortValue(edge);
+  if(n===null) return 'mobile-edge-unavailable';
+  if(n>3) return 'mobile-edge-green';
+  if(n>=2) return 'mobile-edge-yellow';
+  return 'mobile-edge-red';
+}
+
+function syncMobileHeaderOffset(){
+  const controls=document.getElementById('mobileStickyBar');
+  if(!controls) return;
+  document.documentElement.style.setProperty('--mobile-controls-height',`${controls.getBoundingClientRect().height}px`);
 }
 
 function renderMobileMatrix(rows){
@@ -4488,12 +4506,13 @@ function renderMobileMatrix(rows){
   const rail=document.querySelector('.right-rail');
   const grid=document.querySelector('.command-grid');
   if(rail && grid && rail.parentElement!==grid) grid.appendChild(rail);
-  mobile.innerHTML=`<div class="mobile-command-table">
-    <div class="mobile-command-row mobile-command-head">
+  syncMobileHeaderOffset();
+  mobile.innerHTML=`<div class="mobile-command-header" role="row">
       <span>GAME</span>
       <button type="button" class="mobile-command-sort ${SORT_KEY==='spread_edge'?'active':''}" onclick="setSort('spread_edge')">SPREAD EDGE ${sortArrow('spread_edge') || '↕'}</button>
       <button type="button" class="mobile-command-sort ${SORT_KEY==='total_edge'?'active':''}" onclick="setSort('total_edge')">TOTAL EDGE ${sortArrow('total_edge') || '↕'}</button>
     </div>
+    <div class="mobile-command-table">
     <div class="mobile-command-body">
     ${rows.map(game=>{
     const displayedSpreadEdge=displayedEdge(game,'spread');
@@ -6085,6 +6104,7 @@ function syncWorkingViewport(){
 
 window.addEventListener('resize',()=>{
   syncWorkingViewport();
+  syncMobileHeaderOffset();
   placeActivityRail();
 });
 

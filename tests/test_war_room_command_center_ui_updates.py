@@ -65,7 +65,7 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("SPREAD EDGE ${sortArrow('spread_edge')", source)
         self.assertIn("TOTAL EDGE ${sortArrow('total_edge')", source)
         self.assertIn("grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr)", source)
-        self.assertIn(".mobile-command-head{position:sticky;top:91px", source)
+        self.assertIn(".mobile-command-header{position:sticky;top:var(--mobile-controls-height)", source)
         self.assertIn('class="mobile-command-body"', source)
         self.assertIn('<span>GAME</span>', source)
         self.assertNotIn(">EDGE ${sortArrow('best_edge')", source)
@@ -84,6 +84,51 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn('data-game-select aria-label=', source)
         self.assertIn('box-shadow:0 0 0 9999px', source)
         self.assertIn("function modelTooltip(game, market, shownOverride=null)", source)
+
+    def test_mobile_header_is_single_dedicated_container_before_rows(self):
+        source = self.source
+        self.assertEqual(source.count('class="mobile-command-header"'), 1)
+        render = source.split("function renderMobileMatrix(rows){", 1)[1].split(
+            "function isMobileView(){", 1
+        )[0]
+        self.assertLess(
+            render.index('class="mobile-command-header"'),
+            render.index('class="mobile-command-body"'),
+        )
+        self.assertLess(
+            render.index('class="mobile-command-body"'),
+            render.index('class="mobile-command-row game-start'),
+        )
+        self.assertNotIn("mobile-command-row mobile-command-head", source)
+        self.assertIn("function syncMobileHeaderOffset(){", source)
+        self.assertIn("controls.getBoundingClientRect().height", source)
+
+    def test_mobile_edge_color_threshold_boundaries(self):
+        block = self.source.split(
+            "function mobileEdgeMagnitudeClass(edge){", 1
+        )[1].split("function syncMobileHeaderOffset(){", 1)[0]
+        self.assertIn("if(n>3) return 'mobile-edge-green'", block)
+        self.assertIn("if(n>=2) return 'mobile-edge-yellow'", block)
+        self.assertIn("return 'mobile-edge-red'", block)
+
+        def expected(value):
+            if value > 3:
+                return "mobile-edge-green"
+            if value >= 2:
+                return "mobile-edge-yellow"
+            return "mobile-edge-red"
+
+        self.assertEqual(expected(1.9), "mobile-edge-red")
+        self.assertEqual(expected(2.0), "mobile-edge-yellow")
+        self.assertEqual(expected(3.0), "mobile-edge-yellow")
+        self.assertEqual(expected(3.1), "mobile-edge-green")
+
+    def test_desktop_table_contract_is_unchanged(self):
+        source = self.source
+        self.assertIn('<thead id="matrixHead"></thead>', source)
+        self.assertIn('<tbody id="matrixBody"></tbody>', source)
+        self.assertIn("function renderHead(){", source)
+        self.assertIn("function renderMatrix(){", source)
 
     def test_mobile_authority_tooltips_and_manual_controls_share_live_contract(self):
         source = self.source
