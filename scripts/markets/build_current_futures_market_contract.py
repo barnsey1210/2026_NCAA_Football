@@ -180,6 +180,7 @@ def main():
             "over_price": over,
             "under_price": under,
             "observed_date": row.get("snapshot_date"),
+            "pulled_at": row.get("pulled_at") or None,
             "source_url": row.get("source_url") or None,
             "source": "normalized win totals import",
         }
@@ -255,12 +256,28 @@ def main():
             "last_observed_date": newest(
                 q.get("observed_date") for q in quotes.values()
             ),
+            "pulled_at": newest(
+                q.get("pulled_at") for q in quotes.values()
+            ),
         })
 
     # ------------- CONFERENCE TITLES -------------
     conference = defaultdict(dict)
 
     for row in read_csv(CONF_CURRENT):
+        try:
+            row_season = int(float(str(row.get("season") or "").strip()))
+        except (TypeError, ValueError):
+            continue
+
+        observed_date = str(row.get("snapshot_date") or "").strip()
+
+        if row_season != active_season:
+            continue
+
+        if observed_date != current_date:
+            continue
+
         team = resolve_market_team(row.get("team"), canonical_names)
         if not team:
             unmatched["conference_titles"].append(row.get("team"))
@@ -275,6 +292,7 @@ def main():
             "price": price,
             "implied_probability": implied(price),
             "observed_date": row.get("snapshot_date"),
+            "pulled_at": row.get("pulled_at") or None,
             "source_url": row.get("source_url") or None,
             "source": "normalized conference futures import",
         }
@@ -304,6 +322,9 @@ def main():
             "best_executable_book": best_exec_book,
             "last_observed_date": newest(
                 q.get("observed_date") for q in quotes.values()
+            ),
+            "pulled_at": newest(
+                q.get("pulled_at") for q in quotes.values()
             ),
         })
 
@@ -426,12 +447,18 @@ def main():
             "last_observed_date": newest(
                 x["last_observed_date"] for x in win_rows
             ),
+            "pulled_at": newest(
+                x.get("pulled_at") for x in win_rows
+            ),
             "rows": win_rows,
         },
         "conference_titles": {
             "source": "normalized current conference futures import",
             "last_observed_date": newest(
                 x["last_observed_date"] for x in conference_rows
+            ),
+            "pulled_at": newest(
+                x.get("pulled_at") for x in conference_rows
             ),
             "rows": conference_rows,
         },

@@ -248,6 +248,7 @@ async def main():
 
             parsed.append({
                 "snapshot_date": snapshot_date,
+                "pulled_at": pulled_at,
                 "season": 2026,
                 "team": normalize_team(team_raw),
                 "conference": "",

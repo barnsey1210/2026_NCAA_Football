@@ -250,7 +250,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     prefer_state = prefer_state.upper().strip()
 
     final_rows = []
-    group_cols = ["snapshot_date", "season", "team", "conference", "book", "win_total", "source_url"]
+    group_cols = ["snapshot_date", "pulled_at", "season", "team", "conference", "book", "win_total", "source_url"]
 
     for keys, g in df.groupby(group_cols, dropna=False):
         base = dict(zip(group_cols, keys))
@@ -302,7 +302,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     out = pd.DataFrame(final_rows)
 
     cols = [
-        "snapshot_date", "season", "team", "conference", "book", "win_total",
+        "snapshot_date", "pulled_at", "season", "team", "conference", "book", "win_total",
         "over_odds", "under_odds", "source_url", "notes"
     ]
     for c in cols:
@@ -404,6 +404,9 @@ def main() -> None:
     audit.to_csv(args.book_audit_csv, index=False)
 
     all_rows = parse_all_book_rows(data, books_map, args.url, args.season)
+    pulled_at = pd.Timestamp.now(tz="UTC").isoformat()
+    if not all_rows.empty:
+        all_rows["pulled_at"] = pulled_at
     all_rows.to_csv(args.all_brand_rows_csv, index=False)
 
     out = choose_brand_rows(all_rows, args.prefer_state, args.brand_mode)

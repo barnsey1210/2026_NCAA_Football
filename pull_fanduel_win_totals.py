@@ -286,7 +286,7 @@ def parse_prices(prices: Any) -> pd.DataFrame:
 
 
 def merge_existing_output(new_rows: pd.DataFrame, output_csv: str) -> pd.DataFrame:
-    cols = ["snapshot_date","season","team","conference","book","win_total","over_odds","under_odds","source_url","notes"]
+    cols = ["snapshot_date","pulled_at","season","team","conference","book","win_total","over_odds","under_odds","source_url","notes"]
     p = Path(output_csv)
     if p.exists() and p.stat().st_size > 0:
         existing = pd.read_csv(p)
@@ -329,6 +329,7 @@ def main() -> None:
     print("Price rows parsed:", len(px))
 
     rows = []
+    pulled_at = pd.Timestamp.now(tz="UTC").isoformat()
     price_lookup = {(r.market_id, r.selection_id): r.american_odds for r in px.itertuples(index=False)}
     for r in md.itertuples(index=False):
         over = price_lookup.get((str(r.market_id), str(r.over_selection_id)))
@@ -337,6 +338,7 @@ def main() -> None:
             continue
         rows.append({
             "snapshot_date": today(),
+            "pulled_at": pulled_at,
             "season": args.season,
             "team": r.team,
             "conference": "",

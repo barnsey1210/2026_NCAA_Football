@@ -20,6 +20,10 @@ dk = pd.read_csv(DK_PATH)
 if dk.empty:
     raise SystemExit("Visible DK file is empty")
 
+# Canonical normalized imports retain exact acquisition time.
+if "pulled_at" not in imp.columns:
+    imp["pulled_at"] = ""
+
 non_dk = imp[imp["book"].astype(str).str.lower() != "draftkings"].copy()
 
 # Preserve the DraftKings scraper's own acquisition evidence.
@@ -28,6 +32,8 @@ if "snapshot_date" not in dk.columns:
     raise SystemExit("Visible DK file has no snapshot_date")
 if "season" not in dk.columns:
     raise SystemExit("Visible DK file has no season")
+if "pulled_at" not in dk.columns:
+    raise SystemExit("Visible DK file has no pulled_at")
 
 dk = dk[
     pd.to_numeric(dk["season"], errors="coerce").eq(2026)

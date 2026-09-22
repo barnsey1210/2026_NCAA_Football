@@ -272,13 +272,13 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     """
     if df.empty:
         return pd.DataFrame(columns=[
-            "snapshot_date", "season", "conference", "team", "book", "american_odds", "source_url", "notes"
+            "snapshot_date", "pulled_at", "season", "conference", "team", "book", "american_odds", "source_url", "notes"
         ])
 
     prefer_state = prefer_state.upper().strip()
 
     final_rows = []
-    group_cols = ["snapshot_date", "season", "conference", "team", "book", "source_url"]
+    group_cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "source_url"]
 
     for keys, g in df.groupby(group_cols, dropna=False):
         base = dict(zip(group_cols, keys))
@@ -304,7 +304,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
         })
 
     out = pd.DataFrame(final_rows)
-    cols = ["snapshot_date", "season", "conference", "team", "book", "american_odds", "source_url", "notes"]
+    cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "american_odds", "source_url", "notes"]
     return out[cols].sort_values(["conference", "team", "book"]).reset_index(drop=True)
 
 
@@ -347,6 +347,7 @@ def main() -> None:
     all_data = {}
     all_brand_rows = []
     endpoint_audit_rows = []
+    pulled_at = pd.Timestamp.now(tz="UTC").isoformat()
 
     for conference in selected:
         url = CONFERENCE_URLS[conference]
@@ -360,6 +361,8 @@ def main() -> None:
         safe_conf = conference.lower().replace(" ", "_").replace("-", "_")
         Path(f"actionnetwork_conference_futures_raw_{safe_conf}.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
         rows = parse_all_brand_rows(conference, data, books_map, url, args.season)
+        if not rows.empty:
+            rows["pulled_at"] = pulled_at
         all_brand_rows.append(rows)
 
     pd.DataFrame(endpoint_audit_rows).to_csv("actionnetwork_conference_futures_endpoint_audit.csv", index=False)
