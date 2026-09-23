@@ -4,9 +4,13 @@ from datetime import datetime
 import json
 import math
 import re
+import sys
 import pandas as pd
 
 ROOT = Path.cwd()
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from betting.track_close_resolver import canonical_team as canonical_betting_team, resolve_game as resolve_betting_game
 BETS = ROOT / "data" / "bets" / "bets_enriched.csv"
 DASH = ROOT / "data" / "bets" / "betting_dashboard.json"
 AUDIT = ROOT / "data" / "bets" / "market_clv_match_audit.csv"
@@ -89,7 +93,8 @@ def clean_key(x):
 
 def normalize_team(x):
     k = clean_key(x)
-    return TEAM_ALIASES.get(k, str(x).strip() if x is not None and str(x).strip() else "")
+    value = TEAM_ALIASES.get(k, str(x).strip() if x is not None and str(x).strip() else "")
+    return canonical_betting_team(value, ROOT)
 
 def normalize_book(x):
     k = clean_key(x)
@@ -508,61 +513,8 @@ def resolve_canonical_game(row, games):
     That prior behavior caused the Stanford Week 0 wager to match
     Miami (FL) at Stanford in Week 1 instead of Hawaii at Stanford in Week 0.
     """
-    week = parse_bet_week(row)
-
-    team = normalize_team(row.get("team_guess"))
-    bet_type = clean_key(row.get("Bet Type"))
-    bet = clean_key(row.get("Bet"))
-
-    pool = [
-        g for g in games
-        if week is None or parse_num(g.get("week")) == week
-    ]
-
-    is_total = (
-        bet_type in {"total", "game total"}
-        or " over " in f" {bet} "
-        or " under " in f" {bet} "
-    )
-
-    if is_total:
-        tokens = wager_team_tokens(row)
-        token_keys = {
-            clean_key(x)
-            for x in tokens
-            if clean_key(x)
-        }
-
-        matches = []
-
-        for g in pool:
-            participants = {
-                clean_key(normalize_team(g.get("away_team"))),
-                clean_key(normalize_team(g.get("home_team"))),
-            }
-
-            if token_keys and token_keys.issubset(participants):
-                matches.append(g)
-
-        return matches[0] if len(matches) == 1 else None
-
-    tk = clean_key(team)
-
-    if not tk:
-        return None
-
-    matches = []
-
-    for g in pool:
-        participants = {
-            clean_key(normalize_team(g.get("away_team"))),
-            clean_key(normalize_team(g.get("home_team"))),
-        }
-
-        if tk in participants:
-            matches.append(g)
-
-    return matches[0] if len(matches) == 1 else None
+    game, _ = resolve_betting_game(row, games)
+    return game
 
 
 def resolve_game_market_kind(row, game):

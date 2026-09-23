@@ -96,6 +96,10 @@ def summarize_records(rows):
     profit = sum(row["realized_profit"] or 0 for row in settled)
     legacy_clv = [row["clv_pct_current"] for row in rows if row["clv_pct_current"] is not None]
     tracked_rows = [row for row in rows if row.get("track_close")]
+    not_applicable_tracking_rows = [
+        row for row in tracked_rows
+        if row.get("tracking_clv_state") == "NOT_APPLICABLE_POINT_CLV"
+    ]
     resolved_tracking_rows = [
         row for row in tracked_rows
         if row.get("tracking_clv_state") == "FINAL_CLOSE"
@@ -125,7 +129,8 @@ def summarize_records(rows):
         "eligible_clv_sample": len(tracking_clv),
         "track_close_eligible": len(tracked_rows),
         "track_close_resolved": len(resolved_tracking_rows),
-        "track_close_unresolved": len(tracked_rows) - len(resolved_tracking_rows),
+        "track_close_not_applicable": len(not_applicable_tracking_rows),
+        "track_close_unresolved": len(tracked_rows) - len(resolved_tracking_rows) - len(not_applicable_tracking_rows),
         "eligible_positive_clv": sum(value > 0 for value in tracking_clv),
         "eligible_positive_clv_pct": round(sum(value > 0 for value in tracking_clv) / len(tracking_clv), 4) if tracking_clv else None,
         "eligible_avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
@@ -258,7 +263,9 @@ def main():
         tracking_clv_points = None
         tracking_clv_state = "INELIGIBLE"
 
-        if clv_eligible_flag:
+        if track_close and market == "Moneyline":
+            tracking_clv_state = "NOT_APPLICABLE_POINT_CLV"
+        elif clv_eligible_flag:
             if closing_frozen and final_line_clv is not None:
                 tracking_clv_points = final_line_clv
                 tracking_clv_state = "FINAL_CLOSE"
@@ -456,7 +463,7 @@ def main():
             "tracking_clv_state": row["tracking_clv_state"],
         }
         for row in records
-        if row.get("track_close") and row.get("tracking_clv_state") != "FINAL_CLOSE"
+        if row.get("track_close") and row.get("tracking_clv_state") not in {"FINAL_CLOSE", "NOT_APPLICABLE_POINT_CLV"}
     ]
     audit = {"built_at": built_at, "summary": summary, "game_match_reasons": match_reasons,
              "track_close_summary": {
@@ -464,7 +471,7 @@ def main():
                      key: source_groups[name][key]
                      for key in (
                          "track_close_eligible", "track_close_resolved",
-                         "track_close_unresolved", "positive_clv",
+                         "track_close_unresolved", "track_close_not_applicable", "positive_clv",
                          "positive_clv_pct", "avg_clv_points",
                      )
                  }

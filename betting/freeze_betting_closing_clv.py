@@ -5,13 +5,18 @@ import hashlib
 import json
 import math
 import re
+import sys
 import pandas as pd
 
 ROOT = Path.cwd()
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from betting.track_close_resolver import authoritative_frozen_quote, point_clv, resolve_game
 BETS = ROOT / "data" / "bets" / "bets_enriched.csv"
 DASH = ROOT / "data" / "bets" / "betting_dashboard.json"
 FREEZE = ROOT / "data" / "bets" / "bet_closing_clv.csv"
 AUDIT = ROOT / "data" / "bets" / "bet_closing_clv_audit.csv"
+MARKET_CONTRACT = ROOT / "data" / "site" / "current_market_contract.json"
 
 GAME_LINE_FILES = [
     ROOT / "data" / "odds" / "actionnetwork_ncaaf_game_lines_2026.csv",
@@ -70,6 +75,17 @@ def parse_num(x):
         return n
     except Exception:
         return None
+
+def american_implied(odds):
+    odds = parse_num(odds)
+    if odds is None or odds == 0:
+        return None
+    return 100.0 / (odds + 100.0) if odds > 0 else abs(odds) / (abs(odds) + 100.0)
+
+def no_vig_prob(selected_price, opposite_price):
+    selected = american_implied(selected_price)
+    opposite = american_implied(opposite_price)
+    return selected / (selected + opposite) if selected is not None and opposite is not None and selected + opposite > 0 else None
 
 def bet_id(row):
     parts = [
@@ -190,6 +206,10 @@ for c in [
     "closing_clv_pct",
     "closing_ev_dollars",
     "closing_ev_pct",
+    "current_market_game_id",
+    "closing_resolution_method",
+    "closing_market_authority",
+    "closing_source_updated_at",
 ]:
     if c not in df.columns:
         df[c] = None
@@ -217,6 +237,9 @@ else:
 
 frozen_ids = set(frozen["bet_id"].astype(str)) if not frozen.empty else set()
 game_rows = load_game_kickoffs()
+if not MARKET_CONTRACT.exists():
+    raise SystemExit("Missing data/site/current_market_contract.json")
+market_games = json.loads(MARKET_CONTRACT.read_text()).get("games") or []
 now = datetime.now(timezone.utc)
 
 audit_rows = []
@@ -234,46 +257,57 @@ for idx, row in df.iterrows():
     if not game_bet:
         continue
 
-    kickoff = find_kickoff(row, game_rows)
-    kickoff_dt = parse_dt(kickoff["kickoff_utc"]) if kickoff else None
+    game, match_reason = resolve_game(row, market_games)
+    kickoff_dt = parse_dt(game.get("kickoff_at")) if game else None
+    quote, close_reason = authoritative_frozen_quote(row, game) if game else (None, "game_unresolved")
 
     audit_rows.append({
         "bet_id": bid,
         "bet": row.get("Bet"),
         "team": row.get("team_guess"),
         "is_game_bet": game_bet,
-        "kickoff_found": kickoff is not None,
-        "kickoff_utc": kickoff["kickoff_utc"] if kickoff else None,
+        "kickoff_found": game is not None,
+        "kickoff_utc": game.get("kickoff_at") if game else None,
         "now_utc": now.isoformat(),
         "already_frozen": bid in frozen_ids,
         "current_market_match": row.get("current_market_match"),
+        "game_id": game.get("game_id") if game else None,
+        "match_reason": match_reason,
+        "close_reason": close_reason,
     })
 
     if bid in frozen_ids:
         continue
 
-    if not kickoff_dt or now < kickoff_dt:
+    if not kickoff_dt or now < kickoff_dt or not quote:
         continue
 
-    if str(row.get("current_market_match")).lower() != "true":
-        continue
-
-    game = f"{kickoff.get('away_team')} at {kickoff.get('home_team')}" if kickoff else row.get("current_market_note")
+    selected = quote["selected"]
+    opposite = quote["opposite"]
+    line_clv = point_clv(row, quote)
+    fair_prob = no_vig_prob(selected.get("price"), opposite.get("price"))
+    bet_prob = american_implied(row.get("bet_price"))
+    price_clv_pp = (fair_prob - bet_prob) * 100.0 if fair_prob is not None and bet_prob is not None else None
+    game_label = f"{game.get('away_team')} at {game.get('home_team')}"
 
     new_freezes.append({
         "bet_id": bid,
         "frozen_at": now.replace(microsecond=0).isoformat(),
         "kickoff_utc": kickoff_dt.isoformat(),
-        "game": game,
-        "market_source": row.get("current_market_source"),
-        "market_book": row.get("current_market_book"),
-        "market_line": row.get("current_market_line"),
-        "market_price": row.get("current_market_price"),
-        "line_clv": row.get("line_clv_current"),
-        "price_clv_pp": row.get("price_clv_current_pp"),
-        "clv_pct": row.get("clv_pct_current"),
-        "ev_dollars": row.get("ev_current_dollars"),
-        "ev_pct": row.get("ev_current_pct"),
+        "game": game_label,
+        "game_id": game.get("game_id"),
+        "resolution_method": close_reason,
+        "market_authority": quote["authority"],
+        "source_updated_at": selected.get("source_updated_at"),
+        "market_source": selected.get("source"),
+        "market_book": quote["book"],
+        "market_line": selected.get("line"),
+        "market_price": selected.get("price"),
+        "line_clv": line_clv,
+        "price_clv_pp": price_clv_pp,
+        "clv_pct": price_clv_pp / 100.0 if price_clv_pp is not None else None,
+        "ev_dollars": None,
+        "ev_pct": None,
     })
 
 if new_freezes:
@@ -301,6 +335,11 @@ if not frozen.empty:
         df.at[idx, "closing_clv_pct"] = fr.get("clv_pct")
         df.at[idx, "closing_ev_dollars"] = fr.get("ev_dollars")
         df.at[idx, "closing_ev_pct"] = fr.get("ev_pct")
+        if pd.notna(fr.get("game_id")):
+            df.at[idx, "current_market_game_id"] = fr.get("game_id")
+        df.at[idx, "closing_resolution_method"] = fr.get("resolution_method")
+        df.at[idx, "closing_market_authority"] = fr.get("market_authority")
+        df.at[idx, "closing_source_updated_at"] = fr.get("source_updated_at")
 
         # For frozen game bets, display/evaluate using closing market values.
         df.at[idx, "current_market_book"] = fr.get("market_book")
@@ -351,6 +390,7 @@ print("wrote:", BETS)
 print("wrote:", FREEZE)
 print("wrote:", AUDIT)
 print("game rows:", len(game_rows))
+print("canonical market games:", len(market_games))
 print("new freezes:", len(new_freezes))
 print("total frozen:", summary["closing_clv_frozen_count"])
 print("matched:", summary["current_clv_matched"])
