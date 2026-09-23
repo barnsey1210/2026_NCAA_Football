@@ -195,37 +195,38 @@ img[src$="west-virginia.webp"] {
   color:#fff;
 }
 .sourceSummaryGrid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
+  display:block;
   margin:12px 0;
+  overflow-x:auto;
 }
-.sourceSummaryCard{
+.sourceSummaryTable{
+  width:100%;
+  border-collapse:collapse;
   border:1px solid var(--line);
   background:var(--panel);
   border-radius:9px;
-  padding:11px 12px;
+  overflow:hidden;
 }
-.sourceSummaryCard h3{
-  margin:0 0 8px;
-  font-size:13px;
+.sourceSummaryTable th,
+.sourceSummaryTable td{
+  padding:8px 9px;
+  border-bottom:1px solid var(--line);
+  text-align:right;
+  white-space:nowrap;
+  font-size:10px;
 }
-.sourceSummaryStats{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-}
-.sourceSummaryStats span{
-  display:block;
+.sourceSummaryTable th{
   color:var(--muted);
-  font-size:9px;
   text-transform:uppercase;
   letter-spacing:.06em;
 }
-.sourceSummaryStats b{
-  display:block;
-  margin-top:3px;
-  font-size:13px;
+.sourceSummaryTable th:first-child,
+.sourceSummaryTable td:first-child{
+  text-align:left;
+  font-weight:900;
+}
+.sourceSummaryTable tbody tr:last-child td{
+  border-bottom:0;
 }
 .ledger.compactLedger{
   font-size:11px;
@@ -370,12 +371,6 @@ img[src$="west-virginia.webp"] {
   margin-bottom:14px;
 }
 @media(max-width:800px){
-  .sourceSummaryGrid{
-    grid-template-columns:1fr;
-  }
-  .sourceSummaryStats{
-    grid-template-columns:repeat(3,1fr);
-  }
   .trackerHero{
     display:block;
   }
@@ -3846,7 +3841,7 @@ function visible(r){if(tab==='open'&&!(r.is_open&&r.actor.type!=='site_draft'))r
 function renderRows(){const list=allRecords().filter(visible);rows.innerHTML=list.map(r=>`<tr><td>${tags(r)}</td><td>${esc(r.placed_at||'—')}</td><td>${esc(r.market||'—')}</td><td><b>${esc(r.selection||'—')}</b><div class="sub">${r.game_id?`${esc(r.away_team)} at ${esc(r.home_team)}`:esc(r.team||'Team/future')}</div></td><td>${bookLogo(r.sportsbook)}</td><td>${money(r.stake)}</td><td><b>${r.line!=null?num(r.line):'—'} ${r.price!=null?odds(r.price):''}</b></td><td>${r.current_market_line!=null?`${num(r.current_market_line)} ${odds(r.current_market_price)}`:'—'}<div class="sub">${esc(r.current_market_book||'')}</div></td><td class="${tone(r.clv_pct_current)}">${r.clv_pct_current!=null?num(Number(r.clv_pct_current)*100,1)+'% CLV':'—'}<div class="sub ${tone(r.ev_current_pct)}">${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'% EV':''}</div></td><td><b>${esc(r.status||'—')}</b><div class="sub ${tone(r.realized_profit)}">${r.is_open?'Pending':money(r.realized_profit)}</div></td><td>${r.game_id?`<a class="gameLink" href="matchups.html?game_id=${encodeURIComponent(r.game_id)}">Open game</a>`:`<span class="sub">${esc(r.game_link_status||'Team market')}</span>`}</td></tr>`).join('')||'<tr><td colspan="11" class="empty">No records in this view.</td></tr>'}
 function score(m){return`<div class="score"><h3>${esc(m.label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${num(m.positive_clv_pct*100,1)}%</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd></dl></div>`}function mini(title,list){return`<table class="mini"><thead><tr><th>${title}</th><th>Record</th><th>CLV hit</th><th>Avg CLV</th></tr></thead><tbody>${list.map(m=>`<tr><td>${esc(m.label)}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${num(m.positive_clv_pct*100,0)}%</td><td class="${tone(m.avg_clv_pct)}">${num(m.avg_clv_pct*100,2)}%</td></tr>`).join('')||'<tr><td colspan="4">No graded bets yet</td></tr>'}</tbody></table>`}
 function drawChart(){const p=DATA.performance_history||[],vals=p.flatMap(x=>[Number(x.realized_profit)||0,Number(x.total_ev_current_dollars)||0]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?0:i/(p.length-1))*(W-L-R),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(Number(d[k])||0)}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
-async function init(){[DATA,GAMES]=await Promise.all([fetch('data/site/betting_activity_view.json?v=20260922T171542Z').then(r=>r.json()),fetch('data/site/matchups_public_view.json?v=20260922T171542Z').then(r=>r.json())]);const s=DATA.summary,sm=Object.entries(DATA.strategy_metrics).map(([label,m])=>({label,...m})),wm=Object.entries(DATA.week_metrics).map(([label,m])=>({label,...m})),mm=Object.entries(DATA.market_metrics).map(([label,m])=>({label,...m})),overall=DATA.strategy_metrics.Overall;ownedCount.textContent=s.owned_open;exposure.textContent=money(s.open_exposure);totalEv.textContent=money(overall?.current_ev_dollars);totalEv.className=tone(overall?.current_ev_dollars);const syncStatus=document.getElementById('sync');if(syncStatus)syncStatus.textContent=`Sheet snapshot · ${String(DATA.built_at).slice(0,16).replace('T',' ')}`;scores.innerHTML=sm.map(score).join('');weeks.innerHTML=mini('Week',wm);markets.innerHTML=mini('Market',mm);drawChart();const ms=[...new Set(DATA.records.map(r=>r.market).filter(Boolean))].sort();market.innerHTML='<option value="all">All markets</option>'+ms.map(x=>`<option>${esc(x)}</option>`).join('');renderRows()}document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;renderRows()});[market,link,search].forEach(x=>x.addEventListener('input',renderRows));init().catch(e=>rows.innerHTML=`<tr><td colspan="10" class="empty">Unable to load betting data: ${esc(e.message)}</td></tr>`);
+async function init(){[DATA,GAMES]=await Promise.all([fetch('data/site/betting_activity_view.json?v=20260923T022221Z').then(r=>r.json()),fetch('data/site/matchups_public_view.json?v=20260923T022221Z').then(r=>r.json())]);const s=DATA.summary,sm=Object.entries(DATA.strategy_metrics).map(([label,m])=>({label,...m})),wm=Object.entries(DATA.week_metrics).map(([label,m])=>({label,...m})),mm=Object.entries(DATA.market_metrics).map(([label,m])=>({label,...m})),overall=DATA.strategy_metrics.Overall;ownedCount.textContent=s.owned_open;exposure.textContent=money(s.open_exposure);totalEv.textContent=money(overall?.current_ev_dollars);totalEv.className=tone(overall?.current_ev_dollars);const syncStatus=document.getElementById('sync');if(syncStatus)syncStatus.textContent=`Sheet snapshot · ${String(DATA.built_at).slice(0,16).replace('T',' ')}`;scores.innerHTML=sm.map(score).join('');weeks.innerHTML=mini('Week',wm);markets.innerHTML=mini('Market',mm);drawChart();const ms=[...new Set(DATA.records.map(r=>r.market).filter(Boolean))].sort();market.innerHTML='<option value="all">All markets</option>'+ms.map(x=>`<option>${esc(x)}</option>`).join('');renderRows()}document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tab=b.dataset.tab;renderRows()});[market,link,search].forEach(x=>x.addEventListener('input',renderRows));init().catch(e=>rows.innerHTML=`<tr><td colspan="10" class="empty">Unable to load betting data: ${esc(e.message)}</td></tr>`);
 </script><script>{const modelOpenTab=document.querySelector('[data-tab="opener"]');if(modelOpenTab)modelOpenTab.textContent='Model / Open';}</script>
 <script>
 let ACTIVE_PERIOD='Futures',PERIODS=[];
@@ -3863,12 +3858,15 @@ function pMetrics(list){
   const pl=graded.reduce((s,r)=>s+(Number(r.realized_pl)||0),0);
 
   const clv=list.filter(r=>
+    r.track_close===true &&
     r.clv_eligible===true &&
     r.tracking_clv_state==='FINAL_CLOSE' &&
     Number.isFinite(Number(r.tracking_clv_points))
   );
 
   const positive=clv.filter(r=>Number(r.tracking_clv_points)>0).length;
+  const trackClose=list.filter(r=>r.track_close===true);
+  const decisions=graded.filter(r=>r.status==='Won'||r.status==='Lost');
 
   return{
     bets:list.length,
@@ -3879,11 +3877,14 @@ function pMetrics(list){
     wins:graded.filter(r=>r.status==='Won').length,
     losses:graded.filter(r=>r.status==='Lost').length,
     pushes:graded.filter(r=>r.status==='Push').length,
+    win_pct:decisions.length?graded.filter(r=>r.status==='Won').length/decisions.length:null,
     settled_risk:risk,
     profit:pl,
     realized_pl:pl,
     roi:risk?pl/risk:null,
     clv_matched:clv.length,
+    track_close_eligible:trackClose.length,
+    track_close_unresolved:trackClose.length-clv.length,
     positive_clv:positive,
     positive_clv_pct:clv.length?positive/clv.length:null,
     avg_clv_points:clv.length
@@ -4071,7 +4072,9 @@ function compactCloseDisplay(r){
 }
 
 function compactClvDisplay(r){
-  if(!r.clv_eligible)return '<span class="sub">N/A</span>';
+  if(!r.track_close)return '<span class="sub">Not tracked</span>';
+
+  if(!r.clv_eligible)return '<span class="sub">Unresolved</span>';
 
   if(r.tracking_clv_state!=='FINAL_CLOSE'){
     return '<span class="sub">—</span>';
@@ -4136,7 +4139,7 @@ function pRows(){
               <b>${marketReferenceDisplay(r)}</b>
 
               <span>CLV eligibility</span>
-              <b>${r.clv_eligible?'Eligible':'Not eligible'}</b>
+              <b>${r.track_close?'Track Close checked':'Not tracked'}</b>
 
               <span>CLV state</span>
               <b>${esc(r.tracking_clv_state||'UNAVAILABLE')}</b>
@@ -4180,41 +4183,36 @@ function renderSourceSummary(){
     ['Powers',records.filter(r=>r.bet_source_group==='Powers')]
   ];
 
-  root.innerHTML=groups.map(([label,list])=>{
+  const body=groups.map(([label,list])=>{
     const m=pMetrics(list);
 
     return `
-      <div class="sourceSummaryCard">
-        <h3>${esc(label)}</h3>
-        <div class="sourceSummaryStats">
-          <div>
-            <span>Record</span>
-            <b>${m.wins}-${m.losses}-${m.pushes}</b>
-          </div>
-          <div>
-            <span>ROI</span>
-            <b class="${tone(m.roi)}">${pPct(m.roi)}</b>
-          </div>
-          <div>
-            <span>CLV Hit</span>
-            <b>${pPct(m.positive_clv_pct)}</b>
-          </div>
-          <div>
-            <span>Avg CLV</span>
-            <b class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</b>
-          </div>
-          <div>
-            <span>CLV Sample</span>
-            <b>${m.clv_matched}</b>
-          </div>
-          <div>
-            <span>Bets</span>
-            <b>${m.bets}</b>
-          </div>
-        </div>
-      </div>
+      <tr>
+        <td>${esc(label)}</td>
+        <td>${m.wins}-${m.losses}-${m.pushes}</td>
+        <td>${pPct(m.win_pct)}</td>
+        <td>${m.track_close_eligible}</td>
+        <td>${m.clv_matched}</td>
+        <td>${m.track_close_unresolved}</td>
+        <td>${m.positive_clv}</td>
+        <td>${pPct(m.positive_clv_pct)}</td>
+        <td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)} pts`}</td>
+        <td>${money(m.settled_risk)}</td>
+        <td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td>
+        <td class="${tone(m.roi)}">${pPct(m.roi)}</td>
+      </tr>
     `;
   }).join('');
+
+  root.innerHTML=`
+    <table class="sourceSummaryTable">
+      <thead><tr>
+        <th>Source</th><th>Record</th><th>Win %</th><th>Track Close</th>
+        <th>Close Resolved</th><th>Unresolved</th><th>Beat Close</th>
+        <th>Beat Close %</th><th>Avg CLV</th><th>Risked</th><th>P/L</th><th>ROI</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
 }
 
 function pInit(){
@@ -4329,7 +4327,7 @@ function pInit(){
 }
 
 (function waitForBettingData(){if(DATA&&GAMES)return pInit();setTimeout(waitForBettingData,25)})();
-</script><script src="matchup_workspace.js?v=20260922T171542Z"></script>
+</script><script src="matchup_workspace.js?v=20260923T022221Z"></script>
 <!-- V2_DARK_LOGO_BADGES_START -->
 <style>
 img.v2-dark-logo-badge{
@@ -4903,7 +4901,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     button.onclick=()=>switchView(button.dataset.view);
   });
 
-  fetch('data/site/model_performance_view.json?v=20260922T171542Z')
+  fetch('data/site/model_performance_view.json?v=20260923T022221Z')
     .then(response=>{
       if(!response.ok)throw Error(response.status);
       return response.json();
@@ -4983,7 +4981,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
     setMode('standard');
   }
   bind();
-  fetch('data/site/shadow_model_performance.json?v=20260922T171542Z').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
+  fetch('data/site/shadow_model_performance.json?v=20260923T022221Z').then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}).then(data=>{
     if(!valid(data))throw new Error('invalid Shadow performance schema');
     contract=data;
     byId('shadowDisclaimer').textContent=data.status_labels.disclaimer;
