@@ -443,7 +443,34 @@ def main():
                "market_metrics": market_groups, "week_metrics": week_groups,
                "period_metrics": period_groups,
                "performance_history": history, "records": records}
+    unresolved_track_close = [
+        {
+            "bet_id": row["bet_id"],
+            "placed_at": row["placed_at"],
+            "source": row["actor"]["source"],
+            "selection": row["selection"],
+            "market": row["market"],
+            "status": row["status"],
+            "game_id": row["game_id"],
+            "game_link_status": row["game_link_status"],
+            "tracking_clv_state": row["tracking_clv_state"],
+        }
+        for row in records
+        if row.get("track_close") and row.get("tracking_clv_state") != "FINAL_CLOSE"
+    ]
     audit = {"built_at": built_at, "summary": summary, "game_match_reasons": match_reasons,
+             "track_close_summary": {
+                 name: {
+                     key: source_groups[name][key]
+                     for key in (
+                         "track_close_eligible", "track_close_resolved",
+                         "track_close_unresolved", "positive_clv",
+                         "positive_clv_pct", "avg_clv_points",
+                     )
+                 }
+                 for name in ("Overall", "Open", "Powers", "Other")
+             },
+             "unresolved_track_close": unresolved_track_close,
              "policy": {
                  "all_sheet_rows": "owned_wager",
                  "strategy_tags": "Legacy compatibility only; Powers and Model remain non-exclusive tags",
