@@ -236,6 +236,14 @@ img[src$="west-virginia.webp"] {
 .sourceSummaryTable tbody tr:last-child td{
   border-bottom:0;
 }
+.openWeeklySection{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.openWeeklyTitle{text-transform:uppercase;letter-spacing:.08em}
+.openWeeklyCards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px}
+.openWeeklyCard{border:1px solid var(--line);border-radius:9px;background:#081731;padding:9px 11px}
+.openWeeklyCard span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.openWeeklyCard b{display:block;font-size:18px;margin-top:2px}.openWeeklyCard small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.openWeeklyCharts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 10px}.openWeeklyChart{border:1px solid var(--line);border-radius:9px;background:#081731;padding:8px}.openWeeklyChart h3{font-size:11px;margin:0 0 5px}.openWeeklyChart svg{display:block;width:100%;height:145px}.openWeeklyBar{fill:var(--blue)}.openWeeklyBar.negative{fill:var(--red)}.openWeeklyBar.roi{fill:var(--green)}.openWeeklyPending{fill:var(--muted);font-size:8px}.openWeeklyAxis{stroke:#355578;stroke-width:1}.openWeeklyLabel{fill:var(--muted);font-size:8px}
+.openWeeklyWrap{overflow-x:auto}.openWeeklyTable{width:100%;min-width:980px;border-collapse:collapse}.openWeeklyTable th,.openWeeklyTable td{padding:7px 8px;border-top:1px solid var(--line);text-align:right;white-space:nowrap;font-size:10px}.openWeeklyTable th{color:var(--muted);text-transform:uppercase;font-size:9px}.openWeeklyTable th:first-child,.openWeeklyTable td:first-child{text-align:left}.openWeeklyTable tbody tr{cursor:pointer}.openWeeklyTable tbody tr:hover{background:#123665}.openWeeklyTable .sub{white-space:normal}
+@media(max-width:800px){.openWeeklyCards{grid-template-columns:1fr 1fr}.openWeeklyCharts{grid-template-columns:1fr}}
 .ledger.compactLedger{
   font-size:11px;
 }
@@ -388,7 +396,7 @@ img[src$="west-virginia.webp"] {
 </head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a>Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a>Futures</a><a>Simulations</a><a class="active">Betting</a></div><div class="sync" id="sync">Sheet snapshot</div></div><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">2026 Model Tracker</button><button data-view="history">Historical Research</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open</span><b id="ownedCount">—</b></div><div class="metric"><span>Exposure</span><b id="exposure">—</b></div><div class="metric"><span>P/L</span><b id="profitLoss">—</b></div><div class="metric"><span>ROI</span><b id="roi">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div><div class="metric"><span>AVG CLV · PINNACLE</span><b id="averageClv">—</b></div></div></section>
 
 
-<div class="tabs" id="tabs"><button class="active" data-tab="all">All</button><button data-tab="open_source">Open</button><button data-tab="powers_source">Powers</button></div><div class="filters"><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger compactLedger"><thead><tr><th>Source</th><th>Date</th><th>Selection</th><th>Book</th><th>Bet</th><th>Stake</th><th>Close</th><th>CLV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="historicalResearchView" class="modelView" hidden></section><section id="modelPerformanceView" class="modelView" hidden>
+<div class="tabs" id="tabs"><button class="active" data-tab="all">All</button><button data-tab="open_source">Open</button><button data-tab="powers_source">Powers</button></div><div class="filters"><select id="weekFilter"><option value="all">All weeks</option></select><select id="sourceFilter"><option value="all">All sources</option></select><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger compactLedger"><thead><tr><th>Source</th><th>Date</th><th>Selection</th><th>Book</th><th>Bet</th><th>Stake</th><th>Close</th><th>CLV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="historicalResearchView" class="modelView" hidden></section><section id="modelPerformanceView" class="modelView" hidden>
 <section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Betting summary</h2><small>Overall, Powers, and Model / Open</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section>
 <div class="shadowModeSwitch" id="shadowModeSwitch" role="tablist" aria-label="Model performance type">
   <button class="active" type="button" role="tab" aria-selected="true" data-performance-mode="standard">Standard Models</button>
@@ -4033,6 +4041,8 @@ function pVisible(r){
 
   if(tab==='open_source'&&r.bet_source_group!=='Open')return false;
   if(tab==='powers_source'&&r.bet_source_group!=='Powers')return false;
+  if(sourceFilter.value!=='all'&&r.bet_source_group!==sourceFilter.value)return false;
+  if(weekFilter.value!=='all'&&Number(r.week)!==Number(weekFilter.value))return false;
 
   const q=search.value.toLowerCase();
 
@@ -4218,6 +4228,44 @@ function renderSourceSummary(){
     </div>`;
 }
 
+function openWeeklyMetric(value,suffix='',digits=1){
+  if(value==null)return '—';
+  return `${Number(value)>0?'+':''}${num(value,digits)}${suffix}`;
+}
+function openWeeklyChart(rows,key,format,barClass=''){
+  const values=rows.map(row=>row[key]);
+  const numeric=values.filter(value=>value!=null).map(Number);
+  const lo=Math.min(0,...numeric),hi=Math.max(0,...numeric),span=hi-lo||1,W=520,H=145,L=28,R=8,T=12,B=25;
+  const plotH=H-T-B,slot=(W-L-R)/Math.max(rows.length,1),zero=T+(hi/span)*plotH;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img"><line class="openWeeklyAxis" x1="${L}" y1="${zero}" x2="${W-R}" y2="${zero}"/>${rows.map((row,index)=>{
+    const value=row[key],x=L+index*slot+slot*.2,width=slot*.6;
+    if(value==null)return `<text class="openWeeklyPending" x="${x+width/2}" y="${T+plotH/2}" text-anchor="middle">Pending</text><text class="openWeeklyLabel" x="${x+width/2}" y="${H-7}" text-anchor="middle">W${row.week}</text>`;
+    const y=T+(hi-Number(value))/span*plotH,top=Math.min(y,zero),height=Math.max(2,Math.abs(zero-y));
+    return `<rect class="openWeeklyBar ${barClass} ${Number(value)<0?'negative':''}" x="${x}" y="${top}" width="${width}" height="${height}"/><text class="openWeeklyLabel" x="${x+width/2}" y="${Math.max(9,top-3)}" text-anchor="middle">${format(value)}</text><text class="openWeeklyLabel" x="${x+width/2}" y="${H-7}" text-anchor="middle">W${row.week}</text>`;
+  }).join('')}</svg>`;
+}
+function setOpenWeeklyLedgerFilter(week){
+  pSetPeriod('All Bets');
+  sourceFilter.value='Open';
+  weekFilter.value=String(week);
+  tab='all';
+  document.querySelectorAll('#tabs button').forEach(button=>button.classList.toggle('active',button.dataset.tab==='all'));
+  pRows();
+  document.querySelector('.card:has(.ledger)')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderOpenWeeklyPerformance(){
+  const root=document.getElementById('openWeeklyPerformance'),payload=DATA.open_weekly_performance;
+  if(!root||!payload)return;
+  const season=payload.season,trend=payload.trend,weeks=payload.weeks||[];
+  const trendText=trend.week_over_week_clv_change==null?'Need two resolved weeks':`${trend.latest_resolved_week} (n=${trend.latest_resolved_sample}) vs ${trend.previous_resolved_week} (n=${trend.previous_resolved_sample}): ${openWeeklyMetric(trend.week_over_week_clv_change,' pts',2)}`;
+  const body=weeks.map(row=>{
+    const awaiting=row.track_close_resolved===0&&row.track_close_unresolved>0;
+    return `<tr data-open-week="${row.week}" title="Filter ledger to Open · ${esc(row.label)}"><td><b>${esc(row.label)}</b><div class="sub">View Open wagers</div></td><td>${row.bets}</td><td>${row.wins}-${row.losses}-${row.pushes}</td><td>${pPct(row.win_pct)}</td><td class="${tone(row.profit)}">${money(row.profit)}</td><td class="${tone(row.roi)}">${pPct(row.roi)}</td><td>${row.track_close_eligible}<div class="sub">${row.track_close_unresolved} unresolved · ${row.track_close_not_applicable} N/A</div></td><td>${row.track_close_resolved}${awaiting?'<div class="sub">Awaiting Close</div>':''}</td><td>${row.eligible_positive_clv}/${row.track_close_resolved}</td><td>${pPct(row.eligible_positive_clv_pct)}</td><td class="${tone(row.eligible_avg_clv_points)}">${row.eligible_avg_clv_points==null?(awaiting?'Pending':'—'):openWeeklyMetric(row.eligible_avg_clv_points,' pts',2)}</td></tr>`;
+  }).join('');
+  root.innerHTML=`<div class="cardHead"><h2 class="openWeeklyTitle">OPEN BETS — WEEKLY PERFORMANCE</h2><small>Backend-owned results and final point CLV · click a week to filter the ledger</small></div><div class="openWeeklyCards"><div class="openWeeklyCard"><span>Avg Point CLV</span><b class="${tone(season.eligible_avg_clv_points)}">${openWeeklyMetric(season.eligible_avg_clv_points,' pts',2)}</b><small>${season.track_close_resolved} resolved closes</small></div><div class="openWeeklyCard"><span>Beat Close %</span><b>${pPct(season.eligible_positive_clv_pct)}</b><small>${season.eligible_positive_clv}/${season.track_close_resolved} resolved</small></div><div class="openWeeklyCard"><span>ATS Record</span><b>${season.wins}-${season.losses}-${season.pushes}</b><small>${season.wins+season.losses} decisions</small></div><div class="openWeeklyCard"><span>ROI</span><b class="${tone(season.roi)}">${pPct(season.roi)}</b><small>${trendText}</small></div></div><div class="openWeeklyCharts"><div class="openWeeklyChart"><h3>Open Avg Point CLV by Week</h3>${openWeeklyChart(weeks,'eligible_avg_clv_points',value=>openWeeklyMetric(value,'',1))}</div><div class="openWeeklyChart"><h3>Open ROI by Week</h3>${openWeeklyChart(weeks,'roi',value=>openWeeklyMetric(Number(value)*100,'%',1),'roi')}</div></div><div class="openWeeklyWrap"><table class="openWeeklyTable" aria-label="Open weekly performance"><thead><tr><th>Week</th><th>Bets</th><th>ATS</th><th>Win %</th><th>P/L</th><th>ROI</th><th>Track</th><th>Resolved</th><th>Beat Close</th><th>Beat %</th><th>Avg CLV</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  root.querySelectorAll('[data-open-week]').forEach(row=>row.onclick=()=>setOpenWeeklyLedgerFilter(row.dataset.openWeek));
+}
+
 function pInit(){
   const regular=[
     ...new Set(
@@ -4297,6 +4345,11 @@ function pInit(){
   sourceSummary.className='sourceSummaryGrid';
   results.after(sourceSummary);
 
+  const openWeekly=document.createElement('section');
+  openWeekly.id='openWeeklyPerformance';
+  openWeekly.className='openWeeklySection';
+  sourceSummary.after(openWeekly);
+
   const ledger=document.querySelector('.card:has(.ledger)');
 
   const heading=document.createElement('div');
@@ -4309,6 +4362,7 @@ function pInit(){
   ledger.prepend(heading);
 
   renderSourceSummary();
+  renderOpenWeeklyPerformance();
 
   document.querySelectorAll('#tabs button').forEach(button=>{
     button.onclick=()=>{
@@ -4318,11 +4372,19 @@ function pInit(){
 
       button.classList.add('active');
       tab=button.dataset.tab;
+      sourceFilter.value=tab==='open_source'?'Open':tab==='powers_source'?'Powers':'all';
       pDashboard();
     };
   });
 
-  [market,link,search].forEach(control=>{
+  const weeksAvailable=[...new Set((DATA.records||[]).map(row=>row.week).filter(value=>value!=null))].sort((a,b)=>a-b);
+  weekFilter.innerHTML='<option value="all">All weeks</option>'+weeksAvailable.map(value=>`<option value="${value}">Week ${value}</option>`).join('');
+  const sourcesAvailable=[...new Set((DATA.records||[]).map(row=>row.bet_source_group).filter(Boolean))].sort();
+  sourceFilter.innerHTML='<option value="all">All sources</option>'+sourcesAvailable.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
+
+  weekFilter.addEventListener('input',()=>{if(weekFilter.value!=='all')pSetPeriod('All Bets')});
+  sourceFilter.addEventListener('input',()=>{tab='all';document.querySelectorAll('#tabs button').forEach(button=>button.classList.toggle('active',button.dataset.tab==='all'))});
+  [weekFilter,sourceFilter,market,link,search].forEach(control=>{
     control.addEventListener('input',pRows);
   });
 

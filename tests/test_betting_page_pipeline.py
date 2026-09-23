@@ -17,6 +17,17 @@ class BettingPagePipelineTests(unittest.TestCase):
         self.assertIn("<th>Source</th><th>Bets</th><th>ATS Record</th>", page)
         self.assertIn("<th>Close Resolved</th><th>Unresolved</th><th>N/A</th>", page)
 
+    def test_my_bets_renders_open_weekly_dashboard_and_composable_filters(self):
+        page = (Path(__file__).resolve().parents[1] / "betting_v2.html").read_text()
+        self.assertIn("OPEN BETS — WEEKLY PERFORMANCE", page)
+        self.assertIn("DATA.open_weekly_performance", page)
+        self.assertIn('aria-label="Open weekly performance"', page)
+        self.assertIn("Open Avg Point CLV by Week", page)
+        self.assertIn("Open ROI by Week", page)
+        self.assertIn('id="weekFilter"', page)
+        self.assertIn('id="sourceFilter"', page)
+        self.assertIn("setOpenWeeklyLedgerFilter", page)
+
     def test_published_sheet_normalization_rejects_summary_and_blank_rows(self):
         frame = pd.DataFrame([
             {"Date": "8/24/2026", "Bet Description": "Week 0", "Source": "Powers", "Sportsbook": "Draft Kings", "Bet Amount": "$50", "Sport": "NCAAF", "Bet": "USC / New Mexico State Over 59.5", "Bet Type": "Total"},

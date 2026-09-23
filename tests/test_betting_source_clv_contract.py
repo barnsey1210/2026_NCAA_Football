@@ -2,6 +2,7 @@ import unittest
 
 from betting.build_betting_activity_view import (
     bet_source_group,
+    build_open_weekly_performance,
     boolean,
     clv_eligible,
     summarize_records,
@@ -9,6 +10,17 @@ from betting.build_betting_activity_view import (
 
 
 class BettingSourceCLVContractTest(unittest.TestCase):
+    @staticmethod
+    def weekly_row(week, source="Open", track=True, state="FINAL_CLOSE", points=1.0,
+                   status="Won", stake=100, profit=90):
+        return {
+            "week": week, "bet_source_group": source, "is_open": status == "Open",
+            "stake": stake, "realized_profit": profit, "status": status,
+            "clv_pct_current": None, "track_close": track,
+            "tracking_clv_state": state, "tracking_clv_points": points,
+            "ev_current_pct": None,
+        }
+
     def test_source_groups(self):
         self.assertEqual(
             bet_source_group({"Source": "Open"}),
@@ -87,6 +99,29 @@ class BettingSourceCLVContractTest(unittest.TestCase):
         self.assertEqual(metrics["track_close_eligible"], 1)
         self.assertEqual(metrics["track_close_not_applicable"], 1)
         self.assertEqual(metrics["track_close_unresolved"], 0)
+
+    def test_open_weekly_grouping_denominators_and_trend(self):
+        rows = [
+            self.weekly_row(0, points=1.0),
+            self.weekly_row(0, source="Powers", points=9.0),
+            self.weekly_row(1, state="UNAVAILABLE", points=None, status="Open", profit=0),
+            self.weekly_row(1, state="NOT_APPLICABLE_POINT_CLV", points=None),
+            self.weekly_row(2, points=2.0),
+            self.weekly_row(3, points=-1.0, status="Lost", profit=-100),
+            self.weekly_row(3, track=False, points=20.0),
+        ]
+        payload = build_open_weekly_performance(rows)
+        self.assertEqual([row["label"] for row in payload["weeks"]], ["Week 0", "Week 1", "Week 2", "Week 3"])
+        self.assertEqual(payload["season"]["bets"], 6)
+        self.assertEqual(payload["reconciliation"]["weekly_open_bets"], 6)
+        week1 = payload["weeks"][1]
+        self.assertEqual(week1["track_close_unresolved"], 1)
+        self.assertEqual(week1["track_close_not_applicable"], 1)
+        self.assertIsNone(week1["eligible_avg_clv_points"])
+        self.assertEqual(payload["trend"]["latest_resolved_week"], "Week 3")
+        self.assertEqual(payload["trend"]["previous_resolved_week"], "Week 2")
+        self.assertEqual(payload["trend"]["week_over_week_clv_change"], -3.0)
+        self.assertAlmostEqual(payload["trend"]["rolling_3_resolved_week_avg_clv"], 2 / 3, places=3)
 
 
 if __name__ == "__main__":

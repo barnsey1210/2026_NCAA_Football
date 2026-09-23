@@ -144,6 +144,54 @@ def summarize_records(rows):
     }
 
 
+def build_open_weekly_performance(records):
+    """Build the canonical Open-by-week contract consumed by the Betting page."""
+    open_rows = [row for row in records if row.get("bet_source_group") == "Open"]
+    weekly = []
+
+    for week in sorted({row.get("week") for row in open_rows if row.get("week") is not None}):
+        week_rows = [row for row in open_rows if row.get("week") == week]
+        weekly.append({
+            "week": int(week),
+            "label": f"Week {int(week)}",
+            **summarize_records(week_rows),
+        })
+
+    resolved = [row for row in weekly if row["eligible_avg_clv_points"] is not None]
+    latest = resolved[-1] if resolved else None
+    previous = resolved[-2] if len(resolved) > 1 else None
+    rolling = None
+    if len(resolved) >= 3:
+        sample = resolved[-3:]
+        rolling = round(sum(row["eligible_avg_clv_points"] for row in sample) / 3, 3)
+
+    season = summarize_records(open_rows)
+    trend = {
+        "latest_resolved_week": latest["label"] if latest else None,
+        "latest_avg_clv_points": latest["eligible_avg_clv_points"] if latest else None,
+        "latest_resolved_sample": latest["track_close_resolved"] if latest else 0,
+        "previous_resolved_week": previous["label"] if previous else None,
+        "previous_avg_clv_points": previous["eligible_avg_clv_points"] if previous else None,
+        "previous_resolved_sample": previous["track_close_resolved"] if previous else 0,
+        "week_over_week_clv_change": (
+            round(latest["eligible_avg_clv_points"] - previous["eligible_avg_clv_points"], 3)
+            if latest and previous else None
+        ),
+        "rolling_3_resolved_week_avg_clv": rolling,
+        "rolling_3_week_labels": [row["label"] for row in resolved[-3:]] if rolling is not None else [],
+    }
+    return {
+        "season": season,
+        "weeks": weekly,
+        "trend": trend,
+        "reconciliation": {
+            "open_bets": season["bets"],
+            "weekly_open_bets": sum(row["bets"] for row in weekly),
+            "open_rows_without_week": sum(row.get("week") is None for row in open_rows),
+        },
+    }
+
+
 def bet_period(row, game=None):
     """Classify the wager into the page's canonical season-period controls."""
     week = game.get("week") if game else week_from_row(row)
@@ -441,6 +489,7 @@ def main():
             if row.get("bet_source_group") == "Other"
         ]),
     }
+    open_weekly_performance = build_open_weekly_performance(records)
     market_groups = {name: metrics([row for row in records if row["market"] == name]) for name in sorted({row["market"] for row in records})}
     week_groups = {}
     for week in sorted({row["week"] for row in records if row["week"] is not None}):
@@ -465,6 +514,7 @@ def main():
     built_at = datetime.now(timezone.utc).isoformat()
     payload = {"schema_version": "betting-activity-v2", "built_at": built_at, "summary": summary,
                "strategy_metrics": groups, "source_metrics": source_groups,
+               "open_weekly_performance": open_weekly_performance,
                "market_metrics": market_groups, "week_metrics": week_groups,
                "period_metrics": period_groups,
                "performance_history": history, "records": records}
