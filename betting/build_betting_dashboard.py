@@ -103,6 +103,10 @@ df["closing_price"] = optional_apply("Closing Price", num)
 df["profit_num"] = optional_apply("Profit", money_to_float)
 df["status"] = optional_apply("Result", clean_status)
 df["is_open"] = df["status"].eq("Open")
+df["track_close"] = optional_apply(
+    "Track Close",
+    lambda value: str(value).strip().lower() in {"true", "1", "yes", "y", "checked"},
+)
 
 # Sheet Profit may show pending risk as negative on open bets.
 # Dashboard realized profit should only count settled bets.
@@ -164,6 +168,7 @@ def group_summary(col):
 open_cols = [
     "Date", "Account", "Bet Description", "Source", "Sportsbook",
     "Sport", "Bet", "Bet Type", "stake", "bet_line", "bet_price",
+    "track_close",
     "closing_line", "closing_price", "line_clv", "price_clv_pp",
     "status", "Notes", "team_guess", "side"
 ]

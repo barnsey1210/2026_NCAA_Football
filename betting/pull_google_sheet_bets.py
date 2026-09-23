@@ -15,7 +15,7 @@ PUBLISHED_SHEET_CSV_URL = (
 keep_cols = [
     "Date", "Account", "Bet Description", "Source", "Sportsbook",
     "Bet Amount", "Sport", "Bet", "Bet Type", "Bet Line", "Bet Price",
-    "Result", "Profit", "Running Profit", "Closing Line", "Closing Price",
+    "Result", "Profit", "Running Profit", "Track Close", "Closing Line", "Closing Price",
     "CLV", "EV", "Notes", "CLV %"
 ]
 def clean_text(x):

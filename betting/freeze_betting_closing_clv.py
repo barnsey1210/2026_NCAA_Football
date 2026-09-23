@@ -224,6 +224,11 @@ new_freezes = []
 
 for idx, row in df.iterrows():
     bid = str(row.get("bet_id"))
+    track_close = str(row.get("track_close", row.get("Track Close", ""))).strip().lower() in {
+        "true", "1", "yes", "y", "checked"
+    }
+    if not track_close:
+        continue
     game_bet = is_game_bet(row)
 
     if not game_bet:

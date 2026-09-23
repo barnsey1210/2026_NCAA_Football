@@ -195,37 +195,38 @@ img[src$="west-virginia.webp"] {
   color:#fff;
 }
 .sourceSummaryGrid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
+  display:block;
   margin:12px 0;
+  overflow-x:auto;
 }
-.sourceSummaryCard{
+.sourceSummaryTable{
+  width:100%;
+  border-collapse:collapse;
   border:1px solid var(--line);
   background:var(--panel);
   border-radius:9px;
-  padding:11px 12px;
+  overflow:hidden;
 }
-.sourceSummaryCard h3{
-  margin:0 0 8px;
-  font-size:13px;
+.sourceSummaryTable th,
+.sourceSummaryTable td{
+  padding:8px 9px;
+  border-bottom:1px solid var(--line);
+  text-align:right;
+  white-space:nowrap;
+  font-size:10px;
 }
-.sourceSummaryStats{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-}
-.sourceSummaryStats span{
-  display:block;
+.sourceSummaryTable th{
   color:var(--muted);
-  font-size:9px;
   text-transform:uppercase;
   letter-spacing:.06em;
 }
-.sourceSummaryStats b{
-  display:block;
-  margin-top:3px;
-  font-size:13px;
+.sourceSummaryTable th:first-child,
+.sourceSummaryTable td:first-child{
+  text-align:left;
+  font-weight:900;
+}
+.sourceSummaryTable tbody tr:last-child td{
+  border-bottom:0;
 }
 .ledger.compactLedger{
   font-size:11px;
@@ -370,12 +371,6 @@ img[src$="west-virginia.webp"] {
   margin-bottom:14px;
 }
 @media(max-width:800px){
-  .sourceSummaryGrid{
-    grid-template-columns:1fr;
-  }
-  .sourceSummaryStats{
-    grid-template-columns:repeat(3,1fr);
-  }
   .trackerHero{
     display:block;
   }
@@ -3853,12 +3848,15 @@ function pMetrics(list){
   const pl=graded.reduce((s,r)=>s+(Number(r.realized_pl)||0),0);
 
   const clv=list.filter(r=>
+    r.track_close===true &&
     r.clv_eligible===true &&
     r.tracking_clv_state==='FINAL_CLOSE' &&
     Number.isFinite(Number(r.tracking_clv_points))
   );
 
   const positive=clv.filter(r=>Number(r.tracking_clv_points)>0).length;
+  const trackClose=list.filter(r=>r.track_close===true);
+  const decisions=graded.filter(r=>r.status==='Won'||r.status==='Lost');
 
   return{
     bets:list.length,
@@ -3869,11 +3867,14 @@ function pMetrics(list){
     wins:graded.filter(r=>r.status==='Won').length,
     losses:graded.filter(r=>r.status==='Lost').length,
     pushes:graded.filter(r=>r.status==='Push').length,
+    win_pct:decisions.length?graded.filter(r=>r.status==='Won').length/decisions.length:null,
     settled_risk:risk,
     profit:pl,
     realized_pl:pl,
     roi:risk?pl/risk:null,
     clv_matched:clv.length,
+    track_close_eligible:trackClose.length,
+    track_close_unresolved:trackClose.length-clv.length,
     positive_clv:positive,
     positive_clv_pct:clv.length?positive/clv.length:null,
     avg_clv_points:clv.length
@@ -4061,7 +4062,9 @@ function compactCloseDisplay(r){
 }
 
 function compactClvDisplay(r){
-  if(!r.clv_eligible)return '<span class="sub">N/A</span>';
+  if(!r.track_close)return '<span class="sub">Not tracked</span>';
+
+  if(!r.clv_eligible)return '<span class="sub">Unresolved</span>';
 
   if(r.tracking_clv_state!=='FINAL_CLOSE'){
     return '<span class="sub">—</span>';
@@ -4126,7 +4129,7 @@ function pRows(){
               <b>${marketReferenceDisplay(r)}</b>
 
               <span>CLV eligibility</span>
-              <b>${r.clv_eligible?'Eligible':'Not eligible'}</b>
+              <b>${r.track_close?'Track Close checked':'Not tracked'}</b>
 
               <span>CLV state</span>
               <b>${esc(r.tracking_clv_state||'UNAVAILABLE')}</b>
@@ -4170,41 +4173,36 @@ function renderSourceSummary(){
     ['Powers',records.filter(r=>r.bet_source_group==='Powers')]
   ];
 
-  root.innerHTML=groups.map(([label,list])=>{
+  const body=groups.map(([label,list])=>{
     const m=pMetrics(list);
 
     return `
-      <div class="sourceSummaryCard">
-        <h3>${esc(label)}</h3>
-        <div class="sourceSummaryStats">
-          <div>
-            <span>Record</span>
-            <b>${m.wins}-${m.losses}-${m.pushes}</b>
-          </div>
-          <div>
-            <span>ROI</span>
-            <b class="${tone(m.roi)}">${pPct(m.roi)}</b>
-          </div>
-          <div>
-            <span>CLV Hit</span>
-            <b>${pPct(m.positive_clv_pct)}</b>
-          </div>
-          <div>
-            <span>Avg CLV</span>
-            <b class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</b>
-          </div>
-          <div>
-            <span>CLV Sample</span>
-            <b>${m.clv_matched}</b>
-          </div>
-          <div>
-            <span>Bets</span>
-            <b>${m.bets}</b>
-          </div>
-        </div>
-      </div>
+      <tr>
+        <td>${esc(label)}</td>
+        <td>${m.wins}-${m.losses}-${m.pushes}</td>
+        <td>${pPct(m.win_pct)}</td>
+        <td>${m.track_close_eligible}</td>
+        <td>${m.clv_matched}</td>
+        <td>${m.track_close_unresolved}</td>
+        <td>${m.positive_clv}</td>
+        <td>${pPct(m.positive_clv_pct)}</td>
+        <td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)} pts`}</td>
+        <td>${money(m.settled_risk)}</td>
+        <td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td>
+        <td class="${tone(m.roi)}">${pPct(m.roi)}</td>
+      </tr>
     `;
   }).join('');
+
+  root.innerHTML=`
+    <table class="sourceSummaryTable">
+      <thead><tr>
+        <th>Source</th><th>Record</th><th>Win %</th><th>Track Close</th>
+        <th>Close Resolved</th><th>Unresolved</th><th>Beat Close</th>
+        <th>Beat Close %</th><th>Avg CLV</th><th>Risked</th><th>P/L</th><th>ROI</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
 }
 
 function pInit(){

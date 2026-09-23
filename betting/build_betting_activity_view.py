@@ -36,7 +36,7 @@ def number(value):
 
 
 def boolean(value):
-    return clean(value).lower() in {"true", "1", "yes", "y"}
+    return clean(value).lower() in {"true", "1", "yes", "y", "checked"}
 
 
 def week_from_row(row):
@@ -78,12 +78,60 @@ def bet_source_group(row):
     return "Other"
 
 
-def clv_eligible(market, game):
-    """Only canonical full-game spread/total wagers enter CLV tracking."""
+def clv_eligible(market, game, track_close=True):
+    """Only checked canonical full-game spread/total wagers enter CLV tracking."""
     return bool(
+        track_close
+        and
         game is not None
         and market in {"Spread", "Game Total"}
     )
+
+
+def summarize_records(rows):
+    """Summarize settlement separately from checkbox-gated final point CLV."""
+    open_group = [row for row in rows if row["is_open"]]
+    settled = [row for row in rows if not row["is_open"]]
+    settled_stake = sum(row["stake"] or 0 for row in settled)
+    profit = sum(row["realized_profit"] or 0 for row in settled)
+    legacy_clv = [row["clv_pct_current"] for row in rows if row["clv_pct_current"] is not None]
+    tracked_rows = [row for row in rows if row.get("track_close")]
+    resolved_tracking_rows = [
+        row for row in tracked_rows
+        if row.get("tracking_clv_state") == "FINAL_CLOSE"
+        and row.get("tracking_clv_points") is not None
+    ]
+    tracking_clv = [row["tracking_clv_points"] for row in resolved_tracking_rows]
+    ev = [row["ev_current_pct"] for row in rows if row["ev_current_pct"] is not None]
+    return {
+        "bets": len(rows), "open": len(open_group), "settled": len(settled),
+        "amount_risked": round(sum(row["stake"] or 0 for row in rows), 2),
+        "settled_risk": round(settled_stake, 2),
+        "open_exposure": round(sum(row["stake"] or 0 for row in open_group), 2),
+        "wins": sum(row["status"] == "Won" for row in settled),
+        "losses": sum(row["status"] == "Lost" for row in settled),
+        "pushes": sum(row["status"] == "Push" for row in settled),
+        "profit": round(profit, 2),
+        "roi": round(profit / settled_stake, 4) if settled_stake else None,
+        "clv_matched": len(tracking_clv),
+        "positive_clv": sum(value > 0 for value in tracking_clv),
+        "positive_clv_pct": round(sum(value > 0 for value in tracking_clv) / len(tracking_clv), 4) if tracking_clv else None,
+        "avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
+        "legacy_clv_matched": len(legacy_clv),
+        "legacy_positive_clv": sum(value > 0 for value in legacy_clv),
+        "legacy_positive_clv_pct": round(sum(value > 0 for value in legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
+        "legacy_avg_clv_pct": round(sum(legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
+        "avg_clv_pct": round(sum(legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
+        "eligible_clv_sample": len(tracking_clv),
+        "track_close_eligible": len(tracked_rows),
+        "track_close_resolved": len(resolved_tracking_rows),
+        "track_close_unresolved": len(tracked_rows) - len(resolved_tracking_rows),
+        "eligible_positive_clv": sum(value > 0 for value in tracking_clv),
+        "eligible_positive_clv_pct": round(sum(value > 0 for value in tracking_clv) / len(tracking_clv), 4) if tracking_clv else None,
+        "eligible_avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
+        "avg_ev_pct": round(sum(ev) / len(ev), 4) if ev else None,
+        "current_ev_dollars": round(sum((row["stake"] or 0) * (row["ev_current_pct"] or 0) for row in open_group), 2),
+    }
 
 
 def bet_period(row, game=None):
@@ -202,7 +250,8 @@ def main():
         closing_frozen = boolean(row.get("closing_clv_frozen"))
 
         source_group = bet_source_group(row)
-        clv_eligible_flag = clv_eligible(market, game)
+        track_close = boolean(row.get("track_close")) or boolean(row.get("Track Close"))
+        clv_eligible_flag = clv_eligible(market, game, track_close)
         current_line_clv = number(row.get("line_clv_current"))
         final_line_clv = number(row.get("closing_line_clv"))
 
@@ -300,6 +349,7 @@ def main():
             "is_open": is_open, "sport": clean(row.get("Sport")), "market": market,
             "strategy_tags": strategy_tags(row),
             "bet_source_group": source_group,
+            "track_close": track_close,
             "clv_eligible": clv_eligible_flag,
             "tracking_clv_points": tracking_clv_points,
             "tracking_clv_state": tracking_clv_state,
@@ -346,40 +396,7 @@ def main():
         })
 
     open_rows = [row for row in records if row["is_open"]]
-    def metrics(rows):
-        open_group = [row for row in rows if row["is_open"]]
-        settled = [row for row in rows if not row["is_open"]]
-        settled_stake = sum(row["stake"] or 0 for row in settled)
-        profit = sum(row["realized_profit"] or 0 for row in settled)
-        legacy_clv = [
-            row["clv_pct_current"]
-            for row in rows
-            if row["clv_pct_current"] is not None
-        ]
-        tracking_clv = [
-            row["tracking_clv_points"]
-            for row in rows
-            if row.get("clv_eligible")
-            and row.get("tracking_clv_points") is not None
-        ]
-        ev = [row["ev_current_pct"] for row in rows if row["ev_current_pct"] is not None]
-        return {"bets": len(rows), "open": len(open_group), "settled": len(settled),
-                "amount_risked": round(sum(row["stake"] or 0 for row in rows), 2),
-                "settled_risk": round(settled_stake, 2),
-                "open_exposure": round(sum(row["stake"] or 0 for row in open_group), 2),
-                "wins": sum(row["status"] == "Won" for row in settled), "losses": sum(row["status"] == "Lost" for row in settled),
-                "pushes": sum(row["status"] == "Push" for row in settled), "profit": round(profit, 2),
-                "roi": round(profit / settled_stake, 4) if settled_stake else None,
-                "clv_matched": len(legacy_clv),
-                "positive_clv": sum(value > 0 for value in legacy_clv),
-                "positive_clv_pct": round(sum(value > 0 for value in legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
-                "avg_clv_pct": round(sum(legacy_clv) / len(legacy_clv), 4) if legacy_clv else None,
-                "eligible_clv_sample": len(tracking_clv),
-                "eligible_positive_clv": sum(value > 0 for value in tracking_clv),
-                "eligible_positive_clv_pct": round(sum(value > 0 for value in tracking_clv) / len(tracking_clv), 4) if tracking_clv else None,
-                "eligible_avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
-                "avg_ev_pct": round(sum(ev) / len(ev), 4) if ev else None,
-                "current_ev_dollars": round(sum((row["stake"] or 0) * (row["ev_current_pct"] or 0) for row in open_group), 2)}
+    metrics = summarize_records
 
     groups = {"Overall": metrics(records), "Powers": metrics([row for row in records if "Powers" in row["strategy_tags"]]),
               "Model": metrics([row for row in records if "Model" in row["strategy_tags"]])}
@@ -431,7 +448,8 @@ def main():
                  "all_sheet_rows": "owned_wager",
                  "strategy_tags": "Legacy compatibility only; Powers and Model remain non-exclusive tags",
                  "source_groups": "Explicit wager Source normalized to Open, Powers, or Other",
-                 "clv_eligibility": "Canonical game-linked full-game Spread and Game Total only"
+                 "clv_eligibility": "Track Close checked plus canonical game-linked full-game Spread or Game Total",
+                 "clv_denominator": "Checked rows are eligible; only FINAL_CLOSE rows with point CLV are resolved and enter beat-close and average-CLV denominators"
              }}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     AUDIT.parent.mkdir(parents=True, exist_ok=True)

@@ -16,6 +16,16 @@ class BettingPagePipelineTests(unittest.TestCase):
         self.assertEqual(len(normalized), 1)
         self.assertEqual(normalized.iloc[0]["Source"], "Powers")
 
+    def test_track_close_column_is_preserved(self):
+        frame = pd.DataFrame([{
+            "Date": "9/1/2026", "Bet Description": "Week 1", "Source": " Open ",
+            "Sportsbook": "Draft Kings", "Bet Amount": "$50", "Sport": "NCAAF",
+            "Bet": "Iowa State +3", "Bet Type": "Spread", "Track Close": True,
+        }])
+        normalized = normalize_wager_frame(frame)
+        self.assertIn("Track Close", normalized.columns)
+        self.assertEqual(bool(normalized.iloc[0]["Track Close"]), True)
+
     def test_period_classification(self):
         self.assertEqual(bet_period({"Bet Description": "Week 0"}), "Week 0")
         self.assertEqual(bet_period({"Bet Description": "Week 2"}), "Week 2")
