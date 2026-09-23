@@ -18,14 +18,11 @@ class BettingSourceCLVContractTest(unittest.TestCase):
             bet_source_group({"Source": "Powers"}),
             "Powers",
         )
+        self.assertEqual(bet_source_group({"Source": "Steam"}), "Steam")
         self.assertEqual(bet_source_group({"Source": "  OPEN  "}), "Open")
         self.assertEqual(bet_source_group({"Source": " powers "}), "Powers")
         self.assertEqual(
             bet_source_group({"Source": "Model"}),
-            "Other",
-        )
-        self.assertEqual(
-            bet_source_group({"Source": "Steam"}),
             "Other",
         )
 
@@ -78,6 +75,18 @@ class BettingSourceCLVContractTest(unittest.TestCase):
         self.assertEqual(metrics["eligible_positive_clv"], 1)
         self.assertAlmostEqual(metrics["eligible_positive_clv_pct"], 1 / 3, places=4)
         self.assertAlmostEqual(metrics["eligible_avg_clv_points"], 1 / 3, places=3)
+
+    def test_moneyline_na_is_not_unresolved(self):
+        metrics = summarize_records([{
+            "is_open": False, "stake": 100, "realized_profit": 10,
+            "status": "Won", "clv_pct_current": None,
+            "track_close": True,
+            "tracking_clv_state": "NOT_APPLICABLE_POINT_CLV",
+            "tracking_clv_points": None, "ev_current_pct": None,
+        }])
+        self.assertEqual(metrics["track_close_eligible"], 1)
+        self.assertEqual(metrics["track_close_not_applicable"], 1)
+        self.assertEqual(metrics["track_close_unresolved"], 0)
 
 
 if __name__ == "__main__":

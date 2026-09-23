@@ -197,6 +197,14 @@ img[src$="west-virginia.webp"] {
 .sourceSummaryGrid{
   display:block;
   margin:12px 0;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--panel);
+}
+.sourceSummaryGrid .cardHead{
+  padding:14px 16px 8px;
+}
+.sourceSummaryWrap{
   overflow-x:auto;
 }
 .sourceSummaryTable{
@@ -4165,44 +4173,49 @@ function renderSourceSummary(){
   const root=document.getElementById('sourceSummary');
   if(!root)return;
 
-  const records=pRecords().filter(r=>r.actor?.type!=='site_draft');
+  // This table is a presentation of backend-owned canonical metrics. Keep all
+  // denominator and N/A decisions in build_betting_activity_view.py.
+  const metrics=DATA.source_metrics||{};
+  const groups=['Open','Powers','Steam','Overall']
+    .filter(label=>metrics[label]&&metrics[label].bets>0)
+    .map(label=>[label,metrics[label]]);
 
-  const groups=[
-    ['Overall',records],
-    ['Open',records.filter(r=>r.bet_source_group==='Open')],
-    ['Powers',records.filter(r=>r.bet_source_group==='Powers')]
-  ];
-
-  const body=groups.map(([label,list])=>{
-    const m=pMetrics(list);
+  const body=groups.map(([label,m])=>{
 
     return `
       <tr>
         <td>${esc(label)}</td>
+        <td>${m.bets}</td>
         <td>${m.wins}-${m.losses}-${m.pushes}</td>
         <td>${pPct(m.win_pct)}</td>
         <td>${m.track_close_eligible}</td>
-        <td>${m.clv_matched}</td>
+        <td>${m.track_close_resolved}</td>
         <td>${m.track_close_unresolved}</td>
-        <td>${m.positive_clv}</td>
-        <td>${pPct(m.positive_clv_pct)}</td>
-        <td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)} pts`}</td>
-        <td>${money(m.settled_risk)}</td>
-        <td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td>
+        <td>${m.track_close_not_applicable}</td>
+        <td>${m.eligible_positive_clv}/${m.track_close_resolved}</td>
+        <td>${pPct(m.eligible_positive_clv_pct)}</td>
+        <td class="${tone(m.eligible_avg_clv_points)}">${m.eligible_avg_clv_points==null?'—':`${Number(m.eligible_avg_clv_points)>0?'+':''}${num(m.eligible_avg_clv_points,2)} pts`}</td>
+        <td class="${tone(m.profit)}">${money(m.profit)}</td>
         <td class="${tone(m.roi)}">${pPct(m.roi)}</td>
       </tr>
     `;
   }).join('');
 
   root.innerHTML=`
-    <table class="sourceSummaryTable">
-      <thead><tr>
-        <th>Source</th><th>Record</th><th>Win %</th><th>Track Close</th>
-        <th>Close Resolved</th><th>Unresolved</th><th>Beat Close</th>
-        <th>Beat Close %</th><th>Avg CLV</th><th>Risked</th><th>P/L</th><th>ROI</th>
-      </tr></thead>
-      <tbody>${body}</tbody>
-    </table>`;
+    <div class="cardHead">
+      <h2>Betting Results by Source</h2>
+      <small>Canonical Track Close metrics; N/A wagers are excluded from unresolved and CLV rates</small>
+    </div>
+    <div class="sourceSummaryWrap">
+      <table class="sourceSummaryTable" aria-label="Betting Results by Source">
+        <thead><tr>
+          <th>Source</th><th>Bets</th><th>ATS Record</th><th>Win %</th><th>Track Close</th>
+          <th>Close Resolved</th><th>Unresolved</th><th>N/A</th><th>Beat Close</th>
+          <th>Beat-Close Rate</th><th>Avg Point CLV</th><th>P/L</th><th>ROI</th>
+        </tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>`;
 }
 
 function pInit(){

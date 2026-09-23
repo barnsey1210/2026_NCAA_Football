@@ -75,6 +75,8 @@ def bet_source_group(row):
         return "Open"
     if source == "powers":
         return "Powers"
+    if source == "steam":
+        return "Steam"
     return "Other"
 
 
@@ -107,14 +109,17 @@ def summarize_records(rows):
     ]
     tracking_clv = [row["tracking_clv_points"] for row in resolved_tracking_rows]
     ev = [row["ev_current_pct"] for row in rows if row["ev_current_pct"] is not None]
+    wins = sum(row["status"] == "Won" for row in settled)
+    losses = sum(row["status"] == "Lost" for row in settled)
     return {
         "bets": len(rows), "open": len(open_group), "settled": len(settled),
         "amount_risked": round(sum(row["stake"] or 0 for row in rows), 2),
         "settled_risk": round(settled_stake, 2),
         "open_exposure": round(sum(row["stake"] or 0 for row in open_group), 2),
-        "wins": sum(row["status"] == "Won" for row in settled),
-        "losses": sum(row["status"] == "Lost" for row in settled),
+        "wins": wins,
+        "losses": losses,
         "pushes": sum(row["status"] == "Push" for row in settled),
+        "win_pct": round(wins / (wins + losses), 4) if wins + losses else None,
         "profit": round(profit, 2),
         "roi": round(profit / settled_stake, 4) if settled_stake else None,
         "clv_matched": len(tracking_clv),
@@ -418,6 +423,10 @@ def main():
             row for row in records
             if row.get("bet_source_group") == "Powers"
         ]),
+        "Steam": metrics([
+            row for row in records
+            if row.get("bet_source_group") == "Steam"
+        ]),
         "Other": metrics([
             row for row in records
             if row.get("bet_source_group") == "Other"
@@ -475,13 +484,13 @@ def main():
                          "positive_clv_pct", "avg_clv_points",
                      )
                  }
-                 for name in ("Overall", "Open", "Powers", "Other")
+                 for name in ("Overall", "Open", "Powers", "Steam", "Other")
              },
              "unresolved_track_close": unresolved_track_close,
              "policy": {
                  "all_sheet_rows": "owned_wager",
                  "strategy_tags": "Legacy compatibility only; Powers and Model remain non-exclusive tags",
-                 "source_groups": "Explicit wager Source normalized to Open, Powers, or Other",
+                 "source_groups": "Explicit wager Source normalized to Open, Powers, Steam, or Other",
                  "clv_eligibility": "Track Close checked plus canonical game-linked full-game Spread or Game Total",
                  "clv_denominator": "Checked rows are eligible; only FINAL_CLOSE rows with point CLV are resolved and enter beat-close and average-CLV denominators"
              }}
