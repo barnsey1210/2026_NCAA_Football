@@ -40,7 +40,7 @@ def boolean(value):
 
 
 def week_from_row(row):
-    text = f"{clean(row.get('Bet Description'))} {clean(row.get('week_bucket'))}"
+    text = f"{clean(row.get('Bet Description'))} {clean(row.get('Week'))} {clean(row.get('week_bucket'))}"
     match = re.search(r"\bweek\s*(\d+)\b", text, re.I)
     return int(match.group(1)) if match else None
 
@@ -183,13 +183,16 @@ def read_games():
 
 
 def game_match(row, index, by_id):
-    # Prefer the canonical game already resolved by betting enrichment.
-    canonical_game_id = clean(row.get("current_market_game_id"))
+    if clean(row.get("game_identity_status")) == "INVALID_SHEET_GAME_ID":
+        return None, "invalid_sheet_game_id"
+
+    # Prefer the canonical game resolved from the Sheet identity contract.
+    canonical_game_id = clean(row.get("game_id")) or clean(row.get("canonical_game_id")) or clean(row.get("current_market_game_id"))
 
     if canonical_game_id:
         game = by_id.get(canonical_game_id)
         if game:
-            return game, "canonical_market_game_id"
+            return game, clean(row.get("game_identity_source")).lower() or "canonical_game_id"
 
     market = category(row)
 
@@ -405,6 +408,12 @@ def main():
 
             "beat_clv": clean(row.get("beat_clv")),
             "source_pulled_at": clean(row.get("pulled_at")),
+            "game_identity_source": clean(row.get("game_identity_source")) or None,
+            "game_identity_status": clean(row.get("game_identity_status")) or None,
+            "game_identity_reason": clean(row.get("game_identity_reason")) or None,
+            "raw_sheet_game": clean(row.get("raw_sheet_game")),
+            "raw_sheet_game_id": clean(row.get("raw_sheet_game_id")),
+            "game_label_mismatch": boolean(row.get("game_label_mismatch")),
         })
 
     open_rows = [row for row in records if row["is_open"]]

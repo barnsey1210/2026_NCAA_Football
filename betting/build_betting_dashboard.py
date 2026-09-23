@@ -170,7 +170,10 @@ open_cols = [
     "Sport", "Bet", "Bet Type", "stake", "bet_line", "bet_price",
     "track_close",
     "closing_line", "closing_price", "line_clv", "price_clv_pp",
-    "status", "Notes", "team_guess", "side"
+    "status", "Notes", "team_guess", "side", "Game", "Game ID",
+    "raw_sheet_game", "raw_sheet_game_id", "game_id", "game_identity_source",
+    "game_identity_status", "game_identity_reason", "game_label_mismatch",
+    "canonical_game_week", "canonical_game_date", "canonical_away_team", "canonical_home_team"
 ]
 open_table = open_bets[[c for c in open_cols if c in open_bets.columns]].copy()
 
@@ -190,6 +193,11 @@ dashboard = {
         "missing_dates": int(df.get("missing_date", pd.Series(dtype=bool)).fillna(False).sum()) if "missing_date" in df.columns else None,
         "missing_sport": int(df.get("missing_sport", pd.Series(dtype=bool)).fillna(False).sum()) if "missing_sport" in df.columns else None,
         "missing_bet_type": int(df.get("missing_bet_type", pd.Series(dtype=bool)).fillna(False).sum()) if "missing_bet_type" in df.columns else None,
+        "sheet_game_id": int(df.get("raw_sheet_game_id", pd.Series(dtype=str)).fillna("").astype(str).str.strip().ne("").sum()),
+        "fallback_resolver": int(df.get("game_identity_source", pd.Series(dtype=str)).eq("FALLBACK_RESOLVER").sum()),
+        "invalid_sheet_game_id": int(df.get("game_identity_status", pd.Series(dtype=str)).eq("INVALID_SHEET_GAME_ID").sum()),
+        "game_label_mismatch": int(df.get("game_label_mismatch", pd.Series(dtype=bool)).fillna(False).sum()),
+        "identity_unmatched": int(df.get("game_identity_status", pd.Series(dtype=str)).eq("UNMATCHED").sum()),
     },
     "by_bet_description": group_summary("Bet Description"),
     "by_sportsbook": group_summary("Sportsbook"),

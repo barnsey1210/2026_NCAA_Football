@@ -49,7 +49,7 @@ def canonical_team(value, root=ROOT):
 
 
 def parse_week(row):
-    text = " ".join(str(row.get(key) or "") for key in ("Bet Description", "week_bucket", "week"))
+    text = " ".join(str(row.get(key) or "") for key in ("Bet Description", "Week", "week_bucket", "week"))
     match = re.search(r"\bweek\s*(\d+)\b", text, re.I)
     if match:
         return int(match.group(1))
@@ -82,8 +82,57 @@ def market_kind(row):
     return None
 
 
+def raw_sheet_game_id(row):
+    """Return the Sheet-owned game ID without treating derived IDs as Sheet input."""
+    for key in ("raw_sheet_game_id", "Game ID"):
+        value = row.get(key)
+        if value is not None and not (isinstance(value, float) and math.isnan(value)):
+            text = str(value).strip()
+            if text and text.lower() != "nan":
+                return text
+    return ""
+
+
+def canonical_game_id(row):
+    """Return an already-validated canonical ID carried by the wager row."""
+    for key in ("game_id", "canonical_game_id", "current_market_game_id"):
+        value = row.get(key)
+        if value is not None and not (isinstance(value, float) and math.isnan(value)):
+            text = str(value).strip()
+            if text and text.lower() != "nan":
+                return text
+    return ""
+
+
+def game_label_matches(label, game):
+    """Validate the human-readable Sheet label without making it authoritative."""
+    if not str(label or "").strip():
+        return None
+    label_key = clean_key(label)
+    away_key = clean_key(canonical_team(game.get("away_team")))
+    home_key = clean_key(canonical_team(game.get("home_team")))
+    return bool(away_key and home_key and away_key in label_key and home_key in label_key)
+
+
 def resolve_game(row, games):
     """Return (unique game, reason); ambiguity always fails closed."""
+    by_id = {str(game.get("game_id") or "").strip(): game for game in games}
+    sheet_id = raw_sheet_game_id(row)
+    identity_status = str(row.get("game_identity_status") or "").strip().upper()
+
+    # A populated Sheet ID is authoritative. Invalid populated IDs never fall
+    # through to fuzzy matching, because doing so would silently overwrite the
+    # user's explicit identity selection.
+    if sheet_id:
+        game = by_id.get(sheet_id)
+        return (game, "sheet_game_id") if game else (None, "invalid_sheet_game_id")
+    if identity_status == "INVALID_SHEET_GAME_ID":
+        return None, "invalid_sheet_game_id"
+
+    derived_id = canonical_game_id(row)
+    if derived_id and derived_id in by_id:
+        return by_id[derived_id], "canonical_game_id"
+
     week = parse_week(row)
     pool = [game for game in games if week is None or int(float(game.get("week", -1))) == week]
     kind = market_kind(row)
@@ -159,4 +208,3 @@ def point_clv(row, quote):
     if quote["kind"] == "spread":
         return bet_line - close_line
     return close_line - bet_line if quote["side"] == "over" else bet_line - close_line
-
