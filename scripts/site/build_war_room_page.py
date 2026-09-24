@@ -1845,7 +1845,7 @@ tr:hover td.context-group{background:#202d39}
   .mobile-command-table{display:grid;width:100%;min-width:0;box-sizing:border-box}
   .mobile-command-body{display:grid;min-width:0;border:1px solid var(--line2);border-top:0;border-radius:0 0 6px 6px;overflow:visible;background:var(--panel)}
   .mobile-command-row{display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);min-width:0;border-top:1px solid var(--line)}
-  .mobile-command-header{position:sticky;top:var(--mobile-controls-height);z-index:24;display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line2);border-radius:6px 6px 0 0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
+  .mobile-command-header{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr);width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line2);border-radius:6px 6px 0 0;background:#102332;box-shadow:0 3px 8px rgba(0,0,0,.32)}
   .mobile-command-header>span,.mobile-command-sort{min-width:0;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 5px;font:inherit;font-size:8px;font-weight:950;letter-spacing:.35px;text-align:center;text-transform:uppercase}
   .mobile-command-header>span:first-child{border-left:0;text-align:left;padding-left:8px}
   .mobile-command-sort{cursor:pointer}.mobile-command-sort.active{color:var(--green)}
@@ -1865,6 +1865,7 @@ tr:hover td.context-group{background:#202d39}
   .mobile-command-best-value{color:var(--green);font-size:14px;font-weight:950;line-height:1}
   .mobile-command-best-market{color:var(--muted);font-size:6px;font-weight:950;letter-spacing:.35px}
   .mobile-command-edge .edge{width:100%;font-size:inherit;font-weight:950}
+  .mobile-edge-stack{display:grid;place-items:center;gap:4px;min-width:0;width:100%}
   .mobile-edge-display{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}
   .mobile-edge-value{font-size:17px;font-weight:950;line-height:1}
   .mobile-edge-value.mobile-edge-green{color:var(--green)}
@@ -1873,6 +1874,7 @@ tr:hover td.context-group{background:#202d39}
   .mobile-edge-value.mobile-edge-unavailable{color:var(--muted)}
   .mobile-edge-display .team-logo-holder{--team-logo-size:21px}
   .mobile-edge-direction{color:#dce7ef;font-size:8px;font-weight:950;white-space:nowrap}
+  .mobile-edge-reference{display:block;max-width:100%;overflow:hidden;color:var(--muted);font-size:7px;font-weight:800;line-height:1.15;text-overflow:ellipsis;white-space:nowrap}
   .mobile-command-row.game-selected{background:rgba(69,217,237,.07);box-shadow:inset 3px 0 0 var(--cyan)}
   .mobile-command-detail{position:fixed;left:7px;right:7px;bottom:max(7px,env(safe-area-inset-bottom,0px));z-index:60;min-width:0;max-height:72vh;overflow:hidden;border:1px solid var(--line2);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.62),0 12px 34px rgba(0,0,0,.62)}.mobile-command-detail:empty{display:none}
 
@@ -4540,8 +4542,19 @@ function mobileEdgeDisplay(game,market,side,edge){
   }else if(value!==null && value>0 && market==='total' && side){
     recommendation=`<span class="mobile-edge-direction">${side==='under'?'UNDER':'OVER'}</span>`;
   }
-  const shown=`<span class="mobile-edge-display"><strong class="mobile-edge-value ${mobileEdgeMagnitudeClass(edge)}">${edgeDisplay(edge)}</strong>${recommendation}</span>`;
+  const modelValue=displayedModelValue(game,market);
+  const reference=mobileModelReference(game,market,modelValue);
+  const shown=`<span class="mobile-edge-stack"><span class="mobile-edge-display"><strong class="mobile-edge-value ${mobileEdgeMagnitudeClass(edge)}">${edgeDisplay(edge)}</strong>${recommendation}</span><span class="mobile-edge-reference">${reference}</span></span>`;
   return modelTooltip(game,market,shown);
+}
+
+function mobileModelReference(game,market,value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return market==='spread'?'Model: —':'Model Total: —';
+  if(market==='total') return `Model Total: ${n.toFixed(1)}`;
+  if(Math.abs(n)<.05) return 'Model: PK';
+  const team=n<0?game.home_team:game.away_team;
+  return `Model: ${esc(team)} -${Math.abs(n).toFixed(1)}`;
 }
 
 function mobileEdgeMagnitudeClass(edge){

@@ -65,7 +65,8 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn('data-mobile-sort="spread_edge"', source)
         self.assertIn('data-mobile-sort="total_edge"', source)
         self.assertIn("grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr)", source)
-        self.assertIn(".mobile-command-header{position:sticky;top:var(--mobile-controls-height)", source)
+        self.assertIn(".mobile-command-header{position:relative;z-index:2", source)
+        self.assertNotIn(".mobile-command-header{position:sticky", source)
         self.assertIn('class="mobile-command-body"', source)
         self.assertIn('data-mobile-sort="home_team">GAME</button>', source)
         self.assertNotIn(">EDGE ${sortArrow('best_edge')", source)
@@ -77,6 +78,10 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("mobileBookLogo(quote.book)", source)
         self.assertIn("mobileEdgeDisplay(game,'spread'", source)
         self.assertIn("mobileEdgeDisplay(game,'total'", source)
+        self.assertIn("function mobileModelReference(game,market,value)", source)
+        self.assertIn("const modelValue=displayedModelValue(game,market)", source)
+        self.assertIn("Model Total: ${n.toFixed(1)}", source)
+        self.assertIn("Model: ${esc(team)} -${Math.abs(n).toFixed(1)}", source)
         self.assertIn('class="mobile-edge-direction"', source)
         self.assertNotIn('class="mobile-edge-signal"', source)
         self.assertNotIn('class="mobile-edge-model"', source)
@@ -104,8 +109,7 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
             render.index('class="mobile-command-row game-start'),
         )
         self.assertNotIn("mobile-command-row mobile-command-head", source)
-        self.assertIn("function syncMobileHeaderOffset(){", source)
-        self.assertIn("controls.getBoundingClientRect().height", source)
+        self.assertIn(".mobile-command-header{position:relative", source)
         self.assertIn(".mobile-matrix-shell{display:block;width:100%;min-width:0;max-width:100%;padding:7px;box-sizing:border-box;overflow:visible", source)
         self.assertIn("body{overflow-x:hidden;overflow-y:auto}", source)
 
@@ -167,6 +171,24 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertEqual(expected(2.0), "mobile-edge-yellow")
         self.assertEqual(expected(3.0), "mobile-edge-yellow")
         self.assertEqual(expected(3.1), "mobile-edge-green")
+
+    def test_mobile_model_references_use_authoritative_projection_without_changing_edges(self):
+        source = self.source
+        reference = source.split(
+            "function mobileModelReference(game,market,value){", 1
+        )[1].split("function mobileEdgeMagnitudeClass", 1)[0]
+        self.assertIn("const n=Number(value)", reference)
+        self.assertIn("const team=n<0?game.home_team:game.away_team", reference)
+        self.assertNotIn("displayedEdge", reference)
+        self.assertNotIn("component_values", reference)
+
+        renderer = source.split(
+            "function renderMobileMatrix(rows){", 1
+        )[1].split("function isMobileView(){", 1)[0]
+        self.assertIn("const sprEdge=sprSide?displayedSpreadEdge?.best_edge:null", renderer)
+        self.assertIn("const totEdge=totSide?displayedTotalEdge?.best_edge:null", renderer)
+        self.assertIn("mobileEdgeDisplay(game,'spread',sprSide,sprEdge)", renderer)
+        self.assertIn("mobileEdgeDisplay(game,'total',totSide,totEdge)", renderer)
 
     def test_desktop_table_contract_is_unchanged(self):
         source = self.source
