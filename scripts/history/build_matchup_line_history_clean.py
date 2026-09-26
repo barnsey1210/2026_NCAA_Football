@@ -339,15 +339,15 @@ def build_chart(db, parts):
     return chart.sort_values(["game_id","snapshot_date"])
 
 
-def affected_fast_context():
-    payload = json.loads(Path("data/site/war_room_market_matrix.json").read_text())
-    ids = {str(g.get("game_id")) for g in payload.get("games", []) if g.get("game_id")}
-    pulled_at = (payload.get("fast_market_refresh") or {}).get("last_fast_pull_at")
-    return ids, pulled_at
-
-
-def affected_fast_game_ids():
-    return affected_fast_context()[0]
+def affected_transaction_game_ids(paths):
+    ids = set()
+    for raw in paths:
+        path = Path(raw)
+        if not path.exists():
+            raise SystemExit(f"affected-game transaction manifest not found: {path}")
+        payload = json.loads(path.read_text())
+        ids.update(str(value) for value in payload.get("affected_game_ids", []) if value)
+    return ids
 
 
 def atomic_csv(frame, path):
@@ -357,26 +357,45 @@ def atomic_csv(frame, path):
     temporary.replace(path)
 
 
+def semantic_frame(frame):
+    """Normalize row/column ordering without masking any public field value."""
+    normalized = frame.copy()
+    normalized.columns = normalized.columns.astype(str)
+    normalized = normalized.reindex(sorted(normalized.columns), axis=1)
+    keys = [key for key in ("game_id", "snapshot_date") if key in normalized.columns]
+    if keys:
+        normalized = normalized.sort_values(keys)
+    return normalized.reset_index(drop=True).fillna("").astype(str)
+
+
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument("--incremental-fast", action="store_true")
+    mode=parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--incremental", action="store_true")
+    mode.add_argument("--full-reconcile", action="store_true")
+    parser.add_argument("--affected-manifest", action="append", default=[])
+    parser.add_argument("--accept-reconciliation-diff", action="store_true")
     args=parser.parse_args()
     db, by_pair_date, by_pair = load_site_db()
-    affected, fast_pulled_at = affected_fast_context() if args.incremental_fast else (None, None)
+    if args.incremental and not args.affected_manifest:
+        raise SystemExit("--incremental requires at least one --affected-manifest")
+    affected = affected_transaction_game_ids(args.affected_manifest) if args.incremental else None
 
     parts = []
     existing = None
+    if affected is not None and not affected:
+        print("No newly accepted line-history observations; clean history unchanged.")
+        print("mode: incremental")
+        print("affected games: 0")
+        return
     if affected is not None and OUT.exists():
         existing = pd.read_csv(OUT, low_memory=False)
-        prior_affected = existing[existing["game_id"].astype(str).isin(affected)].copy()
-        if not prior_affected.empty:
-            parts.append(prior_affected)
-    book_hist = read_book_history(BOOK_HISTORY, by_pair_date, by_pair, affected, fast_pulled_at)
+    book_hist = read_book_history(BOOK_HISTORY, by_pair_date, by_pair, affected)
     if not book_hist.empty:
         print(BOOK_HISTORY, "rows:", len(book_hist), "games:", book_hist["game_id"].nunique())
         parts.append(book_hist)
 
-    for p in SOURCES if affected is None else ():
+    for p in SOURCES:
         got = read_source(p, by_pair_date, by_pair, affected)
         if not got.empty:
             print(p, "rows:", len(got), "games:", got["game_id"].nunique())
@@ -386,13 +405,23 @@ def main():
     if affected is not None and existing is not None:
         unaffected = existing[~existing["game_id"].astype(str).isin(affected)]
         chart = pd.concat([unaffected, chart], ignore_index=True).sort_values(["game_id","snapshot_date"])
+    if args.full_reconcile and OUT.exists():
+        current = pd.read_csv(OUT, low_memory=False)
+        equivalent = semantic_frame(current).equals(semantic_frame(chart))
+        print("semantic comparison:", "EQUIVALENT" if equivalent else "DIFFERENT")
+        if not equivalent and not args.accept_reconciliation_diff:
+            candidate = OUT.with_suffix(".reconciliation_candidate.csv")
+            atomic_csv(chart, candidate)
+            raise SystemExit(
+                f"full reconciliation differs; preserved current output and wrote candidate: {candidate}"
+            )
     atomic_csv(chart, OUT)
 
     print()
     print("wrote:", OUT)
     print("rows:", len(chart))
     print("games:", chart["game_id"].nunique())
-    print("mode:", "incremental-fast" if affected is not None else "full")
+    print("mode:", "incremental" if affected is not None else "full-reconcile")
     if affected is not None: print("affected games:", len(affected))
     print("snapshot dates:", chart["snapshot_date"].min(), "to", chart["snapshot_date"].max())
     print("snapshots per game:")

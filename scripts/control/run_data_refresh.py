@@ -626,7 +626,9 @@ def main() -> int:
                              "--accepted-quotes", "data/odds/theodds_ncaaf_lines_2026.csv"],
                             [sys.executable, "scripts/odds/build_game_line_movement_report.py"],
                             [sys.executable, "scripts/site/build_matchups_view.py"],
-                            [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],
+                            [sys.executable, "scripts/history/build_matchup_line_history_clean.py", "--incremental",
+                             "--affected-manifest", "data/control/line_history/game_append_transaction.json",
+                             "--affected-manifest", "data/control/line_history/book_append_transaction.json"],
                             [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
                             [sys.executable, "scripts/site/build_odds_screen_v2.py"],
                             [sys.executable, "scripts/site/build_schedule_live_enrichment.py"],
@@ -700,7 +702,9 @@ def main() -> int:
                         # 4. Rebuild current matchup/line/Shadow assets using
                         #    already-available postgame state.
                         [sys.executable, "scripts/site/build_matchups_view.py"],
-                        [sys.executable, "scripts/history/build_matchup_line_history_clean.py"],
+                        [sys.executable, "scripts/history/build_matchup_line_history_clean.py", "--incremental",
+                         "--affected-manifest", "data/control/line_history/game_append_transaction.json",
+                         "--affected-manifest", "data/control/line_history/book_append_transaction.json"],
                         [sys.executable, "scripts/site/inject_matchup_line_history.py", "--asset-only"],
                         [sys.executable, "scripts/postgame/build_shadow_team_game_features_2026.py"],
                         [sys.executable, "scripts/site/build_saturday_shadow_component_predictions.py"],

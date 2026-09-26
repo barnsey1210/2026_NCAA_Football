@@ -4,9 +4,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
+import json
 import pandas as pd
 
 OUT = Path("data/odds/game_line_history.csv")
+TRANSACTION_OUT = Path("data/control/line_history/game_append_transaction.json")
 
 SOURCE_FILES = [
     ("The Odds API", Path("data/odds/theodds_season_game_lines_2026.csv")),
@@ -57,7 +59,16 @@ def main():
 
         rows.append(df[KEEP_COLS])
 
+    def write_transaction(frame):
+        TRANSACTION_OUT.parent.mkdir(parents=True, exist_ok=True)
+        ids = sorted(frame.get("game_id", pd.Series(dtype=str)).dropna().astype(str).unique().tolist())
+        payload = {"schema_version":"line-history-append-transaction-v1","written_at":datetime.now(timezone.utc).isoformat(),
+                   "append_target":str(OUT),"appended_rows":len(frame),"affected_game_ids":ids}
+        temporary = TRANSACTION_OUT.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(payload, indent=2) + "\n")
+        temporary.replace(TRANSACTION_OUT)
     if not rows:
+        write_transaction(pd.DataFrame())
         print("No game line rows to append.")
         return
 
@@ -106,6 +117,7 @@ def main():
             if latest.get(key)==state: continue
             additions.append(row[KEEP_COLS]);latest[key]=state
         if not additions:
+            write_transaction(pd.DataFrame(columns=KEEP_COLS))
             print("Current accepted game-line state is identical by game/source. Skipping append.")
             return
         appended=pd.DataFrame(additions,columns=KEEP_COLS)
@@ -124,6 +136,8 @@ def main():
     out = out.drop_duplicates(subset=[c for c in dedupe_cols if c in out.columns], keep="last")
 
     out.to_csv(OUT, index=False)
+    accepted = appended if 'appended' in locals() else new
+    write_transaction(accepted)
     appended_count = len(out) - (len(old) if 'old' in locals() else 0)
     print(f"Appended {appended_count} changed game/source rows to {OUT}; total rows now {len(out)}")
     print(f"snapshot_ts={snapshot_ts}")

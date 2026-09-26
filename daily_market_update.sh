@@ -634,7 +634,10 @@ fi
   # STAGE: line_history_assets
   if stage_enabled "line_history_assets"; then
   stage_start "line_history_assets"
-  run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py"
+  run_py "scripts/history/build_matchup_line_history_clean.py" "build_matchup_line_history_clean.py" \
+    --incremental \
+    --affected-manifest data/control/line_history/game_append_transaction.json \
+    --affected-manifest data/control/line_history/book_append_transaction.json
   python3 scripts/site/inject_matchup_line_history.py --asset-only
   stage_pass "line_history_assets"
 

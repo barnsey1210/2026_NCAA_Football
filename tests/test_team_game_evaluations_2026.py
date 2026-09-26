@@ -1,4 +1,6 @@
 import importlib.util
+import json
+import tempfile
 import unittest
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -10,6 +12,17 @@ MF = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(MF)
 
 
 class ModelFitMathTests(unittest.TestCase):
+    def test_streaming_ledger_filter_keeps_only_requested_game(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.jsonl"
+            path.write_text("\n".join(json.dumps(row) for row in (
+                {"canonical_game_id":"g1","value":1},
+                {"canonical_game_id":"g10","value":10},
+                {"canonical_game_id":"g2","value":2},
+            )) + "\n")
+            rows = MF.load_jsonl_for_game_ids(path, "canonical_game_id", {"g1"})
+            self.assertEqual(rows, [{"canonical_game_id":"g1","value":1}])
+
     def game(self):
         return {"game_id":"g1", "cfbd_game_id":1, "week":0, "start_date":"2026-08-29T16:00:00Z", "home_team":"Home", "away_team":"Away", "home_margin_actual":7, "home_score":24, "away_score":17, "source":"fixture"}
 

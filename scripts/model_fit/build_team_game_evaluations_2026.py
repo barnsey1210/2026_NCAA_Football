@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import math
+import re
 import tempfile
 import sys
 from collections import defaultdict
@@ -88,6 +89,30 @@ def load_jsonl(path):
             rows.append(json.loads(line))
         except json.JSONDecodeError:
             continue
+    return rows
+
+
+def load_jsonl_for_game_ids(path, field, game_ids):
+    """Stream a large append-only ledger and retain only requested games."""
+    wanted = {str(game_id) for game_id in game_ids}
+    if not wanted or not Path(path).exists():
+        return []
+    rows = []
+    field_pattern = re.compile(r'"' + re.escape(field) + r'"\s*:\s*"([^"]+)"')
+    with Path(path).open() as handle:
+        for line in handle:
+            # Most ledger rows are unrelated; extract the indexed identifier
+            # before decoding to avoid parsing hundreds of thousands of large
+            # historical JSON objects.
+            match = field_pattern.search(line)
+            if not match or match.group(1) not in wanted:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if str(row.get(field)) in wanted:
+                rows.append(row)
     return rows
 
 
@@ -644,11 +669,17 @@ def main():
     unresolved_models = {
         game_id for game_id, (model, _) in prior_inputs.items() if model is None
     }
-    observations = (
-        index_by_game(load_jsonl(args.predictions), "canonical_game_id")
-        if not args.hot_path or unresolved_models else {}
+    observations = index_by_game(
+        load_jsonl(args.predictions) if not args.hot_path else
+        load_jsonl_for_game_ids(args.predictions, "canonical_game_id", unresolved_models),
+        "canonical_game_id",
+    ) if (not args.hot_path or unresolved_models) else {}
+    eligible_ids = {str(game["game_id"]) for game in eligible_games}
+    checkpoints = index_by_game(
+        load_jsonl(args.checkpoints) if not args.hot_path else
+        load_jsonl_for_game_ids(args.checkpoints, "canonical_game_id", eligible_ids),
+        "canonical_game_id",
     )
-    checkpoints = index_by_game(load_jsonl(args.checkpoints), "canonical_game_id")
     captured_markets = {
         str(game["game_id"]): captured_close(game, checkpoints)
         for game in eligible_games

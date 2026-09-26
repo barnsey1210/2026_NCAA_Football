@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[2]
 CONTRACT=ROOT/"data/site/current_market_contract.json"
 FAST_MATRIX=ROOT/"data/site/war_room_market_matrix.json"
 OUT=ROOT/"data/odds/game_book_line_history.csv"
+TRANSACTION_OUT=ROOT/"data/control/line_history/book_append_transaction.json"
 
 COLS=["snapshot_ts","source","date","away_team","home_team","game_key","book","market","line","price",
 "provider_open_line","provider_open_price","provider_close_line","provider_close_price","book_last_updated",
@@ -77,7 +78,16 @@ def main():
     if fast_rows:
         print(f"Canonical fast-matrix quote rows prepared: {len(fast_rows)}")
     new=pd.DataFrame(rows)
+    def write_transaction(rows):
+        TRANSACTION_OUT.parent.mkdir(parents=True,exist_ok=True)
+        payload={"schema_version":"line-history-append-transaction-v1","written_at":datetime.now(timezone.utc).isoformat(),
+                 "append_target":str(OUT.relative_to(ROOT)),"appended_rows":len(rows),
+                 "state_ids":sorted(rows.get("state_id",pd.Series(dtype=str)).dropna().astype(str).unique().tolist()),
+                 "affected_game_ids":sorted(rows.get("canonical_game_id",pd.Series(dtype=str)).dropna().astype(str).unique().tolist())}
+        temporary=TRANSACTION_OUT.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(payload,indent=2)+"\n"); temporary.replace(TRANSACTION_OUT)
     if new.empty:
+        write_transaction(new)
         print("No fresh canonical current-market quotes to append."); return
     new=new.drop_duplicates("state_id",keep="last")
     old=pd.read_csv(OUT,low_memory=False) if OUT.exists() and OUT.stat().st_size else pd.DataFrame(columns=COLS)
@@ -88,12 +98,14 @@ def main():
     existing=set(old["state_id"].dropna().astype(str)) if "state_id" in old.columns else set()
     add=new[~new["state_id"].astype(str).isin(existing)]
     if add.empty:
+        write_transaction(add)
         print("Canonical per-book market state already present; no rows appended."); return
     out=pd.concat([old[cols],add[cols]],ignore_index=True)
     OUT.parent.mkdir(parents=True,exist_ok=True)
     temporary=OUT.with_suffix(OUT.suffix+".tmp")
     out.to_csv(temporary,index=False)
     temporary.replace(OUT)
+    write_transaction(add)
     print(f"Canonical current-market book rows appended: {len(add)}")
     print(f"Total durable book-history rows: {len(out)}")
 if __name__=="__main__": main()
