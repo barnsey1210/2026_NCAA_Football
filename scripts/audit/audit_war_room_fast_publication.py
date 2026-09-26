@@ -140,9 +140,47 @@ def main() -> None:
     if not isinstance(matched, int) or matched <= 0:
         errors.append("market matrix has no matched fast-market games")
     health_games = health_refresh.get("upcoming_games_in_pull")
-    if isinstance(matched, int) and isinstance(health_games, int) and matched != health_games:
+    projection_health = health.get("projection_health") or {}
+    health_matched = projection_health.get("matched_fast_board_games")
+    health_unmatched = projection_health.get("unmatched_fast_board_games")
+    unmatched_rows = (matrix.get("audit") or {}).get("unmatched_fast_rows")
+    unmatched_provider_ids = {
+        str(row.get("provider_game_id") or "").strip()
+        for row in unmatched_rows or []
+        if isinstance(row, dict) and str(row.get("provider_game_id") or "").strip()
+    }
+    matrix_unmatched = len(unmatched_provider_ids)
+
+    # The provider board can legitimately contain games outside the canonical
+    # projection universe (for example FCS-at-FBS games). Reconcile all three
+    # independently built counts instead of comparing the raw provider board
+    # directly with the canonical matrix universe. This keeps the guard
+    # fail-closed without treating an explicit scope difference as dropped
+    # canonical coverage.
+    for label, value in (
+        ("health pull games", health_games),
+        ("health matched fast-board games", health_matched),
+        ("health unmatched fast-board games", health_unmatched),
+    ):
+        if not isinstance(value, int) or value < 0:
+            errors.append(f"{label} must be a nonnegative integer")
+
+    if isinstance(matched, int) and isinstance(health_matched, int) and matched != health_matched:
         errors.append(
-            f"matched matrix games ({matched}) differ from health pull games ({health_games})"
+            f"matched matrix games ({matched}) differ from health matched fast-board games ({health_matched})"
+        )
+    if isinstance(health_unmatched, int) and health_unmatched != matrix_unmatched:
+        errors.append(
+            f"distinct unmatched matrix games ({matrix_unmatched}) differ from health unmatched fast-board games ({health_unmatched})"
+        )
+    if (
+        isinstance(health_games, int)
+        and isinstance(health_matched, int)
+        and isinstance(health_unmatched, int)
+        and health_games != health_matched + health_unmatched
+    ):
+        errors.append(
+            f"health pull games ({health_games}) do not reconcile to matched ({health_matched}) plus unmatched ({health_unmatched})"
         )
 
     if errors:
