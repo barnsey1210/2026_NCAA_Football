@@ -183,6 +183,13 @@ def main():
         action="store_true",
     )
 
+    ap.add_argument(
+        "--dates",
+        nargs="+",
+        default=None,
+        help="Collect only these representative board dates (YYYY-MM-DD)",
+    )
+
     args = ap.parse_args()
 
     OUTDIR.mkdir(
@@ -190,7 +197,7 @@ def main():
         exist_ok=True,
     )
 
-    dates = build_dates()
+    dates = sorted(set(args.dates)) if args.dates else build_dates()
 
     if args.start_date:
         dates = [

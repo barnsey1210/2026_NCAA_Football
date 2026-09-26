@@ -49,6 +49,7 @@ def collection_times():
 
 DATE_RE = re.compile(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{2}\.\d{2}$")
 TIME_RE = re.compile(r"^\d{1,2}:\d{2}\.PM\.ET$|^\d{1,2}:\d{2}\.AM\.ET$")
+GAME_STATUS = {"FINAL", "IN-PROGRESS", "SCHEDULED", "UPSET"}
 PCT_RE = re.compile(r"^\d+\s*%$")
 NUM_RE = re.compile(r"^-?\d+(?:\.\d+)?$")
 
@@ -80,6 +81,11 @@ def parse_file(path, pulled_at=None):
         game_date = parse_date(year, raw_date)
         i += 1
 
+        game_status = "SCHEDULED"
+        if i < len(lines) and lines[i].upper() in GAME_STATUS:
+            game_status = lines[i].upper()
+            i += 1
+
         if i < len(lines) and TIME_RE.match(lines[i]):
             i += 1
 
@@ -89,7 +95,8 @@ def parse_file(path, pulled_at=None):
         away = lines[i]
         home_line = lines[i + 1]
 
-        if home_line.startswith("@ "):
+        neutral_site_hint = not home_line.startswith("@ ")
+        if not neutral_site_hint:
             home = home_line[2:].strip()
         else:
             home = home_line.strip()
@@ -147,6 +154,8 @@ def parse_file(path, pulled_at=None):
             "game_date": game_date,
             "away_team": away,
             "home_team": home,
+            "game_status": game_status,
+            "neutral_site_hint": neutral_site_hint,
             "away_current_score": away_score,
             "home_current_score": home_score,
             "away_projected_points": away_pred,
@@ -173,6 +182,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--start-date")
     parser.add_argument("--end-date")
+    parser.add_argument("--board-dates", nargs="+")
     return parser.parse_args()
 
 
@@ -192,6 +202,7 @@ def main():
     all_audit = []
     collected = collection_times()
 
+    selected_boards = set(args.board_dates or [])
     for path in sorted(RAW_DIR.glob("massey_games_*.txt")):
         raw_date = path.stem.replace("massey_games_", "")
         board_date = (
@@ -199,6 +210,8 @@ def main():
             if len(raw_date) == 8
             else ""
         )
+        if selected_boards and board_date not in selected_boards:
+            continue
         if args.start_date and board_date < args.start_date:
             continue
         if args.end_date and board_date > args.end_date:

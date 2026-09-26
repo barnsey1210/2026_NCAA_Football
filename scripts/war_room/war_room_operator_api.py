@@ -614,58 +614,9 @@ def ratings(request: Request, operator: str = Depends(require_access)):
 
 @app.post("/war-room/massey", status_code=202)
 def massey(request: Request, operator: str = Depends(require_access)):
-    identity = f"massey-{uuid.uuid4().hex[:12]}"
-
-    task = {
-        "schema_version": 1,
-        "task_id": identity,
-        "action": "massey",
-        "trigger": "cloudflare-access",
-        "requester": operator[:120],
-        "requested_at": utc_now(),
-        "status": "REQUESTED",
-        "correlation_id": request.state.correlation_id,
-        "command_owner": "scripts/war_room/run_massey_background_refresh.py",
-        "lock_policy": "MASSEY_CRAWL_NO_CANONICAL_WRITER_LOCK",
-    }
-
-    atomic_json(TASKS / f"{identity}.json", task)
-    atomic_json(LATEST, task)
-
-    process = subprocess.Popen(
-        [
-            sys.executable,
-            "scripts/war_room/run_massey_operator_task.py",
-            "--task-id",
-            identity,
-            "--requester",
-            operator,
-        ],
-        cwd=ROOT,
-        env=os.environ.copy(),
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
-    )
-
-    task["dispatcher_pid"] = process.pid
-    atomic_json(TASKS / f"{identity}.json", task)
-    atomic_json(LATEST, task)
-
-    request.state.task_id = identity
-
-    return JSONResponse(
-        status_code=202,
-        content={
-            "ok": True,
-            "status": "REQUESTED",
-            "action": "massey",
-            "task_id": identity,
-            "correlation_id": request.state.correlation_id,
-            "dispatcher_pid": process.pid,
-        },
-    )
+    # Compatibility route for old operator shells. The canonical Ratings
+    # service now owns Massey acquisition, validation, and propagation.
+    return request_action("ratings", operator, request)
 
 
 @app.post("/war-room/postgame", status_code=202)

@@ -111,6 +111,11 @@ def commands(start_date, end_date, as_of_date=None):
     return {
         "sagarin": [sys.executable, "ratings/pull_sagarin_ratings.py", *bounds, *clock],
         "dratings": [sys.executable, "scripts/projections/pull_dratings_ncaaf_predictions.py", *bounds, *clock],
+        "massey": [
+            sys.executable,
+            "scripts/projections/refresh_massey_game_projections_2026.py",
+            *clock,
+        ],
     }
 
 
@@ -198,12 +203,7 @@ def main():
             None,
         )
 
-        snapshot_only = component == "massey"
-
-        if not snapshot_only and (not stage or stage.get("status") != "PASSED"):
-            continue
-
-        if snapshot_only and after.get(component) is None:
+        if not stage or stage.get("status") != "PASSED":
             continue
 
         changed = component in changed_components
@@ -234,7 +234,7 @@ def main():
         "canonical_game_ids": [row["game_id"] for row in games],
         "providers_checked": ["sagarin", "dratings", "massey"],
         "providers_contacted": [row["provider"] for row in stages],
-        "snapshot_only_providers": ["massey"],
+        "snapshot_only_providers": [],
         "changed_components": changed_components,
         "changed_providers": sorted({name.split("_", 1)[0] for name in changed_components}),
         "coverage": coverage,

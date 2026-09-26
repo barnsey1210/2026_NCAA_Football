@@ -144,8 +144,6 @@ def main() -> int:
             [
                 sys.executable,
                 "scripts/projections/refresh_massey_game_projections_2026.py",
-                "--days",
-                "10",
             ],
             cwd=ROOT,
             text=True,

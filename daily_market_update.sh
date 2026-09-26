@@ -480,6 +480,11 @@ PY2
   run_py "ratings/pull_sagarin_ratings.py" "pull_sagarin_ratings.py" \
     || warn "Sagarin ratings refresh failed; retaining last-known-good data"
 
+  # The shared Standard-source path owns DRatings game predictions and the
+  # validated two-week Massey board acquisition used by Command Center too.
+  run_py "scripts/ratings/run_fast_standard_source_refresh.py" "run_fast_standard_source_refresh.py" \
+    || warn "Standard game-source refresh incomplete; retaining last-known-good accepted data"
+
   # Massey remains a non-production reference source.
   run_py "ratings/parse_massey_visible_ratings.py" "parse_massey_visible_ratings.py" \
     || warn "Massey ratings refresh failed; retaining last-known-good reference data"
@@ -531,8 +536,8 @@ PY2
   # STAGE: projections
   if stage_enabled "projections"; then
   stage_start "projections"
-  run_py "scripts/projections/refresh_massey_game_projections_2026.py" "refresh_massey_game_projections_2026.py" || warn "Massey rolling 14-day game projections refresh failed; retaining last-known-good data"
-  run_py "scripts/projections/pull_dratings_ncaaf_predictions.py" "pull_dratings_ncaaf_predictions.py" || warn "DRatings NCAAF predictions refresh failed"
+  # Massey and DRatings were acquired once in ratings_refresh through the same
+  # guarded path used by the manual Command Center Ratings action.
   run_py "scripts/projections/build_game_projection_sources_2026.py" "build_game_projection_sources_2026.py" || warn "game projection source build failed"
   run_py "scripts/projections/build_current_game_projection_contract.py" "build_current_game_projection_contract.py" || warn "canonical game projection contract build failed"
   run_py "scripts/audit/audit_projection_fbs_production_coverage.py" "audit_projection_fbs_production_coverage.py" || warn "FBS production projection coverage audit failed"

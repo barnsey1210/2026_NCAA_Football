@@ -391,12 +391,18 @@ def load_massey(idx):
                         match_method = "date_tolerance"
                         break
 
+        neutral_site_hint = str(r.get("neutral_site_hint") or "").strip().lower() in {
+            "1", "true", "yes"
+        }
+
         if not g:
             # Massey can reverse orientation for neutral-site games.
-            # Accept only exact-date reversals when canonical schedule
-            # explicitly marks the matchup neutral.
+            # Accept only exact-date reversals when either the canonical
+            # schedule marks the matchup neutral or Massey's rendered board
+            # omits the @ marker and therefore supplies direct neutral-site
+            # evidence (for example Arlington, TX).
             for sg in idx.values():
-                if not bool(sg.get("neutral_site")):
+                if not (bool(sg.get("neutral_site")) or neutral_site_hint):
                     continue
                 if str(sg.get("date")) != source_date:
                     continue

@@ -2432,10 +2432,6 @@ tr:hover td.context-group{background:#202d39}
         ↻ REFRESH RATINGS
       </button>
 
-      <button class="wr-btn operator-control" id="masseyBtn" disabled title="Run independent Massey Safari crawl; if changed, automatically propagate the Total model">
-        ↻ REFRESH MASSEY
-      </button>
-
       <button class="wr-btn operator-control" id="postgameBtn" disabled>
         ↻ REFRESH POSTGAME
       </button>
@@ -6581,7 +6577,6 @@ document.getElementById('acquireBtn').addEventListener(
 );
 
 document.getElementById('ratingsBtn').addEventListener('click', e=>requestOperation('ratings',e.currentTarget,'↻ REQUESTING RATINGS…'));
-document.getElementById('masseyBtn').addEventListener('click', e=>requestOperation('massey',e.currentTarget,'↻ REQUESTING MASSEY…'));
 document.getElementById('postgameBtn').addEventListener('click', e=>requestOperation('postgame',e.currentTarget,'↻ REQUESTING POSTGAME…'));
 
 let LAST_BUILD_ID = null;

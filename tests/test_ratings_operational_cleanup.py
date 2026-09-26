@@ -45,14 +45,15 @@ class RatingsOperationalCleanupTests(unittest.TestCase):
         with patch.object(MASSEY, "run_applescript", side_effect=RuntimeError("fixture")):
             MASSEY.close_safari_worker(77)
 
-    def test_fast_and_daily_horizons_remain_seven_and_fourteen(self):
+    def test_manual_and_daily_use_shared_weekly_massey_path(self):
         fast = (ROOT / "scripts/ratings/run_fast_standard_source_refresh.py").read_text()
         daily = (ROOT / "daily_market_update.sh").read_text()
         wrapper = (ROOT / "scripts/projections/refresh_massey_game_projections_2026.py").read_text()
-        self.assertIn('"--days", "7"', fast)
-        self.assertIn('default=14', wrapper)
-        self.assertIn('end = start + timedelta(days=args.days)', wrapper)
-        self.assertIn('refresh_massey_game_projections_2026.py', daily)
+        self.assertIn('"massey": [', fast)
+        self.assertIn('run_fast_standard_source_refresh.py', daily)
+        self.assertNotIn('run_py "scripts/projections/refresh_massey_game_projections_2026.py"', daily)
+        self.assertIn('football_week_saturdays(start)', wrapper)
+        self.assertIn('validate_massey_weekly_coverage.py', wrapper)
 
     def test_public_operator_never_posts_directly(self):
         public = (ROOT / "scripts/site/build_war_room_page.py").read_text()
