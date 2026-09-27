@@ -148,6 +148,13 @@ class FastMarketSchedulerTests(unittest.TestCase):
         )
         self.assertEqual((report["status"], len(calls)), ("BLOCKED_BY_QUOTA", 1))
 
+    def test_ratings_coalescence_is_benign_and_does_not_advance_cadence(self):
+        now = datetime(2026, 9, 6, 10, 0, tzinfo=ET)
+        _, report, updated, calls = self.run_at(now, task_status="COALESCED_FOR_RATINGS")
+        self.assertEqual((report["status"], len(calls)), ("COALESCED_FOR_RATINGS", 1))
+        self.assertNotIn("last_due_handled_at", updated)
+        self.assertIn("controller owns one catch-up refresh", report["deferred_reason"])
+
     def test_manual_and_automatic_market_share_service_and_owner(self):
         api = (ROOT / "scripts/war_room/war_room_operator_api.py").read_text()
         dispatcher = (ROOT / "scripts/control/run_war_room_service.py").read_text()

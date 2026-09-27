@@ -19,6 +19,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTROL = ROOT / "data/control/war_room_services"
@@ -29,6 +30,12 @@ DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
 REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
 WRITER_QUEUE_WAIT_SECONDS = 900
 WRITER_QUEUE_POLL_SECONDS = 0.1
+LIVE_REQUEST_STATUSES = {
+    "REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "QUEUED_FOR_MARKET_GAP",
+}
+RATINGS_PROTECTED_STATUSES = LIVE_REQUEST_STATUSES | {
+    "RUNNING", "RATINGS_CATCHUP_MARKET",
+}
 
 ACTION_REGISTRY_KEYS = {
     "market": "MARKET_REFRESH",
@@ -121,14 +128,13 @@ def acquire(action: str, identity: str) -> Path:
     return global_lock
 
 
-def live_queue(tasks_dir: Path = TASKS) -> list[dict]:
-    """Return live writer requests in durable FIFO order."""
+def live_queue(tasks_dir: Optional[Path] = None) -> list[dict]:
+    """Return live writer requests in durable priority/FIFO order."""
+    tasks_dir = tasks_dir or TASKS
     queued = []
     for path in tasks_dir.glob("*.json"):
         task = read_json(path, {})
-        if task.get("action") not in ACTION_REGISTRY_KEYS or task.get("status") not in {
-            "REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "QUEUED_FOR_MARKET_GAP",
-        }:
+        if task.get("action") not in ACTION_REGISTRY_KEYS or task.get("status") not in LIVE_REQUEST_STATUSES:
             continue
         pid = task.get("dispatcher_pid")
         if not isinstance(pid, int):
@@ -138,7 +144,42 @@ def live_queue(tasks_dir: Path = TASKS) -> list[dict]:
         except OSError:
             continue
         queued.append(task)
-    return sorted(queued, key=lambda row: (str(row.get("requested_at") or ""), str(row.get("task_id") or "")))
+    return sorted(queued, key=lambda row: (
+        request_priority(row), str(row.get("requested_at") or ""), str(row.get("task_id") or ""),
+    ))
+
+
+def request_priority(task: dict) -> int:
+    """Ratings reservations outrank queued work; running work is never preempted."""
+    action = task.get("action")
+    trigger = str(task.get("trigger") or "")
+    if action == "ratings":
+        return 0 if trigger not in {"ratings-scheduler"} else 1
+    if action == "postgame":
+        return 2
+    if action == "market" and trigger == "ratings-catchup":
+        return 3
+    if action == "market" and trigger == "market-scheduler":
+        return 5
+    return 4
+
+
+def ratings_protection_active(tasks_dir: Optional[Path] = None) -> Optional[dict]:
+    """Return a live Ratings reservation covering queue wait through catch-up Market."""
+    tasks_dir = tasks_dir or TASKS
+    for path in tasks_dir.glob("*.json"):
+        task = read_json(path, {})
+        if task.get("action") != "ratings" or task.get("status") not in RATINGS_PROTECTED_STATUSES:
+            continue
+        pid = task.get("dispatcher_pid")
+        if not isinstance(pid, int):
+            continue
+        try:
+            os.kill(pid, 0)
+            return task
+        except OSError:
+            continue
+    return None
 
 
 def acquire_fifo(
@@ -150,7 +191,7 @@ def acquire_fifo(
     waiting=None,
     sleeper=time.sleep,
 ) -> Path:
-    """Acquire the single writer lock in durable request-time FIFO order."""
+    """Acquire the writer in durable Ratings/Postgame/Market priority then FIFO order."""
     deadline = time.monotonic() + max(0.0, timeout_seconds)
     while True:
         queue = live_queue()
@@ -227,6 +268,16 @@ def main() -> int:
     )
     atomic_json(TASKS / f"{identity}.json", task)
     atomic_json(LATEST, task)
+    if (args.action == "market" and args.trigger == "market-scheduler"
+            and (reservation := ratings_protection_active())):
+        task.update(
+            status="COALESCED_FOR_RATINGS",
+            completed_at=utc_now(),
+            ratings_task_id=reservation.get("task_id"),
+            waiting_reason="Market paused for Ratings; one fresh Market refresh follows Ratings",
+        )
+        atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
+        print(json.dumps(task, indent=2)); return 0
     if daily_running():
         task.update(status="DEFERRED_BY_DAILY_BACKBONE", completed_at=utc_now())
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
@@ -237,6 +288,8 @@ def main() -> int:
         print(json.dumps(task, indent=2)); return 0
 
     lock = None
+    ratings_started = False
+    terminal_status = None
     try:
         def record_waiting(reason: str) -> None:
             task.update(
@@ -248,10 +301,11 @@ def main() -> int:
             atomic_json(LATEST, task)
 
         lock = acquire_fifo(args.action, identity, waiting=record_waiting)
+        ratings_started = args.action == "ratings"
         task.update(
             status="RUNNING",
             started_at=utc_now(),
-            queue_policy="FIFO_EQUAL_PRIORITY",
+            queue_policy="RATINGS_PRIORITY_THEN_FIFO",
         )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         command = resolve_command(args.action)
@@ -275,13 +329,41 @@ def main() -> int:
         )
         if market_result:
             task.update(market_result)
+        terminal_status = task["status"]
     except RuntimeError as exc:
         task.update(status="BLOCKED_BY_OVERLAP", completed_at=utc_now(), error=str(exc))
     except subprocess.TimeoutExpired:
         task.update(status="FAILED", completed_at=utc_now(), error="service execution timed out")
+        terminal_status = "FAILED"
     finally:
         if lock and lock.exists():
             shutil.rmtree(lock)
+        atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
+
+    if ratings_started:
+        # Keep the Ratings reservation live until exactly one fresh Market run has
+        # followed the protected acquisition/propagation/validation/publication transaction.
+        task.update(status="RATINGS_CATCHUP_MARKET", ratings_phase="Market resumed")
+        atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
+        catchup_id = f"market-after-ratings-{hashlib.sha256(identity.encode()).hexdigest()[:12]}"
+        try:
+            catchup = subprocess.run(
+                [sys.executable, "scripts/control/run_war_room_service.py", "market",
+                 "--trigger", "ratings-catchup", "--requester", "ratings-controller",
+                 "--task-id", catchup_id],
+                cwd=ROOT, text=True, capture_output=True, timeout=3600, check=False,
+            )
+            catchup_returncode = catchup.returncode
+        except subprocess.TimeoutExpired:
+            catchup_returncode = 2
+        catchup_task = read_json(TASKS / f"{catchup_id}.json", {})
+        task.update(
+            status=terminal_status or task.get("status", "FAILED"),
+            catchup_market_task_id=catchup_id,
+            catchup_market_status=catchup_task.get("status", "FAILED"),
+            catchup_market_returncode=catchup_returncode,
+            completed_at=utc_now(),
+        )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
     print(json.dumps(task, indent=2))
     return 0 if task["status"] in {"COMPLETED", "COMPLETED_WITH_WARNINGS"} else 2

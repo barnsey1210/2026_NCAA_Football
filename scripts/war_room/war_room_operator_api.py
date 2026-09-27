@@ -215,7 +215,10 @@ def request_action(action: str, requester: str, request: Request) -> JSONRespons
     prior = load_json(task_path, {})
     known_status = prior.get("status") in {
         "REQUESTED",
+        "WAITING_FOR_CANONICAL_WRITER",
         "RUNNING",
+        "RATINGS_CATCHUP_MARKET",
+        "COALESCED_FOR_RATINGS",
         "COMPLETED",
         "COMPLETED_WITH_WARNINGS",
         "FAILED",

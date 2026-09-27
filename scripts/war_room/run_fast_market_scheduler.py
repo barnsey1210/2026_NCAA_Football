@@ -184,13 +184,15 @@ def execute(*, now: datetime, state: dict[str, Any], market_success_at: datetime
         report["deferred_reason"] = str(task.get("error") or "canonical writer is active")
     elif status == "BLOCKED_BY_QUOTA":
         report["deferred_reason"] = "existing Market quota governor blocked acquisition"
+    elif status == "COALESCED_FOR_RATINGS":
+        report["deferred_reason"] = "Market paused for Ratings; controller owns one catch-up refresh"
     report.update(status=status, last_scheduled_dispatch_at=iso(now),
                   service_result=task or {"status": "FAILED", "returncode": result.returncode,
                                           "error": "Market dispatcher returned no structured task result"},
                   duration_seconds=round(time.monotonic() - started, 3))
     code = 0 if status in {"COMPLETED", "COMPLETED_WITH_WARNINGS",
                            "DEFERRED_BY_DAILY_BACKBONE", "BLOCKED_BY_OVERLAP",
-                           "BLOCKED_BY_QUOTA"} else 2
+                           "BLOCKED_BY_QUOTA", "COALESCED_FOR_RATINGS"} else 2
     return code, report, new_state
 
 
