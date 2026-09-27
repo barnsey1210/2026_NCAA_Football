@@ -16,6 +16,7 @@ class RatingSourceTeamNormalizationTests(unittest.TestCase):
     def test_spplus_acronyms_are_canonicalized_upstream(self):
         self.assertEqual(PARSER.canonical("KSU"), "Kennesaw State")
         self.assertEqual(PARSER.canonical("Kennesaw"), "Kennesaw State")
+        self.assertEqual(PARSER.canonical("N Mex St"), "New Mexico State")
         self.assertEqual(PARSER.canonical("SHSU"), "Sam Houston")
 
     def test_fpi_fcs_mascot_names_are_canonicalized_upstream(self):

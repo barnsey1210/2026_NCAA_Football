@@ -160,6 +160,7 @@ ALIASES = {
     "nebraska": "Nebraska",
     "nevada": "Nevada",
     "new mexico": "New Mexico",
+    "n mex st": "New Mexico State",
     "new mexico st": "New Mexico State",
     "nmsu": "New Mexico State",
     "new mexico state": "New Mexico State",
