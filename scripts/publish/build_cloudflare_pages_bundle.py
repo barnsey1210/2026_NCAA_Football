@@ -83,6 +83,16 @@ def planned_files(root: Path, manifest: dict[str, Any]) -> list[tuple[Path, Path
     return planned
 
 
+def materialized_bytes(source: Path, target: Path, manifest: dict[str, Any]) -> bytes | None:
+    compact = set(manifest.get("compact_json_files", []))
+    if target.as_posix() not in compact:
+        return None
+    if source.suffix.lower() != ".json":
+        raise RuntimeError(f"compact JSON target is not JSON: {target}")
+    payload = json.loads(source.read_text())
+    return (json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
+
+
 def build(root: Path, manifest_path: str, output_value: str | None = None) -> dict[str, int]:
     root = root.resolve()
     _, manifest = load_manifest(root, manifest_path)
@@ -91,8 +101,11 @@ def build(root: Path, manifest_path: str, output_value: str | None = None) -> di
     maximum_file = int(manifest["max_file_bytes"])
     maximum_total = int(manifest["max_total_bytes"])
     total = 0
+    materialized: dict[str, bytes | None] = {}
     for source, target in planned:
-        size = source.stat().st_size
+        body = materialized_bytes(source, target, manifest)
+        materialized[target.as_posix()] = body
+        size = len(body) if body is not None else source.stat().st_size
         if size > maximum_file:
             raise RuntimeError(f"public artifact exceeds file limit: {target} ({size} bytes)")
         total += size
@@ -106,7 +119,11 @@ def build(root: Path, manifest_path: str, output_value: str | None = None) -> di
     for source, target in planned:
         destination = output / target
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, destination, follow_symlinks=False)
+        body = materialized[target.as_posix()]
+        if body is None:
+            shutil.copyfile(source, destination, follow_symlinks=False)
+        else:
+            destination.write_bytes(body)
     print(f"Built Cloudflare Pages bundle: {len(planned)} files, {total} bytes, {output}")
     return {"files": len(planned), "bytes": total}
 

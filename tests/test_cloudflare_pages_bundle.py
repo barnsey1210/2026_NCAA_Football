@@ -108,6 +108,36 @@ class CloudflarePagesBundleTests(unittest.TestCase):
         self.assertIn("ncaab", trees)
         self.assertIn("ncaab/command-center/index.html", manifest["required_pages"])
         self.assertIn("ncaab/ratings/index.html", manifest["required_pages"])
+        self.assertIn(
+            "data/site/war_room_market_matrix.json",
+            manifest["compact_json_files"],
+        )
+
+    def test_compact_json_is_lossless_and_used_for_file_limits(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.fixture(root)
+            matrix = root / "data/site/view.json"
+            matrix.write_text(json.dumps({"games": [{"id": "g1", "edge": 2.5}]}, indent=8))
+            manifest_path = root / "config/cloudflare_pages_manifest.json"
+            manifest = json.loads(manifest_path.read_text())
+            manifest["compact_json_files"] = ["data/site/view.json"]
+            manifest_path.write_text(json.dumps(manifest))
+            bundle.build(root, "config/cloudflare_pages_manifest.json")
+            checker.validate(root, "config/cloudflare_pages_manifest.json", allow_untracked_inputs=True)
+            output = root / "build/cloudflare_pages/data/site/view.json"
+            self.assertEqual(json.loads(output.read_text()), json.loads(matrix.read_text()))
+            self.assertLess(output.stat().st_size, matrix.stat().st_size)
+
+    def test_nested_page_references_resolve_from_page_directory(self):
+        self.assertEqual(
+            checker.local_reference("../assets/app.css", "ncaab/ratings/index.html"),
+            "ncaab/assets/app.css",
+        )
+        self.assertEqual(
+            checker.local_reference("assets/app.css", "ncaab/index.html"),
+            "ncaab/assets/app.css",
+        )
 
     def test_validator_fails_when_required_input_is_not_git_tracked(self):
         with tempfile.TemporaryDirectory() as temporary:

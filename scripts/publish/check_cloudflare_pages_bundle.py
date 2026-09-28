@@ -35,16 +35,30 @@ def digest(path: Path) -> str:
     return value.hexdigest()
 
 
-def local_reference(value: str) -> str | None:
+def local_reference(value: str, page: str = "") -> str | None:
     if not value or "${" in value or value.startswith(("#", "data:", "mailto:", "javascript:")):
         return None
     parsed = urlsplit(value)
     if parsed.scheme or parsed.netloc:
         return None
-    path = unquote(parsed.path).lstrip("/")
-    if not path or path.endswith("/") or ".." in Path(path).parts:
+    raw_path = unquote(parsed.path)
+    if not raw_path or raw_path.endswith("/"):
         return None
-    return path
+    if raw_path.startswith("/"):
+        resolved = Path(raw_path.lstrip("/"))
+    else:
+        resolved = Path(page).parent / raw_path
+    normalized: list[str] = []
+    for part in resolved.parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if not normalized:
+                return None
+            normalized.pop()
+        else:
+            normalized.append(part)
+    return Path(*normalized).as_posix() if normalized else None
 
 
 def untracked_inputs(root: Path, paths: list[Path]) -> list[str]:
@@ -91,8 +105,12 @@ def validate(
     if extra:
         raise RuntimeError(f"bundle contains non-allowlisted files: {extra[:10]}")
     for relative, source in expected.items():
-        if digest(source) != digest(actual[relative]):
-            raise RuntimeError(f"bundle hash mismatch: {relative}")
+        body = builder.materialized_bytes(source, Path(relative), manifest)
+        if body is None:
+            if digest(source) != digest(actual[relative]):
+                raise RuntimeError(f"bundle hash mismatch: {relative}")
+        elif actual[relative].read_bytes() != body:
+            raise RuntimeError(f"bundle compact JSON mismatch: {relative}")
     for page in manifest["required_pages"]:
         if page not in actual:
             raise RuntimeError(f"required public page is missing: {page}")
@@ -118,7 +136,7 @@ def validate(
         if MALFORMED_CACHE_BUST.search(text):
             raise RuntimeError(f"malformed cache-busting URL found: {relative}")
         for match in REFERENCE.finditer(text):
-            reference = local_reference(match.group(1) or match.group(2))
+            reference = local_reference(match.group(1) or match.group(2), relative)
             if (
                 reference
                 and reference not in actual
