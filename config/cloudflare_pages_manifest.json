@@ -20,7 +20,11 @@
     "playoff.html",
     "sim_lab.html",
     "simulations.html",
-    "team.html"
+    "team.html",
+    "ncaaf/index.html",
+    "ncaab/index.html",
+    "ncaab/ratings/index.html",
+    "ncaab/command-center/index.html"
   ],
   "files": [
     "index.html",
@@ -117,6 +121,16 @@
         ".svg",
         ".webp"
       ]
+    },
+    {
+      "source": "ncaaf",
+      "target": "ncaaf",
+      "allowed_extensions": [".html"]
+    },
+    {
+      "source": "ncaab",
+      "target": "ncaab",
+      "allowed_extensions": [".html", ".css", ".js", ".json"]
     }
   ],
   "allowed_top_level": [
@@ -132,6 +146,8 @@
     "futures_dashboard.js",
     "index.html",
     "logos",
+    "ncaaf",
+    "ncaab",
     "matchup.html",
     "matchup_workspace.js",
     "matchups.html",

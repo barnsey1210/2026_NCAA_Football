@@ -11,6 +11,7 @@ LINKS=[
  ('Command Center','war-room.html'),('Odds','odds.html'),('Schedule','schedule.html'),
  ('Futures','futures.html'),('Conferences','conferences.html'),('Coaches','coaches.html'),
  ('Playoff','playoff.html'),('Sim Lab','sim_lab.html'),('Betting','betting.html'),
+ ('NCAAB','ncaab/'),
 ]
 # Command Center remains a standalone page while sharing the canonical public shell.
 ACTIVE_ALIASES={'simulations.html':'sim_lab.html'}
@@ -20,10 +21,12 @@ STYLE="""<style id="shared-war-room-shell-v2">
 .war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
 .war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
 .war-room-global .war-room-nav{display:flex!important;align-items:stretch!important;gap:0!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;height:82px!important;scrollbar-width:none!important}.war-room-global .war-room-nav::-webkit-scrollbar{display:none!important}.war-room-global .war-room-nav a{display:flex!important;align-items:center!important;padding:0 10px!important;color:#becada!important;font-size:14px!important;font-weight:900!important;white-space:nowrap!important;text-decoration:none!important;position:relative!important}.war-room-global .war-room-nav a.active{color:var(--wr-gold)!important}.war-room-global .war-room-nav a.active:after{content:"";position:absolute;left:9px;right:9px;bottom:0;height:4px;background:var(--wr-gold);border-radius:4px}
+.war-room-global .war-room-nav a[href="ncaab/"]{color:#72c6ff!important;border-left:1px solid #214a70!important}
 .war-room-global .war-room-meta{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;min-width:max-content!important}.war-room-global .war-room-context{color:#8fa7c5!important;font-size:10px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important}.war-room-global .war-room-health{margin:0!important;white-space:nowrap!important}
+.war-room-sports{width:min(1240px,calc(100vw - 20px));margin:8px auto 0;padding:7px 10px;display:flex;align-items:center;gap:8px;border:1px solid #214a70;border-radius:8px;background:#061525;color:#e8f0f8}.war-room-sports b{margin-right:auto;color:#9eb1c5;font-size:9px;letter-spacing:.12em}.war-room-sports a{padding:7px 12px;border:1px solid #315779;border-radius:999px;color:#c6d4e2;font-weight:900;text-decoration:none}.war-room-sports a.active{border-color:#ffc83d;color:#ffc83d;background:#2a2108}.war-room-sports a.basketball{border-color:#3caaff;color:#8dccff}
 @media(max-width:1550px){.war-room-global{grid-template-columns:235px minmax(0,1fr) max-content!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:34px!important}.war-room-global .war-room-nav a{font-size:12px!important;padding:0 7px!important}.war-room-global .war-room-context{display:none!important}}
 @media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
-@media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}}
+@media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}.war-room-sports{display:grid;grid-template-columns:1fr 1fr}.war-room-sports b{grid-column:1/-1}.war-room-sports a{text-align:center}}
 </style>"""
 
 def shell_markup(target:str)->str:
@@ -60,8 +63,14 @@ def apply(path:Path)->None:
         r'\1\n<header class="war-room-global">'+markup+r'</header>',
         text,count=1,flags=re.S,
     )
-    if 'shared-war-room-shell-v2' not in text:
+    if 'shared-war-room-shell-v2' in text:
+        text=re.sub(r'<style id="shared-war-room-shell-v2">.*?</style>',STYLE,text,count=1,flags=re.S)
+    else:
         text=text.replace('</head>',STYLE+'</head>',1)
+    text=re.sub(r'<section class="war-room-sports".*?</section>\s*','',text,count=1,flags=re.S)
+    if target == 'index.html':
+        portal='<section class="war-room-sports" aria-label="War Room sports"><b>WAR ROOM SPORTS</b><a class="active" href="ncaaf/">NCAAF</a><a class="basketball" href="ncaab/">NCAAB</a></section>'
+        text=text.replace('</header>','</header>\n'+portal,1)
     path.write_text(text)
     print(f'War Room shell: {path}')
 
@@ -71,8 +80,9 @@ def main():
     for path in sorted(OUT.glob('*.html')):
         if path.name in CANONICAL or path.name=='index.html':
             apply(path)
-    if (ROOT/'index.html').exists():
-        apply(ROOT/'index.html')
+    for path in sorted(ROOT.glob('*.html')):
+        if path.name in CANONICAL or path.name == 'index.html':
+            apply(path)
 
 if __name__=='__main__':
     main()

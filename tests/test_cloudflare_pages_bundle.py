@@ -101,6 +101,14 @@ class CloudflarePagesBundleTests(unittest.TestCase):
         self.assertIn("data/research/shadow_value_confidence/summary.json", manifest["files"])
         self.assertNotIn("data/research", [entry["source"] for entry in manifest["directory_trees"]])
 
+    def test_default_manifest_includes_isolated_sport_paths(self):
+        manifest = json.loads((ROOT / "config/cloudflare_pages_manifest.json").read_text())
+        trees = {entry["source"]: entry for entry in manifest["directory_trees"]}
+        self.assertIn("ncaaf", trees)
+        self.assertIn("ncaab", trees)
+        self.assertIn("ncaab/command-center/index.html", manifest["required_pages"])
+        self.assertIn("ncaab/ratings/index.html", manifest["required_pages"])
+
     def test_validator_fails_when_required_input_is_not_git_tracked(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
