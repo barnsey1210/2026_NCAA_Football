@@ -1,6 +1,8 @@
 import unittest
 
-from pull_actionnetwork_win_totals_api import market_season
+import pandas as pd
+
+from pull_actionnetwork_win_totals_api import choose_brand_rows, market_season
 
 
 class ActionWinTotalsSeasonTests(unittest.TestCase):
@@ -12,3 +14,9 @@ class ActionWinTotalsSeasonTests(unittest.TestCase):
         payload = {"name": "2026 NCAAF Regular Season - Total Wins"}
         self.assertIn("_2027_", url)
         self.assertEqual(market_season(payload), 2026)
+
+    def test_consensus_only_action_payload_leaves_mergeable_empty_schema(self):
+        rows = choose_brand_rows(pd.DataFrame(), "OH", "state")
+        self.assertIn("pulled_at", rows.columns)
+        self.assertIn("book", rows.columns)
+        self.assertIn("win_total", rows.columns)

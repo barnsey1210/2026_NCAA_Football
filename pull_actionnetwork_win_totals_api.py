@@ -250,7 +250,11 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     - best: use best available over and under odds across all same-brand state books.
     """
     if df.empty:
-        return df
+        return pd.DataFrame(columns=[
+            "snapshot_date", "pulled_at", "season", "team", "conference",
+            "book", "win_total", "over_odds", "under_odds", "source_url",
+            "notes",
+        ])
 
     prefer_state = prefer_state.upper().strip()
 
