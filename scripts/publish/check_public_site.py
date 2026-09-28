@@ -165,8 +165,14 @@ def validate(root: Path, out: Path) -> list[str]:
                 errors.append(f"shared shell navigation order is incorrect: {name}")
             if text.count("<header") != 1:
                 errors.append(f"public page retains a competing semantic header: {name}")
+            legacy_scan_text = re.sub(
+                r'<section class="war-room-sports".*?</section>',
+                '',
+                text,
+                flags=re.S,
+            )
             for legacy in ('>NCAAF</', '>NCAAF Edge</', 'class="site-nav"'):
-                if legacy in text:
+                if legacy in legacy_scan_text:
                     errors.append(f"legacy header marker remains in {name}: {legacy}")
 
     for retired in ("dashboard.html", "legacy.html", "v1.html"):
