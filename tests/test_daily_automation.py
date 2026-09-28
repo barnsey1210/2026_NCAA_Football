@@ -173,6 +173,17 @@ class DailyAutomationAuditTests(unittest.TestCase):
         self.assertIn('if [ "$EMAIL_REGRESSION_PASSED" -ne 1 ]', email_send_block)
         self.assertIn('stage_skip "email_send" "email regression failed"', email_send_block)
 
+    def test_futures_degradation_does_not_suppress_betting_or_postgame(self) -> None:
+        source = ORCHESTRATOR.read_text(encoding="utf-8")
+        futures_start = source.index("# STAGE: futures_market_acquisition")
+        game_market_start = source.index("# STAGE: game_market_acquisition")
+        futures_block = source[futures_start:game_market_start]
+        self.assertIn("DEGRADED_PRIOR_ACCEPTED_ARTIFACT_PRESERVED", futures_block)
+        self.assertIn("remaining daily pipeline continues", futures_block)
+
+        profile_block = source[source.index("postgame:schedule_refresh"):source.index("market:game_market_acquisition")]
+        self.assertIn("postgame:betting_ledger", profile_block)
+
     def test_source_coverage_reports_runtime_only_without_failing(self) -> None:
         stages = [{"scripts": ["tracked.py", "runtime.py", "missing.py"]}]
         with tempfile.TemporaryDirectory() as repo_dir, tempfile.TemporaryDirectory() as runtime_dir:

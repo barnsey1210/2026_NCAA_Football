@@ -112,6 +112,7 @@ stage_enabled() {
     postgame:matchup_core|\
     postgame:shadow_models|\
     postgame:model_tracking_v2|\
+    postgame:betting_ledger|\
     postgame:site_build|\
     postgame:site_validation|\
     postgame:publication)
@@ -346,7 +347,17 @@ trap on_exit EXIT
   run_py "scripts/futures/run_fast_futures_refresh.py" "run_fast_futures_refresh.py"
   # The fast refresh preserves prior accepted artifacts on provider failure;
   # the scheduled daily run still requires today's acquisition to pass.
-  run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase acquisition
+  if run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase acquisition; then
+    status_stage "futures_market_acquisition" RUNNING "current acquisition accepted"
+  else
+    # Futures is fail-closed inside run_fast_futures_refresh.py: rejected
+    # candidates are restored before control returns here.  Do not let a
+    # sportsbook outage suppress unrelated Ratings, Postgame, Betting, or site
+    # publication work; record the degradation and publish the last accepted
+    # Futures artifact with an explicit stale operational status.
+    warn "Futures acquisition degraded; prior accepted Futures artifacts preserved while the remaining daily pipeline continues"
+    status_stage "futures_market_acquisition" RUNNING "DEGRADED_PRIOR_ACCEPTED_ARTIFACT_PRESERVED"
+  fi
   run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
   run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
   run_py "build_market_arbitrage_report.py" || warn "market arbitrage report build failed; preserving prior report"
@@ -775,6 +786,7 @@ fi
   python3 scripts/audit/audit_canonical_v2_index.py build/public_site/index.html
   python3 scripts/audit/audit_canonical_openers_drawer.py
   python3 scripts/audit/audit_war_room_home_market_propagation.py
+  python3 scripts/audit/audit_derived_page_freshness.py
   python3 scripts/publish/check_public_site.py
   stage_pass "site_validation"
 

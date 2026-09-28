@@ -55,6 +55,43 @@ def clean_int(value: Any):
     return int(x) if x is not None and float(x).is_integer() else x
 
 
+def align_provider_result_to_site_game(provider_game: dict, site_game: dict) -> dict:
+    """Return scores/probabilities in the canonical site's team orientation.
+
+    Neutral-site providers may label home/away differently from the immutable
+    site schedule.  A stable provider game id is sufficient to match the game,
+    but it is not sufficient to assume the same orientation.
+    """
+    provider_away = norm(provider_game.get("away_team"))
+    provider_home = norm(provider_game.get("home_team"))
+    site_away = norm(site_game.get("away_team"))
+    site_home = norm(site_game.get("home_team"))
+
+    reversed_orientation = (
+        provider_away == site_home
+        and provider_home == site_away
+        and provider_away
+        and provider_home
+    )
+
+    away_score = finite(provider_game.get("away_points"))
+    home_score = finite(provider_game.get("home_points"))
+    away_pgwe = finite(provider_game.get("away_postgame_win_probability"))
+    home_pgwe = finite(provider_game.get("home_postgame_win_probability"))
+
+    if reversed_orientation:
+        away_score, home_score = home_score, away_score
+        away_pgwe, home_pgwe = home_pgwe, away_pgwe
+
+    return {
+        "away_score": away_score,
+        "home_score": home_score,
+        "away_postgame_win_probability": away_pgwe,
+        "home_postgame_win_probability": home_pgwe,
+        "provider_orientation_reversed": bool(reversed_orientation),
+    }
+
+
 def atomic_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -192,10 +229,7 @@ def main() -> None:
 
         away = cg.get("away_team")
         home = cg.get("home_team")
-        away_score = finite(cg.get("away_points"))
-        home_score = finite(cg.get("home_points"))
-
-        if away_score is None or home_score is None:
+        if finite(cg.get("away_points")) is None or finite(cg.get("home_points")) is None:
             continue
 
         sg = None
@@ -239,6 +273,10 @@ def main() -> None:
             })
             continue
 
+        aligned = align_provider_result_to_site_game(cg, sg)
+        away_score = aligned["away_score"]
+        home_score = aligned["home_score"]
+
         game_id = str(sg.get("game_id") or "")
         market = closing_market_fields(market_by_game_id.get(game_id), sg)
         home_margin = home_score - away_score
@@ -265,12 +303,9 @@ def main() -> None:
             "home_score": clean_int(home_score),
             "home_margin_actual": clean_int(home_margin),
             "total_points_actual": clean_int(total_points),
-            "home_postgame_win_probability": finite(
-                cg.get("home_postgame_win_probability")
-            ),
-            "away_postgame_win_probability": finite(
-                cg.get("away_postgame_win_probability")
-            ),
+            "home_postgame_win_probability": aligned["home_postgame_win_probability"],
+            "away_postgame_win_probability": aligned["away_postgame_win_probability"],
+            "provider_orientation_reversed": aligned["provider_orientation_reversed"],
             "pgwe_source": (
                 "CollegeFootballData /games"
                 if cg.get("home_postgame_win_probability") is not None

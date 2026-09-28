@@ -154,10 +154,12 @@ def build_schedule_index(
     projection_rows,
     fbs_teams,
     conference_by_matchup=None,
+    preseason_games=None,
 ):
     """Store each canonical game once and return chronological team references."""
     conference_by_matchup = conference_by_matchup or {}
     projections = {}
+    projections_by_game_id = {}
     for row in projection_rows:
         key = (
             str(row.get("date") or "")[:10],
@@ -169,6 +171,15 @@ def build_schedule_index(
             "neutral_site": str(row.get("neutral_site") or "").strip().lower()
             in {"true", "1", "yes"},
         }
+        game_id = str(row.get("game_id") or "").strip()
+        if game_id:
+            projections_by_game_id[game_id] = projections[key]
+
+    canonical_game_id_by_cfbd_id = {
+        str(game.get("cfbd_game_id")): str(game.get("game_id"))
+        for game in (preseason_games or [])
+        if game.get("cfbd_game_id") is not None and game.get("game_id")
+    }
 
     schedule_index = {}
     team_game_ids = {team: [] for team in fbs_teams}
@@ -183,6 +194,11 @@ def build_schedule_index(
         date = str(game.get("date") or game.get("start_date") or "")[:10]
 
         projection = projections.get((date, away, home))
+        if projection is None and game.get("cfbd_game_id") is not None:
+            canonical_game_id = canonical_game_id_by_cfbd_id.get(
+                str(game.get("cfbd_game_id"))
+            )
+            projection = projections_by_game_id.get(canonical_game_id)
         margin_home = (
             projection.get("margin_home")
             if projection
@@ -883,6 +899,7 @@ def main():
         projection_rows,
         set(teams),
         conference_by_matchup,
+        preseason_db.get("games", []),
     )
 
     canonical_ratings = load_canonical_ratings_view(

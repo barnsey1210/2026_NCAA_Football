@@ -1,6 +1,9 @@
 import unittest
 
-from scripts.results.build_game_results_2026 import closing_market_fields
+from scripts.results.build_game_results_2026 import (
+    align_provider_result_to_site_game,
+    closing_market_fields,
+)
 
 
 def quote(line, status="FROZEN_CLOSE", book="Pinnacle", venue_type="sharp_reference"):
@@ -14,6 +17,24 @@ def quote(line, status="FROZEN_CLOSE", book="Pinnacle", venue_type="sharp_refere
 
 
 class GameResultsMarketCloseTests(unittest.TestCase):
+    def test_reversed_neutral_orientation_swaps_scores_and_pgwe(self):
+        aligned = align_provider_result_to_site_game(
+            {
+                "away_team": "West Virginia",
+                "home_team": "Virginia",
+                "away_points": 38,
+                "home_points": 27,
+                "away_postgame_win_probability": 0.97,
+                "home_postgame_win_probability": 0.03,
+            },
+            {"away_team": "Virginia", "home_team": "West Virginia"},
+        )
+        self.assertEqual(aligned["away_score"], 27)
+        self.assertEqual(aligned["home_score"], 38)
+        self.assertEqual(aligned["away_postgame_win_probability"], 0.03)
+        self.assertEqual(aligned["home_postgame_win_probability"], 0.97)
+        self.assertTrue(aligned["provider_orientation_reversed"])
+
     def test_canonical_frozen_pinnacle_precedes_legacy_close(self):
         canonical = {"quotes": {
             "DraftKings": {

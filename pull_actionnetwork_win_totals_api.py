@@ -73,6 +73,11 @@ def clean_text(x: Any) -> str:
     return re.sub(r"\s+", " ", str(x or "")).strip()
 
 
+def market_season(data: Dict[str, Any]) -> Optional[int]:
+    match = re.match(r"^([0-9]{4})\b", clean_text(data.get("name")))
+    return int(match.group(1)) if match else None
+
+
 def fetch_json(url: str) -> Any:
     headers = {
         "Accept": "application/json",
@@ -345,15 +350,13 @@ def main() -> None:
     p.add_argument("--book-audit-csv", default="actionnetwork_book_id_mapping.csv")
     args = p.parse_args()
 
-    # Fail closed on a wrong-season Action futures fixture.
-    # The provider has previously exposed a 2027 fixture on the 2026 page;
-    # never relabel that payload as the requested season.
-    fixture_match = re.search(
-        r"_([0-9]{4})_ncaaf_regular_season_total_wins",
-        str(args.url),
-        flags=re.I,
-    )
-    fixture_season = int(fixture_match.group(1)) if fixture_match else None
+    # Action's internal NCAAF fixture slug is one year ahead of its displayed
+    # season (the 2027 slug is the provider's 2026 market).  Validate the
+    # provider-native market name after retrieval instead of misclassifying the
+    # routing slug as the offered season.
+    data = fetch_json(args.url)
+    market_name = clean_text(data.get("name"))
+    fixture_season = market_season(data)
 
     if fixture_season != args.season:
         cols = [
@@ -368,6 +371,7 @@ def main() -> None:
                     "requested_season": args.season,
                     "fixture_season": fixture_season,
                     "source_url": args.url,
+                    "market_name": market_name,
                     "observed_at": datetime.now().isoformat(),
                 },
                 indent=2,
@@ -395,7 +399,6 @@ def main() -> None:
         print("Wrote empty current win-total base; downstream validated providers may populate it.")
         return
 
-    data = fetch_json(args.url)
     books_map = build_books_map()
 
     Path(args.raw_json).write_text(json.dumps(data, indent=2), encoding="utf-8")

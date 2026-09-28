@@ -372,6 +372,7 @@
       "publication_dependency": true,
       "entrypoint": "daily_market_update.sh#site_validation",
       "scripts": [
+        "scripts/audit/audit_derived_page_freshness.py",
         "scripts/audit/audit_canonical_v2_index.py",
         "scripts/audit/audit_canonical_openers_drawer.py",
         "scripts/audit/audit_war_room_home_market_propagation.py",
