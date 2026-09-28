@@ -333,6 +333,39 @@ def main():
                         if isinstance(row, dict):
                             row.pop('rank_basis', None)
 
+            # Identity already lives in game and is repeated in every weather
+            # object. Keep the operative forecast fields without paying that
+            # cost across the entire season schedule.
+            weather = game.get('weather')
+            if isinstance(weather, dict):
+                for key in (
+                    'game_id',
+                    'cfbd_game_id',
+                    'date',
+                    'away_team',
+                    'home_team',
+                ):
+                    weather.pop(key, None)
+
+            # Empty activity rows need only the two arrays consumed by the
+            # public Matchups UI. Preserve full activity whenever a wager,
+            # expert pick, note, assignment, or decision exists.
+            activity = game.get('activity')
+            if isinstance(activity, dict) and not any(
+                activity.get(key)
+                for key in (
+                    'wagers',
+                    'expert_picks',
+                    'notes',
+                    'unassigned',
+                    'decision',
+                )
+            ):
+                game['activity'] = {
+                    'wagers': [],
+                    'expert_picks': [],
+                }
+
         public_matchups.write_text(
             json.dumps(
                 payload,
