@@ -1,14 +1,14 @@
 {
   "schema_version": "projection-source-status-view-v2",
-  "generated_at": "2026-09-26T15:16:28.662100+00:00",
+  "generated_at": "2026-09-29T12:07:15.437794+00:00",
   "production_scope": "FBS_VS_FBS",
   "production_games": 765,
   "standard_spread": {
     "model_id": "standard_spread_4src_equal_v1",
     "degraded_model_id": "standard_spread_degraded_v1",
     "production_games": 765,
-    "full_available": 215,
-    "degraded_available": 550,
+    "full_available": 271,
+    "degraded_available": 494,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -46,9 +46,9 @@
       {
         "key": "DRatings",
         "name": "DRatings Game Predictions",
-        "games_available": 215,
+        "games_available": 271,
         "production_games": 765,
-        "coverage_pct": 28.1,
+        "coverage_pct": 35.4,
         "state": "PARTIAL"
       }
     ],
@@ -59,7 +59,7 @@
           "FPI",
           "TeamRankings"
         ],
-        "games": 550,
+        "games": 494,
         "effective_weights": {
           "SP+": 0.333333,
           "FPI": 0.333333,
@@ -73,7 +73,7 @@
           "TeamRankings",
           "DRatings Game Predictions"
         ],
-        "games": 215,
+        "games": 271,
         "effective_weights": {
           "SP+": 0.25,
           "FPI": 0.25,
@@ -87,8 +87,8 @@
     "model_id": "standard_total_sp_massey_dratings_v1",
     "degraded_model_id": "standard_total_degraded_v1",
     "production_games": 765,
-    "full_available": 215,
-    "degraded_available": 550,
+    "full_available": 271,
+    "degraded_available": 494,
     "displayable": 765,
     "coverage_pct": 100.0,
     "current_mode": "MIXED_FULL_AND_DEGRADED",
@@ -109,17 +109,17 @@
       {
         "key": "Massey Dual",
         "name": "Massey Dual",
-        "games_available": 271,
+        "games_available": 329,
         "production_games": 765,
-        "coverage_pct": 35.4,
+        "coverage_pct": 43.0,
         "state": "PARTIAL"
       },
       {
         "key": "DRatings Total",
         "name": "DRatings Total",
-        "games_available": 215,
+        "games_available": 271,
         "production_games": 765,
-        "coverage_pct": 28.1,
+        "coverage_pct": 35.4,
         "state": "PARTIAL"
       }
     ],
@@ -128,7 +128,7 @@
         "components": [
           "SP+"
         ],
-        "games": 494,
+        "games": 436,
         "effective_weights": {
           "SP+": 1.0
         }
@@ -139,7 +139,7 @@
           "Massey Dual",
           "DRatings Total"
         ],
-        "games": 215,
+        "games": 271,
         "effective_weights": {
           "SP+": 0.4,
           "Massey Dual": 0.4,
@@ -151,7 +151,7 @@
           "SP+",
           "Massey Dual"
         ],
-        "games": 56,
+        "games": 58,
         "effective_weights": {
           "SP+": 0.5,
           "Massey Dual": 0.5
@@ -164,33 +164,33 @@
       "name": "DRatings Game Predictions",
       "source_key": "DRatings Predictions",
       "role": "Standard Spread game-prediction input",
-      "games_available": 215,
+      "games_available": 271,
       "production_games": 765,
-      "coverage_pct": 28.1,
+      "coverage_pct": 35.4,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-09-26T15:15:53.235778+00:00",
-      "latest_snapshot_date": "2026-09-26",
+      "latest_pulled_at": "2026-09-29T12:02:02.909351+00:00",
+      "latest_snapshot_date": "2026-09-29",
       "latest_check_status": "UPDATED",
-      "latest_accepted_update_at": "2026-09-26T15:16:23.129158+00:00",
+      "latest_accepted_update_at": "2026-09-29T12:02:02.987396+00:00",
       "comparison_available": true,
       "first_game_date": "2026-08-29",
-      "last_game_date": "2026-09-26"
+      "last_game_date": "2026-10-03"
     },
     {
       "name": "Massey Game Predictions",
       "source_key": "Massey Games",
       "role": "Supplies projected total + team scores used to build Massey Dual",
-      "games_available": 271,
+      "games_available": 329,
       "production_games": 765,
-      "coverage_pct": 35.4,
+      "coverage_pct": 43.0,
       "state": "PARTIAL",
-      "latest_pulled_at": "2026-09-26T15:16:14.909398+00:00",
-      "latest_snapshot_date": "2026-09-26",
+      "latest_pulled_at": "2026-09-28T15:51:33.888189+00:00",
+      "latest_snapshot_date": "2026-09-29",
       "latest_check_status": "NO_CHANGE",
-      "latest_accepted_update_at": "2026-09-26T13:09:25.129320+00:00",
+      "latest_accepted_update_at": "2026-09-28T12:58:31.623925+00:00",
       "comparison_available": true,
       "first_game_date": "2026-08-29",
-      "last_game_date": "2026-10-03"
+      "last_game_date": "2026-10-10"
     },
     {
       "name": "Sagarin Game Total",
