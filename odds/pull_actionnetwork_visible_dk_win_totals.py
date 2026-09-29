@@ -15,7 +15,6 @@ AUDIT = Path("data/audit/actionnetwork_visible_dk_win_totals_audit.csv")
 FAILED = Path("data/audit/actionnetwork_visible_dk_failed_body.txt")
 URL = "https://www.actionnetwork.com/ncaaf/futures"
 TARGET_MARKET = "2026 NCAAF Regular Season - Total Wins"
-DK_CELL_INDEX = 7
 
 def parse_price(x):
     s = str(x or "").strip().replace("−", "-")
@@ -174,13 +173,68 @@ async def force_select_market(page):
 async def scrape_rows(page):
     return await page.evaluate(
         r"""
-        (dkIndex) => {
+        () => {
           function lines(s) {
             return (s || '').split('\n').map(x => x.trim()).filter(Boolean);
           }
 
+          function cellSignal(cell) {
+            if (!cell) return '';
+            const bits = [
+              cell.innerText,
+              cell.getAttribute('aria-label'),
+              cell.getAttribute('title'),
+              ...Array.from(cell.querySelectorAll('img')).flatMap(img => [
+                img.alt, img.title, img.src,
+              ]),
+              ...Array.from(cell.querySelectorAll('a')).flatMap(a => [
+                a.href, a.getAttribute('aria-label'), a.title,
+              ]),
+            ];
+            return bits.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+          }
+
+          function isDraftKings(signal) {
+            const normalized = (signal || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+            return normalized.includes('draftkings');
+          }
+
           const rows = [];
           const trs = Array.from(document.querySelectorAll('tr'));
+
+          const dataRow = trs.find(tr => tr.querySelector('td.options-futures-row__first-cell'));
+          const dataCellCount = dataRow ? dataRow.children.length : 0;
+          const table = dataRow ? dataRow.closest('table') : null;
+          const headerRows = table
+            ? Array.from(table.querySelectorAll('tr')).filter(tr => !tr.querySelector('td.options-futures-row__first-cell'))
+            : [];
+          const headerSignals = [];
+          const detected = [];
+
+          for (const headerRow of headerRows) {
+            const cells = Array.from(headerRow.children);
+            if (cells.length !== dataCellCount) continue;
+            cells.forEach((cell, index) => {
+              const signal = cellSignal(cell);
+              headerSignals.push({index, signal});
+              if (isDraftKings(signal)) detected.push(index);
+            });
+          }
+
+          // Some responsive versions render sportsbook identity only inside
+          // the quote cells (for example as a logo URL or outbound link).
+          // Inspect a small sample without relying on the visual column order.
+          const sampleRows = trs
+            .filter(tr => tr.querySelector('td.options-futures-row__first-cell'))
+            .slice(0, 5);
+          for (const sampleRow of sampleRows) {
+            Array.from(sampleRow.children).forEach((cell, index) => {
+              if (isDraftKings(cellSignal(cell))) detected.push(index);
+            });
+          }
+
+          const uniqueDetected = Array.from(new Set(detected));
+          const dkIndex = uniqueDetected.length === 1 ? uniqueDetected[0] : null;
 
           for (const tr of trs) {
             const first = tr.querySelector('td.options-futures-row__first-cell');
@@ -188,7 +242,7 @@ async def scrape_rows(page):
 
             const cells = Array.from(tr.children);
             const teamRaw = lines(first.innerText)[0] || '';
-            const dk = cells[dkIndex];
+            const dk = dkIndex === null ? null : cells[dkIndex];
             const dkLines = dk ? lines(dk.innerText) : [];
 
             rows.push({
@@ -200,10 +254,16 @@ async def scrape_rows(page):
           }
 
           const bodyText = document.body.innerText || '';
-          return {rows, bodyText};
+          return {
+            rows,
+            bodyText,
+            dataCellCount,
+            detectedDkIndexes: uniqueDetected,
+            resolvedDkIndex: dkIndex,
+            headerSignals,
+          };
         }
         """,
-        DK_CELL_INDEX
     )
 
 async def main():
@@ -224,6 +284,7 @@ async def main():
 
         data = await scrape_rows(page)
         rows = data["rows"]
+        resolved_dk_index = data.get("resolvedDkIndex")
 
         parsed = []
 
@@ -257,7 +318,7 @@ async def main():
                 "over_odds": over_odds,
                 "under_odds": under_odds,
                 "source_url": URL,
-                "notes": f"Action rendered table; book=DK OH; cell_index={DK_CELL_INDEX}; pulled_at={pulled_at}; team_raw={team_raw}",
+                "notes": f"Action rendered table; book=DK OH; cell_index={resolved_dk_index}; pulled_at={pulled_at}; team_raw={team_raw}",
             })
 
         audit = pd.DataFrame([{
@@ -267,6 +328,10 @@ async def main():
             "attempts": json.dumps(attempts),
             "dom_rows_seen": len(rows),
             "parsed_rows": len(parsed),
+            "data_cell_count": data.get("dataCellCount"),
+            "resolved_dk_cell_index": resolved_dk_index,
+            "detected_dk_indexes": json.dumps(data.get("detectedDkIndexes", [])),
+            "header_signals": json.dumps(data.get("headerSignals", [])),
             "body_has_regular_season": "Regular Season" in data["bodyText"],
             "body_has_total_wins": "Total Wins" in data["bodyText"],
             "body_has_alabama": "Alabama Crimson Tide" in data["bodyText"],
@@ -281,6 +346,7 @@ async def main():
         print("clicked category:", clicked)
         print("attempts:", attempts)
         print("dom rows seen:", len(rows))
+        print("resolved DK cell index:", resolved_dk_index)
         print("rows parsed:", len(df))
         print("wrote audit:", AUDIT)
 
