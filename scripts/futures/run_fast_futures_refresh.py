@@ -161,39 +161,9 @@ def main() -> int:
             # The contract then rebuilds from current sportsbook inputs only.
             KALSHI.unlink(missing_ok=True)
 
-        dk_ok = run(
-            "Visible DraftKings win totals",
-            [sys.executable, "odds/pull_actionnetwork_visible_dk_win_totals.py"],
-            required=False,
-        )
-        if dk_ok:
-            run(
-                "Merge visible DraftKings win totals",
-                [sys.executable, "odds/merge_visible_dk_win_totals.py"],
-                required=False,
-            )
-
-        run(
-            "FanDuel win totals",
-            [sys.executable, "pull_fanduel_win_totals.py"],
-            required=False,
-        )
-
-        run(
-            "Caesars win totals",
-            [sys.executable, "pull_bettingpros_caesars_win_totals.py"],
-            required=False,
-        )
-
         acquisition_ok &= run(
             "Action Network conference futures",
             [sys.executable, "pulls/pull_actionnetwork_conference_futures_api.py"],
-        )
-
-        run(
-            "Quarantine invalid DraftKings win totals",
-            [sys.executable, "odds/quarantine_bad_draftkings_win_total_rows.py"],
-            required=False,
         )
 
         acquisition_ok &= run(

@@ -41,10 +41,33 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 import requests
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 
 DEFAULT_URL = "https://api.actionnetwork.com/web/v1/leagues/2/futures/ncaaf_futures_special_fixture_10997_2027_ncaaf_regular_season_total_wins"
 BOOKS_URL = "https://api.actionnetwork.com/web/v1/books"
+ACTION_CONFIG = Path(__file__).resolve().parent / "config/action_network_futures.json"
+
+
+def action_config() -> Dict[str, Any]:
+    return json.loads(ACTION_CONFIG.read_text(encoding="utf-8"))
+
+
+def action_market_url(url: str, book_ids: List[int]) -> str:
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query["bookIds"] = ",".join(str(book_id) for book_id in book_ids)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+
+
+def represented_requested_books(data: Dict[str, Any], requested: set[int]) -> set[int]:
+    return {
+        int(book["book_id"])
+        for book in data.get("books", [])
+        if book.get("book_id") is not None
+        and int(book["book_id"]) in requested
+        and book.get("odds")
+    }
 
 OPTION_TYPE_MAP = {
     72: "over",
@@ -195,7 +218,7 @@ def parse_all_book_rows(data: Dict[str, Any], books_map: Dict[int, Dict[str, Any
         display_name = book_info.get("display_name") or f"Action Book {book_id}"
 
         # Keep only target/currently useful books for the import.
-        if brand not in {"DraftKings", "BetMGM", "FanDuel", "Caesars"}:
+        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetRivers", "bet365", "Consensus"}:
             continue
 
         paired: Dict[Tuple[str, float], Dict[str, Any]] = {}
@@ -225,6 +248,12 @@ def parse_all_book_rows(data: Dict[str, Any], books_map: Dict[int, Dict[str, Any
                 "over_odds": None,
                 "under_odds": None,
                 "source_url": source_url,
+                "acquisition_source": "Action Network",
+                "market_identity": clean_text(data.get("name")),
+                "action_book_id": int(book_id),
+                "action_book_display_name": display_name,
+                "action_book_state": state,
+                "action_book_source_name": book_info.get("source_name"),
                 "_action_book_id": int(book_id),
                 "_action_book_display": display_name,
                 "_action_book_state": state,
@@ -259,7 +288,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     prefer_state = prefer_state.upper().strip()
 
     final_rows = []
-    group_cols = ["snapshot_date", "pulled_at", "season", "team", "conference", "book", "win_total", "source_url"]
+    group_cols = ["snapshot_date", "pulled_at", "season", "team", "conference", "book", "win_total", "source_url", "acquisition_source", "market_identity"]
 
     for keys, g in df.groupby(group_cols, dropna=False):
         base = dict(zip(group_cols, keys))
@@ -273,6 +302,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
                 # If multiple state rows somehow exist, use first complete row.
                 row = sg.iloc[0]
                 rec = {**base, "over_odds": row.get("over_odds"), "under_odds": row.get("under_odds")}
+                rec.update({"action_book_id": row.get("action_book_id"), "action_book_display_name": row.get("action_book_display_name"), "action_book_state": row.get("action_book_state"), "action_book_source_name": row.get("action_book_source_name")})
                 selected_note = f"preferred_state={prefer_state}; action_book_id={row.get('_action_book_id')}; action_book_display={row.get('_action_book_display')}"
                 rec["notes"] = selected_note
                 final_rows.append(rec)
@@ -306,13 +336,16 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
             f"best_over={rec.get('_best_over_display')} {rec.get('_best_over_state')}; "
             f"best_under={rec.get('_best_under_display')} {rec.get('_best_under_state')}"
         )
+        selected = over_rows.iloc[0] if not over_rows.empty else under_rows.iloc[0]
+        rec.update({"action_book_id": selected.get("action_book_id"), "action_book_display_name": selected.get("action_book_display_name"), "action_book_state": selected.get("action_book_state"), "action_book_source_name": selected.get("action_book_source_name")})
         final_rows.append(rec)
 
     out = pd.DataFrame(final_rows)
 
     cols = [
         "snapshot_date", "pulled_at", "season", "team", "conference", "book", "win_total",
-        "over_odds", "under_odds", "source_url", "notes"
+        "over_odds", "under_odds", "source_url", "acquisition_source", "market_identity",
+        "action_book_id", "action_book_display_name", "action_book_state", "action_book_source_name", "notes"
     ]
     for c in cols:
         if c not in out.columns:
@@ -358,7 +391,10 @@ def main() -> None:
     # season (the 2027 slug is the provider's 2026 market).  Validate the
     # provider-native market name after retrieval instead of misclassifying the
     # routing slug as the offered season.
-    data = fetch_json(args.url)
+    cfg = action_config()
+    requested_ids = [int(value) for value in cfg["book_ids"]]
+    request_url = action_market_url(args.url, requested_ids)
+    data = fetch_json(request_url)
     market_name = clean_text(data.get("name"))
     fixture_season = market_season(data)
 
@@ -374,7 +410,7 @@ def main() -> None:
                     "status": "REJECTED_WRONG_SEASON_SOURCE",
                     "requested_season": args.season,
                     "fixture_season": fixture_season,
-                    "source_url": args.url,
+                    "source_url": request_url,
                     "market_name": market_name,
                     "observed_at": datetime.now().isoformat(),
                 },
@@ -398,25 +434,37 @@ def main() -> None:
             "REJECTED_WRONG_SEASON_SOURCE:",
             f"requested={args.season}",
             f"fixture={fixture_season}",
-            f"url={args.url}",
+            f"url={request_url}",
         )
         print("Wrote empty current win-total base; downstream validated providers may populate it.")
         return
 
     books_map = build_books_map()
+    represented = represented_requested_books(data, set(requested_ids))
+    executable_ids = {
+        int(book_id) for book_id, detail in cfg["books"].items()
+        if detail.get("executable")
+    }
+    if not represented.intersection(executable_ids):
+        raise SystemExit("Action win totals returned no configured executable sportsbook rows; Consensus-only acquisition rejected")
 
     Path(args.raw_json).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     audit = build_book_audit(data, books_map)
     audit.to_csv(args.book_audit_csv, index=False)
 
-    all_rows = parse_all_book_rows(data, books_map, args.url, args.season)
+    all_rows = parse_all_book_rows(data, books_map, request_url, args.season)
     pulled_at = pd.Timestamp.now(tz="UTC").isoformat()
     if not all_rows.empty:
         all_rows["pulled_at"] = pulled_at
     all_rows.to_csv(args.all_brand_rows_csv, index=False)
 
-    out = choose_brand_rows(all_rows, args.prefer_state, args.brand_mode)
+    executable_brands = {
+        detail["brand"] for detail in cfg["books"].values()
+        if detail.get("executable")
+    }
+    executable_rows = all_rows[all_rows["book"].isin(executable_brands)] if not all_rows.empty else all_rows
+    out = choose_brand_rows(executable_rows, args.prefer_state, args.brand_mode)
     out.to_csv(args.output_csv, index=False)
 
     print("Done.")

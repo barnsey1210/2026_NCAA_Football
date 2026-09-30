@@ -2,7 +2,13 @@ import unittest
 
 import pandas as pd
 
-from pull_actionnetwork_win_totals_api import choose_brand_rows, market_season
+from pull_actionnetwork_win_totals_api import (
+    action_config,
+    action_market_url,
+    choose_brand_rows,
+    market_season,
+    represented_requested_books,
+)
 
 
 class ActionWinTotalsSeasonTests(unittest.TestCase):
@@ -20,3 +26,18 @@ class ActionWinTotalsSeasonTests(unittest.TestCase):
         self.assertIn("pulled_at", rows.columns)
         self.assertIn("book", rows.columns)
         self.assertIn("win_total", rows.columns)
+
+    def test_frontend_book_ids_are_always_added(self):
+        config = action_config()
+        url = action_market_url("https://api.actionnetwork.com/web/v1/leagues/2/futures/example", config["book_ids"])
+        self.assertIn("bookIds=79%2C123%2C68%2C69%2C71%2C15", url)
+
+    def test_consensus_only_is_not_executable_action_coverage(self):
+        config = action_config()
+        represented = represented_requested_books(
+            {"books": [{"book_id": 15, "odds": [{"money": 100}]}]},
+            set(config["book_ids"]),
+        )
+        executable = {int(key) for key, detail in config["books"].items() if detail["executable"]}
+        self.assertEqual(represented, {15})
+        self.assertFalse(represented.intersection(executable))

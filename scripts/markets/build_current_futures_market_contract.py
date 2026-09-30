@@ -194,9 +194,17 @@ def main():
             source_url,
             flags=re.I,
         )
+        provider_market_season = re.match(
+            r"^([0-9]{4})\b",
+            str(row.get("market_identity") or "").strip(),
+        )
         if (
             source_season_match
             and int(source_season_match.group(1)) != active_season
+            and (
+                provider_market_season is None
+                or int(provider_market_season.group(1)) != active_season
+            )
         ):
             continue
 
@@ -223,7 +231,12 @@ def main():
             "observed_date": row.get("snapshot_date"),
             "pulled_at": row.get("pulled_at") or None,
             "source_url": row.get("source_url") or None,
-            "source": "normalized win totals import",
+            "source": row.get("acquisition_source") or "normalized win totals import",
+            "market_identity": row.get("market_identity") or None,
+            "action_book_id": row.get("action_book_id") or None,
+            "action_book_display_name": row.get("action_book_display_name") or None,
+            "action_book_state": row.get("action_book_state") or None,
+            "action_book_source_name": row.get("action_book_source_name") or None,
         }
 
     if kalshi:
@@ -380,7 +393,12 @@ def main():
             "observed_date": row.get("snapshot_date"),
             "pulled_at": row.get("pulled_at") or None,
             "source_url": row.get("source_url") or None,
-            "source": "normalized conference futures import",
+            "source": row.get("acquisition_source") or "normalized conference futures import",
+            "market_identity": row.get("market_identity") or None,
+            "action_book_id": row.get("action_book_id") or None,
+            "action_book_display_name": row.get("action_book_display_name") or None,
+            "action_book_state": row.get("action_book_state") or None,
+            "action_book_source_name": row.get("action_book_source_name") or None,
         }
 
     if kalshi:
@@ -428,6 +446,7 @@ def main():
     action_books = {
         str(k): v for k, v in action.get("books", {}).items()
     }
+    action_book_metadata = action.get("book_metadata", {})
 
     playoff_domains = {}
 
@@ -487,6 +506,11 @@ def main():
                     "implied_probability": implied(price),
                     "pulled_at": action.get("pulled_at"),
                     "source": "Action Network",
+                    "market_identity": market.get("name"),
+                    "action_book_id": int(bid) if bid.isdigit() else bid,
+                    "action_book_display_name": (action_book_metadata.get(bid) or {}).get("display_name"),
+                    "action_book_state": (action_book_metadata.get(bid) or {}).get("state"),
+                    "action_book_source_name": (action_book_metadata.get(bid) or {}).get("source_name"),
                 }
 
                 if prior is None or price > prior["price"]:

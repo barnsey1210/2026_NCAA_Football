@@ -44,9 +44,23 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 import requests
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 
 BOOKS_URL = "https://api.actionnetwork.com/web/v1/books"
+ROOT = Path(__file__).resolve().parents[1]
+ACTION_CONFIG = ROOT / "config/action_network_futures.json"
+
+
+def action_config() -> Dict[str, Any]:
+    return json.loads(ACTION_CONFIG.read_text(encoding="utf-8"))
+
+
+def action_market_url(url: str, book_ids: List[int]) -> str:
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query["bookIds"] = ",".join(str(book_id) for book_id in book_ids)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
 
 # Action Network conference-title futures endpoints.
 # Note: Action uses a 2027 slug for the market name even though the user-facing
@@ -236,7 +250,7 @@ def parse_all_brand_rows(conference: str, data: Dict[str, Any], books_map: Dict[
         state = book_info.get("state") or ""
         display_name = book_info.get("display_name") or f"Action Book {book_id}"
 
-        if brand not in {"DraftKings", "BetMGM", "FanDuel", "Caesars"}:
+        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetRivers", "bet365", "Consensus"}:
             continue
 
         for odd in book_obj.get("odds", []):
@@ -253,6 +267,12 @@ def parse_all_brand_rows(conference: str, data: Dict[str, Any], books_map: Dict[
                 "book": brand,
                 "american_odds": int(money),
                 "source_url": source_url,
+                "acquisition_source": "Action Network",
+                "market_identity": clean_text(data.get("name")),
+                "action_book_id": int(book_id),
+                "action_book_display_name": display_name,
+                "action_book_state": state,
+                "action_book_source_name": book_info.get("source_name"),
                 "_action_book_id": int(book_id),
                 "_action_book_display": display_name,
                 "_action_book_state": state,
@@ -278,7 +298,7 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
     prefer_state = prefer_state.upper().strip()
 
     final_rows = []
-    group_cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "source_url"]
+    group_cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "source_url", "acquisition_source", "market_identity"]
 
     for keys, g in df.groupby(group_cols, dropna=False):
         base = dict(zip(group_cols, keys))
@@ -291,6 +311,10 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
                 rec = {
                     **base,
                     "american_odds": int(row["american_odds"]),
+                    "action_book_id": row.get("action_book_id"),
+                    "action_book_display_name": row.get("action_book_display_name"),
+                    "action_book_state": row.get("action_book_state"),
+                    "action_book_source_name": row.get("action_book_source_name"),
                     "notes": f"preferred_state={prefer_state}; action_book_id={row.get('_action_book_id')}; action_book_display={row.get('_action_book_display')}",
                 }
                 final_rows.append(rec)
@@ -300,11 +324,15 @@ def choose_brand_rows(df: pd.DataFrame, prefer_state: str, brand_mode: str) -> p
         final_rows.append({
             **base,
             "american_odds": int(row["american_odds"]),
+            "action_book_id": row.get("action_book_id"),
+            "action_book_display_name": row.get("action_book_display_name"),
+            "action_book_state": row.get("action_book_state"),
+            "action_book_source_name": row.get("action_book_source_name"),
             "notes": f"brand_mode={brand_mode}; selected={row.get('_action_book_display')} {row.get('_action_book_state')}; action_book_id={row.get('_action_book_id')}",
         })
 
     out = pd.DataFrame(final_rows)
-    cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "american_odds", "source_url", "notes"]
+    cols = ["snapshot_date", "pulled_at", "season", "conference", "team", "book", "american_odds", "source_url", "acquisition_source", "market_identity", "action_book_id", "action_book_display_name", "action_book_state", "action_book_source_name", "notes"]
     return out[cols].sort_values(["conference", "team", "book"]).reset_index(drop=True)
 
 
@@ -342,6 +370,9 @@ def main() -> None:
     args = p.parse_args()
 
     books_map = build_books_map()
+    cfg = action_config()
+    requested_ids = [int(value) for value in cfg["book_ids"]]
+    executable_ids = {int(book_id) for book_id, detail in cfg["books"].items() if detail.get("executable")}
     selected = args.only if args.only else list(CONFERENCE_URLS.keys())
 
     all_data = {}
@@ -350,11 +381,17 @@ def main() -> None:
     pulled_at = pd.Timestamp.now(tz="UTC").isoformat()
 
     for conference in selected:
-        url = CONFERENCE_URLS[conference]
+        url = action_market_url(CONFERENCE_URLS[conference], requested_ids)
         data = fetch_json(url)
         if data is None:
             endpoint_audit_rows.append({"conference": conference, "ok": False, "url": url})
             continue
+        represented = {
+            int(block["book_id"]) for block in data.get("books", [])
+            if block.get("book_id") is not None and block.get("odds")
+        }
+        if not represented.intersection(executable_ids):
+            raise SystemExit(f"Action {conference} futures returned no configured executable sportsbook rows; Consensus-only acquisition rejected")
 
         endpoint_audit_rows.append({"conference": conference, "ok": True, "url": url})
         all_data[conference] = data
@@ -372,7 +409,12 @@ def main() -> None:
     audit = build_book_audit(all_data, books_map)
     audit.to_csv(args.book_audit_csv, index=False)
 
-    out = choose_brand_rows(all_rows, args.prefer_state, args.brand_mode)
+    executable_brands = {
+        detail["brand"] for detail in cfg["books"].values()
+        if detail.get("executable")
+    }
+    executable_rows = all_rows[all_rows["book"].isin(executable_brands)] if not all_rows.empty else all_rows
+    out = choose_brand_rows(executable_rows, args.prefer_state, args.brand_mode)
     out.to_csv(args.output_csv, index=False)
 
     print("Done.")
