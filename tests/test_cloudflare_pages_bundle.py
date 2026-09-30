@@ -97,6 +97,7 @@ class CloudflarePagesBundleTests(unittest.TestCase):
 
     def test_default_manifest_explicitly_includes_external_data_dependencies(self):
         manifest = json.loads((ROOT / "config/cloudflare_pages_manifest.json").read_text())
+        self.assertIn("data/site/derived_page_status.json", manifest["files"])
         self.assertIn("data/snapshots/preseason/preseason_db.json", manifest["files"])
         self.assertIn("data/research/shadow_value_confidence/summary.json", manifest["files"])
         self.assertNotIn("data/research", [entry["source"] for entry in manifest["directory_trees"]])
