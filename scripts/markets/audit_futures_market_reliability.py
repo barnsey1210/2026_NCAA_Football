@@ -321,9 +321,39 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         rows = [row for row in rows if row.get("outcome") in (None, "Yes")]
     by_team = {row.get("team"): row for row in rows if row.get("team")}
     missing = sorted(set(expected_teams) - set(by_team))
+    unmatched = sorted(set(
+        contract.get("audit", {}).get("unmatched", {}).get(key, []) or []
+    ))
+    prior_active_teams = {
+        row.get("team") for row in (prior_rows or [])
+        if row.get("team")
+        and row.get("outcome") in (None, "Yes")
+        and row.get("executable_book_count")
+    }
+    availability = {
+        team: row.get("market_availability")
+        for team, row in by_team.items()
+    }
+    if key == "make_cfp":
+        unexplained = sorted(
+            team for team in expected_teams
+            if team not in by_team
+            or availability.get(team) not in {"AVAILABLE", "NOT_LISTED_BY_MARKET"}
+        )
+        not_listed = sorted(
+            team for team in expected_teams
+            if availability.get(team) == "NOT_LISTED_BY_MARKET"
+        )
+    else:
+        unexplained = missing
+        not_listed = []
     no_executable = sorted(
         team for team, row in by_team.items()
         if not row.get("executable_book_count")
+        and not (
+            key == "make_cfp"
+            and row.get("market_availability") == "NOT_LISTED_BY_MARKET"
+        )
     )
     current_books = Counter(
         book for row in rows for book in row.get("executable_books", [])
@@ -348,8 +378,10 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
     age_hours = ((now - timestamp).total_seconds() / 3600) if timestamp else None
     if timestamp is None or age_hours > 26:
         errors.append(f"{key}: Action Network pull is stale or unavailable")
-    if missing:
-        errors.append(f"{key}: {len(missing)} expected teams disappeared")
+    if unmatched:
+        errors.append(f"{key}: {len(unmatched)} unmatched team labels")
+    if unexplained:
+        errors.append(f"{key}: {len(unexplained)} expected teams are unexplained missing/failed")
     if no_executable:
         errors.append(f"{key}: {len(no_executable)} teams lack an approved executable quote")
     if disappeared:
@@ -369,11 +401,24 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         "expected_teams": len(expected_teams),
         "covered_teams": len(by_team),
         "missing_teams": missing,
+        "available_teams": sorted(
+            team for team in expected_teams
+            if availability.get(team) == "AVAILABLE"
+        ) if key == "make_cfp" else sorted(set(expected_teams) - set(missing)),
+        "not_listed_by_market_teams": not_listed,
+        "previously_listed_now_not_listed_teams": sorted(
+            set(not_listed) & prior_active_teams
+        ) if key == "make_cfp" else [],
+        "unexplained_missing_teams": unexplained,
+        "availability_counts": dict(sorted(Counter(
+            availability.get(team) or "MISSING_FAILED" for team in expected_teams
+        ).items())) if key == "make_cfp" else {},
         "teams_without_executable_quote": no_executable,
         "book_team_counts": dict(sorted(current_books.items())),
         "previous_book_team_counts": dict(sorted(prior_books.items())),
         "provider_wide_disappearances": disappeared,
         "material_book_drops": dropped_books,
+        "unmatched_team_labels": unmatched,
         "errors": errors,
         "warnings": warnings,
     }

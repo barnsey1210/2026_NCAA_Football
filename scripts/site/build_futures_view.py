@@ -1199,6 +1199,13 @@ def main():
             ),
             "playoff_price": cfp_price,
             "playoff_book": cfp_book,
+            "playoff_market_availability": cfp.get(
+                "market_availability", "MISSING_FAILED"
+            ),
+            "playoff_market_availability_reason": cfp.get(
+                "market_availability_reason",
+                "No canonical current Make CFP market state",
+            ),
             "playoff_market_authority": (
                 "Action observed" if cfp_price is not None else None
             ),

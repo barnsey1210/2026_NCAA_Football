@@ -175,6 +175,14 @@ console.log(JSON.stringify(out));
         self.assertIn("NCAAF_FUTURES_RELIABILITY_PATH", source)
         self.assertIn('reliability.get("warnings", [])', source)
 
+    def test_make_cfp_non_listing_is_explicit_without_fabricated_price(self):
+        source = (ROOT / "scripts/site/build_futures_view.py").read_text()
+        dashboard = (ROOT / "futures_dashboard.js").read_text()
+        self.assertIn('"playoff_market_availability"', source)
+        self.assertIn('"playoff_market_availability_reason"', source)
+        self.assertIn("row.playoff_market_availability==='NOT_LISTED_BY_MARKET'", dashboard)
+        self.assertIn("No current market price", dashboard)
+
     def test_conference_record_overlay_uses_canonical_final(self):
         games = [{"game_id": "g1", "cfbd_completed": False, "away_points": None, "home_points": None}]
         CONF_MODULE.apply_canonical_results(games, [{"game_id": "g1", "completed": True, "away_score": 17, "home_score": 28}])

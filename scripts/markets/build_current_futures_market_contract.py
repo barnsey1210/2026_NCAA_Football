@@ -103,6 +103,90 @@ def newest(values):
     return max(good) if good else None
 
 
+def prior_executable_teams(path: Path, market_key: str) -> set[str]:
+    """Read the prior on-disk contract before replacing it."""
+    if not path.exists():
+        return set()
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return set()
+    return {
+        row.get("team")
+        for row in payload.get(market_key, {}).get("rows", [])
+        if row.get("team")
+        and row.get("outcome") in (None, "Yes")
+        and row.get("executable_book_count")
+    }
+
+
+def apply_make_cfp_availability(
+    canonical_names,
+    rows,
+    *,
+    acquisition_succeeded,
+    raw_executable_teams,
+    unmatched_labels,
+    prior_active_teams,
+):
+    """Make every canonical team inspectable without fabricating a quote."""
+    yes_rows = {
+        row.get("team"): row
+        for row in rows
+        if row.get("team") and row.get("outcome") in (None, "Yes")
+    }
+    has_unmatched = bool(unmatched_labels)
+    for team in canonical_names:
+        row = yes_rows.get(team)
+        if row is not None and row.get("executable_book_count"):
+            row["market_availability"] = "AVAILABLE"
+            row["market_availability_reason"] = (
+                "At least one approved executable provider currently lists Make CFP"
+            )
+            continue
+
+        evidence = []
+        if not acquisition_succeeded:
+            evidence.append("approved provider acquisition did not succeed")
+        if team in raw_executable_teams:
+            evidence.append("approved raw provider row was lost before executable normalization")
+        if has_unmatched:
+            evidence.append("unmatched approved provider labels remain")
+
+        state = "MISSING_FAILED" if evidence else "NOT_LISTED_BY_MARKET"
+        reason = (
+            "; ".join(evidence)
+            if evidence
+            else (
+                "No approved executable provider currently offers a Make CFP price; "
+                "prior listing is no longer present across successful current providers"
+                if team in prior_active_teams
+                else "No approved executable provider currently offers a Make CFP price"
+            )
+        )
+        if row is None:
+            row = {
+                "team": team,
+                "outcome": "Yes",
+                "quotes": {},
+                "books": [],
+                "book_count": 0,
+                "executable_books": [],
+                "executable_book_count": 0,
+                "best_observed_price": None,
+                "best_observed_book": None,
+                "best_executable_price": None,
+                "best_executable_book": None,
+                "pulled_at": None,
+            }
+            rows.append(row)
+        row["market_availability"] = state
+        row["market_availability_reason"] = reason
+
+    rows.sort(key=lambda row: (row.get("team") or "", row.get("outcome") or ""))
+    return rows
+
+
 def current_kalshi_payload(path: Path, now=None, max_hours=26):
     """Return a fresh successful Kalshi payload, otherwise None (no carry-forward)."""
     if not path.exists():
@@ -154,6 +238,8 @@ def main():
         "win_totals": [],
         "conference_titles": [],
         "playoff_futures": [],
+        "make_cfp": [],
+        "national_title": [],
     }
 
     # ---------------- WIN TOTALS ----------------
@@ -449,6 +535,10 @@ def main():
     action_book_metadata = action.get("book_metadata", {})
 
     playoff_domains = {}
+    prior_active_by_domain = {
+        key: prior_executable_teams(OUT, key)
+        for key in ("make_cfp", "national_title")
+    }
 
     for market_key in ("make_cfp", "national_title"):
         market = action.get("markets", {}).get(market_key, {})
@@ -459,6 +549,7 @@ def main():
         options = market.get("rules", {}).get("options", {})
 
         grouped = defaultdict(dict)
+        raw_executable_teams = set()
 
         for block in market.get("books", []):
             bid = str(block.get("book_id"))
@@ -476,14 +567,10 @@ def main():
                     canonical_names,
                 )
                 if not team:
-                    unmatched["playoff_futures"].append(
-                        raw_team.get("display_name")
-                        or raw_team.get("full_name")
-                    )
-                    continue
-
-                price = clean_price(odd.get("money"))
-                if price is None:
+                    raw_label = raw_team.get("display_name") or raw_team.get("full_name")
+                    if raw_label:
+                        unmatched["playoff_futures"].append(raw_label)
+                        unmatched[market_key].append(raw_label)
                     continue
 
                 option = options.get(
@@ -497,6 +584,13 @@ def main():
                         continue
                 else:
                     option = "Yes"
+
+                if book in approved_books and option == "Yes":
+                    raw_executable_teams.add(team)
+
+                price = clean_price(odd.get("money"))
+                if price is None:
+                    continue
 
                 key = f"{team}|{option}"
                 prior = grouped[key].get(book)
@@ -554,7 +648,9 @@ def main():
                 if not team or not quote:
                     if source_row.get("team"):
                         unmatched["playoff_futures"].append(source_row.get("team"))
+                        unmatched[market_key].append(source_row.get("team"))
                     continue
+                raw_executable_teams.add(team)
                 target = by_key.get((team, outcome))
                 if target is None:
                     target = {"team": team, "outcome": outcome, "quotes": {}}
@@ -578,6 +674,16 @@ def main():
                     "pulled_at": newest(q.get("pulled_at") for q in quotes.values()),
                 })
 
+        if market_key == "make_cfp":
+            rows = apply_make_cfp_availability(
+                canonical_names,
+                rows,
+                acquisition_succeeded=bool(action.get("pull_succeeded")),
+                raw_executable_teams=raw_executable_teams,
+                unmatched_labels=unmatched[market_key],
+                prior_active_teams=prior_active_by_domain[market_key],
+            )
+
         playoff_domains[market_key] = {
             "source": "Action Network",
             "pull_succeeded": bool(action.get("pull_succeeded")),
@@ -586,7 +692,7 @@ def main():
         }
 
     payload = {
-        "schema_version": "current-futures-market-2026-v1",
+        "schema_version": "current-futures-market-2026-v2",
         "built_at": datetime.now(timezone.utc).isoformat(),
         "season": 2026,
         "identity_source": "canonical 138-team universe + shared market resolver",

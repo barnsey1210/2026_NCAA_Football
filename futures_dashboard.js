@@ -1087,6 +1087,9 @@ function fourBookCount(data){
 
 function bestMarketMarkup(row,kind){
   const d=quoteKind(row,kind);
+  if(kind==='cfp'&&row.playoff_market_availability==='NOT_LISTED_BY_MARKET'){
+    return `<span class="muted">No current market price</span>`;
+  }
   const payload=encodeURIComponent(JSON.stringify({
     team:row.team,
     kind
@@ -1505,6 +1508,9 @@ function mobileSortButton(label,kind,key){
 
 function mobileBestMarketMarkup(row,kind){
   const d=quoteKind(row,kind);
+  if(kind==='cfp'&&row.playoff_market_availability==='NOT_LISTED_BY_MARKET'){
+    return `<span class="muted">No current market price</span>`;
+  }
   const selected=d.quotes?.[d.bestBook]||null;
   const price=quoteOdds(selected,d.side);
   const line=price;

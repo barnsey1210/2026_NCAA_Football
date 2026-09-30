@@ -9,6 +9,11 @@ SPEC = importlib.util.spec_from_file_location("futures_reliability", MODULE_PATH
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
+BUILDER_PATH = Path(__file__).parents[1] / "scripts/markets/build_current_futures_market_contract.py"
+BUILDER_SPEC = importlib.util.spec_from_file_location("futures_contract", BUILDER_PATH)
+BUILDER = importlib.util.module_from_spec(BUILDER_SPEC)
+BUILDER_SPEC.loader.exec_module(BUILDER)
+
 
 def row(date, team, book, price="-110", line="7.5"):
     return {
@@ -22,6 +27,86 @@ def row(date, team, book, price="-110", line="7.5"):
 
 
 class FuturesMarketReliabilityTests(unittest.TestCase):
+    @staticmethod
+    def make_cfp_rows(teams, **kwargs):
+        rows = []
+        BUILDER.apply_make_cfp_availability(teams, rows, **kwargs)
+        return rows
+
+    def test_absent_team_is_explained_non_listing_and_passes(self):
+        rows = self.make_cfp_rows(
+            ["A"], acquisition_succeeded=True, raw_executable_teams=set(),
+            unmatched_labels=[], prior_active_teams=set(),
+        )
+        contract = {"make_cfp": {"rows": rows}, "audit": {"unmatched": {"make_cfp": []}}}
+        result = MODULE.contract_domain(
+            contract, "make_cfp", ["A"], "2026-09-10T12:00:00+00:00",
+            MODULE.datetime(2026, 9, 10, 13, tzinfo=MODULE.timezone.utc),
+        )
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["not_listed_by_market_teams"], ["A"])
+        self.assertEqual(result["unexplained_missing_teams"], [])
+
+    def test_raw_provider_row_lost_in_normalization_still_fails(self):
+        rows = self.make_cfp_rows(
+            ["A"], acquisition_succeeded=True, raw_executable_teams={"A"},
+            unmatched_labels=[], prior_active_teams=set(),
+        )
+        self.assertEqual(rows[0]["market_availability"], "MISSING_FAILED")
+        result = MODULE.contract_domain(
+            {"make_cfp": {"rows": rows}}, "make_cfp", ["A"],
+            "2026-09-10T12:00:00+00:00",
+            MODULE.datetime(2026, 9, 10, 13, tzinfo=MODULE.timezone.utc),
+        )
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["unexplained_missing_teams"], ["A"])
+
+    def test_unmatched_label_cannot_become_non_listing(self):
+        rows = self.make_cfp_rows(
+            ["A"], acquisition_succeeded=True, raw_executable_teams=set(),
+            unmatched_labels=["Mystery State"], prior_active_teams=set(),
+        )
+        contract = {
+            "make_cfp": {"rows": rows},
+            "audit": {"unmatched": {"make_cfp": ["Mystery State"]}},
+        }
+        result = MODULE.contract_domain(
+            contract, "make_cfp", ["A"], "2026-09-10T12:00:00+00:00",
+            MODULE.datetime(2026, 9, 10, 13, tzinfo=MODULE.timezone.utc),
+        )
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["unmatched_team_labels"], ["Mystery State"])
+
+    def test_new_provider_listing_automatically_becomes_available(self):
+        rows = [{
+            "team": "A", "outcome": "Yes", "quotes": {"FanDuel": {"price": 500}},
+            "executable_books": ["FanDuel"], "executable_book_count": 1,
+        }]
+        BUILDER.apply_make_cfp_availability(
+            ["A"], rows, acquisition_succeeded=True, raw_executable_teams={"A"},
+            unmatched_labels=[], prior_active_teams=set(),
+        )
+        self.assertEqual(rows[0]["market_availability"], "AVAILABLE")
+
+    def test_consensus_only_presence_is_not_executable_availability(self):
+        rows = [{
+            "team": "A", "outcome": "Yes", "quotes": {"Consensus": {"price": 500}},
+            "executable_books": [], "executable_book_count": 0,
+        }]
+        BUILDER.apply_make_cfp_availability(
+            ["A"], rows, acquisition_succeeded=True, raw_executable_teams=set(),
+            unmatched_labels=[], prior_active_teams=set(),
+        )
+        self.assertEqual(rows[0]["market_availability"], "NOT_LISTED_BY_MARKET")
+
+    def test_prior_listing_absent_across_successful_current_feeds_is_non_listing(self):
+        rows = self.make_cfp_rows(
+            ["A"], acquisition_succeeded=True, raw_executable_teams=set(),
+            unmatched_labels=[], prior_active_teams={"A"},
+        )
+        self.assertEqual(rows[0]["market_availability"], "NOT_LISTED_BY_MARKET")
+        self.assertIn("prior listing", rows[0]["market_availability_reason"])
+
     def test_material_drop_ignores_small_books_but_catches_large_regression(self):
         self.assertFalse(MODULE.material_drop(0, 2))
         self.assertFalse(MODULE.material_drop(92, 100))
@@ -75,6 +160,7 @@ class FuturesMarketReliabilityTests(unittest.TestCase):
         )
         self.assertEqual(result["status"], "fail")
         self.assertEqual(result["missing_teams"], ["B"])
+        self.assertEqual(result["unexplained_missing_teams"], ["A", "B"])
 
     def test_contract_domain_detects_large_book_regression(self):
         current = {"national_title": {"rows": [
