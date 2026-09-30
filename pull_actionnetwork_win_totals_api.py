@@ -218,7 +218,7 @@ def parse_all_book_rows(data: Dict[str, Any], books_map: Dict[int, Dict[str, Any
         display_name = book_info.get("display_name") or f"Action Book {book_id}"
 
         # Keep only target/currently useful books for the import.
-        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetRivers", "bet365", "Consensus"}:
+        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetMGM", "BetRivers", "bet365", "Consensus"}:
             continue
 
         paired: Dict[Tuple[str, float], Dict[str, Any]] = {}

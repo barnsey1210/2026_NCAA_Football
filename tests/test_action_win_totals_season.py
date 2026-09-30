@@ -30,7 +30,7 @@ class ActionWinTotalsSeasonTests(unittest.TestCase):
     def test_frontend_book_ids_are_always_added(self):
         config = action_config()
         url = action_market_url("https://api.actionnetwork.com/web/v1/leagues/2/futures/example", config["book_ids"])
-        self.assertIn("bookIds=79%2C123%2C68%2C69%2C71%2C15", url)
+        self.assertIn("bookIds=79%2C123%2C68%2C69%2C71%2C1665%2C15", url)
 
     def test_consensus_only_is_not_executable_action_coverage(self):
         config = action_config()

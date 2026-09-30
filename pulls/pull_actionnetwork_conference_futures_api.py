@@ -250,7 +250,7 @@ def parse_all_brand_rows(conference: str, data: Dict[str, Any], books_map: Dict[
         state = book_info.get("state") or ""
         display_name = book_info.get("display_name") or f"Action Book {book_id}"
 
-        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetRivers", "bet365", "Consensus"}:
+        if brand not in {"DraftKings", "FanDuel", "Caesars", "BetMGM", "BetRivers", "bet365", "Consensus"}:
             continue
 
         for odd in book_obj.get("odds", []):
