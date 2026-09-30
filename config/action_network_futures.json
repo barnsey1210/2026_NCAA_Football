@@ -1,6 +1,12 @@
 {
-  "schema_version": "action-network-futures-v1",
+  "schema_version": "action-network-futures-v2",
   "book_ids": [79, 123, 68, 69, 71, 1665, 15],
+  "domains": {
+    "win_totals": {"book_ids": [79, 123, 68, 69, 71, 1665, 15]},
+    "conference_titles": {"book_ids": [79, 123, 68, 69, 71, 1665, 15]},
+    "make_cfp": {"book_ids": [79, 2029, 2031, 69, 71, 15]},
+    "national_title": {"book_ids": [79, 123, 68, 69, 71, 1665, 15]}
+  },
   "books": {
     "79": {"brand": "bet365", "executable": false},
     "123": {"brand": "Caesars", "executable": true},
@@ -8,7 +14,9 @@
     "69": {"brand": "FanDuel", "executable": true},
     "71": {"brand": "BetRivers", "executable": false},
     "1665": {"brand": "BetMGM", "executable": true, "display_name": "BetMGM OH", "source_name": "betmgmoh", "state": "OH"},
+    "2029": {"brand": "Caesars", "executable": true, "display_name": "Caesars OH", "source_name": "caesarsoh", "state": "OH"},
+    "2031": {"brand": "DraftKings", "executable": true, "display_name": "DraftKings OH", "source_name": "draftkingsoh", "state": "OH"},
     "15": {"brand": "Consensus", "executable": false}
   },
-  "notes": "Matches the validated 2026 NCAAF Futures Action Network bookIds set. BetMGM OH is executable with its Action display/source metadata retained. Consensus is diagnostic only; bet365 and BetRivers remain non-executable under current Futures policy."
+  "notes": "Domain-level Action request policy. Win Totals, Conference Titles, and National Title retain the validated shared/default set, including BetMGM OH. Make CFP uses the proven full-coverage DraftKings OH and Caesars OH feeds; BetMGM is omitted because no Make CFP rows were demonstrated. Consensus, bet365, and BetRivers remain diagnostic/non-executable."
 }

@@ -56,6 +56,11 @@ def action_config() -> Dict[str, Any]:
     return json.loads(ACTION_CONFIG.read_text(encoding="utf-8"))
 
 
+def domain_book_ids(config: Dict[str, Any], domain: str) -> List[int]:
+    domain_config = config.get("domains", {}).get(domain, {})
+    return [int(value) for value in domain_config.get("book_ids", config["book_ids"])]
+
+
 def action_market_url(url: str, book_ids: List[int]) -> str:
     parts = urlsplit(url)
     query = dict(parse_qsl(parts.query, keep_blank_values=True))
@@ -371,7 +376,7 @@ def main() -> None:
 
     books_map = build_books_map()
     cfg = action_config()
-    requested_ids = [int(value) for value in cfg["book_ids"]]
+    requested_ids = domain_book_ids(cfg, "conference_titles")
     executable_ids = {int(book_id) for book_id, detail in cfg["books"].items() if detail.get("executable")}
     selected = args.only if args.only else list(CONFERENCE_URLS.keys())
 

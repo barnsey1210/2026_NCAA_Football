@@ -53,6 +53,11 @@ def action_config() -> Dict[str, Any]:
     return json.loads(ACTION_CONFIG.read_text(encoding="utf-8"))
 
 
+def domain_book_ids(config: Dict[str, Any], domain: str) -> List[int]:
+    domain_config = config.get("domains", {}).get(domain, {})
+    return [int(value) for value in domain_config.get("book_ids", config["book_ids"])]
+
+
 def action_market_url(url: str, book_ids: List[int]) -> str:
     parts = urlsplit(url)
     query = dict(parse_qsl(parts.query, keep_blank_values=True))
@@ -392,7 +397,7 @@ def main() -> None:
     # provider-native market name after retrieval instead of misclassifying the
     # routing slug as the offered season.
     cfg = action_config()
-    requested_ids = [int(value) for value in cfg["book_ids"]]
+    requested_ids = domain_book_ids(cfg, "win_totals")
     request_url = action_market_url(args.url, requested_ids)
     data = fetch_json(request_url)
     market_name = clean_text(data.get("name"))
