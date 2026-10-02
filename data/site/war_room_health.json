@@ -1,6 +1,6 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-10-02T14:20:56.997300+00:00",
+  "built_at": "2026-10-02T14:52:53.495026+00:00",
   "fast_market_refresh": {
     "refresh_id": "theodds_20261002T142056Z",
     "last_fast_pull_at": "2026-10-02T14:20:56.533463+00:00",
@@ -39,7 +39,7 @@
   },
   "ratings_health": {
     "status": "AVAILABLE",
-    "generated_at": "2026-10-02T14:20:47.516206+00:00",
+    "generated_at": "2026-10-02T14:49:32.925432+00:00",
     "sources": {
       "SP+": {
         "source": "SP+",
@@ -130,21 +130,21 @@
     "color": "GREEN",
     "status": "READY",
     "postgame_status": "live_shadow_ready",
-    "completed_team_updates": 658,
+    "completed_team_updates": 636,
     "display_ready_games": 230,
     "displayed_shadow_rows": 230,
     "component_games": 417,
     "spread_model_status": "ready",
     "total_model_status": "awaiting_current_season_pbp",
-    "postgame_built_at": "2026-10-02T12:42:42.742387+00:00",
-    "components_generated_at": "2026-10-02T13:16:31.361571+00:00",
-    "shadow_lines_built_at": "2026-10-02T13:16:37.557252+00:00",
+    "postgame_built_at": "2026-10-02T14:48:59.741872+00:00",
+    "components_generated_at": "2026-10-02T14:49:35.420420+00:00",
+    "shadow_lines_built_at": "2026-10-02T14:49:40.089816+00:00",
     "activation_policy": "GREEN only after genuine completed-game updates exist and at least one Shadow projection is display-ready. Expected pregame waiting states are YELLOW, not RED."
   },
   "projection_health": {
     "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
     "selection_policy": "Frontend selects the matching week entry. ALL WEEKS does not aggregate season-wide projection health.",
-    "projection_contract_built_at": "2026-10-02T14:20:46.094894+00:00",
+    "projection_contract_built_at": "2026-10-02T14:49:35.809385+00:00",
     "matched_fast_board_games": 57,
     "unmatched_fast_board_games": 0,
     "fbs_vs_fbs_games": 54,
@@ -262,10 +262,10 @@
       "spread_completeness_pct": 100.0,
       "total_completeness_pct": 100.0,
       "quote_rows": 216,
-      "canonical_current_games": 314,
+      "canonical_current_games": 316,
       "canonical_source_counts": {
         "The Odds API": 1798,
-        "Action Network": 10
+        "Action Network": 18
       },
       "quote_age_median_seconds": 78.5,
       "quote_age_p90_seconds": 78.5
@@ -283,10 +283,10 @@
       "spread_completeness_pct": 100.0,
       "total_completeness_pct": 100.0,
       "quote_rows": 132,
-      "canonical_current_games": 358,
+      "canonical_current_games": 378,
       "canonical_source_counts": {
-        "The Odds API": 336,
-        "Action Network": 1576,
+        "The Odds API": 204,
+        "Action Network": 1894,
         "SportsGameOdds": 2
       },
       "quote_age_median_seconds": 64.5,
