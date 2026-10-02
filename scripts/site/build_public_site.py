@@ -341,6 +341,8 @@ def main():
                 for key in (
                     'game_id',
                     'cfbd_game_id',
+                    'season',
+                    'week',
                     'date',
                     'away_team',
                     'home_team',
