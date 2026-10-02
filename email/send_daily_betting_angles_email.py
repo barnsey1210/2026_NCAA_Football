@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from datetime import date, datetime, timezone
 from email.message import EmailMessage
+from email.utils import make_msgid
 
 REPORT_MD = Path("data/agents/daily_betting_angles.md")
 REPORT_HTML = Path("data/agents/daily_betting_angles.html")
@@ -33,6 +34,7 @@ if not REPORT_MD.exists() and not REPORT_HTML.exists():
 send_date = date.today().isoformat()
 subject = f"Daily NCAAF Betting Angles — {send_date}"
 send_key = hashlib.sha256(f"{send_date}\0{recipient}".encode()).hexdigest()
+message_id = make_msgid(idstring=f"ncaaf-daily-{send_date}")
 
 
 def read_ledger() -> dict:
@@ -70,6 +72,7 @@ ledger["sends"][send_key] = {
     "date": send_date,
     "recipient": recipient,
     "subject": subject,
+    "message_id": message_id,
     "status": "IN_FLIGHT",
     "claimed_at_utc": claimed_at,
 }
@@ -84,6 +87,7 @@ msg = EmailMessage()
 msg["From"] = sender
 msg["To"] = recipient
 msg["Subject"] = subject
+msg["Message-ID"] = message_id
 
 if html_body:
     msg.set_content(text_body)
@@ -133,4 +137,4 @@ ledger["sends"][send_key].update(
 )
 write_ledger(ledger)
 
-print(f"Sent daily betting angles email to {recipient}")
+print(f"Sent daily betting angles email to {recipient}; Message-ID: {message_id}")
