@@ -14,12 +14,17 @@ contract, but a separate THE_ODDS_API_KEY_FAST credential and fast worker.
 import json
 import os
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from time import perf_counter
 from pathlib import Path
 
 import pandas as pd
 import requests
+
+from scripts.markets.fast_market_horizon import (
+    provider_timestamp,
+    remaining_season_horizon,
+)
 
 
 PROFILE = os.environ.get("NCAAF_THEODDS_PROFILE", "daily").strip().lower()
@@ -141,17 +146,15 @@ params = {
     "dateFormat": "iso",
 }
 
-# The Command Center is a near-term operational surface. Bounding the provider
-# response to the current weekend avoids parsing and serializing future boards
-# while retaining the same books, markets, quota, and acceptance gates.
+# Every Command Center pull discovers posted openers across the entire remaining
+# canonical season. Environment overrides remain available for controlled tests.
 if PROFILE == "command_center":
-    window_start = datetime.now(timezone.utc)
-    window_end = window_start + timedelta(days=4)
+    window_start, window_end, canonical_latest_kickoff = remaining_season_horizon()
     params["commenceTimeFrom"] = os.environ.get(
-        "NCAAF_FAST_COMMENCE_TIME_FROM", window_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        "NCAAF_FAST_COMMENCE_TIME_FROM", provider_timestamp(window_start)
     )
     params["commenceTimeTo"] = os.environ.get(
-        "NCAAF_FAST_COMMENCE_TIME_TO", window_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        "NCAAF_FAST_COMMENCE_TIME_TO", provider_timestamp(window_end)
     )
 
 request_started_at = datetime.now(timezone.utc)
@@ -186,6 +189,14 @@ quota = {
     "requested_markets": MARKETS,
     "commence_time_from": params.get("commenceTimeFrom"),
     "commence_time_to": params.get("commenceTimeTo"),
+    "horizon_policy": (
+        "CANONICAL_REMAINING_2026_SEASON" if PROFILE == "command_center" else None
+    ),
+    "canonical_latest_kickoff": (
+        provider_timestamp(canonical_latest_kickoff)
+        if PROFILE == "command_center"
+        else None
+    ),
 }
 quota_path = AUDIT_DIR / f"theodds_api_quota_status{FILE_SUFFIX}.json"
 quota_path.write_text(json.dumps(quota, indent=2) + "\n", encoding="utf-8")

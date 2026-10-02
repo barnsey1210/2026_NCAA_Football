@@ -1,18 +1,40 @@
 import ast
+import json
+import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
+
+from scripts.markets.fast_market_horizon import remaining_season_horizon
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class FastMarketLatencyContractTests(unittest.TestCase):
-    def test_provider_request_is_bounded_and_timed(self):
+    def test_provider_request_uses_canonical_remaining_season_and_is_timed(self):
         source = (ROOT / "pull_theodds_ncaaf_lines_2026.py").read_text()
         self.assertIn('params["commenceTimeFrom"]', source)
         self.assertIn('params["commenceTimeTo"]', source)
-        self.assertIn('strftime("%Y-%m-%dT%H:%M:%SZ")', source)
+        self.assertIn("remaining_season_horizon()", source)
+        self.assertIn('"CANONICAL_REMAINING_2026_SEASON"', source)
+        self.assertNotIn("timedelta(days=4)", source)
         self.assertIn('quota["normalization_ms"]', source)
         ast.parse(source)
+
+    def test_horizon_includes_latest_canonical_kickoff_with_tail(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            schedule = Path(tmp) / "schedule.json"
+            schedule.write_text(json.dumps({"games": [
+                {"start_date": "2026-10-10T16:00:00Z"},
+                {"start_date": "2026-12-12T20:00:00Z"},
+            ]}))
+            start, end, latest = remaining_season_horizon(
+                schedule,
+                now=datetime(2026, 10, 2, tzinfo=timezone.utc),
+            )
+            self.assertEqual(start, datetime(2026, 10, 2, tzinfo=timezone.utc))
+            self.assertEqual(latest, datetime(2026, 12, 12, 20, tzinfo=timezone.utc))
+            self.assertEqual(end, datetime(2026, 12, 13, 20, tzinfo=timezone.utc))
 
     def test_every_fast_pull_records_durable_history(self):
         source = (ROOT / "scripts/war_room/run_fast_market_refresh.py").read_text()
