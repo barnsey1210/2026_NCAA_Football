@@ -47,6 +47,16 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("positionModelTooltip(this)", block)
         self.assertIn("quoteBundle(game,book)", block)
 
+    def test_exact_frozen_shadow_total_displays_without_changing_partial_icons(self):
+        block = self.source.split("function shadowDisplay(game, model, market){", 1)[1].split(
+            "const BOOK_LOGOS", 1
+        )[0]
+        self.assertIn("selection_reason==='EXACT_FROZEN_PREGAME_SNAPSHOT'", block)
+        self.assertIn("readyCount===2 || historicalFrozen", block)
+        self.assertIn("shadowTeamChip(game.away_team,awayReady)", block)
+        self.assertIn("shadowTeamChip(game.home_team,homeReady)", block)
+        self.assertIn("Historical Shadow spread unavailable", self.source)
+
     def test_mobile_health_notes_and_game_footer_stack_without_overlap(self):
         mobile = self.source.rsplit("@media(max-width:900px){", 1)[1].split(
             "@media(min-width:901px){", 1

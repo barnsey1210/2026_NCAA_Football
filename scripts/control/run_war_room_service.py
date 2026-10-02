@@ -239,18 +239,47 @@ def live_queue(tasks_dir: Optional[Path] = None) -> list[dict]:
 
 
 def request_priority(task: dict) -> int:
-    """Ratings reservations outrank queued work; running work is never preempted."""
+    """Operator work and Ratings reservations outrank automatic Market ticks."""
     action = task.get("action")
     trigger = str(task.get("trigger") or "")
+    if action == "ratings" and trigger != "ratings-scheduler":
+        return 0
     if action == "ratings":
-        return 0 if trigger not in {"ratings-scheduler"} else 1
-    if action == "postgame":
+        return 1
+    if manual_operator_request(task):
         return 2
-    if action == "market" and trigger == "ratings-catchup":
+    if action == "postgame":
         return 3
+    if action == "market" and trigger == "ratings-catchup":
+        return 4
     if action == "market" and trigger == "market-scheduler":
-        return 5
-    return 4
+        return 6
+    return 5
+
+
+def manual_operator_request(task: dict) -> bool:
+    """Recognize authenticated Command Center/manual writer requests."""
+    if task.get("action") not in {"market", "ratings", "postgame"}:
+        return False
+    trigger = str(task.get("trigger") or "").strip().lower()
+    requester = str(task.get("requester") or "").strip().lower()
+    return trigger in {"manual", "manual-operator", "cloudflare-access"} or any(
+        marker in requester for marker in ("cloudflare-access", "manual operator", "command center")
+    )
+
+
+def operator_protection_active(tasks_dir: Optional[Path] = None) -> Optional[dict]:
+    """Return a live manual operator reservation through terminal completion."""
+    tasks_dir = tasks_dir or TASKS
+    reconcile_stale_tasks(tasks_dir)
+    for path in tasks_dir.glob("*.json"):
+        task = read_json(path, {})
+        if task.get("status") not in RATINGS_PROTECTED_STATUSES or not manual_operator_request(task):
+            continue
+        live, _ = dispatcher_is_live(task)
+        if live:
+            return task
+    return None
 
 
 def ratings_protection_active(tasks_dir: Optional[Path] = None) -> Optional[dict]:
@@ -364,6 +393,16 @@ def main() -> int:
         )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         print(json.dumps(task, indent=2)); return 0
+    if (args.action == "market" and args.trigger == "market-scheduler"
+            and (reservation := operator_protection_active())):
+        task.update(
+            status="COALESCED_FOR_OPERATOR",
+            completed_at=utc_now(),
+            operator_task_id=reservation.get("task_id"),
+            waiting_reason="Automatic Market tick deferred while a manual operator request completes",
+        )
+        atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
+        print(json.dumps(task, indent=2)); return 0
     if daily_running():
         task.update(status="DEFERRED_BY_DAILY_BACKBONE", completed_at=utc_now())
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
@@ -396,7 +435,7 @@ def main() -> int:
         task.update(
             status="RUNNING",
             started_at=utc_now(),
-            queue_policy="RATINGS_PRIORITY_THEN_FIFO",
+            queue_policy="MANUAL_OPERATOR_THEN_RATINGS_THEN_FIFO",
         )
         atomic_json(TASKS / f"{identity}.json", task); atomic_json(LATEST, task)
         command = resolve_command(args.action)

@@ -44,14 +44,16 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
         ]
         return tasks, patches
 
-    def test_manual_then_scheduled_ratings_outrank_postgame_and_recurring_market(self):
+    def test_manual_operator_then_ratings_policy_outranks_recurring_market(self):
         rows = [
             {"action": "market", "trigger": "market-scheduler"},
             {"action": "postgame", "trigger": "cfbd-final-watcher"},
             {"action": "ratings", "trigger": "ratings-scheduler"},
             {"action": "ratings", "trigger": "cloudflare-access"},
+            {"action": "market", "trigger": "cloudflare-access"},
+            {"action": "postgame", "trigger": "manual-operator"},
         ]
-        self.assertEqual([DISPATCHER.request_priority(row) for row in rows], [5, 2, 1, 0])
+        self.assertEqual([DISPATCHER.request_priority(row) for row in rows], [6, 3, 1, 0, 2, 2])
 
     def test_live_queue_applies_priority_then_fifo_without_preempting_lock_owner(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -69,6 +71,46 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
             with mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")):
                 self.assertEqual([row["task_id"] for row in DISPATCHER.live_queue(tasks)],
                                  ["ratings", "postgame", "market"])
+
+    def test_queued_auto_markets_cannot_jump_manual_market(self):
+        rows = [
+            {"task_id": "auto-1", "action": "market", "trigger": "market-scheduler", "requested_at": "2026-10-02T15:00:00Z"},
+            {"task_id": "auto-2", "action": "market", "trigger": "market-scheduler", "requested_at": "2026-10-02T15:01:00Z"},
+            {"task_id": "manual", "action": "market", "trigger": "cloudflare-access", "requested_at": "2026-10-02T15:02:00Z"},
+        ]
+        ordered = sorted(rows, key=lambda row: (DISPATCHER.request_priority(row), row["requested_at"]))
+        self.assertEqual([row["task_id"] for row in ordered], ["manual", "auto-1", "auto-2"])
+
+    def test_active_auto_market_is_not_preempted_then_manual_is_next(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp) / "tasks"
+            locks = Path(tmp) / "locks"
+            tasks.mkdir()
+            locks.mkdir()
+            owner = {"task_id": "auto-running", "action": "market", "pid": os.getpid()}
+            (locks / "canonical-writer.lock").mkdir()
+            (locks / "canonical-writer.lock" / "owner.json").write_text(json.dumps(owner))
+            (tasks / "auto-running.json").write_text(json.dumps({
+                "task_id": "auto-running", "action": "market", "trigger": "market-scheduler",
+                "status": "RUNNING", "dispatcher_pid": os.getpid(),
+            }))
+            queued = [
+                {"task_id": "auto-queued", "action": "market", "trigger": "market-scheduler", "requested_at": "2026-10-02T15:00:00Z"},
+                {"task_id": "manual-next", "action": "market", "trigger": "cloudflare-access", "requested_at": "2026-10-02T15:01:00Z"},
+            ]
+            with mock.patch.object(DISPATCHER, "LOCKS", locks), \
+                    mock.patch.object(DISPATCHER, "TASKS", tasks), \
+                    mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")):
+                with self.assertRaisesRegex(RuntimeError, "overlap blocked by running task auto-running"):
+                    DISPATCHER.acquire("market", "manual-next")
+            ordered = sorted(queued, key=lambda row: (DISPATCHER.request_priority(row), row["requested_at"]))
+            self.assertEqual(ordered[0]["task_id"], "manual-next")
+
+    def test_manual_postgame_outranks_continuing_auto_market_cadence(self):
+        manual = {"action": "postgame", "trigger": "manual", "requester": "Command Center"}
+        automatic = {"action": "market", "trigger": "market-scheduler"}
+        self.assertTrue(DISPATCHER.manual_operator_request(manual))
+        self.assertLess(DISPATCHER.request_priority(manual), DISPATCHER.request_priority(automatic))
 
     def test_dead_pid_is_abandoned_and_excluded(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -116,6 +158,33 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
             self.assertEqual([row["status"] for row in market],
                              ["COALESCED_FOR_RATINGS", "COALESCED_FOR_RATINGS"])
             self.assertFalse(any(row["status"] in DISPATCHER.LIVE_REQUEST_STATUSES for row in market))
+
+    def test_repeated_market_ticks_during_manual_operator_run_are_coalesced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks, patches = self.configure(Path(tmp))
+            (tasks / "manual-live.json").write_text(json.dumps({
+                "task_id": "manual-live", "action": "postgame", "trigger": "cloudflare-access",
+                "requester": "Command Center", "status": "RUNNING", "dispatcher_pid": os.getpid(),
+            }))
+            with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], \
+                    mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")):
+                for identity in ("market-tick-one", "market-tick-two"):
+                    with mock.patch.object(sys, "argv", ["run_war_room_service.py", "market",
+                            "--trigger", "market-scheduler", "--task-id", identity]):
+                        self.assertEqual(DISPATCHER.main(), 0)
+            market = [json.loads(path.read_text()) for path in tasks.glob("market-*.json")]
+            self.assertEqual([row["status"] for row in market],
+                             ["COALESCED_FOR_OPERATOR", "COALESCED_FOR_OPERATOR"])
+            self.assertFalse(any(row["status"] in DISPATCHER.LIVE_REQUEST_STATUSES for row in market))
+
+    def test_auto_cadence_is_eligible_after_manual_completion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp)
+            (tasks / "manual-complete.json").write_text(json.dumps({
+                "task_id": "manual-complete", "action": "market", "trigger": "cloudflare-access",
+                "status": "COMPLETED", "dispatcher_pid": os.getpid(),
+            }))
+            self.assertIsNone(DISPATCHER.operator_protection_active(tasks))
 
     def test_ratings_lock_covers_service_and_exactly_one_catchup_runs_on_success(self):
         with tempfile.TemporaryDirectory() as tmp:

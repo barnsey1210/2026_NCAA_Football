@@ -4156,6 +4156,16 @@ function signedImpact(value){
 
 function shadowTooltipText(game,market,readyCount){
   const readiness=game?.shadow_readiness||{};
+  const model=game?.models?.[`shadow_${market}`]||{};
+  const historicalFrozen=model?.selection_reason==='EXACT_FROZEN_PREGAME_SNAPSHOT';
+  if(historicalFrozen){
+    return market==='spread'
+      ? 'Historical Shadow spread unavailable — exact game-level value was not persisted pregame'
+      : 'Exact frozen pregame Shadow total · component readiness remains as recorded';
+  }
+  if(game?.projection_freeze?.status==='FROZEN_PREKICKOFF' && market==='spread' && model?.value_home_line==null){
+    return 'Historical Shadow spread unavailable — exact game-level value was not persisted pregame';
+  }
   const contributions=readiness.team_contributions||{};
   const teamText=(side)=>{
     const team=side==='away'?game.away_team:game.home_team;
@@ -4181,7 +4191,8 @@ function shadowDisplay(game, model, market){
   const homeReady=Boolean(readiness[`home_${market}_shadow_ready`]);
   const readyCount=Number(awayReady)+Number(homeReady);
   const value=market==='spread'?model?.value_home_line:model?.value_total;
-  const available=readyCount===2 && model?.selection_status==='AVAILABLE' && value!==null && value!==undefined;
+  const historicalFrozen=model?.selection_reason==='EXACT_FROZEN_PREGAME_SNAPSHOT';
+  const available=(readyCount===2 || historicalFrozen) && model?.selection_status==='AVAILABLE' && value!==null && value!==undefined;
   const label=available?modelDisplay(value,market):(readyCount===0?'WAIT':readyCount===1?'PARTIAL':'UNAVAILABLE');
   const valueMarkup=available && market==='spread'
     ? `<span class="shadow-value-line">${spreadFavoriteLogo(game,value)}<span>${label}</span></span>`
