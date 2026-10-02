@@ -1,6 +1,6 @@
 {
   "schema_version": "season-simulations-2026-v1",
-  "built_at": "2026-10-02T12:57:46.417561+00:00",
+  "built_at": "2026-10-02T14:24:27.488626+00:00",
   "season": 2026,
   "trials": 20000,
   "seed": 20260511,
@@ -15,50 +15,7 @@
   "remaining_projections_applied": 559,
   "completed_finals_frozen": 333,
   "conference_game_overrides_applied": 0,
-  "projection_model_metadata": {
-    "family": "Game Projection Consensus",
-    "spread_version": "spread_consensus_equal_available_v1",
-    "spread_max_sources": 5,
-    "spread_sources": [
-      "SP+",
-      "FPI",
-      "TeamRankings",
-      "DRatings Predictions",
-      "Sagarin Predictor Prediction"
-    ],
-    "spread_active_sources": [
-      "SP+",
-      "FPI",
-      "TeamRankings",
-      "DRatings Predictions"
-    ],
-    "spread_pending_sources": [
-      "Sagarin Predictor Prediction"
-    ],
-    "spread_fallback": "equal weight across available eligible production sources",
-    "win_probability_version": "logistic_margin_scale_6_5_v1",
-    "win_probability_method": "logistic from canonical projected home margin",
-    "win_probability_logistic_scale": 6.5,
-    "win_probability_calibration": "logistic scale 6.5 validated against fitted alternatives on 2025 holdout using current-style four-source historical proxy",
-    "total_version": "total_consensus_equal_available_v1",
-    "total_max_sources": 4,
-    "total_sources": [
-      "SP+",
-      "DRatings Predictions",
-      "Massey Games",
-      "Sagarin Predictor Prediction"
-    ],
-    "total_active_sources": [
-      "SP+",
-      "DRatings Predictions"
-    ],
-    "total_pending_sources": [
-      "Massey Games",
-      "Sagarin Predictor Prediction"
-    ],
-    "total_fallback": "equal weight across available eligible production sources",
-    "updated_at": "2026-10-02T12:39:40.496215+00:00"
-  },
+  "projection_model_metadata": {},
   "simulation_model": "Completed games are frozen to canonical final scores. Remaining games use Monte Carlo from canonical Game Projection Consensus margins/probabilities, and hypothetical conference title games; all model margins convert to win probability with logistic scale 6.5.",
   "teams": [
     {
@@ -3847,9 +3804,9 @@
       "avg_total_wins": 3.2885,
       "avg_conference_wins": 2.2885,
       "bowl_eligibility_pct": 0.034,
-      "make_title_game_pct": 0.0054,
-      "conference_title_pct": 0.0007,
-      "lose_title_game_pct": 0.0047,
+      "make_title_game_pct": 0.0053,
+      "conference_title_pct": 0.0008,
+      "lose_title_game_pct": 0.0045,
       "win_distribution": [
         {
           "wins": 1,
@@ -4131,9 +4088,9 @@
       "avg_total_wins": 9.8581,
       "avg_conference_wins": 6.8581,
       "bowl_eligibility_pct": 0.9999,
-      "make_title_game_pct": 0.8814,
-      "conference_title_pct": 0.7148,
-      "lose_title_game_pct": 0.1666,
+      "make_title_game_pct": 0.8801,
+      "conference_title_pct": 0.7144,
+      "lose_title_game_pct": 0.1657,
       "win_distribution": [
         {
           "wins": 5,
@@ -4351,9 +4308,9 @@
       "avg_total_wins": 7.9208,
       "avg_conference_wins": 5.9208,
       "bowl_eligibility_pct": 0.9748,
-      "make_title_game_pct": 0.573,
-      "conference_title_pct": 0.1688,
-      "lose_title_game_pct": 0.4042,
+      "make_title_game_pct": 0.5756,
+      "conference_title_pct": 0.1707,
+      "lose_title_game_pct": 0.4049,
       "win_distribution": [
         {
           "wins": 3,
@@ -4720,48 +4677,48 @@
     {
       "team": "Kennesaw State",
       "conference": "CUSA",
-      "avg_total_wins": 4.9143,
-      "avg_conference_wins": 3.9144,
-      "bowl_eligibility_pct": 0.3369,
-      "make_title_game_pct": 0.1161,
-      "conference_title_pct": 0.0243,
-      "lose_title_game_pct": 0.0917,
+      "avg_total_wins": 4.8231,
+      "avg_conference_wins": 3.823,
+      "bowl_eligibility_pct": 0.3114,
+      "make_title_game_pct": 0.1103,
+      "conference_title_pct": 0.0237,
+      "lose_title_game_pct": 0.0866,
       "win_distribution": [
         {
           "wins": 1,
-          "probability": 0.0037
+          "probability": 0.005
         },
         {
           "wins": 2,
-          "probability": 0.0335
+          "probability": 0.0374
         },
         {
           "wins": 3,
-          "probability": 0.1146
+          "probability": 0.1286
         },
         {
           "wins": 4,
-          "probability": 0.2326
+          "probability": 0.2381
         },
         {
           "wins": 5,
-          "probability": 0.2787
+          "probability": 0.2796
         },
         {
           "wins": 6,
-          "probability": 0.2139
+          "probability": 0.1973
         },
         {
           "wins": 7,
-          "probability": 0.0938
+          "probability": 0.0916
         },
         {
           "wins": 8,
-          "probability": 0.0272
+          "probability": 0.0201
         },
         {
           "wins": 9,
-          "probability": 0.0022
+          "probability": 0.0024
         }
       ]
     },
@@ -5127,9 +5084,9 @@
       "avg_total_wins": 6.5388,
       "avg_conference_wins": 4.5388,
       "bowl_eligibility_pct": 0.7818,
-      "make_title_game_pct": 0.2123,
-      "conference_title_pct": 0.055,
-      "lose_title_game_pct": 0.1573,
+      "make_title_game_pct": 0.2155,
+      "conference_title_pct": 0.0548,
+      "lose_title_game_pct": 0.1608,
       "win_distribution": [
         {
           "wins": 2,
@@ -5307,9 +5264,9 @@
       "avg_total_wins": 6.0915,
       "avg_conference_wins": 4.0915,
       "bowl_eligibility_pct": 0.6862,
-      "make_title_game_pct": 0.0998,
-      "conference_title_pct": 0.0195,
-      "lose_title_game_pct": 0.0803,
+      "make_title_game_pct": 0.1007,
+      "conference_title_pct": 0.019,
+      "lose_title_game_pct": 0.0817,
       "win_distribution": [
         {
           "wins": 2,
@@ -5531,9 +5488,9 @@
       "avg_total_wins": 4.3139,
       "avg_conference_wins": 3.3138,
       "bowl_eligibility_pct": 0.1641,
-      "make_title_game_pct": 0.0408,
-      "conference_title_pct": 0.0058,
-      "lose_title_game_pct": 0.035,
+      "make_title_game_pct": 0.0403,
+      "conference_title_pct": 0.0056,
+      "lose_title_game_pct": 0.0348,
       "win_distribution": [
         {
           "wins": 2,
@@ -5660,44 +5617,44 @@
     {
       "team": "Missouri State",
       "conference": "CUSA",
-      "avg_total_wins": 3.754,
-      "avg_conference_wins": 2.754,
-      "bowl_eligibility_pct": 0.0843,
-      "make_title_game_pct": 0.0171,
-      "conference_title_pct": 0.0024,
-      "lose_title_game_pct": 0.0147,
+      "avg_total_wins": 3.8453,
+      "avg_conference_wins": 2.8453,
+      "bowl_eligibility_pct": 0.0975,
+      "make_title_game_pct": 0.0194,
+      "conference_title_pct": 0.0027,
+      "lose_title_game_pct": 0.0167,
       "win_distribution": [
         {
           "wins": 1,
-          "probability": 0.0261
+          "probability": 0.0227
         },
         {
           "wins": 2,
-          "probability": 0.1363
+          "probability": 0.1176
         },
         {
           "wins": 3,
-          "probability": 0.2696
+          "probability": 0.2645
         },
         {
           "wins": 4,
-          "probability": 0.296
+          "probability": 0.3008
         },
         {
           "wins": 5,
-          "probability": 0.1876
+          "probability": 0.1969
         },
         {
           "wins": 6,
-          "probability": 0.0676
+          "probability": 0.0784
         },
         {
           "wins": 7,
-          "probability": 0.0153
+          "probability": 0.0171
         },
         {
           "wins": 8,
-          "probability": 0.0014
+          "probability": 0.0019
         },
         {
           "wins": 9,
@@ -6047,9 +6004,9 @@
       "avg_total_wins": 4.6952,
       "avg_conference_wins": 2.6435,
       "bowl_eligibility_pct": 0.2493,
-      "make_title_game_pct": 0.0056,
+      "make_title_game_pct": 0.006,
       "conference_title_pct": 0.0006,
-      "lose_title_game_pct": 0.005,
+      "lose_title_game_pct": 0.0055,
       "win_distribution": [
         {
           "wins": 2,
@@ -6091,9 +6048,9 @@
       "avg_total_wins": 4.6768,
       "avg_conference_wins": 3.6768,
       "bowl_eligibility_pct": 0.2572,
-      "make_title_game_pct": 0.0486,
-      "conference_title_pct": 0.0082,
-      "lose_title_game_pct": 0.0404,
+      "make_title_game_pct": 0.0467,
+      "conference_title_pct": 0.0078,
+      "lose_title_game_pct": 0.0388,
       "win_distribution": [
         {
           "wins": 1,
