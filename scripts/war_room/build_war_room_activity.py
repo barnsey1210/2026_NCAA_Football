@@ -724,18 +724,19 @@ def public_moves(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         candidates.append((row, 1 if delta > 0 else -1))
 
     groups: list[list[dict[str, Any]]] = []
+    latest_group: dict[tuple[str, str, int], list[dict[str, Any]]] = {}
     for row, direction in sorted(candidates, key=lambda item: parsed_timestamp(item[0].get("event_timestamp"))):
-        matched = None
-        for group in reversed(groups):
-            anchor = group[0]
-            anchor_delta = float(anchor["new_line"]) - float(anchor["old_line"])
-            if (anchor.get("game_id"), anchor.get("market"), 1 if anchor_delta > 0 else -1) != (row.get("game_id"), row.get("market"), direction):
-                continue
-            if (parsed_timestamp(row.get("event_timestamp")) - parsed_timestamp(group[-1].get("event_timestamp"))).total_seconds() <= AGGREGATION_SECONDS:
-                matched = group
-            break
+        key = (str(row.get("game_id")), str(row.get("market")), direction)
+        matched = latest_group.get(key)
+        if matched is not None and (
+            parsed_timestamp(row.get("event_timestamp"))
+            - parsed_timestamp(matched[-1].get("event_timestamp"))
+        ).total_seconds() > AGGREGATION_SECONDS:
+            matched = None
         if matched is None:
-            groups.append([row])
+            matched = [row]
+            groups.append(matched)
+            latest_group[key] = matched
         else:
             matched.append(row)
 
@@ -1179,11 +1180,18 @@ def build_game_index(
     }
 
 
-def read_history(path: Path) -> list[dict[str, Any]]:
+def read_history(path: Path, event_types: set[str] | None = None) -> list[dict[str, Any]]:
     rows = []
     try:
-        for line in path.read_text().splitlines():
-            if line.strip(): rows.append(json.loads(line))
+        needles = (
+            {f'"event_type": "{event_type}"' for event_type in event_types}
+            if event_types else None
+        )
+        with path.open(encoding="utf-8") as handle:
+            for line in handle:
+                if not line.strip() or (needles and not any(needle in line for needle in needles)):
+                    continue
+                rows.append(json.loads(line))
     except (OSError, json.JSONDecodeError):
         pass
     return rows
@@ -1204,6 +1212,10 @@ def main() -> None:
     parser.add_argument("--max-public-events", type=int, default=200)
     parser.add_argument("--max-game-events", type=int, default=100)
     parser.add_argument("--detected-at")
+    parser.add_argument(
+        "--fast-cycle", action="store_true",
+        help="Update the live bounded tape while deferring all-season game-index maintenance.",
+    )
     args = parser.parse_args()
     detected_at = args.detected_at or utc_now()
     matrix = load_json(args.matrix, {})
@@ -1267,23 +1279,30 @@ def main() -> None:
             "recent_change_events": recent_change_events,
             "events": newest[:max(1, args.max_public_events)],
         }
-        line_history = load_json(args.line_history, {})
-        results_payload = load_json(args.results, {})
-        game_index = build_game_index(
-            newest, line_history if isinstance(line_history, dict) else {},
-            current.get("games_meta") or {}, detected_at, current.get("refresh_id"),
-            args.max_game_events, load_pinnacle_openers(args.book_history),
-            load_book_market_timeline(args.book_history),
-            canonical_results_by_game(results_payload),
-        )
-        # Static fallback includes only opener summaries and the already-bounded
-        # public tape; full per-game history remains lazy through the live API.
-        payload["opening_markets"] = {
-            gid: row.get("openers") for gid, row in game_index["games"].items()
-            if any((row.get("openers") or {}).values())
-        }
+        if args.fast_cycle:
+            # The live tape above contains every newly detected market/model
+            # event. Reuse the last canonical opener projection; rebuilding the
+            # all-season per-game index scans the durable sportsbook ledger and
+            # belongs to daily maintenance, not the operator's browser path.
+            prior_public = load_json(args.output, {})
+            payload["opening_markets"] = prior_public.get("opening_markets") or {}
+        else:
+            line_history = load_json(args.line_history, {})
+            results_payload = load_json(args.results, {})
+            game_index = build_game_index(
+                newest, line_history if isinstance(line_history, dict) else {},
+                current.get("games_meta") or {}, detected_at, current.get("refresh_id"),
+                args.max_game_events, load_pinnacle_openers(args.book_history),
+                load_book_market_timeline(args.book_history),
+                canonical_results_by_game(results_payload),
+            )
+            payload["opening_markets"] = {
+                gid: row.get("openers") for gid, row in game_index["games"].items()
+                if any((row.get("openers") or {}).values())
+            }
         atomic_json(args.output, payload)
-        atomic_json(args.game_index_output, game_index)
+        if not args.fast_cycle:
+            atomic_json(args.game_index_output, game_index)
     print(f"activity events: {len(history)} total, {len(new_events)} new")
     print(f"wrote: {args.output}")
 

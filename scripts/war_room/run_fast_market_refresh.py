@@ -176,6 +176,7 @@ def main():
             [
                 sys.executable,
                 "scripts/war_room/build_war_room_activity.py",
+                "--fast-cycle",
             ],
             env,
         )

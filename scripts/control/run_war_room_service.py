@@ -17,7 +17,7 @@ import shutil
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -29,7 +29,8 @@ LATEST = CONTROL / "latest.json"
 DAILY_STATUS = ROOT / "data/control/daily_run_status.json"
 REGISTRY = ROOT / "scripts/control/refresh_stage_registry.json"
 WRITER_QUEUE_WAIT_SECONDS = 900
-WRITER_QUEUE_POLL_SECONDS = 0.1
+WRITER_QUEUE_POLL_SECONDS = 1.0
+STALE_TASK_MAX_AGE_SECONDS = 24 * 60 * 60
 LIVE_REQUEST_STATUSES = {
     "REQUESTED", "WAITING_FOR_CANONICAL_WRITER", "QUEUED_FOR_MARKET_GAP",
 }
@@ -107,6 +108,99 @@ def task_id(action: str, trigger: str) -> str:
     return f"{action}-{hashlib.sha256(raw).hexdigest()[:12]}"
 
 
+def parse_time(value: object) -> Optional[datetime]:
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def process_identity(pid: int) -> Optional[dict]:
+    """Return immutable start time and command for one macOS/POSIX process."""
+    try:
+        result = subprocess.run(
+            ["ps", "-p", str(pid), "-o", "lstart=", "-o", "command="],
+            text=True, capture_output=True, timeout=2, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    line = (result.stdout or "").strip()
+    if result.returncode or not line:
+        return None
+    parts = line.split(None, 5)
+    if len(parts) < 6:
+        return None
+    try:
+        started = datetime.strptime(" ".join(parts[:5]), "%a %b %d %H:%M:%S %Y")
+    except ValueError:
+        return None
+    return {
+        "started_at": started.replace(tzinfo=timezone.utc).isoformat(),
+        "command": parts[5],
+    }
+
+
+def dispatcher_is_live(task: dict, *, now: Optional[datetime] = None) -> tuple[bool, str]:
+    """Reject dead, reused, unrelated, or time-incompatible dispatcher PIDs."""
+    pid = task.get("dispatcher_pid")
+    if not isinstance(pid, int):
+        return False, "missing_dispatcher_pid"
+    identity = process_identity(pid)
+    if not identity:
+        return False, "dispatcher_pid_not_running"
+    command = identity["command"]
+    action = str(task.get("action") or "")
+    task_identity = str(task.get("task_id") or "")
+    if "run_war_room_service.py" not in command or not re.search(
+        rf"(?:^|\s){re.escape(action)}(?:\s|$)", command
+    ):
+        return False, "dispatcher_pid_command_mismatch"
+    recorded_start = parse_time(task.get("dispatcher_process_started_at"))
+    actual_start = parse_time(identity["started_at"])
+    if recorded_start and actual_start and abs((actual_start - recorded_start).total_seconds()) > 1:
+        return False, "dispatcher_pid_start_time_mismatch"
+    requested = parse_time(task.get("requested_at"))
+    if requested and actual_start and actual_start > requested + timedelta(seconds=5):
+        return False, "dispatcher_started_after_request"
+    if task_identity not in command:
+        trigger = str(task.get("trigger") or "")
+        if requested:
+            bucket = int(requested.timestamp() // 60)
+            expected = f"{action}-{hashlib.sha256(f'{action}|{trigger}|{bucket}'.encode()).hexdigest()[:12]}"
+            if task_identity != expected:
+                return False, "dispatcher_task_id_mismatch"
+        elif task.get("dispatcher_process_started_at") is None:
+            return False, "dispatcher_task_identity_unverifiable"
+    current = now or datetime.now(timezone.utc)
+    if requested and (current - requested).total_seconds() > STALE_TASK_MAX_AGE_SECONDS:
+        return False, "task_age_exceeded"
+    return True, "live"
+
+
+def reconcile_stale_tasks(tasks_dir: Optional[Path] = None) -> list[dict]:
+    """Durably abandon stale queue records before priority/FIFO decisions."""
+    tasks_dir = tasks_dir or TASKS
+    abandoned = []
+    for path in tasks_dir.glob("*.json"):
+        task = read_json(path, {})
+        if task.get("action") not in ACTION_REGISTRY_KEYS or task.get("status") not in RATINGS_PROTECTED_STATUSES:
+            continue
+        live, reason = dispatcher_is_live(task)
+        if live:
+            continue
+        task.update(
+            status="ABANDONED_STALE",
+            completed_at=utc_now(),
+            stale_reconciliation_reason=reason,
+        )
+        atomic_json(path, task)
+        abandoned.append(task)
+    return abandoned
+
+
 def acquire(action: str, identity: str) -> Path:
     LOCKS.mkdir(parents=True, exist_ok=True)
     global_lock = LOCKS / "canonical-writer.lock"
@@ -114,16 +208,14 @@ def acquire(action: str, identity: str) -> Path:
         global_lock.mkdir()
     except FileExistsError:
         owner = read_json(global_lock / "owner.json", {})
-        pid = owner.get("pid")
-        if isinstance(pid, int):
-            try:
-                os.kill(pid, 0)
-                raise RuntimeError(f"overlap blocked by running task {owner.get('task_id')}")
-            except ProcessLookupError:
-                shutil.rmtree(global_lock)
-                global_lock.mkdir()
-        else:
+        owner_task = read_json(TASKS / f"{owner.get('task_id')}.json", {})
+        live, _ = dispatcher_is_live(owner_task)
+        if live:
+            raise RuntimeError(f"overlap blocked by running task {owner.get('task_id')}")
+        if not isinstance(owner.get("pid"), int):
             raise RuntimeError("overlap blocked by canonical writer lock")
+        shutil.rmtree(global_lock)
+        global_lock.mkdir()
     atomic_json(global_lock / "owner.json", {"task_id": identity, "action": action, "pid": os.getpid(), "started_at": utc_now()})
     return global_lock
 
@@ -131,17 +223,14 @@ def acquire(action: str, identity: str) -> Path:
 def live_queue(tasks_dir: Optional[Path] = None) -> list[dict]:
     """Return live writer requests in durable priority/FIFO order."""
     tasks_dir = tasks_dir or TASKS
+    reconcile_stale_tasks(tasks_dir)
     queued = []
     for path in tasks_dir.glob("*.json"):
         task = read_json(path, {})
         if task.get("action") not in ACTION_REGISTRY_KEYS or task.get("status") not in LIVE_REQUEST_STATUSES:
             continue
-        pid = task.get("dispatcher_pid")
-        if not isinstance(pid, int):
-            continue
-        try:
-            os.kill(pid, 0)
-        except OSError:
+        live, _ = dispatcher_is_live(task)
+        if not live:
             continue
         queued.append(task)
     return sorted(queued, key=lambda row: (
@@ -167,18 +256,14 @@ def request_priority(task: dict) -> int:
 def ratings_protection_active(tasks_dir: Optional[Path] = None) -> Optional[dict]:
     """Return a live Ratings reservation covering queue wait through catch-up Market."""
     tasks_dir = tasks_dir or TASKS
+    reconcile_stale_tasks(tasks_dir)
     for path in tasks_dir.glob("*.json"):
         task = read_json(path, {})
         if task.get("action") != "ratings" or task.get("status") not in RATINGS_PROTECTED_STATUSES:
             continue
-        pid = task.get("dispatcher_pid")
-        if not isinstance(pid, int):
-            continue
-        try:
-            os.kill(pid, 0)
+        live, _ = dispatcher_is_live(task)
+        if live:
             return task
-        except OSError:
-            continue
     return None
 
 
@@ -264,6 +349,7 @@ def main() -> int:
         requested_at=task.get("requested_at", utc_now()),
         status="REQUESTED",
         dispatcher_pid=os.getpid(),
+        dispatcher_process_started_at=(process_identity(os.getpid()) or {}).get("started_at"),
         command_owner=resolve_command(args.action)[1],
     )
     atomic_json(TASKS / f"{identity}.json", task)
@@ -291,7 +377,11 @@ def main() -> int:
     ratings_started = False
     terminal_status = None
     try:
+        last_wait_write = [0.0]
         def record_waiting(reason: str) -> None:
+            current = time.monotonic()
+            if task.get("waiting_reason") == reason and current - last_wait_write[0] < 5.0:
+                return
             task.update(
                 status="WAITING_FOR_CANONICAL_WRITER",
                 waiting_since=task.get("waiting_since", utc_now()),
@@ -299,6 +389,7 @@ def main() -> int:
             )
             atomic_json(TASKS / f"{identity}.json", task)
             atomic_json(LATEST, task)
+            last_wait_write[0] = current
 
         lock = acquire_fifo(args.action, identity, waiting=record_waiting)
         ratings_started = args.action == "ratings"

@@ -66,10 +66,38 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
                     "requested_at": requested, "status": "REQUESTED",
                     "dispatcher_pid": os.getpid(),
                 }))
-            self.assertEqual(
-                [row["task_id"] for row in DISPATCHER.live_queue(tasks)],
-                ["ratings", "postgame", "market"],
-            )
+            with mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")):
+                self.assertEqual([row["task_id"] for row in DISPATCHER.live_queue(tasks)],
+                                 ["ratings", "postgame", "market"])
+
+    def test_dead_pid_is_abandoned_and_excluded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp)
+            path = tasks / "dead.json"
+            path.write_text(json.dumps({"task_id": "dead", "action": "market", "status": "REQUESTED", "dispatcher_pid": 99999999}))
+            self.assertEqual(DISPATCHER.live_queue(tasks), [])
+            self.assertEqual(json.loads(path.read_text())["status"], "ABANDONED_STALE")
+
+    def test_reused_pid_with_unrelated_command_is_abandoned(self):
+        task = {"task_id": "market-reused", "action": "market", "status": "RUNNING", "dispatcher_pid": 13129}
+        with mock.patch.object(DISPATCHER, "process_identity", return_value={"started_at": "2026-09-29T12:00:00+00:00", "command": "/System/Library/callservicesd"}):
+            self.assertEqual(DISPATCHER.dispatcher_is_live(task), (False, "dispatcher_pid_command_mismatch"))
+
+    def test_stale_task_age_is_rejected_even_when_process_matches(self):
+        task = {"task_id": "market-stale", "action": "market", "trigger": "manual", "status": "REQUESTED",
+                "dispatcher_pid": 123, "requested_at": "2026-09-01T00:00:00+00:00",
+                "dispatcher_process_started_at": "2026-09-01T00:00:00+00:00"}
+        with mock.patch.object(DISPATCHER, "process_identity", return_value={"started_at": "2026-09-01T00:00:00+00:00", "command": "python scripts/control/run_war_room_service.py market --task-id market-stale"}):
+            live, reason = DISPATCHER.dispatcher_is_live(task, now=DISPATCHER.parse_time("2026-10-02T00:00:00Z"))
+        self.assertFalse(live)
+        self.assertEqual(reason, "task_age_exceeded")
+
+    def test_legitimate_active_dispatcher_identity_is_live(self):
+        task = {"task_id": "market-live", "action": "market", "trigger": "manual", "status": "REQUESTED",
+                "dispatcher_pid": 123, "requested_at": "2026-10-02T15:00:00+00:00",
+                "dispatcher_process_started_at": "2026-10-02T14:59:59+00:00"}
+        with mock.patch.object(DISPATCHER, "process_identity", return_value={"started_at": "2026-10-02T14:59:59+00:00", "command": "python scripts/control/run_war_room_service.py market --task-id market-live"}):
+            self.assertEqual(DISPATCHER.dispatcher_is_live(task, now=DISPATCHER.parse_time("2026-10-02T15:01:00Z")), (True, "live"))
 
     def test_repeated_market_ticks_during_ratings_create_no_pending_backlog(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -78,7 +106,8 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
                 "task_id": "ratings-live", "action": "ratings", "trigger": "ratings-scheduler",
                 "status": "RUNNING", "dispatcher_pid": os.getpid(),
             }))
-            with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6]:
+            with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], \
+                    mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")):
                 for identity in ("market-tick-one", "market-tick-two"):
                     with mock.patch.object(sys, "argv", ["run_war_room_service.py", "market",
                             "--trigger", "market-scheduler", "--task-id", identity]):
@@ -102,6 +131,8 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
                 return subprocess.CompletedProcess(command, 0, "", "")
             with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], \
                     mock.patch.object(DISPATCHER.subprocess, "run", side_effect=run), \
+                    mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")), \
+                    mock.patch.object(DISPATCHER, "process_identity", return_value={"started_at": "2026-10-02T15:00:00+00:00", "command": "dispatcher"}), \
                     mock.patch.object(sys, "argv", ["run_war_room_service.py", "ratings",
                                                     "--task-id", "ratings-success"]):
                 self.assertEqual(DISPATCHER.main(), 0)
@@ -123,6 +154,8 @@ class RatingsMarketAntiStarvationTests(unittest.TestCase):
                 return subprocess.CompletedProcess(command, 0, "", "")
             with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], \
                     mock.patch.object(DISPATCHER.subprocess, "run", side_effect=run), \
+                    mock.patch.object(DISPATCHER, "dispatcher_is_live", return_value=(True, "live")), \
+                    mock.patch.object(DISPATCHER, "process_identity", return_value={"started_at": "2026-10-02T15:00:00+00:00", "command": "dispatcher"}), \
                     mock.patch.object(sys, "argv", ["run_war_room_service.py", "ratings",
                                                     "--task-id", "ratings-failed"]):
                 self.assertEqual(DISPATCHER.main(), 2)

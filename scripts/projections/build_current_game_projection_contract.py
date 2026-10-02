@@ -484,14 +484,12 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         }
         # Both inputs are bookmaker home lines. Never substitute Market/SP+ or SP+ fallback.
         shadow_spread_value = fixed_weight_value(shadow_spread_values, shadow_spread_weights)
+        # A validated one-team postgame update is a legitimate PARTIAL Shadow
+        # projection: the other team remains on its immutable preseason
+        # baseline. Readiness metadata stays PARTIAL, but must not erase the
+        # game-level value that is frozen at kickoff.
         shadow_spread_activated = (
-            int(
-                shadow.get(
-                    "shadow_spread_updated_team_count"
-                )
-                or 0
-            )
-            >= 2
+            int(shadow.get("shadow_spread_updated_team_count") or 0) >= 1
             and shadow.get(
                 "validated_shadow_spread_inputs_validated"
             ) is True
@@ -516,12 +514,8 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         )
         shadow_total_activated = bool(
             int(
-                shadow.get(
-                    "shadow_total_updated_team_count"
-                )
-                or 0
-            )
-            >= 2
+                shadow.get("shadow_total_updated_team_count") or 0
+            ) >= 1
             and shadow.get("no_lookahead_pass")
             and shadow_spec["valid"]
             and exact_shadow_inputs

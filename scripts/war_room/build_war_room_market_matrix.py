@@ -659,7 +659,7 @@ def enrich_activity_output():
     enrich_activity_metadata(
         payload,
         load_json(ACTIVITY_STATE, {}),
-        read_history(ACTIVITY_HISTORY),
+        read_history(ACTIVITY_HISTORY, {"SPREAD_MOVED", "TOTAL_MOVED"}),
     )
     OUT.write_text(json.dumps(payload, indent=2) + "\n")
     print("WAR ROOM MARKET ACTIVITY ENRICHMENT")
@@ -2656,7 +2656,9 @@ def main():
     pinnacle_openers = load_pinnacle_openers(BOOK_LINE_HISTORY)
     activity_state = load_json(ACTIVITY_STATE, {})
     first_market_state = activity_state.get("first_market_availability") or {}
-    move_index = material_move_index(read_history(ACTIVITY_HISTORY))
+    move_index = material_move_index(
+        read_history(ACTIVITY_HISTORY, {"SPREAD_MOVED", "TOTAL_MOVED"})
+    )
 
     shadow_component_payload = (
         json.loads(SHADOW_COMPONENTS.read_text())
