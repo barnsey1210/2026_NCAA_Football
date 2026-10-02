@@ -584,7 +584,17 @@ PY2
 if stage_enabled "conference_simulations"; then
 
 stage_start "conference_simulations"
-run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
+if python3 scripts/simulations/simulation_input_gate.py conference; then
+  run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
+  run_py "scripts/simulations/simulation_input_gate.py conference --record" "simulation_input_gate.py conference --record"
+else
+  gate_status=$?
+  if [ "$gate_status" -eq 3 ]; then
+    echo "Conference simulations unchanged; preserving accepted output."
+  else
+    exit "$gate_status"
+  fi
+fi
 stage_pass "conference_simulations"
 
 # Current CFP selection and playoff Monte Carlo simulation. This consumes the
@@ -599,9 +609,19 @@ fi
 if stage_enabled "playoff_simulations"; then
 
 stage_start "playoff_simulations"
-python3 scripts/simulations/run_playoff_model_2026.py \
-  --scenario-output data/site/futures_scenario_universe_2026.json
-run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
+if python3 scripts/simulations/simulation_input_gate.py playoff; then
+  python3 scripts/simulations/run_playoff_model_2026.py \
+    --scenario-output data/site/futures_scenario_universe_2026.json
+  run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
+  run_py "scripts/simulations/simulation_input_gate.py playoff --record" "simulation_input_gate.py playoff --record"
+else
+  gate_status=$?
+  if [ "$gate_status" -eq 3 ]; then
+    echo "Playoff simulations unchanged; preserving accepted output."
+  else
+    exit "$gate_status"
+  fi
+fi
 stage_pass "playoff_simulations"
 
 

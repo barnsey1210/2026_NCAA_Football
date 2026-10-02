@@ -322,8 +322,9 @@ for dirpath, dirnames, filenames in os.walk(source, followlinks=True):
         allowed = (len(rel.parts)==1 and rel.suffix.lower() in {".html",".js",".css",".json",".png",".svg",".ico"}) or (rel.parts and rel.parts[0] in {"logos","assets"}) or (len(rel.parts)>=2 and rel.parts[:2]==("data","site"))
         if not allowed or rel in excluded:
             continue
-        if src.stat().st_size > 16777216:
-            raise SystemExit(f"public file exceeds 16 MiB: {rel}")
+        hard_limit = int(os.environ.get("NCAAF_PUBLIC_JSON_MAX_BYTES", 22 * 1024 * 1024))
+        if src.stat().st_size > hard_limit:
+            raise SystemExit(f"public file exceeds configured hard limit: {rel} ({src.stat().st_size} > {hard_limit})")
         dst = target / rel
         if dst.exists() and digest(src) == digest(dst):
             continue

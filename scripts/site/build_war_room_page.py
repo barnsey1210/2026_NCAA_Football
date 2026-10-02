@@ -2269,6 +2269,9 @@ tr:hover td.context-group{background:#202d39}
   .ratings-health-strip{
     align-items:stretch !important;
     flex-wrap:wrap !important;
+    overflow:visible !important;
+    position:relative !important;
+    z-index:45 !important;
   }
 
   .ratings-health-content{
@@ -6542,7 +6545,7 @@ document.getElementById('modelAutoBtn').addEventListener('click',e=>{
 
 document.getElementById('modelManualBtn').addEventListener('click',()=>{
   document.getElementById('manualSourcePanel').hidden=false;
-  submitModelOverride('MANUAL',document.getElementById('modelManualBtn'));
+  document.getElementById('manualSourceStatus').textContent='Select sources, then apply manual mode';
 });
 
 document.getElementById('manualCancelBtn').addEventListener('click',()=>{

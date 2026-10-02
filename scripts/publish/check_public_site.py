@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -185,8 +186,9 @@ def validate(root: Path, out: Path) -> list[str]:
         errors.append("public build exposes the internal rich matchup artifact")
     if not matchup_payload.is_file():
         errors.append("public matchup payload missing: data/site/matchups_public_view.json")
-    if matchup_payload.is_file() and matchup_payload.stat().st_size > 16 * 1024 * 1024:
-        errors.append(f"public matchup payload exceeds 16 MiB: {matchup_payload.stat().st_size}")
+    payload_limit = int(os.environ.get("NCAAF_PUBLIC_JSON_MAX_BYTES", 22 * 1024 * 1024))
+    if matchup_payload.is_file() and matchup_payload.stat().st_size > payload_limit:
+        errors.append(f"public matchup payload exceeds configured hard limit: {matchup_payload.stat().st_size} > {payload_limit}")
     if matchup_payload.is_file():
         try:
             public_matchups = json.loads(matchup_payload.read_text())

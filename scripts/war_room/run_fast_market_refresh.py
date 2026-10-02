@@ -93,6 +93,17 @@ def main():
             env,
         )
     )
+    try:
+        quota = json.loads((ROOT / "data/war_room/audits/theodds_api_quota_status_fast.json").read_text())
+        stages[-1]["substeps"] = {
+            "provider_http_ms": quota.get("http_latency_ms"),
+            "normalize_rows_ms": quota.get("normalization_ms"),
+            "provider_games_returned": quota.get("provider_games_returned"),
+            "commence_time_from": quota.get("commence_time_from"),
+            "commence_time_to": quota.get("commence_time_to"),
+        }
+    except (OSError, ValueError, TypeError):
+        pass
 
     stages.append(
         run_stage(
@@ -102,16 +113,6 @@ def main():
                 "scripts/war_room/analyze_fast_market_latency.py",
             ],
             env,
-        )
-    )
-
-    current_market_env = env.copy()
-    current_market_env["NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY"] = "1"
-    stages.append(
-        run_stage(
-            "canonical_current_market_overlay",
-            [sys.executable, "scripts/markets/build_current_market_contract.py"],
-            current_market_env,
         )
     )
 
@@ -143,6 +144,27 @@ def main():
     war_room_ready_ms = round(
         (perf_counter() - start) * 1000,
         1,
+    )
+
+    # Canonical all-season reconciliation and durable operational history are
+    # required current-state maintenance, but the matrix above resolves the
+    # accepted near-term fast quotes directly. Keep these gates intact without
+    # making the browser wait for all-season work.
+    current_market_env = env.copy()
+    current_market_env["NCAAF_ENABLE_FAST_CURRENT_MARKET_OVERLAY"] = "1"
+    stages.append(
+        run_stage(
+            "canonical_current_market_overlay",
+            [sys.executable, "scripts/markets/build_current_market_contract.py"],
+            current_market_env,
+        )
+    )
+    stages.append(
+        run_stage(
+            "record_fast_refresh_history",
+            [sys.executable, "scripts/war_room/record_fast_refresh_history.py"],
+            env,
+        )
     )
 
     # Detect accepted BEST/EDGE transitions on every fast cycle so the public
@@ -186,7 +208,6 @@ def main():
         "deferred_to_daily_maintenance": [
             "odds_screen_v2_rebuild",
             "matchups_current_market_overlay",
-            "record_fast_refresh_history",
             "append_current_market_book_history",
             "build_matchup_line_history_clean",
             "inject_matchup_line_history_asset",

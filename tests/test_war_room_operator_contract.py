@@ -217,7 +217,7 @@ class OperatorContractTests(unittest.TestCase):
         self.assertIn("fetchJsonWithFallback(LIVE_ACTIVITY_URL,ACTIVITY_URL,'Activity')", builder)
         self.assertIn('POLL_SECONDS = max(1, int(control_config.get("browser_version_poll_seconds", 2)))', builder)
 
-    def test_manual_toggle_submits_and_failed_change_restores_persisted_mode(self):
+    def test_manual_toggle_opens_editor_without_mutating_mode(self):
         builder = (api.ROOT / "scripts/site/build_war_room_page.py").read_text()
         manual_handler = builder.split(
             "document.getElementById('modelManualBtn').addEventListener", 1
@@ -225,7 +225,8 @@ class OperatorContractTests(unittest.TestCase):
         submit = builder.split("function submitModelOverride(mode,button){", 1)[1].split(
             "document.getElementById('modelAutoBtn').addEventListener", 1
         )[0]
-        self.assertIn("submitModelOverride('MANUAL'", manual_handler)
+        self.assertNotIn("submitModelOverride('MANUAL'", manual_handler)
+        self.assertIn("Select sources, then apply manual mode", manual_handler)
         self.assertIn("persistedMode", submit)
         self.assertIn("onError:error=>", submit)
         self.assertIn("Mode unchanged", submit)
@@ -480,43 +481,22 @@ class OperatorContractTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden,combined)
 
-    def test_ratings_no_change_merges_fresh_check_before_health_rebuild(self):
+    def test_ratings_no_change_updates_observability_without_content_rebuild(self):
         commands = refresh.ratings_no_change_commands()
         names = [Path(command[1]).name for command in commands]
-        self.assertIn("build_all_ratings_latest.py", names)
-        self.assertIn("build_active_2026_ratings_master.py", names)
-        self.assertIn("merge_live_rating_change_status.py", names)
+        self.assertEqual(names, ["merge_live_rating_change_status.py", "build_war_room_health.py"])
+        self.assertFalse(any("projection" in name or "matchups" in name for name in names))
+
+    def test_ratings_paths_refresh_projection_status_before_war_room(self):
+        names = [Path(command[1]).name for command in refresh.ratings_change_commands()]
         self.assertLess(
-            names.index("build_all_ratings_latest.py"),
             names.index("build_current_game_projection_contract.py"),
-        )
-        self.assertLess(
-            names.index("build_active_2026_ratings_master.py"),
-            names.index("build_current_game_projection_contract.py"),
-        )
-        self.assertLess(
-            names.index("merge_live_rating_change_status.py"),
-            names.index("build_war_room_health.py"),
+            names.index("build_projection_source_status_view.py"),
         )
         self.assertLess(
             names.index("build_projection_source_status_view.py"),
-            names.index("build_war_room_health.py"),
+            names.index("build_war_room_market_matrix.py"),
         )
-
-    def test_ratings_paths_refresh_projection_status_before_war_room(self):
-        for commands in (
-            refresh.ratings_change_commands(),
-            refresh.ratings_no_change_commands(),
-        ):
-            names = [Path(command[1]).name for command in commands]
-            self.assertLess(
-                names.index("build_current_game_projection_contract.py"),
-                names.index("build_projection_source_status_view.py"),
-            )
-            self.assertLess(
-                names.index("build_projection_source_status_view.py"),
-                names.index("build_war_room_market_matrix.py"),
-            )
 
     def test_ratings_change_detection(self):
         with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"NO_CHANGE"}}}):

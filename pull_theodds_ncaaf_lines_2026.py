@@ -14,7 +14,7 @@ contract, but a separate THE_ODDS_API_KEY_FAST credential and fast worker.
 import json
 import os
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from time import perf_counter
 from pathlib import Path
 
@@ -141,6 +141,19 @@ params = {
     "dateFormat": "iso",
 }
 
+# The Command Center is a near-term operational surface. Bounding the provider
+# response to the current weekend avoids parsing and serializing future boards
+# while retaining the same books, markets, quota, and acceptance gates.
+if PROFILE == "command_center":
+    window_start = datetime.now(timezone.utc)
+    window_end = window_start + timedelta(days=4)
+    params["commenceTimeFrom"] = os.environ.get(
+        "NCAAF_FAST_COMMENCE_TIME_FROM", window_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
+    params["commenceTimeTo"] = os.environ.get(
+        "NCAAF_FAST_COMMENCE_TIME_TO", window_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
+
 request_started_at = datetime.now(timezone.utc)
 request_started_perf = perf_counter()
 
@@ -171,6 +184,8 @@ quota = {
     "sport": SPORT,
     "requested_bookmakers": BOOKMAKERS,
     "requested_markets": MARKETS,
+    "commence_time_from": params.get("commenceTimeFrom"),
+    "commence_time_to": params.get("commenceTimeTo"),
 }
 quota_path = AUDIT_DIR / f"theodds_api_quota_status{FILE_SUFFIX}.json"
 quota_path.write_text(json.dumps(quota, indent=2) + "\n", encoding="utf-8")
@@ -188,6 +203,8 @@ if resp.status_code != 200:
 data = resp.json()
 if not isinstance(data, list):
     raise SystemExit(f"Unexpected response type: {type(data).__name__}")
+
+normalization_started_perf = perf_counter()
 
 stamp = now.strftime("%Y%m%dT%H%M%SZ")
 archive_path = ARCHIVE_DIR / f"theodds_ncaaf_{stamp}.json"
@@ -244,6 +261,11 @@ for game in data:
                     }
                 )
                 rows_by_book[canonical_key] += 1
+
+normalization_ms = round((perf_counter() - normalization_started_perf) * 1000, 1)
+quota["provider_games_returned"] = len(data)
+quota["normalization_ms"] = normalization_ms
+quota_path.write_text(json.dumps(quota, indent=2) + "\n", encoding="utf-8")
 
 columns = [
     "pulled_at",

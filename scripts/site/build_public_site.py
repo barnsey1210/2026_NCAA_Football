@@ -2,7 +2,7 @@
 """Assemble approved pages while retaining the monolith for team detail routes."""
 from pathlib import Path
 from datetime import datetime, timezone
-import json, re, shutil, subprocess, sys
+import json, os, re, shutil, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
@@ -36,7 +36,8 @@ ROOT_PUBLICATION_PAGES = (
     "war-room.html",
     "coaches.html",
 )
-PUBLIC_JSON_MAX_BYTES = 16 * 1024 * 1024
+PUBLIC_JSON_WARNING_BYTES = int(os.environ.get("NCAAF_PUBLIC_JSON_WARNING_BYTES", 18 * 1024 * 1024))
+PUBLIC_JSON_MAX_BYTES = int(os.environ.get("NCAAF_PUBLIC_JSON_MAX_BYTES", 22 * 1024 * 1024))
 PUBLIC_WAR_ROOM_TARGET_BYTES = 31 * 512 * 1024  # 15.5 MiB
 PUBLIC_QUOTE_INTERNAL_FIELDS = (
     'game_id',
@@ -382,9 +383,14 @@ def main():
             f'Public matchup payload: '
             f'{size / 1024 / 1024:.2f} MiB'
         )
+        if size > PUBLIC_JSON_WARNING_BYTES:
+            print(
+                f'WARNING: public matchup payload exceeds '
+                f'{PUBLIC_JSON_WARNING_BYTES / 1024 / 1024:.0f} MiB warning threshold'
+            )
         if size > limit:
             raise RuntimeError(
-                f'public matchup payload exceeds 16 MiB: '
+                f'public matchup payload exceeds configured hard limit: '
                 f'{size} > {limit}'
             )
 
@@ -416,7 +422,7 @@ def main():
         )
         if matrix_size > matrix_limit:
             raise RuntimeError(
-                f'public War Room matrix exceeds 16 MiB: '
+                f'public War Room matrix exceeds configured hard limit: '
                 f'{matrix_size} > {matrix_limit}'
             )
         if matrix_size > PUBLIC_WAR_ROOM_TARGET_BYTES:

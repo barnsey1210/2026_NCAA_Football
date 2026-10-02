@@ -205,9 +205,12 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
             "weightText=`${(authorityWeight*100).toFixed(1)}% · ACTIVE`",
             "document.getElementById('modelManualBtn').addEventListener",
             "document.getElementById('manualSourcePanel').hidden=false",
-            "submitModelOverride('MANUAL'",
+            "Select sources, then apply manual mode",
         ):
             self.assertIn(token, source)
+        mobile_css = source.split("@media(max-width:900px){", 2)[-1].split("@media(min-width:901px)", 1)[0]
+        self.assertIn(".ratings-health-strip{", mobile_css)
+        self.assertIn("overflow:visible !important", mobile_css)
 
 
 if __name__ == "__main__":
