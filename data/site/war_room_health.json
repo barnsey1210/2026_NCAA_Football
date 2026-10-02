@@ -1,9 +1,9 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-10-02T14:52:53.495026+00:00",
+  "built_at": "2026-10-02T16:46:48.481763+00:00",
   "fast_market_refresh": {
-    "refresh_id": "theodds_20261002T142056Z",
-    "last_fast_pull_at": "2026-10-02T14:20:56.533463+00:00",
+    "refresh_id": "theodds_20261002T164647Z",
+    "last_fast_pull_at": "2026-10-02T16:46:47.929431+00:00",
     "source": "The Odds API",
     "upcoming_games_in_pull": 57,
     "participation_policy": "Book participation remains tied to the most recent fast market pull until another fast pull occurs. No elapsed-time cutoff changes participation.",
@@ -17,29 +17,29 @@
     "status": "HEALTHY",
     "color": "GREEN",
     "monthly_limit_configured": 20000,
-    "credits_used": 6,
-    "credits_remaining": 19994,
+    "credits_used": 20,
+    "credits_remaining": 19980,
     "last_call_cost": 2,
     "emergency_reserve": 2000,
-    "available_operating_credits": 17994,
-    "estimated_fast_pulls_remaining": 9997,
-    "estimated_operating_pulls_before_reserve": 8997,
+    "available_operating_credits": 17980,
+    "estimated_fast_pulls_remaining": 9990,
+    "estimated_operating_pulls_before_reserve": 8990,
     "calendar_month": "2026-10",
     "period_timezone": "UTC",
-    "quota_observed_at": "2026-10-02T14:20:56.533463+00:00",
+    "quota_observed_at": "2026-10-02T16:46:47.929431+00:00",
     "quota_observed_period": "2026-10",
     "rollover_reconciliation_required": false,
     "prior_period_credits_remaining": null,
     "reset_at_utc": "2026-11-01T00:00:00+00:00",
     "days_until_reset": 30,
-    "daily_operating_credit_budget": 599.8,
-    "daily_operating_pull_budget": 299.9,
+    "daily_operating_credit_budget": 599.3,
+    "daily_operating_pull_budget": 299.7,
     "scheduled_refresh_allowed": true,
     "policy": "Command Center quota is budgeted by UTC calendar month. Scheduled fast refreshes protect the configured emergency reserve. A prior-period header permits one normal guarded request to reconcile the new period; its response headers then become the runtime source of truth."
   },
   "ratings_health": {
     "status": "AVAILABLE",
-    "generated_at": "2026-10-02T14:49:32.925432+00:00",
+    "generated_at": "2026-10-02T16:24:50.211636+00:00",
     "sources": {
       "SP+": {
         "source": "SP+",
@@ -47,8 +47,8 @@
         "status": "CURRENT",
         "teams": 138,
         "snapshot_date": "2026-10-02",
-        "pulled_at": "2026-10-02T14:20:41Z",
-        "latest_pull_at": "2026-10-02T14:20:41Z",
+        "pulled_at": "2026-10-02T16:24:16Z",
+        "latest_pull_at": "2026-10-02T16:24:16Z",
         "last_changed_at": "2026-09-27T13:40:48Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -60,8 +60,8 @@
         "status": "CURRENT",
         "teams": 138,
         "snapshot_date": "2026-10-02",
-        "pulled_at": "2026-10-02T14:20:41Z",
-        "latest_pull_at": "2026-10-02T14:20:41Z",
+        "pulled_at": "2026-10-02T16:24:16Z",
+        "latest_pull_at": "2026-10-02T16:24:16Z",
         "last_changed_at": "2026-10-02T12:36:54Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -73,8 +73,8 @@
         "status": "CURRENT",
         "teams": 138,
         "snapshot_date": "2026-10-02",
-        "pulled_at": "2026-10-02T14:20:41Z",
-        "latest_pull_at": "2026-10-02T14:20:41Z",
+        "pulled_at": "2026-10-02T16:24:16Z",
+        "latest_pull_at": "2026-10-02T16:24:16Z",
         "last_changed_at": "2026-10-02T12:36:56Z",
         "change_status": "NO_CHANGE",
         "teams_changed": 0,
@@ -89,8 +89,8 @@
         "total_state": null,
         "coverage_pct": 0,
         "snapshot_date": "2026-10-02",
-        "pulled_at": "2026-10-02T12:37:00Z",
-        "latest_pull_at": "2026-10-02T12:37:00Z",
+        "pulled_at": "2026-10-02T16:24:18Z",
+        "latest_pull_at": "2026-10-02T16:24:18Z",
         "last_changed_at": ""
       },
       "DR": {
@@ -100,7 +100,7 @@
         "games_available": 271,
         "production_games": 765,
         "coverage_pct": 35.4,
-        "latest_pulled_at": "2026-10-02T12:37:03.539879+00:00",
+        "latest_pulled_at": "2026-10-02T16:24:20.611008+00:00",
         "latest_snapshot_date": "2026-10-02"
       },
       "MAS": {
@@ -110,7 +110,7 @@
         "games_available": 329,
         "production_games": 765,
         "coverage_pct": 43.0,
-        "latest_pulled_at": "2026-09-28T15:51:33.888189+00:00",
+        "latest_pulled_at": "2026-10-02T16:24:37.055507+00:00",
         "latest_snapshot_date": "2026-10-02"
       }
     }
@@ -130,21 +130,21 @@
     "color": "GREEN",
     "status": "READY",
     "postgame_status": "live_shadow_ready",
-    "completed_team_updates": 636,
+    "completed_team_updates": 658,
     "display_ready_games": 230,
     "displayed_shadow_rows": 230,
     "component_games": 417,
     "spread_model_status": "ready",
     "total_model_status": "awaiting_current_season_pbp",
-    "postgame_built_at": "2026-10-02T14:48:59.741872+00:00",
-    "components_generated_at": "2026-10-02T14:49:35.420420+00:00",
-    "shadow_lines_built_at": "2026-10-02T14:49:40.089816+00:00",
+    "postgame_built_at": "2026-10-02T16:23:40.647481+00:00",
+    "components_generated_at": "2026-10-02T16:23:43.611911+00:00",
+    "shadow_lines_built_at": "2026-10-02T16:23:45.664318+00:00",
     "activation_policy": "GREEN only after genuine completed-game updates exist and at least one Shadow projection is display-ready. Expected pregame waiting states are YELLOW, not RED."
   },
   "projection_health": {
     "scope": "LATEST_FAST_BOARD_FBS_VS_FBS_ONLY",
     "selection_policy": "Frontend selects the matching week entry. ALL WEEKS does not aggregate season-wide projection health.",
-    "projection_contract_built_at": "2026-10-02T14:49:35.809385+00:00",
+    "projection_contract_built_at": "2026-10-02T16:24:48.667065+00:00",
     "matched_fast_board_games": 57,
     "unmatched_fast_board_games": 0,
     "fbs_vs_fbs_games": 54,
@@ -175,16 +175,15 @@
           }
         },
         "shadow": {
-          "status": "DEGRADED",
-          "color": "YELLOW",
+          "status": "OFFICIAL",
+          "color": "GREEN",
           "displayed_games": 54,
-          "ready_games": 45,
+          "ready_games": 54,
           "degraded_games": 0,
-          "waiting_games": 9,
+          "waiting_games": 0,
           "unavailable_games": 0,
           "availability_counts": {
-            "READY": 45,
-            "WAITING": 9
+            "READY": 54
           }
         }
       }
@@ -226,8 +225,8 @@
         "SportsGameOdds": 2,
         "Action Network": 2
       },
-      "quote_age_median_seconds": 65.5,
-      "quote_age_p90_seconds": 65.5
+      "quote_age_median_seconds": 97.9,
+      "quote_age_p90_seconds": 97.9
     },
     "FanDuel": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -246,8 +245,8 @@
       "canonical_source_counts": {
         "The Odds API": 2230
       },
-      "quote_age_median_seconds": 28.5,
-      "quote_age_p90_seconds": 29.5
+      "quote_age_median_seconds": 28.9,
+      "quote_age_p90_seconds": 28.9
     },
     "BetMGM": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -267,8 +266,8 @@
         "The Odds API": 1798,
         "Action Network": 18
       },
-      "quote_age_median_seconds": 78.5,
-      "quote_age_p90_seconds": 78.5
+      "quote_age_median_seconds": 58.9,
+      "quote_age_p90_seconds": 58.9
     },
     "Caesars": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -285,12 +284,12 @@
       "quote_rows": 132,
       "canonical_current_games": 378,
       "canonical_source_counts": {
-        "The Odds API": 204,
-        "Action Network": 1894,
+        "The Odds API": 336,
+        "Action Network": 1762,
         "SportsGameOdds": 2
       },
-      "quote_age_median_seconds": 64.5,
-      "quote_age_p90_seconds": 64.5
+      "quote_age_median_seconds": 60.9,
+      "quote_age_p90_seconds": 60.9
     },
     "Novig": {
       "group": "EXCHANGE",
@@ -309,8 +308,8 @@
       "canonical_source_counts": {
         "The Odds API": 2218
       },
-      "quote_age_median_seconds": 75.5,
-      "quote_age_p90_seconds": 75.5
+      "quote_age_median_seconds": 68.9,
+      "quote_age_p90_seconds": 68.9
     },
     "ProphetX": {
       "group": "EXCHANGE",
@@ -329,8 +328,8 @@
       "canonical_source_counts": {
         "The Odds API": 2194
       },
-      "quote_age_median_seconds": 33.5,
-      "quote_age_p90_seconds": 33.5
+      "quote_age_median_seconds": 28.9,
+      "quote_age_p90_seconds": 28.9
     },
     "Kalshi": {
       "group": "EXCHANGE",
@@ -349,8 +348,8 @@
       "canonical_source_counts": {
         "The Odds API": 1384
       },
-      "quote_age_median_seconds": 13.5,
-      "quote_age_p90_seconds": 14.5
+      "quote_age_median_seconds": 9.9,
+      "quote_age_p90_seconds": 10.9
     },
     "Pinnacle": {
       "group": "SHARP_REFERENCE",
@@ -358,19 +357,19 @@
       "status": "CURRENT_HEALTHY",
       "participated_in_last_fast_pull": true,
       "eligible_for_fast_market_selection": true,
-      "games_with_any_quote": 56,
-      "board_breadth_pct": 98.2,
-      "spread_games": 56,
-      "total_games": 56,
+      "games_with_any_quote": 57,
+      "board_breadth_pct": 100.0,
+      "spread_games": 57,
+      "total_games": 57,
       "spread_completeness_pct": 100.0,
       "total_completeness_pct": 100.0,
-      "quote_rows": 224,
-      "canonical_current_games": 379,
+      "quote_rows": 228,
+      "canonical_current_games": 380,
       "canonical_source_counts": {
-        "The Odds API": 2064
+        "The Odds API": 2068
       },
-      "quote_age_median_seconds": 34.5,
-      "quote_age_p90_seconds": 34.5
+      "quote_age_median_seconds": 30.9,
+      "quote_age_p90_seconds": 30.9
     }
   }
 }
