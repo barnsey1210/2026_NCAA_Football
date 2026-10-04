@@ -1,7 +1,524 @@
 {
-  "built_at": "2026-10-04T00:36:36.547632Z",
-  "event_count": 94528,
+  "built_at": "2026-10-04T01:45:08.233832Z",
+  "event_count": 94636,
   "events": [
+    {
+      "away_team": "Baylor",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 92,
+      "entity_id": "g339|total|best",
+      "entity_type": "game_market",
+      "event_id": "wrp_e695769672f295dd779b6a88",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
+      "event_type": "BEST_TOTAL_CHANGED",
+      "event_version": 1,
+      "game_id": "g339",
+      "home_team": "Arizona State",
+      "idempotency_key": "BEST_TOTAL_CHANGED|g339|total|best|9762f57a6e5bdf1055d2b99efa3763a70043831f47b4e765a05513a8078510e8|1b1f8b18fd8b97f56f6a2dc528b2d7b9fe174667dba423cb3a5f558f583be97d",
+      "market": "total",
+      "metadata": {
+        "new_best": {
+          "best_edge": 4.3,
+          "best_side": "over",
+          "book": "BetMGM",
+          "line": 49.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 4.3,
+          "best_side": "over",
+          "book": "DraftKings",
+          "line": 49.5,
+          "market": "total",
+          "price": -105,
+          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "DraftKings"
+      },
+      "new_line": 49.5,
+      "new_price": -108,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 49.5,
+      "old_price": -105,
+      "payload": {
+        "new_best": {
+          "best_edge": 4.3,
+          "best_side": "over",
+          "book": "BetMGM",
+          "line": 49.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 4.3,
+          "best_side": "over",
+          "book": "DraftKings",
+          "line": 49.5,
+          "market": "total",
+          "price": -105,
+          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "DraftKings"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": null,
+      "source_system": "war_room_matrix_observer",
+      "underlying_event_ids": [
+        "wre_f13dc694710100bcb23fb5fe"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Cincinnati",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 92,
+      "entity_id": "g338|spread|best",
+      "entity_type": "game_market",
+      "event_id": "wrp_ba803a7a40068dffa91f51d1",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
+      "event_type": "BEST_SPREAD_CHANGED",
+      "event_version": 1,
+      "game_id": "g338",
+      "home_team": "Arizona",
+      "idempotency_key": "BEST_SPREAD_CHANGED|g338|spread|best|84b75517c9c6b30e502aef8093214d9621aba458529ab617d1b580323d219da6|405116a0156c701528c5102b72749563b423fd37596f1d518a2cdefbe85d3d0b",
+      "market": "spread",
+      "metadata": {
+        "new_best": {
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
+          "market": "spread",
+          "price": -112,
+          "quote_timestamp": "2026-10-04T01:44:43Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "DraftKings",
+        "old_best": {
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
+          "market": "spread",
+          "price": -115,
+          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "DraftKings"
+      },
+      "new_line": 7,
+      "new_price": -112,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 7,
+      "old_price": -115,
+      "payload": {
+        "new_best": {
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
+          "market": "spread",
+          "price": -112,
+          "quote_timestamp": "2026-10-04T01:44:43Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "DraftKings",
+        "old_best": {
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
+          "market": "spread",
+          "price": -115,
+          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "DraftKings"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "away",
+      "significance": "ACTIONABLE",
+      "source": null,
+      "source_system": "war_room_matrix_observer",
+      "underlying_event_ids": [
+        "wre_25c5e003ac68de9aa1ec7ecb"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Cincinnati",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 92,
+      "entity_id": "g338|total|best",
+      "entity_type": "game_market",
+      "event_id": "wrp_7d6cef8865653894adb7a49a",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
+      "event_type": "BEST_TOTAL_CHANGED",
+      "event_version": 1,
+      "game_id": "g338",
+      "home_team": "Arizona",
+      "idempotency_key": "BEST_TOTAL_CHANGED|g338|total|best|461512d2befa9d238a9d67c5b075eda3a115d6d197b42c85f0eff91ec8b1df8c|5992c6272b11fb56bdea24e9a8f9c1fdf92293eb37985fb7a4df6137127546ca",
+      "market": "total",
+      "metadata": {
+        "new_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -110,
+          "quote_timestamp": "2026-10-04T00:34:29Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "BetMGM"
+      },
+      "new_line": 56.5,
+      "new_price": -108,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 56.5,
+      "old_price": -110,
+      "payload": {
+        "new_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -110,
+          "quote_timestamp": "2026-10-04T00:34:29Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "BetMGM"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "under",
+      "significance": "ACTIONABLE",
+      "source": null,
+      "source_system": "war_room_matrix_observer",
+      "underlying_event_ids": [
+        "wre_091264179db12028636d6c13"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Baylor",
+      "book": "Pinnacle",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 82,
+      "entity_id": "g339|Pinnacle|total",
+      "entity_type": "market",
+      "event_id": "wrp_ebb51cdc7b767b301804e497",
+      "event_timestamp": "2026-10-04T01:44:58Z",
+      "event_type": "PINNACLE_MOVE",
+      "event_version": 1,
+      "game_id": "g339",
+      "home_team": "Arizona State",
+      "idempotency_key": "TOTAL_MOVED|g339|Pinnacle|total|d618ec7d2cb2802189586d7d032640ff7f40151565cdace9960521f2a0bcbf8e|3ad1441eaeb240f30367a497d7a5548848befed52164f973c512cc2fcbb6b599",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 49.5,
+      "new_price": -105,
+      "observed_at": "2026-10-04T01:44:58Z",
+      "old_line": 48.5,
+      "old_price": -109,
+      "payload": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_530827b769db0af41733ad1f"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Baylor",
+      "book": "Pinnacle",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 82,
+      "entity_id": "g339|Pinnacle|spread",
+      "entity_type": "market",
+      "event_id": "wrp_c7867a50a2b9108440e6a1e5",
+      "event_timestamp": "2026-10-04T01:44:58Z",
+      "event_type": "PINNACLE_MOVE",
+      "event_version": 1,
+      "game_id": "g339",
+      "home_team": "Arizona State",
+      "idempotency_key": "SPREAD_MOVED|g339|Pinnacle|spread|b1b19927330e0f4c51149c356dba9343a9037ceea2c44362a89533d6f275c42a|2d5788046c4782a59ab1c88bb017ccfa57240e66acb602839a55ddc469adaca2",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": -3.5,
+      "new_price": 102,
+      "observed_at": "2026-10-04T01:44:58Z",
+      "old_line": -3,
+      "old_price": -113,
+      "payload": {
+        "books": [
+          "Pinnacle"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_1696da150c3ce9abfaf82e6e"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Texas State",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 80,
+      "entity_id": "g378|BetMGM|spread",
+      "entity_type": "market",
+      "event_id": "wrp_4ec8efeae775e55056119b14",
+      "event_timestamp": "2026-10-04T01:44:58Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g378",
+      "home_team": "San Diego State",
+      "idempotency_key": "SPREAD_MOVED|g378|BetMGM|spread|c414d7ddffa888f86c5be20a8d593d2c00ad97432571bed8a989dffb70ec9f32|51d802129771fe999e4953589ef1fc7dd7c86e04870fb00ea0615e30ecef493b",
+      "market": "spread",
+      "metadata": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 9,
+      "new_price": -110,
+      "observed_at": "2026-10-04T01:44:58Z",
+      "old_line": 9.5,
+      "old_price": -110,
+      "payload": {
+        "books": [
+          "BetMGM"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "home",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_4988e429a992f94459120ad7"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Cincinnati",
+      "book": "DraftKings",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 80,
+      "entity_id": "g338|DraftKings|total",
+      "entity_type": "market",
+      "event_id": "wrp_9d769f1c47d8a1e29a054276",
+      "event_timestamp": "2026-10-04T01:44:04Z",
+      "event_type": "MARKET_MOVE",
+      "event_version": 1,
+      "game_id": "g338",
+      "home_team": "Arizona",
+      "idempotency_key": "TOTAL_MOVED|g338|DraftKings|total|261cdb9a6cafe280cc81aaedcd70249574d3ffdbf407d2b6e45e7c79cb12f14f|29ea94a26a095f69a37804cd0c21eb55f856352a5eca7186b4317d45727d2d6c",
+      "market": "total",
+      "metadata": {
+        "books": [
+          "Caesars",
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "new_line": 55.5,
+      "new_price": -112,
+      "observed_at": "2026-10-04T01:44:04Z",
+      "old_line": 56.5,
+      "old_price": -108,
+      "payload": {
+        "books": [
+          "Caesars",
+          "DraftKings"
+        ],
+        "selection_source": "LATEST_FAST_PULL"
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": "over",
+      "significance": "ACTIONABLE",
+      "source": "The Odds API",
+      "source_system": "canonical_market",
+      "underlying_event_ids": [
+        "wre_ec9720c980471b49285cecff",
+        "wre_38bd606991146c974ce80434"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Texas Southern",
+      "book": null,
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 50,
+      "entity_id": "g350",
+      "entity_type": "game",
+      "event_id": "wrp_8e87792c685771773f327533",
+      "event_timestamp": "2026-10-04T01:28:35.413312Z",
+      "event_type": "FINAL_POSTED",
+      "event_version": 1,
+      "game_id": "g350",
+      "home_team": "Florida Atlantic",
+      "idempotency_key": "FINAL_POSTED|g350|10|66",
+      "market": null,
+      "metadata": {
+        "away_score": 10,
+        "home_score": 66
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-10-04T01:28:35.413312Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "away_score": 10,
+        "home_score": 66
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": "CollegeFootballData /games",
+      "source_system": "canonical_results",
+      "underlying_event_ids": [
+        "wre_1ff570d1c3fd5efa53394b26"
+      ],
+      "week": 5
+    },
+    {
+      "away_team": "Oregon State",
+      "book": null,
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
+      "cycle_id": "2026_WK5_PREP",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 50,
+      "entity_id": "g348",
+      "entity_type": "game",
+      "event_id": "wrp_4b0d83f3a2c9e12b467b3788",
+      "event_timestamp": "2026-10-04T01:28:35.413312Z",
+      "event_type": "FINAL_POSTED",
+      "event_version": 1,
+      "game_id": "g348",
+      "home_team": "Colorado State",
+      "idempotency_key": "FINAL_POSTED|g348|56|26",
+      "market": null,
+      "metadata": {
+        "away_score": 56,
+        "home_score": 26
+      },
+      "new_line": null,
+      "new_price": null,
+      "observed_at": "2026-10-04T01:28:35.413312Z",
+      "old_line": null,
+      "old_price": null,
+      "payload": {
+        "away_score": 56,
+        "home_score": 26
+      },
+      "refresh_id": "theodds_20261004T014504Z",
+      "season": 2026,
+      "side": null,
+      "significance": "OPERATIONAL",
+      "source": "CollegeFootballData /games",
+      "source_system": "canonical_results",
+      "underlying_event_ids": [
+        "wre_fcc8a02057f2cad1eb32a5fc"
+      ],
+      "week": 5
+    },
     {
       "away_team": "LSU",
       "book": null,
@@ -11517,522 +12034,21 @@
         "wre_1762867ee1be60dcb131f66b"
       ],
       "week": 5
-    },
-    {
-      "away_team": "Oregon State",
-      "book": "Pinnacle",
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 80,
-      "entity_id": "g348|Pinnacle|total",
-      "entity_type": "market",
-      "event_id": "wrp_7ea532b09eb928505bdf89a2",
-      "event_timestamp": "2026-10-03T21:43:08Z",
-      "event_type": "MARKET_MOVE",
-      "event_version": 1,
-      "game_id": "g348",
-      "home_team": "Colorado State",
-      "idempotency_key": "TOTAL_MOVED|g348|Pinnacle|total|cc6b18f1fc0e9bc81a8736ab725e4f89c97097e0128286a23e1154262e8fb0b3|f393b05f5f3b3a174cbe0eb5a3059b34c27d4853dd8b7c82028422df76c51daf",
-      "market": "total",
-      "metadata": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel",
-          "Pinnacle"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "new_line": 61,
-      "new_price": -108,
-      "observed_at": "2026-10-03T21:43:08Z",
-      "old_line": 62,
-      "old_price": -112,
-      "payload": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel",
-          "Pinnacle"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": "over",
-      "significance": "ACTIONABLE",
-      "source": "The Odds API",
-      "source_system": "canonical_market",
-      "underlying_event_ids": [
-        "wre_1553b3aa123b1d8d19cceb30",
-        "wre_68e594212594d64243f30bcb",
-        "wre_799d016ad41f5def57ce4d2a",
-        "wre_95d69caa21cf1340da5dce95"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "BYU",
-      "book": "Pinnacle",
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 80,
-      "entity_id": "g382|Pinnacle|total",
-      "entity_type": "market",
-      "event_id": "wrp_5d5a2ae1dd43dd2a59f8e02e",
-      "event_timestamp": "2026-10-03T21:43:08Z",
-      "event_type": "MARKET_MOVE",
-      "event_version": 1,
-      "game_id": "g382",
-      "home_team": "TCU",
-      "idempotency_key": "TOTAL_MOVED|g382|Pinnacle|total|5d485e708c776acf90e13e60cc811e67ca2e64b994f7142048a001c509a6b981|58b6e49c36223ce4772f524916ad8eecdc344536cb6f7d132ddc9a368e8bfb87",
-      "market": "total",
-      "metadata": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel",
-          "Caesars",
-          "Pinnacle"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "new_line": 49,
-      "new_price": -105,
-      "observed_at": "2026-10-03T21:43:08Z",
-      "old_line": 48,
-      "old_price": -104,
-      "payload": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel",
-          "Caesars",
-          "Pinnacle"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": "over",
-      "significance": "ACTIONABLE",
-      "source": "The Odds API",
-      "source_system": "canonical_market",
-      "underlying_event_ids": [
-        "wre_9c2729f59ab0b24b47ca103b",
-        "wre_5277260b12620ba975198511",
-        "wre_b7ec62743782b1881ca09447",
-        "wre_37153c4d9c739eacf8e16608",
-        "wre_a64c47e99ca9ce2628c63ac5"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Temple",
-      "book": "BetMGM",
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 80,
-      "entity_id": "g381|BetMGM|spread",
-      "entity_type": "market",
-      "event_id": "wrp_1feca6f9899697e89215f8e0",
-      "event_timestamp": "2026-10-03T21:43:08Z",
-      "event_type": "MARKET_MOVE",
-      "event_version": 1,
-      "game_id": "g381",
-      "home_team": "South Florida",
-      "idempotency_key": "SPREAD_MOVED|g381|BetMGM|spread|fc3cab00b7b7a96316f20d4d9809da6e6b428c35aba1a9d3e6f7106697b4c6a6|19fbd13664a311101601d6e37f21a535c925a44ecdb62edb17aa023cf77c6fba",
-      "market": "spread",
-      "metadata": {
-        "books": [
-          "BetMGM"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "new_line": -6,
-      "new_price": -108,
-      "observed_at": "2026-10-03T21:43:08Z",
-      "old_line": -5.5,
-      "old_price": -110,
-      "payload": {
-        "books": [
-          "BetMGM"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": "home",
-      "significance": "ACTIONABLE",
-      "source": "The Odds API",
-      "source_system": "canonical_market",
-      "underlying_event_ids": [
-        "wre_089f38ce8d08be14ee5dd165"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "UTSA",
-      "book": "FanDuel",
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 80,
-      "entity_id": "g375|FanDuel|total",
-      "entity_type": "market",
-      "event_id": "wrp_0dbab3e706ab1531f1cb1af7",
-      "event_timestamp": "2026-10-03T21:43:08Z",
-      "event_type": "MARKET_MOVE",
-      "event_version": 1,
-      "game_id": "g375",
-      "home_team": "Rice",
-      "idempotency_key": "TOTAL_MOVED|g375|FanDuel|total|11b060a625c9ebf859f41daac5c5e90010856700aac95d9077cc3d0eafbe5b23|eb89bbe0d9f4c6e9af4ad6bf37c828b5f76e434d0d888dd1aa419fbb681e5cc5",
-      "market": "total",
-      "metadata": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "new_line": 56.5,
-      "new_price": -110,
-      "observed_at": "2026-10-03T21:43:08Z",
-      "old_line": 55.5,
-      "old_price": -106,
-      "payload": {
-        "books": [
-          "BetMGM",
-          "DraftKings",
-          "FanDuel"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": "over",
-      "significance": "ACTIONABLE",
-      "source": "The Odds API",
-      "source_system": "canonical_market",
-      "underlying_event_ids": [
-        "wre_9cd3901cd4d0bda430da61ab",
-        "wre_d716e7443e4d6a1211764c7b",
-        "wre_bb622b93dea3003a865a325a"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "UL-Monroe",
-      "book": "BetMGM",
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 80,
-      "entity_id": "g379|BetMGM|spread",
-      "entity_type": "market",
-      "event_id": "wrp_04047e594031d42a7b38a505",
-      "event_timestamp": "2026-10-03T21:43:08Z",
-      "event_type": "MARKET_MOVE",
-      "event_version": 1,
-      "game_id": "g379",
-      "home_team": "South Alabama",
-      "idempotency_key": "SPREAD_MOVED|g379|BetMGM|spread|e452c8d2de262711b251941192af65be6544fe94f7142ed4e2c2d02e76eabbe4|a459bea70a81fd98688c2a5012a35e6bdc37ca1066f9bb6e11b33facc282d7f1",
-      "market": "spread",
-      "metadata": {
-        "books": [
-          "BetMGM"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "new_line": -13.5,
-      "new_price": -112,
-      "observed_at": "2026-10-03T21:43:08Z",
-      "old_line": -13,
-      "old_price": -110,
-      "payload": {
-        "books": [
-          "BetMGM"
-        ],
-        "selection_source": "LATEST_FAST_PULL"
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": "home",
-      "significance": "ACTIONABLE",
-      "source": "The Odds API",
-      "source_system": "canonical_market",
-      "underlying_event_ids": [
-        "wre_4c4c172e351bbcd644d76011"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Toledo",
-      "book": null,
-      "correlation_id": "theodds_20261003T214406Z",
-      "created_at": "2026-10-03T21:44:11.772947Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T21:44:11.772947Z",
-      "display_priority": 50,
-      "entity_id": "g340",
-      "entity_type": "game",
-      "event_id": "wrp_35ac7030b6968e21004ce26c",
-      "event_timestamp": "2026-10-03T21:32:46.550988Z",
-      "event_type": "FINAL_POSTED",
-      "event_version": 1,
-      "game_id": "g340",
-      "home_team": "Ball State",
-      "idempotency_key": "FINAL_POSTED|g340|39|24",
-      "market": null,
-      "metadata": {
-        "away_score": 39,
-        "home_score": 24
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-10-03T21:32:46.550988Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "away_score": 39,
-        "home_score": 24
-      },
-      "refresh_id": "theodds_20261003T214406Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": "CollegeFootballData /games",
-      "source_system": "canonical_results",
-      "underlying_event_ids": [
-        "wre_4f997bb1bbbb6ac10852327f"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Connecticut",
-      "book": null,
-      "correlation_id": "theodds_20261003T204358Z",
-      "created_at": "2026-10-03T20:44:10.163623Z",
-      "cycle_id": "2026_WK6_PREP",
-      "detected_at": "2026-10-03T20:44:10.163623Z",
-      "display_priority": 70,
-      "entity_id": "g438",
-      "entity_type": "game",
-      "event_id": "wrp_f6cf21a5e5b7163794a4a2ed",
-      "event_timestamp": "2026-10-03T20:44:10.163623Z",
-      "event_type": "MODEL_STATE_CHANGED",
-      "event_version": 1,
-      "game_id": "g438",
-      "home_team": "Temple",
-      "idempotency_key": "MODEL_STATE_CHANGED|g438|597d860b80a0369da33d36c0a691360180a48281799d464045cfe77abf8c9779|fa64e6c10596a7c64c020c2c58d91c73acac0e1609d377ed3079eefdd2361b86",
-      "market": null,
-      "metadata": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OPERATIONAL_DEGRADED",
-        "old_state": "STALE",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-10-03T20:44:10.163623Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "new_state": "SHADOW_PARTIAL",
-        "old_spread_authority": "OPERATIONAL_DEGRADED",
-        "old_state": "STALE",
-        "old_total_authority": "OPERATIONAL_DEGRADED",
-        "spread_authority": "OPERATIONAL_DEGRADED",
-        "spread_model_id": "standard_spread_degraded_v1",
-        "total_authority": "OPERATIONAL_DEGRADED",
-        "total_model_id": "standard_total_degraded_v1"
-      },
-      "refresh_id": "theodds_20261003T204358Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "projection_adapter",
-      "underlying_event_ids": [
-        "wre_17779f525491bd01d465eed0"
-      ],
-      "week": 6
-    },
-    {
-      "away_team": "Kent State",
-      "book": null,
-      "correlation_id": "theodds_20261003T204358Z",
-      "created_at": "2026-10-03T20:44:10.163623Z",
-      "cycle_id": "2026_WK6_PREP",
-      "detected_at": "2026-10-03T20:44:10.163623Z",
-      "display_priority": 70,
-      "entity_id": "g448|spread",
-      "entity_type": "game",
-      "event_id": "wrp_ead7e0fac5e04bb124033f22",
-      "event_timestamp": "2026-10-03T20:44:10.163623Z",
-      "event_type": "SHADOW_SPREAD_READY",
-      "event_version": 1,
-      "game_id": "g448",
-      "home_team": "Western Michigan",
-      "idempotency_key": "SHADOW_SPREAD_READY|g448|spread|shadow_spread_sp_sagarin_v1|-17.277506471433256",
-      "market": null,
-      "metadata": {
-        "component_status": {
-          "Shadow SP+": "PRESENT",
-          "Shadow Sagarin": "PRESENT",
-          "activation": "PRESENT",
-          "forbidden_fallbacks_rejected": "MARKET_SPPLUS_AND_SPPLUS_ONLY"
-        },
-        "model_id": "shadow_spread_sp_sagarin_v1",
-        "ready": true,
-        "value": -17.277506471433256
-      },
-      "new_line": null,
-      "new_price": null,
-      "observed_at": "2026-10-03T20:44:10.163623Z",
-      "old_line": null,
-      "old_price": null,
-      "payload": {
-        "component_status": {
-          "Shadow SP+": "PRESENT",
-          "Shadow Sagarin": "PRESENT",
-          "activation": "PRESENT",
-          "forbidden_fallbacks_rejected": "MARKET_SPPLUS_AND_SPPLUS_ONLY"
-        },
-        "model_id": "shadow_spread_sp_sagarin_v1",
-        "ready": true,
-        "value": -17.277506471433256
-      },
-      "refresh_id": "theodds_20261003T204358Z",
-      "season": 2026,
-      "side": null,
-      "significance": "OPERATIONAL",
-      "source": null,
-      "source_system": "shadow_projection",
-      "underlying_event_ids": [
-        "wre_2673ddffd17f3dcabb3729eb"
-      ],
-      "week": 6
-    },
-    {
-      "away_team": "Fresno State",
-      "book": "BetMGM",
-      "correlation_id": "theodds_20261003T204358Z",
-      "created_at": "2026-10-03T20:44:10.163623Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-03T20:44:10.163623Z",
-      "display_priority": 92,
-      "entity_id": "g389|spread|best",
-      "entity_type": "game_market",
-      "event_id": "wrp_deab735104a2526e1bd9fd80",
-      "event_timestamp": "2026-10-03T20:44:10.163623Z",
-      "event_type": "BEST_SPREAD_CHANGED",
-      "event_version": 1,
-      "game_id": "g389",
-      "home_team": "Washington State",
-      "idempotency_key": "BEST_SPREAD_CHANGED|g389|spread|best|5e7039b1417ad6285f50c46d1a6b4a84f2624b9341a7dad245f049b004339622|1ae457f0772362851b675d8d154d08c377a083fe5c73b67ceb02813d8b7326f8",
-      "market": "spread",
-      "metadata": {
-        "new_best": {
-          "best_edge": 5.225,
-          "best_side": "away",
-          "book": "BetMGM",
-          "line": 2.5,
-          "market": "spread",
-          "price": -110,
-          "quote_timestamp": "2026-10-03T20:43:36Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "BetMGM",
-        "old_best": {
-          "best_edge": 5.225,
-          "best_side": "away",
-          "book": "DraftKings",
-          "line": 2.5,
-          "market": "spread",
-          "price": -112,
-          "quote_timestamp": "2026-10-03T19:43:30Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "DraftKings"
-      },
-      "new_line": 2.5,
-      "new_price": -110,
-      "observed_at": "2026-10-03T20:44:10.163623Z",
-      "old_line": 2.5,
-      "old_price": -112,
-      "payload": {
-        "new_best": {
-          "best_edge": 5.225,
-          "best_side": "away",
-          "book": "BetMGM",
-          "line": 2.5,
-          "market": "spread",
-          "price": -110,
-          "quote_timestamp": "2026-10-03T20:43:36Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "BetMGM",
-        "old_best": {
-          "best_edge": 5.225,
-          "best_side": "away",
-          "book": "DraftKings",
-          "line": 2.5,
-          "market": "spread",
-          "price": -112,
-          "quote_timestamp": "2026-10-03T19:43:30Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "DraftKings"
-      },
-      "refresh_id": "theodds_20261003T204358Z",
-      "season": 2026,
-      "side": "away",
-      "significance": "ACTIONABLE",
-      "source": null,
-      "source_system": "war_room_matrix_observer",
-      "underlying_event_ids": [
-        "wre_9194fce2c8b5b827eb3b66ca"
-      ],
-      "week": 5
     }
   ],
   "latest_refresh_event_ids": [
-    "wrp_da80123eb1bea6743055eac7",
-    "wrp_888f644ef5b808fac9ff9021",
-    "wrp_6c337003c88703c5201c8204",
-    "wrp_67e686dbfd627f9b8a6bbf56",
-    "wrp_672f0a61c31a08b52cb2b2c9",
-    "wrp_5b34bf5e5230fd6c6bf47828",
-    "wrp_2c614160041d7412acc13c6e",
-    "wrp_26eee577726332a905288351",
-    "wrp_240ee31d0d0c0b6f7438de51",
-    "wrp_209d4c3c8c836db3bc1405cf",
-    "wrp_149069a1ac200d05d6a0e5d8",
-    "wrp_0d5b2e87a69d509fb680e3d7",
-    "wrp_04cf39050a287ab5c158294b",
-    "wrp_02f3a1326e36568cb8490f36",
-    "wrp_e83f6e0cf870f96adf6caff2",
-    "wrp_c505a624b02fbfeb12d222cf",
-    "wrp_5c95e34fd094be6cf018baa3",
-    "wrp_8fb682fa130f32f2844a60e0",
-    "wrp_6b7803f02753bd81dba9d11a"
+    "wrp_e695769672f295dd779b6a88",
+    "wrp_ba803a7a40068dffa91f51d1",
+    "wrp_7d6cef8865653894adb7a49a",
+    "wrp_ebb51cdc7b767b301804e497",
+    "wrp_c7867a50a2b9108440e6a1e5",
+    "wrp_4ec8efeae775e55056119b14",
+    "wrp_9d769f1c47d8a1e29a054276",
+    "wrp_8e87792c685771773f327533",
+    "wrp_4b0d83f3a2c9e12b467b3788"
   ],
-  "latest_refresh_id": "theodds_20261004T003625Z",
-  "new_event_count": 19,
+  "latest_refresh_id": "theodds_20261004T014504Z",
+  "new_event_count": 9,
   "opening_markets": {
     "g1": {
       "pinnacle_spread": {
@@ -29604,275 +29620,43 @@
     }
   },
   "pipeline_refreshes": {
-    "market": "2026-10-04T00:36:25.424544+00:00",
+    "market": "2026-10-04T01:45:04.098632+00:00",
     "model": "2026-10-02T16:24:50.211636+00:00",
-    "postgame": "2026-10-04T00:11:53.490919+00:00"
+    "postgame": "2026-10-04T01:29:25.732542+00:00"
   },
-  "public_event_count": 26160,
+  "public_event_count": 26169,
   "recent_change_events": [
     {
       "away_team": "Baylor",
-      "book": "DraftKings",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
-      "display_priority": 95,
-      "entity_id": "g339|total|edge",
-      "entity_type": "game_edge",
-      "event_id": "wrp_888f644ef5b808fac9ff9021",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
-      "event_type": "EDGE_ACTIONABLE_CHANGED",
-      "event_version": 1,
-      "game_id": "g339",
-      "home_team": "Arizona State",
-      "idempotency_key": "EDGE_ACTIONABLE_CHANGED|g339|total|edge|total|5.3|4.3|over|over|theodds_20261004T003625Z",
-      "market": "total",
-      "metadata": {
-        "new_book": "DraftKings",
-        "new_edge": 4.3,
-        "new_side": "over",
-        "old_book": "FanDuel",
-        "old_edge": 5.3,
-        "old_side": "over"
-      },
-      "new_line": 49.5,
-      "new_price": -105,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": 48.5,
-      "old_price": -108,
-      "payload": {
-        "new_book": "DraftKings",
-        "new_edge": 4.3,
-        "new_side": "over",
-        "old_book": "FanDuel",
-        "old_edge": 5.3,
-        "old_side": "over"
-      },
-      "refresh_id": "theodds_20261004T003625Z",
-      "season": 2026,
-      "side": "over",
-      "significance": "ACTIONABLE",
-      "source": null,
-      "source_system": "war_room_matrix_observer",
-      "underlying_event_ids": [
-        "wre_bc66ceeb8149927ae30ba36c"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Texas State",
-      "book": "DraftKings",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
-      "display_priority": 92,
-      "entity_id": "g378|spread|best",
-      "entity_type": "game_market",
-      "event_id": "wrp_672f0a61c31a08b52cb2b2c9",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
-      "event_type": "BEST_SPREAD_CHANGED",
-      "event_version": 1,
-      "game_id": "g378",
-      "home_team": "San Diego State",
-      "idempotency_key": "BEST_SPREAD_CHANGED|g378|spread|best|e6ad43fc8e9b36e4fb6db14a076bd69490c7fa571bf1050a42236477ec3767d1|b7ca6c89a12bf993df244cb4afa3dbedc4a01ceaae5b7526535c3dd2d6c11cad",
-      "market": "spread",
-      "metadata": {
-        "new_best": {
-          "best_edge": 7.275,
-          "best_side": "home",
-          "book": "DraftKings",
-          "line": 9.5,
-          "market": "spread",
-          "price": -105,
-          "quote_timestamp": "2026-10-04T00:36:00Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "DraftKings",
-        "old_best": {
-          "best_edge": 7.775,
-          "best_side": "home",
-          "book": "BetMGM",
-          "line": 10,
-          "market": "spread",
-          "price": -115,
-          "quote_timestamp": "2026-10-03T23:43:55Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "BetMGM"
-      },
-      "new_line": 9.5,
-      "new_price": -105,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": 10,
-      "old_price": -115,
-      "payload": {
-        "new_best": {
-          "best_edge": 7.275,
-          "best_side": "home",
-          "book": "DraftKings",
-          "line": 9.5,
-          "market": "spread",
-          "price": -105,
-          "quote_timestamp": "2026-10-04T00:36:00Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "DraftKings",
-        "old_best": {
-          "best_edge": 7.775,
-          "best_side": "home",
-          "book": "BetMGM",
-          "line": 10,
-          "market": "spread",
-          "price": -115,
-          "quote_timestamp": "2026-10-03T23:43:55Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "BetMGM"
-      },
-      "refresh_id": "theodds_20261004T003625Z",
-      "season": 2026,
-      "side": "home",
-      "significance": "ACTIONABLE",
-      "source": null,
-      "source_system": "war_room_matrix_observer",
-      "underlying_event_ids": [
-        "wre_a28782786ab0370342669726"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Fresno State",
       "book": "BetMGM",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
       "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
-      "display_priority": 92,
-      "entity_id": "g389|total|best",
-      "entity_type": "game_market",
-      "event_id": "wrp_5b34bf5e5230fd6c6bf47828",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
-      "event_type": "BEST_TOTAL_CHANGED",
-      "event_version": 1,
-      "game_id": "g389",
-      "home_team": "Washington State",
-      "idempotency_key": "BEST_TOTAL_CHANGED|g389|total|best|b42f3a6fb12fdabf3a56408f73f60a24431c2191f104c94854a728d0fa3ec96f|d6d962f9095271e11c54598ed1de3dee88c50565f27d9d1d7b587a20003ae551",
-      "market": "total",
-      "metadata": {
-        "new_best": {
-          "best_edge": 1.68,
-          "best_side": "over",
-          "book": "BetMGM",
-          "line": 44.5,
-          "market": "total",
-          "price": -108,
-          "quote_timestamp": "2026-10-04T00:34:29Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "BetMGM",
-        "old_best": {
-          "best_edge": 1.68,
-          "best_side": "over",
-          "book": "DraftKings",
-          "line": 44.5,
-          "market": "total",
-          "price": -105,
-          "quote_timestamp": "2026-10-03T23:44:11Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "DraftKings"
-      },
-      "new_line": 44.5,
-      "new_price": -108,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": 44.5,
-      "old_price": -105,
-      "payload": {
-        "new_best": {
-          "best_edge": 1.68,
-          "best_side": "over",
-          "book": "BetMGM",
-          "line": 44.5,
-          "market": "total",
-          "price": -108,
-          "quote_timestamp": "2026-10-04T00:34:29Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "BetMGM",
-        "old_best": {
-          "best_edge": 1.68,
-          "best_side": "over",
-          "book": "DraftKings",
-          "line": 44.5,
-          "market": "total",
-          "price": -105,
-          "quote_timestamp": "2026-10-03T23:44:11Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "old_book": "DraftKings"
-      },
-      "refresh_id": "theodds_20261004T003625Z",
-      "season": 2026,
-      "side": "over",
-      "significance": "ACTIONABLE",
-      "source": null,
-      "source_system": "war_room_matrix_observer",
-      "underlying_event_ids": [
-        "wre_bd939f599b18ebcb41f696d9"
-      ],
-      "week": 5
-    },
-    {
-      "away_team": "Baylor",
-      "book": "DraftKings",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
-      "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
       "display_priority": 92,
       "entity_id": "g339|total|best",
       "entity_type": "game_market",
-      "event_id": "wrp_149069a1ac200d05d6a0e5d8",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
+      "event_id": "wrp_e695769672f295dd779b6a88",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
       "event_type": "BEST_TOTAL_CHANGED",
       "event_version": 1,
       "game_id": "g339",
       "home_team": "Arizona State",
-      "idempotency_key": "BEST_TOTAL_CHANGED|g339|total|best|c870b23d34c797481a117095d1bd3067fd00a4e5a515581e7bcda476d6a8f5b9|9762f57a6e5bdf1055d2b99efa3763a70043831f47b4e765a05513a8078510e8",
+      "idempotency_key": "BEST_TOTAL_CHANGED|g339|total|best|9762f57a6e5bdf1055d2b99efa3763a70043831f47b4e765a05513a8078510e8|1b1f8b18fd8b97f56f6a2dc528b2d7b9fe174667dba423cb3a5f558f583be97d",
       "market": "total",
       "metadata": {
         "new_best": {
           "best_edge": 4.3,
           "best_side": "over",
-          "book": "DraftKings",
+          "book": "BetMGM",
           "line": 49.5,
           "market": "total",
-          "price": -105,
-          "quote_timestamp": "2026-10-04T00:36:00Z",
-          "selection_source": "LATEST_FAST_PULL"
-        },
-        "new_book": "DraftKings",
-        "old_best": {
-          "best_edge": 5.3,
-          "best_side": "over",
-          "book": "FanDuel",
-          "line": 48.5,
-          "market": "total",
           "price": -108,
-          "quote_timestamp": "2026-10-03T23:44:30Z",
+          "quote_timestamp": "2026-10-04T01:44:58Z",
           "selection_source": "LATEST_FAST_PULL"
         },
-        "old_book": "FanDuel"
-      },
-      "new_line": 49.5,
-      "new_price": -105,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": 48.5,
-      "old_price": -108,
-      "payload": {
-        "new_best": {
+        "new_book": "BetMGM",
+        "old_best": {
           "best_edge": 4.3,
           "best_side": "over",
           "book": "DraftKings",
@@ -29882,159 +29666,209 @@
           "quote_timestamp": "2026-10-04T00:36:00Z",
           "selection_source": "LATEST_FAST_PULL"
         },
-        "new_book": "DraftKings",
-        "old_best": {
-          "best_edge": 5.3,
+        "old_book": "DraftKings"
+      },
+      "new_line": 49.5,
+      "new_price": -108,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 49.5,
+      "old_price": -105,
+      "payload": {
+        "new_best": {
+          "best_edge": 4.3,
           "best_side": "over",
-          "book": "FanDuel",
-          "line": 48.5,
+          "book": "BetMGM",
+          "line": 49.5,
           "market": "total",
           "price": -108,
-          "quote_timestamp": "2026-10-03T23:44:30Z",
+          "quote_timestamp": "2026-10-04T01:44:58Z",
           "selection_source": "LATEST_FAST_PULL"
         },
-        "old_book": "FanDuel"
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 4.3,
+          "best_side": "over",
+          "book": "DraftKings",
+          "line": 49.5,
+          "market": "total",
+          "price": -105,
+          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "DraftKings"
       },
-      "refresh_id": "theodds_20261004T003625Z",
+      "refresh_id": "theodds_20261004T014504Z",
       "season": 2026,
       "side": "over",
       "significance": "ACTIONABLE",
       "source": null,
       "source_system": "war_room_matrix_observer",
       "underlying_event_ids": [
-        "wre_ce503810eb768b22576d2604"
+        "wre_f13dc694710100bcb23fb5fe"
       ],
       "week": 5
     },
     {
-      "away_team": "San Jose State",
+      "away_team": "Cincinnati",
       "book": "DraftKings",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
       "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
       "display_priority": 92,
-      "entity_id": "g354|spread|best",
+      "entity_id": "g338|spread|best",
       "entity_type": "game_market",
-      "event_id": "wrp_0d5b2e87a69d509fb680e3d7",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
+      "event_id": "wrp_ba803a7a40068dffa91f51d1",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
       "event_type": "BEST_SPREAD_CHANGED",
       "event_version": 1,
-      "game_id": "g354",
-      "home_team": "Hawaii",
-      "idempotency_key": "BEST_SPREAD_CHANGED|g354|spread|best|e94b0ee3f04e582e58df0d845600c88ba1e6c4db4b42c47e82e0a4c9a6aa364d|86f858ea10a6678ca55029d851ff4b9d2162ee9d67960b048d1ec2a5057025c6",
+      "game_id": "g338",
+      "home_team": "Arizona",
+      "idempotency_key": "BEST_SPREAD_CHANGED|g338|spread|best|84b75517c9c6b30e502aef8093214d9621aba458529ab617d1b580323d219da6|405116a0156c701528c5102b72749563b423fd37596f1d518a2cdefbe85d3d0b",
       "market": "spread",
       "metadata": {
         "new_best": {
-          "best_edge": 1.375,
-          "best_side": "home",
+          "best_edge": 3.15,
+          "best_side": "away",
           "book": "DraftKings",
-          "line": -2.5,
+          "line": 7,
           "market": "spread",
-          "price": -120,
-          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "price": -112,
+          "quote_timestamp": "2026-10-04T01:44:43Z",
           "selection_source": "LATEST_FAST_PULL"
         },
         "new_book": "DraftKings",
         "old_best": {
-          "best_edge": 1.375,
-          "best_side": "home",
-          "book": "FanDuel",
-          "line": -2.5,
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
           "market": "spread",
           "price": -115,
-          "quote_timestamp": "2026-10-03T23:44:30Z",
+          "quote_timestamp": "2026-10-04T00:36:00Z",
           "selection_source": "LATEST_FAST_PULL"
         },
-        "old_book": "FanDuel"
+        "old_book": "DraftKings"
       },
-      "new_line": -2.5,
-      "new_price": -120,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": -2.5,
+      "new_line": 7,
+      "new_price": -112,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 7,
       "old_price": -115,
       "payload": {
         "new_best": {
-          "best_edge": 1.375,
-          "best_side": "home",
+          "best_edge": 3.15,
+          "best_side": "away",
           "book": "DraftKings",
-          "line": -2.5,
+          "line": 7,
           "market": "spread",
-          "price": -120,
-          "quote_timestamp": "2026-10-04T00:36:00Z",
+          "price": -112,
+          "quote_timestamp": "2026-10-04T01:44:43Z",
           "selection_source": "LATEST_FAST_PULL"
         },
         "new_book": "DraftKings",
         "old_best": {
-          "best_edge": 1.375,
-          "best_side": "home",
-          "book": "FanDuel",
-          "line": -2.5,
+          "best_edge": 3.15,
+          "best_side": "away",
+          "book": "DraftKings",
+          "line": 7,
           "market": "spread",
           "price": -115,
-          "quote_timestamp": "2026-10-03T23:44:30Z",
+          "quote_timestamp": "2026-10-04T00:36:00Z",
           "selection_source": "LATEST_FAST_PULL"
         },
-        "old_book": "FanDuel"
+        "old_book": "DraftKings"
       },
-      "refresh_id": "theodds_20261004T003625Z",
+      "refresh_id": "theodds_20261004T014504Z",
       "season": 2026,
-      "side": "home",
+      "side": "away",
       "significance": "ACTIONABLE",
       "source": null,
       "source_system": "war_room_matrix_observer",
       "underlying_event_ids": [
-        "wre_8fb023a18f6bd88785de7da2"
+        "wre_25c5e003ac68de9aa1ec7ecb"
       ],
       "week": 5
     },
     {
-      "away_team": "Texas State",
-      "book": "DraftKings",
-      "correlation_id": "theodds_20261004T003625Z",
-      "created_at": "2026-10-04T00:36:36.547632Z",
+      "away_team": "Cincinnati",
+      "book": "BetMGM",
+      "correlation_id": "theodds_20261004T014504Z",
+      "created_at": "2026-10-04T01:45:08.233832Z",
       "cycle_id": "2026_WK5_PREP",
-      "detected_at": "2026-10-04T00:36:36.547632Z",
-      "display_priority": 95,
-      "entity_id": "g378|spread|edge",
-      "entity_type": "game_edge",
-      "event_id": "wrp_04cf39050a287ab5c158294b",
-      "event_timestamp": "2026-10-04T00:36:36.547632Z",
-      "event_type": "EDGE_ACTIONABLE_CHANGED",
+      "detected_at": "2026-10-04T01:45:08.233832Z",
+      "display_priority": 92,
+      "entity_id": "g338|total|best",
+      "entity_type": "game_market",
+      "event_id": "wrp_7d6cef8865653894adb7a49a",
+      "event_timestamp": "2026-10-04T01:45:08.233832Z",
+      "event_type": "BEST_TOTAL_CHANGED",
       "event_version": 1,
-      "game_id": "g378",
-      "home_team": "San Diego State",
-      "idempotency_key": "EDGE_ACTIONABLE_CHANGED|g378|spread|edge|spread|7.775|7.275|home|home|theodds_20261004T003625Z",
-      "market": "spread",
+      "game_id": "g338",
+      "home_team": "Arizona",
+      "idempotency_key": "BEST_TOTAL_CHANGED|g338|total|best|461512d2befa9d238a9d67c5b075eda3a115d6d197b42c85f0eff91ec8b1df8c|5992c6272b11fb56bdea24e9a8f9c1fdf92293eb37985fb7a4df6137127546ca",
+      "market": "total",
       "metadata": {
-        "new_book": "DraftKings",
-        "new_edge": 7.275,
-        "new_side": "home",
-        "old_book": "BetMGM",
-        "old_edge": 7.775,
-        "old_side": "home"
+        "new_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -110,
+          "quote_timestamp": "2026-10-04T00:34:29Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "BetMGM"
       },
-      "new_line": 9.5,
-      "new_price": -105,
-      "observed_at": "2026-10-04T00:36:36.547632Z",
-      "old_line": 10,
-      "old_price": -115,
+      "new_line": 56.5,
+      "new_price": -108,
+      "observed_at": "2026-10-04T01:45:08.233832Z",
+      "old_line": 56.5,
+      "old_price": -110,
       "payload": {
-        "new_book": "DraftKings",
-        "new_edge": 7.275,
-        "new_side": "home",
-        "old_book": "BetMGM",
-        "old_edge": 7.775,
-        "old_side": "home"
+        "new_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -108,
+          "quote_timestamp": "2026-10-04T01:44:58Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "new_book": "BetMGM",
+        "old_best": {
+          "best_edge": 2.64,
+          "best_side": "under",
+          "book": "BetMGM",
+          "line": 56.5,
+          "market": "total",
+          "price": -110,
+          "quote_timestamp": "2026-10-04T00:34:29Z",
+          "selection_source": "LATEST_FAST_PULL"
+        },
+        "old_book": "BetMGM"
       },
-      "refresh_id": "theodds_20261004T003625Z",
+      "refresh_id": "theodds_20261004T014504Z",
       "season": 2026,
-      "side": "home",
+      "side": "under",
       "significance": "ACTIONABLE",
       "source": null,
       "source_system": "war_room_matrix_observer",
       "underlying_event_ids": [
-        "wre_ad300a9afabadc97450eb2db"
+        "wre_091264179db12028636d6c13"
       ],
       "week": 5
     }
@@ -30042,12 +29876,12 @@
   "recent_change_window_minutes": 30,
   "schema_version": "war-room-activity-v1",
   "since_last_refresh": {
-    "best": 4,
-    "edge_changed": 2,
+    "best": 3,
+    "edge_changed": 0,
     "edge_lost": 0,
     "final": 2,
-    "model": 8,
-    "moves": 3,
+    "model": 0,
+    "moves": 4,
     "new_edge": 0,
     "open": 0,
     "ratings": 0
