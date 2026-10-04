@@ -160,17 +160,14 @@ def ratings_acquisition_commands(sources: str = "") -> list[list[str]]:
 
 def ratings_change_commands(matchup_report: dict[str, Any] | None = None) -> list[list[str]]:
     """Bounded canonical propagation after at least one accepted panel changes."""
-    window = (matchup_report or {}).get("window") or {}
-    bounds = []
-    if window.get("start") and window.get("end"):
-        bounds = ["--start-date", window["start"], "--end-date", window["end"]]
     return [
         [sys.executable, "scripts/ratings/build_all_ratings_latest.py"],
         [sys.executable, "scripts/ratings/build_active_2026_ratings_master.py"],
         [sys.executable, "scripts/ratings/merge_live_rating_change_status.py"],
-        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py", *bounds],
-        # Acquisition/source refresh remains bounded, but canonical projection
-        # resolution uses every valid game already returned by providers.
+        # Acquisition remains bounded per provider. Canonical propagation must
+        # consume every accepted row because DRatings and Massey can publish
+        # different rolling windows.
+        [sys.executable, "scripts/projections/build_game_projection_sources_2026.py"],
         [sys.executable, "scripts/projections/build_current_game_projection_contract.py"],
         # The War Room reads matchup-feed acceptance evidence from this view.
         # Rebuild it after the canonical sources/contract so a newly accepted

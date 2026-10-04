@@ -498,6 +498,18 @@ class OperatorContractTests(unittest.TestCase):
             names.index("build_war_room_market_matrix.py"),
         )
 
+    def test_ratings_propagation_uses_all_accepted_provider_windows(self):
+        commands = refresh.ratings_change_commands({
+            "window": {"start": "2026-10-04", "end": "2026-10-11"}
+        })
+        projection = next(
+            command for command in commands
+            if Path(command[1]).name == "build_game_projection_sources_2026.py"
+        )
+        self.assertEqual(len(projection), 2)
+        self.assertNotIn("--start-date", projection)
+        self.assertNotIn("--end-date", projection)
+
     def test_ratings_change_detection(self):
         with patch.object(refresh,"load_json",return_value={"sources":{"SP+":{"change_status":"NO_CHANGE"}}}):
             self.assertFalse(refresh.accepted_ratings_changed()[0])
