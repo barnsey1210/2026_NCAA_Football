@@ -47,6 +47,49 @@ def matrix(spread=-3.0, spread_price=-110, include_total=True):
 
 
 class WarRoomActivityTest(unittest.TestCase):
+    def test_best_move_classification_covers_line_side_price_and_book(self):
+        old = {"best_side": "home", "line": -3.0, "price": -110, "book": "DraftKings"}
+        cases = [
+            ({**old, "line": -3.5}, ["LINE_MOVE"]),
+            ({**old, "best_side": "away"}, ["SIDE_CHANGE"]),
+            ({**old, "price": -105}, ["PRICE_CHANGE"]),
+            ({**old, "book": "FanDuel"}, ["BEST_BOOK_CHANGE"]),
+        ]
+        for new, expected in cases:
+            self.assertEqual(activity.best_move_classification(old, new), expected)
+
+    def test_fast_cycle_index_adds_latest_best_move_without_losing_openers(self):
+        prior = {"schema_version": "war-room-game-activity-index-v1", "games": {"g1": {
+            "game_id": "g1", "openers": {"spread": {"line": -2.5}},
+            "events": [], "prior_games": {"away": {}, "home": {}},
+        }}}
+        move = {
+            "event_id": "move-1", "event_type": "BEST_SPREAD_CHANGED",
+            "event_timestamp": "2026-08-27T12:10:00Z", "game_id": "g1",
+            "old_line": -3.0, "new_line": -3.5, "book": "DraftKings",
+        }
+        updated = activity.update_fast_game_index(
+            prior, [move], {"g1": {"season": 2026, "week": 1,
+            "away_team": "A", "home_team": "B"}},
+            "2026-08-27T12:10:01Z", "r2",
+        )
+        game = updated["games"]["g1"]
+        self.assertEqual(game["events"][0]["event_id"], "move-1")
+        self.assertEqual(game["openers"]["spread"]["line"], -2.5)
+        self.assertEqual(updated["latest_refresh_id"], "r2")
+
+    def test_fast_cycle_index_is_idempotent_and_first_observation_is_not_a_move(self):
+        base = activity.update_fast_game_index(
+            {"games": {}}, [], {"g1": {"away_team": "A", "home_team": "B"}},
+            "2026-08-27T12:00:00Z", "r1",
+        )
+        self.assertNotIn("g1", base["games"])
+        move = {"event_id": "m1", "event_type": "BEST_TOTAL_CHANGED",
+                "event_timestamp": "2026-08-27T12:01:00Z", "game_id": "g1"}
+        once = activity.update_fast_game_index(base, [move], {"g1": {}}, "2026-08-27T12:01:01Z", "r2")
+        twice = activity.update_fast_game_index(once, [move], {"g1": {}}, "2026-08-27T12:01:02Z", "r2")
+        self.assertEqual(len(twice["games"]["g1"]["events"]), 1)
+
     def test_first_market_is_one_event_per_domain_and_persists_across_reloads(self):
         health = {"ratings_health": {"sources": {}}}
         empty = matrix(include_total=False)

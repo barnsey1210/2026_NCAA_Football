@@ -41,7 +41,7 @@
       "live_version_route": "/war-room/live/version",
       "static_fallback": true,
       "opener_contract": "market.openers uses earliest accepted canonical matchup line history; Pinnacle opener remains a separate canonical-history diagnostic",
-      "movement_contract": "best_sportsbook quote may expose only its own latest >=0.5-point material move; no exchange markers or price-only moves",
+      "movement_contract": "accepted fast snapshots emit bounded BEST quote events for line, side, price, and best-book changes; per-book quote badges remain limited to their own latest >=0.5-point material line move",
       "first_market_contract": "market.first_available persists the first accepted spread and total availability independently; startup inventory is marked baseline and never emits false opening alerts",
       "shadow_tooltip_contract": "shadow_readiness.team_contributions exposes direct 50/50 team-level net decompositions of validated Spread and Total component updates plus readiness reasons; the browser only formats them",
       "recency_contract": "canonical opener and move timestamps age locally; latest plus two prior completed refresh ids support hybrid movement recency",

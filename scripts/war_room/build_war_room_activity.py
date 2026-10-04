@@ -165,6 +165,20 @@ def decision_snapshot(game: dict[str, Any], market: str) -> dict[str, Any]:
     }
 
 
+def best_move_classification(old: dict[str, Any], new: dict[str, Any]) -> list[str]:
+    """Describe exactly which accepted BEST-quote dimensions changed."""
+    classifications = []
+    if old.get("best_side") != new.get("best_side"):
+        classifications.append("SIDE_CHANGE")
+    if old.get("line") != new.get("line"):
+        classifications.append("LINE_MOVE")
+    if old.get("price") != new.get("price"):
+        classifications.append("PRICE_CHANGE")
+    if old.get("book") != new.get("book"):
+        classifications.append("BEST_BOOK_CHANGE")
+    return classifications
+
+
 def selected_week_health(matrix: dict[str, Any]) -> dict[str, Any]:
     by_week: dict[str, Any] = {}
     games = [g for g in matrix.get("games", []) if (g.get("scope") or {}).get("fbs_vs_fbs") is True]
@@ -408,6 +422,7 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
 
             if old_best != new_best and any(value is not None for value in new_best):
                 event_type = "BEST_SPREAD_CHANGED" if market == "spread" else "BEST_TOTAL_CHANGED"
+                classifications = best_move_classification(old, new)
                 out.append(event(
                     event_type=event_type,
                     observed_at=detected_at,
@@ -430,6 +445,8 @@ def detect(previous: dict[str, Any], current: dict[str, Any], detected_at: str) 
                     new_price=new.get("price"),
                     significance="ACTIONABLE",
                     metadata={
+                        "move_classifications": classifications,
+                        "primary_classification": classifications[0] if classifications else "BEST_QUOTE_CHANGE",
                         "old_best": old,
                         "new_best": new,
                         "old_book": old.get("book"),
@@ -1180,6 +1197,52 @@ def build_game_index(
     }
 
 
+def update_fast_game_index(
+    prior_index: dict[str, Any], public_events: list[dict[str, Any]],
+    games_meta: dict[str, Any], built_at: str, refresh_id: str | None,
+    max_events: int = 100,
+) -> dict[str, Any]:
+    """Atomically refresh per-game events without scanning canonical history."""
+    prior_games = dict(prior_index.get("games") or {})
+    incoming: dict[str, list[dict[str, Any]]] = {}
+    for row in public_events:
+        gid = str(row.get("game_id") or "")
+        if gid:
+            incoming.setdefault(gid, []).append(row)
+
+    for gid, rows in incoming.items():
+        prior = dict(prior_games.get(gid) or {})
+        by_id = {
+            str(row.get("event_id") or stable_hash(row)): row
+            for row in list(prior.get("events") or []) + rows
+        }
+        events = sorted(
+            by_id.values(),
+            key=lambda row: (row.get("event_timestamp") or "", row.get("event_id") or ""),
+            reverse=True,
+        )[:max(1, max_events)]
+        meta = games_meta.get(gid) or {}
+        prior.update({
+            "game_id": gid,
+            "season": meta.get("season", prior.get("season")),
+            "week": meta.get("week", prior.get("week")),
+            "away_team": meta.get("away_team") or prior.get("away_team"),
+            "home_team": meta.get("home_team") or prior.get("home_team"),
+            "events": events,
+            "event_count": len(events),
+        })
+        prior_games[gid] = prior
+
+    return {
+        "schema_version": "war-room-game-activity-index-v1",
+        "built_at": built_at,
+        "latest_refresh_id": refresh_id,
+        "game_count": len(prior_games),
+        "max_events_per_game": max(1, max_events),
+        "games": prior_games,
+    }
+
+
 def read_history(path: Path, event_types: set[str] | None = None) -> list[dict[str, Any]]:
     rows = []
     try:
@@ -1286,6 +1349,13 @@ def main() -> None:
             # belongs to daily maintenance, not the operator's browser path.
             prior_public = load_json(args.output, {})
             payload["opening_markets"] = prior_public.get("opening_markets") or {}
+            game_index = update_fast_game_index(
+                load_json(args.game_index_output, {}), newest,
+                current.get("games_meta") or {}, detected_at,
+                current.get("refresh_id"), args.max_game_events,
+            )
+            atomic_json(args.game_index_output, game_index)
+            payload["game_activity_index_status"] = "FAST_EVENTS_UPDATED"
         else:
             line_history = load_json(args.line_history, {})
             results_payload = load_json(args.results, {})
