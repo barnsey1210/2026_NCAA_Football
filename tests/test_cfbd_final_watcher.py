@@ -35,7 +35,7 @@ class FinalWatcherTests(unittest.TestCase):
    commands.append(command)
    if command[1].endswith("build_game_results_2026.py"):watcher.RESULTS.write_text(json.dumps({"games":[{"game_id":"g1","cfbd_game_id":99,"home_score":14,"away_score":7}]}))
    return ok(command)
-  code,r=self.execute(fetch=lambda *_:self.score("final"),runner=runner); self.assertEqual((code,r["status"],r["api_calls_this_run"]),(0,"POSTGAME_DISPATCHED",2)); self.assertEqual(sum("pull_cfbd_schedule_2026.py" in x for c in commands for x in c),1); self.assertIn("--prepared-results",commands[-1])
+  code,r=self.execute(fetch=lambda *_:self.score("final"),runner=runner); self.assertEqual((code,r["status"],r["api_calls_this_run"]),(0,"POSTGAME_DISPATCHED",2)); self.assertEqual(sum("pull_cfbd_schedule_2026.py" in x for c in commands for x in c),1); self.assertEqual(sum("apply_cfbd_schedule_overlay_2026.py" in x for c in commands for x in c),1); self.assertIn("--prepared-results",commands[-1])
   commands.clear(); code,r=self.execute(now=datetime(2026,8,29,16,5,tzinfo=timezone.utc),fetch=lambda *_:self.score("final"),runner=lambda c:(commands.append(c) or ok(c))); self.assertEqual(r["status"],"NO_NEW_FINALS"); self.assertEqual(len(commands),1)
  def test_unaccepted_final_remains_retryable(self):
   commands=[]; code,r=self.execute(fetch=lambda *_:self.score("final"),runner=lambda c:(commands.append(c) or ok(c))); self.assertEqual((code,r["status"]),(0,"FINAL_CANDIDATE")); self.assertFalse(any("run_war_room_service.py" in x for c in commands for x in c))

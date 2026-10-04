@@ -391,6 +391,34 @@ def load_massey(idx):
                         match_method = "date_tolerance"
                         break
 
+        if not g:
+            # A provider can publish a shifted game date while retaining the
+            # exact matchup. Resolve only one same-orientation canonical pair
+            # within three days; duplicate pairs remain unmatched rather than
+            # guessing. The audit keeps this distinct from normal tolerance.
+            shifted_candidates = []
+            for sg in idx.values():
+                if (
+                    team_key(sg.get("away_team")) != source_away
+                    or team_key(sg.get("home_team")) != source_home
+                ):
+                    continue
+                try:
+                    day_delta = abs(
+                        (
+                            pd.to_datetime(sg.get("date")) -
+                            pd.to_datetime(r.get("game_date"))
+                        ).days
+                    )
+                except Exception:
+                    continue
+                if day_delta <= 3:
+                    shifted_candidates.append(sg)
+
+            if len(shifted_candidates) == 1:
+                g = shifted_candidates[0]
+                match_method = "unique_team_pair_date_conflict"
+
         neutral_site_hint = str(r.get("neutral_site_hint") or "").strip().lower() in {
             "1", "true", "yes"
         }

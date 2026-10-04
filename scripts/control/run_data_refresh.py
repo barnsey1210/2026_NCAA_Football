@@ -200,6 +200,7 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
     """Lean runtime Postgame propagation; broad maintenance is deferred."""
     commands = [
         [sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"],
+        [sys.executable, "scripts/schedule/apply_cfbd_schedule_overlay_2026.py", "--apply"],
         [sys.executable, "scripts/results/build_game_results_2026.py"],
         [sys.executable, "scripts/postgame/pull_sp_plus_postgame_2026.py"],
         [sys.executable, "scripts/postgame/pull_cfbd_postgame_2026.py"],
@@ -213,7 +214,7 @@ def postgame_commands(skip_schedule: bool = False) -> list[list[str]]:
         [sys.executable, "scripts/war_room/build_war_room_health.py"],
         [sys.executable, "scripts/war_room/build_war_room_market_matrix.py"],
     ]
-    return commands[2:] if skip_schedule else commands
+    return commands[3:] if skip_schedule else commands
 
 
 def execute_postgame_service(

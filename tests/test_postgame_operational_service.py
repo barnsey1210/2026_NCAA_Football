@@ -149,6 +149,8 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         commands = CONTROL.postgame_commands()
         names = [Path(command[1]).name for command in commands]
         self.assertEqual(names[0], "pull_cfbd_schedule_2026.py")
+        self.assertEqual(names[1], "apply_cfbd_schedule_overlay_2026.py")
+        self.assertIn("--apply", commands[1])
         self.assertEqual(
             names[-2:],
             [
@@ -228,10 +230,10 @@ class PostgameOperationalServiceTests(unittest.TestCase):
         self.assertIs(result, lock)
         self.assertEqual(waiting, ["FIFO queue position 2"])
 
-    def test_prepared_results_skips_only_schedule_and_results(self):
+    def test_prepared_results_skips_schedule_overlay_and_results(self):
         full = CONTROL.postgame_commands()
         prepared = CONTROL.postgame_commands(skip_schedule=True)
-        self.assertEqual(prepared, full[2:])
+        self.assertEqual(prepared, full[3:])
         self.assertEqual(
             Path(prepared[0][1]).name,
             "pull_sp_plus_postgame_2026.py",

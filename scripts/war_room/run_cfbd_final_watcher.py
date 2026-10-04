@@ -286,6 +286,8 @@ def execute(*, now: datetime, cfg: dict[str, Any], trigger: str, fetch: Callable
         schedule = runner([sys.executable, "scripts/schedule/pull_cfbd_schedule_2026.py"])
         budget.record("/games", run_id, trigger, "SUCCESS" if schedule.returncode == 0 else "FAILED", now); report["api_calls_this_run"] += 1
         if schedule.returncode != 0: report.update(status="PROVIDER_FAILED", error="canonical /games refresh failed"); return 2, report
+        overlay = runner([sys.executable, "scripts/schedule/apply_cfbd_schedule_overlay_2026.py", "--apply"])
+        if overlay.returncode != 0: report.update(status="PROVIDER_FAILED", error="canonical CFBD schedule overlay failed"); return 2, report
         results = runner([sys.executable, "scripts/results/build_game_results_2026.py"])
         if results.returncode != 0: report.update(status="PROVIDER_FAILED", error="canonical results build failed"); return 2, report
         accepted_ids = accepted_result_ids(); newly_accepted = [r for r in validate if r["game_id"] in accepted_ids or str(r.get("cfbd_game_id")) in accepted_ids]; accepted.extend(newly_accepted)
