@@ -27,6 +27,12 @@ AUDIT = load_module(
 
 
 class WarRoomFastPublicContextTests(unittest.TestCase):
+    def test_fast_packager_honors_the_configured_publisher_checkout(self):
+        source = (
+            ROOT / "scripts/war_room/run_fast_market_publication.py"
+        ).read_text()
+        self.assertIn('os.environ.get("NCAAF_MAIN_REPO"', source)
+
     def test_fast_bundle_rewrites_internal_matchup_context_url(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)

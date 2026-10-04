@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -13,7 +14,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "build/war_room_public"
 HEALTH = ROOT / "data/site/war_room_health.json"
-MAIN_REPO = Path.home() / "NCAAF_MAIN_REPO"
+MAIN_REPO = Path(
+    os.environ.get("NCAAF_MAIN_REPO", str(Path.home() / "NCAAF_MAIN_REPO"))
+).expanduser().resolve()
 
 # Direct script execution puts scripts/war_room, rather than the repository
 # root, on sys.path. Add the root explicitly before importing the shared public
