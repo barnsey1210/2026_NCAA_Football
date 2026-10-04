@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import unittest
 
@@ -55,14 +55,25 @@ class CFBDepthInjuryImpactTests(unittest.TestCase):
 
     def test_matrix_loader_accepts_fresh_and_rejects_stale(self):
         payload_path = ROOT / "data/canonical/cfbdepth_team_injury_impact_current.json"
-        fresh_now = datetime(2026, 8, 30, 15, 30, tzinfo=timezone.utc)
-        stale_now = datetime(2026, 8, 31, 0, 0, tzinfo=timezone.utc)
+        payload = json.loads(payload_path.read_text())
+        pulled_at = datetime.fromisoformat(payload["pulled_at"].replace("Z", "+00:00"))
+        fresh_now = pulled_at + timedelta(minutes=30)
+        stale_now = pulled_at + timedelta(hours=7)
         fresh, fresh_meta = self.matrix.load_team_injury_impact(payload_path, fresh_now)
         stale, stale_meta = self.matrix.load_team_injury_impact(payload_path, stale_now)
         self.assertEqual(len(fresh), 138)
         self.assertEqual(fresh_meta["status"], "AVAILABLE_SOURCE_TIME_UNVERIFIED")
         self.assertEqual(stale, {})
         self.assertEqual(stale_meta["status"], "STALE")
+
+    def test_missing_or_unavailable_injury_data_never_becomes_zero(self):
+        missing, missing_meta = self.matrix.load_team_injury_impact(
+            ROOT / "data/canonical/does-not-exist.json",
+            datetime(2026, 8, 30, 15, 30, tzinfo=timezone.utc),
+        )
+        self.assertEqual(missing, {})
+        self.assertEqual(missing_meta["status"], "UNAVAILABLE")
+        self.assertNotIn("injury_impact_rank", missing.get("Ohio State", {}))
 
     def test_five_fixed_tiers_cover_exact_contract(self):
         source = (ROOT / "scripts/site/build_war_room_page.py").read_text()

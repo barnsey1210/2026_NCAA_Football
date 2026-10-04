@@ -12,6 +12,18 @@ MF = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(MF)
 
 
 class ModelFitMathTests(unittest.TestCase):
+    def test_evaluation_universe_includes_completed_week5_and_excludes_future_week6(self):
+        universe = ["Alpha", "Beta", "Gamma"]
+        games = [
+            {"game_id":"w5", "week":5, "away_team":"Alpha", "home_team":"Beta", "completed":True, "closing_home_spread":-3},
+            {"game_id":"w6", "week":6, "away_team":"Alpha", "home_team":"Gamma", "completed":False, "closing_home_spread":-4},
+            {"game_id":"fcs", "week":5, "away_team":"Other", "home_team":"Alpha", "completed":True, "closing_home_spread":-20},
+        ]
+        self.assertEqual(
+            [game["game_id"] for game in MF.eligible_completed_games(games, universe)],
+            ["w5"],
+        )
+
     def test_streaming_ledger_filter_keeps_only_requested_game(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.jsonl"
@@ -126,6 +138,23 @@ class ModelFitMathTests(unittest.TestCase):
         self.assertEqual(repeated["lifecycle_state"],"COMPLETE")
         self.assertEqual((repeated["model_margin"],repeated["market_margin"]),(4.0,2.0))
         self.assertEqual((repeated["sp_plus_adjusted_margin"],repeated["cfbd_equivalent_margin"]),(7,11.0))
+
+    def test_accepted_frozen_model_is_not_replaced_by_current_projection(self):
+        frozen={"model_margin_home":4.0,"component_values":dict.fromkeys(MF.COMPONENTS,4.0),"component_snapshot_timestamps":{},"model_observed_at":"2026-08-29T12:00:00Z","model_provenance":"CAPTURED","source_artifacts":[]}
+        market={"market_margin_home":2.0,"close_book":"Pinnacle","close_provider":"fixture","close_timestamp":"t","close_provenance":"CAPTURED","market_source_artifact":"fixture"}
+        prior=MF.grade("Home","Away","home",self.game(),frozen,market,(.8,.2,"t"),{"sp_plus_adjusted_margin":7,"source":"fixture","collected_at":"t"})
+        accepted_model, accepted_market = MF.accepted_frozen_inputs(prior)
+        today={**frozen,"model_margin_home":18.0,"model_observed_at":"2026-10-04T12:00:00Z"}
+        rebuilt=MF.grade("Home","Away","home",self.game(),accepted_model or today,accepted_market,(.8,.2,"t"),{"sp_plus_adjusted_margin":7,"source":"fixture","collected_at":"t"},previous=prior)
+        self.assertEqual(rebuilt["standard_model_margin"],4.0)
+        self.assertEqual(rebuilt["performance_vs_model"],5.0)
+
+    def test_sample_count_matches_accepted_completed_rows(self):
+        base={"model_abs_error_actual":1.0,"market_abs_error_actual":2.0,"model_advantage_vs_market_actual":1.0,"qualified_edge":False,"directional_bias_actual":0.0,"model_market_edge":1.0,"sp_plus_adjusted_margin":3.0,"cfbd_equivalent_margin":5.0,"standard_model_margin":2.0,"performance_margin":4.0,"performance_vs_model":2.0,"model_abs_error_sp_plus_margin":1.0,"market_abs_error_sp_plus_margin":2.0,"model_advantage_vs_market_sp_plus":1.0,"directional_bias_sp_plus":1.0,"model_abs_error_cfbd_margin":1.0,"market_abs_error_cfbd_margin":2.0,"model_advantage_vs_market_cfbd":1.0,"directional_bias_cfbd":3.0,"lifecycle_state":"COMPLETE"}
+        aggregate=MF.aggregate([{**base,"team":"Alpha"},{**base,"team":"Alpha"}])[0]
+        self.assertEqual(aggregate["games_evaluated"],2)
+        self.assertEqual(aggregate["eligible_completed_games"],2)
+        self.assertEqual(aggregate["performance_games_available"],2)
 
     def test_team_health_rank_agreement_and_sample_are_separate(self):
         base={"model_abs_error_actual":1.0,"market_abs_error_actual":2.0,"model_advantage_vs_market_actual":1.0,"qualified_edge":False,"directional_bias_actual":3.0,"model_market_edge":1.0,"model_abs_error_sp_plus_margin":1.0,"market_abs_error_sp_plus_margin":2.0,"model_advantage_vs_market_sp_plus":1.0,"model_abs_error_cfbd_margin":1.0,"market_abs_error_cfbd_margin":2.0,"model_advantage_vs_market_cfbd":1.0}

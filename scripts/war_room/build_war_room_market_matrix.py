@@ -492,7 +492,7 @@ def load_team_injury_impact(path, now=None):
         if not team or not isinstance(rank, int) or not 1 <= rank <= 138:
             continue
         rows[team] = row
-    return rows, {
+    return rows if fresh else {}, {
         "status": source_status if fresh else "STALE" if pulled_at else "UNAVAILABLE",
         "source": payload.get("source") or "CFBDepth Injury Impact Report",
         "source_updated_at": payload.get("source_updated_at"),

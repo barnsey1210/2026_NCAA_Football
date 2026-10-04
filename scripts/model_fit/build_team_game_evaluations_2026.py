@@ -80,6 +80,27 @@ def load_json(path):
     return json.loads(Path(path).read_text())
 
 
+def load_fbs_universe(path):
+    universe_path = Path(path)
+    if not universe_path.exists():
+        return []
+    with universe_path.open(newline="", encoding="utf-8-sig") as handle:
+        teams = [str(row.get("team") or "").strip() for row in csv.DictReader(handle)]
+    return [team for team in teams if team]
+
+
+def eligible_completed_games(results, fbs_universe):
+    """Return settled FBS-v-FBS games in the established evaluation universe."""
+    fbs_keys = {canonical_team_key(team) for team in fbs_universe}
+    return [
+        game for game in results
+        if game.get("completed") is True
+        and num(game.get("closing_home_spread")) is not None
+        and canonical_team_key(game.get("away_team")) in fbs_keys
+        and canonical_team_key(game.get("home_team")) in fbs_keys
+    ]
+
+
 def load_jsonl(path):
     if not Path(path).exists():
         return []
@@ -655,11 +676,12 @@ def main():
     parser.add_argument("--allow-empty-output", action="store_true", help="explicitly permit replacing a populated artifact with zero team-game rows")
     args = parser.parse_args()
     results = load_json(args.results).get("games", [])
+    universe = load_fbs_universe(args.fbs_universe)
+    eligible_games = eligible_completed_games(results, universe)
     output = Path(args.output)
     previous_path = Path(args.previous) if args.previous else output
     previous_payload = load_json(previous_path) if previous_path.exists() else {"team_games": []}
     previous_rows = {(str(row.get("game_id")), row.get("team")): row for row in previous_payload.get("team_games", [])}
-    eligible_games = [game for game in results if num(game.get("closing_home_spread")) is not None]
     prior_inputs = {
         str(game["game_id"]): accepted_frozen_inputs(
             previous_rows.get((str(game["game_id"]), game["home_team"]))
@@ -698,10 +720,9 @@ def main():
     component_snapshots = load_json(args.component_snapshots) if (not args.hot_path or unresolved_models) and Path(args.component_snapshots).exists() else {"games": []}
     as_of = dt(args.as_of) if args.as_of else datetime.now(timezone.utc)
     rows = []; gaps = []; coverage = defaultdict(lambda: {"eligible": 0, "model_reconstructable": 0, "market_reconstructable": 0, "result_available": 0, "all_three": 0, "sp_plus_available": 0, "cfbd_pgwe_available": 0})
-    # A non-null result closing spread defines the established 51-game FBS-v-FBS evaluation universe; it is never used as close lifecycle proof.
-    for game in results:
-        if num(game.get("closing_home_spread")) is None:
-            continue
+    # Canonical completion, FBS-v-FBS identity, and a non-null result closing
+    # spread define the evaluation universe. The spread is not close lifecycle proof.
+    for game in eligible_games:
         week = str(game["week"]); coverage[week]["eligible"] += 1; coverage[week]["result_available"] += 1
         prior_model, prior_market = prior_inputs[str(game["game_id"])]
         if args.hot_path and prior_model:
@@ -730,12 +751,6 @@ def main():
         for side in ("home", "away"):
             key = (str(game["game_id"]), game[f"{side}_team"])
             rows.append(grade(game[f"{side}_team"], game["away_team" if side == "home" else "home_team"], side, game, model, market, probability, sp_game.get(sp_plus_team_key(game[f"{side}_team"])), now=as_of, previous=previous_rows.get(key)))
-    universe_path = Path(args.fbs_universe)
-    universe = []
-    if universe_path.exists():
-        with universe_path.open(newline="", encoding="utf-8-sig") as handle:
-            universe = [str(row.get("team") or "").strip() for row in csv.DictReader(handle)]
-            universe = [team for team in universe if team]
     decision_weeks = list(range(0, 18))
     aggregates_by_decision_week = {
         str(week): aggregate(
@@ -743,7 +758,7 @@ def main():
         )
         for week in decision_weeks
     }
-    payload = {"schema_version": "team-game-evaluations-2026-v5", "built_at": as_of.isoformat(), "policy": {"positive_margin": "team expected or actual to win", "positive_advantage": "model closer than market under the named lens", "positive_bias": "performance or actual margin minus model margin; model underrated team", "performance_margin": "equal average of SP+ adjusted margin and CFBD equivalent margin only when both lenses exist; otherwise unavailable while each lens remains separate", "performance_vs_model": "performance_margin minus frozen standard_model_margin; primary signed diagnostic and ranking basis", "score_vs_model": "actual_margin minus frozen standard_model_margin; secondary scoreboard diagnostic", "display_model_fit_alias": "compatibility alias equal to performance_vs_model; not a separate metric", "benchmarks": "score, SP+ adjusted performance margin, and CFBD equivalent margin remain separately visible; no partial combined value is fabricated", "lifecycle_states": ["PREGAME_FROZEN", "SCORE_READY", "CFBD_READY", "SP_PLUS_READY", "COMPLETE", "DEGRADED"], "degraded_after_hours": 48, "near_zero_agreement_tolerance_points": MODEL_FIT_NEAR_ZERO_TOLERANCE, "accepted_value_policy": "available accepted postgame lens values persist across temporary source omissions; an available source row may explicitly revise its own value", "sp_plus_adjusted_margin": "direct source truth from the SP+ POSTGAME WIN EXPECTANCY table", "cfbd_equivalent_margin": {"version": CFBD_EQUIVALENT_MARGIN_VERSION, "anchors_percent_to_margin": [list(anchor) for anchor in CFBD_EQUIVALENT_MARGIN_ANCHORS], "interpolation": "linear between anchors with exact sign symmetry below 50%", "provenance": CFBD_EQUIVALENT_MARGIN_PROVENANCE, "endpoint_policy": "0 maps to -65.0 and 1 maps to +65.0 under the approved reference tail"}, "deprecated_public_model_fit_conversion": "pgwe_adjusted_margin_v1 is research-only and does not feed this contract", "rank_policy": "signed descending performance_vs_model among teams with at least one complete two-lens performance game; all FBS teams remain present and no-sample teams are unranked", "fbs_universe_size": len(universe), "fbs_universe_note": "result closing_home_spread selects gradeable completed games; no-sample FBS teams remain explicit and unranked"}, "coverage_by_week": dict(coverage), "sp_plus_match_audit": sp_plus_audit, "gaps": gaps, "team_games": rows, "team_aggregates": aggregate(rows, universe), "team_aggregates_by_decision_week": aggregates_by_decision_week}
+    payload = {"schema_version": "team-game-evaluations-2026-v5", "built_at": as_of.isoformat(), "policy": {"positive_margin": "team expected or actual to win", "positive_advantage": "model closer than market under the named lens", "positive_bias": "performance or actual margin minus model margin; model underrated team", "performance_margin": "equal average of SP+ adjusted margin and CFBD equivalent margin only when both lenses exist; otherwise unavailable while each lens remains separate", "performance_vs_model": "performance_margin minus frozen standard_model_margin; primary signed diagnostic and ranking basis", "score_vs_model": "actual_margin minus frozen standard_model_margin; secondary scoreboard diagnostic", "display_model_fit_alias": "compatibility alias equal to performance_vs_model; not a separate metric", "benchmarks": "score, SP+ adjusted performance margin, and CFBD equivalent margin remain separately visible; no partial combined value is fabricated", "lifecycle_states": ["PREGAME_FROZEN", "SCORE_READY", "CFBD_READY", "SP_PLUS_READY", "COMPLETE", "DEGRADED"], "degraded_after_hours": 48, "near_zero_agreement_tolerance_points": MODEL_FIT_NEAR_ZERO_TOLERANCE, "accepted_value_policy": "available accepted postgame lens values persist across temporary source omissions; an available source row may explicitly revise its own value", "result_acceptance_policy": "completed=true, canonical FBS-v-FBS identity, and an accepted closing spread; future or incomplete games are excluded", "sp_plus_adjusted_margin": "direct source truth from the SP+ POSTGAME WIN EXPECTANCY table", "cfbd_equivalent_margin": {"version": CFBD_EQUIVALENT_MARGIN_VERSION, "anchors_percent_to_margin": [list(anchor) for anchor in CFBD_EQUIVALENT_MARGIN_ANCHORS], "interpolation": "linear between anchors with exact sign symmetry below 50%", "provenance": CFBD_EQUIVALENT_MARGIN_PROVENANCE, "endpoint_policy": "0 maps to -65.0 and 1 maps to +65.0 under the approved reference tail"}, "deprecated_public_model_fit_conversion": "pgwe_adjusted_margin_v1 is research-only and does not feed this contract", "rank_policy": "signed descending performance_vs_model among teams with at least one complete two-lens performance game; all FBS teams remain present and no-sample teams are unranked", "fbs_universe_size": len(universe), "fbs_universe_note": "accepted completed FBS-v-FBS results with a closing_home_spread define the evaluation universe; no-sample FBS teams remain explicit and unranked"}, "coverage_by_week": dict(coverage), "sp_plus_match_audit": sp_plus_audit, "gaps": gaps, "team_games": rows, "team_aggregates": aggregate(rows, universe), "team_aggregates_by_decision_week": aggregates_by_decision_week}
     output.parent.mkdir(parents=True, exist_ok=True)
     if not rows and output.exists() and not args.allow_empty_output:
         prior = load_json(output)
