@@ -54,6 +54,71 @@ CANONICAL_MATCHUPS_NAME = 'matchups_view.json'
 PUBLIC_MATCHUPS_NAME = 'matchups_public_view.json'
 
 
+def compact_public_matchups_payload(payload):
+    """Compact display-only context without changing canonical game rows."""
+    for game in payload.get('games', []):
+        model = game.get('model')
+        if isinstance(model, dict):
+            game['model'] = {
+                key: model[key]
+                for key in (
+                    'home_spread',
+                    'total',
+                    'home_win_probability',
+                )
+                if key in model
+            }
+
+        teams = game.get('teams')
+        if isinstance(teams, dict):
+            for side in ('away', 'home'):
+                team = teams.get(side)
+                if not isinstance(team, dict):
+                    continue
+                schedule = team.get('upcoming_schedule')
+                if not isinstance(schedule, list):
+                    continue
+                for row in schedule:
+                    if isinstance(row, dict):
+                        row.pop('rank_basis', None)
+
+        # Identity already lives in game and is repeated in every weather
+        # object. Keep the operative forecast fields without paying that
+        # cost across the entire season schedule.
+        weather = game.get('weather')
+        if isinstance(weather, dict):
+            for key in (
+                'game_id',
+                'cfbd_game_id',
+                'season',
+                'week',
+                'date',
+                'away_team',
+                'home_team',
+            ):
+                weather.pop(key, None)
+
+        # Empty activity rows need only the two arrays consumed by the
+        # public Matchups UI. Preserve full activity whenever a wager,
+        # expert pick, note, assignment, or decision exists.
+        activity = game.get('activity')
+        if isinstance(activity, dict) and not any(
+            activity.get(key)
+            for key in (
+                'wagers',
+                'expert_picks',
+                'notes',
+                'unassigned',
+                'decision',
+            )
+        ):
+            game['activity'] = {
+                'wagers': [],
+                'expert_picks': [],
+            }
+    return payload
+
+
 def compact_public_war_room_matrix(payload):
     """Remove internal-only diagnostics from the public matrix copy.
 
@@ -307,67 +372,9 @@ def main():
     canonical_matchups_copy = public_site_data / CANONICAL_MATCHUPS_NAME
     public_matchups = public_site_data / PUBLIC_MATCHUPS_NAME
     if canonical_matchups_copy.exists():
-        payload = json.loads(canonical_matchups_copy.read_text())
-        for game in payload.get('games', []):
-            model = game.get('model')
-            if isinstance(model, dict):
-                game['model'] = {
-                    key: model[key]
-                    for key in (
-                        'home_spread',
-                        'total',
-                        'home_win_probability',
-                    )
-                    if key in model
-                }
-
-            teams = game.get('teams')
-            if isinstance(teams, dict):
-                for side in ('away', 'home'):
-                    team = teams.get(side)
-                    if not isinstance(team, dict):
-                        continue
-                    schedule = team.get('upcoming_schedule')
-                    if not isinstance(schedule, list):
-                        continue
-                    for row in schedule:
-                        if isinstance(row, dict):
-                            row.pop('rank_basis', None)
-
-            # Identity already lives in game and is repeated in every weather
-            # object. Keep the operative forecast fields without paying that
-            # cost across the entire season schedule.
-            weather = game.get('weather')
-            if isinstance(weather, dict):
-                for key in (
-                    'game_id',
-                    'cfbd_game_id',
-                    'season',
-                    'week',
-                    'date',
-                    'away_team',
-                    'home_team',
-                ):
-                    weather.pop(key, None)
-
-            # Empty activity rows need only the two arrays consumed by the
-            # public Matchups UI. Preserve full activity whenever a wager,
-            # expert pick, note, assignment, or decision exists.
-            activity = game.get('activity')
-            if isinstance(activity, dict) and not any(
-                activity.get(key)
-                for key in (
-                    'wagers',
-                    'expert_picks',
-                    'notes',
-                    'unassigned',
-                    'decision',
-                )
-            ):
-                game['activity'] = {
-                    'wagers': [],
-                    'expert_picks': [],
-                }
+        payload = compact_public_matchups_payload(
+            json.loads(canonical_matchups_copy.read_text())
+        )
 
         public_matchups.write_text(
             json.dumps(

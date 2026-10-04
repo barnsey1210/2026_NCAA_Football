@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a normalized, read-only Matchups page view model and coverage audit."""
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 import csv
@@ -34,6 +34,31 @@ PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
 OUT = ROOT / "data/site/matchups_view.json"
 AUDIT = ROOT / "data/audits/matchups_view_audit.json"
+
+
+def regular_season_week_calendar(games):
+    """Return one canonical display date for each defined regular-season week."""
+    dates_by_week = defaultdict(Counter)
+    for game in games:
+        week = integer(game.get("week"))
+        game_date = clean(game.get("date"))
+        if week is None or not 0 <= week <= 13 or not game_date:
+            continue
+        dates_by_week[week][game_date] += 1
+
+    return [
+        {
+            "week": week,
+            # Saturday is the modal date for canonical weeks. Sorting makes
+            # an unexpected frequency tie deterministic without inventing a
+            # date outside the accepted schedule.
+            "date": sorted(
+                dates.items(),
+                key=lambda item: (-item[1], item[0]),
+            )[0][0],
+        }
+        for week, dates in sorted(dates_by_week.items())
+    ]
 
 
 def clean(value):
@@ -893,6 +918,7 @@ def main():
 
             recent_games_by_team[team].append({
                 "date": clean(game.get("date")),
+                "week": integer(game.get("week")),
                 "opponent": opponent,
                 "site": site,
                 "team_points": team_points,
@@ -1290,6 +1316,7 @@ def main():
             "Market rows are current best fields; a quote-level atomic-offer array should be added before production EV selection.",
         ]}
     payload = {"schema_version": "matchups-view-v2-context", "built_at": audit["built_at"], "production_model": production_model(), "site_composite_model": production_model(), "game_projection_model": {"source":"data/site/current_game_projection_contract.json","schema_version":projection_contract.get("schema_version"),"resolver_policy":"STRICT_CANONICAL_ONLY_NO_FALLBACK_SUBSTITUTIONS"}, "rating_freshness": rating_freshness,
+        "regular_season_week_calendar": regular_season_week_calendar(games),
         "assets": {"line_history": "data/site/matchup_line_history.json", "betting_activity": "data/site/betting_activity_view.json"},
         "injury_source_status": injury_source_status,
         "audit_summary": coverage,

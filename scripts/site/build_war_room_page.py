@@ -759,6 +759,18 @@ button,select{
 .team-context-table td:nth-child(1),
 .team-context-table td:nth-child(2){text-align:left}
 .team-context-table .completed{color:#eef7ff}
+.team-context-table .bye{
+  background:linear-gradient(90deg,rgba(66,217,255,.055),rgba(66,217,255,.015));
+}
+.team-context-table .bye td{
+  color:#75899a;
+  font-style:italic;
+}
+.team-context-table .bye td:nth-child(2){
+  color:#9fb4c5;
+  font-weight:950;
+  letter-spacing:.45px;
+}
 .rank-tier-1{color:#39e89a!important;font-weight:950}
 .rank-tier-2{color:#a9df6a!important;font-weight:950}
 .rank-tier-3{color:#f4cd4b!important;font-weight:950}
@@ -5550,11 +5562,12 @@ function scheduleOpponentName(name){
   return String(name || '—');
 }
 
-function scheduleRows(teamData){
+function scheduleRows(teamData,weekCalendar=MATCHUPS_CONTEXT?.regular_season_week_calendar || []){
   const recent=(teamData?.recent_form || [])
     .filter(row=>String(row?.date || '').startsWith('2026-'))
     .map(row=>({
     date:row.date,
+    week:Number(row.week),
     opponent:row.opponent,
     site:row.site,
     ranks:row.opponent_ranks || {},
@@ -5569,6 +5582,7 @@ function scheduleRows(teamData){
     .filter(row=>String(row?.date || '').startsWith('2026-'))
     .map(row=>({
     date:row.date,
+    week:Number(row.week),
     opponent:row.opponent,
     site:row.site,
     ranks:row.opponent_ranks || {},
@@ -5579,7 +5593,36 @@ function scheduleRows(teamData){
     ou:null
   }));
 
-  return [...recent,...upcoming].sort((a,b)=>new Date(a.date || 0)-new Date(b.date || 0));
+  const games=[...recent,...upcoming];
+  const scheduledWeeks=new Set(
+    games.map(row=>Number(row.week)).filter(Number.isFinite)
+  );
+  const byeRows=[];
+  const seenByeWeeks=new Set();
+  for(const slot of weekCalendar || []){
+    const week=Number(slot?.week);
+    if(!Number.isFinite(week) || scheduledWeeks.has(week) || seenByeWeeks.has(week)) continue;
+    seenByeWeeks.add(week);
+    byeRows.push({
+      date:slot?.date,
+      week,
+      opponent:'BYE',
+      site:null,
+      ranks:{},
+      completed:false,
+      bye:true,
+      teamPoints:null,
+      opponentPoints:null,
+      ats:null,
+      ou:null
+    });
+  }
+
+  return [...games,...byeRows].sort((a,b)=>{
+    const weekDelta=Number(a.week)-Number(b.week);
+    if(Number.isFinite(weekDelta) && weekDelta!==0) return weekDelta;
+    return new Date(a.date || 0)-new Date(b.date || 0);
+  });
 }
 
 function renderTeamSchedule(teamName,teamData){
@@ -5587,6 +5630,13 @@ function renderTeamSchedule(teamName,teamData){
   const rows=scheduleRows(teamData);
 
   const body=rows.map(row=>{
+    if(row.bye){
+      return `<tr class="bye" data-schedule-week="${esc(row.week)}" data-row-type="bye">
+        <td>${esc(fmtContextDate(row.date))}</td>
+        <td>BYE</td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+      </tr>`;
+    }
     const opponentFull=String(row.opponent || '—');
     const opponentShort=scheduleOpponentName(opponentFull);
     const opp=row.site==='Away' ? `@ ${opponentShort}` : opponentShort;
@@ -5598,7 +5648,7 @@ function renderTeamSchedule(teamName,teamData){
       score=`${result} ${row.teamPoints}-${row.opponentPoints}`;
     }
 
-    return `<tr class="${row.completed?'completed':''}">
+    return `<tr class="${row.completed?'completed':''}" data-schedule-week="${esc(row.week)}" data-row-type="game">
       <td>${esc(fmtContextDate(row.date))}</td>
       <td title="${esc(opponentFull)}">${esc(opp)}</td>
       <td class="${rankTierClass(row.ranks?.overall)}">${esc(row.ranks?.overall ?? '—')}</td>
