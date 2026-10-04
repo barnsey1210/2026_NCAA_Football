@@ -245,6 +245,23 @@ def execute_ratings_service(
 
     global_changed, statuses = accepted_ratings_changed()
     matchup_changed, matchup_report = matchup_source_refresh_status()
+    provider_warnings = list(matchup_report.get("provider_warnings") or [])
+    coverage = matchup_report.get("coverage") or {}
+    for provider, row in coverage.items():
+        missing = list((row or {}).get("missing_game_ids") or [])
+        if missing:
+            provider_warnings.append({
+                "provider": provider,
+                "status": "PARTIAL_COVERAGE",
+                "games_requested": row.get("games_requested"),
+                "games_resolved": row.get("games_resolved"),
+                "missing_game_ids": missing,
+            })
+    if provider_warnings:
+        run["warnings"].append(
+            "provider-specific Ratings warnings; valid accepted providers continued"
+        )
+        run["validation_results"]["provider_warnings"] = provider_warnings
     changed = global_changed or matchup_changed
     run["providers_called"] = (
         [value for value in sources.split(",") if value]
@@ -275,13 +292,13 @@ def execute_ratings_service(
 
     if not changed:
         run["publication"] = {"status": "SKIPPED_NO_CHANGES"}
-        run["status"] = "NO_CHANGES"
+        run["status"] = "COMPLETED_WITH_WARNINGS" if provider_warnings else "NO_CHANGES"
         return
 
     # AUTO's validated Command Center artifacts are served live through the
     # tunnel. Static repository publication is deferred maintenance.
     run["publication"] = {"status": "LIVE_RUNTIME_READY"}
-    run["status"] = "COMPLETED"
+    run["status"] = "COMPLETED_WITH_WARNINGS" if provider_warnings else "COMPLETED"
 
 
 def deployed_commit() -> str | None:

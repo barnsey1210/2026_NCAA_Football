@@ -23,6 +23,15 @@ from scripts.projections.build_game_projection_sources_2026 import (
 OUT = ROOT / "data/control/massey_weekly_coverage.json"
 
 
+def coverage_status(required_games: int, canonical_matches: int) -> str:
+    """Classify provider coverage without converting a row gap into a global failure."""
+    if required_games == 0 or canonical_matches == required_games:
+        return "PASS"
+    if canonical_matches > 0:
+        return "PARTIAL"
+    return "FAIL"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--start-date", required=True)
@@ -48,10 +57,16 @@ def main() -> int:
     missing = [game for game in required if str(game.get("game_id")) not in matched]
     spread = sum(pd.notna(matched.get(str(g.get("game_id")), {}).get("spread_home")) for g in required)
     total = sum(pd.notna(matched.get(str(g.get("game_id")), {}).get("total")) for g in required)
+    status = coverage_status(len(required), len(required) - len(missing))
     payload = {
         "schema_version": "massey-weekly-coverage-v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "PASS" if not missing else "FAIL",
+        "status": status,
+        "acceptance_policy": (
+            "VALID_ROWS_ACCEPTED_UNRESOLVED_ROWS_EXPLICITLY_MISSING"
+            if status == "PARTIAL"
+            else "FULL_COVERAGE_ACCEPTED" if status == "PASS" else "NO_VALID_REQUIRED_ROWS"
+        ),
         "window": {"start": args.start_date, "end": args.end_date},
         "board_dates": args.board_dates,
         "required_games": len(required),
@@ -69,7 +84,10 @@ def main() -> int:
     temporary.write_text(json.dumps(payload, indent=2) + "\n")
     temporary.replace(OUT)
     print(json.dumps(payload, indent=2))
-    return 0 if payload["status"] == "PASS" else 2
+    # PARTIAL is a provider warning, not a corrupt canonical artifact. The
+    # downstream projection contract remains strict per game/domain and marks
+    # absent components unavailable instead of fabricating a match or value.
+    return 0 if payload["status"] in {"PASS", "PARTIAL"} else 2
 
 
 if __name__ == "__main__":

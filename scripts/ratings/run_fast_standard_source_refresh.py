@@ -119,6 +119,17 @@ def commands(start_date, end_date, as_of_date=None):
     }
 
 
+def provider_run_status(stages):
+    """Return a global result only for orchestration-wide failure."""
+    passed = [row for row in stages if row.get("returncode") == 0]
+    failed = [row for row in stages if row.get("returncode") != 0]
+    if not passed:
+        return "FAILED", False
+    if failed:
+        return "COMPLETED_WITH_WARNINGS", True
+    return "COMPLETED", True
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--as-of-date", help="Fixture-only clock override")
@@ -226,6 +237,7 @@ def main():
         provider: provider_coverage(OUTPUTS[provider], games)
         for provider in ("sagarin", "dratings", "massey")
     }
+    status, orchestration_succeeded = provider_run_status(stages)
     payload = {
         "schema_version": "ratings-fast-standard-source-refresh-v1",
         "built_at": utc_now(),
@@ -240,18 +252,23 @@ def main():
         "coverage": coverage,
         "stages": stages,
         "elapsed_seconds": round(time.monotonic() - started, 3),
-        "success": (
-            len(stages) == len(provider_commands)
-            and all(row["returncode"] == 0 for row in stages)
-            and after.get("massey") is not None
-        ),
+        "status": status,
+        "success": orchestration_succeeded,
         "partial_failure": any(row["returncode"] != 0 for row in stages),
+        "provider_warnings": [
+            {
+                "provider": row["provider"],
+                "status": "FAILED_LAST_KNOWN_GOOD_RETAINED",
+                "returncode": row["returncode"],
+            }
+            for row in stages if row["returncode"] != 0
+        ],
     }
     atomic_json(REPORT, payload)
     print(json.dumps(payload, indent=2))
     # A complete independent evaluation is a successful orchestration run.
     # Individual failures remain explicit in the report and preserve LKG.
-    return 0 if payload["success"] else 2
+    return 0 if orchestration_succeeded else 2
 
 
 if __name__ == "__main__":
