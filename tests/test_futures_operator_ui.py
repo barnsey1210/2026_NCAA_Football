@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import re
 import subprocess
 import unittest
 
@@ -174,6 +175,36 @@ console.log(JSON.stringify(out));
         source = (ROOT / "scripts/site/build_futures_view.py").read_text()
         self.assertIn("NCAAF_FUTURES_RELIABILITY_PATH", source)
         self.assertIn('reliability.get("warnings", [])', source)
+
+    def test_market_refresh_uses_accepted_contract_timestamp(self):
+        source = (ROOT / "scripts/site/build_futures_view.py").read_text()
+        dashboard = (ROOT / "futures_dashboard.js").read_text()
+        self.assertIn(').get("pulled_at")', source)
+        self.assertIn("D?.market_freshness?.win_totals?.pulled_at", dashboard)
+        self.assertIn("D?.market_freshness?.conference_titles?.pulled_at", dashboard)
+        self.assertIn("before exact", dashboard)
+        self.assertNotIn("value=qa.generated_at", dashboard)
+
+    def test_three_simulation_timestamps_are_artifact_driven_and_safe(self):
+        dashboard = (ROOT / "futures_dashboard.js").read_text()
+        for label in ("WIN TOTALS", "CONFERENCE TITLES", "PLAYOFFS / CFP"):
+            self.assertIn(label, dashboard)
+        self.assertIn("simulationFreshness(season.built_at)", dashboard)
+        self.assertIn("simulationFreshness(cfp.built_at)", dashboard)
+        self.assertIn("MISSING", dashboard)
+        self.assertIn("STALE ·", dashboard)
+        self.assertIn("MODEL RUN", dashboard)
+
+    def test_market_card_height_is_content_driven_for_all_books(self):
+        dashboard = (ROOT / "futures_dashboard.js").read_text()
+        self.assertIn("${BOOKS.map(book=>", dashboard)
+        self.assertIn("height:auto!important", dashboard)
+        self.assertIn("max-height:none!important", dashboard)
+        self.assertIn("overflow:visible!important", dashboard)
+        self.assertIn("grid-template-columns:28px repeat(4,minmax(0,1fr))!important", dashboard)
+        self.assertIn(".simulationFreshnessGrid{\n        grid-template-columns:1fr!important", dashboard)
+        self.assertIsNone(re.search(r"(?m)^\s*height:112px!important", dashboard))
+        self.assertIsNone(re.search(r"(?m)^\s*max-height:112px!important", dashboard))
 
     def test_make_cfp_non_listing_is_explicit_without_fabricated_price(self):
         source = (ROOT / "scripts/site/build_futures_view.py").read_text()

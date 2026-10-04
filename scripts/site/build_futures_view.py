@@ -1410,9 +1410,17 @@ def main():
         "win_totals", {}
     ).get("last_observed_date")
 
+    win_pulled = market_contract.get(
+        "win_totals", {}
+    ).get("pulled_at")
+
     title_date = market_contract.get(
         "conference_titles", {}
     ).get("last_observed_date")
+
+    title_pulled = market_contract.get(
+        "conference_titles", {}
+    ).get("pulled_at")
 
     playoff_pulled = market_contract.get(
         "make_cfp", {}
@@ -1450,21 +1458,35 @@ def main():
         for b in x.get("executable_books", [])
     }
 
-    # Current CSVs retain a daily observation date rather than an exact
-    # acquisition timestamp, so report that distinction explicitly instead
-    # of manufacturing a precise pull time.
-    win_market_meta = observed_date_freshness(
-        win_date,
-        market_contract.get("win_totals", {}).get("source"),
-        win_books,
+    # Prefer the accepted contract's exact acquisition timestamp. Retain the
+    # daily observation-date fallback for older accepted artifacts that predate
+    # exact pull provenance; never substitute the view-build or QA-build time.
+    win_market_meta = (
+        freshness(
+            win_pulled,
+            market_contract.get("win_totals", {}).get("source"),
+            win_books,
+        )
+        if win_pulled
+        else observed_date_freshness(
+            win_date,
+            market_contract.get("win_totals", {}).get("source"),
+            win_books,
+        )
     )
 
-    title_market_meta = observed_date_freshness(
-        title_date,
-        market_contract.get(
-            "conference_titles", {}
-        ).get("source"),
-        title_books,
+    title_market_meta = (
+        freshness(
+            title_pulled,
+            market_contract.get("conference_titles", {}).get("source"),
+            title_books,
+        )
+        if title_pulled
+        else observed_date_freshness(
+            title_date,
+            market_contract.get("conference_titles", {}).get("source"),
+            title_books,
+        )
     )
 
     playoff_market_meta = freshness(

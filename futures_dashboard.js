@@ -2141,6 +2141,17 @@ function compactFreshTime(value){
 }
 
 function latestFuturesMarketTime(){
+  const accepted=[
+    D?.market_freshness?.win_totals?.pulled_at,
+    D?.market_freshness?.conference_titles?.pulled_at,
+    D?.market_freshness?.make_cfp?.pulled_at,
+    D?.market_freshness?.national_title?.pulled_at
+  ].map(value=>new Date(value).getTime()).filter(Number.isFinite);
+
+  if(accepted.length)return new Date(Math.max(...accepted)).toISOString();
+
+  // Compatibility fallback for accepted artifacts created before exact
+  // domain-level pull timestamps were added to the Futures view contract.
   const exact=[];
   const dated=[];
 
@@ -2172,15 +2183,25 @@ function compactModelStatus(){
   const cfp=mf.playoff_simulation||{};
   const baseline=D?.weekly_baseline||{};
 
-  const shortTime=value=>{
-    if(!value)return '—';
+  const simulationFreshness=value=>{
+    if(!value)return {status:'missing',label:'MISSING'};
     const d=new Date(value);
-    if(Number.isNaN(d.getTime()))return '—';
-    return d.toLocaleTimeString('en-US',{
+    if(Number.isNaN(d.getTime()))return {status:'missing',label:'MISSING'};
+    const ageHours=(Date.now()-d.getTime())/36e5;
+    const status=ageHours>30?'stale':'current';
+    const date=d.toLocaleDateString('en-US',{
+      month:'short',
+      day:'numeric',
+      year:'numeric',
+      timeZone:'America/New_York'
+    });
+    const time=d.toLocaleTimeString('en-US',{
       hour:'numeric',
       minute:'2-digit',
       timeZone:'America/New_York'
     });
+    const stamp=`${date} · ${time} ET`;
+    return {status,label:`${status==='stale'?'STALE · ':''}${stamp}`};
   };
 
   const baselineDate=baseline.checkpoint_date
@@ -2194,44 +2215,31 @@ function compactModelStatus(){
     ? `W${baseline.prior_week}${baselineDate?` · ${baselineDate}`:''}`
     : 'Unavailable';
 
+  const seasonFresh=simulationFreshness(season.built_at);
+  const cfpFresh=simulationFreshness(cfp.built_at);
+  const allCurrent=[seasonFresh,cfpFresh].every(item=>item.status==='current');
+  const status=document.getElementById('modelFreshStatus');
+  if(status){
+    status.textContent=allCurrent?'CURRENT':'CHECK';
+    status.className=`freshStatus ${allCurrent?'current':'warn'}`;
+  }
+
+  const runRow=(label,fresh)=>`
+    <div class="simulationFreshnessRow ${fresh.status}">
+      <span>${label}<small>MODEL RUN</small></span>
+      <b>${fresh.label}</b>
+    </div>`;
+
   holder.innerHTML=`
-    <div class="compactModelTable">
-      <div class="compactModelHeader">
-        <span>SOURCE</span>
-        <span>WEIGHT</span>
-        <span>MODEL RUN</span>
-        <span>TIME</span>
-      </div>
-
-      <div class="compactModelRow">
-        <span>SP+</span>
-        <b>25%</b>
-        <span>SEASON SIM</span>
-        <b>${shortTime(season.built_at)}</b>
-      </div>
-
-      <div class="compactModelRow">
-        <span>FPI</span>
-        <b>25%</b>
-        <span>CFP SIM</span>
-        <b>${shortTime(cfp.built_at)}</b>
-      </div>
-
-      <div class="compactModelRow">
-        <span>TEAMRANKINGS</span>
-        <b>25%</b>
-        <span></span>
-        <b></b>
-      </div>
-
-      <div class="compactModelRow sagarinNoteRow">
-        <span>SAGARIN</span>
-        <b>25%</b>
-        <span class="modelMovementInline">
-          Ratings/rank movement compares current values with the post–Week ${baseline.prior_week ?? '—'} reference baseline${baselineDate ? ` captured ${baselineDate}` : ''}.
-        </span>
-        <b></b>
-      </div>
+    <div class="simulationFreshnessGrid">
+      ${runRow('WIN TOTALS',seasonFresh)}
+      ${runRow('CONFERENCE TITLES',seasonFresh)}
+      ${runRow('PLAYOFFS / CFP',cfpFresh)}
+    </div>
+    <div class="modelSourceNote">
+      <span>MODEL SOURCES</span>
+      <b>SP+ 25% · FPI 25% · TEAMRANKINGS 25% · SAGARIN 25%</b>
+      <small>${baselineText}</small>
     </div>
   `;
 }
@@ -2259,17 +2267,7 @@ function renderSportsbookFreshness(){
     const evidence=latestBookEvidence(field,book);
     if(!evidence)return '—';
 
-    let value=evidence.value;
-
-    if(
-      evidence.kind!=='exact' &&
-      (field==='title_quotes' || field==='win_quotes') &&
-      qa.generated_at
-    ){
-      value=qa.generated_at;
-    }
-
-    const d=new Date(value);
+    const d=new Date(evidence.value);
     if(Number.isNaN(d.getTime()))return '—';
 
     return d.toLocaleTimeString('en-US',{
@@ -3396,10 +3394,11 @@ installSortControl();
     .modelStatusCard,
     .marketStatusCard{
       box-sizing:border-box!important;
-      height:112px!important;
+      height:auto!important;
       min-height:112px!important;
-      max-height:112px!important;
-      align-self:stretch!important;
+      max-height:none!important;
+      align-self:start!important;
+      overflow:visible!important;
     }
 
     .modelStatusCard{
@@ -3479,6 +3478,50 @@ installSortControl();
       width:auto!important;
       min-width:0!important;
     }
+
+    .simulationFreshnessGrid{
+      display:grid!important;
+      grid-template-columns:repeat(3,minmax(150px,1fr))!important;
+      gap:5px!important;
+    }
+
+    .simulationFreshnessRow{
+      display:grid!important;
+      gap:2px!important;
+      min-width:0!important;
+      padding:5px 6px!important;
+      border:1px solid #29435e!important;
+      border-radius:6px!important;
+      background:#0d2139!important;
+    }
+
+    .simulationFreshnessRow>span{
+      display:flex!important;
+      justify-content:space-between!important;
+      gap:6px!important;
+      color:#9fb1ca!important;
+      font-size:8px!important;
+      font-weight:950!important;
+      letter-spacing:.04em!important;
+    }
+
+    .simulationFreshnessRow small{color:#6f88a7!important;font-size:7px!important}
+    .simulationFreshnessRow b{color:#fff!important;font-size:9px!important;white-space:nowrap!important}
+    .simulationFreshnessRow.stale b{color:#ffd166!important}
+    .simulationFreshnessRow.missing b{color:var(--red)!important}
+
+    .modelSourceNote{
+      display:flex!important;
+      align-items:center!important;
+      gap:7px!important;
+      padding:5px 2px 1px!important;
+      color:#8195ae!important;
+      font-size:7px!important;
+      white-space:nowrap!important;
+    }
+
+    .modelSourceNote b{color:#c9d5e3!important;font-size:8px!important}
+    .modelSourceNote small{margin-left:auto!important;color:#8195ae!important;font-size:7px!important}
 
     .compactMarketTable{
       width:max-content!important;
@@ -3742,6 +3785,10 @@ installSortControl();
       .freshCard{
         padding:4px 8px!important;
         border-radius:8px!important;
+      }
+
+      .modelStatusCard #modelFreshRows{
+        display:block!important;
       }
 
       .freshHead{
@@ -4140,6 +4187,9 @@ installSortControl();
       .freshCard{
         padding:3px 7px!important;
         min-height:0!important;
+        height:auto!important;
+        max-height:none!important;
+        overflow:visible!important;
       }
 
       .freshHead{
@@ -4255,6 +4305,42 @@ installSortControl();
     }
 
     @media (max-width:900px){
+      .modelStatusCard,
+      .marketStatusCard{
+        width:100%!important;
+        max-width:100%!important;
+        height:auto!important;
+        max-height:none!important;
+        overflow:visible!important;
+      }
+
+      .modelStatusCard #modelFreshRows{
+        display:block!important;
+      }
+
+      .simulationFreshnessGrid{
+        grid-template-columns:1fr!important;
+      }
+
+      .modelSourceNote{
+        flex-wrap:wrap!important;
+        white-space:normal!important;
+      }
+
+      .modelSourceNote small{margin-left:0!important}
+
+      .compactMarketTable,
+      .compactMarketLead{
+        width:100%!important;
+      }
+
+      .compactMarketHeader,
+      .compactMarketRow{
+        grid-template-columns:28px repeat(4,minmax(0,1fr))!important;
+        gap:3px!important;
+        width:100%!important;
+      }
+
       .futuresCommandControls{
         display:grid!important;
         grid-template-columns:1fr 1fr!important;
