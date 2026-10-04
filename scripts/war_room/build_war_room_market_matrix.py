@@ -94,7 +94,8 @@ PROJECTION_SOURCE_STATUS = (
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
 TEAM_GAME_EVALUATIONS = ROOT / "data/site/team_game_evaluations_2026.json"
 MODEL_FIT_DISPLAY_FIELDS = (
-    "team", "games_evaluated", "model_fit_health", "model_fit_status",
+    "team", "games_evaluated", "performance_games_available",
+    "model_fit_health", "model_fit_status",
     "sample_state", "performance_vs_model", "score_vs_model",
     "sp_plus_vs_model", "cfbd_vs_model", "performance_vs_model_rank",
     "lens_gap", "agreement", "selected_week_expected_games",
@@ -355,6 +356,7 @@ def load_team_model_fit(path):
 def unavailable_model_fit(team):
     return {
         "team": team, "games_evaluated": 0, "eligible_completed_games": 0,
+        "performance_games_available": 0,
         "model_fit_health": "UNAVAILABLE", "model_fit_status": "GRAY",
         "sample_state": "UNAVAILABLE", "display_model_fit": None,
         "performance_margin": None, "performance_vs_model": None,

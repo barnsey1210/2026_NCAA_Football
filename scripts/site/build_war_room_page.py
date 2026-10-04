@@ -4039,7 +4039,7 @@ function performanceValueClass(value){
 function modelFitTeam(team,row){
   const fit=row||{};
   const slug=teamLogoSlug(team);
-  const games=Number(fit.games_evaluated)||0;
+  const games=Number(fit.performance_games_available)||0;
   const disagreement=fit.agreement==='DISAGREE';
   const title=[
     `${team} PERFORMANCE VS MODEL`,

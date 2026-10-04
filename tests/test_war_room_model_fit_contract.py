@@ -19,7 +19,7 @@ class WarRoomModelFitContractTests(unittest.TestCase):
         self.assertIn('<span class="mobile-foot-label">PERF VS MODEL</span>${modelFitCell(game)}', source)
         self.assertIn("fit.agreement==='DISAGREE'", source)
         for field in (
-            "games_evaluated", "model_fit_health", "sample_state",
+            "games_evaluated", "performance_games_available", "model_fit_health", "sample_state",
             "performance_vs_model", "score_vs_model",
             "sp_plus_vs_model", "cfbd_vs_model", "lens_gap",
         ):
@@ -53,12 +53,17 @@ class WarRoomModelFitContractTests(unittest.TestCase):
         self.assertEqual(set(projected), set(matrix.MODEL_FIT_DISPLAY_FIELDS))
         self.assertNotIn("internal_metric", projected)
         for field in (
-            "games_evaluated", "model_fit_health", "model_fit_status",
+            "games_evaluated", "performance_games_available", "model_fit_health", "model_fit_status",
             "sample_state", "performance_vs_model", "score_vs_model",
             "sp_plus_vs_model", "cfbd_vs_model",
             "performance_vs_model_rank", "lens_gap", "agreement",
         ):
             self.assertIn(field, projected)
+
+    def test_perf_tooltip_uses_the_two_lens_performance_sample_count(self):
+        source = PAGE.read_text()
+        self.assertIn("const games=Number(fit.performance_games_available)||0;", source)
+        self.assertNotIn("const games=Number(fit.games_evaluated)||0;", source)
 
     def test_value_colors_and_rank_use_canonical_helpers(self):
         source = PAGE.read_text()
