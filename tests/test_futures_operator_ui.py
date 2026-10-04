@@ -206,6 +206,22 @@ console.log(JSON.stringify(out));
         self.assertIsNone(re.search(r"(?m)^\s*height:112px!important", dashboard))
         self.assertIsNone(re.search(r"(?m)^\s*max-height:112px!important", dashboard))
 
+    def test_model_status_cards_stack_as_full_width_rows(self):
+        dashboard = (ROOT / "futures_dashboard.js").read_text()
+        self.assertIn("FUTURES_MODEL_STATUS_STACK_V1", dashboard)
+        self.assertIn("style.id='futuresModelStatusStackV1'", dashboard)
+        self.assertIn(
+            ".modelStatusCard #modelFreshRows{\n"
+            "        display:grid!important;\n"
+            "        grid-template-columns:minmax(0,1fr)!important",
+            dashboard,
+        )
+        self.assertIn(
+            "grid-template-columns:minmax(120px,.45fr) minmax(0,1fr)!important",
+            dashboard,
+        )
+        self.assertIn("white-space:normal!important", dashboard)
+
     def test_make_cfp_non_listing_is_explicit_without_fabricated_price(self):
         source = (ROOT / "scripts/site/build_futures_view.py").read_text()
         dashboard = (ROOT / "futures_dashboard.js").read_text()

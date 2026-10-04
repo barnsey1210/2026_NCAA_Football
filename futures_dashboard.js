@@ -4585,6 +4585,49 @@ installSortControl();
   document.head.appendChild(style);
 })();
 
+/* FUTURES_MODEL_STATUS_STACK_V1 */
+(function installFuturesModelStatusStack(){
+  if(typeof document==='undefined')return;
+
+  const style=document.createElement('style');
+  style.id='futuresModelStatusStackV1';
+  style.textContent=`
+    @media (min-width:901px){
+      .modelStatusCard #modelFreshRows{
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr)!important;
+        gap:4px!important;
+        width:100%!important;
+      }
+
+      .modelStatusCard #modelFreshRows .freshRow{
+        display:grid!important;
+        grid-template-columns:minmax(120px,.45fr) minmax(0,1fr)!important;
+        align-items:center!important;
+        gap:10px!important;
+        min-width:0!important;
+        padding:4px 6px!important;
+        border-top:1px solid #29435e!important;
+      }
+
+      .modelStatusCard #modelFreshRows .freshRow:first-child{
+        border-top:0!important;
+      }
+
+      .modelStatusCard #modelFreshRows .freshRow span:first-child,
+      .modelStatusCard #modelFreshRows .freshRow span:last-child{
+        min-width:0!important;
+        text-align:left!important;
+        white-space:normal!important;
+        overflow:visible!important;
+        text-overflow:clip!important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
 (function installScenarioTableStyles(){
   if(document.getElementById('futuresScenarioTableStyles'))return;
 
