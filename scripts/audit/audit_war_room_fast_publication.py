@@ -46,6 +46,10 @@ def main() -> None:
         for name in EXPECTED:
             if f"data/site/{name}" not in text:
                 errors.append(f"war-room.html does not reference data/site/{name}")
+        if "data/site/matchups_public_view.json" not in text:
+            errors.append("war-room.html does not reference the public matchup context")
+        if "data/site/matchups_view.json" in text:
+            errors.append("war-room.html references the internal matchup context")
         if "cache:'no-store'" not in text and 'cache: "no-store"' not in text:
             errors.append("war-room.html does not require no-store JSON fetches")
 

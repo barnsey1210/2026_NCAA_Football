@@ -10,11 +10,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "build/war_room_public"
 HEALTH = ROOT / "data/site/war_room_health.json"
 MAIN_REPO = Path.home() / "NCAAF_MAIN_REPO"
+
+# Direct script execution puts scripts/war_room, rather than the repository
+# root, on sys.path. Add the root explicitly before importing the shared public
+# transformation used by the full-site builder.
+sys.path.insert(0, str(ROOT))
+from scripts.site.build_public_site import cache_bust_public_assets
 
 
 def run(*parts: str) -> subprocess.CompletedProcess[str]:
@@ -39,8 +44,19 @@ def build_bundle() -> None:
     if BUNDLE.exists():
         shutil.rmtree(BUNDLE)
     (BUNDLE / "data/site").mkdir(parents=True)
+    page_source = MAIN_REPO / "war-room.html"
+    if not page_source.is_file():
+        raise SystemExit(f"Required fast publication source missing: {page_source}")
+
+    # The canonical generated page uses the rich internal Matchups contract.
+    # Fast publication must apply the same public URL transformation as the
+    # full-site builder; otherwise a later Market tick can regress Teams and
+    # Coaches by publishing a page that requests an intentionally absent file.
+    (BUNDLE / "war-room.html").write_text(
+        cache_bust_public_assets(page_source.read_text())
+    )
+
     for source, relative in (
-        (MAIN_REPO / "war-room.html", Path("war-room.html")),
         (ROOT / "data/site/war_room_health.json", Path("data/site/war_room_health.json")),
         (
             ROOT / "data/site/war_room_market_matrix.json",

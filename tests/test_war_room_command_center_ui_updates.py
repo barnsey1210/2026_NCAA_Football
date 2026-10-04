@@ -1,9 +1,11 @@
 from pathlib import Path
+import json
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "scripts/site/build_war_room_page.py"
+PUBLIC_CONTEXT = ROOT / "data/site/matchups_public_view.json"
 
 
 class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
@@ -17,6 +19,61 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
             'data-filter="SIGNALS">COACHES</button>',
             self.source,
         )
+
+    def test_teams_and_coaches_handlers_render_selected_matchup_context(self):
+        source = self.source
+        self.assertIn("if(ACTIVITY_FILTER==='SIGNALS')", source)
+        self.assertIn("renderSignalsPanel(selectedGame())", source)
+        self.assertIn("if(ACTIVITY_FILTER==='TEAMS')", source)
+        self.assertIn("renderTeamsPanel(selectedGame())", source)
+        self.assertIn("const context=selectedContextGame();", source)
+        self.assertIn("context?.teams?.away", source)
+        self.assertIn("context?.teams?.home", source)
+        self.assertIn("context?.matchup?.coaches", source)
+
+    def test_team_selection_still_uses_canonical_game_identity(self):
+        source = self.source
+        selector = source.split("function selectedContextGame(){", 1)[1].split(
+            "function pctText", 1
+        )[0]
+        self.assertIn("row?.game?.game_id", selector)
+        self.assertIn("game.game_id", selector)
+        self.assertIn("row?.game?.away_team", selector)
+        self.assertIn("row?.game?.home_team", selector)
+
+    def test_public_context_has_team_coach_completed_game_and_record_fields(self):
+        payload = json.loads(PUBLIC_CONTEXT.read_text())
+        games = payload.get("games") or []
+        self.assertTrue(games)
+
+        eligible = []
+        for game in games:
+            teams = game.get("teams") or {}
+            coaches = (game.get("matchup") or {}).get("coaches") or []
+            sides = [teams.get("away") or {}, teams.get("home") or {}]
+            if len(coaches) < 2 or not all(side.get("team") for side in sides):
+                continue
+            if not all(side.get("betting_record", {}).get("ats") for side in sides):
+                continue
+            completed = [
+                row
+                for side in sides
+                for row in side.get("recent_form") or []
+                if row.get("team_points") is not None
+                and row.get("opponent_points") is not None
+            ]
+            if completed:
+                eligible.append((game, sides, coaches, completed))
+
+        self.assertTrue(eligible)
+        game, sides, coaches, completed = eligible[0]
+        self.assertTrue((game.get("game") or {}).get("game_id"))
+        self.assertTrue(all(side.get("recent_form") for side in sides))
+        self.assertTrue(all(side.get("upcoming_schedule") for side in sides))
+        self.assertTrue(all(coach.get("team") for coach in coaches[:2]))
+        self.assertTrue(all("ats" in side["betting_record"] for side in sides))
+        self.assertIsNotNone(completed[0].get("ats_result"))
+        self.assertIsNotNone(completed[0].get("total_result"))
 
     def test_best_tooltip_has_required_books(self):
         for value in (
