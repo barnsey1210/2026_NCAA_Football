@@ -32,6 +32,7 @@ CONF_CURRENT = DATA_ROOT / "market_conference_futures_import.csv"
 PLAYOFF_CURRENT = DATA_ROOT / "data/markets/action/action_playoff_futures_2026.json"
 KALSHI_CURRENT = DATA_ROOT / "data/markets/kalshi/kalshi_futures_2026.json"
 POLICY_PATH = ROOT / "config/futures_market_policy.json"
+ELIGIBILITY_PATH = ROOT / "config/futures_book_eligibility.json"
 
 OUT = Path(
     os.environ.get(
@@ -70,11 +71,13 @@ def implied(price):
     return abs(price) / (abs(price) + 100)
 
 
-def best_price(quotes, approved_books=None):
+def best_price(quotes, approved_books=None, *, eligible_only=True):
     candidates = []
 
     for book, quote in quotes.items():
         if approved_books is not None and book not in approved_books:
+            continue
+        if eligible_only and quote.get("eligible_for_best") is False:
             continue
 
         price = clean_price(quote.get("price"))
@@ -85,6 +88,46 @@ def best_price(quotes, approved_books=None):
         return None, None
 
     return max(candidates)
+
+
+def conference_segment(conference, eligibility):
+    groups = eligibility.get("conference_classification", {})
+    for segment in ("power", "g6", "non_power_other"):
+        if conference in groups.get(segment, []):
+            return segment
+    raise ValueError(f"Unclassified canonical conference: {conference!r}")
+
+
+def annotate_quotes(quotes, *, market_domain, segment, eligibility):
+    exchanges = set(eligibility.get("exchanges", []))
+    domain = eligibility.get("domains", {}).get(market_domain, {})
+    rule = domain.get(segment, domain.get("all", {}))
+    eligible = set(rule.get("eligible_sportsbooks", []))
+    excluded = rule.get("excluded_sportsbooks", {})
+    exchange_policy = eligibility.get("exchange_policy", {})
+
+    for book, quote in quotes.items():
+        quote["market_domain"] = market_domain
+        quote["segment"] = segment
+        if book in exchanges or quote.get("provider_type") == "exchange":
+            quote["provider_type"] = "exchange"
+            quote["eligible_for_best"] = False
+            quote["eligible_for_edge"] = False
+            quote["quote_status"] = exchange_policy.get("quote_status", "REFERENCE_ONLY")
+            quote["exclusion_reason"] = exchange_policy.get("exclusion_reason", "EXCHANGE_REFERENCE_ONLY")
+        elif book in eligible:
+            quote["provider_type"] = "sportsbook"
+            quote["eligible_for_best"] = True
+            quote["eligible_for_edge"] = True
+            quote["quote_status"] = "ELIGIBLE"
+            quote["exclusion_reason"] = None
+        else:
+            quote["provider_type"] = "sportsbook"
+            quote["eligible_for_best"] = False
+            quote["eligible_for_edge"] = False
+            quote["quote_status"] = "POLICY_EXCLUDED"
+            quote["exclusion_reason"] = excluded.get(book, "SPORTSBOOK_NOT_ELIGIBLE_FOR_SEGMENT")
+    return quotes
 
 
 def iso_from_date(value):
@@ -228,8 +271,10 @@ def kalshi_quote(row, side=None):
 def main():
     sim = json.loads(SEASON_SIM.read_text())
     canonical_names = [x["team"] for x in sim["teams"]]
+    team_conferences = {x["team"]: x.get("conference") for x in sim["teams"]}
 
     policy = json.loads(POLICY_PATH.read_text())
+    eligibility = json.loads(ELIGIBILITY_PATH.read_text())
     approved_books = set(policy.get("approved_executable_books", []))
     provider_types = policy.get("provider_types", {})
     kalshi = current_kalshi_payload(KALSHI_CURRENT)
@@ -373,11 +418,18 @@ def main():
     win_rows = []
     for team in sorted(wins):
         quotes = wins[team]
+        segment = conference_segment(team_conferences.get(team), eligibility)
+        annotate_quotes(
+            quotes,
+            market_domain="win_totals",
+            segment=segment,
+            eligibility=eligibility,
+        )
 
         executable_quotes = {
             book: quote
             for book, quote in quotes.items()
-            if book in approved_books
+            if book in approved_books and quote.get("eligible_for_best") is True
         }
 
         over_candidates = [
@@ -422,6 +474,8 @@ def main():
 
         win_rows.append({
             "team": team,
+            "market_domain": "win_totals",
+            "segment": segment,
             "quotes": quotes,
             "books": sorted(quotes),
             "book_count": len(quotes),
@@ -499,13 +553,22 @@ def main():
     conference_rows = []
     for team in sorted(conference):
         quotes = conference[team]
-        best_all_price, best_all_book = best_price(quotes)
+        segment = conference_segment(team_conferences.get(team), eligibility)
+        annotate_quotes(
+            quotes,
+            market_domain="conference_titles",
+            segment=segment,
+            eligibility=eligibility,
+        )
+        best_all_price, best_all_book = best_price(quotes, eligible_only=False)
         best_exec_price, best_exec_book = best_price(
             quotes, approved_books
         )
 
         conference_rows.append({
             "team": team,
+            "market_domain": "conference_titles",
+            "segment": segment,
             "quotes": quotes,
             "books": sorted(quotes),
             "book_count": len(quotes),
@@ -615,7 +678,13 @@ def main():
         for key in sorted(grouped):
             team, option = key.rsplit("|", 1)
             quotes = grouped[key]
-            best_all_price, best_all_book = best_price(quotes)
+            annotate_quotes(
+                quotes,
+                market_domain=market_key,
+                segment="all",
+                eligibility=eligibility,
+            )
+            best_all_price, best_all_book = best_price(quotes, eligible_only=False)
             best_exec_price, best_exec_book = best_price(
                 quotes, approved_books
             )
@@ -623,6 +692,8 @@ def main():
             rows.append({
                 "team": team,
                 "outcome": option,
+                "market_domain": market_key,
+                "segment": "all",
                 "quotes": quotes,
                 "books": sorted(quotes),
                 "book_count": len(quotes),
@@ -650,7 +721,6 @@ def main():
                         unmatched["playoff_futures"].append(source_row.get("team"))
                         unmatched[market_key].append(source_row.get("team"))
                     continue
-                raw_executable_teams.add(team)
                 target = by_key.get((team, outcome))
                 if target is None:
                     target = {"team": team, "outcome": outcome, "quotes": {}}
@@ -660,7 +730,13 @@ def main():
 
             for row in rows:
                 quotes = row["quotes"]
-                best_all_price, best_all_book = best_price(quotes)
+                annotate_quotes(
+                    quotes,
+                    market_domain=market_key,
+                    segment="all",
+                    eligibility=eligibility,
+                )
+                best_all_price, best_all_book = best_price(quotes, eligible_only=False)
                 best_exec_price, best_exec_book = best_price(quotes, approved_books)
                 row.update({
                     "books": sorted(quotes),
@@ -698,7 +774,12 @@ def main():
         "identity_source": "canonical 138-team universe + shared market resolver",
         "market_policy": {
             "schema_version": policy.get("schema_version"),
+            "book_eligibility_schema_version": eligibility.get("schema_version"),
             "approved_executable_books": sorted(approved_books),
+            "sportsbooks": eligibility.get("sportsbooks", []),
+            "exchanges": eligibility.get("exchanges", []),
+            "conference_classification": eligibility.get("conference_classification", {}),
+            "domains": eligibility.get("domains", {}),
             "provider_types": provider_types,
             "kalshi_status": "current" if kalshi else "unavailable_or_stale",
         },

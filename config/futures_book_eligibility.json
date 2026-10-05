@@ -1,0 +1,43 @@
+{
+  "schema_version": "futures-book-eligibility-v1",
+  "sportsbooks": ["DraftKings", "FanDuel", "BetMGM", "Caesars"],
+  "exchanges": ["Kalshi"],
+  "conference_classification": {
+    "power": ["ACC", "B1G", "B12", "SEC"],
+    "g6": ["American", "CUSA", "MAC", "MW", "Sun Belt"],
+    "non_power_other": ["Independent", "PAC12"]
+  },
+  "domains": {
+    "win_totals": {
+      "power": {"eligible_sportsbooks": ["DraftKings", "FanDuel", "BetMGM", "Caesars"]},
+      "g6": {
+        "eligible_sportsbooks": ["FanDuel", "Caesars"],
+        "excluded_sportsbooks": {"DraftKings": "ACTION_SOURCE_STALE_CONTENT", "BetMGM": "ACTION_SOURCE_STALE_CONTENT"}
+      },
+      "non_power_other": {
+        "eligible_sportsbooks": ["FanDuel", "Caesars"],
+        "excluded_sportsbooks": {"DraftKings": "ACTION_SOURCE_STALE_CONTENT", "BetMGM": "ACTION_SOURCE_STALE_CONTENT"}
+      }
+    },
+    "conference_titles": {
+      "power": {"eligible_sportsbooks": ["DraftKings", "FanDuel", "BetMGM", "Caesars"]},
+      "g6": {
+        "eligible_sportsbooks": ["FanDuel", "BetMGM", "Caesars"],
+        "excluded_sportsbooks": {"DraftKings": "ACTION_SOURCE_STALE_CONTENT"}
+      },
+      "non_power_other": {"eligible_sportsbooks": ["FanDuel", "BetMGM", "Caesars"]}
+    },
+    "make_cfp": {
+      "all": {"eligible_sportsbooks": ["DraftKings", "FanDuel", "BetMGM", "Caesars"]}
+    },
+    "national_title": {
+      "all": {"eligible_sportsbooks": ["DraftKings", "FanDuel", "BetMGM", "Caesars"]}
+    }
+  },
+  "exchange_policy": {
+    "eligible_for_best": false,
+    "eligible_for_edge": false,
+    "quote_status": "REFERENCE_ONLY",
+    "exclusion_reason": "EXCHANGE_REFERENCE_ONLY"
+  }
+}

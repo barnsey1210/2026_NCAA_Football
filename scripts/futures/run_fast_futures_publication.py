@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -37,7 +38,15 @@ def parse_result(text: str) -> dict:
     return {}
 
 
-def main() -> int:
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Refresh accepted Futures data and publish the scoped Futures bundle."
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv=None) -> int:
+    parse_args(argv)
     refresh = run_capture(
         [sys.executable, "scripts/futures/run_fast_futures_refresh.py"]
     )

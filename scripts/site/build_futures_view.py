@@ -1615,6 +1615,7 @@ def main():
             "approved_executable_books": market_contract.get(
                 "market_policy", {}
             ).get("approved_executable_books", []),
+            "book_eligibility": market_contract.get("market_policy", {}),
         },
 
         "weekly_baseline": weekly_baseline,

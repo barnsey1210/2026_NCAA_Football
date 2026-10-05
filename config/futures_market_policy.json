@@ -4,8 +4,7 @@
     "DraftKings",
     "FanDuel",
     "BetMGM",
-    "Caesars",
-    "Kalshi"
+    "Caesars"
   ],
   "provider_types": {
     "DraftKings": "sportsbook",
@@ -14,5 +13,5 @@
     "Caesars": "sportsbook",
     "Kalshi": "exchange"
   },
-  "notes": "Canonical futures market contract preserves sportsbook and exchange semantics. Actionable BEST selections use approved executable providers; Kalshi comparisons use its ask plus official taker entry fee."
+  "notes": "Canonical futures market contract preserves sportsbook and exchange semantics. Domain and segment eligibility is owned by config/futures_book_eligibility.json. Kalshi is reference-only and never participates in BEST or EDGE."
 }

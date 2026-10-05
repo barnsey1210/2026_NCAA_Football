@@ -1,7 +1,8 @@
 (function(){
 'use strict';
 
-const BOOKS=['DraftKings','FanDuel','BetMGM','Caesars','Kalshi'];
+const SPORTSBOOKS=['DraftKings','FanDuel','BetMGM','Caesars'];
+const BOOKS=[...SPORTSBOOKS,'Kalshi'];
 const BOOK_SLUG={
   DraftKings:'draftkings',
   FanDuel:'fanduel',
@@ -19,6 +20,7 @@ let state={
   selectedTeam:null,
   mobileExpandedTeam:null,
   railTab:'overview',
+  bookFilters:{},
   scenario:{
     loaded:false,
     loading:false,
@@ -1081,6 +1083,123 @@ function quoteKind(row,kind){
   };
 }
 
+function tabStorageKey(mode){
+  return `ncaaf-futures-books-v1:${mode}`;
+}
+
+function canonicalSportsbooks(){
+  const configured=D?.market_contract?.book_eligibility?.sportsbooks;
+  return Array.isArray(configured)&&configured.length
+    ? configured.filter(book=>SPORTSBOOKS.includes(book))
+    : SPORTSBOOKS.slice();
+}
+
+function defaultBooksForMode(mode){
+  const fields=mode==='wins'
+    ? ['win_quotes']
+    : mode==='title'
+      ? ['title_quotes']
+      : ['playoff_quotes','national_title_quotes'];
+  const eligible=new Set();
+  for(const row of D?.rows||[]){
+    for(const field of fields){
+      for(const [book,quote] of Object.entries(row[field]||{})){
+        if(quote?.provider_type!=='exchange'&&quote?.eligible_for_best===true){
+          eligible.add(book);
+        }
+      }
+    }
+  }
+  return canonicalSportsbooks().filter(book=>eligible.has(book));
+}
+
+function selectedBooksForMode(mode=state.mode){
+  if(!Array.isArray(state.bookFilters[mode])){
+    let stored=null;
+    try{ stored=JSON.parse(localStorage.getItem(tabStorageKey(mode))); }catch(_error){}
+    const allowed=canonicalSportsbooks();
+    state.bookFilters[mode]=Array.isArray(stored)
+      ? stored.filter(book=>allowed.includes(book))
+      : defaultBooksForMode(mode);
+  }
+  return new Set(state.bookFilters[mode]);
+}
+
+function quoteEligibility(quote,book,mode=state.mode){
+  if(!quote)return {eligible:false,reason:'NO_QUOTE'};
+  if(quote.provider_type==='exchange'||book==='Kalshi'){
+    return {eligible:false,reason:'EXCHANGE_REFERENCE_ONLY'};
+  }
+  if(quote.eligible_for_best!==true||quote.eligible_for_edge!==true){
+    return {eligible:false,reason:quote.exclusion_reason||'POLICY_EXCLUDED'};
+  }
+  if(!selectedBooksForMode(mode).has(book)){
+    return {eligible:false,reason:'USER_EXCLUDED'};
+  }
+  return {eligible:true,reason:null};
+}
+
+function bestMoneyline(quotes,mode){
+  const candidates=Object.entries(quotes||{})
+    .filter(([book,quote])=>quoteEligibility(quote,book,mode).eligible&&hasNumber(quote.price))
+    .sort((a,b)=>Number(b[1].price)-Number(a[1].price));
+  return candidates[0]||null;
+}
+
+function bestWinSide(quotes,side,mode){
+  const priceKey=side==='Over'?'over_price':'under_price';
+  const candidates=Object.entries(quotes||{})
+    .filter(([book,quote])=>quoteEligibility(quote,book,mode).eligible&&hasNumber(quote.number)&&hasNumber(quote[priceKey]))
+    .sort((a,b)=>{
+      const lineDelta=side==='Over'
+        ? Number(a[1].number)-Number(b[1].number)
+        : Number(b[1].number)-Number(a[1].number);
+      return lineDelta||Number(b[1][priceKey])-Number(a[1][priceKey]);
+    });
+  return candidates[0]||null;
+}
+
+function americanImplied(price){
+  if(!hasNumber(price)||Number(price)===0)return null;
+  price=Number(price);
+  return price>0?100/(price+100):Math.abs(price)/(Math.abs(price)+100);
+}
+
+function effectiveRow(source){
+  const row={...source};
+  const winQuotes=source.win_quotes||{};
+  const eligibleWin=Object.entries(winQuotes).filter(([book,q])=>quoteEligibility(q,book,'wins').eligible);
+  const counts=new Map();
+  eligibleWin.forEach(([,q])=>{
+    if(hasNumber(q.number))counts.set(Number(q.number),(counts.get(Number(q.number))||0)+1);
+  });
+  const reference=[...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0])[0]?.[0]??null;
+  const direction=hasNumber(source.projected_wins)&&hasNumber(reference)&&Number(source.projected_wins)>=reference?'Over':'Under';
+  const win=bestWinSide(winQuotes,direction,'wins');
+  row.win_direction=direction;
+  row.market_win_total=win?Number(win[1].number):null;
+  row.win_price=win?(direction==='Over'?win[1].over_price:win[1].under_price):null;
+  row.win_book=win?.[0]||null;
+  row.win_edge=hasNumber(source.projected_wins)&&hasNumber(row.market_win_total)
+    ? Number(source.projected_wins)-Number(row.market_win_total):null;
+
+  for(const [prefix,quotesField,modelField,mode] of [
+    ['title','title_quotes','title_model_prob','title'],
+    ['playoff','playoff_quotes','playoff_model_prob','playoff'],
+    ['national_title','national_title_quotes','national_title_model_prob','playoff']
+  ]){
+    const best=bestMoneyline(source[quotesField]||{},mode);
+    const price=best?.[1]?.price??null;
+    const probability=americanImplied(price);
+    row[`${prefix}_price`]=price;
+    row[`${prefix}_book`]=best?.[0]||null;
+    row[`${prefix}_market_prob`]=probability;
+    row[`${prefix}_edge`]=hasNumber(source[modelField])&&hasNumber(probability)
+      ? Number(source[modelField])-Number(probability):null;
+  }
+  return row;
+}
+
 function fourBookCount(data){
   return BOOKS.filter(book=>data.quotes?.[book]).length;
 }
@@ -1090,6 +1209,7 @@ function bestMarketMarkup(row,kind){
   if(kind==='cfp'&&row.playoff_market_availability==='NOT_LISTED_BY_MARKET'){
     return `<span class="muted">No current market price</span>`;
   }
+  if(!d.bestBook)return `<span class="muted">No trusted quote</span>`;
   const payload=encodeURIComponent(JSON.stringify({
     team:row.team,
     kind
@@ -1202,7 +1322,7 @@ function visibleRows(){
 }
 
 function sortedVisibleRows(){
-  const data=visibleRows().slice();
+  const data=visibleRows().map(effectiveRow);
   const key=state.sortKey;
   const dir=state.sortDir==='asc'?1:-1;
 
@@ -1511,6 +1631,7 @@ function mobileBestMarketMarkup(row,kind){
   if(kind==='cfp'&&row.playoff_market_availability==='NOT_LISTED_BY_MARKET'){
     return `<span class="muted">No current market price</span>`;
   }
+  if(!d.bestBook)return `<span class="muted">No trusted quote</span>`;
   const selected=d.quotes?.[d.bestBook]||null;
   const price=quoteOdds(selected,d.side);
   const line=price;
@@ -1664,11 +1785,13 @@ function fourBookBoard(row,kind){
       const line=kind==='wins'&&hasNumber(q.number)
         ? `${data.side?.slice(0,1)||''} ${num(q.number)}`
         : '';
+      const eligibility=quoteEligibility(q,book,kind==='cfp'||kind==='national'?'playoff':kind);
+      const status=best?'BEST':eligibility.eligible?'AVAILABLE':eligibility.reason==='USER_EXCLUDED'?'USER EXCLUDED':q.quote_status==='REFERENCE_ONLY'?'REFERENCE ONLY':'POLICY EXCLUDED';
 
-      return `<div class="railBookRow ${best?'bestBookRow':''}">
+      return `<div class="railBookRow ${best?'bestBookRow':eligibility.eligible?'':'excludedBookRow'}">
         <span>${bookLogo(book)}</span>
         <b>${line?`${esc(line)} · `:''}${quoteOdds(q,data.side)}</b>
-        <small>${best?'BEST':'AVAILABLE'}</small>
+        <small title="${esc(eligibility.reason||'Eligible sportsbook quote')}">${esc(status)}</small>
       </div>`;
     }).join('')}
   </div>`;
@@ -2341,6 +2464,7 @@ function installControls(){
     (D.rows||[]).map(r=>r.conference).filter(Boolean)
   )].sort();
 
+  const selected=selectedBooksForMode(state.mode);
   controls.innerHTML=`<label>
     <span>Conference</span>
     <select id="futConference">
@@ -2352,7 +2476,11 @@ function installControls(){
     <span>Team Search</span>
     <input id="futSearch" type="search" placeholder="Find a team">
   </label>
-  <button type="button" id="futReset">Reset</button>`;
+  <fieldset class="futBookFilters"><legend>Sportsbooks · ${esc(state.mode==='playoff'?'CFP / National':state.mode==='title'?'Conference Titles':'Win Totals')}</legend>
+    ${canonicalSportsbooks().map(book=>`<label title="Additional user filter; canonical stale-content exclusions still apply"><input type="checkbox" data-fut-book="${esc(book)}" ${selected.has(book)?'checked':''}>${bookLogo(book)}<span>${esc(book)}</span></label>`).join('')}
+    <small>Kalshi is shown as exchange reference only and never enters BEST or EDGE.</small>
+  </fieldset>
+  <button type="button" id="futReset">Reset trusted defaults</button>`;
 
   futConference.value=state.conference;
   futSearch.value=state.search;
@@ -2367,12 +2495,23 @@ function installControls(){
     renderCommandCenter();
   };
 
+  controls.querySelectorAll('[data-fut-book]').forEach(input=>{
+    input.onchange=()=>{
+      const next=canonicalSportsbooks().filter(book=>controls.querySelector(`[data-fut-book="${book}"]`)?.checked);
+      state.bookFilters[state.mode]=next;
+      localStorage.setItem(tabStorageKey(state.mode),JSON.stringify(next));
+      renderCommandCenter();
+    };
+  });
+
   futReset.onclick=()=>{
     state.conference='all';
     state.search='';
     state.sortKey='rank';
     state.sortDir='asc';
     state.selectedTeam=null;
+    state.bookFilters[state.mode]=defaultBooksForMode(state.mode);
+    localStorage.removeItem(tabStorageKey(state.mode));
     futConference.value='all';
     futSearch.value='';
     renderCommandCenter();
@@ -2412,7 +2551,7 @@ function installStyles(){
   style.textContent=`
     .futuresCommandControls{
       display:grid;
-      grid-template-columns:210px minmax(240px,430px) 90px;
+      grid-template-columns:160px minmax(170px,1fr) minmax(340px,1.5fr) 110px 150px;
       gap:8px;
       align-items:end;
       margin:10px 0;
@@ -2446,6 +2585,13 @@ function installStyles(){
       font-weight:900;
       cursor:pointer;
     }
+    .futBookFilters{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-height:39px}
+    .futBookFilters legend{color:var(--muted);font-size:9px;font-weight:950;letter-spacing:.06em;text-transform:uppercase;padding:0 4px}
+    .futBookFilters label{display:flex!important;grid-auto-flow:column;align-items:center;gap:3px;color:#fff!important;font-size:9px!important;letter-spacing:0!important;text-transform:none!important;cursor:pointer}
+    .futBookFilters input{width:auto!important;margin:0}
+    .futBookFilters .futBookLogo{width:20px;height:15px}
+    .futBookFilters>small{flex-basis:100%;color:var(--muted);font-size:8px;font-weight:800}
+    .excludedBookRow{opacity:.58}
     .futuresWorkspace{
       display:grid;
       grid-template-columns:minmax(0,1fr) 390px;
@@ -2971,6 +3117,8 @@ function enhance(){
 
       state.railTab='overview';
       state.selectedTeam=null;
+      installControls();
+      installSortControl();
       renderCommandCenter();
     };
   });

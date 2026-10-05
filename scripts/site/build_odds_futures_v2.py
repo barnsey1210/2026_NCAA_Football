@@ -304,34 +304,38 @@ def coverage(rows: list[dict]) -> dict:
     return {book: sum(book in row.get("quotes", {}) for row in rows) for book in BOOKS}
 
 
-def merge_kalshi(rows: list[dict], contract_rows: list[dict], win_totals=False) -> None:
+def merge_contract_policy(rows: list[dict], contract_rows: list[dict], win_totals=False) -> None:
     targets = {(row.get("team"), row.get("outcome", "Yes")): row for row in rows}
     for source in contract_rows:
-        quote = (source.get("quotes") or {}).get("Kalshi")
-        if not quote:
-            continue
         key = (source.get("team"), source.get("outcome", "Yes"))
         target = targets.get(key)
         if target is None:
             continue
-        target.setdefault("quotes", {})["Kalshi"] = quote
+        target["quotes"] = source.get("quotes", {})
+        target["market_domain"] = source.get("market_domain")
+        target["segment"] = source.get("segment")
         if win_totals:
-            over = [((-(q["number"]), q.get("over_price") or -1_000_000), b, q) for b, q in target["quotes"].items() if q.get("over_price") is not None]
-            under = [((q["number"], q.get("under_price") or -1_000_000), b, q) for b, q in target["quotes"].items() if q.get("under_price") is not None]
+            eligible = {b: q for b, q in target["quotes"].items() if q.get("eligible_for_best") is True}
+            over = [((-(q["number"]), q.get("over_price") or -1_000_000), b, q) for b, q in eligible.items() if q.get("over_price") is not None]
+            under = [((q["number"], q.get("under_price") or -1_000_000), b, q) for b, q in eligible.items() if q.get("under_price") is not None]
             bo = max(over, default=(None, None, None)); bu = max(under, default=(None, None, None))
             target["best_over"] = {"book": bo[1], **bo[2]} if bo[2] else None
             target["best_under"] = {"book": bu[1], **bu[2]} if bu[2] else None
             target["best_over_highlight_eligible"] = len(over) >= 2
             target["best_under_highlight_eligible"] = len(under) >= 2
         else:
-            best, book = best_price(target["quotes"])
+            eligible = {b: q for b, q in target["quotes"].items() if q.get("eligible_for_best") is True}
+            best, book = best_price(eligible)
             target["best_price"] = best
             target["best_book"] = book
-            target["best_highlight_eligible"] = len(target["quotes"]) >= 2
+            target["best_highlight_eligible"] = len(eligible) >= 2
             target["market_implied_probability"] = implied(best)
             model = target.get("model_probability")
             target["edge"] = model - implied(best) if model is not None and implied(best) is not None else None
-        target["last_updated"] = max(target.get("last_updated") or "", quote.get("pulled_at") or "")
+        target["last_updated"] = max(
+            [target.get("last_updated") or ""]
+            + [quote.get("pulled_at") or quote.get("observed_date") or "" for quote in target["quotes"].values()]
+        )
 
 
 def main() -> None:
@@ -349,10 +353,10 @@ def main() -> None:
     conference, conference_audit = build_conference(read_csv(CONF_CURRENT), read_csv(CONF_HISTORY), by_norm)
     wins, wins_audit = build_wins(read_csv(WINS_CURRENT), read_csv(WINS_HISTORY), by_norm)
     contract = json.loads(CONTRACT.read_text())
-    merge_kalshi(national, contract.get("national_title", {}).get("rows", []))
-    merge_kalshi(playoff, contract.get("make_cfp", {}).get("rows", []))
-    merge_kalshi(conference, contract.get("conference_titles", {}).get("rows", []))
-    merge_kalshi(wins, contract.get("win_totals", {}).get("rows", []), win_totals=True)
+    merge_contract_policy(national, contract.get("national_title", {}).get("rows", []))
+    merge_contract_policy(playoff, contract.get("make_cfp", {}).get("rows", []))
+    merge_contract_policy(conference, contract.get("conference_titles", {}).get("rows", []))
+    merge_contract_policy(wins, contract.get("win_totals", {}).get("rows", []), win_totals=True)
     heisman = {
         "available": False,
         "message": "Heisman odds are not yet available in the current normalized futures pipeline.",
@@ -361,7 +365,7 @@ def main() -> None:
     built_at = source_build_time((ACTION, FUTURES_VIEW, CONF_CURRENT, CONF_HISTORY, WINS_CURRENT, WINS_HISTORY, TITLE_OPEN, CONTRACT))
     payload = {
         "schema_version": "odds-futures-v2-production-1", "prototype_only": False, "built_at": built_at,
-        "books": list(BOOKS), "history_scope": "Open is the earliest retained normalized local snapshot when available; full futures history is intentionally deferred.",
+        "books": list(BOOKS), "book_eligibility": contract.get("market_policy", {}), "history_scope": "Open is the earliest retained normalized local snapshot when available; full futures history is intentionally deferred.",
         "categories": {"national_title": national, "playoff": playoff, "conference_title": conference, "win_totals": wins},
         "heisman": heisman,
     }
