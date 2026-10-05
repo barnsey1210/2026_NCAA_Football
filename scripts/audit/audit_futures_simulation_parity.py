@@ -179,6 +179,8 @@ def main():
     page_parity_failures = []
     for row in rows:
         team = canon(row.get("team"))
+        if team not in conference_rows:
+            continue
         conference_row = conference_rows.get(team, {})
         projected = row.get("projected_conference_record") or {}
         comparisons = (

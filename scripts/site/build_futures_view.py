@@ -1096,6 +1096,26 @@ def main():
         }
 
         projected_wins = number(team.get("avg_total_wins"))
+        total_games = (
+            int(records.get(key, {}).get("wins") or 0)
+            + int(records.get(key, {}).get("losses") or 0)
+            + int(schedule_summary["games_remaining"])
+        )
+        schedule_summary["expected_remaining_wins"] = (
+            projected_wins - int(records.get(key, {}).get("wins") or 0)
+            if projected_wins is not None
+            else None
+        )
+        schedule_summary["projected_record"] = {
+            "wins": projected_wins,
+            "losses": (
+                total_games - projected_wins
+                if projected_wins is not None
+                else None
+            ),
+            "complete": projected_wins is not None,
+            "source": "season_simulations_2026",
+        }
         title_prob = number(team.get("conference_title_pct"))
 
         reference_total = number(win.get("reference_number"))
@@ -1441,7 +1461,8 @@ def main():
 
     by_conference = {}
     for row in rows:
-        by_conference.setdefault(row.get("conference"), []).append(row)
+        if row.get("conference") != "Independent":
+            by_conference.setdefault(row.get("conference"), []).append(row)
     for conference_rows in by_conference.values():
         conference_rows.sort(
             key=lambda row: (
