@@ -328,7 +328,7 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         row.get("team") for row in (prior_rows or [])
         if row.get("team")
         and row.get("outcome") in (None, "Yes")
-        and row.get("executable_book_count")
+        and any(book in APPROVED_BOOKS for book in row.get("executable_books", []))
     }
     availability = {
         team: row.get("market_availability")
@@ -362,6 +362,7 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
         book for row in (prior_rows or [])
         if row.get("outcome") in (None, "Yes")
         for book in row.get("executable_books", [])
+        if book in APPROVED_BOOKS
     )
     disappeared = sorted(
         book for book, count in prior_books.items()

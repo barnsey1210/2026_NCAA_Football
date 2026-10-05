@@ -27,6 +27,36 @@ def row(date, team, book, price="-110", line="7.5"):
 
 
 class FuturesMarketReliabilityTests(unittest.TestCase):
+    def test_prior_exchange_never_counts_as_executable_provider_regression(self):
+        current = {
+            "make_cfp": {
+                "rows": [{
+                    "team": "A",
+                    "outcome": "Yes",
+                    "executable_books": ["FanDuel"],
+                    "executable_book_count": 1,
+                    "market_availability": "AVAILABLE",
+                }]
+            },
+            "audit": {"unmatched": {"make_cfp": []}},
+        }
+        prior = [{
+            "team": "A",
+            "outcome": "Yes",
+            "executable_books": ["FanDuel", "Kalshi"],
+            "executable_book_count": 2,
+        } for _ in range(10)]
+        result = MODULE.contract_domain(
+            current,
+            "make_cfp",
+            ["A"],
+            "2026-10-05T12:00:00+00:00",
+            MODULE.datetime(2026, 10, 5, 13, 0, tzinfo=MODULE.timezone.utc),
+            prior_rows=prior,
+        )
+        self.assertNotIn("Kalshi", result["previous_book_team_counts"])
+        self.assertNotIn("Kalshi", result["provider_wide_disappearances"])
+
     @staticmethod
     def make_cfp_rows(teams, **kwargs):
         rows = []
