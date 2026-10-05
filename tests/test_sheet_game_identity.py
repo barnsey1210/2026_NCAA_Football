@@ -34,6 +34,19 @@ def canonical_game(game_id="g7", week=0, away="San Jose State", home="USC"):
 
 
 class SheetGameIdentityTests(unittest.TestCase):
+    def test_total_wager_conflicting_with_populated_game_id_fails_closed_for_clv(self):
+        games = [canonical_game(game_id="g393", week=6, away="Jacksonville State", home="Kennesaw State")]
+        frame = pd.DataFrame([{
+            "Week": "Week 6", "Bet": "Tennessee/Arkansas Over",
+            "Bet Type": "Total", "Track Close": True, "Game ID": "g393",
+            "Game": "10/07 Jacksonville State @ Kennesaw State",
+        }])
+        row = attach_game_identity(frame, games).iloc[0]
+        self.assertTrue(row["wager_game_mismatch"])
+        game, reason = resolve_game(row, games)
+        self.assertIsNone(game)
+        self.assertEqual(reason, "wager_game_mismatch")
+
     def test_valid_sheet_id_bypasses_fuzzy_resolver_and_attaches_canonical_fields(self):
         games = [canonical_game()]
         frame = pd.DataFrame([{

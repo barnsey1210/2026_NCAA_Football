@@ -30,12 +30,14 @@ def _alias_map(root=ROOT):
         "ball st": "Ball State",
         "fiu": "Florida International",
         "georgia st": "Georgia State",
+        "gt": "Georgia Tech",
         "middle tennessee state": "Middle Tennessee",
         "minnestoa": "Minnesota",
         "northern ill": "Northern Illinois",
         "okst": "Oklahoma State",
         "oregon st": "Oregon State",
         "sam houston state": "Sam Houston",
+        "san diego st": "San Diego State",
         "san jose st": "San Jose State",
         "ucf": "Central Florida",
         "usc": "USC",
@@ -116,6 +118,8 @@ def game_label_matches(label, game):
 
 def resolve_game(row, games):
     """Return (unique game, reason); ambiguity always fails closed."""
+    if str(row.get("wager_game_mismatch") or "").strip().lower() in {"true", "1", "yes"}:
+        return None, "wager_game_mismatch"
     by_id = {str(game.get("game_id") or "").strip(): game for game in games}
     sheet_id = raw_sheet_game_id(row)
     identity_status = str(row.get("game_identity_status") or "").strip().upper()

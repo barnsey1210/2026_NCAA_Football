@@ -8,7 +8,7 @@ import pandas as pd
 
 if str(ROOT := Path(__file__).resolve().parents[1]) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from betting.track_close_resolver import game_label_matches, resolve_game
+from betting.track_close_resolver import game_label_matches, market_kind, resolve_game, wager_team_tokens
 
 PUBLISHED_SHEET_CSV_URL = (
     "https://docs.google.com/spreadsheets/d/e/"
@@ -85,6 +85,22 @@ def attach_game_identity(df, games):
         row["game_identity_status"] = identity_status
         row["game_identity_reason"] = identity_reason
         row["game_label_mismatch"] = bool(game and raw_label and not game_label_matches(raw_label, game))
+        wager_tokens = {
+            str(team).strip().lower()
+            for team in wager_team_tokens(row)
+            if str(team).strip()
+        }
+        participants = {
+            str(game.get(key) or "").strip().lower()
+            for key in ("away_team", "home_team")
+        } if game else set()
+        row["wager_game_mismatch"] = bool(
+            game
+            and str(row.get("Track Close") or "").strip().lower() in {"true", "1", "yes", "y", "checked"}
+            and market_kind(row) == "total"
+            and len(wager_tokens) >= 2
+            and not wager_tokens.issubset(participants)
+        )
         row["game_id"] = game.get("game_id") if game else None
         row["canonical_game_id"] = game.get("game_id") if game else None
         row["canonical_game_week"] = game.get("week") if game else None

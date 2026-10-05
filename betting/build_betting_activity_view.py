@@ -231,6 +231,8 @@ def read_games():
 
 
 def game_match(row, index, by_id):
+    if boolean(row.get("wager_game_mismatch")):
+        return None, "wager_game_mismatch"
     if clean(row.get("game_identity_status")) == "INVALID_SHEET_GAME_ID":
         return None, "invalid_sheet_game_id"
 
