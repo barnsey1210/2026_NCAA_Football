@@ -324,6 +324,28 @@ finalize_run_status() {
 
 on_exit() {
   local exit_code=$?
+  if [ "$exit_code" -ne 0 ] && stage_enabled "odds_payloads"; then
+    odds_status="$(python3 - "$STATUS_FILE" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    payload = json.load(open(sys.argv[1], encoding="utf-8"))
+    print(next(s["status"] for s in payload["stages"] if s["id"] == "odds_payloads"))
+except Exception:
+    print("UNKNOWN")
+PY
+)"
+    if [ "$odds_status" = "PENDING" ]; then
+      prior_stage="$CURRENT_STAGE"
+      CURRENT_STAGE="odds_payloads"
+      status_stage "odds_payloads" RUNNING "bounded recovery from accepted current market" || true
+      if python3 scripts/control/recover_odds_payloads.py --max-age-hours 18; then
+        status_stage "odds_payloads" PASSED "recovered from fresh accepted current market after upstream abort; no provider calls" || true
+      else
+        status_stage "odds_payloads" FAILED "recovery refused or failed; accepted current market was not safely reusable" || true
+      fi
+      CURRENT_STAGE="$prior_stage"
+    fi
+  fi
   finalize_run_status "$exit_code"
   exit "$exit_code"
 }
@@ -586,7 +608,7 @@ if stage_enabled "conference_simulations"; then
 stage_start "conference_simulations"
 if python3 scripts/simulations/simulation_input_gate.py conference; then
   run_py "scripts/simulations/build_season_simulations_2026.py" "build_season_simulations_2026.py"
-  run_py "scripts/simulations/simulation_input_gate.py conference --record" "simulation_input_gate.py conference --record"
+  run_py "scripts/simulations/simulation_input_gate.py" "simulation_input_gate.py" conference --record
 else
   gate_status=$?
   if [ "$gate_status" -eq 3 ]; then
@@ -613,7 +635,7 @@ if python3 scripts/simulations/simulation_input_gate.py playoff; then
   python3 scripts/simulations/run_playoff_model_2026.py \
     --scenario-output data/site/futures_scenario_universe_2026.json
   run_py "scripts/audit/audit_playoff_model_2026.py" "audit_playoff_model_2026.py"
-  run_py "scripts/simulations/simulation_input_gate.py playoff --record" "simulation_input_gate.py playoff --record"
+  run_py "scripts/simulations/simulation_input_gate.py" "simulation_input_gate.py" playoff --record
 else
   gate_status=$?
   if [ "$gate_status" -eq 3 ]; then

@@ -163,13 +163,24 @@ fi
 python3 - "$PUBLIC_DIR/data/site/odds_screen_v2.json" "$MAX_ODDS_AGE_HOURS" <<'PY'
 from datetime import datetime, timezone
 from pathlib import Path
+import json
 import sys
 
 path = Path(sys.argv[1])
 limit = float(sys.argv[2])
-age_hours = (datetime.now(timezone.utc).timestamp() - path.stat().st_mtime) / 3600
+payload = json.loads(path.read_text(encoding="utf-8"))
+value = payload.get("built_at")
+if not isinstance(value, str) or not value.strip():
+    raise SystemExit("odds payload has no built_at; refusing to publish")
+try:
+    built_at = datetime.fromisoformat(value.replace("Z", "+00:00"))
+except ValueError as exc:
+    raise SystemExit(f"odds payload has invalid built_at {value!r}; refusing to publish") from exc
+if built_at.tzinfo is None:
+    raise SystemExit("odds payload built_at has no timezone; refusing to publish")
+age_hours = (datetime.now(timezone.utc) - built_at.astimezone(timezone.utc)).total_seconds() / 3600
 print(f"[canonical-publish] odds payload age: {age_hours:.2f} hours")
-if age_hours > limit:
+if age_hours < -0.25 or age_hours > limit:
     raise SystemExit(
         f"odds payload is {age_hours:.1f}h old; refusing to publish "
         f"(limit {limit:.1f}h, override with NCAAF_MAX_ODDS_AGE_HOURS)"

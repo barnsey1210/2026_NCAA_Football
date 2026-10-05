@@ -92,9 +92,17 @@ def matchup_key(date, away, home):
     return str(date or "")[:10], norm_team(away), norm_team(home)
 
 
-def source_build_time(paths: tuple[Path, ...]) -> str:
-    modified = max(path.stat().st_mtime for path in paths if path.exists())
-    return datetime.fromtimestamp(modified, timezone.utc).isoformat()
+def current_market_build_time(contract: dict) -> str:
+    value = contract.get("built_at")
+    if not isinstance(value, str) or not value.strip():
+        raise SystemExit("current market contract is missing built_at")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise SystemExit(f"invalid current market built_at: {value}") from exc
+    if parsed.tzinfo is None:
+        raise SystemExit("current market built_at must include a timezone")
+    return parsed.astimezone(timezone.utc).isoformat()
 
 
 def history_rows(points: list[dict], market: str) -> list[dict]:
@@ -442,7 +450,9 @@ def main() -> None:
 
     games.sort(key=lambda g: (g.get("date") or "", g.get("start_time_utc") or "", g.get("away_team") or ""))
 
-    built_at = source_build_time((CURRENT_MARKET, CFBD, HISTORY))
+    # Freshness belongs to the accepted current-market observation.  History or
+    # file-copy mtimes must never make an old market look current.
+    built_at = current_market_build_time(contract)
 
     payload = {
         "schema_version": "odds_screen_v2.production.2",
