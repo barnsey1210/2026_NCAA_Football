@@ -378,8 +378,8 @@ h1 {{ margin:0; font-size:25px; }}
 select {{ color:var(--text); background:#101c2c; border:1px solid var(--line); border-radius:8px; padding:8px 10px; }}
 .legend {{ display:flex; gap:7px; flex-wrap:wrap; margin:10px 0 12px; font-size:10px; color:var(--muted); }}
 .legend span {{ padding:5px 7px; border:1px solid var(--line); border-radius:6px; }}
-.schedule-layout {{ width:100%; max-width:100%; display:grid; grid-template-columns:190px minmax(0,1fr) 254px; border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; }}
-.floating-table-header {{ position:fixed; top:0; left:0; z-index:75; display:none; grid-template-columns:190px minmax(0,1fr) 254px; background:#101c2c; border:1px solid var(--line); border-top:0; box-shadow:0 8px 18px rgba(0,0,0,.38); overflow:hidden; }}
+.schedule-layout {{ width:100%; max-width:100%; display:grid; grid-template-columns:minmax(250px,280px) minmax(0,1fr) 254px; border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; }}
+.floating-table-header {{ position:fixed; top:0; left:0; z-index:75; display:none; grid-template-columns:minmax(250px,280px) minmax(0,1fr) 254px; background:#101c2c; border:1px solid var(--line); border-top:0; box-shadow:0 8px 18px rgba(0,0,0,.38); overflow:hidden; }}
 .floating-table-header.visible {{ display:grid; }}
 .floating-table-header table {{ border-collapse:separate; border-spacing:0; width:100%; table-layout:fixed; }}
 .floating-table-header .floating-schedule {{ min-width:0; overflow:hidden; background:#101c2c; }}
@@ -404,15 +404,16 @@ th.sortable:hover {{ color:var(--text); }}
 th .sort-arrow {{ margin-left:4px; opacity:.35; }}
 th.sorted .sort-arrow {{ opacity:1; }}
 .sticky-left {{ z-index:7; }}
-.team-column {{ width:190px; text-align:left; }}
+.team-column {{ width:100%; min-width:250px; text-align:left; }}
 th.sticky-left {{ z-index:10; }}
-.team-name {{ display:flex; align-items:center; gap:8px; }}
+.team-name {{ display:flex; align-items:center; gap:8px; min-width:0; }}
+.team-name > div {{ min-width:0; }}
 .team-name img {{ width:27px; height:27px; object-fit:contain; }}
 .team-logo-badge {{ width:32px; height:32px; display:grid; place-items:center; border-radius:8px; flex:0 0 32px; }}
 .team-logo-badge.light-logo {{ background:#f7f8fb; box-shadow:0 0 0 1px rgba(255,255,255,.30) inset; }}
 .team-logo-badge.light-logo img {{ width:30px; height:30px; }}
-.team-primary {{ font-size:14px; line-height:1.05; }}
-.team-meta {{ display:block; margin-top:3px; font-size:10px; line-height:1.15; font-weight:800; white-space:nowrap; }}
+.team-primary {{ display:block; font-size:14px; line-height:1.1; overflow-wrap:anywhere; }}
+.team-meta {{ display:block; margin-top:3px; font-size:10px; line-height:1.25; font-weight:800; white-space:normal; overflow-wrap:anywhere; }}
 .team-meta .rating-value {{ color:var(--muted); }}
 .rank-good {{ color:#49e99a; }} .rank-mid {{ color:#f4c451; }} .rank-low {{ color:#ff6877; }} .rank-unknown {{ color:var(--muted); }}
 .sos-lines {{ display:inline; font-size:9px; line-height:1.15; font-weight:750; }}
@@ -477,8 +478,8 @@ td.current-week-cell .schedule-cell {{ box-shadow:0 0 0 2px #fff inset; }}
 .popover a {{ color:#83b7ff; font-size:11px; font-weight:700; text-decoration:none; }}
 .close-popover {{ border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:17px; padding:0; }}
 .empty {{ padding:32px; color:var(--muted); text-align:center; }}
-@media (max-width:1050px) {{ .schedule-layout{{grid-template-columns:180px minmax(0,1fr) 226px}} .team-column{{width:180px}} .proj-finish{{width:84px}} .make-title{{width:68px}} .win-title{{width:74px}} .page{{padding:12px}} }}
-@media (max-width:700px) {{ body{{padding-bottom:48px}} .range-key{{justify-content:flex-start;gap:13px;padding:9px 10px;font-size:10px}} .page{{padding:10px}} .header{{display:block}} .controls{{margin-top:10px;justify-content:flex-start}} .schedule-layout{{grid-template-columns:166px minmax(0,1fr) 210px}} .team-column{{width:166px}} .team-primary{{font-size:12px}} .team-meta{{font-size:9px}} .sos-lines{{font-size:8px}} .proj-finish{{width:76px}} .make-title{{width:62px}} .win-title{{width:72px}} }}
+@media (max-width:1050px) {{ .schedule-layout{{grid-template-columns:minmax(220px,240px) minmax(0,1fr) 226px}} .team-column{{min-width:220px}} .proj-finish{{width:84px}} .make-title{{width:68px}} .win-title{{width:74px}} .page{{padding:12px}} }}
+@media (max-width:700px) {{ body{{padding-bottom:48px}} .range-key{{justify-content:flex-start;gap:13px;padding:9px 10px;font-size:10px}} .page{{padding:10px}} .header{{display:block}} .controls{{margin-top:10px;justify-content:flex-start}} .schedule-layout{{grid-template-columns:minmax(200px,220px) minmax(0,1fr) 210px}} .team-column{{min-width:200px}} .team-primary{{font-size:12px}} .team-meta{{font-size:9px}} .sos-lines{{display:block;font-size:8px;margin-top:2px}} .proj-finish{{width:76px}} .make-title{{width:62px}} .win-title{{width:72px}} }}
 
 .top {{ width:100%; display:flex; align-items:center; gap:16px; padding:12px 18px; border-bottom:1px solid var(--line); background:#071326; overflow-x:auto; }}
 .top .brand {{ font-size:20px; font-weight:950; white-space:nowrap; }}

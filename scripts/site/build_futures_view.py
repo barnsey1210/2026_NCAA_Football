@@ -180,6 +180,11 @@ def build_schedule_index(
         for game in (preseason_games or [])
         if game.get("cfbd_game_id") is not None and game.get("game_id")
     }
+    conference_by_cfbd_id = {
+        str(game.get("cfbd_game_id")): bool(game.get("is_conference_game"))
+        for game in (preseason_games or [])
+        if game.get("cfbd_game_id") is not None
+    }
 
     schedule_index = {}
     team_game_ids = {team: [] for team in fbs_teams}
@@ -244,9 +249,15 @@ def build_schedule_index(
             "home_team": home,
             "neutral_site": bool(game.get("neutral_site")),
             "is_conference_game": bool(
-                conference_by_matchup.get(
-                    (date, away, home),
-                    game.get("is_conference_game", False),
+                conference_by_cfbd_id.get(
+                    str(game.get("cfbd_game_id")),
+                    conference_by_matchup.get(
+                        (date, away, home),
+                        game.get(
+                            "conference_game",
+                            game.get("is_conference_game", False),
+                        ),
+                    ),
                 )
             ),
             "completed": bool(game.get("completed")),
@@ -1059,6 +1070,31 @@ def main():
             schedule_index,
         )
 
+        # The season simulation owns projected conference standings.  The
+        # schedule adapter owns only the current record and games remaining.
+        projected_conf_wins = number(team.get("avg_conference_wins"))
+        total_conf_games = (
+            int(records.get(key, {}).get("conf_wins") or 0)
+            + int(records.get(key, {}).get("conf_losses") or 0)
+            + int(schedule_summary["conference_games_remaining"])
+        )
+        schedule_summary["expected_remaining_conference_wins"] = (
+            projected_conf_wins
+            - int(records.get(key, {}).get("conf_wins") or 0)
+            if projected_conf_wins is not None
+            else None
+        )
+        schedule_summary["projected_conference_record"] = {
+            "wins": projected_conf_wins,
+            "losses": (
+                total_conf_games - projected_conf_wins
+                if projected_conf_wins is not None
+                else None
+            ),
+            "complete": projected_conf_wins is not None,
+            "source": "season_simulations_2026",
+        }
+
         projected_wins = number(team.get("avg_total_wins"))
         title_prob = number(team.get("conference_title_pct"))
 
@@ -1403,6 +1439,24 @@ def main():
             })
         current_row["history"] = history
 
+    by_conference = {}
+    for row in rows:
+        by_conference.setdefault(row.get("conference"), []).append(row)
+    for conference_rows in by_conference.values():
+        conference_rows.sort(
+            key=lambda row: (
+                number((row.get("projected_conference_record") or {}).get("wins"))
+                if number((row.get("projected_conference_record") or {}).get("wins")) is not None
+                else -999,
+                number(row.get("team_rating"))
+                if number(row.get("team_rating")) is not None
+                else -999,
+            ),
+            reverse=True,
+        )
+        for projected_finish, row in enumerate(conference_rows, 1):
+            row["projected_conference_finish"] = projected_finish
+
     season_built = season_model.get("built_at")
     playoff_built = playoff_model_payload.get("built_at")
 
@@ -1563,7 +1617,7 @@ def main():
     QA_PATH.write_text(json.dumps(qa, indent=2) + "\n")
 
     payload = {
-        "schema_version": "futures-view-v6",
+        "schema_version": "futures-view-v7",
         "built_at": build_generated_at,
 
         # Backward compatibility for current UI.
@@ -1626,7 +1680,7 @@ def main():
             "missing_value_policy": "gap_null_never_zero_or_interpolated",
         },
         "schedule_contract": {
-            "schema_version": "futures-schedule-index-v1",
+            "schema_version": "futures-schedule-index-v2",
             "source": str(SCHEDULE_PATH.relative_to(DATA_ROOT)),
             "projection_source": str(PROJECTION_BLEND_PATH.relative_to(DATA_ROOT)),
             "win_probability_model": "logistic_margin_scale_6_5_v1",
