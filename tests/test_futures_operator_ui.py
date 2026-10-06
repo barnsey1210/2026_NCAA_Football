@@ -96,6 +96,20 @@ class FuturesOperatorMarkupTests(unittest.TestCase):
         self.assertIn("position:sticky!important", js)
         self.assertIn("grid-template-columns:repeat(4,1fr)", js)
 
+    def test_mobile_details_have_reliable_collapse_and_back_to_table_controls(self):
+        js = (ROOT / "futures_dashboard.js").read_text()
+        for token in (
+            'data-mobile-collapse=',
+            'class="futuresRailClose" data-rail-close',
+            'Back to table',
+            "state.mobileExpandedTeam=null;",
+            "state.selectedTeam=null;",
+            "workspace?.classList.toggle('hasSelection',Boolean(row))",
+            ".futuresWorkspace.hasSelection .card{display:none!important}",
+        ):
+            self.assertIn(token, js)
+        self.assertNotIn("state.selectedTeam=data[0]?.team||null", js)
+
     def test_mobile_team_and_edge_sorting_for_every_market_table(self):
         script = r"""
 const fs=require('fs');

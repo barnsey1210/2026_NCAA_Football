@@ -1659,6 +1659,7 @@ function mobileDetailMarkup(row,kind){
     <span><small>Record</small><b>${row.record?.wins??0}-${row.record?.losses??0}</b></span>
     <span><small>Projected</small><b>${projected?`${num(projected.wins)}-${num(projected.losses)}`:'—'}</b></span>
     <button type="button" data-mobile-full-detail="${esc(row.team)}">Full details</button>
+    <button type="button" class="mobileInlineClose" data-mobile-collapse="${esc(row.team)}" aria-label="Collapse ${esc(row.team)} details">Close details</button>
   </div></td></tr>`;
 }
 
@@ -1721,6 +1722,15 @@ function renderMobileTables(data){
       state.selectedTeam=button.dataset.mobileFullDetail;
       renderRail();
       document.getElementById('futuresRail')?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+  });
+
+  host.querySelectorAll('[data-mobile-collapse]').forEach(button=>{
+    button.onclick=event=>{
+      event.stopPropagation();
+      state.mobileExpandedTeam=null;
+      renderCommandCenter();
+      document.querySelector(`[data-mobile-team="${CSS.escape(button.dataset.mobileCollapse)}"]`)?.focus();
     };
   });
 }
@@ -1923,7 +1933,16 @@ function renderRail(){
   const rail=document.getElementById('futuresRail');
   const row=rowForTeam(state.selectedTeam);
 
-  if(!rail||!row)return;
+  if(!rail)return;
+
+  const workspace=document.getElementById('futuresWorkspace');
+  workspace?.classList.toggle('hasSelection',Boolean(row));
+  rail.hidden=!row;
+
+  if(!row){
+    rail.innerHTML='';
+    return;
+  }
 
   const content=
     state.railTab==='schedule'?renderRailSchedule(row):
@@ -1935,7 +1954,8 @@ function renderRail(){
   const rank=row.overall_rank??row.rank;
   const record=`${row.record?.wins??0}-${row.record?.losses??0}`;
 
-  rail.innerHTML=`<div class="futuresRailHead compactRailHead">
+  rail.innerHTML=`<button type="button" class="futuresRailClose" data-rail-close aria-label="Close ${esc(row.team)} details"><span aria-hidden="true">←</span><span class="futuresRailCloseLabel">Back to table</span></button>
+  <div class="futuresRailHead compactRailHead">
     ${teamLogo(row,'railTeamLogo')}
     <div class="compactTeamIdentity">
       <span class="compactTeamRank ${rankClass(rank)}">#${rank??'—'}</span>
@@ -1963,6 +1983,17 @@ function renderRail(){
         ensureScenarioUniverse();
       }
     };
+  });
+
+  rail.querySelector('[data-rail-close]')?.addEventListener('click',()=>{
+    const team=state.selectedTeam;
+    state.selectedTeam=null;
+    state.mobileExpandedTeam=null;
+    renderCommandCenter();
+    const target=document.querySelector(`[data-mobile-team="${CSS.escape(team)}"]`)
+      ||document.querySelector(`[data-fut-team="${CSS.escape(team)}"] .futTeamButton`);
+    target?.scrollIntoView({behavior:'smooth',block:'center'});
+    target?.focus();
   });
 
   if(state.railTab==='scenario'){
@@ -2144,9 +2175,7 @@ function renderCommandCenter(){
 
   let data=sortedVisibleRows();
 
-  if(!data.some(r=>r.team===state.selectedTeam)){
-    state.selectedTeam=data[0]?.team||null;
-  }
+  if(state.selectedTeam&&!data.some(r=>r.team===state.selectedTeam))state.selectedTeam=null;
 
   document.querySelectorAll('.tabs button').forEach(button=>{
     button.classList.toggle('active',button.dataset.mode===state.mode);
@@ -3096,6 +3125,7 @@ function enhance(){
 
   installStyles();
   installControls();
+  installSortControl();
   installWorkspace();
 
   document.querySelectorAll('.tabs button').forEach(button=>{
@@ -3261,6 +3291,183 @@ installSortControl();
       }
     }
   `;
+  document.head.appendChild(style);
+})();
+
+/* FUTURES_COMPACT_RESPONSIVE_CONTROLS_V3 */
+(function installCompactResponsiveControlsV3(){
+  if(typeof document==='undefined'||document.getElementById('futuresCompactResponsiveControlsV3'))return;
+
+  const style=document.createElement('style');
+  style.id='futuresCompactResponsiveControlsV3';
+  style.textContent=`
+    .hero{margin:10px 0 6px!important}
+    .hero h1{font-size:31px!important;line-height:1.08}
+    .tabs{margin:5px 0!important}
+    .tabs button{padding:7px 12px!important}
+    .freshnessGrid{margin:3px 0 5px!important;gap:6px!important}
+    .futuresRail[hidden]{display:none!important}
+    .futuresRailClose{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      width:100%;
+      margin:0 0 8px;
+      border:1px solid #315c88;
+      background:#102949;
+      color:#d9ebff;
+      border-radius:7px;
+      padding:7px 9px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .futuresRailClose>span:first-child{font-size:15px;line-height:1}
+    .mobileInlineClose{background:#0b1c35!important;color:#afc6e1!important}
+
+    @media(min-width:901px){
+      .freshnessGrid{
+        display:grid!important;
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+        align-items:stretch!important;
+      }
+      .freshnessGrid>.freshCard,
+      .modelStatusCard,
+      .marketStatusCard{
+        width:100%!important;
+        min-width:0!important;
+        max-width:none!important;
+        height:auto!important;
+      }
+      .compactMarketTable,
+      .compactMarketLead{width:100%!important;min-width:0!important}
+      .compactMarketHeader,
+      .compactMarketRow{
+        width:100%!important;
+        grid-template-columns:32px repeat(4,minmax(0,1fr))!important;
+        min-height:13px!important;
+        line-height:1!important;
+        gap:3px!important;
+      }
+      .compactMarketRow b{font-size:8.5px!important;line-height:1!important}
+      .compactMarketBook .futBookLogo{width:16px!important;height:12px!important;padding:1px!important}
+      .compactMarketLead{min-height:14px!important;margin-bottom:0!important}
+      .compactMarketLead span{font-size:8px!important}
+      .compactMarketLead b{font-size:10px!important}
+      .futuresCommandControls{
+        grid-template-columns:140px minmax(180px,1fr) minmax(410px,2fr) 125px 148px!important;
+        gap:6px!important;
+        margin:4px 0 6px!important;
+      }
+      .futuresCommandControls .futSearchControl{grid-column:auto!important}
+      .futBookFilters{
+        min-width:0!important;
+        min-height:32px!important;
+        padding:2px 7px!important;
+        gap:4px 7px!important;
+        flex-wrap:nowrap!important;
+      }
+      .futBookFilters legend{font-size:8px!important;line-height:1!important}
+      .futBookFilters label{white-space:nowrap!important}
+      .futBookFilters>small{
+        flex:1 1 auto!important;
+        white-space:nowrap!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+      }
+      #futReset{font-size:10px!important;padding:0 8px!important;white-space:nowrap!important}
+      .futuresWorkspace:not(.hasSelection){grid-template-columns:minmax(0,1fr)!important}
+      .futuresRailCloseLabel{display:none}
+      .futuresRailClose{width:30px;height:28px;padding:0;justify-content:center;margin-left:auto}
+    }
+
+    @media(min-width:901px) and (max-width:1180px){
+      .futuresCommandControls{
+        grid-template-columns:130px minmax(170px,1fr) 120px 142px!important;
+        grid-template-areas:
+          "conference search sort reset"
+          "books books books books"!important;
+      }
+      .futuresCommandControls>label:first-child{grid-area:conference}
+      .futuresCommandControls .futSearchControl{grid-area:search!important}
+      .futuresCommandControls .futBookFilters{grid-area:books}
+      .futuresCommandControls .futSortControl{grid-area:sort}
+      #futReset{grid-area:reset}
+    }
+
+    @media(max-width:900px){
+      .shell{padding:8px!important}
+      .hero{margin:8px 0 4px!important}
+      .hero h1{font-size:25px!important}
+      .tabs{gap:5px!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding-bottom:2px}
+      .tabs button{flex:0 0 auto;padding:7px 10px!important;font-size:11px!important}
+      .futuresCommandControls{
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+        grid-template-areas:
+          "conference sort"
+          "search search"
+          "books books"
+          "reset reset"!important;
+        gap:6px!important;
+        margin:5px 0!important;
+      }
+      .futuresCommandControls>label:first-child{grid-area:conference}
+      .futuresCommandControls .futSearchControl{grid-area:search!important}
+      .futuresCommandControls .futBookFilters{grid-area:books}
+      .futuresCommandControls .futSortControl{grid-area:sort!important}
+      #futReset{grid-area:reset!important;height:32px!important;min-height:32px!important}
+      .futuresCommandControls select,
+      .futuresCommandControls input{height:34px!important;padding:6px 8px!important;font-size:12px!important}
+      .futBookFilters{padding:5px 7px!important;gap:5px 8px!important;min-width:0!important}
+      .futBookFilters>small{flex-basis:100%!important;font-size:8px!important;line-height:1.2}
+      .modelStatusCard #modelFreshRows{
+        display:grid!important;
+        gap:3px!important;
+      }
+      .modelStatusCard #modelFreshRows .freshRow{
+        display:grid!important;
+        grid-template-columns:minmax(105px,.8fr) minmax(0,1.2fr)!important;
+        gap:8px!important;
+        align-items:start!important;
+        padding:2px 0!important;
+      }
+      .modelStatusCard #modelFreshRows .freshRow span:first-child,
+      .modelStatusCard #modelFreshRows .freshRow span:last-child{
+        min-width:0!important;
+        white-space:normal!important;
+        overflow:visible!important;
+        text-overflow:clip!important;
+      }
+      .futuresRail{
+        order:0!important;
+        margin:0 0 8px!important;
+        padding:8px!important;
+      }
+      .futuresRailClose{
+        position:sticky;
+        top:0;
+        z-index:20;
+        min-height:40px;
+        margin:0 0 8px;
+        font-size:12px;
+      }
+      .futuresWorkspace.hasSelection .card{display:none!important}
+      .futuresWorkspace.hasSelection .futuresRail{display:block!important}
+      .mobileDetailRow>td>div{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+      .mobileDetailRow button{min-height:38px!important}
+    }
+
+    @media(max-width:430px){
+      .futBookFilters label{font-size:8px!important}
+      .futBookFilters .futBookLogo{width:18px!important;height:14px!important}
+      .mobileFuturesTable th,.mobileFuturesTable td{padding:7px 4px!important}
+      .mobileFuturesTable th:first-child,.mobileFuturesTable td:first-child{width:36%!important}
+      .mobileFuturesTable th:nth-child(2),.mobileFuturesTable td:nth-child(2){width:15%!important}
+      .mobileFuturesTable th:nth-child(3),.mobileFuturesTable td:nth-child(3){width:30%!important}
+      .mobileFuturesTable th:nth-child(4),.mobileFuturesTable td:nth-child(4){width:19%!important}
+    }
+  `;
+
   document.head.appendChild(style);
 })();
 
@@ -5158,5 +5365,7 @@ installSortControl();
   document.head.appendChild(style);
 })();
 
+const compactResponsiveStyles=document.getElementById('futuresCompactResponsiveControlsV3');
+if(compactResponsiveStyles)document.head.appendChild(compactResponsiveStyles);
 
 })();
