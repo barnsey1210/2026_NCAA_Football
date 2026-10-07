@@ -26,8 +26,18 @@ MARKET_CONTRACT_PATH = Path(
         str(DATA_ROOT / "data/markets/current_futures_market_2026.json"),
     )
 ).expanduser().resolve()
-SEASON_MODEL_PATH = DATA_ROOT / "data/site/season_simulations_2026.json"
-PLAYOFF_MODEL_PATH = DATA_ROOT / "data/site/playoff_model_2026.json"
+SEASON_MODEL_PATH = Path(
+    os.environ.get(
+        "NCAAF_SEASON_MODEL_PATH",
+        str(DATA_ROOT / "data/site/season_simulations_2026.json"),
+    )
+).expanduser().resolve()
+PLAYOFF_MODEL_PATH = Path(
+    os.environ.get(
+        "NCAAF_PLAYOFF_MODEL_PATH",
+        str(DATA_ROOT / "data/site/playoff_model_2026.json"),
+    )
+).expanduser().resolve()
 BETS_PATH = DATA_ROOT / "data/site/betting_activity_view.json"
 WIN_MOVEMENT_PATH = DATA_ROOT / "market_win_totals_movement.csv"
 TITLE_MOVEMENT_PATH = DATA_ROOT / "market_conference_futures_movement.csv"

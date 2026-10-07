@@ -51,7 +51,9 @@ class CompletedGameFreezingTests(unittest.TestCase):
         by_team = {x["team"]: x for x in out["teams"]}
         self.assertGreaterEqual(by_team["A"]["avg_total_wins"], 1.0)
         self.assertGreaterEqual(by_team["A"]["avg_conference_wins"], 1.0)
-        self.assertEqual(by_team["A"]["win_distribution"], [{"wins": 1, "probability": 1.0}])
+        # The frozen win is present in every trial; the future game remains a
+        # genuine Normal-margin draw under Dynamic v1.
+        self.assertTrue(all(row["wins"] >= 1 for row in by_team["A"]["win_distribution"]))
 
     def test_completed_results_are_seed_independent(self):
         winners = []

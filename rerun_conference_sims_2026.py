@@ -127,6 +127,14 @@ def american_from_prob(p: float) -> Optional[int]:
 WIN_PROB_LOGISTIC_SCALE = 6.5
 WIN_PROB_MODEL_VERSION = "logistic_margin_scale_6_5_v1"
 
+# Frozen Dynamic Conference/Season Simulator v1 parameters.  These govern only
+# season-path uncertainty; they do not alter Standard/Shadow projections.
+DYNAMIC_MODEL_VERSION = "dynamic_conference_season_v1"
+GAME_SIGMA = 15.7
+UPDATE_BETA = 0.09
+WEEKLY_STRENGTH_SHOCK_SD = 1.5
+SURPRISE_CAP = 35.0
+
 
 def apply_current_simulation_inputs(
     db: Dict[str, Any],
@@ -485,6 +493,113 @@ def completed_game_winner(game: Dict[str, Any]) -> Optional[str]:
     return game.get("home_team") if fnum(home_score) > fnum(away_score) else game.get("away_team")
 
 
+def game_week(game: Dict[str, Any]) -> int:
+    return to_int(game.get("week", game.get("game_week")), 999)
+
+
+def game_date(game: Dict[str, Any]) -> str:
+    return str(game.get("start_date") or game.get("start_time") or game.get("kickoff") or game.get("date") or "")
+
+
+def dynamic_base_margin_home(game: Dict[str, Any], teams: Dict[str, Dict[str, Any]]) -> float:
+    """Point-in-time canonical home margin, frozen before a trial begins."""
+    margin = fnum(game.get("projected_margin_home"), float("nan"))
+    if math.isfinite(margin):
+        return margin
+    p_home = fnum(game.get("win_prob_home"), float("nan"))
+    if math.isfinite(p_home) and 0.0001 < p_home < 0.9999:
+        return GAME_SIGMA * normal_inverse_cdf(p_home)
+    return estimate_margin_home(
+        teams.get(game.get("home_team"), {}),
+        teams.get(game.get("away_team"), {}),
+        bool(game.get("neutral_site")),
+    )
+
+
+def normal_inverse_cdf(p: float) -> float:
+    """Acklam approximation, avoiding a scipy dependency in production."""
+    # Python's standard-library NormalDist is stable and available in runtime.
+    from statistics import NormalDist
+    return NormalDist().inv_cdf(max(1e-9, min(1.0 - 1e-9, p)))
+
+
+def prepare_dynamic_regular_season(db: Dict[str, Any]) -> Dict[str, Any]:
+    teams = {t.get("team"): t for t in db.get("teams", []) if t.get("team")}
+    games = sorted(build_regular_games(db), key=lambda g: (game_week(g), game_date(g), str(g.get("game_id") or "")))
+    completed = [g for g in games if completed_game_winner(g) is not None]
+    future_by_week: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+    base_margins = {}
+    for g in games:
+        if completed_game_winner(g) is None:
+            future_by_week[game_week(g)].append(g)
+            base_margins[scenario_game_key(g)] = dynamic_base_margin_home(g, teams)
+    return {
+        "teams": teams,
+        "games": games,
+        "completed": completed,
+        "future_by_week": dict(sorted(future_by_week.items())),
+        "base_margins": base_margins,
+    }
+
+
+def simulate_dynamic_regular_season_trial(
+    prepared: Dict[str, Any],
+    rng: random.Random,
+    forced_results: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
+    """Simulate one chronological season path and return its evolved state."""
+    teams = prepared["teams"]
+    latent = {team: 0.0 for team in teams}
+    wins, losses, conf_wins = Counter(), Counter(), Counter()
+    results: Dict[Tuple[str, str], str] = {}
+    margins: Dict[Tuple[str, str], float] = {}
+
+    def record(game: Dict[str, Any], margin_home: float) -> None:
+        away, home = game.get("away_team"), game.get("home_team")
+        winner, loser = (home, away) if margin_home > 0 else (away, home)
+        results[(away, home)] = winner
+        margins[(away, home)] = margin_home
+        wins[winner] += 1
+        losses[loser] += 1
+        ac, hc = norm_conf(game.get("away_conference")), norm_conf(game.get("home_conference"))
+        if bool(game.get("is_conference_game")) and ac == hc:
+            conf_wins[winner] += 1
+
+    for game in prepared["completed"]:
+        margin = fnum(game.get("home_score", game.get("home_points"))) - fnum(game.get("away_score", game.get("away_points")))
+        record(game, margin)
+
+    for week, games in prepared["future_by_week"].items():
+        # Every modeled team evolves every week, including teams on a bye.
+        for team in latent:
+            latent[team] += rng.gauss(0.0, WEEKLY_STRENGTH_SHOCK_SD)
+        for game in games:
+            away, home = game.get("away_team"), game.get("home_team")
+            expected = prepared["base_margins"][scenario_game_key(game)]
+            expected += latent.get(home, 0.0) - latent.get(away, 0.0)
+            actual = rng.gauss(expected, GAME_SIGMA)
+            forced = forced_winner_for_game(game, forced_results)
+            if forced is not None:
+                actual = max(0.01, abs(actual)) if forced == home else -max(0.01, abs(actual))
+            if actual == 0:
+                actual = 0.01 if rng.random() < 0.5 else -0.01
+            record(game, actual)
+            surprise = max(-SURPRISE_CAP, min(SURPRISE_CAP, actual - expected))
+            if home in latent:
+                latent[home] += UPDATE_BETA * surprise
+            if away in latent:
+                latent[away] -= UPDATE_BETA * surprise
+
+    evolved_teams = {name: deepcopy(row) for name, row in teams.items()}
+    for name, row in evolved_teams.items():
+        row["combo"] = team_rating(row) + latent[name]
+    return {
+        "wins": wins, "losses": losses, "conf_wins": conf_wins,
+        "results": results, "margins": margins, "latent": latent,
+        "evolved_teams": evolved_teams,
+    }
+
+
 def expected_conf_games(conf: str, team: str) -> Optional[int]:
     if conf == "ACC":
         return 8 if team in ACC_EIGHT_GAME_TEAMS_2026 else 9
@@ -540,6 +655,7 @@ def rerun_sims(
     title_rules = load_eligibility_rules(Path("conference_eligibility_rules_2026.csv"))
 
     regular_games = build_regular_games(db)
+    dynamic_prepared = prepare_dynamic_regular_season(db)
     conf_games_by_conf: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for g in regular_games:
         ac, hc = norm_conf(g.get("away_conference")), norm_conf(g.get("home_conference"))
@@ -554,34 +670,12 @@ def rerun_sims(
     conf_title = Counter()
     title_matchups = Counter()
 
-    # Precompute regular game probabilities.
-    game_probs = []
-    for g in regular_games:
-        p_home = game_home_prob(g, team_by_name, sigma)
-        game_probs.append((g, p_home))
-
     for _ in range(sims):
-        total_wins = Counter()
-        conf_wins = Counter()
-        simulated_results: Dict[Tuple[str, str], str] = {}
-
-        for g, p_home in game_probs:
-            away, home = g.get("away_team"), g.get("home_team")
-            actual_winner = completed_game_winner(g)
-            if actual_winner is not None:
-                winner = actual_winner
-            else:
-                # Always consume the canonical random draw so paired WIN/LOSS
-                # scenarios preserve common random numbers downstream.
-                simulated_winner = home if rng.random() < p_home else away
-                forced_winner = forced_winner_for_game(g, forced_results)
-                winner = forced_winner if forced_winner is not None else simulated_winner
-            simulated_results[(away, home)] = winner
-            total_wins[winner] += 1
-
-            ac, hc = norm_conf(g.get("away_conference")), norm_conf(g.get("home_conference"))
-            if bool(g.get("is_conference_game")) and ac == hc and winner in {away, home}:
-                conf_wins[winner] += 1
+        trial = simulate_dynamic_regular_season_trial(dynamic_prepared, rng, forced_results)
+        total_wins = trial["wins"]
+        conf_wins = trial["conf_wins"]
+        simulated_results = trial["results"]
+        evolved_teams = trial["evolved_teams"]
 
         for t in team_by_name:
             tw = total_wins.get(t, 0)
@@ -596,7 +690,7 @@ def rerun_sims(
             eligible = [t for t in names if eligible_for_title(conf, t, title_rules)]
             if len(eligible) < 2:
                 continue
-            ranked = rank_conference_teams(conf, eligible, conf_wins, team_by_name, simulated_results, conf_games_by_conf.get(conf, []), rng)
+            ranked = rank_conference_teams(conf, eligible, conf_wins, evolved_teams, simulated_results, conf_games_by_conf.get(conf, []), rng)
             no1, no2 = ranked[0], ranked[1]
             make_title[no1] += 1
             make_title[no2] += 1
@@ -606,11 +700,11 @@ def rerun_sims(
             cobj = next((c for c in db.get("conferences", []) if c.get("conference") == conf), {})
             cg = cobj.get("championship_game") or {}
             neutral = bool(cg.get("neutral_site"))
-            home_team = team_by_name.get(no1, {})
-            away_team = team_by_name.get(no2, {})
+            home_team = evolved_teams.get(no1, {})
+            away_team = evolved_teams.get(no2, {})
             margin_home = estimate_margin_home(home_team, away_team, neutral)
-            p_home = canonical_home_prob_from_margin(margin_home)
-            champ = no1 if rng.random() < p_home else no2
+            title_margin = rng.gauss(margin_home, GAME_SIGMA)
+            champ = no1 if title_margin > 0 else no2
             conf_title[champ] += 1
 
     # Update team rows globally.
@@ -679,12 +773,18 @@ def rerun_sims(
     db.setdefault("meta", {})["conference_sims_rerun_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     db["meta"]["conference_sims_num_trials"] = sims
     db["meta"]["conference_sims_model"] = (
-        "Completed games are frozen to canonical final scores. Remaining games use "
-        "Monte Carlo from canonical Game Projection Consensus margins/probabilities, "
-        "and hypothetical "
-        "conference title games; all model margins convert to win probability with "
-        "logistic scale 6.5."
+        "Dynamic Conference/Season Simulator v1: completed games are frozen; future games "
+        "run chronologically from canonical projected margins with Normal game variance, "
+        "weekly all-team latent shocks, antisymmetric surprise updates, and evolved-strength "
+        "conference championship games."
     )
+    db["meta"]["simulation_model_version"] = DYNAMIC_MODEL_VERSION
+    db["meta"]["dynamic_simulation_parameters"] = {
+        "game_sigma": GAME_SIGMA,
+        "update_beta": UPDATE_BETA,
+        "weekly_strength_shock_sd": WEEKLY_STRENGTH_SHOCK_SD,
+        "surprise_cap": SURPRISE_CAP,
+    }
     db["meta"]["win_probability_model_version"] = WIN_PROB_MODEL_VERSION
     db["meta"]["win_probability_logistic_scale"] = WIN_PROB_LOGISTIC_SCALE
     return db

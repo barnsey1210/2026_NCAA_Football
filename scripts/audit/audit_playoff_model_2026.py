@@ -10,6 +10,7 @@ EXPECTED_TRIALS = 20000
 EXPECTED_PROB_VERSION = "logistic_margin_scale_6_5_v1"
 EXPECTED_SCALE = 6.5
 EXPECTED_HFA = 2.6
+EXPECTED_SEASON_MODEL = "dynamic_conference_season_v1"
 
 G6_CONFS = {"American", "CUSA", "MAC", "MW", "PAC12", "Sun Belt"}
 
@@ -58,6 +59,14 @@ def main():
             "wrong first-round HFA: "
             f"{meta.get('fixed_home_field_advantage')}"
         )
+
+    if meta.get("season_simulation_model_version") != EXPECTED_SEASON_MODEL:
+        fail(f"wrong season model version: {meta.get('season_simulation_model_version')}")
+
+    params = meta.get("dynamic_simulation_parameters") or {}
+    expected_params = {"game_sigma": 15.7, "update_beta": 0.09, "weekly_strength_shock_sd": 1.5, "surprise_cap": 35.0}
+    if params != expected_params:
+        fail(f"wrong dynamic simulation parameters: {params}")
 
     if len(field) != 12:
         fail(f"projected CFP field has {len(field)} teams instead of 12")

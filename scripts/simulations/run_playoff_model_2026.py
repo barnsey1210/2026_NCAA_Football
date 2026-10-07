@@ -174,8 +174,7 @@ def game_winner(a: str, b: str, teams: Dict[str, dict], rng: random.Random, sigm
     elif home == a:
         margin_b -= FIXED_HFA
 
-    p_b = canonical_win_prob_from_margin(margin_b)
-    return b if rng.random() < p_b else a
+    return b if rng.gauss(margin_b, CONF.GAME_SIGMA) > 0 else a
 
 
 def select_field(
@@ -320,6 +319,7 @@ def run_model(
 
     title_rules = CONF.load_eligibility_rules(ROOT / "conference_eligibility_rules_2026.csv")
     game_probs = [(g, CONF.game_home_prob(g, teams, sigma)) for g in games]
+    dynamic_prepared = CONF.prepare_dynamic_regular_season(db)
 
     scenario = None
     if capture_scenarios:
@@ -380,54 +380,24 @@ def run_model(
     }
 
     for trial_idx in range(sims):
-        wins, losses, conf_wins = Counter(), Counter(), Counter()
-        results, played = {}, []
+        season_trial = CONF.simulate_dynamic_regular_season_trial(
+            dynamic_prepared, rng, forced_results
+        )
+        wins = season_trial["wins"]
+        losses = season_trial["losses"]
+        conf_wins = season_trial["conf_wins"]
+        results = season_trial["results"]
+        evolved_teams = season_trial["evolved_teams"]
+        played = []
         opponents, sos_opponents = defaultdict(list), defaultdict(list)
         defeated, lost_to = defaultdict(list), defaultdict(list)
         mov_values, mol_values, raw_game_control = defaultdict(list), defaultdict(list), defaultdict(list)
         for g, p_home in game_probs:
             away, home = g.get("away_team"), g.get("home_team")
-            if g.get("cfbd_completed") and g.get("away_score") is not None and g.get("home_score") is not None:
-                margin_home = fnum(g.get("home_score")) - fnum(g.get("away_score"))
-            else:
-                expected = g.get("projected_margin_home")
-                if expected is None:
-                    if away in teams and home in teams:
-                        expected = CONF.estimate_margin_home(
-                            teams[home],
-                            teams[away],
-                            bool(g.get("neutral_site")),
-                        )
-                    else:
-                        # FBS-v-FCS games already receive their canonical
-                        # probability from CONF.game_home_prob(), including the
-                        # explicit 98/2 fallback when no projection exists.
-                        # Convert that probability back to the equivalent
-                        # logistic margin solely for resume-margin simulation.
-                        clipped_p = max(1e-6, min(1.0 - 1e-6, p_home))
-                        expected = WIN_PROB_LOGISTIC_SCALE * math.log(
-                            clipped_p / (1.0 - clipped_p)
-                        )
-
-                # game_probs is sourced from CONF.game_home_prob(), which uses
-                # the canonical logistic /6.5 probability for consensus games.
-                margin_home = simulated_margin_with_canonical_winner(
-                    fnum(expected),
-                    p_home,
-                    rng,
-                    sigma,
-                )
-
-                forced_winner = CONF.forced_winner_for_game(g, forced_results)
-                if forced_winner is not None:
-                    magnitude = max(0.01, abs(margin_home))
-                    margin_home = magnitude if forced_winner == home else -magnitude
+            margin_home = season_trial["margins"][(away, home)]
 
             winner, loser = (home, away) if margin_home > 0 else (away, home)
             margin = abs(margin_home)
-            wins[winner] += 1
-            losses[loser] += 1
-            results[(away, home)] = winner
             # CFP opponent-WP/SOS is defined over the modeled FBS universe.
             # FBS-v-FCS games still count toward record, margin, Game Control,
             # quality/bad-loss logic, etc., but an unmodeled FCS participant
@@ -450,9 +420,6 @@ def run_model(
             raw_game_control[winner].append(winner_gc)
             raw_game_control[loser].append(loser_gc)
             played.append((winner, loser, margin))
-            ac, hc = CONF.norm_conf(g.get("away_conference")), CONF.norm_conf(g.get("home_conference"))
-            if g.get("is_conference_game") and ac == hc:
-                conf_wins[winner] += 1
 
         if scenario is not None:
             team_count = len(scenario["team_order"])
@@ -480,19 +447,13 @@ def run_model(
             eligible = [t for t in names if CONF.eligible_for_title(conf, t, title_rules)]
             if len(eligible) < 2:
                 continue
-            ranked_conf = CONF.rank_conference_teams(conf, eligible, conf_wins, teams, results, conf_games[conf], rng)
+            ranked_conf = CONF.rank_conference_teams(conf, eligible, conf_wins, evolved_teams, results, conf_games[conf], rng)
             a, b = ranked_conf[0], ranked_conf[1]
             expected_margin_b = (
-                CONF.team_rating(teams[b]) -
-                CONF.team_rating(teams[a])
+                CONF.team_rating(evolved_teams[b]) -
+                CONF.team_rating(evolved_teams[a])
             )
-            p_b = canonical_win_prob_from_margin(expected_margin_b)
-            margin_b = simulated_margin_with_canonical_winner(
-                expected_margin_b,
-                p_b,
-                rng,
-                sigma,
-            )
+            margin_b = rng.gauss(expected_margin_b, CONF.GAME_SIGMA)
             champ, runner = (b, a) if margin_b > 0 else (a, b)
             margin = max(0.01, abs(margin_b))
             champs[conf] = champ
@@ -552,7 +513,7 @@ def run_model(
         for t in teams:
             metrics[t]["top25_wins"] = float(sum(1 for o in defeated[t] if o in official_top25))
         apply_validated_resume_score(metrics)
-        ranked = sorted(teams, key=lambda t: (metrics[t]["resume_score"], CONF.team_rating(teams[t])), reverse=True)
+        ranked = sorted(teams, key=lambda t: (metrics[t]["resume_score"], CONF.team_rating(evolved_teams[t])), reverse=True)
         for rank, t in enumerate(ranked, 1):
             rank_sums[t] += rank
             if rank <= 25: top25_count[t] += 1
@@ -580,9 +541,9 @@ def run_model(
 
         champion = simulate_bracket(
             field,
-            teams,
+            evolved_teams,
             rng,
-            sigma,
+            CONF.GAME_SIGMA,
             counters,
         )
 
@@ -631,7 +592,7 @@ def run_model(
     expected_ranked = [r["team"] for r in sorted(rows, key=lambda r: r["projected_cfp_rank"])]
     projected_field, projected_auto = select_field(expected_ranked, expected_champs, teams)
     db["playoff_model"] = {
-        "schema_version": "cfp-2026-v7-g6-seed12-causal-percentile-resume",
+        "schema_version": "cfp-2026-v8-dynamic-season-state",
         "built_at": datetime.now(timezone.utc).isoformat(),
         "trials": sims,
         "metadata": {
@@ -650,17 +611,23 @@ def run_model(
             "historical_validation": "2021-24 leave-one-season-out: 81.3% Top-12 recall, 82.5% Top-25 recall, 4.86 Top-25 MAE, 0.808 Spearman. Championship bonuses are applied only because these simulations include the completed conference-title round.",
             "top25_status": official_top25_status,
             "game_model": (
-                "Canonical win probabilities use logistic margin scale 6.5. "
-                "Scheduled games use Game Projection Consensus margins when available; "
-                "hypothetical conference-title and CFP matchups use Site Composite "
-                "rating margins. CFP first-round hosts receive fixed 2.6 HFA; later "
-                "rounds are neutral. Legacy Normal sigma is retained only for simulated "
-                "margin magnitude used by validated CFP resume metrics."
+                "Dynamic Conference/Season Simulator v1 supplies chronological trial outcomes "
+                "and evolved team strengths. Scheduled games remain anchored to canonical Game "
+                "Projection Consensus margins. Conference-title and CFP matchups use each trial's "
+                "evolved strength; CFP first-round hosts receive fixed 2.6 HFA and later rounds "
+                "are neutral."
             ),
+            "season_simulation_model_version": CONF.DYNAMIC_MODEL_VERSION,
+            "dynamic_simulation_parameters": {
+                "game_sigma": CONF.GAME_SIGMA,
+                "update_beta": CONF.UPDATE_BETA,
+                "weekly_strength_shock_sd": CONF.WEEKLY_STRENGTH_SHOCK_SD,
+                "surprise_cap": CONF.SURPRISE_CAP,
+            },
             "win_probability_model_version": WIN_PROB_MODEL_VERSION,
             "win_probability_logistic_scale": WIN_PROB_LOGISTIC_SCALE,
             "fixed_home_field_advantage": FIXED_HFA,
-            "resume_margin_sigma": sigma,
+            "resume_margin_sigma": CONF.GAME_SIGMA,
             "results_source": db.get("meta", {}).get("results_source"),
             "completed_finals_frozen": db.get("meta", {}).get("completed_finals_frozen", 0),
         },
@@ -686,7 +653,12 @@ def run_model(
                 "away_is_fbs": game.get("away_team") in teams,
                 "home_is_fbs": game.get("home_team") in teams,
                 "is_conference_game": bool(game.get("is_conference_game")),
-                "home_win_probability": round(float(p_home), 8),
+                "home_win_probability": round(
+                    CONF.normal_cdf(
+                        CONF.dynamic_base_margin_home(game, teams) / CONF.GAME_SIGMA
+                    ),
+                    8,
+                ),
                 "home_win_mask_index": game_idx,
             })
 
@@ -699,8 +671,8 @@ def run_model(
             "valid_trials": scenario["valid_trials"],
             "seed": seed,
             "sigma": sigma,
-            "win_probability_model_version": WIN_PROB_MODEL_VERSION,
-            "win_probability_logistic_scale": WIN_PROB_LOGISTIC_SCALE,
+            "win_probability_model_version": CONF.DYNAMIC_MODEL_VERSION,
+            "game_sigma": CONF.GAME_SIGMA,
             "encoding": {
                 "bit_order": "little_endian_within_byte",
                 "mask_bytes": scenario["mask_bytes"],
@@ -812,7 +784,8 @@ def main():
     print(f"Playoff model: {args.sims} trials")
     print(f"Source DB: {db_path}")
     print(f"Wrote {out}")
-    print(f"Win probability model: {WIN_PROB_MODEL_VERSION}")
+    print(f"Season model: {CONF.DYNAMIC_MODEL_VERSION}")
+    print(f"Game sigma: {CONF.GAME_SIGMA}")
     print(f"First-round HFA: {FIXED_HFA}")
 
     for row in db["playoff_model"]["teams"][:15]:
