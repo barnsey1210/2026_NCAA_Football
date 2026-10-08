@@ -1326,11 +1326,11 @@ tr:hover td.context-group{background:#202d39}
 }
 .model-fit-col{width:112px;min-width:112px;max-width:112px;text-align:center;box-sizing:border-box}
 .model-fit-stack{display:flex;flex-direction:column;gap:3px;align-items:stretch}
-.model-fit-team{display:grid;grid-template-columns:18px 7px 36px 22px;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
-.model-fit-team .team-logo-holder{--team-logo-size:17px}
-.model-fit-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-.model-fit-dot.GREEN{background:var(--green)}.model-fit-dot.YELLOW{background:var(--yellow)}.model-fit-dot.RED{background:var(--red)}.model-fit-dot.GRAY{background:#687786}
-.model-fit-value{font-size:11px;font-weight:900}.model-fit-value.positive{color:var(--green)}.model-fit-value.neutral{color:var(--yellow)}.model-fit-value.negative{color:var(--red)}
+.model-fit-team{display:grid;grid-template-columns:28px 38px 32px;grid-template-rows:26px;align-items:center;justify-content:center;column-gap:3px;min-height:26px;white-space:nowrap;font-weight:950;line-height:1}
+.model-fit-team .team-logo-holder{--team-logo-size:24px;grid-column:1;grid-row:1;justify-self:center;align-self:center}
+.model-fit-value{grid-column:2;grid-row:1;min-width:38px;text-align:left;font-size:10px;font-weight:950;font-variant-numeric:tabular-nums;justify-self:start;align-self:center}.model-fit-value.positive{color:var(--green)}.model-fit-value.neutral{color:var(--yellow)}.model-fit-value.negative{color:var(--red)}
+.model-fit-rank{grid-column:3;grid-row:1;min-width:22px;padding:3px 3px;justify-self:end;align-self:center;border-radius:4px;background:#071019;box-shadow:0 0 0 1px rgba(255,255,255,.22);text-align:center;font-size:11px;font-weight:950;font-variant-numeric:tabular-nums}
+.model-fit-rank.rank-tier-1{color:#39e89a}.model-fit-rank.rank-tier-2{color:#78e6ad}.model-fit-rank.rank-tier-3{color:#f4cd4b}.model-fit-rank.rank-tier-4{color:#ff8a5b}.model-fit-rank.rank-tier-5{color:#ff4d63}
 .model-fit-team.disagree .model-fit-value:after{content:'!';color:var(--yellow);margin-left:1px}
 
 .state-col{
@@ -3975,6 +3975,14 @@ function modelFitNumber(value){
   return Number.isFinite(n)?`${n>=0?'+':''}${n.toFixed(1)}`:'—';
 }
 
+function modelFitDisplayNumber(value){
+  if(value===null || value===undefined || value==='') return '—';
+  const n=Number(value);
+  if(!Number.isFinite(n)) return '—';
+  const rounded=Math.round(n);
+  return `${rounded>=0?'+':''}${rounded}`;
+}
+
 function modelFitState(value){
   return String(value||'UNAVAILABLE').replaceAll('_',' ');
 }
@@ -4004,7 +4012,7 @@ function modelFitTeam(team,row){
   const disagree=disagreement?' disagree':'';
   const value=fit.performance_vs_model;
   const rank=fit.performance_vs_model_rank;
-  return `<span class="model-fit-team${disagree}" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="model-fit-dot ${esc(fit.model_fit_status||'GRAY')}"></span><span class="model-fit-value ${performanceValueClass(value)}">${modelFitNumber(value)}</span><span class="team-composite-rank ${compositeRankClass(rank)}">${rank?esc(rank):'—'}</span></span>`;
+  return `<span class="model-fit-team${disagree}" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="model-fit-value ${performanceValueClass(value)}">${modelFitDisplayNumber(value)}</span><span class="model-fit-rank ${compositeRankClass(rank)}">${rank?esc(rank):'—'}</span></span>`;
 }
 
 function modelFitCell(game){

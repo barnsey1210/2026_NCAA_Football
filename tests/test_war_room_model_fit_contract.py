@@ -70,10 +70,24 @@ class WarRoomModelFitContractTests(unittest.TestCase):
         self.assertIn("if(n>=2) return 'positive'", source)
         self.assertIn("if(n<=-2) return 'negative'", source)
         self.assertIn("compositeRankClass(rank)", source)
-        self.assertIn('<span class="team-composite-rank ${compositeRankClass(rank)}">${rank?esc(rank):\'—\'}</span>', source)
+        self.assertIn('<span class="model-fit-rank ${compositeRankClass(rank)}">${rank?esc(rank):\'—\'}</span>', source)
         self.assertNotIn("'#'+esc(rank)", source)
-        self.assertNotIn("model-fit-rank", source)
         self.assertIn("fit.performance_vs_model", source)
+
+    def test_perf_presentation_matches_l2_scale_without_status_dot(self):
+        source = PAGE.read_text()
+        self.assertIn(".model-fit-team .team-logo-holder{--team-logo-size:24px", source)
+        self.assertIn(".model-fit-value{grid-column:2;grid-row:1;min-width:38px;text-align:left;font-size:10px;font-weight:950", source)
+        self.assertIn(".model-fit-rank{grid-column:3;grid-row:1;min-width:22px;padding:3px 3px", source)
+        self.assertNotIn("model-fit-dot", source)
+
+    def test_perf_primary_value_is_signed_whole_number_but_tooltip_keeps_precision(self):
+        source = PAGE.read_text()
+        self.assertIn("const rounded=Math.round(n);", source)
+        self.assertIn("${rounded>=0?'+':''}${rounded}", source)
+        self.assertIn("${modelFitDisplayNumber(value)}", source)
+        self.assertIn("`Performance vs Model ${modelFitNumber(fit.performance_vs_model)}`", source)
+        self.assertIn("return Number.isFinite(n)?`${n>=0?'+':''}${n.toFixed(1)}`:'—';", source)
 
     def test_selected_week_health_pending_complete_degraded_bye_and_no_sample(self):
         schedule = [
