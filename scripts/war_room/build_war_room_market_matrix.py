@@ -339,6 +339,44 @@ def load_team_composite_ranks(path):
     return ranks
 
 
+def load_team_l2_trends(path):
+    """Load the canonical Ratings-page L2 values without recalculating them."""
+    payload = load_json(path, {})
+    rows = {}
+    for row in payload.get("teams", []):
+        team = normalize_team(row.get("team"))
+        change = number(row.get("l2_change"))
+        rank = number(row.get("l2_movement_rank"))
+        if (
+            not team
+            or change is None
+            or rank is None
+            or not float(rank).is_integer()
+            or not 1 <= rank <= 138
+        ):
+            continue
+        rank = int(rank)
+        rows[team] = {
+            "team": team,
+            "l2_change": change,
+            "l2_rank": rank,
+        }
+    definition = payload.get("l2_definition") or {}
+    return rows, {
+        "status": (
+            "AVAILABLE" if len(rows) == 138
+            else "PARTIAL" if rows
+            else "UNAVAILABLE"
+        ),
+        "source": "ratings_view.teams.l2_change/l2_movement_rank",
+        "snapshot_date": payload.get("snapshot_date"),
+        "baseline_snapshot_date": definition.get("baseline_snapshot_date"),
+        "method": definition.get("method"),
+        "rank_method": definition.get("movement_rank_method"),
+        "team_count": len(rows),
+    }
+
+
 def load_team_model_fit(path):
     payload = load_json(path, {})
     by_week = {}
@@ -2717,6 +2755,7 @@ def main():
 
     fbs_teams = load_fbs_team_universe()
     team_composite_ranks = load_team_composite_ranks(RATINGS_VIEW)
+    team_l2_trends, l2_source = load_team_l2_trends(RATINGS_VIEW)
     team_model_fit = load_team_model_fit(TEAM_GAME_EVALUATIONS)
     team_injury_impact, injury_source = load_team_injury_impact(
         CFBDEPTH_INJURY_IMPACT
@@ -3321,6 +3360,14 @@ def main():
                 ),
                 "source": "ratings_view.teams.overall_rank",
             },
+            "l2_trend": {
+                "away": team_l2_trends.get(
+                    normalize_team(game.get("away_team"))
+                ),
+                "home": team_l2_trends.get(
+                    normalize_team(game.get("home_team"))
+                ),
+            },
             "model_fit": {
                 "away": compact_model_fit(selected_week_model_fit(
                     model_fit_for_week.get(normalize_team(game.get("away_team")), unavailable_model_fit(game.get("away_team"))),
@@ -3578,6 +3625,8 @@ def main():
             "season",
             2026,
         ),
+
+        "l2_trend_policy": l2_source,
 
         "fast_market_refresh": {
             "refresh_id": refresh_id,

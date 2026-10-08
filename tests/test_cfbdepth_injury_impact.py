@@ -75,36 +75,6 @@ class CFBDepthInjuryImpactTests(unittest.TestCase):
         self.assertEqual(missing_meta["status"], "UNAVAILABLE")
         self.assertNotIn("injury_impact_rank", missing.get("Ohio State", {}))
 
-    def test_five_fixed_tiers_cover_exact_contract(self):
-        source = (ROOT / "scripts/site/build_war_room_page.py").read_text()
-        expected = {
-            1: "injury-tier-1",
-            28: "injury-tier-1",
-            29: "injury-tier-2",
-            56: "injury-tier-2",
-            57: "injury-tier-3",
-            83: "injury-tier-3",
-            84: "injury-tier-4",
-            111: "injury-tier-4",
-            112: "injury-tier-5",
-            138: "injury-tier-5",
-        }
-        # Mirrors the intentionally tiny presentational boundary function.
-        def tier(value):
-            if value <= 28:
-                return "injury-tier-1"
-            if value <= 56:
-                return "injury-tier-2"
-            if value <= 83:
-                return "injury-tier-3"
-            if value <= 111:
-                return "injury-tier-4"
-            return "injury-tier-5"
-
-        self.assertEqual({value: tier(value) for value in expected}, expected)
-        for class_name in set(expected.values()):
-            self.assertIn(class_name, source)
-
     def test_existing_injury_stage_owns_acquisition(self):
         registry = json.loads((ROOT / "config/daily_stages.json").read_text())
         stage = next(row for row in registry["stages"] if row["id"] == "injuries_and_signals")

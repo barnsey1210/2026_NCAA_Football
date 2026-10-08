@@ -50,7 +50,7 @@ class RatingsL2Test(unittest.TestCase):
     def tearDown(self):
         self.tempdir.cleanup()
 
-    def test_uses_latest_complete_snapshot_from_two_prior_cycles(self):
+    def test_uses_latest_complete_snapshot_in_exact_two_week_cycle(self):
         write_history(self.history, [
             ("2026-08-30", panel(8, -8)),
             ("2026-09-01", panel(10, -10)),
@@ -85,20 +85,29 @@ class RatingsL2Test(unittest.TestCase):
         )[0]
         self.assertEqual(snapshot["ratings"], {"A": 8.0, "B": -8.0})
 
-    def test_absolute_movement_ranks_are_unique_and_direction_agnostic(self):
-        ranks = MODULE.absolute_movement_ranks({
+    def test_missing_exact_two_week_cycle_does_not_fall_back_farther(self):
+        write_history(self.history, [
+            ("2026-08-23", panel(6, -6)),
+            ("2026-09-06", panel(12, -12)),
+        ])
+        self.assertIsNone(MODULE.two_cycle_ago_baseline(
+            self.history, "2026-09-09", min_teams=2
+        ))
+
+    def test_directional_movement_ranks_improvement_before_decline(self):
+        ranks = MODULE.directional_movement_ranks({
             "Alpha": -4.0,
             "Beta": 2.0,
             "Gamma": 4.0,
             "Missing": None,
         })
-        self.assertEqual(ranks, {"Alpha": 1, "Gamma": 2, "Beta": 3})
+        self.assertEqual(ranks, {"Gamma": 1, "Beta": 2, "Alpha": 3})
         self.assertEqual(sorted(ranks.values()), [1, 2, 3])
 
-    def test_absolute_movement_rank_ties_use_team_name(self):
-        changes = {"Zulu": 1.5, "Alpha": -1.5, "Middle": 0.0}
+    def test_directional_movement_rank_ties_use_team_name(self):
+        changes = {"Zulu": 1.5, "Alpha": 1.5, "Middle": 0.0}
         self.assertEqual(
-            MODULE.absolute_movement_ranks(changes),
+            MODULE.directional_movement_ranks(changes),
             {"Alpha": 1, "Zulu": 2, "Middle": 3},
         )
 

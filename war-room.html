@@ -1261,7 +1261,7 @@ tr:hover td.context-group{background:#202d39}
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{
+.l2-trend-col{
   width:102px;
   min-width:102px;
   max-width:102px;
@@ -1602,11 +1602,11 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .signal-placeholder,
-.injury-placeholder{
+.l2-placeholder{
   color:var(--muted);
 }
 
-.injury-stack{
+.l2-trend-stack{
   display:flex;
   flex-direction:column;
   align-items:stretch;
@@ -1614,7 +1614,7 @@ tr:hover td.context-group{background:#202d39}
   gap:3px;
   width:100%;
 }
-.injury-team{
+.l2-trend-team{
   display:grid;
   grid-template-columns:28px 26px 38px;
   grid-template-rows:26px;
@@ -1627,15 +1627,15 @@ tr:hover td.context-group{background:#202d39}
   font-weight:950;
   line-height:1;
 }
-.injury-team .team-logo-holder{
+.l2-trend-team .team-logo-holder{
   --team-logo-size:24px;
-  grid-column:2;
+  grid-column:1;
   grid-row:1;
   justify-self:center;
   align-self:center;
 }
-.injury-rank{
-  grid-column:1;
+.l2-trend-rank{
+  grid-column:3;
   grid-row:1;
   min-width:22px;
   padding:3px 3px;
@@ -1649,13 +1649,13 @@ tr:hover td.context-group{background:#202d39}
   font-weight:950;
   font-variant-numeric:tabular-nums;
 }
-.injury-rank.injury-tier-1{color:#39e89a}
-.injury-rank.injury-tier-2{color:#a9df6a}
-.injury-rank.injury-tier-3{color:#f4cd4b}
-.injury-rank.injury-tier-4{color:#f28c45}
-.injury-rank.injury-tier-5{color:#ff626f}
-.injury-trend{
-  grid-column:3;
+.l2-trend-rank.l2-tier-1{color:#39e89a}
+.l2-trend-rank.l2-tier-2{color:#a9df6a}
+.l2-trend-rank.l2-tier-3{color:#f4cd4b}
+.l2-trend-rank.l2-tier-4{color:#f28c45}
+.l2-trend-rank.l2-tier-5{color:#ff626f}
+.l2-trend-value{
+  grid-column:2;
   grid-row:1;
   min-width:38px;
   text-align:left;
@@ -1665,10 +1665,8 @@ tr:hover td.context-group{background:#202d39}
   justify-self:start;
   align-self:center;
 }
-.injury-trend.worse{color:var(--red)}
-.injury-trend.better{color:var(--green)}
-.injury-trend.flat{color:var(--muted)}
-.injury-trend.unavailable{color:var(--muted)}
+.l2-trend-value{color:#dce5ed}
+.l2-trend-value.unavailable{color:var(--muted)}
 
 
 .signal-stack{
@@ -2022,8 +2020,8 @@ tr:hover td.context-group{background:#202d39}
   }
   .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
   .mobile-foot-injury{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
-  .mobile-foot-injury .injury-stack{flex-direction:row;gap:12px;justify-content:flex-start}
-  .mobile-foot-injury .injury-team{width:auto}
+  .mobile-foot-injury .l2-trend-stack{flex-direction:row;gap:12px;justify-content:flex-start}
+  .mobile-foot-injury .l2-trend-team{width:auto}
 
   .wr-top{
     align-items:flex-start;
@@ -2288,7 +2286,7 @@ tr:hover td.context-group{background:#202d39}
     border-top:1px solid rgba(51,73,92,.55);
   }
 
-  .mobile-foot-injury .injury-stack{
+  .mobile-foot-injury .l2-trend-stack{
     min-width:0;
     flex-wrap:wrap;
     row-gap:4px;
@@ -2354,21 +2352,9 @@ tr:hover td.context-group{background:#202d39}
 }
 
 </style>
-<style id="shared-war-room-shell-v2">
-:root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
-.war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
-.war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
-.war-room-global .war-room-nav{display:flex!important;align-items:stretch!important;gap:0!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;height:82px!important;scrollbar-width:none!important}.war-room-global .war-room-nav::-webkit-scrollbar{display:none!important}.war-room-global .war-room-nav a{display:flex!important;align-items:center!important;padding:0 10px!important;color:#becada!important;font-size:14px!important;font-weight:900!important;white-space:nowrap!important;text-decoration:none!important;position:relative!important}.war-room-global .war-room-nav a.active{color:var(--wr-gold)!important}.war-room-global .war-room-nav a.active:after{content:"";position:absolute;left:9px;right:9px;bottom:0;height:4px;background:var(--wr-gold);border-radius:4px}
-.war-room-global .war-room-nav a[href="ncaab/"]{color:#72c6ff!important;border-left:1px solid #214a70!important}
-.war-room-global .war-room-meta{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;min-width:max-content!important}.war-room-global .war-room-context{color:#8fa7c5!important;font-size:10px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important}.war-room-global .war-room-health{margin:0!important;white-space:nowrap!important}
-.war-room-sports{width:min(1240px,calc(100vw - 20px));margin:8px auto 0;padding:7px 10px;display:flex;align-items:center;gap:8px;border:1px solid #214a70;border-radius:8px;background:#061525;color:#e8f0f8}.war-room-sports b{margin-right:auto;color:#9eb1c5;font-size:9px;letter-spacing:.12em}.war-room-sports a{padding:7px 12px;border:1px solid #315779;border-radius:999px;color:#c6d4e2;font-weight:900;text-decoration:none}.war-room-sports a.active{border-color:#ffc83d;color:#ffc83d;background:#2a2108}.war-room-sports a.basketball{border-color:#3caaff;color:#8dccff}
-@media(max-width:1550px){.war-room-global{grid-template-columns:235px minmax(0,1fr) max-content!important;padding:0 14px!important}.war-room-global .war-room-brand strong{font-size:34px!important}.war-room-global .war-room-nav a{font-size:12px!important;padding:0 7px!important}.war-room-global .war-room-context{display:none!important}}
-@media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
-@media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}.war-room-sports{display:grid;grid-template-columns:1fr 1fr}.war-room-sports b{grid-column:1/-1}.war-room-sports a{text-align:center}}
-</style></head>
+</head>
 
 <body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html" class="active">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a><a href="ncaab/">NCAAB</a></nav><div class="war-room-meta"><span class="war-room-context">Command Center</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
 <div class="wr-shell">
 
   <div class="wr-top">
@@ -2594,10 +2580,10 @@ tr:hover td.context-group{background:#202d39}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20261007T121501Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20261007T121501Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20261007T121501Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20261007T121501Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json';
+const HEALTH_URL = 'data/site/war_room_health.json';
+const ACTIVITY_URL = 'data/site/war_room_activity.json';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
@@ -3511,7 +3497,7 @@ function renderHead(){
         TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="matrix-header-cell injury-col context-group">INJURY</th>
+      <th class="matrix-header-cell l2-trend-col context-group">L2 TREND</th>
       <th class="matrix-header-cell model-fit-col context-group">PERF<br>VS MODEL</th>
       <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
@@ -3890,88 +3876,41 @@ function compositeRankClass(rank){
   return '';
 }
 
-function injuryRankClass(rank){
+function l2TrendRankClass(rank){
   const value=Number(rank);
   if(!Number.isInteger(value) || value<1 || value>138) return '';
-  if(value<=28) return 'injury-tier-1';
-  if(value<=56) return 'injury-tier-2';
-  if(value<=83) return 'injury-tier-3';
-  if(value<=111) return 'injury-tier-4';
-  return 'injury-tier-5';
+  if(value<=28) return 'l2-tier-1';
+  if(value<=55) return 'l2-tier-2';
+  if(value<=83) return 'l2-tier-3';
+  if(value<=110) return 'l2-tier-4';
+  return 'l2-tier-5';
 }
 
-function injuryTrend(row){
-  const delta=Number(row?.weekly_impact_delta);
-  const direction=String(row?.weekly_direction || 'UNAVAILABLE').toUpperCase();
-
-  if(!Number.isFinite(delta) || direction==='UNAVAILABLE'){
-    return '<span class="injury-trend unavailable">—</span>';
-  }
-
-  const rounded=Math.round(Math.abs(delta));
-
-  if(direction==='WORSE'){
-    return `<span class="injury-trend worse">↑ +${rounded}</span>`;
-  }
-
-  if(direction==='BETTER'){
-    return `<span class="injury-trend better">↓ -${rounded}</span>`;
-  }
-
-  const flatRounded=Math.round(delta);
-  const signed=flatRounded>0 ? `+${flatRounded}` : `${flatRounded}`;
-  return `<span class="injury-trend flat">→ ${signed}</span>`;
-}
-
-function injuryTeam(team,row,source){
-  if(!row || !Number.isInteger(Number(row.injury_impact_rank))){
-    return `<span class="injury-team" title="${esc(team)} · injury impact unavailable"><span class="injury-placeholder">—</span></span>`;
-  }
-
-  const rank=Number(row.injury_impact_rank);
+function l2TrendTeam(team,row,source){
   const slug=teamLogoSlug(team);
-  const updated=row.source_updated_at
-    ? fmtDateTimeET(row.source_updated_at)
-    : 'source update time unverified';
-
-  const delta=Number(row.weekly_impact_delta);
-  const priorRank=Number(row.weekly_prior_rank);
-  const priorScore=Number(row.weekly_prior_score);
-  const direction=String(row.weekly_direction || 'UNAVAILABLE').toUpperCase();
+  const logo=`<span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
+  const change=Number(row?.l2_change);
+  const rank=Number(row?.l2_rank);
+  if(!Number.isFinite(change) || !Number.isInteger(rank)){
+    return `<span class="l2-trend-team" title="${esc(team)} · two-week rating history unavailable">${logo}<span class="l2-trend-value unavailable">—</span><span class="l2-trend-rank">NR</span></span>`;
+  }
+  const signed=`${change>=0?'+':''}${change.toFixed(1)}`;
 
   const title=[
     team,
-    `Current Injury Impact Rank: ${rank}/138`,
-    `Current Impact Score: ${row.injury_impact_score ?? '—'}`,
-    `Impact Injuries: ${row.injury_number ?? '—'}`,
-    `New Injuries: ${row.injury_new ?? '—'}`,
-    Number.isFinite(priorScore)
-      ? `${row.weekly_days ?? '7'}-Day Prior Impact Score: ${priorScore}`
-      : 'Weekly prior impact unavailable',
-    Number.isInteger(priorRank)
-      ? `${row.weekly_days ?? '7'}-Day Prior Rank: ${priorRank}/138`
-      : null,
-    Number.isFinite(delta)
-      ? `Weekly Impact Change: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} · ${direction}`
-      : null,
-    row.weekly_baseline_date
-      ? `Comparison Baseline: ${row.weekly_baseline_date}`
-      : null,
-    `Updated: ${updated}`,
-    source?.pulled_at ? `Pulled: ${fmtDateTimeET(source.pulled_at)}` : null
+    `L2 Rating Change: ${signed}`,
+    `L2 Improvement Rank: ${rank}/138`,
+    source?.snapshot_date ? `Current Snapshot: ${source.snapshot_date}` : null,
+    source?.baseline_snapshot_date ? `Two-Week Baseline: ${source.baseline_snapshot_date}` : null,
   ].filter(Boolean).join('\n');
 
-  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span>${injuryTrend(row)}</span>`;
+  return `<span class="l2-trend-team" title="${esc(title)}">${logo}<span class="l2-trend-value">${signed}</span><span class="l2-trend-rank ${l2TrendRankClass(rank)}">${rank}</span></span>`;
 }
 
-function injuryCell(game){
-  const injury=game.injury_rank || {};
-
-  if(!injury.away && !injury.home){
-    return '<span class="injury-placeholder">—</span>';
-  }
-
-  return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
+function l2TrendCell(game){
+  const trend=game.l2_trend || {};
+  const source=MATRIX?.l2_trend_policy || {};
+  return `<span class="l2-trend-stack">${l2TrendTeam(game.away_team,trend.away,source)}${l2TrendTeam(game.home_team,trend.home,source)}</span>`;
 }
 
 function modelFitNumber(value){
@@ -4733,8 +4672,8 @@ function renderMatrix(){
           </span>
         </td>
 
-        <td class="injury-col context-group">
-          ${injuryCell(game)}
+        <td class="l2-trend-col context-group">
+          ${l2TrendCell(game)}
         </td>
 
         <td class="model-fit-col context-group">

@@ -8,7 +8,7 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-from ratings_l2 import absolute_movement_ranks, two_cycle_ago_baseline
+from ratings_l2 import directional_movement_ranks, two_cycle_ago_baseline
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -514,7 +514,7 @@ for item in out:
     )
 
 
-l2_movement_ranks = absolute_movement_ranks({
+l2_movement_ranks = directional_movement_ranks({
     item["team"]: item["l2_change"] for item in out
 })
 for item in out:
@@ -592,7 +592,7 @@ active_weight = (
 payload = {
     "snapshot_date": latest,
     "l2_definition": {
-        "method": "current canonical four-source composite minus the latest complete accepted canonical snapshot from two ISO weekly cycles ago",
+        "method": "current canonical four-source composite minus the latest complete accepted canonical snapshot in the exact ISO weekly cycle two weeks earlier",
         "required_sources": ["SP+", "FPI", "TeamRankings", "normalized Sagarin"],
         "baseline_snapshot_date": (
             l2_baseline["snapshot_date"] if l2_baseline else None
@@ -602,7 +602,8 @@ payload = {
             if l2_baseline
             else None
         ),
-        "movement_rank_method": "ordinal rank by absolute L2 movement; team name is the deterministic tie-breaker",
+        "missing_history_policy": "L2 change and rank are null when the exact two-weeks-earlier cycle lacks a complete comparable four-source snapshot",
+        "movement_rank_method": "ordinal rank by signed L2 change descending; team name is the deterministic tie-breaker",
         "movement_rank_bands": [[1, 28], [29, 55], [56, 83], [84, 110], [111, 138]],
     },
     "composite_model": {

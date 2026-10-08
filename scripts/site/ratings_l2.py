@@ -97,27 +97,35 @@ def canonical_cycle_snapshots(history_path, season="2026", min_teams=130):
 def two_cycle_ago_baseline(
     history_path, current_snapshot_date, season="2026", min_teams=130
 ):
-    """Resolve the latest complete snapshot from two cycle buckets ago."""
-    current_cycle = _cycle_key(current_snapshot_date)
-    prior_cycles = [
-        snapshot
-        for snapshot in canonical_cycle_snapshots(
-            history_path, season=season, min_teams=min_teams
-        )
-        if snapshot["cycle"] < current_cycle
-    ]
-    return prior_cycles[-2] if len(prior_cycles) >= 2 else None
+    """Resolve the latest complete snapshot in the exact cycle two weeks ago.
+
+    Missing weekly history is explicit: never reach farther back and describe
+    an older snapshot as a two-week comparison.
+    """
+    current_date = date.fromisoformat(current_snapshot_date)
+    target_date = date.fromordinal(current_date.toordinal() - 14)
+    target_cycle = _cycle_key(target_date.isoformat())
+    return next(
+        (
+            snapshot
+            for snapshot in canonical_cycle_snapshots(
+                history_path, season=season, min_teams=min_teams
+            )
+            if snapshot["cycle"] == target_cycle
+        ),
+        None,
+    )
 
 
-def absolute_movement_ranks(changes):
-    """Return unique ordinal ranks by absolute move, then team name.
+def directional_movement_ranks(changes):
+    """Rank largest improvement first and largest decline last.
 
-    The alphabetical tie-break makes equal absolute moves deterministic while
-    preserving a complete 1..N rank sequence for the compact site display.
-    Missing movements are not ranked.
+    Equal changes use normalized team name as a deterministic tie-break, so a
+    complete 138-team input always produces the unique ordinal ranks 1..138.
+    Missing movements are explicit and are not ranked.
     """
     ranked_teams = sorted(
         (team for team, change in changes.items() if change is not None),
-        key=lambda team: (-abs(changes[team]), team.casefold(), team),
+        key=lambda team: (-changes[team], team.casefold(), team),
     )
     return {team: rank for rank, team in enumerate(ranked_teams, start=1)}

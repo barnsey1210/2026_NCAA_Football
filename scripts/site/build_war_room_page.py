@@ -1317,7 +1317,7 @@ tr:hover td.context-group{background:#202d39}
   padding-right:5px;
   box-sizing:border-box;
 }
-.injury-col{
+.l2-trend-col{
   width:102px;
   min-width:102px;
   max-width:102px;
@@ -1658,11 +1658,11 @@ tr:hover td.context-group{background:#202d39}
 }
 
 .signal-placeholder,
-.injury-placeholder{
+.l2-placeholder{
   color:var(--muted);
 }
 
-.injury-stack{
+.l2-trend-stack{
   display:flex;
   flex-direction:column;
   align-items:stretch;
@@ -1670,7 +1670,7 @@ tr:hover td.context-group{background:#202d39}
   gap:3px;
   width:100%;
 }
-.injury-team{
+.l2-trend-team{
   display:grid;
   grid-template-columns:28px 26px 38px;
   grid-template-rows:26px;
@@ -1683,15 +1683,15 @@ tr:hover td.context-group{background:#202d39}
   font-weight:950;
   line-height:1;
 }
-.injury-team .team-logo-holder{
+.l2-trend-team .team-logo-holder{
   --team-logo-size:24px;
-  grid-column:2;
+  grid-column:1;
   grid-row:1;
   justify-self:center;
   align-self:center;
 }
-.injury-rank{
-  grid-column:1;
+.l2-trend-rank{
+  grid-column:3;
   grid-row:1;
   min-width:22px;
   padding:3px 3px;
@@ -1705,13 +1705,13 @@ tr:hover td.context-group{background:#202d39}
   font-weight:950;
   font-variant-numeric:tabular-nums;
 }
-.injury-rank.injury-tier-1{color:#39e89a}
-.injury-rank.injury-tier-2{color:#a9df6a}
-.injury-rank.injury-tier-3{color:#f4cd4b}
-.injury-rank.injury-tier-4{color:#f28c45}
-.injury-rank.injury-tier-5{color:#ff626f}
-.injury-trend{
-  grid-column:3;
+.l2-trend-rank.l2-tier-1{color:#39e89a}
+.l2-trend-rank.l2-tier-2{color:#a9df6a}
+.l2-trend-rank.l2-tier-3{color:#f4cd4b}
+.l2-trend-rank.l2-tier-4{color:#f28c45}
+.l2-trend-rank.l2-tier-5{color:#ff626f}
+.l2-trend-value{
+  grid-column:2;
   grid-row:1;
   min-width:38px;
   text-align:left;
@@ -1721,10 +1721,8 @@ tr:hover td.context-group{background:#202d39}
   justify-self:start;
   align-self:center;
 }
-.injury-trend.worse{color:var(--red)}
-.injury-trend.better{color:var(--green)}
-.injury-trend.flat{color:var(--muted)}
-.injury-trend.unavailable{color:var(--muted)}
+.l2-trend-value{color:#dce5ed}
+.l2-trend-value.unavailable{color:var(--muted)}
 
 
 .signal-stack{
@@ -2078,8 +2076,8 @@ tr:hover td.context-group{background:#202d39}
   }
   .mobile-foot-label{color:var(--muted);font-size:8px;font-weight:900}
   .mobile-foot-injury{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
-  .mobile-foot-injury .injury-stack{flex-direction:row;gap:12px;justify-content:flex-start}
-  .mobile-foot-injury .injury-team{width:auto}
+  .mobile-foot-injury .l2-trend-stack{flex-direction:row;gap:12px;justify-content:flex-start}
+  .mobile-foot-injury .l2-trend-team{width:auto}
 
   .wr-top{
     align-items:flex-start;
@@ -2344,7 +2342,7 @@ tr:hover td.context-group{background:#202d39}
     border-top:1px solid rgba(51,73,92,.55);
   }
 
-  .mobile-foot-injury .injury-stack{
+  .mobile-foot-injury .l2-trend-stack{
     min-width:0;
     flex-wrap:wrap;
     row-gap:4px;
@@ -3555,7 +3553,7 @@ function renderHead(){
         TOTAL<br>EDGE ${sortArrow('total_edge')}
       </th>
 
-      <th class="matrix-header-cell injury-col context-group">INJURY</th>
+      <th class="matrix-header-cell l2-trend-col context-group">L2 TREND</th>
       <th class="matrix-header-cell model-fit-col context-group">PERF<br>VS MODEL</th>
       <th class="matrix-header-cell state-col context-group sortable" onclick="setSort('model_state')">
         <span class="header-tooltip" tabindex="0">
@@ -3934,88 +3932,41 @@ function compositeRankClass(rank){
   return '';
 }
 
-function injuryRankClass(rank){
+function l2TrendRankClass(rank){
   const value=Number(rank);
   if(!Number.isInteger(value) || value<1 || value>138) return '';
-  if(value<=28) return 'injury-tier-1';
-  if(value<=56) return 'injury-tier-2';
-  if(value<=83) return 'injury-tier-3';
-  if(value<=111) return 'injury-tier-4';
-  return 'injury-tier-5';
+  if(value<=28) return 'l2-tier-1';
+  if(value<=55) return 'l2-tier-2';
+  if(value<=83) return 'l2-tier-3';
+  if(value<=110) return 'l2-tier-4';
+  return 'l2-tier-5';
 }
 
-function injuryTrend(row){
-  const delta=Number(row?.weekly_impact_delta);
-  const direction=String(row?.weekly_direction || 'UNAVAILABLE').toUpperCase();
-
-  if(!Number.isFinite(delta) || direction==='UNAVAILABLE'){
-    return '<span class="injury-trend unavailable">—</span>';
-  }
-
-  const rounded=Math.round(Math.abs(delta));
-
-  if(direction==='WORSE'){
-    return `<span class="injury-trend worse">↑ +${rounded}</span>`;
-  }
-
-  if(direction==='BETTER'){
-    return `<span class="injury-trend better">↓ -${rounded}</span>`;
-  }
-
-  const flatRounded=Math.round(delta);
-  const signed=flatRounded>0 ? `+${flatRounded}` : `${flatRounded}`;
-  return `<span class="injury-trend flat">→ ${signed}</span>`;
-}
-
-function injuryTeam(team,row,source){
-  if(!row || !Number.isInteger(Number(row.injury_impact_rank))){
-    return `<span class="injury-team" title="${esc(team)} · injury impact unavailable"><span class="injury-placeholder">—</span></span>`;
-  }
-
-  const rank=Number(row.injury_impact_rank);
+function l2TrendTeam(team,row,source){
   const slug=teamLogoSlug(team);
-  const updated=row.source_updated_at
-    ? fmtDateTimeET(row.source_updated_at)
-    : 'source update time unverified';
-
-  const delta=Number(row.weekly_impact_delta);
-  const priorRank=Number(row.weekly_prior_rank);
-  const priorScore=Number(row.weekly_prior_score);
-  const direction=String(row.weekly_direction || 'UNAVAILABLE').toUpperCase();
+  const logo=`<span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span>`;
+  const change=Number(row?.l2_change);
+  const rank=Number(row?.l2_rank);
+  if(!Number.isFinite(change) || !Number.isInteger(rank)){
+    return `<span class="l2-trend-team" title="${esc(team)} · two-week rating history unavailable">${logo}<span class="l2-trend-value unavailable">—</span><span class="l2-trend-rank">NR</span></span>`;
+  }
+  const signed=`${change>=0?'+':''}${change.toFixed(1)}`;
 
   const title=[
     team,
-    `Current Injury Impact Rank: ${rank}/138`,
-    `Current Impact Score: ${row.injury_impact_score ?? '—'}`,
-    `Impact Injuries: ${row.injury_number ?? '—'}`,
-    `New Injuries: ${row.injury_new ?? '—'}`,
-    Number.isFinite(priorScore)
-      ? `${row.weekly_days ?? '7'}-Day Prior Impact Score: ${priorScore}`
-      : 'Weekly prior impact unavailable',
-    Number.isInteger(priorRank)
-      ? `${row.weekly_days ?? '7'}-Day Prior Rank: ${priorRank}/138`
-      : null,
-    Number.isFinite(delta)
-      ? `Weekly Impact Change: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} · ${direction}`
-      : null,
-    row.weekly_baseline_date
-      ? `Comparison Baseline: ${row.weekly_baseline_date}`
-      : null,
-    `Updated: ${updated}`,
-    source?.pulled_at ? `Pulled: ${fmtDateTimeET(source.pulled_at)}` : null
+    `L2 Rating Change: ${signed}`,
+    `L2 Improvement Rank: ${rank}/138`,
+    source?.snapshot_date ? `Current Snapshot: ${source.snapshot_date}` : null,
+    source?.baseline_snapshot_date ? `Two-Week Baseline: ${source.baseline_snapshot_date}` : null,
   ].filter(Boolean).join('\n');
 
-  return `<span class="injury-team" title="${esc(title)}"><span class="team-logo-holder"><img src="logos/${esc(slug)}.png" alt="${esc(team)}" onerror="this.parentElement.style.display='none'"></span><span class="injury-rank ${injuryRankClass(rank)}">${rank}</span>${injuryTrend(row)}</span>`;
+  return `<span class="l2-trend-team" title="${esc(title)}">${logo}<span class="l2-trend-value">${signed}</span><span class="l2-trend-rank ${l2TrendRankClass(rank)}">${rank}</span></span>`;
 }
 
-function injuryCell(game){
-  const injury=game.injury_rank || {};
-
-  if(!injury.away && !injury.home){
-    return '<span class="injury-placeholder">—</span>';
-  }
-
-  return `<span class="injury-stack">${injuryTeam(game.away_team,injury.away,injury)}${injuryTeam(game.home_team,injury.home,injury)}</span>`;
+function l2TrendCell(game){
+  const trend=game.l2_trend || {};
+  const source=MATRIX?.l2_trend_policy || {};
+  return `<span class="l2-trend-stack">${l2TrendTeam(game.away_team,trend.away,source)}${l2TrendTeam(game.home_team,trend.home,source)}</span>`;
 }
 
 function modelFitNumber(value){
@@ -4777,8 +4728,8 @@ function renderMatrix(){
           </span>
         </td>
 
-        <td class="injury-col context-group">
-          ${injuryCell(game)}
+        <td class="l2-trend-col context-group">
+          ${l2TrendCell(game)}
         </td>
 
         <td class="model-fit-col context-group">

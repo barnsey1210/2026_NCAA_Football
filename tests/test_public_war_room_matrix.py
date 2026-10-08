@@ -20,6 +20,7 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
             "schema_version": "war-room-market-matrix-v1",
             "built_at": "2026-09-14T22:30:09Z",
             "season": 2026,
+            "l2_trend_policy": {"source": "ratings_view.teams.l2_change/l2_movement_rank"},
             "summary": {"games": 1},
             "audit": {"current_market_fallbacks": [{"reason": "internal"}]},
             "games": [{
@@ -55,6 +56,7 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
                 },
                 "shadow_readiness": {"spread": {"status": "READY"}},
                 "injury_rank": {"away": {"rank": 10}},
+                "l2_trend": {"away": {"l2_change": 1.2, "l2_rank": 10}},
                 "betting_signals": {"away": {"signals": []}},
             }],
         }
@@ -69,7 +71,7 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertNotIn("auto_authority", public["games"][0]["operator_model"])
         for field in (
             "authority", "models", "standard_freshness",
-            "shadow_readiness", "injury_rank", "betting_signals",
+            "shadow_readiness", "injury_rank", "l2_trend", "betting_signals",
         ):
             self.assertEqual(public["games"][0][field], original["games"][0][field])
         self.assertEqual(public["games"][0]["operator_model"]["mode"], "AUTO")

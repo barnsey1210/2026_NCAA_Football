@@ -136,12 +136,14 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
         self.assertIn("'available'", block)
         self.assertIn("'missing'", block)
 
-    def test_injury_rank_tiers_and_two_team_rendering(self):
-        for boundary in (28, 56, 83, 111, 138):
+    def test_l2_trend_tiers_and_two_team_rendering(self):
+        for boundary in (28, 55, 83, 110):
             self.assertIn(f"value<={boundary}", self.source)
-        self.assertIn("injuryTeam(game.away_team,injury.away,injury)", self.source)
-        self.assertIn("injuryTeam(game.home_team,injury.home,injury)", self.source)
-        self.assertIn("Injury Impact Rank: ${rank}/138", self.source)
+        self.assertIn("l2TrendTeam(game.away_team,trend.away,source)", self.source)
+        self.assertIn("l2TrendTeam(game.home_team,trend.home,source)", self.source)
+        self.assertIn("L2 Improvement Rank: ${rank}/138", self.source)
+        self.assertIn("L2 TREND", self.source)
+        self.assertNotIn(">INJURY</th>", self.source)
 
     def test_week_change_is_view_only(self):
         handler = re.search(
@@ -214,7 +216,7 @@ class WarRoomSelectedWeekScopeTests(unittest.TestCase):
             ".shadow-team-chip .team-logo-holder{--team-logo-size:26px}",
             ".shadow-value-line .team-logo-holder,.projection-value .team-logo-holder{--team-logo-size:28px}",
             ".decision-edge .team-logo-holder{--team-logo-size:28px}",
-            ".injury-team .team-logo-holder{--team-logo-size:22px}",
+            ".l2-trend-team .team-logo-holder{--team-logo-size:24px}",
             ".signal-chip .team-logo-holder{--team-logo-size:26px}",
             ".mobile-metric .decision-edge .team-logo-holder{--team-logo-size:26px}",
         ):
