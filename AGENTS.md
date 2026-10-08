@@ -11,7 +11,7 @@ Before changing code, data contracts, builders, or public pages, read:
 
 ## Authoritative operating model
 
-- `/Users/jameslindesmith/NCAAF_MAIN_REPO` is the authoritative source repository and the canonical GitHub Pages publishing repository.
+- `/Users/jameslindesmith/NCAAF_MAIN_REPO` is the authoritative source and publication repository. A validated push to `main` deploys the primary public site on Cloudflare Pages at `https://barnseywr.com`; GitHub Pages remains the independently verified fallback origin.
 - `/Users/jameslindesmith/NCAAF_AUTO` is the operational runtime workspace. It performs scheduled pulls, runtime builds, validation, email generation, and public artifact staging.
 - `/Users/jameslindesmith/NCAAF_CONTROL` is reserved for guarded/manual refresh and acceptance tooling.
 - `/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy and is not part of the canonical daily publishing workflow.

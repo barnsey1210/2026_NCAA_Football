@@ -8,9 +8,8 @@
 ## Purpose
 
 This document is the source-of-truth map for how data moves from raw providers
-to canonical domain contracts, page adapters, public artifacts, and the current
-GitHub Pages public site. Migration of the public shell to Cloudflare Pages is
-planned but not complete.
+to canonical domain contracts, page adapters, public artifacts, the primary
+Cloudflare Pages site at `https://barnseywr.com`, and the GitHub Pages fallback.
 
 ## Coverage
 
@@ -114,11 +113,12 @@ already-public contracts through fixed read-only routes:
 - `/war-room/live/health`
 - `/war-room/live/market-matrix`
 
-The GitHub Pages shell polls the small version route every two seconds and
-reloads health and matrix only when the refresh ID changes. Static GitHub Pages
-copies remain the fallback and archival/public snapshot. Normal fast refreshes
-do not synchronously commit or push; explicit `--push` and the full 8 AM path
-retain repository publication. Operator POST routes remain Access-protected.
+The public Cloudflare Pages shell polls the small version route every two
+seconds and reloads health and matrix only when the refresh ID changes. Static
+Cloudflare Pages and GitHub Pages copies remain public snapshots, with GitHub
+Pages retained as the fallback origin. Normal fast refreshes do not
+synchronously commit or push; explicit `--push` and the full 8 AM path retain
+repository publication. Operator POST routes remain Access-protected.
 
 ## Canonical projection architecture
 

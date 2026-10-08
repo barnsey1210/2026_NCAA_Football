@@ -1,15 +1,17 @@
 # 2026 NCAAF — Current Priorities
 
-_Synchronized as of 2026-09-01_
+_Synchronized as of 2026-10-07_
 
 ## Repository roles
 
 - `/Users/jameslindesmith/NCAAF_MAIN_REPO` is the authoritative Git source for reviewed code, configuration, tests, and documentation.
 - `/Users/jameslindesmith/NCAAF_AUTO` is the operational runtime workspace. It holds mutable data, caches, databases, logs, generated pages, and provider responses and is not a Git repository.
 - `/Users/jameslindesmith/NCAAF_CONTROL` is limited to private manual/control tooling and safe workflow dispatch. It is not a source-code mirror, data repository, or publication repository.
-- `/Users/jameslindesmith/NCAAF_MAIN_REPO` is also the canonical GitHub Pages
-  publication repository. `/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy
-  and is not part of the canonical workflow.
+- `/Users/jameslindesmith/NCAAF_MAIN_REPO` is also the canonical publication
+  repository. Validated pushes to `main` deploy the primary Cloudflare Pages
+  site at `https://barnseywr.com`; GitHub Pages remains the fallback origin.
+  `/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy and is not part of the
+  canonical workflow.
 
 The V2 site is canonical. Legacy V1 generation and promotion must remain disabled.
 
@@ -44,9 +46,9 @@ Deployment stays manual and separate from `daily_market_update.sh`, the LaunchAg
 
 1. Improve Command Center logo/value spacing and expired operator-session UX
    without changing the approved matrix width/layout.
-2. Migrate the current GitHub Pages public site to Cloudflare Pages at
-   `barnseywr.com`, redirect `www` to the apex, and preserve the authenticated
-   `control.barnseywr.com` origin after pre-cutover CORS/Access validation.
+2. Keep the Cloudflare Pages primary site and GitHub Pages fallback in artifact
+   parity, and automate independent deployment-status verification so a slow or
+   failed fallback deployment does not block primary-site confirmation.
 3. Resume historical timing analysis separately; deferred SUN12 and
    retrospective anomalies are not validated production betting conclusions.
 

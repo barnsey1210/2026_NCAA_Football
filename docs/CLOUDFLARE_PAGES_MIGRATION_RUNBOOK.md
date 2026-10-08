@@ -1,6 +1,21 @@
 # Cloudflare Pages Migration Runbook
 
-Status: Phase 1 repository preparation only. GitHub Pages remains the production public host until the preview and cutover gates below pass.
+Status: Cutover complete. Cloudflare Pages serves `https://barnseywr.com` as
+the production public host. GitHub Pages remains the fallback origin. The
+pre-cutover sections below are retained as historical acceptance/rollback
+procedure; current releases follow the post-cutover operating model.
+
+## Current post-cutover operating model
+
+1. Build and validate public artifacts in `NCAAF_AUTO`.
+2. Synchronize only manifest-allowlisted artifacts into `NCAAF_MAIN_REPO`.
+3. Push canonical `main`; Cloudflare Pages and GitHub Pages deploy independently.
+4. Verify `https://barnseywr.com` first as the primary production result.
+5. Verify the GitHub Pages workflow/origin separately as fallback evidence and
+   compare shared artifact hashes. A slow or failed fallback deployment does
+   not negate a confirmed Cloudflare primary deployment, but it must be reported.
+6. Keep `control.barnseywr.com`, Cloudflare Access, exact-origin CORS, and the
+   loopback operator service unchanged.
 
 ## Boundaries
 
@@ -8,7 +23,8 @@ Status: Phase 1 repository preparation only. GitHub Pages remains the production
 - `NCAAF_AUTO` remains the operational runtime.
 - `control.barnseywr.com`, its Cloudflare Tunnel, Cloudflare Access policy, loopback FastAPI service, fixed action routes, and provider credentials are unchanged.
 - The site remains a multipage static site. Do not configure an SPA fallback.
-- Do not attach either custom domain until the `pages.dev` preview passes.
+- Do not change or detach production custom domains without an approved cutover
+  or rollback task.
 
 ## Local build and validation
 
@@ -34,7 +50,7 @@ The last command must print nothing. The bundle is materialized at `build/cloudf
 
 Do not add `wrangler.toml` for this static Pages deployment. The committed `_headers` file is copied into the bundle. No `_redirects` or SPA fallback is used.
 
-## Preview acceptance
+## Historical preview acceptance
 
 1. Create the Pages project without a custom domain and allow it to produce its exact stable `https://<project>.pages.dev` origin.
 2. Add that exact origin to the protected operator environment as `WAR_ROOM_PAGES_ORIGIN`. Never use `*.pages.dev`.
@@ -54,7 +70,7 @@ Using the exact preview origin:
 5. In a separately approved bounded acceptance test, confirm an operator action POST originates from `https://control.barnseywr.com`, is Access-authenticated, and reaches only an allowlisted fixed route.
 6. Confirm no credential or Access token is present in public JavaScript.
 
-## Apex cutover
+## Historical apex cutover
 
 1. Keep GitHub Pages live while the preview tests run.
 2. Attach `barnseywr.com` to Cloudflare Pages only after all preview and operator gates pass.

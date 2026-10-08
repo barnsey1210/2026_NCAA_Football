@@ -1,6 +1,6 @@
 # 2026 NCAAF Repository and Data Architecture
 
-_Last synchronized: 2026-09-01_
+_Last synchronized: 2026-10-07_
 
 ## Authoritative locations
 
@@ -9,16 +9,16 @@ _Last synchronized: 2026-09-01_
 | Main source repository | `/Users/jameslindesmith/NCAAF_MAIN_REPO` | Approved source, documentation, canonical artifacts, tests, Git history |
 | Runtime workspace | `/Users/jameslindesmith/NCAAF_AUTO` | Scheduled execution, live pulls, runtime state, logs, caches, generated output |
 | Manual control repository | `/Users/jameslindesmith/NCAAF_CONTROL` | Guarded refresh, acceptance, rollback, audit-ledger tooling |
-| Canonical publishing repository | `/Users/jameslindesmith/NCAAF_MAIN_REPO` | Receives allowlisted validated artifacts and publishes GitHub Pages from `main` |
+| Canonical publishing repository | `/Users/jameslindesmith/NCAAF_MAIN_REPO` | Receives allowlisted validated artifacts; pushes to `main` deploy Cloudflare Pages primary and GitHub Pages fallback |
 | Legacy site checkout | `/Users/jameslindesmith/Sites/NCAAF_SITE` | Legacy only; not part of the canonical workflow |
 
 Canonical V2 owns public site output. Runtime generates and validates; MAIN
-preserves approved source and performs explicit publication. The current public
-host is GitHub Pages. Planned migration is `barnseywr.com` on Cloudflare Pages,
-with `www.barnseywr.com` redirecting to the apex and
-`control.barnseywr.com` preserved for the authenticated controller/API. The
-migration is not complete and must preserve/test CORS, origin, and Access
-behavior before DNS cutover.
+preserves approved source and performs explicit publication. Cloudflare Pages
+serves the primary public site at `https://barnseywr.com`; GitHub Pages remains
+the fallback origin. `www.barnseywr.com` redirects to the apex, while
+`control.barnseywr.com` remains the authenticated controller/API origin.
+Publication verification treats the Cloudflare custom domain and GitHub Pages
+fallback as separate deployment states and confirms artifact parity explicitly.
 
 ## Required workflow
 

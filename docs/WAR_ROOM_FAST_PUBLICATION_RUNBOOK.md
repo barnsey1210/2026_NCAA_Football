@@ -10,7 +10,8 @@
    timestamps, V1 schemas, nonempty matched coverage, and a pull no older than
    15 minutes.
 4. `publish_site.sh --war-room-push` synchronizes and commits only those three
-   files to canonical `main`, which triggers the existing GitHub Pages publish.
+   files to canonical `main`, which triggers the Cloudflare Pages production
+   deployment and the independent GitHub Pages fallback deployment.
 
 The full public build is not used because it can contain older copies of other
 page payloads. Home is not rebuilt.

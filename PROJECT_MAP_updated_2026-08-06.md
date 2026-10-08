@@ -1,6 +1,6 @@
 # 2026 NCAAF Project Map
 
-_Last synchronized: 2026-09-01_
+_Last synchronized: 2026-10-07_
 
 ## Current operating rule
 
@@ -11,7 +11,8 @@ The authoritative source-code repository is:
 
 The operational runtime workspace is `/Users/jameslindesmith/NCAAF_AUTO`. The
 manual control repository is `/Users/jameslindesmith/NCAAF_CONTROL`. MAIN is
-also the canonical GitHub Pages publishing repository;
+also the canonical publication repository for Cloudflare Pages primary and the
+GitHub Pages fallback;
 `/Users/jameslindesmith/Sites/NCAAF_SITE` is legacy.
 
 Canonical V2 owns public output. Runtime generates and validates; the main repository preserves approved source and publishes explicitly. Do not restore recurring legacy V1 ownership.
@@ -33,12 +34,13 @@ Canonical V2 owns public output. Runtime generates and validates; the main repos
 
 ## Current public topology
 
-- Current public host: GitHub Pages.
-- Planned primary host: `https://barnseywr.com` on Cloudflare Pages.
-- Planned redirect: `https://www.barnseywr.com` to the apex.
+- Primary public host: `https://barnseywr.com` on Cloudflare Pages.
+- Fallback public host: `https://barnsey1210.github.io/2026_NCAA_Football/` on GitHub Pages.
+- Redirect: `https://www.barnseywr.com` to the apex.
 - Preserved authenticated control/API origin: `https://control.barnseywr.com`.
-- DNS cutover is deferred until CORS, exact-origin, authentication, and public
-  page behavior pass pre-cutover validation.
+- A validated push to canonical `main` feeds both deployments. Verify the
+  Cloudflare primary first, then verify fallback status and artifact parity
+  independently.
 
 ## CFBDepth data architecture
 

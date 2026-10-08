@@ -1,6 +1,6 @@
 # 2026 NCAAF Current Production Handoff
 
-_Status synchronized: 2026-09-01_
+_Status synchronized: 2026-10-07 (hosting topology amended after Cloudflare Pages cutover)_
 
 ## Production models
 
@@ -51,15 +51,17 @@ directly, or publish unvalidated artifacts.
 
 ## Public and control topology
 
-The public site currently runs on GitHub Pages. The planned migration is:
+The production topology is:
 
 - `https://barnseywr.com`: primary public site on Cloudflare Pages;
 - `https://www.barnseywr.com`: redirect to the apex;
 - `https://control.barnseywr.com`: retained authenticated controller/API.
+- `https://barnsey1210.github.io/2026_NCAA_Football/`: fallback public origin.
 
-Test exact-origin CORS, Cloudflare Access, authentication, live-data reads, and
-operator actions before DNS cutover. Manual operator actions use the protected
-popup/API. An expired Cloudflare Access session in an already-open popup can
+Validated pushes to canonical `main` feed Cloudflare Pages primary and GitHub
+Pages fallback deployments. Verify the custom domain first and report fallback
+status/parity separately. Manual operator actions use the protected popup/API.
+An expired Cloudflare Access session in an already-open popup can
 fail before FastAPI receives the POST; reconnecting the operator session fixes
 the channel. This is not a Market or quota defect.
 
@@ -67,8 +69,8 @@ the channel. This is not a Market or quota defect.
 
 1. Fix Command Center logo/value spacing and expired-operator-session UX while
    preserving the approved matrix width/layout.
-2. Move the public site to `barnseywr.com` through tested Cloudflare Pages
-   migration and DNS cutover.
+2. Keep Cloudflare primary and GitHub Pages fallback publication evidence
+   separate, with automated status and artifact-parity checks.
 3. Resume historical timing audit later as a separate research workstream.
 
 Historical SUN12 and retrospective timing anomalies remain deferred. They must

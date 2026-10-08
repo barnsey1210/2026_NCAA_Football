@@ -73,7 +73,8 @@ choose a provider, calculate API budgets, or create page-local data authority.
 - production source code and deployment manifests;
 - tests, simulations, audits, and validators;
 - reviewed changes before runtime deployment; and
-- the canonical GitHub Pages publishing repository.
+- the canonical publication repository for Cloudflare Pages primary and the
+  GitHub Pages fallback.
 
 ### `NCAAF_AUTO` owns
 
@@ -91,7 +92,9 @@ reviewed source change
 MAIN_REPO -- deploy/source_manifest.txt + deploy/deploy_to_auto.sh --> AUTO
 
 validated public artifact
-AUTO/build/public_site -- explicit public allowlist --> MAIN_REPO --> GitHub Pages
+AUTO/build/public_site -- explicit public allowlist --> MAIN_REPO/main
+                                                    --> Cloudflare Pages primary
+                                                    --> GitHub Pages fallback
 ```
 
 Deployment is explicit, manifest-only, and non-destructive. `AUTO` is not a
@@ -283,7 +286,9 @@ and preserve the last-known-good public artifact with its original timestamp.
 They must not relabel it as current. Overlapping work is deduplicated or blocked
 by task identity and runtime locks.
 
-Once publication completes, GitHub Pages receives the new allowlisted artifact.
+Once publication pushes canonical `main`, Cloudflare Pages and GitHub Pages
+deploy independently. Confirm the Cloudflare custom domain as the primary live
+result; report GitHub Pages separately as fallback deployment/parity evidence.
 Public JSON requests should use the established cache-busting/no-store policy
 where applicable. A normal browser navigation or cache revalidation should show
 the release; there is no current promise of server push, SSE, or an always-open
