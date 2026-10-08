@@ -81,6 +81,17 @@ class WarRoomModelFitContractTests(unittest.TestCase):
         self.assertIn(".model-fit-rank{grid-column:3;grid-row:1;min-width:22px;padding:3px 3px", source)
         self.assertNotIn("model-fit-dot", source)
 
+    def test_context_columns_have_vertical_separators(self):
+        source = PAGE.read_text()
+        self.assertIn(
+            "th.model-fit-col,th.state-col{border-left:1px solid rgba(235,242,248,.72)}",
+            source,
+        )
+        self.assertIn(
+            "td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}",
+            source,
+        )
+
     def test_perf_primary_value_is_signed_whole_number_but_tooltip_keeps_precision(self):
         source = PAGE.read_text()
         self.assertIn("const rounded=Math.round(n);", source)

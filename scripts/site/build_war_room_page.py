@@ -1325,6 +1325,8 @@ tr:hover td.context-group{background:#202d39}
   box-sizing:border-box;
 }
 .model-fit-col{width:112px;min-width:112px;max-width:112px;text-align:center;box-sizing:border-box}
+th.model-fit-col,th.state-col{border-left:1px solid rgba(235,242,248,.72)}
+td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
 .model-fit-stack{display:flex;flex-direction:column;gap:3px;align-items:stretch}
 .model-fit-team{display:grid;grid-template-columns:28px 38px 32px;grid-template-rows:26px;align-items:center;justify-content:center;column-gap:3px;min-height:26px;white-space:nowrap;font-weight:950;line-height:1}
 .model-fit-team .team-logo-holder{--team-logo-size:24px;grid-column:1;grid-row:1;justify-self:center;align-self:center}
