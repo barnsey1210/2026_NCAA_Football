@@ -22,10 +22,10 @@ REQUIRED_CATEGORIES = {
     "Game line edge",
 }
 
-# Five-digit positive American odds are valid for very long shots (for example,
-# +10000).  Six or more digits indicates the concatenation/corruption this gate
-# is intended to catch without blocking a legitimate market price.
-MALFORMED_PRICE_RE = re.compile(r"(?<!\d)[+-]\d{6,}(?:\.\d+)?")
+# Six-digit positive American odds are offered for extreme long shots (for
+# example, FanDuel +100000). Seven or more digits remains outside the accepted
+# provider range and indicates the concatenation/corruption this gate catches.
+MALFORMED_PRICE_RE = re.compile(r"(?<!\d)[+-]\d{7,}(?:\.\d+)?")
 NAN_RE = re.compile(r"(?i)(?:^|[\s,;:>])nan(?:$|[\s,;:<])")
 
 
@@ -62,7 +62,7 @@ def main() -> int:
     csv_text = df.fillna("").astype(str).to_csv(index=False)
 
     if MALFORMED_PRICE_RE.search(csv_text):
-        fail("CSV contains a malformed six-or-more-digit signed price")
+        fail("CSV contains a malformed seven-or-more-digit signed price")
 
     if NAN_RE.search(csv_text):
         fail("CSV contains a visible nan value")
@@ -74,7 +74,7 @@ def main() -> int:
         fail("email HTML is empty")
 
     if MALFORMED_PRICE_RE.search(visible_text):
-        fail("HTML contains a malformed six-or-more-digit signed price")
+        fail("HTML contains a malformed seven-or-more-digit signed price")
 
     if NAN_RE.search(visible_text):
         fail("HTML contains a visible nan value")

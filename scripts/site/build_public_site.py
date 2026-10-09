@@ -149,6 +149,10 @@ def compact_public_war_room_matrix(payload):
     for game in payload.get('games', []):
         if not isinstance(game, dict):
             continue
+        # Command Center replaced the Injury column with canonical L2 Trend.
+        # Keep injury_rank in the complete runtime/audit matrix, but do not
+        # carry the now-unconsumed repeated block in the browser fallback.
+        game.pop('injury_rank', None)
         operator_model = game.get('operator_model')
         if isinstance(operator_model, dict):
             operator_model.pop('auto_authority', None)

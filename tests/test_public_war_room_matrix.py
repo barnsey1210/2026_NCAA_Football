@@ -71,9 +71,11 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertNotIn("auto_authority", public["games"][0]["operator_model"])
         for field in (
             "authority", "models", "standard_freshness",
-            "shadow_readiness", "injury_rank", "l2_trend", "betting_signals",
+            "shadow_readiness", "l2_trend", "betting_signals",
         ):
             self.assertEqual(public["games"][0][field], original["games"][0][field])
+        self.assertIn("injury_rank", original["games"][0])
+        self.assertNotIn("injury_rank", public["games"][0])
         self.assertEqual(public["games"][0]["operator_model"]["mode"], "AUTO")
         self.assertEqual(
             public["games"][0]["operator_model"]["manual"],
