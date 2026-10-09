@@ -2,7 +2,7 @@
   const target=document.getElementById('futures');
   if(!target)return;
   try{
-    const data=await fetch('data/site/futures_view.json?v=20261008T015946Z').then(r=>r.json());
+    const data=await fetch('data/site/futures_view.json?v=20261009T154858Z').then(r=>r.json());
     const candidates=data.rows
       .filter(x=>Number.isFinite(Number(x.national_title_edge)))
       .sort((a,b)=>Number(b.national_title_edge)-Number(a.national_title_edge))
