@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -12,6 +13,17 @@ SPEC = importlib.util.spec_from_file_location(
 projection_sources = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader
 SPEC.loader.exec_module(projection_sources)
+
+
+def test_week_7_kennesaw_missouri_state_canonical_orientation():
+    preseason = json.loads(
+        (ROOT / "data/snapshots/preseason/preseason_db.json").read_text()
+    )
+    game = next(row for row in preseason["games"] if row["game_id"] == "g451")
+
+    assert game["away_team"] == "Kennesaw State"
+    assert game["home_team"] == "Missouri State"
+    assert not bool(game["neutral_site"])
 
 
 def write_massey(path: Path) -> None:
