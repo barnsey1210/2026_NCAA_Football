@@ -2091,13 +2091,23 @@ def model_freshness(
             watermark_date,
         )
 
+        # ``accepted_update`` is durable lifecycle evidence that this source
+        # promoted a changed version after the completed-week cutoff.  A later
+        # successful NO_CHANGE check must not revoke that authority, but the
+        # accepted version must still postdate this game's team-final
+        # watermark.  Keep ``state`` as diagnostic metadata and use the
+        # durable accepted timestamp for the NO_CHANGE carry-forward case.
+        accepted_date = iso_date(
+            meta.get("latest_accepted_update_at")
+        )
         authority_current = (
             accepted_update
             and (
                 state in ("PRE_GAME", "UPDATED")
                 or (
-                    week_cutoff_at is None
+                    accepted_date is not None
                     and watermark_date is not None
+                    and accepted_date > watermark_date
                 )
             )
         )

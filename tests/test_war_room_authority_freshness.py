@@ -141,6 +141,9 @@ class AuthorityFreshnessTests(unittest.TestCase):
             {"TeamRankings": metadata},
         )
         self.assertTrue(result["sources"]["TeamRankings"]["accepted_update"])
+        self.assertTrue(result["sources"]["TeamRankings"]["authority_current"])
+        self.assertEqual(result["updated_sources"], 1)
+        self.assertEqual(result["temporal_status"], "UPDATED")
         self.assertEqual(
             result["sources"]["TeamRankings"]["latest_check_status"],
             "NO_CHANGE",
