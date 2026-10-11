@@ -32,6 +32,7 @@ INDEX = ROOT / "v1.html"
 PRESEASON_DB = ROOT / "data/snapshots/preseason/preseason_db.json"
 PROJECTION_CONTRACT = ROOT / "data/site/current_game_projection_contract.json"
 RATINGS_VIEW = ROOT / "data/site/ratings_view.json"
+SPPLUS_RATINGS = ROOT / "data/ratings/spplus_2026_from_espn_latest.csv"
 OUT = ROOT / "data/site/matchups_view.json"
 AUDIT = ROOT / "data/audits/matchups_view_audit.json"
 
@@ -180,6 +181,34 @@ def apply_canonical_composite_ratings(teams, ratings_path=RATINGS_VIEW):
             row["combo"] = number(canonical.get("rating"))
         merged.append(row)
     return merged
+
+
+def load_canonical_spplus_component_ranks(path=SPPLUS_RATINGS):
+    """Rank accepted SP+ offense/defense values without fallback substitution."""
+    rows = csv_rows(path)
+    by_team = {
+        canonical_team(row.get("team")): row
+        for row in rows
+        if clean(row.get("team"))
+    }
+    if len(by_team) != 138:
+        raise SystemExit(f"Canonical SP+ component coverage is not 138: {len(by_team)}")
+
+    offense = [
+        (team, number(row.get("spplus_off"))) for team, row in by_team.items()
+    ]
+    defense = [
+        (team, number(row.get("spplus_def"))) for team, row in by_team.items()
+    ]
+    if any(value is None for _, value in offense + defense):
+        raise SystemExit("Canonical SP+ component ratings contain missing values")
+
+    offense.sort(key=lambda item: (-item[1], item[0]))
+    defense.sort(key=lambda item: (item[1], item[0]))
+    return (
+        {team: rank for rank, (team, _) in enumerate(offense, 1)},
+        {team: rank for rank, (team, _) in enumerate(defense, 1)},
+    )
 
 
 def team_ranks(teams):
@@ -659,10 +688,7 @@ def main():
     # These are current production ranks. They are useful opponent context, but
     # must not be represented as historical, point-in-time ranks for 2025 games.
     overall_rank_by_team = {canonical_team(row.get("team")): integer(row.get("rank")) for row in teams}
-    offense_order = sorted((row for row in teams if number(row.get("sp_offense")) is not None), key=lambda row: number(row.get("sp_offense")), reverse=True)
-    defense_order = sorted((row for row in teams if number(row.get("sp_defense")) is not None), key=lambda row: number(row.get("sp_defense")))
-    offense_rank_by_team = {canonical_team(row.get("team")): rank for rank, row in enumerate(offense_order, 1)}
-    defense_rank_by_team = {canonical_team(row.get("team")): rank for rank, row in enumerate(defense_order, 1)}
+    offense_rank_by_team, defense_rank_by_team = load_canonical_spplus_component_ranks()
 
     def rank_snapshot(team):
         team = canonical_team(team)
