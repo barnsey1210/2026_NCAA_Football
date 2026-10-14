@@ -197,11 +197,23 @@ def main():
         (item.get("opponent"), item.get("site"))
         for item in north_texas.get("remaining_sos_inputs", [])
     }
-    expected_north_texas_fixture = {
-        ("Charlotte", "HOME"), ("Navy", "AWAY"),
-        ("Florida Atlantic", "HOME"), ("Rice", "HOME"),
-        ("UTSA", "AWAY"), ("Tulane", "AWAY"), ("UAB", "HOME"),
+    completed_game_ids = {
+        str(game.get("game_id"))
+        for game in results.get("games", [])
+        if game.get("game_id") is not None and game.get("completed")
     }
+    expected_north_texas_fixture = set()
+    for game in preseason.get("games", []):
+        away = canon(game.get("away_team"))
+        home = canon(game.get("home_team"))
+        if "North Texas" not in {away, home} or not game.get("is_conference_game"):
+            continue
+        if str(game.get("game_id")) in completed_game_ids:
+            continue
+        opponent = away if home == "North Texas" else home
+        expected_north_texas_fixture.add(
+            (opponent, "HOME" if home == "North Texas" else "AWAY")
+        )
     north_texas_ratings = [
         float(item["rating"])
         for item in north_texas.get("remaining_sos_inputs", [])
@@ -209,8 +221,12 @@ def main():
     ]
     north_texas_fixture_ok = (
         north_texas_fixture == expected_north_texas_fixture
-        and len(north_texas_ratings) == 7
-        and abs(sum(north_texas_ratings) / 7 - float(north_texas.get("remaining_sos"))) < 1e-9
+        and len(north_texas_ratings) == len(expected_north_texas_fixture)
+        and bool(north_texas_ratings)
+        and abs(
+            sum(north_texas_ratings) / len(north_texas_ratings)
+            - float(north_texas.get("remaining_sos"))
+        ) < 1e-9
     )
 
     parity_rows.sort(reverse=True)
