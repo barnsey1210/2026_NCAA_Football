@@ -58,6 +58,11 @@ RESUME_WEIGHTS = {
     "g6_championship_bonus": 5.0,
 }
 
+SELECTOR_BASELINE = "baseline_percentile_resume_v1"
+SELECTOR_LOSS_GATE = "loss_gate_exception_v1"
+SELECTOR_LOSS_PENALTY = "marginal_loss_penalty_v1"
+SELECTOR_RECORD_FIRST = "record_first_at_large_v1"
+
 OFFICIAL_CFP_2026 = ROOT / "data/models/cfp_rankings_official_2026.csv"
 
 
@@ -250,6 +255,112 @@ def select_field(
     return field, auto
 
 
+def select_field_candidate(
+    ranked: List[str],
+    champs: Dict[str, str],
+    teams: Dict[str, dict],
+    metrics: Dict[str, Dict[str, float]],
+    policy: str,
+    selection_losses: Dict[str, int],
+) -> Tuple[List[str], set]:
+    """Select the field with the automatic-bid path unchanged.
+
+    Candidate policies affect only the seven at-large bids.  The record-first
+    candidate exhausts each regular-season loss tier in ascending order while
+    preserving the production resume ranking within a tier.  The loss-gate
+    candidate admits three-loss teams only with an exceptional trial-specific
+    resume (five quality wins, no bad loss and top-quartile CFP SOS), and
+    excludes four-loss teams.  The penalty candidate keeps the open ranking
+    pool but applies large marginal penalties after the second loss.
+    """
+    power_auto = {champs[c] for c in POWER_CONFS if c in champs}
+    g6_candidates = {champs[c] for c in G6_CONFS if c in champs}
+    rank_index = {team: i for i, team in enumerate(ranked)}
+    g6_auto = min(g6_candidates, key=lambda t: rank_index.get(t, 9999)) if g6_candidates else None
+    auto = power_auto | ({g6_auto} if g6_auto else set())
+
+    def is_g6(team: str) -> bool:
+        return CONF.norm_conf(teams.get(team, {}).get("conference")) in G6_CONFS
+
+    pool = [team for team in ranked if team not in auto and not is_g6(team)]
+    if policy == SELECTOR_RECORD_FIRST:
+        ordered_pool = sorted(
+            pool,
+            key=lambda team: (
+                int(selection_losses.get(team, 0)),
+                rank_index.get(team, 9999),
+            ),
+        )
+    elif policy == SELECTOR_LOSS_GATE:
+        sos_values = sorted(metrics[t]["sos"] for t in pool)
+        sos_q3 = sos_values[int(0.75 * (len(sos_values) - 1))]
+
+        def eligible(team: str) -> bool:
+            row = metrics[team]
+            losses = int(selection_losses.get(team, 0))
+            if losses <= 2:
+                return True
+            if losses >= 4:
+                return False
+            return (
+                row["quality_wins"] >= 5
+                and row["bad_losses"] == 0
+                and row["sos"] >= sos_q3
+            )
+
+        preferred = [team for team in pool if eligible(team)]
+        # Preserve the 12-team field even in an unusually high-loss season.
+        # Ordinary three-loss teams are a last-resort tier, followed by 4+
+        # only if mathematically necessary; the existing resume rank orders
+        # teams within each tier.
+        fallback_three = [team for team in pool if int(selection_losses.get(team, 0)) == 3 and team not in preferred]
+        fallback_four_plus = [team for team in pool if int(selection_losses.get(team, 0)) >= 4]
+        ordered_pool = preferred + fallback_three + fallback_four_plus
+    elif policy == SELECTOR_LOSS_PENALTY:
+        def adjusted_score(team: str) -> float:
+            losses = int(selection_losses.get(team, 0))
+            third_loss = 36.0 if losses >= 3 else 0.0
+            later_losses = 48.0 * max(0, losses - 3)
+            return metrics[team]["resume_score"] - third_loss - later_losses
+
+        ordered_pool = sorted(
+            pool,
+            key=lambda team: (adjusted_score(team), metrics[team]["resume_score"], CONF.team_rating(teams[team])),
+            reverse=True,
+        )
+    else:
+        raise ValueError(f"Unknown selector candidate: {policy}")
+
+    if len(ordered_pool) < 7:
+        raise RuntimeError(
+            f"CFP at-large invariant failed under {policy}: only "
+            f"{len(ordered_pool)} eligible teams"
+        )
+    at_large = ordered_pool[:7]
+    non_g6_field = power_auto | set(at_large)
+    field = [team for team in ranked if team in non_g6_field][:11]
+    if g6_auto is None:
+        raise RuntimeError("CFP field invariant failed: no eligible G6 champion found")
+    field.append(g6_auto)
+    if len(field) != 12:
+        raise RuntimeError(f"CFP field invariant failed under {policy}: {len(field)} teams")
+    return field, auto
+
+
+def record_bucket(wins: int, losses: int) -> str:
+    if wins == 12 and losses == 0:
+        return "12-0"
+    if wins == 11 and losses == 1:
+        return "11-1"
+    if wins == 10 and losses == 2:
+        return "10-2"
+    if wins == 9 and losses == 3:
+        return "9-3"
+    if wins == 8 and losses == 4:
+        return "8-4"
+    return "7-5_or_worse"
+
+
 def simulate_bracket(field: List[str], teams: Dict[str, dict], rng: random.Random, sigma: float, counters: dict):
     seeded = {i + 1: team for i, team in enumerate(field)}
     for seed, team in seeded.items():
@@ -297,6 +408,7 @@ def run_model(
     forced_results: dict[str, str] | None = None,
     capture_scenarios: bool = False,
     scenario_week: int | None = None,
+    selector_audit: bool = False,
 ) -> dict:
     rng = random.Random(seed)
     teams = {t["team"]: t for t in db.get("teams", [])}
@@ -378,6 +490,30 @@ def run_model(
         "quarterfinal": Counter(), "semifinal": Counter(), "title_game": Counter(),
         "champion": Counter(), "seed": defaultdict(Counter), "field": Counter(),
     }
+    selector_policies = [
+        SELECTOR_BASELINE,
+        SELECTOR_LOSS_GATE,
+        SELECTOR_LOSS_PENALTY,
+        SELECTOR_RECORD_FIRST,
+    ]
+    selector_counts = {policy: Counter() for policy in selector_policies}
+    selector_at_large = {policy: Counter() for policy in selector_policies}
+    selector_buckets = {
+        policy: defaultdict(lambda: {"trials": 0, "selected": 0, "at_large": 0})
+        for policy in selector_policies
+    }
+    selector_loss_buckets = {
+        policy: defaultdict(lambda: {"trials": 0, "selected": 0, "at_large": 0})
+        for policy in selector_policies
+    }
+    selector_team_buckets = {
+        policy: defaultdict(lambda: {"trials": 0, "selected": 0, "at_large": 0})
+        for policy in selector_policies
+    }
+    field_size_counts = {policy: Counter() for policy in selector_policies}
+    emergency_fill_trials = {
+        SELECTOR_RECORD_FIRST: {"3_loss": 0, "4_plus_loss": 0},
+    }
 
     for trial_idx in range(sims):
         season_trial = CONF.simulate_dynamic_regular_season_trial(
@@ -385,6 +521,8 @@ def run_model(
         )
         wins = season_trial["wins"]
         losses = season_trial["losses"]
+        regular_wins = dict(wins)
+        regular_losses = dict(losses)
         conf_wins = season_trial["conf_wins"]
         results = season_trial["results"]
         evolved_teams = season_trial["evolved_teams"]
@@ -527,6 +665,56 @@ def run_model(
         for t in auto:
             counters["auto"][t] += 1
 
+        if selector_audit:
+            candidate_fields = {
+                SELECTOR_BASELINE: (field, auto),
+                SELECTOR_LOSS_GATE: select_field_candidate(
+                    ranked, champs, teams, metrics, SELECTOR_LOSS_GATE, regular_losses
+                ),
+                SELECTOR_LOSS_PENALTY: select_field_candidate(
+                    ranked, champs, teams, metrics, SELECTOR_LOSS_PENALTY, regular_losses
+                ),
+                SELECTOR_RECORD_FIRST: select_field_candidate(
+                    ranked, champs, teams, metrics, SELECTOR_RECORD_FIRST, regular_losses
+                ),
+            }
+            for policy, (policy_field, policy_auto) in candidate_fields.items():
+                field_size_counts[policy][len(policy_field)] += 1
+                selected = set(policy_field)
+                at_large = selected - set(policy_auto)
+                if policy == SELECTOR_RECORD_FIRST:
+                    selected_losses = [int(regular_losses.get(team, 0)) for team in at_large]
+                    emergency_fill_trials[policy]["3_loss"] += int(
+                        any(losses_value == 3 for losses_value in selected_losses)
+                    )
+                    emergency_fill_trials[policy]["4_plus_loss"] += int(
+                        any(losses_value >= 4 for losses_value in selected_losses)
+                    )
+                for team in teams:
+                    selector_counts[policy][team] += int(team in selected)
+                    selector_at_large[policy][team] += int(team in at_large)
+                    champion_status = "champion" if team in champs.values() else "non_champion"
+                    bucket = record_bucket(
+                        int(regular_wins.get(team, 0)),
+                        int(regular_losses.get(team, 0)),
+                    )
+                    key = f"{bucket}|{champion_status}"
+                    row = selector_team_buckets[policy][(team, key)]
+                    row["trials"] += 1
+                    row["selected"] += int(team in selected)
+                    row["at_large"] += int(team in at_large)
+                    aggregate = selector_buckets[policy][key]
+                    aggregate["trials"] += 1
+                    aggregate["selected"] += int(team in selected)
+                    aggregate["at_large"] += int(team in at_large)
+                    if champion_status == "non_champion":
+                        losses_value = int(regular_losses.get(team, 0))
+                        loss_key = "4+" if losses_value >= 4 else str(losses_value)
+                        loss_row = selector_loss_buckets[policy][loss_key]
+                        loss_row["trials"] += 1
+                        loss_row["selected"] += int(team in selected)
+                        loss_row["at_large"] += int(team in at_large)
+
         if scenario is not None:
             _set_bit(scenario["valid_trial_mask"], trial_idx)
             scenario["valid_trials"] += 1
@@ -640,6 +828,73 @@ def run_model(
     db.setdefault("meta", {})["playoff_model_built_at"] = db["playoff_model"]["built_at"]
     db["meta"]["playoff_model_trials"] = sims
 
+    if selector_audit:
+        def finalize_bucket(row: dict) -> dict:
+            trials = row["trials"]
+            return {
+                **row,
+                "selection_rate": round(row["selected"] / trials, 6) if trials else None,
+                "at_large_rate": round(row["at_large"] / trials, 6) if trials else None,
+            }
+
+        db["selector_audit"] = {
+            "schema_version": "cfp-selector-audit-v1",
+            "built_at": datetime.now(timezone.utc).isoformat(),
+            "trials": sims,
+            "seed": seed,
+            "record_definition": "Regular-season record before the conference championship game; champion status is reported separately.",
+            "policies": {
+                SELECTOR_BASELINE: {
+                    "description": "Current percentile resume ranking with unrestricted non-G6 at-large pool.",
+                },
+                SELECTOR_LOSS_GATE: {
+            "description": "At-large tiers: <=2 losses first; exceptional 3-loss resumes (>=5 quality wins, zero bad losses, top-quartile CFP SOS) next; ordinary 3-loss and then 4+ teams only as required to preserve 12 teams.",
+                },
+                SELECTOR_LOSS_PENALTY: {
+                    "description": "At-large ranking subtracts 36 points for the third loss and 48 points for each later loss.",
+                },
+                SELECTOR_RECORD_FIRST: {
+                    "description": "Strict record-first at-large tiers: 0, then 1, then 2 regular-season losses; 3-loss and 4+ teams are emergency-fill tiers only. Production resume rank and tiebreaks order teams within each tier.",
+                },
+            },
+            "field_size_counts": {
+                policy: dict(sorted(counts.items()))
+                for policy, counts in field_size_counts.items()
+            },
+            "emergency_fill_trials": emergency_fill_trials,
+            "teams": {
+                policy: {
+                    team: {
+                        "cfp_selections": selector_counts[policy][team],
+                        "cfp_probability": round(selector_counts[policy][team] / sims, 6),
+                        "at_large_selections": selector_at_large[policy][team],
+                        "at_large_probability": round(selector_at_large[policy][team] / sims, 6),
+                        "record_champion_buckets": {
+                            key: finalize_bucket(row)
+                            for (bucket_team, key), row in selector_team_buckets[policy].items()
+                            if bucket_team == team
+                        },
+                    }
+                    for team in sorted(teams)
+                }
+                for policy in selector_policies
+            },
+            "all_fbs_record_champion_buckets": {
+                policy: {
+                    key: finalize_bucket(row)
+                    for key, row in sorted(selector_buckets[policy].items())
+                }
+                for policy in selector_policies
+            },
+            "all_fbs_non_champion_loss_buckets": {
+                policy: {
+                    key: finalize_bucket(row)
+                    for key, row in sorted(selector_loss_buckets[policy].items())
+                }
+                for policy in selector_policies
+            },
+        }
+
     if scenario is not None:
         games_payload = []
         for game_idx, (game, p_home) in enumerate(scenario["target_games"]):
@@ -730,6 +985,11 @@ def main():
         default=None,
         help="Week to capture. Defaults to the earliest incomplete regular-season week.",
     )
+    ap.add_argument(
+        "--selector-audit-output",
+        default=None,
+        help="Optional trial-level baseline and candidate selector audit JSON.",
+    )
     args = ap.parse_args()
 
     db_path = ROOT / args.db
@@ -750,6 +1010,7 @@ def main():
         args.sigma,
         capture_scenarios=bool(args.scenario_output),
         scenario_week=args.scenario_week,
+        selector_audit=bool(args.selector_audit_output),
     )
 
     out = ROOT / args.output
@@ -780,6 +1041,17 @@ def main():
             f"Scenario artifact: {scenario_out} "
             f"({scenario_out.stat().st_size / 1024 / 1024:.2f} MiB)"
         )
+
+    if args.selector_audit_output:
+        selector_audit_out = Path(args.selector_audit_output)
+        if not selector_audit_out.is_absolute():
+            selector_audit_out = ROOT / selector_audit_out
+        selector_audit_out.parent.mkdir(parents=True, exist_ok=True)
+        selector_audit_out.write_text(
+            json.dumps(db["selector_audit"], indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(f"Selector audit: {selector_audit_out}")
 
     print(f"Playoff model: {args.sims} trials")
     print(f"Source DB: {db_path}")
