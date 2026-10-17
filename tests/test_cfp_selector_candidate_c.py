@@ -1,6 +1,8 @@
 import unittest
 
 from scripts.simulations.run_playoff_model_2026 import (
+    CFP_SCHEMA_VERSION,
+    PRODUCTION_SELECTOR,
     SELECTOR_RECORD_FIRST,
     select_field_candidate,
 )
@@ -45,6 +47,10 @@ class CandidateCSelectorTests(unittest.TestCase):
             SELECTOR_RECORD_FIRST,
             losses,
         )
+
+    def test_candidate_c_is_the_versioned_production_selector(self):
+        self.assertEqual(PRODUCTION_SELECTOR, SELECTOR_RECORD_FIRST)
+        self.assertEqual(CFP_SCHEMA_VERSION, "cfp-2026-v9-record-first-at-large")
 
     def test_exhausts_zero_through_two_loss_teams_before_three_loss_team(self):
         ranked = [

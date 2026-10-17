@@ -62,6 +62,8 @@ SELECTOR_BASELINE = "baseline_percentile_resume_v1"
 SELECTOR_LOSS_GATE = "loss_gate_exception_v1"
 SELECTOR_LOSS_PENALTY = "marginal_loss_penalty_v1"
 SELECTOR_RECORD_FIRST = "record_first_at_large_v1"
+PRODUCTION_SELECTOR = SELECTOR_RECORD_FIRST
+CFP_SCHEMA_VERSION = "cfp-2026-v9-record-first-at-large"
 
 OFFICIAL_CFP_2026 = ROOT / "data/models/cfp_rankings_official_2026.csv"
 
@@ -656,7 +658,14 @@ def run_model(
             rank_sums[t] += rank
             if rank <= 25: top25_count[t] += 1
             for name in metric_names: metric_sums[name][t] += metrics[t][name]
-        field, auto = select_field(ranked, champs, teams)
+        field, auto = select_field_candidate(
+            ranked,
+            champs,
+            teams,
+            metrics,
+            PRODUCTION_SELECTOR,
+            regular_losses,
+        )
         if len(field) != 12:
             continue
         counters["field"][tuple(field)] += 1
@@ -667,7 +676,7 @@ def run_model(
 
         if selector_audit:
             candidate_fields = {
-                SELECTOR_BASELINE: (field, auto),
+                SELECTOR_BASELINE: select_field(ranked, champs, teams),
                 SELECTOR_LOSS_GATE: select_field_candidate(
                     ranked, champs, teams, metrics, SELECTOR_LOSS_GATE, regular_losses
                 ),
@@ -778,9 +787,24 @@ def run_model(
                 key=lambda t: (fnum(teams[t].get("conference_title_pct")), CONF.team_rating(teams[t])),
             )
     expected_ranked = [r["team"] for r in sorted(rows, key=lambda r: r["projected_cfp_rank"])]
-    projected_field, projected_auto = select_field(expected_ranked, expected_champs, teams)
+    projected_losses = {
+        row["team"]: max(0, int(round(row["losses"])))
+        for row in rows
+    }
+    expected_metrics = {
+        row["team"]: {"resume_score": row["resume_score"]}
+        for row in rows
+    }
+    projected_field, projected_auto = select_field_candidate(
+        expected_ranked,
+        expected_champs,
+        teams,
+        expected_metrics,
+        PRODUCTION_SELECTOR,
+        projected_losses,
+    )
     db["playoff_model"] = {
-        "schema_version": "cfp-2026-v8-dynamic-season-state",
+        "schema_version": CFP_SCHEMA_VERSION,
         "built_at": datetime.now(timezone.utc).isoformat(),
         "trials": sims,
         "metadata": {
@@ -789,6 +813,8 @@ def run_model(
             "g6_at_large_policy": "Exactly one G6 team is allowed in the field; all non-selected G6 teams are excluded from at-large bids.",
             "g6_seeding_policy": "The selected G6 automatic qualifier is always assigned seed 12.",
             "at_large_bids": 7,
+            "at_large_selector": PRODUCTION_SELECTOR,
+            "at_large_selector_policy": "Exhaust 0-, 1-, and 2-loss non-champions in loss-tier order before emergency 3-loss and then 4+ loss field fill; retain the validated resume rank and tiebreaks within each tier.",
             "byes": "Seeds 1-4",
             "ranking_proxy": "Prospective percentile resume blend validated with leave-one-season-out 2021-24 weekly CFP polls; schedule-adjusted Game Control, quality wins, prior-poll Top-25 wins, losses, bad losses, capped MOV and weighted MOL.",
             "resume_weights": RESUME_WEIGHTS,

@@ -11,6 +11,8 @@ EXPECTED_PROB_VERSION = "logistic_margin_scale_6_5_v1"
 EXPECTED_SCALE = 6.5
 EXPECTED_HFA = 2.6
 EXPECTED_SEASON_MODEL = "dynamic_conference_season_v1"
+EXPECTED_CFP_SCHEMA = "cfp-2026-v9-record-first-at-large"
+EXPECTED_SELECTOR = "record_first_at_large_v1"
 
 G6_CONFS = {"American", "CUSA", "MAC", "MW", "PAC12", "Sun Belt"}
 
@@ -38,6 +40,12 @@ def main():
     meta = d.get("metadata") or {}
     teams = d.get("teams") or []
     field = d.get("projected_field") or []
+
+    if d.get("schema_version") != EXPECTED_CFP_SCHEMA:
+        fail(f"wrong CFP schema version: {d.get('schema_version')}")
+
+    if meta.get("at_large_selector") != EXPECTED_SELECTOR:
+        fail(f"wrong at-large selector: {meta.get('at_large_selector')}")
 
     if d.get("trials") != EXPECTED_TRIALS:
         fail(f"expected {EXPECTED_TRIALS} trials, got {d.get('trials')}")
