@@ -102,6 +102,7 @@ ALIASES = {
     "iowa": "Iowa",
     "iowa st": "Iowa State",
     "iowa state": "Iowa State",
+    "jax st": "Jacksonville State",
     "j ville state": "Jacksonville State",
     "jacksonville st": "Jacksonville State",
     "jacksonville state": "Jacksonville State",
