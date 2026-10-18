@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 
 MODULE_PATH = Path(__file__).parents[1] / "scripts/markets/audit_futures_market_reliability.py"
@@ -178,6 +179,44 @@ class FuturesMarketReliabilityTests(unittest.TestCase):
             )
             self.assertEqual(result["status"], "fail")
             self.assertEqual(result["provider_wide_disappearances"], ["FanDuel"])
+
+    def test_conference_single_team_non_listing_is_coverage_warning(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tmp_path = Path(directory)
+            current = tmp_path / "current.csv"
+            history = tmp_path / "history.csv"
+            header = "snapshot_date,pulled_at,team,book,american_odds\n"
+            current.write_text(
+                header + "2026-09-10,2026-09-10T12:00:00Z,A,DraftKings,500\n"
+            )
+            history.write_text(
+                header
+                + "2026-09-09,2026-09-09T12:00:00Z,A,DraftKings,500\n"
+                + "2026-09-09,2026-09-09T12:00:00Z,B,DraftKings,500\n"
+            )
+            with mock.patch.object(
+                MODULE,
+                "datetime",
+                mock.Mock(
+                    wraps=MODULE.datetime,
+                    now=mock.Mock(
+                        return_value=MODULE.datetime(
+                            2026, 9, 10, 13, tzinfo=MODULE.timezone.utc
+                        )
+                    ),
+                ),
+            ):
+                result = MODULE.audit_csv_domain(
+                    "conference_titles", current, history, ["A", "B"],
+                    ["A", "B"], ("american_odds",), "2026-09-10"
+                )
+            self.assertEqual(result["status"], "warn")
+            self.assertEqual(result["missing_teams"], ["B"])
+            self.assertEqual(result["errors"], [])
+            self.assertEqual(
+                result["warnings"],
+                ["conference_titles: 1 expected teams have no quote"],
+            )
 
     def test_contract_domain_requires_current_executable_quotes(self):
         contract = {"make_cfp": {"rows": [

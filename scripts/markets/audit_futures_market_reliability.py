@@ -263,11 +263,13 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     if invalid:
         errors.append(f"{name}: {len(invalid)} malformed prices")
     if missing:
-        message = f"{name}: {len(missing)} expected teams have no quote"
-        if name == "win_totals":
-            warnings.append(message)
-        else:
-            errors.append(message)
+        # Individual team markets can be withdrawn while the surrounding
+        # conference board remains healthy.  Treat those as explicit coverage
+        # warnings here; unmatched labels, malformed prices, provider-wide
+        # disappearances, and material book drops remain hard failures.  The
+        # accepted contract therefore reflects current actual coverage without
+        # inventing or carrying forward a quote for the missing team.
+        warnings.append(f"{name}: {len(missing)} expected teams have no quote")
     if disappeared:
         errors.append(f"{name}: provider-wide disappearance: {', '.join(disappeared)}")
     if dropped_books:

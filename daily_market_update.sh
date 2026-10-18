@@ -243,6 +243,7 @@ STARTED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 CURRENT_STAGE=""
 RUN_FINALIZED=0
 EMAIL_REGRESSION_PASSED=1
+FUTURES_ACQUISITION_ACCEPTED=1
 
 
 status_stage() {
@@ -379,6 +380,7 @@ trap on_exit EXIT
     # Futures artifact with an explicit stale operational status.
     warn "Futures acquisition degraded; prior accepted Futures artifacts preserved while the remaining daily pipeline continues"
     status_stage "futures_market_acquisition" RUNNING "DEGRADED_PRIOR_ACCEPTED_ARTIFACT_PRESERVED"
+    FUTURES_ACQUISITION_ACCEPTED=0
   fi
   run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
   run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
@@ -742,16 +744,20 @@ fi
   stage_start "playoff_futures"
   # Acquisition already ran in the early fast Futures stage. Rebuild after
   # simulations so the public view reflects both fresh markets and fresh sims.
-  run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
-  if run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture; then
-    :
+  if [ "$FUTURES_ACQUISITION_ACCEPTED" -eq 1 ]; then
+    run_py "scripts/markets/build_current_futures_market_contract.py" "build_current_futures_market_contract.py" || warn "Canonical futures market contract build failed; retaining prior valid contract"
+    if run_py "scripts/markets/audit_futures_market_reliability.py" "audit_futures_market_reliability.py" --phase all --capture; then
+      :
+    else
+      warn "Playoff futures reliability audit failed; stale or unavailable playoff markets will remain explicitly degraded"
+    fi
+    if run_py "scripts/site/build_futures_view.py" "build_futures_view.py"; then
+      run_py "scripts/markets/capture_futures_checkpoint.py" "capture_futures_checkpoint.py" || warn "Futures checkpoint capture failed"
+    else
+      warn "Futures V2 data build failed"
+    fi
   else
-    warn "Playoff futures reliability audit failed; stale or unavailable playoff markets will remain explicitly degraded"
-  fi
-  if run_py "scripts/site/build_futures_view.py" "build_futures_view.py"; then
-    run_py "scripts/markets/capture_futures_checkpoint.py" "capture_futures_checkpoint.py" || warn "Futures checkpoint capture failed"
-  else
-    warn "Futures V2 data build failed"
+    warn "Skipping post-simulation Futures rebuild because current acquisition was rejected; preserving the prior accepted contract and view"
   fi
   run_py "scripts/site/build_conference_workspace.py" "build_conference_workspace.py"
   stage_pass "playoff_futures"
@@ -768,7 +774,11 @@ fi
   stage_start "odds_payloads"
   # Canonical current market was built immediately after acquisition.
   run_py "scripts/site/build_odds_screen_v2.py" "build_odds_screen_v2.py" || warn "Odds game payload build failed; retaining last valid artifact"
-  run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || warn "Odds futures payload build failed; retaining last valid artifact"
+  if [ "$FUTURES_ACQUISITION_ACCEPTED" -eq 1 ]; then
+    run_py "scripts/site/build_odds_futures_v2.py" "build_odds_futures_v2.py" || warn "Odds futures payload build failed; retaining last valid artifact"
+  else
+    warn "Skipping Odds Futures rebuild because current Futures acquisition was rejected; retaining prior accepted payload"
+  fi
   stage_pass "odds_payloads"
 
   # Optional email send. Do not let missing Gmail env vars stop the market/site/rating build.
