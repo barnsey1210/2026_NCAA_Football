@@ -99,7 +99,11 @@ def fast_market_result(output: str) -> dict:
 
 def daily_running() -> bool:
     state = read_json(DAILY_STATUS, {})
-    return str(state.get("status", "")).upper() in {"RUNNING", "STARTED", "IN_PROGRESS"}
+    # daily_run_status.py owns this artifact and records lifecycle state in
+    # ``overall_result``.  Keep the legacy ``status`` fallback for older
+    # fixtures/artifacts, but never let fast writers overlap a live daily run.
+    lifecycle = state.get("overall_result", state.get("status", ""))
+    return str(lifecycle).upper() in {"RUNNING", "STARTED", "IN_PROGRESS"}
 
 
 def task_id(action: str, trigger: str) -> str:
