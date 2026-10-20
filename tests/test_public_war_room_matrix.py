@@ -77,10 +77,7 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertIn("injury_rank", original["games"][0])
         self.assertNotIn("injury_rank", public["games"][0])
         self.assertEqual(public["games"][0]["operator_model"]["mode"], "AUTO")
-        self.assertEqual(
-            public["games"][0]["operator_model"]["manual"],
-            original["games"][0]["operator_model"]["manual"],
-        )
+        self.assertNotIn("spread", public["games"][0]["operator_model"]["manual"])
         runtime_quote = original["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
         public_quote = public["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
         for field in BUILDER.PUBLIC_QUOTE_INTERNAL_FIELDS:
@@ -99,6 +96,18 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         encoded = (json.dumps(public, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
 
         self.assertLessEqual(len(encoded), BUILDER.PUBLIC_WAR_ROOM_TARGET_BYTES)
+
+    def test_null_pruning_preserves_non_null_public_values(self):
+        runtime = self.fixture()
+        runtime["games"][0]["models"]["standard_total"] = {
+            "value": None,
+            "authority": "UNAVAILABLE",
+        }
+        public = BUILDER.compact_public_war_room_matrix(copy.deepcopy(runtime))
+
+        total = public["games"][0]["models"]["standard_total"]
+        self.assertNotIn("value", total)
+        self.assertEqual(total["authority"], "UNAVAILABLE")
 
 
 if __name__ == "__main__":

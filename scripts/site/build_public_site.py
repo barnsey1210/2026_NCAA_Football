@@ -145,6 +145,19 @@ def compact_public_war_room_matrix(payload):
             for nested in value:
                 compact_market_quotes(nested)
 
+    def prune_null_fields(value):
+        """Drop absent optional values from the browser-only serialization."""
+        if isinstance(value, dict):
+            for key in list(value):
+                nested = value[key]
+                if nested is None:
+                    del value[key]
+                    continue
+                prune_null_fields(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                prune_null_fields(nested)
+
     payload.pop('audit', None)
     for game in payload.get('games', []):
         if not isinstance(game, dict):
@@ -157,6 +170,10 @@ def compact_public_war_room_matrix(payload):
         if isinstance(operator_model, dict):
             operator_model.pop('auto_authority', None)
         compact_market_quotes(game.get('market'))
+    # Optional values are read defensively by the public client. Omitting nulls
+    # preserves their unavailable meaning while keeping the fallback artifact
+    # below the static-host headroom target as the season schedule grows.
+    prune_null_fields(payload)
     return payload
 
 
