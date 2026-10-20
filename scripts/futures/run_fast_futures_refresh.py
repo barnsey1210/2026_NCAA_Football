@@ -20,6 +20,8 @@ KALSHI = ROOT / "data/markets/kalshi/kalshi_futures_2026.json"
 CONTRACT = ROOT / "data/markets/current_futures_market_2026.json"
 FUTURES_VIEW = ROOT / "data/site/futures_view.json"
 ODDS_FUTURES = ROOT / "data/site/odds_futures_v2.json"
+WIN_RAW = ROOT / "actionnetwork_win_totals_raw.json"
+WIN_FALLBACK_RECEIPT = ROOT / "data/audits/futures_win_totals_fallback.json"
 
 STATE_DIR = ROOT / "data/control/futures_market_scheduler"
 MARKET_STATE = STATE_DIR / "market_state.json"
@@ -146,10 +148,41 @@ def main() -> int:
 
         acquisition_ok = True
 
-        acquisition_ok &= run(
+        action_win_ok = run(
             "Action Network win totals",
             [sys.executable, "pull_actionnetwork_win_totals_api.py"],
         )
+        direct_win_ok = False
+        action_detail = read_json(WIN_RAW, {})
+        if not action_win_ok and action_detail.get("status") == "ACTION_NO_CONTENT":
+            direct_win_ok = run(
+                "Direct FanDuel win totals fallback",
+                [
+                    sys.executable,
+                    "pull_fanduel_win_totals.py",
+                    "--replace-output",
+                ],
+            )
+        win_rows = 0
+        win_teams = 0
+        if direct_win_ok and WIN.exists():
+            import csv
+            with WIN.open(newline="") as handle:
+                records = list(csv.DictReader(handle))
+            win_rows = len(records)
+            win_teams = len({row.get("team") for row in records if row.get("team")})
+        atomic_json(WIN_FALLBACK_RECEIPT, {
+            "schema_version": 1,
+            "generated_at": now_iso(),
+            "action_status": action_detail.get("status"),
+            "action_http_status": action_detail.get("http_status"),
+            "action_error_code": (action_detail.get("provider_error") or {}).get("errorCode"),
+            "fallback_source": "FanDuel direct" if direct_win_ok else None,
+            "fallback_status": "PASSED" if direct_win_ok else "NOT_ACCEPTED",
+            "normalized_rows": win_rows,
+            "covered_teams": win_teams,
+        })
+        acquisition_ok &= action_win_ok or direct_win_ok
 
         kalshi_ok = run(
             "Kalshi NCAAF futures",

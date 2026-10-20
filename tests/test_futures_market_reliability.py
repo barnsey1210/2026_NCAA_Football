@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -179,6 +180,43 @@ class FuturesMarketReliabilityTests(unittest.TestCase):
             )
             self.assertEqual(result["status"], "fail")
             self.assertEqual(result["provider_wide_disappearances"], ["FanDuel"])
+
+    def test_bounded_direct_fanduel_fallback_accepts_only_verified_no_content(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tmp_path = Path(directory)
+            (tmp_path / "data/audits").mkdir(parents=True)
+            current = tmp_path / "current.csv"
+            history = tmp_path / "history.csv"
+            header = "snapshot_date,pulled_at,team,book,win_total,over_odds,under_odds\n"
+            now = [
+                {
+                    **row("2026-10-20", f"Team {i}", "FanDuel"),
+                    "pulled_at": "2026-10-20T12:30:00+00:00",
+                }
+                for i in range(80)
+            ]
+            prior = [row("2026-10-19", f"Team {i}", "DraftKings") for i in range(80)]
+            for path, records in ((current, now), (history, prior)):
+                path.write_text(header + "".join(
+                    f"{r['snapshot_date']},{r.get('pulled_at','2026-10-19T12:00:00+00:00')},{r['team']},{r['book']},{r['win_total']},{r['over_odds']},{r['under_odds']}\n"
+                    for r in records
+                ))
+            (tmp_path / "data/audits/futures_win_totals_fallback.json").write_text(json.dumps({
+                "action_status": "ACTION_NO_CONTENT",
+                "action_http_status": 404,
+                "action_error_code": "NO_CONTENT_FOUND",
+                "fallback_source": "FanDuel direct",
+                "fallback_status": "PASSED",
+                "covered_teams": 80,
+            }))
+            canonical = [f"Team {i}" for i in range(80)]
+            result = MODULE.audit_csv_domain(
+                "win_totals", current, history, canonical, canonical,
+                ("over_odds", "under_odds"), "2026-10-20"
+            )
+            self.assertEqual(result["status"], "warn")
+            self.assertEqual(result["provider_wide_disappearances"], [])
+            self.assertEqual(result["direct_fallback_receipt"]["covered_teams"], 80)
 
     def test_conference_single_team_non_listing_is_coverage_warning(self):
         with tempfile.TemporaryDirectory() as directory:

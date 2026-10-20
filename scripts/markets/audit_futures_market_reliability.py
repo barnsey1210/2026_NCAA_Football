@@ -196,6 +196,7 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     # is explicitly rejected for carrying a wrong-season fixture. Only that
     # documented quarantine is exempt from provider-drop failure handling.
     quarantined_books = set()
+    direct_fallback = None
     if name == "win_totals":
         quarantine_path = current_path.parent / "actionnetwork_win_totals_raw.json"
         try:
@@ -205,6 +206,27 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
 
         if quarantine.get("status") == "REJECTED_WRONG_SEASON_SOURCE":
             quarantined_books.add("BetMGM")
+
+        fallback_path = current_path.parent / "data/audits/futures_win_totals_fallback.json"
+        try:
+            fallback = json.loads(fallback_path.read_text())
+        except Exception:
+            fallback = {}
+        direct_fallback = (
+            fallback
+            if fallback.get("action_status") == "ACTION_NO_CONTENT"
+            and fallback.get("action_http_status") == 404
+            and fallback.get("action_error_code") == "NO_CONTENT_FOUND"
+            and fallback.get("fallback_source") == "FanDuel direct"
+            and fallback.get("fallback_status") == "PASSED"
+            and int(fallback.get("covered_teams") or 0) >= 80
+            and set(current_books) == {"FanDuel"}
+            and current_books.get("FanDuel", 0) >= 80
+            else None
+        )
+        if direct_fallback:
+            disappeared = []
+            dropped_books = {}
 
         if quarantined_books:
             disappeared = [
@@ -279,6 +301,11 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
             f"{name}: {len(ambiguous)} team/book pairs expose multiple totals; "
             "the existing selector collapses these at brand level"
         )
+    if direct_fallback:
+        warnings.append(
+            "win_totals: Action aggregate returned NO_CONTENT_FOUND; accepted bounded "
+            f"direct FanDuel fallback for {direct_fallback['covered_teams']} teams"
+        )
 
     return {
         "domain": name,
@@ -312,6 +339,7 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
         "unmatched_team_labels": unmatched,
         "invalid_prices": invalid,
         "ambiguous_team_book_lines": ambiguous,
+        "direct_fallback_receipt": direct_fallback,
         "errors": errors,
         "warnings": warnings,
     }

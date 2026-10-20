@@ -399,7 +399,31 @@ def main() -> None:
     cfg = action_config()
     requested_ids = domain_book_ids(cfg, "win_totals")
     request_url = action_market_url(args.url, requested_ids)
-    data = fetch_json(request_url)
+    try:
+        data = fetch_json(request_url)
+    except requests.HTTPError as exc:
+        response = exc.response
+        detail = {}
+        if response is not None:
+            try:
+                detail = response.json()
+            except Exception:
+                detail = {"body": response.text[:1000]}
+        Path(args.raw_json).write_text(
+            json.dumps({
+                "status": "ACTION_NO_CONTENT" if (
+                    response is not None
+                    and response.status_code == 404
+                    and detail.get("errorCode") == "NO_CONTENT_FOUND"
+                ) else "ACTION_REQUEST_FAILED",
+                "http_status": response.status_code if response is not None else None,
+                "provider_error": detail,
+                "source_url": request_url,
+                "observed_at": datetime.now().astimezone().isoformat(),
+            }, indent=2),
+            encoding="utf-8",
+        )
+        raise
     market_name = clean_text(data.get("name"))
     fixture_season = market_season(data)
 

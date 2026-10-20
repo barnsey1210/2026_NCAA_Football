@@ -40,6 +40,7 @@ TEAM_ALIASES = {
     "Miss State": "Mississippi State", "Kansas St": "Kansas State", "Arizona St": "Arizona State",
     "Oklahoma St": "Oklahoma State", "Iowa St": "Iowa State", "UCF": "Central Florida",
     "Miami (FL)": "Miami-FL",
+    "Miami Florida": "Miami-FL",
 }
 
 
@@ -311,6 +312,11 @@ def main() -> None:
     p.add_argument("--season", type=int, default=2026)
     p.add_argument("--output-csv", default=OUTPUT_CSV)
     p.add_argument("--debug-only", action="store_true")
+    p.add_argument(
+        "--replace-output",
+        action="store_true",
+        help="Write only the current direct FanDuel board instead of merging prior providers.",
+    )
     args = p.parse_args()
 
     meta = fetch_json(META_URL, "GET")
@@ -357,9 +363,9 @@ def main() -> None:
         out_new.to_csv("fanduel_win_totals_import_debug.csv", index=False)
         print("Debug only wrote fanduel_win_totals_import_debug.csv")
         return
-    merged = merge_existing_output(out_new, args.output_csv)
+    merged = out_new if args.replace_output else merge_existing_output(out_new, args.output_csv)
     merged.to_csv(args.output_csv, index=False)
-    print("Merged output:", args.output_csv, "rows:", len(merged))
+    print("Output:", args.output_csv, "rows:", len(merged), "replace:", args.replace_output)
 
 
 if __name__ == "__main__":
