@@ -70,6 +70,28 @@ class TrackCloseResolverTests(unittest.TestCase):
         self.assertIsNone(resolved)
         self.assertEqual(reason, "ambiguous_team")
 
+    def test_sheet_game_id_keeps_miami_oh_distinct_from_miami_fl(self):
+        games = [
+            game("g479", 7, "Florida State", "Miami-FL", spread_home=-20.0),
+            game("g480", 7, "Akron", "Miami-OH", spread_home=-9.5),
+        ]
+        row = {
+            "raw_sheet_game_id": "g480",
+            "team_guess": "miami-oh",
+            "Bet Type": "Spread",
+            "bet_line": -9.5,
+        }
+
+        resolved, identity_reason = resolve_game(row, games)
+        quote, quote_reason = authoritative_frozen_quote(row, resolved)
+
+        self.assertEqual(resolved["game_id"], "g480")
+        self.assertEqual(identity_reason, "sheet_game_id")
+        self.assertEqual(quote_reason, "pinnacle_frozen_close")
+        self.assertEqual(quote["side"], "home")
+        self.assertEqual(point_clv(row, quote), 0.0)
+        self.assertEqual(canonical_team("miami-oh"), "miami-oh")
+
     def test_live_quote_is_not_historical_close(self):
         quote, reason = authoritative_frozen_quote(
             {"Bet Type": "Side", "team_guess": "Home", "bet_line": -3.0},
