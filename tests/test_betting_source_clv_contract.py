@@ -18,7 +18,7 @@ class BettingSourceCLVContractTest(unittest.TestCase):
             "stake": stake, "realized_profit": profit, "status": status,
             "clv_pct_current": None, "track_close": track,
             "tracking_clv_state": state, "tracking_clv_points": points,
-            "ev_current_pct": None,
+            "ev_current_pct": None, "close_ev_pct": None,
         }
 
     def test_source_groups(self):
@@ -70,6 +70,7 @@ class BettingSourceCLVContractTest(unittest.TestCase):
                 "status": status, "clv_pct_current": None,
                 "track_close": track, "tracking_clv_state": state,
                 "tracking_clv_points": points, "ev_current_pct": None,
+                "close_ev_pct": None,
             }
 
         metrics = summarize_records([
@@ -95,6 +96,7 @@ class BettingSourceCLVContractTest(unittest.TestCase):
             "track_close": True,
             "tracking_clv_state": "NOT_APPLICABLE_POINT_CLV",
             "tracking_clv_points": None, "ev_current_pct": None,
+            "close_ev_pct": None,
         }])
         self.assertEqual(metrics["track_close_eligible"], 1)
         self.assertEqual(metrics["track_close_not_applicable"], 1)

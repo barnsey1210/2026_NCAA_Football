@@ -17,12 +17,21 @@
     "conferences.html": ["conference", "ratings", "futures", "schedule", "betting"],
     "playoff.html": ["futures", "ratings", "schedule"],
     "simulations.html": ["ratings", "schedule", "futures"],
-    "betting.html": ["betting", "current_market", "market_history", "historical_betting_analytics", "model_performance"],
+    "betting.html": ["betting", "current_market", "market_history", "historical_betting_analytics", "model_performance", "close_derived_ev"],
     "team.html": ["ratings", "schedule", "current_market", "model_fit", "injuries", "coaches"],
     "coaches.html": ["coaches", "schedule", "current_market"],
     "v1.html": ["legacy_embedded_data"]
   },
   "contracts": {
+    "close_derived_ev": {
+      "artifact": "data/site/betting_activity_view.json",
+      "builder": "betting/build_betting_activity_view.py",
+      "schema_version": "betting-activity-v2",
+      "owner": "BETTING_RESULTS_PROJECTOR",
+      "record_grain": "one canonical wager",
+      "aggregation_contract": "sum expected P/L divided by sum eligible settled risk; never average wager EV percentages",
+      "provenance_categories": ["spread_curve", "total_curve", "team_total_estimated", "team_total_devig", "moneyline_devig", "moneyline_estimated", "pending", "unsupported_na"]
+    },
     "war_room_health": {
       "artifact": "data/site/war_room_health.json",
       "builder": "scripts/war_room/build_war_room_health.py",

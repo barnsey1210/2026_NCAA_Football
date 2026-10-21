@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 
 from lib.ncaaf_config import canonical_team
 from betting.key_aware_spread_ev import SpreadEVCalculator
+from betting.close_derived_ev import CloseDerivedEV, aggregate_ev
 
 INFILE = ROOT / "data/bets/bets_enriched.csv"
 GAME_VIEW = ROOT / "data/site/matchups_view.json"
@@ -141,6 +142,7 @@ def summarize_records(rows):
         "eligible_avg_clv_points": round(sum(tracking_clv) / len(tracking_clv), 3) if tracking_clv else None,
         "avg_ev_pct": round(sum(ev) / len(ev), 4) if ev else None,
         "current_ev_dollars": round(sum((row["stake"] or 0) * (row["ev_current_pct"] or 0) for row in open_group), 2),
+        **aggregate_ev(rows),
     }
 
 
@@ -286,6 +288,7 @@ def main():
         source_rows = list(csv.DictReader(handle))
 
     spread_ev = SpreadEVCalculator(ROOT)
+    close_ev = CloseDerivedEV(ROOT, list(games_by_id.values()))
 
     records = []
     match_reasons = {}
@@ -405,7 +408,7 @@ def main():
         is_graded = clean(row.get("status")) in {"Won", "Lost", "Push", "Cashout"}
         stake = number(row.get("stake"))
         realized_profit = number(row.get("realized_profit")) or 0
-        records.append({
+        record = {
             "bet_id": bet_id, "game_id": game.get("game_id") if game else None,
             "game_link_status": reason, "week": game.get("week") if game else week_from_row(row),
             "game_date": game.get("date") if game else None,
@@ -464,7 +467,9 @@ def main():
             "raw_sheet_game": clean(row.get("raw_sheet_game")),
             "raw_sheet_game_id": clean(row.get("raw_sheet_game_id")),
             "game_label_mismatch": boolean(row.get("game_label_mismatch")),
-        })
+        }
+        record.update(close_ev.price(record, game))
+        records.append(record)
 
     open_rows = [row for row in records if row["is_open"]]
     metrics = summarize_records

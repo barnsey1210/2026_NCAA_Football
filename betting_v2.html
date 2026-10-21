@@ -396,7 +396,7 @@ img[src$="west-virginia.webp"] {
 </head><body><main class="shell"><div class="top"><div class="brand">NCAAF</div><div class="nav"><a>Ratings</a><a href="openers_v2.html">Openers</a><a href="matchups_v2.html">Matchups</a><a href="dashboard_v2.html">Dashboard</a><a>Futures</a><a>Simulations</a><a class="active">Betting</a></div><div class="sync" id="sync">Sheet snapshot</div></div><div class="viewSwitch"><button class="active" data-view="bets">My Bets</button><button data-view="model">2026 Model Tracker</button><button data-view="history">Historical Research</button></div><div id="myBetsView" class="modelView"><section class="hero"><div><h1>Betting</h1><p>Performance, closing-line value, current expected value, and one complete wager ledger.</p></div><div class="metrics"><div class="metric"><span>Open</span><b id="ownedCount">—</b></div><div class="metric"><span>Exposure</span><b id="exposure">—</b></div><div class="metric"><span>P/L</span><b id="profitLoss">—</b></div><div class="metric"><span>ROI</span><b id="roi">—</b></div><div class="metric"><span>Current EV</span><b id="totalEv">—</b></div><div class="metric"><span>AVG CLV · PINNACLE</span><b id="averageClv">—</b></div></div></section>
 
 
-<div class="tabs" id="tabs"><button class="active" data-tab="all">All</button><button data-tab="open_source">Open</button><button data-tab="powers_source">Powers</button></div><div class="filters"><select id="weekFilter"><option value="all">All weeks</option></select><select id="sourceFilter"><option value="all">All sources</option></select><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger compactLedger"><thead><tr><th>Source</th><th>Date</th><th>Selection</th><th>Book</th><th>Bet</th><th>Stake</th><th>Close</th><th>CLV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="historicalResearchView" class="modelView" hidden></section><section id="modelPerformanceView" class="modelView" hidden>
+<div class="tabs" id="tabs"><button class="active" data-tab="all">All</button><button data-tab="open_source">Open</button><button data-tab="powers_source">Powers</button></div><div class="filters"><select id="weekFilter"><option value="all">All weeks</option></select><select id="sourceFilter"><option value="all">All sources</option></select><select id="market"><option value="all">All markets</option></select><select id="link"><option value="all">All link states</option><option value="linked">Game linked</option><option value="team">Team/future</option><option value="unlinked">Unlinked game bet</option></select><input id="search" placeholder="Find team, selection, book, or source"></div><div class="card"><div class="wrap"><table class="ledger compactLedger"><thead><tr><th>Source</th><th>Date</th><th>Selection</th><th>Book</th><th>Bet</th><th>Stake</th><th>Close</th><th>CLV</th><th>Close EV</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"><tr><td colspan="11" class="empty">Loading betting activity…</td></tr></tbody></table></div></div><p class="foot">Official wagers come from the Google Sheet. Site-entered drafts remain device-local and are excluded from official performance.</p></div><section id="historicalResearchView" class="modelView" hidden></section><section id="modelPerformanceView" class="modelView" hidden>
 <section class="performance"><div class="card"><div class="cardHead"><h2>Performance over time</h2><small>Realized P/L and open-bet EV</small></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:var(--green)"></i>Realized P/L</span><span><i style="background:var(--blue)"></i>Current EV</span></div></div><div class="card"><div class="cardHead"><h2>Betting summary</h2><small>Overall, Powers, and Model / Open</small></div><div class="scoreGrid" id="scores"></div><div class="breakdowns"><div id="weeks"></div><div id="markets"></div></div></div></section>
 <div class="shadowModeSwitch" id="shadowModeSwitch" role="tablist" aria-label="Model performance type">
   <button class="active" type="button" role="tab" aria-selected="true" data-performance-mode="standard">Standard Models</button>
@@ -3873,6 +3873,10 @@ function pMetrics(list){
   const positive=clv.filter(r=>Number(r.tracking_clv_points)>0).length;
   const trackClose=list.filter(r=>r.track_close===true);
   const decisions=graded.filter(r=>r.status==='Won'||r.status==='Lost');
+  const closeEv=graded.filter(r=>Number.isFinite(Number(r.close_ev_pct))&&Number(r.settled_risk)>0);
+  const closeEvRisk=closeEv.reduce((s,r)=>s+Number(r.settled_risk),0);
+  const closeEvExpected=closeEv.reduce((s,r)=>s+Number(r.close_ev_expected_pl),0);
+  const closeEvRealized=closeEv.reduce((s,r)=>s+Number(r.realized_pl),0);
 
   return{
     bets:list.length,
@@ -3896,7 +3900,13 @@ function pMetrics(list){
     avg_clv_points:clv.length
       ? clv.reduce((s,r)=>s+Number(r.tracking_clv_points),0)/clv.length
       : null,
-    current_ev_dollars:open.reduce((s,r)=>s+(Number(r.current_ev)||0),0)
+    current_ev_dollars:open.reduce((s,r)=>s+(Number(r.current_ev)||0),0),
+    close_ev_eligible:closeEv.length,
+    close_ev_risk:closeEvRisk,
+    close_ev_expected_pl:closeEvExpected,
+    close_ev_roi:closeEvRisk?closeEvExpected/closeEvRisk:null,
+    close_ev_realized_roi:closeEvRisk?closeEvRealized/closeEvRisk:null,
+    close_ev_actual_vs_expected:closeEvRisk?(closeEvRealized-closeEvExpected)/closeEvRisk:null
   };
 }
 function pScore(label,list){const m=pMetrics(list);return`<div class="score"><h3>${esc(label)}</h3><strong>${m.wins}-${m.losses}-${m.pushes}</strong><dl><dt>Bets</dt><dd>${m.bets}</dd><dt>Amount risked</dt><dd>${money(m.amount_risked)}</dd><dt>Profit / loss</dt><dd class="${tone(m.realized_pl)}">${money(m.realized_pl)}</dd><dt>ROI</dt><dd class="${tone(m.roi)}">${m.roi==null?'—':num(m.roi*100,1)+'%'}</dd><dt>Positive CLV</dt><dd>${m.positive_clv}/${m.clv_matched} · ${m.positive_clv_pct==null?'—':num(m.positive_clv_pct*100,1)+'%'}</dd><dt>Average CLV</dt><dd class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)} pts`}</dd><dt>Current EV</dt><dd class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</dd><dt>Open exposure</dt><dd>${money(m.open_exposure)}</dd></dl></div>`}
@@ -3905,7 +3915,7 @@ function pGroup(list,key){const map=new Map;list.forEach(r=>{const name=r[key]||
 function pChart(list){const by=new Map;list.forEach(r=>{const key=ACTIVE_PERIOD==='Futures'?(r.placed_at||r.source_pulled_at):(r.game_date||r.placed_at)||'Unknown';if(!by.has(key))by.set(key,[]);by.get(key).push(r)});let realized=0,ev=0;const p=[...by.entries()].sort((a,b)=>new Date(a[0])-new Date(b[0])).map(([date,rows])=>{realized+=rows.reduce((s,r)=>s+(r.is_graded?Number(r.realized_pl)||0:0),0);ev+=rows.reduce((s,r)=>s+(r.is_open?Number(r.current_ev)||0:0),0);return{snapshot_at:date,realized_profit:realized,total_ev_current_dollars:ev}}),vals=p.flatMap(x=>[x.realized_profit,x.total_ev_current_dollars]),lo=Math.min(0,...vals),hi=Math.max(1,...vals),W=620,H=190,L=48,R=12,T=10,B=27,x=i=>L+(p.length<2?(W-L-R)/2:i/(p.length-1)*(W-L-R)),y=v=>T+(hi-v)/(hi-lo||1)*(H-T-B),path=k=>p.map((d,i)=>`${i?'L':'M'}${x(i)},${y(d[k])}`).join(' ');chart.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="axis" x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/><text class="chartText" x="2" y="${T+5}">$${num(hi,0)}</text><text class="chartText" x="2" y="${H-B}">$${num(lo,0)}</text>${p.length?`<path class="profit" d="${path('realized_profit')}"/><path class="ev" d="${path('total_ev_current_dollars')}"/>`:''}${p.map((d,i)=>i===0||i===p.length-1?`<text class="chartText" x="${x(i)}" y="${H-5}" text-anchor="${i?'end':'start'}">${esc(String(d.snapshot_at).slice(0,10))}</text>`:'').join('')}</svg>`}
 function pPeriodMetrics(period){return pMetrics(pSelected(pRecords().filter(r=>r.actor?.type!=='site_draft'),period))}
 function pResults(){const activity=new Set((DATA.records||[]).map(r=>r.bet_period)),shown=['Futures',...PERIODS.filter(p=>p.startsWith('Week ')&&activity.has(p)),'Conference Championships','Bowl / Playoff',...(activity.has('Unassigned')?['Unassigned']:[])],rowsData=shown.map(p=>[p,pPeriodMetrics(p)]),total=pPeriodMetrics('All Bets');periodResultsBody.innerHTML=rowsData.map(([p,m])=>pResultRow(p,m)).join('')+pResultRow('All Bets',total,true);periodResultsBody.querySelectorAll('tr[data-period]').forEach(r=>r.onclick=()=>pSetPeriod(r.dataset.period))}
-function pResultRow(period,m,total=false){return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
+function pResultRow(period,m,total=false){const tip=`${m.close_ev_eligible} eligible · ${money(m.close_ev_expected_pl)} expected P/L · ${pPct(m.close_ev_realized_roi)} realized ROI`;return`<tr data-period="${esc(period)}" class="${ACTIVE_PERIOD===period?'active ':''}${total?'total':''}"><td>${esc(total?'Total':period)}</td><td>${m.bets}</td><td>${m.wins}-${m.losses}-${m.pushes}</td><td>${money(m.settled_risk)}</td><td class="${tone(m.realized_pl)}">${money(m.realized_pl)}</td><td class="${tone(m.roi)}">${pPct(m.roi)}</td><td class="${tone(m.close_ev_roi)}" title="${esc(tip)}">${pPct(m.close_ev_roi)}<div class="sub">n=${m.close_ev_eligible}</div></td><td>${m.positive_clv}/${m.clv_matched} · ${pPct(m.positive_clv_pct,0)}</td><td class="${tone(m.avg_clv_points)}">${m.avg_clv_points==null?'—':`${Number(m.avg_clv_points)>0?'+':''}${num(m.avg_clv_points,2)}`}</td><td>${m.clv_matched}</td><td class="${tone(m.current_ev_dollars)}">${money(m.current_ev_dollars)}</td><td>${money(m.open_exposure)}</td></tr>`}
 
 function spreadMarketReference(r){
   if(r.market!=='Spread') return null;
@@ -4096,6 +4106,10 @@ function compactClvDisplay(r){
 
   return `<span class="compactClv ${tone(value)}">${value>0?'+':''}${value.toFixed(2)}</span>`;
 }
+function closeEvDisplay(r){
+  if(r.close_ev_pct!=null)return `<span class="${tone(r.close_ev_pct)}" title="${esc(r.close_ev_provenance||'')}">${pPct(r.close_ev_pct)}</span>`;
+  return r.close_ev_status==='PENDING'?'<span class="sub">Pending</span>':'<span class="sub">N/A</span>';
+}
 
 function pRows(){
   const list=pRecords().filter(pVisible);
@@ -4125,6 +4139,7 @@ function pRows(){
       <td>${money(r.stake)}</td>
       <td>${compactCloseDisplay(r)}</td>
       <td>${compactClvDisplay(r)}</td>
+      <td>${closeEvDisplay(r)}</td>
       <td>${resultDisplay(r)}</td>
       <td>
         <details class="betDetails">
@@ -4155,6 +4170,18 @@ function pRows(){
               <span>Current EV</span>
               <b>${r.ev_current_pct!=null?num(Number(r.ev_current_pct)*100,1)+'%':'—'}</b>
 
+              <span>Close-derived EV</span>
+              <b>${closeEvDisplay(r)} · ${r.close_ev_expected_pl!=null?money(r.close_ev_expected_pl):'—'} expected</b>
+
+              <span>Closing fair value</span>
+              <b>${r.close_ev_fair_probability!=null?pPct(r.close_ev_fair_probability):'—'} · ${r.close_ev_fair_price!=null?odds(Math.round(r.close_ev_fair_price)):'—'}</b>
+
+              <span>Close EV method</span>
+              <b>${esc(r.close_ev_method||'unsupported_na')}</b>
+
+              <span>Close EV provenance</span>
+              <b>${esc(r.close_ev_provenance||'Unavailable')}</b>
+
               <span>Game link</span>
               <b>${esc(r.game_link_status||'Team market')}</b>
 
@@ -4174,7 +4201,7 @@ function pRows(){
         </details>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="10" class="empty">No records in this period and filter combination.</td></tr>';
+  `).join('') || '<tr><td colspan="11" class="empty">No records in this period and filter combination.</td></tr>';
 }
 
 function pDashboard(){const periodList=pSelected();const list=tab==='open_source'?periodList.filter(r=>r.bet_source_group==='Open'):tab==='powers_source'?periodList.filter(r=>r.bet_source_group==='Powers'):periodList;const overall=pMetrics(list),powers=list.filter(r=>(r.strategy_tags||[]).includes('Powers')),model=list.filter(r=>(r.strategy_tags||[]).includes('Model'));ownedCount.textContent=overall.open;exposure.textContent=money(overall.open_exposure);profitLoss.textContent=money(overall.realized_pl);profitLoss.className=tone(overall.realized_pl);roi.textContent=pPct(overall.roi);roi.className=tone(overall.roi);totalEv.textContent=money(overall.current_ev_dollars);totalEv.className=tone(overall.current_ev_dollars);averageClv.textContent=overall.avg_clv_points==null?'—':`${Number(overall.avg_clv_points)>0?'+':''}${num(overall.avg_clv_points,2)} pts`;averageClv.className=tone(overall.avg_clv_points);scores.innerHTML=pScore('Overall',list)+pScore('Powers',powers)+pScore('Model / Open',model);const categories=pGroup(list,'market_group');if(ACTIVE_PERIOD==='All Bets')weeks.innerHTML=pMini('Period',PERIODS.filter(p=>p!=='All Bets').map(p=>[p,pSelected(pRecords(),p)]).filter(x=>x[1].length));else weeks.innerHTML=pMini('Strategy',[['Powers',powers],['Model / Open',model]]);markets.innerHTML=pMini('Category',categories);pChart(list);pRows();pResults()}
@@ -4205,6 +4232,7 @@ function renderSourceSummary(){
         <td>${m.eligible_positive_clv}/${m.track_close_resolved}</td>
         <td>${pPct(m.eligible_positive_clv_pct)}</td>
         <td class="${tone(m.eligible_avg_clv_points)}">${m.eligible_avg_clv_points==null?'—':`${Number(m.eligible_avg_clv_points)>0?'+':''}${num(m.eligible_avg_clv_points,2)} pts`}</td>
+        <td class="${tone(m.close_ev_roi)}" title="${m.close_ev_eligible} eligible · ${money(m.close_ev_expected_pl)} expected P/L">${pPct(m.close_ev_roi)}<div class="sub">n=${m.close_ev_eligible}</div></td>
         <td class="${tone(m.profit)}">${money(m.profit)}</td>
         <td class="${tone(m.roi)}">${pPct(m.roi)}</td>
       </tr>
@@ -4221,7 +4249,7 @@ function renderSourceSummary(){
         <thead><tr>
           <th>Source</th><th>Bets</th><th>ATS Record</th><th>Win %</th><th>Track Close</th>
           <th>Close Resolved</th><th>Unresolved</th><th>N/A</th><th>Beat Close</th>
-          <th>Beat-Close Rate</th><th>Avg Point CLV</th><th>P/L</th><th>ROI</th>
+          <th>Beat-Close Rate</th><th>Avg Point CLV</th><th>Close EV</th><th>P/L</th><th>ROI</th>
         </tr></thead>
         <tbody>${body}</tbody>
       </table>
@@ -4260,9 +4288,9 @@ function renderOpenWeeklyPerformance(){
   const trendText=trend.week_over_week_clv_change==null?'Need two resolved weeks':`${trend.latest_resolved_week} (n=${trend.latest_resolved_sample}) vs ${trend.previous_resolved_week} (n=${trend.previous_resolved_sample}): ${openWeeklyMetric(trend.week_over_week_clv_change,' pts',2)}`;
   const body=weeks.map(row=>{
     const awaiting=row.track_close_resolved===0&&row.track_close_unresolved>0;
-    return `<tr data-open-week="${row.week}" title="Filter ledger to Open · ${esc(row.label)}"><td><b>${esc(row.label)}</b><div class="sub">View Open wagers</div></td><td>${row.bets}</td><td>${row.wins}-${row.losses}-${row.pushes}</td><td>${pPct(row.win_pct)}</td><td class="${tone(row.profit)}">${money(row.profit)}</td><td class="${tone(row.roi)}">${pPct(row.roi)}</td><td>${row.track_close_eligible}<div class="sub">${row.track_close_unresolved} unresolved · ${row.track_close_not_applicable} N/A</div></td><td>${row.track_close_resolved}${awaiting?'<div class="sub">Awaiting Close</div>':''}</td><td>${row.eligible_positive_clv}/${row.track_close_resolved}</td><td>${pPct(row.eligible_positive_clv_pct)}</td><td class="${tone(row.eligible_avg_clv_points)}">${row.eligible_avg_clv_points==null?(awaiting?'Pending':'—'):openWeeklyMetric(row.eligible_avg_clv_points,' pts',2)}</td></tr>`;
+    return `<tr data-open-week="${row.week}" title="Filter ledger to Open · ${esc(row.label)}"><td><b>${esc(row.label)}</b><div class="sub">View Open wagers</div></td><td>${row.bets}</td><td>${row.wins}-${row.losses}-${row.pushes}</td><td>${pPct(row.win_pct)}</td><td class="${tone(row.profit)}">${money(row.profit)}</td><td class="${tone(row.roi)}">${pPct(row.roi)}</td><td class="${tone(row.close_ev_roi)}" title="${row.close_ev_eligible} eligible · ${money(row.close_ev_expected_pl)} expected P/L">${pPct(row.close_ev_roi)}<div class="sub">n=${row.close_ev_eligible}</div></td><td>${row.track_close_eligible}<div class="sub">${row.track_close_unresolved} unresolved · ${row.track_close_not_applicable} N/A</div></td><td>${row.track_close_resolved}${awaiting?'<div class="sub">Awaiting Close</div>':''}</td><td>${row.eligible_positive_clv}/${row.track_close_resolved}</td><td>${pPct(row.eligible_positive_clv_pct)}</td><td class="${tone(row.eligible_avg_clv_points)}">${row.eligible_avg_clv_points==null?(awaiting?'Pending':'—'):openWeeklyMetric(row.eligible_avg_clv_points,' pts',2)}</td></tr>`;
   }).join('');
-  root.innerHTML=`<div class="cardHead"><h2 class="openWeeklyTitle">OPEN BETS — WEEKLY PERFORMANCE</h2><small>Backend-owned results and final point CLV · click a week to filter the ledger</small></div><div class="openWeeklyCards"><div class="openWeeklyCard"><span>Avg Point CLV</span><b class="${tone(season.eligible_avg_clv_points)}">${openWeeklyMetric(season.eligible_avg_clv_points,' pts',2)}</b><small>${season.track_close_resolved} resolved closes</small></div><div class="openWeeklyCard"><span>Beat Close %</span><b>${pPct(season.eligible_positive_clv_pct)}</b><small>${season.eligible_positive_clv}/${season.track_close_resolved} resolved</small></div><div class="openWeeklyCard"><span>ATS Record</span><b>${season.wins}-${season.losses}-${season.pushes}</b><small>${season.wins+season.losses} decisions</small></div><div class="openWeeklyCard"><span>ROI</span><b class="${tone(season.roi)}">${pPct(season.roi)}</b><small>${trendText}</small></div></div><div class="openWeeklyCharts"><div class="openWeeklyChart"><h3>Open Avg Point CLV by Week</h3>${openWeeklyChart(weeks,'eligible_avg_clv_points',value=>openWeeklyMetric(value,'',1))}</div><div class="openWeeklyChart"><h3>Open ROI by Week</h3>${openWeeklyChart(weeks,'roi',value=>openWeeklyMetric(Number(value)*100,'%',1),'roi')}</div></div><div class="openWeeklyWrap"><table class="openWeeklyTable" aria-label="Open weekly performance"><thead><tr><th>Week</th><th>Bets</th><th>ATS</th><th>Win %</th><th>P/L</th><th>ROI</th><th>Track</th><th>Resolved</th><th>Beat Close</th><th>Beat %</th><th>Avg CLV</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  root.innerHTML=`<div class="cardHead"><h2 class="openWeeklyTitle">OPEN BETS — WEEKLY PERFORMANCE</h2><small>Backend-owned results, close-derived EV, and final point CLV · click a week to filter the ledger</small></div><div class="openWeeklyCards"><div class="openWeeklyCard"><span>Close-Derived EV</span><b class="${tone(season.close_ev_roi)}">${pPct(season.close_ev_roi)}</b><small>${season.close_ev_eligible} eligible · ${money(season.close_ev_expected_pl)} expected · ${pPct(season.close_ev_actual_vs_expected)} actual vs expected</small></div><div class="openWeeklyCard"><span>Avg Point CLV</span><b class="${tone(season.eligible_avg_clv_points)}">${openWeeklyMetric(season.eligible_avg_clv_points,' pts',2)}</b><small>${season.track_close_resolved} resolved closes</small></div><div class="openWeeklyCard"><span>Beat Close %</span><b>${pPct(season.eligible_positive_clv_pct)}</b><small>${season.eligible_positive_clv}/${season.track_close_resolved} resolved</small></div><div class="openWeeklyCard"><span>ATS Record</span><b>${season.wins}-${season.losses}-${season.pushes}</b><small>${season.wins+season.losses} decisions</small></div><div class="openWeeklyCard"><span>ROI</span><b class="${tone(season.roi)}">${pPct(season.roi)}</b><small>${trendText}</small></div></div><div class="openWeeklyCharts"><div class="openWeeklyChart"><h3>Open Avg Point CLV by Week</h3>${openWeeklyChart(weeks,'eligible_avg_clv_points',value=>openWeeklyMetric(value,'',1))}</div><div class="openWeeklyChart"><h3>Open ROI by Week</h3>${openWeeklyChart(weeks,'roi',value=>openWeeklyMetric(Number(value)*100,'%',1),'roi')}</div></div><div class="openWeeklyWrap"><table class="openWeeklyTable" aria-label="Open weekly performance"><thead><tr><th>Week</th><th>Bets</th><th>ATS</th><th>Win %</th><th>P/L</th><th>ROI</th><th>Close EV</th><th>Track</th><th>Resolved</th><th>Beat Close</th><th>Beat %</th><th>Avg CLV</th></tr></thead><tbody>${body}</tbody></table></div>`;
   root.querySelectorAll('[data-open-week]').forEach(row=>row.onclick=()=>setOpenWeeklyLedgerFilter(row.dataset.openWeek));
 }
 
@@ -4326,6 +4354,7 @@ function pInit(){
             <th>Risked</th>
             <th>Profit/Loss</th>
             <th>ROI</th>
+            <th>Close EV</th>
             <th>CLV Hit</th>
             <th>Avg CLV</th>
             <th>CLV Sample</th>

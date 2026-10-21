@@ -27,6 +27,10 @@ class BettingPagePipelineTests(unittest.TestCase):
         self.assertIn('id="weekFilter"', page)
         self.assertIn('id="sourceFilter"', page)
         self.assertIn("setOpenWeeklyLedgerFilter", page)
+        self.assertIn("CLOSE-DERIVED EV", page.upper())
+        self.assertIn("close_ev_expected_pl", page)
+        self.assertIn("Close EV method", page)
+        self.assertIn("<th>Close EV</th>", page)
 
     def test_published_sheet_normalization_rejects_summary_and_blank_rows(self):
         frame = pd.DataFrame([
