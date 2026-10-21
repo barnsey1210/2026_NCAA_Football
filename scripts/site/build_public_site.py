@@ -463,7 +463,7 @@ def main():
     # directories independently.
     for name in ('logos', 'helmets'):
         target = ROOT / name
-        if target.exists():
+        if target.exists() and not (OUT / name).exists():
             (OUT / name).symlink_to(target, target_is_directory=True)
 
     print(f'Built {len(PAGES) + 1} non-home pages in {OUT}')
