@@ -59,7 +59,13 @@ def canon_team(team):
 
 def read_csv(path):
     if path.exists():
-        return pd.read_csv(path)
+        try:
+            return pd.read_csv(path)
+        except pd.errors.EmptyDataError:
+            # A zero-opportunity report is valid input. Some upstream report
+            # writers represent that state as an empty file instead of a
+            # header-only CSV, so treat it like a missing optional report.
+            return pd.DataFrame()
     return pd.DataFrame()
 
 

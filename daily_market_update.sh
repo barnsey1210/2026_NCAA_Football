@@ -385,6 +385,12 @@ trap on_exit EXIT
   run_py "append_market_history.py" || warn "market history append failed; preserving prior history"
   run_py "build_daily_market_movement_report.py" || warn "daily market movement report build failed; preserving prior report"
   run_py "build_market_arbitrage_report.py" || warn "market arbitrage report build failed; preserving prior report"
+  # Publish accepted Futures through the existing scoped publisher before
+  # unrelated daily domains run. Later failures remain visible and still block
+  # the full-site publisher, but cannot strand already-valid Futures data.
+  if [ "$FUTURES_ACQUISITION_ACCEPTED" -eq 1 ]; then
+    bash scripts/publish/publish_site.sh --futures-push
+  fi
   stage_pass "futures_market_acquisition"
 
   else
