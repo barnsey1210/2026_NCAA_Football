@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const DATA_URL = 'data/site/matchups_public_view.json?v=20261022T121854Z';
+  const DATA_URL = 'data/site/matchups_public_view.json?v=20261023T122042Z';
   const HISTORY_URL = (
     window.MATCHUP_LINE_HISTORY_URL
     || `data/site/matchup_line_history.json?v=${Date.now()}`
