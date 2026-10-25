@@ -130,6 +130,30 @@ class CloudflarePagesBundleTests(unittest.TestCase):
             self.assertEqual(json.loads(output.read_text()), json.loads(matrix.read_text()))
             self.assertLess(output.stat().st_size, matrix.stat().st_size)
 
+    def test_public_current_market_serialization_is_lossless(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "current_market_contract.json"
+            payload = {
+                "schema_version": "current-market-contract-v1",
+                "games": [{
+                    "game_id": "g1",
+                    "quotes": {"DraftKings": {"spread": {"home": {
+                        "line": -3.5,
+                        "price": -110,
+                        "freshness_status": "FROZEN_CLOSE",
+                        "source_updated_at": "2026-10-25T12:00:00+00:00",
+                    }}}},
+                }],
+            }
+            path.write_text(json.dumps(payload, indent=8))
+            pretty_size = path.stat().st_size
+            public_builder.write_compact_json(path, payload)
+            self.assertEqual(json.loads(path.read_text()), payload)
+            self.assertLess(path.stat().st_size, pretty_size)
+            quote = json.loads(path.read_text())["games"][0]["quotes"]["DraftKings"]["spread"]["home"]
+            self.assertEqual(quote["freshness_status"], "FROZEN_CLOSE")
+            self.assertEqual(quote["line"], -3.5)
+
     def test_nested_page_references_resolve_from_page_directory(self):
         self.assertEqual(
             checker.local_reference("../assets/app.css", "ncaab/ratings/index.html"),

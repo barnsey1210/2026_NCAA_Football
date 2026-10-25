@@ -39,6 +39,7 @@ ROOT_PUBLICATION_PAGES = (
 PUBLIC_JSON_WARNING_BYTES = int(os.environ.get("NCAAF_PUBLIC_JSON_WARNING_BYTES", 18 * 1024 * 1024))
 PUBLIC_JSON_MAX_BYTES = int(os.environ.get("NCAAF_PUBLIC_JSON_MAX_BYTES", 22 * 1024 * 1024))
 PUBLIC_WAR_ROOM_TARGET_BYTES = 31 * 512 * 1024  # 15.5 MiB
+PUBLIC_CURRENT_MARKET_NAME = 'current_market_contract.json'
 PUBLIC_QUOTE_INTERNAL_FIELDS = (
     'game_id',
     'provider_game_id',
@@ -175,6 +176,17 @@ def compact_public_war_room_matrix(payload):
     # below the static-host headroom target as the season schedule grows.
     prune_null_fields(payload)
     return payload
+
+
+def write_compact_json(path, payload):
+    """Write a lossless browser copy without human-readable indentation."""
+    path.write_text(
+        json.dumps(
+            payload,
+            separators=(',', ':'),
+            ensure_ascii=False,
+        ) + '\n'
+    )
 
 
 def cache_bust_site_json(text):
@@ -425,6 +437,26 @@ def main():
         # The public bundle has its own deliberately reduced contract.  Do not
         # leave the rich canonical artifact in the browser publication tree.
         canonical_matchups_copy.unlink()
+
+    # The canonical current-market contract intentionally retains every
+    # current and frozen-close quote required by runtime consumers. Its public
+    # copy needs the exact same JSON values, but not roughly 9 MiB of repeated
+    # indentation. Keep this transformation serialization-only so no market,
+    # provenance, lifecycle, or close evidence is discarded.
+    public_current_market = public_site_data / PUBLIC_CURRENT_MARKET_NAME
+    if public_current_market.exists():
+        current_market_payload = json.loads(public_current_market.read_text())
+        write_compact_json(public_current_market, current_market_payload)
+        current_market_size = public_current_market.stat().st_size
+        print(
+            f'Public current-market contract: '
+            f'{current_market_size / 1024 / 1024:.2f} MiB'
+        )
+        if current_market_size > PUBLIC_JSON_MAX_BYTES:
+            raise RuntimeError(
+                f'public current-market contract exceeds configured hard limit: '
+                f'{current_market_size} > {PUBLIC_JSON_MAX_BYTES}'
+            )
 
     # Preserve the complete user-facing War Room contract while compacting only
     # its public serialization. The runtime artifact remains unchanged and
