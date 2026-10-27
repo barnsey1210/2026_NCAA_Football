@@ -18,10 +18,27 @@ ratings_history_path = ROOT / "data/ratings/ratings_history.csv"
 market_latest_path = ROOT / "data/ratings/market_implied_ratings_latest.csv"
 market_audit_path = ROOT / "data/research/market_implied_ratings/production_2026_audit.json"
 ratings_source_status_path = ROOT / "data/ratings/ratings_source_status.csv"
+spplus_components_path = ROOT / "data/ratings/spplus_2026_from_espn_latest.csv"
 
 rows = list(csv.DictReader(ratings_latest_path.open()))
 master_rows = list(csv.DictReader(ratings_master_path.open()))
 master_by_team = {row["team"]: row for row in master_rows if row.get("team")}
+spplus_components = {}
+if spplus_components_path.exists():
+    for row in csv.DictReader(spplus_components_path.open()):
+        team = row.get("team")
+        if not team or team in spplus_components:
+            raise SystemExit("SP+ offense/defense input contains a missing or duplicate team")
+        try:
+            spplus_components[team] = {
+                "offense": float(row["spplus_off"]),
+                "defense": float(row["spplus_def"]),
+            }
+        except (KeyError, TypeError, ValueError):
+            raise SystemExit(f"SP+ offense/defense input is incomplete for {team}")
+    if len(spplus_components) != 138:
+        raise SystemExit(f"SP+ offense/defense input must contain exactly 138 teams, found {len(spplus_components)}")
+spplus_total_available = bool(spplus_components)
 dates = sorted({r["snapshot_date"] for r in rows if r.get("snapshot_date")})
 if not dates:
     raise SystemExit("No rating snapshot dates found")
@@ -333,6 +350,7 @@ for team, sources in by_team.items():
         "team": team,
         "rating": current,
         "sources": sources,
+        "spplus_components": spplus_components.get(team),
         "bradpowers_detail": bradpowers_detail.get(team),
         "composite_sources": composite_sources,
         "source_count": len(composite_sources),
@@ -591,6 +609,45 @@ active_weight = (
 
 payload = {
     "snapshot_date": latest,
+    "matchup_estimator": {
+        "label": "3-Source Spread / SP+ Total",
+        "status": "AVAILABLE" if spplus_total_available else "SPREAD_AVAILABLE_TOTAL_UNAVAILABLE",
+        "spread": {
+            "formula_version": "ratings_matchup_sp_fpi_tr_equal_v1",
+            "required_sources": ["spplus", "fpi", "teamrankings"],
+            "weights": {"spplus": 1 / 3, "fpi": 1 / 3, "teamrankings": 1 / 3},
+            "source_labels": {
+                "spplus": "SP+",
+                "fpi": "FPI",
+                "teamrankings": "TeamRankings",
+            },
+            "source_home_margin_formula": "home team rating - away team rating + HFA",
+            "missing_component_policy": "UNAVAILABLE_NO_REWEIGHTING",
+            "sign_convention": "positive home margin means home favored; displayed favorite carries a negative spread",
+        },
+        "home_field_advantage": {
+            "formula_version": "ncaaf_fixed_hfa_2_6_v1",
+            "non_neutral_points": 2.6,
+            "neutral_points": 0.0,
+            "source": "canonical project-wide NCAAF fixed HFA",
+            "application": "applied once to home margin after the neutral three-source mean",
+        },
+        "total": {
+            "source": "SP+",
+            "status": "AVAILABLE" if spplus_total_available else "UNAVAILABLE",
+            "formula_version": "shadow_total_enhanced_spplus_od_v1",
+            "total_formula": "0.5 * (home SP+ offense + away SP+ defense) + 0.5 * (away SP+ offense + home SP+ defense)",
+            "hfa_total_effect": 0.0,
+            "missing_component_policy": "UNAVAILABLE_NO_SUBSTITUTION",
+        },
+        "projected_score": {
+            "status": "AVAILABLE",
+            "formula": {
+                "away": "(total - home_margin) / 2",
+                "home": "(total + home_margin) / 2",
+            },
+        },
+    },
     "l2_definition": {
         "method": "current canonical four-source composite minus the latest complete accepted canonical snapshot in the exact ISO weekly cycle two weeks earlier",
         "required_sources": ["SP+", "FPI", "TeamRankings", "normalized Sagarin"],

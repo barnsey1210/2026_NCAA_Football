@@ -417,6 +417,16 @@ def validate(root: Path, out: Path) -> list[str]:
         for marker in ("Canonical Composite", "SP+ 25%", "FPI 25%", "TeamRankings 25%", "Sagarin 25%"):
             if marker not in ratings_text:
                 errors.append(f"Ratings canonical composite marker missing: {marker}")
+        for marker in (
+            "MATCHUP ESTIMATE",
+            "matchupAway",
+            "matchupHome",
+            "matchupNeutral",
+            "cfg.spread.required_sources",
+            "shadow_total_enhanced_spplus_od_v1",
+        ):
+            if marker not in ratings_text:
+                errors.append(f"Ratings matchup estimator marker missing: {marker}")
         if "BP 25%" in ratings_text:
             errors.append("Brad Powers leaked into the production Ratings composite badge")
 
