@@ -112,7 +112,16 @@
       "freshness_states": ["LIVE", "BACKUP_SOURCE", "STALE", "MISSING"]
     },
     "market_history": {"purpose": "historical snapshots only; never overrides current market"},
-    "ratings": {"required_dates": ["source_updated_at", "pulled_at", "status_built_at", "applied_snapshot_date"]},
+    "ratings": {
+      "required_dates": ["source_updated_at", "pulled_at", "status_built_at", "applied_snapshot_date"],
+      "matchup_estimator": {
+        "spread_sources": ["SP+", "FPI", "TeamRankings"],
+        "spread_policy": "equal weight with all three required; no partial reweighting",
+        "hfa_policy": "canonical fixed NCAAF HFA applied once; zero at neutral sites",
+        "total_policy": "reuse shadow_total_enhanced_spplus_od_v1 exactly: 0.5*(home offense + away defense) + 0.5*(away offense + home defense); HFA has zero total effect",
+        "forbidden_sources": ["Sagarin", "DRatings"]
+      }
+    },
     "model_performance": {
       "standard_artifact": "data/site/model_performance_view.json",
       "standard_builder": "scripts/model_tracking/build_model_performance_view.py",
