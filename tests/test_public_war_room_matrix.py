@@ -47,7 +47,17 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
                     "freshness_status": "CURRENT",
                     "market_lifecycle_state": "PREGAME",
                     "kickoff_at": "2026-09-19T19:30:00Z",
-                }}}},
+                }}}, "best_exchange": {"spread": {"away": {
+                    "book": "Kalshi",
+                    "line": 7.5,
+                    "price": -105,
+                    "source": "Exchange API",
+                }}}, "openers": {"spread": {
+                    "line": 6.5,
+                    "price": -110,
+                    "source": "Opening feed",
+                    "observed_at": "2026-09-01T12:00:00Z",
+                }}},
                 "standard_freshness": {"spread": {"sources": {"SP+": {"status": "FRESH"}}}},
                 "operator_model": {
                     "mode": "AUTO",
@@ -80,11 +90,17 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertNotIn("spread", public["games"][0]["operator_model"]["manual"])
         runtime_quote = original["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
         public_quote = public["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
+        self.assertNotIn("best_exchange", public["games"][0]["market"])
         for field in BUILDER.PUBLIC_QUOTE_INTERNAL_FIELDS:
             self.assertIn(field, runtime_quote)
             self.assertNotIn(field, public_quote)
-        for field in ("book", "side", "line", "price", "last_update", "pulled_at", "source"):
+        for field in ("book", "side", "line", "price", "last_update", "pulled_at"):
             self.assertEqual(public_quote[field], runtime_quote[field])
+        self.assertNotIn("source", public_quote)
+        self.assertEqual(
+            public["games"][0]["market"]["openers"]["spread"]["source"],
+            "Opening feed",
+        )
 
     def test_internal_only_growth_does_not_consume_public_size_budget(self):
         runtime = self.fixture()

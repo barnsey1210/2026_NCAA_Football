@@ -140,6 +140,11 @@ def compact_public_war_room_matrix(payload):
             ):
                 for field in PUBLIC_QUOTE_INTERNAL_FIELDS:
                     value.pop(field, None)
+                # The enclosing sportsbook/exchange key already identifies a
+                # current quote's source. Preserve source on opener evidence,
+                # where the UI uses it when no book label is available.
+                if 'observed_at' not in value:
+                    value.pop('source', None)
             for nested in value.values():
                 compact_market_quotes(nested)
         elif isinstance(value, list):
@@ -170,7 +175,12 @@ def compact_public_war_room_matrix(payload):
         operator_model = game.get('operator_model')
         if isinstance(operator_model, dict):
             operator_model.pop('auto_authority', None)
-        compact_market_quotes(game.get('market'))
+        market = game.get('market')
+        if isinstance(market, dict):
+            # Public consumers read exchange rows from market.exchanges. The
+            # selected best_exchange branch is a redundant copy.
+            market.pop('best_exchange', None)
+        compact_market_quotes(market)
     # Optional values are read defensively by the public client. Omitting nulls
     # preserves their unavailable meaning while keeping the fallback artifact
     # below the static-host headroom target as the season schedule grows.
