@@ -144,6 +144,25 @@ class FuturesMarketReliabilityTests(unittest.TestCase):
         self.assertFalse(MODULE.material_drop(92, 100))
         self.assertTrue(MODULE.material_drop(80, 100))
 
+    def test_healthy_late_season_conference_board_downgrades_drop_to_warning(self):
+        expected = [f"Team {i}" for i in range(136)]
+        current_books = {
+            "DraftKings": 128,
+            "FanDuel": 96,
+            "BetMGM": 89,
+            "Caesars": 84,
+        }
+        self.assertTrue(MODULE.healthy_seasonal_contraction(
+            "conference_titles", current_books, expected, 133, []
+        ))
+
+    def test_seasonal_contraction_never_excuses_provider_disappearance(self):
+        expected = [f"Team {i}" for i in range(136)]
+        current_books = {"DraftKings": 128, "FanDuel": 96, "BetMGM": 89}
+        self.assertFalse(MODULE.healthy_seasonal_contraction(
+            "conference_titles", current_books, expected, 133, ["Caesars"]
+        ))
+
     def test_normalized_coverage_reports_ambiguous_brand_lines(self):
         rows = [
             row("2026-09-10", "Navy", "BetMGM", line="7.5"),
@@ -210,10 +229,22 @@ class FuturesMarketReliabilityTests(unittest.TestCase):
                 "covered_teams": 80,
             }))
             canonical = [f"Team {i}" for i in range(80)]
-            result = MODULE.audit_csv_domain(
-                "win_totals", current, history, canonical, canonical,
-                ("over_odds", "under_odds"), "2026-10-20"
-            )
+            with mock.patch.object(
+                MODULE,
+                "datetime",
+                mock.Mock(
+                    wraps=MODULE.datetime,
+                    now=mock.Mock(
+                        return_value=MODULE.datetime(
+                            2026, 10, 20, 13, tzinfo=MODULE.timezone.utc
+                        )
+                    ),
+                ),
+            ):
+                result = MODULE.audit_csv_domain(
+                    "win_totals", current, history, canonical, canonical,
+                    ("over_odds", "under_odds"), "2026-10-20"
+                )
             self.assertEqual(result["status"], "warn")
             self.assertEqual(result["provider_wide_disappearances"], [])
             self.assertEqual(result["direct_fallback_receipt"]["covered_teams"], 80)

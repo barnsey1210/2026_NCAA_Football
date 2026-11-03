@@ -34,6 +34,29 @@ EASTERN = ZoneInfo("America/New_York")
 APPROVED_BOOKS = {"DraftKings", "FanDuel", "BetMGM", "Caesars"}
 
 
+def reliability_policy():
+    path = ROOT / "config/futures_market_policy.json"
+    try:
+        return json.loads(path.read_text()).get("reliability", {})
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def healthy_seasonal_contraction(name, current_books, expected_teams, covered_teams,
+                                 disappeared):
+    policy = reliability_policy().get(name, {})
+    if policy.get("seasonal_contraction_mode") != "warn_when_board_healthy":
+        return False
+    expected = len(expected_teams)
+    coverage = (covered_teams / expected) if expected else 0.0
+    approved_present = len(set(current_books) & APPROVED_BOOKS)
+    return (
+        not disappeared
+        and coverage >= float(policy.get("minimum_team_coverage_ratio", 1.0))
+        and approved_present >= int(policy.get("minimum_approved_books_present", 4))
+    )
+
+
 def audit_kalshi(path: Path, now: datetime):
     if not path.exists():
         return {
@@ -287,15 +310,23 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     if missing:
         # Individual team markets can be withdrawn while the surrounding
         # conference board remains healthy.  Treat those as explicit coverage
-        # warnings here; unmatched labels, malformed prices, provider-wide
-        # disappearances, and material book drops remain hard failures.  The
-        # accepted contract therefore reflects current actual coverage without
-        # inventing or carrying forward a quote for the missing team.
+        # warnings here; unmatched labels, malformed prices, and provider-wide
+        # disappearances remain hard failures. Configured late-season board
+        # contraction may downgrade a book-count drop only while team coverage
+        # and approved-book diversity remain healthy.
         warnings.append(f"{name}: {len(missing)} expected teams have no quote")
     if disappeared:
         errors.append(f"{name}: provider-wide disappearance: {', '.join(disappeared)}")
     if dropped_books:
-        errors.append(f"{name}: material provider coverage drop")
+        if healthy_seasonal_contraction(
+            name, current_books, expected_teams, len(teams), disappeared
+        ):
+            warnings.append(
+                f"{name}: seasonal provider coverage contraction accepted: "
+                f"{dropped_books}"
+            )
+        else:
+            errors.append(f"{name}: material provider coverage drop")
     if ambiguous:
         warnings.append(
             f"{name}: {len(ambiguous)} team/book pairs expose multiple totals; "

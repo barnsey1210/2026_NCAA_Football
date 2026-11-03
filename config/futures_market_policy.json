@@ -13,5 +13,12 @@
     "Caesars": "sportsbook",
     "Kalshi": "exchange"
   },
+  "reliability": {
+    "conference_titles": {
+      "seasonal_contraction_mode": "warn_when_board_healthy",
+      "minimum_team_coverage_ratio": 0.95,
+      "minimum_approved_books_present": 4
+    }
+  },
   "notes": "Canonical futures market contract preserves sportsbook and exchange semantics. Domain and segment eligibility is owned by config/futures_book_eligibility.json. Kalshi is reference-only and never participates in BEST or EDGE."
 }
