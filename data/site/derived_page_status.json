@@ -1,22 +1,25 @@
 {
   "betting": {
-    "built_at": "2026-11-07T13:29:00.670194+00:00",
+    "built_at": "2026-11-08T13:27:35.872196+00:00",
     "latest_completed_week": 10,
-    "latest_represented_week": 10,
-    "results_generated_at": "2026-11-07T13:02:43.434111+00:00",
+    "latest_represented_week": 11,
+    "results_generated_at": "2026-11-08T13:17:41.543436+00:00",
     "status": "CURRENT"
   },
   "errors": [],
   "futures": {
-    "built_at": "2026-11-07T14:00:13.283966+00:00",
-    "market_contract_built_at": "2026-11-07T14:00:07.414549+00:00",
-    "market_reliability_errors": [],
-    "market_reliability_status": "warn",
-    "playoff_simulation_built_at": "2026-11-07T13:28:35.292896+00:00",
-    "season_simulation_built_at": "2026-11-07T13:17:17.977485+00:00",
-    "status": "CURRENT"
+    "built_at": "2026-11-08T13:39:22.354576+00:00",
+    "market_contract_built_at": "2026-11-08T13:39:15.628005+00:00",
+    "market_reliability_errors": [
+      "make_cfp: 1 unmatched team labels",
+      "make_cfp: 91 teams lack an approved executable quote"
+    ],
+    "market_reliability_status": "fail",
+    "playoff_simulation_built_at": "2026-11-08T13:27:10.671458+00:00",
+    "season_simulation_built_at": "2026-11-08T13:22:29.069042+00:00",
+    "status": "DEGRADED_PRIOR_ACCEPTED_ARTIFACT_PRESERVED"
   },
-  "generated_at": "2026-11-07T14:03:30.236946+00:00",
+  "generated_at": "2026-11-08T13:40:56.100746+00:00",
   "schema_version": "derived-page-status-v1",
-  "status": "PASS"
+  "status": "DEGRADED"
 }
