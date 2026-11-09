@@ -22,7 +22,11 @@ MAIN_REPO = Path(
 # root, on sys.path. Add the root explicitly before importing the shared public
 # transformation used by the full-site builder.
 sys.path.insert(0, str(ROOT))
-from scripts.site.build_public_site import cache_bust_public_assets
+from scripts.site.build_public_site import (
+    cache_bust_public_assets,
+    compact_public_war_room_matrix,
+    write_compact_json,
+)
 
 
 def run(*parts: str) -> subprocess.CompletedProcess[str]:
@@ -72,7 +76,18 @@ def build_bundle() -> None:
     ):
         if not source.is_file():
             raise SystemExit(f"Required fast publication source missing: {source}")
-        shutil.copy2(source, BUNDLE / relative)
+        destination = BUNDLE / relative
+        if relative.as_posix() == "data/site/war_room_market_matrix.json":
+            # Match the full-site builder: the runtime matrix retains rich
+            # audit/provenance data, while the public fallback receives only
+            # the fields consumed by the Command Center. This prevents a fast
+            # Market tick from bypassing the Cloudflare size gate.
+            write_compact_json(
+                destination,
+                compact_public_war_room_matrix(json.loads(source.read_text())),
+            )
+        else:
+            shutil.copy2(source, destination)
 
 
 def main() -> int:

@@ -147,13 +147,10 @@ def main() -> None:
     projection_health = health.get("projection_health") or {}
     health_matched = projection_health.get("matched_fast_board_games")
     health_unmatched = projection_health.get("unmatched_fast_board_games")
-    unmatched_rows = (matrix.get("audit") or {}).get("unmatched_fast_rows")
-    unmatched_provider_ids = {
-        str(row.get("provider_game_id") or "").strip()
-        for row in unmatched_rows or []
-        if isinstance(row, dict) and str(row.get("provider_game_id") or "").strip()
-    }
-    matrix_unmatched = len(unmatched_provider_ids)
+    # Public matrices intentionally omit the rich internal builder audit.
+    # The canonical builder's summary retains the independently calculated
+    # unmatched count needed for fail-closed reconciliation.
+    matrix_unmatched = summary.get("unmatched_fast_rows")
 
     # The provider board can legitimately contain games outside the canonical
     # projection universe (for example FCS-at-FBS games). Reconcile all three
@@ -173,7 +170,9 @@ def main() -> None:
         errors.append(
             f"matched matrix games ({matched}) differ from health matched fast-board games ({health_matched})"
         )
-    if isinstance(health_unmatched, int) and health_unmatched != matrix_unmatched:
+    if not isinstance(matrix_unmatched, int) or matrix_unmatched < 0:
+        errors.append("matrix unmatched fast rows must be a nonnegative integer")
+    elif isinstance(health_unmatched, int) and health_unmatched != matrix_unmatched:
         errors.append(
             f"distinct unmatched matrix games ({matrix_unmatched}) differ from health unmatched fast-board games ({health_unmatched})"
         )

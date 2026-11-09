@@ -181,6 +181,22 @@ def compact_public_war_room_matrix(payload):
             # selected best_exchange branch is a redundant copy.
             market.pop('best_exchange', None)
         compact_market_quotes(market)
+        # ``health_snapshot_date`` duplicates each source row's canonical
+        # ``snapshot_date`` and is not read by the Command Center. Keep the
+        # richer runtime/audit matrix unchanged, but omit this repeated
+        # transport field from the browser fallback to preserve static-host
+        # size headroom as the season schedule grows.
+        standard_freshness = game.get('standard_freshness')
+        if isinstance(standard_freshness, dict):
+            for market_name in ('spread', 'total'):
+                sources = (
+                    standard_freshness.get(market_name, {}).get('sources', {})
+                )
+                if not isinstance(sources, dict):
+                    continue
+                for source in sources.values():
+                    if isinstance(source, dict):
+                        source.pop('health_snapshot_date', None)
     # Optional values are read defensively by the public client. Omitting nulls
     # preserves their unavailable meaning while keeping the fallback artifact
     # below the static-host headroom target as the season schedule grows.

@@ -102,6 +102,22 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
             "Opening feed",
         )
 
+    def test_redundant_health_snapshot_date_is_public_only_compacted(self):
+        runtime = self.fixture()
+        source = runtime["games"][0]["standard_freshness"]["spread"]["sources"]["SP+"]
+        source.update({
+            "snapshot_date": "2026-09-14",
+            "health_snapshot_date": "2026-09-14",
+        })
+        original = copy.deepcopy(runtime)
+
+        public = BUILDER.compact_public_war_room_matrix(copy.deepcopy(runtime))
+
+        public_source = public["games"][0]["standard_freshness"]["spread"]["sources"]["SP+"]
+        self.assertEqual(runtime, original)
+        self.assertEqual(public_source["snapshot_date"], "2026-09-14")
+        self.assertNotIn("health_snapshot_date", public_source)
+
     def test_internal_only_growth_does_not_consume_public_size_budget(self):
         runtime = self.fixture()
         runtime["audit"]["current_market_fallbacks"] = ["x" * 1024] * 20000

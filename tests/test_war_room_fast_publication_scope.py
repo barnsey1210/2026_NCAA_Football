@@ -24,6 +24,7 @@ class WarRoomFastPublicationScopeTest(unittest.TestCase):
                 "war_room_health.json",
                 "war_room_market_matrix.json",
                 "war_room_activity.json",
+                "matchups_public_view.json",
             )
         )
         (bundle / "war-room.html").write_text(page.ljust(1200, " "))
@@ -54,14 +55,11 @@ class WarRoomFastPublicationScopeTest(unittest.TestCase):
                 "refresh_id": "theodds_test",
                 "last_fast_pull_at": now,
             },
-            "summary": {"fast_market_games_matched": 76},
-            "games": [{"game_id": "g1"}],
-            "audit": {
-                "unmatched_fast_rows": [
-                    {"provider_game_id": f"provider-{index}"}
-                    for index in range(matrix_unmatched)
-                ]
+            "summary": {
+                "fast_market_games_matched": 76,
+                "unmatched_fast_rows": matrix_unmatched,
             },
+            "games": [{"game_id": "g1"}],
         }
         activity = {
             "schema_version": "war-room-activity-v1",
