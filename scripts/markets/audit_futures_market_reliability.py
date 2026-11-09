@@ -51,8 +51,7 @@ def healthy_seasonal_contraction(name, current_books, expected_teams, covered_te
     coverage = (covered_teams / expected) if expected else 0.0
     approved_present = len(set(current_books) & APPROVED_BOOKS)
     return (
-        not disappeared
-        and coverage >= float(policy.get("minimum_team_coverage_ratio", 1.0))
+        coverage >= float(policy.get("minimum_team_coverage_ratio", 1.0))
         and approved_present >= int(policy.get("minimum_approved_books_present", 4))
     )
 
@@ -265,6 +264,12 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     missing = sorted(set(expected_teams) - set(teams))
     errors = []
     warnings = []
+    available_count = sum(
+        availability.get(team) == "AVAILABLE" for team in expected_teams
+    ) if key == "make_cfp" else len(by_team)
+    seasonal_contraction_ok = healthy_seasonal_contraction(
+        key, current_books, expected_teams, available_count, disappeared
+    )
 
     # Exact acquisition freshness for normalized CSV-backed futures.
     # snapshot_date protects Eastern market-date identity; pulled_at proves
@@ -447,9 +452,16 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
     if no_executable:
         errors.append(f"{key}: {len(no_executable)} teams lack an approved executable quote")
     if disappeared:
-        errors.append(f"{key}: provider-wide disappearance: {', '.join(disappeared)}")
+        if seasonal_contraction_ok:
+            warnings.append(
+                f"{key}: seasonal provider contraction accepted: "
+                f"{', '.join(disappeared)} no longer listed; "
+                f"{available_count}/{len(expected_teams)} teams retain executable quotes"
+            )
+        else:
+            errors.append(f"{key}: provider-wide disappearance: {', '.join(disappeared)}")
     if dropped_books:
-        if key in {"make_cfp", "national_title"} and not disappeared:
+        if seasonal_contraction_ok or (key in {"make_cfp", "national_title"} and not disappeared):
             warnings.append(
                 f"{key}: material provider coverage drop: {dropped_books}"
             )

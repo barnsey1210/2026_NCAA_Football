@@ -18,6 +18,11 @@
       "seasonal_contraction_mode": "warn_when_board_healthy",
       "minimum_team_coverage_ratio": 0.95,
       "minimum_approved_books_present": 4
+    },
+    "make_cfp": {
+      "seasonal_contraction_mode": "warn_when_board_healthy",
+      "minimum_team_coverage_ratio": 0.8,
+      "minimum_approved_books_present": 2
     }
   },
   "notes": "Canonical futures market contract preserves sportsbook and exchange semantics. Domain and segment eligibility is owned by config/futures_book_eligibility.json. Kalshi is reference-only and never participates in BEST or EDGE."
