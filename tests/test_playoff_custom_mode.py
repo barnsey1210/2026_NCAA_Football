@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v6", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v6", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v7", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v7", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -88,6 +88,14 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertNotIn("`Proj ${projected.toFixed(1)}`", self.js)
         css = (ROOT / "playoff_custom.css").read_text()
         self.assertIn(".team-detail em{color:#a9bdd4}", css)
+
+    def test_live_scoring_does_not_rebuild_or_force_scroll(self):
+        self.assertIn("function paintLiveGame", self.js)
+        self.assertIn("scrollLeft=left", self.js)
+        self.assertNotIn("scrollIntoView", self.js)
+        self.assertIn("champion-footer", self.js)
+        css = (ROOT / "playoff_custom.css").read_text()
+        self.assertIn("position:fixed;left:50%;bottom:8px", css)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
