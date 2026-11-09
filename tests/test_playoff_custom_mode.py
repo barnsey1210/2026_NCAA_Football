@@ -51,7 +51,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn(".5*(spHome.offense+spAway.defense)+.5*(spAway.offense+spHome.defense)", self.js)
 
     def test_manual_invalidation_champion_and_stochastic_simulation_markers(self):
-        for marker in ("pruneWinners", "state.winners.championship", "GAME_SIGMA=15.7", "normalCdf(margin/GAME_SIGMA)", "Math.random()<p.winProbHome", "validateSimulation"):
+        for marker in ("pruneWinners", "state.winners.championship", "GAME_SIGMA=15.7", "normalCdf(margin/GAME_SIGMA)", "simulateGame(p)", "validateSimulation"):
             self.assertIn(marker, self.js)
         self.assertNotIn("margin>=0?a:b", self.js)
 
@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v4", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v4", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v5", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v5", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -70,15 +70,23 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(asset, cloudflare["allowed_top_level"])
         for marker in ("CUSTOM MATCHUP", "playoffMatchupAway", "playoffMatchupHome", "playoffMatchupNeutral", "Ratings-page projection"):
             self.assertIn(marker, self.js)
-        for marker in ("(Rtg #", "overall_rank", "ratingClass", "decorateModelRanks", "decorateCustomRanks"):
+        for marker in ("overall_rank", "ratingClass", "decorateModelRanks", "decorateCustomRanks"):
             self.assertIn(marker, self.js)
+
+    def test_drag_swap_inline_lines_and_variable_simulated_scores(self):
+        for marker in ("swapSeeds", "drag-handle", "data-seed-row", "simulateGame", "normalRandom", "state.scores", "setTimeout(r,2000)", "notre-dame", "Number(a.overall_rank)-Number(b.overall_rank)"):
+            self.assertIn(marker, self.js)
+        self.assertIn("O/U ${p.total.toFixed(1)}", self.js)
+        self.assertIn("-${Math.abs(p.margin).toFixed(1)}", self.js)
+        self.assertNotIn("(Rtg #${rank})", self.js)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
         self.assertIn("@media(max-width:620px)", css)
         self.assertIn("@media(max-width:350px)", css)
-        self.assertIn(".custom-rounds{display:block}", css)
-        self.assertNotIn("overflow-x:auto", css)
+        self.assertIn("grid-template-columns:repeat(4,minmax(280px,84vw))", css)
+        self.assertIn("overflow-x:auto", css)
+        self.assertIn("scroll-snap-type:x mandatory", css)
 
 
 if __name__ == "__main__":
