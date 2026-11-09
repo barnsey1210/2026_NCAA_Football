@@ -21,6 +21,7 @@ PAGES = {
     "coaches.html":"coaches.html",
 }
 PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
+PLAYOFF_CUSTOM_ASSETS = ('playoff_custom.css', 'playoff_custom.js')
 BUILD_VERSION = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 PUBLIC_ALIASES = {"simulations.html": "sim_lab.html"}
 ROOT_PUBLICATION_PAGES = (
@@ -382,6 +383,8 @@ def main():
         cache_bust_public_assets((ROOT/'war-room.html').read_text())
     )
     for asset in PAGE_HEALTH_ASSETS:
+        shutil.copy2(ROOT/asset, OUT/asset)
+    for asset in PLAYOFF_CUSTOM_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
     # The approved Conference Logo Schedule is generated from current conference
     # workspace and matchup artifacts after shared page-health assets exist.
