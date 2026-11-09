@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v5", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v5", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v6", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v6", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -74,11 +74,20 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(marker, self.js)
 
     def test_drag_swap_inline_lines_and_variable_simulated_scores(self):
-        for marker in ("swapSeeds", "drag-handle", "data-seed-row", "simulateGame", "normalRandom", "state.scores", "setTimeout(r,2000)", "notre-dame", "Number(a.overall_rank)-Number(b.overall_rank)"):
+        for marker in ("swapSeeds", "drag-handle", "data-seed-row", "simulateGame", "normalRandom", "state.scores", "2000/(events.length+4)", "notre-dame", "Number(a.overall_rank)-Number(b.overall_rank)"):
             self.assertIn(marker, self.js)
         self.assertIn("O/U ${p.total.toFixed(1)}", self.js)
         self.assertIn("-${Math.abs(p.margin).toFixed(1)}", self.js)
         self.assertNotIn("(Rtg #${rank})", self.js)
+
+    def test_quarter_scoring_seed_labels_and_champion_banner(self):
+        for marker in ("scoreChunks", "scoreEvents", "period:'1Q'", "`${q}Q`", "period:'FINAL'", "champion-team", "🏆"):
+            self.assertIn(marker, self.js)
+        self.assertIn('<span class="seed-number">${s}</span>', self.js)
+        self.assertIn("${seedOf(name)||''}", self.js)
+        self.assertNotIn("`Proj ${projected.toFixed(1)}`", self.js)
+        css = (ROOT / "playoff_custom.css").read_text()
+        self.assertIn(".team-detail em{color:#a9bdd4}", css)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
