@@ -59,6 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v3", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v3", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -66,6 +68,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         for asset in ("playoff_custom.css", "playoff_custom.js"):
             self.assertIn(asset, cloudflare["files"])
             self.assertIn(asset, cloudflare["allowed_top_level"])
+        for marker in ("CUSTOM MATCHUP", "playoffMatchupAway", "playoffMatchupHome", "playoffMatchupNeutral", "Ratings-page projection"):
+            self.assertIn(marker, self.js)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
