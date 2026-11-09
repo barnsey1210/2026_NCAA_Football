@@ -62,6 +62,10 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
+        cloudflare = json.loads((ROOT / "config/cloudflare_pages_manifest.json").read_text())
+        for asset in ("playoff_custom.css", "playoff_custom.js"):
+            self.assertIn(asset, cloudflare["files"])
+            self.assertIn(asset, cloudflare["allowed_top_level"])
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
