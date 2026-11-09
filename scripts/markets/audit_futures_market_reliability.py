@@ -264,12 +264,6 @@ def audit_csv_domain(name, current_path, history_path, canonical_names,
     missing = sorted(set(expected_teams) - set(teams))
     errors = []
     warnings = []
-    available_count = sum(
-        availability.get(team) == "AVAILABLE" for team in expected_teams
-    ) if key == "make_cfp" else len(by_team)
-    seasonal_contraction_ok = healthy_seasonal_contraction(
-        key, current_books, expected_teams, available_count, disappeared
-    )
 
     # Exact acquisition freshness for normalized CSV-backed futures.
     # snapshot_date protects Eastern market-date identity; pulled_at proves
@@ -441,6 +435,12 @@ def contract_domain(contract, key, expected_teams, pulled_at, now, prior_rows=No
     }
     errors = []
     warnings = []
+    available_count = sum(
+        availability.get(team) == "AVAILABLE" for team in expected_teams
+    ) if key == "make_cfp" else len(by_team)
+    seasonal_contraction_ok = healthy_seasonal_contraction(
+        key, current_books, expected_teams, available_count, disappeared
+    )
     timestamp = parse_time(pulled_at)
     age_hours = ((now - timestamp).total_seconds() / 3600) if timestamp else None
     if timestamp is None or age_hours > 26:
