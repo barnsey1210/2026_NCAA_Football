@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v9", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v9", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v10", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v10", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -124,6 +124,13 @@ class PlayoffCustomModeTest(unittest.TestCase):
         css = (ROOT / "playoff_custom.css").read_text()
         for marker in ("grid-template-rows:auto auto", ".advance>.team-card-meta", ".team-record.record-good", ".team-record.record-mid", ".team-record.record-low"):
             self.assertIn(marker, css)
+
+    def test_custom_typography_and_model_metadata_spacing(self):
+        css = (ROOT / "playoff_custom.css").read_text()
+        self.assertIn(".seed-grid select,.team-main b{font-weight:950}", css)
+        self.assertIn(".layout .team-record{margin-left:7px}", css)
+        self.assertIn(".layout .rating-rank{margin-left:7px}", css)
+        self.assertIn("grid-template-columns:repeat(4,minmax(0,1fr))", css)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
