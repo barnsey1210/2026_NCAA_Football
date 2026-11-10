@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v7", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v7", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v8", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v8", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -96,6 +96,27 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("champion-footer", self.js)
         css = (ROOT / "playoff_custom.css").read_text()
         self.assertIn("position:fixed;left:50%;bottom:8px", css)
+
+    def test_desktop_sidebar_records_and_staggered_bracket(self):
+        for marker in ("custom-desktop-layout", "firstOut", "first-out-row", "current_wins", "current_losses", "season_simulations_2026.json", "data-round"):
+            self.assertIn(marker, self.js)
+        css = (ROOT / "playoff_custom.css").read_text()
+        for marker in ("@media(min-width:1000px)", "grid-template-columns:310px minmax(0,1fr)", "height:1040px", "grid-row:5", "custom-game:after"):
+            self.assertIn(marker, css)
+
+    def test_current_record_coverage_including_independents(self):
+        workspace = json.loads((ROOT / "data/site/conference_workspace.json").read_text())
+        simulations = json.loads((ROOT / "data/site/season_simulations_2026.json").read_text())
+        records = {x["team"]: f'{x["current_wins"]}-{x["current_losses"]}' for c in workspace["conferences"] for x in c["teams"]}
+        for row in simulations["teams"]:
+            if row["team"] in records:
+                continue
+            wins = [int(x["wins"]) for x in row.get("win_distribution", [])]
+            if wins:
+                low, high = min(wins), max(wins)
+                records[row["team"]] = f"{low}-{max(0, 12 - (high - low) - low)}"
+        self.assertEqual(len(records), 138)
+        self.assertEqual(records["Notre Dame"], "8-1")
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
