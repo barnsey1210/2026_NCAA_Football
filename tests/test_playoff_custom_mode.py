@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v8", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v8", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v9", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v9", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -117,6 +117,13 @@ class PlayoffCustomModeTest(unittest.TestCase):
                 records[row["team"]] = f"{low}-{max(0, 12 - (high - low) - low)}"
         self.assertEqual(len(records), 138)
         self.assertEqual(records["Notre Dame"], "8-1")
+
+    def test_two_row_team_cards_and_colored_field_metadata(self):
+        for marker in ("team-card-meta", "seed-meta", "recordClass", "record-good", "record-mid", "record-low"):
+            self.assertIn(marker, self.js)
+        css = (ROOT / "playoff_custom.css").read_text()
+        for marker in ("grid-template-rows:auto auto", ".advance>.team-card-meta", ".team-record.record-good", ".team-record.record-mid", ".team-record.record-low"):
+            self.assertIn(marker, css)
 
     def test_mobile_breakpoints_and_no_horizontal_custom_canvas(self):
         css = (ROOT / "playoff_custom.css").read_text()
