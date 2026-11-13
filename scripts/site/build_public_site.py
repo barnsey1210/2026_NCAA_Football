@@ -175,6 +175,12 @@ def compact_public_war_room_matrix(payload):
         # fallback while preserving them in the canonical runtime matrix.
         game.pop('provider_game_ids', None)
         game.pop('market_release_timestamp', None)
+        scope = game.get('scope')
+        if isinstance(scope, dict):
+            # The browser filters only on the combined FBS-vs-FBS flag; the
+            # individual away/home flags remain available in the runtime
+            # matrix for audit and diagnostics.
+            game['scope'] = {'fbs_vs_fbs': scope.get('fbs_vs_fbs') is True}
         # Command Center replaced the Injury column with canonical L2 Trend.
         # Keep injury_rank in the complete runtime/audit matrix, but do not
         # carry the now-unconsumed repeated block in the browser fallback.
