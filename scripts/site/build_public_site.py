@@ -169,6 +169,12 @@ def compact_public_war_room_matrix(payload):
     for game in payload.get('games', []):
         if not isinstance(game, dict):
             continue
+        # Provider identity linkage and the internal market-release marker are
+        # runtime/audit evidence. The Command Center browser does not read
+        # either field, so omit the repeated per-game copies from the static
+        # fallback while preserving them in the canonical runtime matrix.
+        game.pop('provider_game_ids', None)
+        game.pop('market_release_timestamp', None)
         # Command Center replaced the Injury column with canonical L2 Trend.
         # Keep injury_rank in the complete runtime/audit matrix, but do not
         # carry the now-unconsumed repeated block in the browser fallback.
