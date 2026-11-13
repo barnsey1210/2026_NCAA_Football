@@ -58,6 +58,19 @@ class KalshiFuturesTests(unittest.TestCase):
         self.assertEqual(quote["display"], "Kalshi 34¢ (+178)")
         self.assertEqual(quote["provider_type"], "exchange")
 
+    def test_boundary_quote_is_not_misclassified_as_unmatched_team(self):
+        team, quote = CONTRACT.resolve_kalshi_contract_row(
+            {
+                "team": "Georgia",
+                "american_odds": None,
+                "ask_cents": 100,
+                "market": {"ticker": "KXNCAAFPLAYOFF-26-UGA"},
+            },
+            ["Georgia", "Georgia Tech", "Georgia State"],
+        )
+        self.assertEqual(team, "Georgia")
+        self.assertIsNone(quote)
+
     def test_national_title_series_is_in_scope(self):
         self.assertEqual(PULL.NATIONAL_TITLE_SERIES, "KXNCAAF")
 

@@ -268,6 +268,17 @@ def kalshi_quote(row, side=None):
     }
 
 
+def resolve_kalshi_contract_row(row, canonical_names):
+    """Resolve identity independently from quote usability.
+
+    A valid Kalshi team can still have a non-convertible boundary quote (for
+    example a 100-cent ask).  That is an unavailable quote, not an unmatched
+    team identity.
+    """
+    team = resolve_market_team(row.get("team"), canonical_names)
+    return team, kalshi_quote(row) if team else None
+
+
 def main():
     sim = json.loads(SEASON_SIM.read_text())
     canonical_names = [x["team"] for x in sim["teams"]]
@@ -713,13 +724,14 @@ def main():
         if kalshi:
             by_key = {(row["team"], row["outcome"]): row for row in rows}
             for source_row in kalshi.get(market_key, []):
-                team = resolve_market_team(source_row.get("team"), canonical_names)
+                team, quote = resolve_kalshi_contract_row(source_row, canonical_names)
                 outcome = "Yes"
-                quote = kalshi_quote(source_row)
-                if not team or not quote:
+                if not team:
                     if source_row.get("team"):
                         unmatched["playoff_futures"].append(source_row.get("team"))
                         unmatched[market_key].append(source_row.get("team"))
+                    continue
+                if not quote:
                     continue
                 target = by_key.get((team, outcome))
                 if target is None:
