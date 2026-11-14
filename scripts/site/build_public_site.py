@@ -166,6 +166,10 @@ def compact_public_war_room_matrix(payload):
                 prune_null_fields(nested)
 
     payload.pop('audit', None)
+    # Selection policy is governance/audit metadata and is not read by the
+    # browser client. Preserve it in the canonical runtime matrix while
+    # keeping the static fallback below its hard size target.
+    payload.pop('selection_policy', None)
     for game in payload.get('games', []):
         if not isinstance(game, dict):
             continue
