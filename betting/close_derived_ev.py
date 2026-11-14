@@ -231,5 +231,6 @@ def aggregate_ev(rows):
         "close_ev_roi": round(expected_pl / risk, 4) if risk else None,
         "close_ev_realized_pl": round(realized_pl, 2),
         "close_ev_realized_roi": round(realized_pl / risk, 4) if risk else None,
+        "close_ev_variance_pl": round(realized_pl - expected_pl, 2),
         "close_ev_actual_vs_expected": round((realized_pl - expected_pl) / risk, 4) if risk else None,
     }

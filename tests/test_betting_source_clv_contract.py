@@ -102,6 +102,25 @@ class BettingSourceCLVContractTest(unittest.TestCase):
         self.assertEqual(metrics["track_close_not_applicable"], 1)
         self.assertEqual(metrics["track_close_unresolved"], 0)
 
+    def test_close_ev_dollars_are_stake_weighted_and_match_eligible_actuals(self):
+        def row(stake, ev_pct, profit):
+            return {
+                "is_open": False, "stake": stake, "realized_profit": profit,
+                "realized_pl": profit, "status": "Won" if profit > 0 else "Lost",
+                "clv_pct_current": None, "track_close": True,
+                "tracking_clv_state": "FINAL_CLOSE", "tracking_clv_points": 1.0,
+                "ev_current_pct": None, "close_ev_pct": ev_pct,
+                "close_ev_expected_pl": stake * ev_pct,
+            }
+
+        metrics = summarize_records([row(200, 0.04, 180), row(50, 0.04, -50)])
+        self.assertEqual(metrics["close_ev_risk"], 250)
+        self.assertEqual(metrics["close_ev_expected_pl"], 10)
+        self.assertEqual(metrics["close_ev_realized_pl"], 130)
+        self.assertEqual(metrics["close_ev_variance_pl"], 120)
+        self.assertEqual(metrics["close_ev_roi"], 0.04)
+        self.assertEqual(metrics["close_ev_actual_vs_expected"], 0.48)
+
     def test_open_weekly_grouping_denominators_and_trend(self):
         rows = [
             self.weekly_row(0, points=1.0),

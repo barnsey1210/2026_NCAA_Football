@@ -29,6 +29,11 @@ class BettingPagePipelineTests(unittest.TestCase):
         self.assertIn("setOpenWeeklyLedgerFilter", page)
         self.assertIn("CLOSE-DERIVED EV", page.upper())
         self.assertIn("close_ev_expected_pl", page)
+        self.assertIn("close_ev_realized_pl", page)
+        self.assertIn("close_ev_variance_pl", page)
+        self.assertIn("Expected P/L", page)
+        self.assertIn("Actual P/L*", page)
+        self.assertIn("EV Variance", page)
         self.assertIn("Close EV method", page)
         self.assertIn("<th>Close EV</th>", page)
 
