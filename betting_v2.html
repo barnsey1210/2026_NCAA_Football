@@ -3873,7 +3873,13 @@ function pMetrics(list){
   const positive=clv.filter(r=>Number(r.tracking_clv_points)>0).length;
   const trackClose=list.filter(r=>r.track_close===true);
   const decisions=graded.filter(r=>r.status==='Won'||r.status==='Lost');
-  const closeEv=graded.filter(r=>Number.isFinite(Number(r.close_ev_pct))&&Number(r.settled_risk)>0);
+  const closeEv=graded.filter(r=>
+    r.close_ev_pct!=null && r.close_ev_pct!=='' &&
+    Number.isFinite(Number(r.close_ev_pct)) &&
+    r.close_ev_expected_pl!=null && r.close_ev_expected_pl!=='' &&
+    Number.isFinite(Number(r.close_ev_expected_pl)) &&
+    Number(r.settled_risk)>0
+  );
   const closeEvRisk=closeEv.reduce((s,r)=>s+Number(r.settled_risk),0);
   const closeEvExpected=closeEv.reduce((s,r)=>s+Number(r.close_ev_expected_pl),0);
   const closeEvRealized=closeEv.reduce((s,r)=>s+Number(r.realized_pl),0);

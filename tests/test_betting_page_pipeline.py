@@ -34,6 +34,8 @@ class BettingPagePipelineTests(unittest.TestCase):
         self.assertIn("Expected P/L", page)
         self.assertIn("Actual P/L*", page)
         self.assertIn("EV Variance", page)
+        self.assertIn("r.close_ev_pct!=null && r.close_ev_pct!==''", page)
+        self.assertIn("r.close_ev_expected_pl!=null && r.close_ev_expected_pl!==''", page)
         self.assertIn("Close EV method", page)
         self.assertIn("<th>Close EV</th>", page)
 
