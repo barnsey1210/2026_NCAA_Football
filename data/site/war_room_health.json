@@ -1,9 +1,9 @@
 {
   "schema_version": "war-room-health-v1",
-  "built_at": "2026-11-15T14:09:19.753282+00:00",
+  "built_at": "2026-11-15T14:10:02.434951+00:00",
   "fast_market_refresh": {
-    "refresh_id": "theodds_20261115T140743Z",
-    "last_fast_pull_at": "2026-11-15T14:07:43.668887+00:00",
+    "refresh_id": "theodds_20261115T141001Z",
+    "last_fast_pull_at": "2026-11-15T14:10:01.888295+00:00",
     "source": "The Odds API",
     "upcoming_games_in_pull": 37,
     "participation_policy": "Book participation remains tied to the most recent fast market pull until another fast pull occurs. No elapsed-time cutoff changes participation.",
@@ -17,22 +17,22 @@
     "status": "HEALTHY",
     "color": "GREEN",
     "monthly_limit_configured": 20000,
-    "credits_used": 4402,
-    "credits_remaining": 15598,
+    "credits_used": 4404,
+    "credits_remaining": 15596,
     "last_call_cost": 2,
     "emergency_reserve": 2000,
-    "available_operating_credits": 13598,
-    "estimated_fast_pulls_remaining": 7799,
-    "estimated_operating_pulls_before_reserve": 6799,
+    "available_operating_credits": 13596,
+    "estimated_fast_pulls_remaining": 7798,
+    "estimated_operating_pulls_before_reserve": 6798,
     "calendar_month": "2026-11",
     "period_timezone": "UTC",
-    "quota_observed_at": "2026-11-15T14:07:43.668887+00:00",
+    "quota_observed_at": "2026-11-15T14:10:01.888295+00:00",
     "quota_observed_period": "2026-11",
     "rollover_reconciliation_required": false,
     "prior_period_credits_remaining": null,
     "reset_at_utc": "2026-12-01T00:00:00+00:00",
     "days_until_reset": 16,
-    "daily_operating_credit_budget": 849.9,
+    "daily_operating_credit_budget": 849.8,
     "daily_operating_pull_budget": 424.9,
     "scheduled_refresh_allowed": true,
     "policy": "Command Center quota is budgeted by UTC calendar month. Scheduled fast refreshes protect the configured emergency reserve. A prior-period header permits one normal guarded request to reconcile the new period; its response headers then become the runtime source of truth."
@@ -263,8 +263,8 @@
         "SportsGameOdds": 2,
         "Action Network": 26
       },
-      "quote_age_median_seconds": 62.7,
-      "quote_age_p90_seconds": 62.7
+      "quote_age_median_seconds": 67.9,
+      "quote_age_p90_seconds": 67.9
     },
     "FanDuel": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -284,8 +284,8 @@
         "The Odds API": 4572,
         "Action Network": 2
       },
-      "quote_age_median_seconds": 14.7,
-      "quote_age_p90_seconds": 14.7
+      "quote_age_median_seconds": 14.9,
+      "quote_age_p90_seconds": 14.9
     },
     "BetMGM": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -305,8 +305,8 @@
         "The Odds API": 3966,
         "Action Network": 12
       },
-      "quote_age_median_seconds": 61.7,
-      "quote_age_p90_seconds": 61.7
+      "quote_age_median_seconds": 67.9,
+      "quote_age_p90_seconds": 67.9
     },
     "Caesars": {
       "group": "BETTABLE_SPORTSBOOK",
@@ -327,8 +327,8 @@
         "Action Network": 4022,
         "SportsGameOdds": 2
       },
-      "quote_age_median_seconds": 14.7,
-      "quote_age_p90_seconds": 14.7
+      "quote_age_median_seconds": 14.9,
+      "quote_age_p90_seconds": 14.9
     },
     "Novig": {
       "group": "EXCHANGE",
@@ -347,8 +347,8 @@
       "canonical_source_counts": {
         "The Odds API": 4554
       },
-      "quote_age_median_seconds": 29.7,
-      "quote_age_p90_seconds": 29.7
+      "quote_age_median_seconds": 25.9,
+      "quote_age_p90_seconds": 25.9
     },
     "ProphetX": {
       "group": "EXCHANGE",
@@ -359,16 +359,16 @@
       "games_with_any_quote": 26,
       "board_breadth_pct": 70.3,
       "spread_games": 24,
-      "total_games": 18,
+      "total_games": 19,
       "spread_completeness_pct": 92.3,
-      "total_completeness_pct": 69.2,
-      "quote_rows": 84,
+      "total_completeness_pct": 73.1,
+      "quote_rows": 86,
       "canonical_current_games": 781,
       "canonical_source_counts": {
         "The Odds API": 4518
       },
-      "quote_age_median_seconds": 13.7,
-      "quote_age_p90_seconds": 13.7
+      "quote_age_median_seconds": 15.9,
+      "quote_age_p90_seconds": 15.9
     },
     "Kalshi": {
       "group": "EXCHANGE",
@@ -387,8 +387,8 @@
       "canonical_source_counts": {
         "The Odds API": 3638
       },
-      "quote_age_median_seconds": 25.7,
-      "quote_age_p90_seconds": 26.7
+      "quote_age_median_seconds": 14.9,
+      "quote_age_p90_seconds": 14.9
     },
     "Pinnacle": {
       "group": "SHARP_REFERENCE",
@@ -407,8 +407,8 @@
       "canonical_source_counts": {
         "The Odds API": 4208
       },
-      "quote_age_median_seconds": 14.7,
-      "quote_age_p90_seconds": 14.7
+      "quote_age_median_seconds": 22.9,
+      "quote_age_p90_seconds": 22.9
     }
   }
 }
