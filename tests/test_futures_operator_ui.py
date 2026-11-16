@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import subprocess
 import unittest
+from datetime import datetime, timedelta, timezone
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,25 @@ SPEC.loader.exec_module(MODULE)
 CONF_SPEC = importlib.util.spec_from_file_location("build_conference_workspace", ROOT / "scripts/site/build_conference_workspace.py")
 CONF_MODULE = importlib.util.module_from_spec(CONF_SPEC)
 CONF_SPEC.loader.exec_module(CONF_MODULE)
+
+
+class FuturesMarketFreshnessTests(unittest.TestCase):
+    def test_current_domain_is_actionable(self):
+        pulled_at = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+        self.assertTrue(MODULE.market_domain_is_current({"pulled_at": pulled_at}))
+
+    def test_stale_domain_is_not_actionable(self):
+        pulled_at = (datetime.now(timezone.utc) - timedelta(hours=25)).isoformat()
+        self.assertFalse(MODULE.market_domain_is_current({"pulled_at": pulled_at}))
+
+    def test_build_filters_each_market_domain_independently(self):
+        source = (ROOT / "scripts/site/build_futures_view.py").read_text()
+        for domain in ("win_domain", "title_domain", "cfp_domain", "national_domain"):
+            self.assertIn(f"if market_domain_is_current({domain})", source)
+
+        scheduler = (ROOT / "scripts/futures/run_fast_futures_refresh.py").read_text()
+        self.assertIn('(("win_totals", WIN), ("conference_titles", CONF))', scheduler)
+        self.assertIn('restore(saved, [path])', scheduler)
 
 
 class FuturesWeeklyBaselineTests(unittest.TestCase):

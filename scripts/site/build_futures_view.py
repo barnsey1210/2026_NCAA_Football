@@ -879,6 +879,24 @@ def observed_date_freshness(observed_date, source, books=None, current_days=1):
     }
 
 
+def market_domain_is_current(domain, *, current_hours=24, current_days=1):
+    """Return whether a market domain is safe to expose as actionable.
+
+    Exact accepted pull provenance is authoritative when present.  The date
+    fallback exists only for older accepted artifacts.  View-build time is
+    never used to make retained quotes appear current.
+    """
+    pulled_at = domain.get("pulled_at")
+    if pulled_at:
+        return freshness(pulled_at, domain.get("source"), current_hours=current_hours)[
+            "status"
+        ] == "current"
+    observed_date = domain.get("last_observed_date")
+    return observed_date_freshness(
+        observed_date, domain.get("source"), current_days=current_days
+    )["status"] == "current"
+
+
 def main():
     required = (
         MARKET_CONTRACT_PATH,
@@ -951,25 +969,34 @@ def main():
         and x.get("market") in {"Win Total", "Conference Future"}
     ]
 
+    win_domain = market_contract.get("win_totals", {})
+    title_domain = market_contract.get("conference_titles", {})
+    cfp_domain = market_contract.get("make_cfp", {})
+    national_domain = market_contract.get("national_title", {})
+
     win_market = {
         canonical_team(x.get("team")): x
-        for x in market_contract.get("win_totals", {}).get("rows", [])
+        for x in win_domain.get("rows", [])
+        if market_domain_is_current(win_domain)
     }
 
     title_market = {
         canonical_team(x.get("team")): x
-        for x in market_contract.get("conference_titles", {}).get("rows", [])
+        for x in title_domain.get("rows", [])
+        if market_domain_is_current(title_domain)
     }
 
     cfp_market = {
         canonical_team(x.get("team")): x
-        for x in market_contract.get("make_cfp", {}).get("rows", [])
+        for x in cfp_domain.get("rows", [])
+        if market_domain_is_current(cfp_domain)
         if x.get("outcome") == "Yes"
     }
 
     national_market = {
         canonical_team(x.get("team")): x
-        for x in market_contract.get("national_title", {}).get("rows", [])
+        for x in national_domain.get("rows", [])
+        if market_domain_is_current(national_domain)
         if x.get("outcome") == "Yes"
     }
 

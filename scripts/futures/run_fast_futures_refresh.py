@@ -22,6 +22,7 @@ FUTURES_VIEW = ROOT / "data/site/futures_view.json"
 ODDS_FUTURES = ROOT / "data/site/odds_futures_v2.json"
 WIN_RAW = ROOT / "actionnetwork_win_totals_raw.json"
 WIN_FALLBACK_RECEIPT = ROOT / "data/audits/futures_win_totals_fallback.json"
+RELIABILITY_AUDIT = ROOT / "data/audits/futures_market_reliability.json"
 
 STATE_DIR = ROOT / "data/control/futures_market_scheduler"
 MARKET_STATE = STATE_DIR / "market_state.json"
@@ -209,11 +210,27 @@ def main() -> int:
             ],
         )
 
-        if not acquisition_ok:
-            restore(saved, [WIN, CONF])
+        # Accept or retain each sportsbook domain independently.  A degraded
+        # Win Totals pull must not discard a healthy Conference Titles pull.
+        # The public view separately suppresses any retained domain once its
+        # accepted timestamp ages beyond the freshness window.
+        acquisition_audit = read_json(RELIABILITY_AUDIT, {})
+        acquisition_domains = acquisition_audit.get("domains", {})
+        accepted_domains = []
+        retained_domains = []
+        for domain, path in (("win_totals", WIN), ("conference_titles", CONF)):
+            if acquisition_domains.get(domain, {}).get("status") == "fail":
+                restore(saved, [path])
+                retained_domains.append(domain)
+            else:
+                accepted_domains.append(domain)
+
+        if not acquisition_ok and not accepted_domains:
             write_result(
                 "ACQUISITION_DEGRADED_PRIOR_MARKET_PRESERVED",
                 False,
+                accepted_domains=accepted_domains,
+                retained_domains=retained_domains,
             )
             return 0
 
@@ -233,7 +250,7 @@ def main() -> int:
             write_result("CONTRACT_BUILD_FAILED_PRIOR_VIEW_PRESERVED", False)
             return 0
 
-        if not run(
+        reliability_ok = run(
             "Full Futures reliability audit",
             [
                 sys.executable,
@@ -241,10 +258,7 @@ def main() -> int:
                 "--phase",
                 "all",
             ],
-        ):
-            restore(saved, [CONTRACT, FUTURES_VIEW, ODDS_FUTURES])
-            write_result("RELIABILITY_FAILED_PRIOR_VIEW_PRESERVED", False)
-            return 0
+        )
 
         if not run(
             "Build Futures view",
@@ -272,6 +286,9 @@ def main() -> int:
             "prior_semantic_hash": prior_hash,
             "changed": changed,
             "contract": str(CONTRACT.relative_to(ROOT)),
+            "accepted_domains": accepted_domains,
+            "retained_domains": retained_domains,
+            "reliability_status": "pass" if reliability_ok else "degraded",
         }
         atomic_json(MARKET_STATE, state)
 
