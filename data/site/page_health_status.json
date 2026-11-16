@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-11-16T14:45:00+00:00",
+  "built_at": "2026-11-16T17:17:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -8,9 +8,9 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T14:45:31.275851+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": -0.5,
+      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": -0.6,
       "age_hours": -0.01,
       "metrics": [
         {
@@ -61,9 +61,9 @@
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-11-16T00:00:00+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": 885.0,
-      "age_hours": 14.75,
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": 1037.0,
+      "age_hours": 17.28,
       "metrics": [
         {
           "label": "Composite",
@@ -115,9 +115,9 @@
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-11-16T13:06:22+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": 98.6,
-      "age_hours": 1.64,
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": 250.6,
+      "age_hours": 4.18,
       "metrics": [
         {
           "label": "Games",
@@ -166,9 +166,9 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T14:45:31.275851+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": -0.5,
+      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": -0.6,
       "age_hours": -0.01,
       "metrics": [
         {
@@ -220,9 +220,9 @@
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-11-16T13:06:22+00:00",
-      "artifact_built_at": "2026-11-16T14:15:12.665540+00:00",
-      "age_minutes": 98.6,
-      "age_hours": 1.64,
+      "artifact_built_at": "2026-11-16T17:00:54.248109+00:00",
+      "age_minutes": 250.6,
+      "age_hours": 4.18,
       "metrics": [
         {
           "label": "Games",
@@ -273,9 +273,9 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T14:45:31.275851+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": -0.5,
+      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": -0.6,
       "age_hours": -0.01,
       "metrics": [
         {
@@ -324,11 +324,11 @@
       "display_name": "Futures",
       "status": "yellow",
       "status_label": "Usable with warnings",
-      "summary": "Make-CFP market data is stale or unavailable.",
-      "last_success_at": "2026-11-16T14:14:53.636055+00:00",
-      "artifact_built_at": "2026-11-16T14:14:53.636055+00:00",
-      "age_minutes": 30.1,
-      "age_hours": 0.5,
+      "summary": "Win-total market data unavailable.",
+      "last_success_at": "2026-11-16T17:00:31.993002+00:00",
+      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
+      "age_minutes": 16.5,
+      "age_hours": 0.27,
       "metrics": [
         {
           "label": "Teams",
@@ -337,17 +337,17 @@
         },
         {
           "label": "Win totals",
-          "value": 80,
+          "value": 0,
           "detail": ""
         },
         {
           "label": "Conference title",
-          "value": 107,
+          "value": 103,
           "detail": ""
         },
         {
           "label": "Playoff",
-          "value": 38,
+          "value": 32,
           "detail": ""
         },
         {
@@ -362,12 +362,12 @@
         }
       ],
       "warnings": [
-        "Make-CFP market data is stale or unavailable.",
-        "National-title market data is stale or unavailable.",
-        "One or more futures market team identities were unmatched.",
-        "win_totals: 119 expected teams have no quote",
-        "conference_titles: seasonal provider coverage contraction accepted: {'Caesars': {'previous': 64, 'current': 54}, 'BetMGM': {'previous': 73, 'current': 55}}",
-        "kalshi: 3 ambiguous or unmatched markets excluded"
+        "Win-total market data unavailable.",
+        "win_totals: 138 expected teams have no quote",
+        "conference_titles: seasonal provider coverage contraction accepted: {'BetMGM': {'previous': 73, 'current': 55}, 'Caesars': {'previous': 64, 'current': 54}}",
+        "kalshi: 3 ambiguous or unmatched markets excluded",
+        "make_cfp: material provider coverage drop: {'Caesars': {'previous': 37, 'current': 29}, 'DraftKings': {'previous': 16, 'current': 9}}",
+        "national_title: material provider coverage drop: {'BetMGM': {'previous': 33, 'current': 25}, 'Caesars': {'previous': 41, 'current': 34}}"
       ],
       "critical_failures": [],
       "unavailable_reasons": [
@@ -388,9 +388,9 @@
       "status_label": "Usable with warnings",
       "summary": "Conference title market data is stale.",
       "last_success_at": "2026-11-16T14:25:10.952431+00:00",
-      "artifact_built_at": "2026-11-16T14:25:10.952431+00:00",
-      "age_minutes": 19.8,
-      "age_hours": 0.33,
+      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
+      "age_minutes": 171.8,
+      "age_hours": 2.86,
       "metrics": [
         {
           "label": "Conferences",
@@ -441,10 +441,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Eligible-team playoff market coverage is partial.",
-      "last_success_at": "2026-11-16T14:14:53.636055+00:00",
-      "artifact_built_at": "2026-11-16T14:14:53.636055+00:00",
-      "age_minutes": 30.1,
-      "age_hours": 0.5,
+      "last_success_at": "2026-11-16T17:00:31.993002+00:00",
+      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
+      "age_minutes": 16.5,
+      "age_hours": 0.27,
       "metrics": [
         {
           "label": "Simulations",
@@ -468,7 +468,7 @@
         },
         {
           "label": "Playoff markets",
-          "value": "38/138",
+          "value": "32/138",
           "detail": ""
         }
       ],
@@ -494,8 +494,8 @@
       "summary": "Critical data is current and expected coverage checks passed.",
       "last_success_at": "2026-11-16T14:25:10.952431+00:00",
       "artifact_built_at": "2026-11-16T14:25:10.952431+00:00",
-      "age_minutes": 19.8,
-      "age_hours": 0.33,
+      "age_minutes": 171.8,
+      "age_hours": 2.86,
       "metrics": [
         {
           "label": "Simulations",
@@ -544,9 +544,9 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T14:45:31.275851+00:00",
-      "artifact_built_at": "2026-11-16T14:45:31.275851+00:00",
-      "age_minutes": -0.5,
+      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
+      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
+      "age_minutes": -0.6,
       "age_hours": -0.01,
       "metrics": [
         {
