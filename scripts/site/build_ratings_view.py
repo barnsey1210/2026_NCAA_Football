@@ -4,6 +4,7 @@
 import csv
 import json
 import statistics
+import sys
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -11,6 +12,9 @@ from pathlib import Path
 from ratings_l2 import directional_movement_ranks, two_cycle_ago_baseline
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.projections.spplus_total import load_current_components
 
 ratings_latest_path = ROOT / "data/ratings/ratings_latest.csv"
 ratings_master_path = ROOT / "data/ratings/ratings_master_latest.csv"
@@ -25,19 +29,10 @@ master_rows = list(csv.DictReader(ratings_master_path.open()))
 master_by_team = {row["team"]: row for row in master_rows if row.get("team")}
 spplus_components = {}
 if spplus_components_path.exists():
-    for row in csv.DictReader(spplus_components_path.open()):
-        team = row.get("team")
-        if not team or team in spplus_components:
-            raise SystemExit("SP+ offense/defense input contains a missing or duplicate team")
-        try:
-            spplus_components[team] = {
-                "offense": float(row["spplus_off"]),
-                "defense": float(row["spplus_def"]),
-            }
-        except (KeyError, TypeError, ValueError):
-            raise SystemExit(f"SP+ offense/defense input is incomplete for {team}")
-    if len(spplus_components) != 138:
-        raise SystemExit(f"SP+ offense/defense input must contain exactly 138 teams, found {len(spplus_components)}")
+    try:
+        spplus_components = load_current_components(spplus_components_path)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 spplus_total_available = bool(spplus_components)
 dates = sorted({r["snapshot_date"] for r in rows if r.get("snapshot_date")})
 if not dates:

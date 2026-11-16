@@ -10,9 +10,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from lib.ncaaf_config import canonical_team
+from scripts.projections.spplus_total import load_current_components, projected_total
 
 PRESEASON_DB = Path("data/snapshots/preseason/preseason_db.json")
 RATINGS = Path("data/ratings/ratings_latest.csv")
+SPPLUS_COMPONENTS = Path("data/ratings/spplus_2026_from_espn_latest.csv")
 OUT = Path("data/projections/game_projection_sources_2026.csv")
 AUDIT = Path("data/projections/game_projection_sources_audit_2026.csv")
 MASSEY = Path("data/ratings/external_sources/massey_game_projections_2026.csv")
@@ -286,26 +288,13 @@ def add_common(row, source, g, spread_home, total, away_score=None, home_score=N
         "source_url": source_url, "pulled_at": row.get("pulled_at", ""), "notes": notes,
     }
 
-def explicit_spplus_total(game):
-    """Return only the authoritative preseason SP+ offense/defense baseline total."""
-    preserved = game.get("projection_overlay_previous_total")
-    if preserved is not None and str(preserved).strip() not in ("", "nan", "None"):
-        try:
-            return float(preserved)
-        except (TypeError, ValueError):
-            pass
-
-    source_label = str(game.get("projection_total_sources") or "").lower()
-    model_version = str(game.get("projection_total_model_version") or "").strip().lower()
-    value = game.get("projected_total")
-
-    if "sp+" in source_label and not model_version:
-        try:
-            if value is not None and str(value).strip() not in ("", "nan", "None"):
-                return float(value)
-        except (TypeError, ValueError):
-            pass
-    return None
+def current_spplus_total(game, components):
+    """Calculate the authoritative total from current raw SP+ O/D fields."""
+    away = components.get(canonical_team(game.get("away_team")))
+    home = components.get(canonical_team(game.get("home_team")))
+    if not away or not home:
+        return None
+    return projected_total(away["offense"], home["defense"], home["offense"], away["defense"])
 
 def load_rating_game_projections(db):
     rows, audit = [], []
@@ -319,6 +308,7 @@ def load_rating_game_projections(db):
     by_source_team = {
         (r["source"], norm(r["team"])): r for r in rdf.to_dict("records")
     }
+    spplus_components = {canonical_team(team): values for team, values in load_current_components(SPPLUS_COMPONENTS).items()}
     for g in db.get("games", []):
         for source, rating_label in RATING_SOURCES.items():
             home = by_source_team.get((rating_label, norm(g.get("home_team"))))
@@ -335,8 +325,8 @@ def load_rating_game_projections(db):
                 "pulled_at": max(str(home.get("pulled_at") or ""), str(away.get("pulled_at") or "")),
             }
             source_url = home.get("source_url") or away.get("source_url") or ""
-            explicit_total = explicit_spplus_total(g) if source == "SP+" else ""
-            total_note = " Explicit SP+ offense/defense baseline total." if source == "SP+" and explicit_total is not None else ""
+            explicit_total = current_spplus_total(g, spplus_components) if source == "SP+" else ""
+            total_note = " Current accepted raw SP+ offense/defense total." if source == "SP+" and explicit_total is not None else ""
             rows.append(add_common(provenance, source, g, float(hv)-float(av)+hfa, explicit_total,
                                    source_url=source_url,
                                    notes=f"{source} team-rating projection: home - away + {hfa:g} HFA.{total_note}"))

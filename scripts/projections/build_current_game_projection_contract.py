@@ -25,6 +25,7 @@ from scripts.projections.projection_resolver import (
     resolve_operational_projection,
     resolve_projection,
 )
+from scripts.projections.spplus_total import projected_total as authoritative_spplus_total
 
 DEFAULT_GAMES = ROOT / "data/snapshots/preseason/preseason_db.json"
 DEFAULT_SOURCES = ROOT / "data/projections/game_projection_sources_2026.csv"
@@ -124,19 +125,6 @@ def massey_dual(published_total: Any, away_points: Any, home_points: Any) -> flo
     if None in (published, away, home):
         return None
     return (published + away + home) / 2.0
-
-
-def enhanced_shadow_total(
-    home_offense: Any,
-    away_offense: Any,
-    home_defense: Any,
-    away_defense: Any,
-) -> float | None:
-    values = [finite(v) for v in (home_offense, away_offense, home_defense, away_defense)]
-    if any(v is None for v in values):
-        return None
-    home_off, away_off, home_def, away_def = values
-    return 0.5 * (home_off + away_def) + 0.5 * (away_off + home_def)
 
 
 def status(values: dict[str, float | None], *, activated: bool = True) -> str:
@@ -521,11 +509,11 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
             and exact_shadow_inputs
         )
         shadow_total_value = (
-            enhanced_shadow_total(
+            authoritative_spplus_total(
                 shadow_total_values["updated home SP+ offense"],
+                shadow_total_values["updated away SP+ defense"],
                 shadow_total_values["updated away SP+ offense"],
                 shadow_total_values["updated home SP+ defense"],
-                shadow_total_values["updated away SP+ defense"],
             )
             if shadow_total_activated
             else None
