@@ -192,6 +192,51 @@ def compact_public_war_room_matrix(payload):
         operator_model = game.get('operator_model')
         if isinstance(operator_model, dict):
             operator_model.pop('auto_authority', None)
+            # Manual configuration is only consumed when the canonical mode is
+            # MANUAL.  AUTO rows carried a full dormant copy for every game,
+            # which needlessly grows the static fallback during the season.
+            # Keep the complete branch in the runtime matrix and retain the
+            # browser-visible mode here.
+            if str(operator_model.get('mode') or 'AUTO').upper() != 'MANUAL':
+                game['operator_model'] = {
+                    'mode': str(operator_model.get('mode') or 'AUTO').upper(),
+                }
+        betting_signals = game.get('betting_signals')
+        if isinstance(betting_signals, dict):
+            # The Command Center renders only team/count chips. Individual
+            # signal evidence remains in the canonical runtime matrix.
+            game['betting_signals'] = {
+                'total_count': betting_signals.get('total_count'),
+                'away': {
+                    'team': (betting_signals.get('away') or {}).get('team'),
+                    'count': (betting_signals.get('away') or {}).get('count'),
+                },
+                'home': {
+                    'team': (betting_signals.get('home') or {}).get('team'),
+                    'count': (betting_signals.get('home') or {}).get('count'),
+                },
+            }
+        shadow_readiness = game.get('shadow_readiness')
+        if isinstance(shadow_readiness, dict):
+            contributions = shadow_readiness.get('team_contributions')
+            if isinstance(contributions, dict):
+                # The browser tooltip consumes only net_impact for each team
+                # and market. Full component changes, formulas, statuses, and
+                # reasons remain available in the runtime/audit matrix.
+                compact_contributions = {}
+                for side in ('away', 'home'):
+                    side_row = contributions.get(side)
+                    if not isinstance(side_row, dict):
+                        continue
+                    compact_side = {}
+                    for market_name in ('spread', 'total'):
+                        market_row = side_row.get(market_name)
+                        if isinstance(market_row, dict):
+                            compact_side[market_name] = {
+                                'net_impact': market_row.get('net_impact'),
+                            }
+                    compact_contributions[side] = compact_side
+                shadow_readiness['team_contributions'] = compact_contributions
         market = game.get('market')
         if isinstance(market, dict):
             # Public consumers read exchange rows from market.exchanges. The
@@ -214,6 +259,12 @@ def compact_public_war_room_matrix(payload):
                 for source in sources.values():
                     if isinstance(source, dict):
                         source.pop('health_snapshot_date', None)
+                        # These repeated diagnostics are not read by the
+                        # browser. snapshot_date/pulled_at and the accepted
+                        # update timestamp remain for tooltips and coverage.
+                        source.pop('health_pulled_at', None)
+                        source.pop('last_changed_at', None)
+                        source.pop('source_key', None)
     # Optional values are read defensively by the public client. Omitting nulls
     # preserves their unavailable meaning while keeping the fallback artifact
     # below the static-host headroom target as the season schedule grows.

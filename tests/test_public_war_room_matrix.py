@@ -58,7 +58,13 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
                     "source": "Opening feed",
                     "observed_at": "2026-09-01T12:00:00Z",
                 }}},
-                "standard_freshness": {"spread": {"sources": {"SP+": {"status": "FRESH"}}}},
+                "standard_freshness": {"spread": {"sources": {"SP+": {
+                    "status": "FRESH",
+                    "snapshot_date": "2026-09-14",
+                    "health_pulled_at": "2026-09-14T22:30:00Z",
+                    "last_changed_at": "2026-09-14T20:00:00Z",
+                    "source_key": "spplus",
+                }}}},
                 "operator_model": {
                     "mode": "AUTO",
                     "manual": {"spread": None},
@@ -67,7 +73,11 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
                 "shadow_readiness": {"spread": {"status": "READY"}},
                 "injury_rank": {"away": {"rank": 10}},
                 "l2_trend": {"away": {"l2_change": 1.2, "l2_rank": 10}},
-                "betting_signals": {"away": {"signals": []}},
+                "betting_signals": {
+                    "total_count": 1,
+                    "away": {"team": "Ohio", "count": 1, "signals": [{"detail": "internal"}]},
+                    "home": {"team": "Rutgers", "count": 0, "signals": []},
+                },
             }],
         }
 
@@ -80,14 +90,18 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertNotIn("audit", public)
         self.assertNotIn("auto_authority", public["games"][0]["operator_model"])
         for field in (
-            "authority", "models", "standard_freshness",
-            "shadow_readiness", "l2_trend", "betting_signals",
+            "authority", "models",
+            "shadow_readiness", "l2_trend",
         ):
             self.assertEqual(public["games"][0][field], original["games"][0][field])
         self.assertIn("injury_rank", original["games"][0])
         self.assertNotIn("injury_rank", public["games"][0])
-        self.assertEqual(public["games"][0]["operator_model"]["mode"], "AUTO")
-        self.assertNotIn("spread", public["games"][0]["operator_model"]["manual"])
+        self.assertEqual(public["games"][0]["operator_model"], {"mode": "AUTO"})
+        self.assertEqual(public["games"][0]["betting_signals"], {
+            "total_count": 1,
+            "away": {"team": "Ohio", "count": 1},
+            "home": {"team": "Rutgers", "count": 0},
+        })
         runtime_quote = original["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
         public_quote = public["games"][0]["market"]["best_sportsbook"]["spread"]["away"]
         self.assertNotIn("best_exchange", public["games"][0]["market"])
@@ -117,6 +131,9 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         self.assertEqual(runtime, original)
         self.assertEqual(public_source["snapshot_date"], "2026-09-14")
         self.assertNotIn("health_snapshot_date", public_source)
+        self.assertNotIn("health_pulled_at", public_source)
+        self.assertNotIn("last_changed_at", public_source)
+        self.assertNotIn("source_key", public_source)
 
     def test_internal_only_growth_does_not_consume_public_size_budget(self):
         runtime = self.fixture()
@@ -128,6 +145,31 @@ class PublicWarRoomMatrixTests(unittest.TestCase):
         encoded = (json.dumps(public, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
 
         self.assertLessEqual(len(encoded), BUILDER.PUBLIC_WAR_ROOM_TARGET_BYTES)
+
+    def test_shadow_contributions_keep_only_browser_consumed_net_impact(self):
+        runtime = self.fixture()
+        runtime["games"][0]["shadow_readiness"]["team_contributions"] = {
+            "away": {
+                "component_status": "READY",
+                "spread": {"net_impact": 1.25, "net_impact_formula": "internal", "sp_plus_change": 2.0},
+                "total": {"net_impact": -0.5, "net_impact_formula": "internal", "offense_change": 1.0},
+            },
+            "home": {
+                "component_reason": "internal evidence",
+                "spread": {"net_impact": -1.25, "net_impact_formula": "internal"},
+                "total": {"net_impact": 0.5, "net_impact_formula": "internal"},
+            },
+        }
+        original = copy.deepcopy(runtime)
+
+        public = BUILDER.compact_public_war_room_matrix(copy.deepcopy(runtime))
+
+        self.assertEqual(runtime, original)
+        contributions = public["games"][0]["shadow_readiness"]["team_contributions"]
+        self.assertEqual(contributions["away"]["spread"], {"net_impact": 1.25})
+        self.assertEqual(contributions["away"]["total"], {"net_impact": -0.5})
+        self.assertEqual(contributions["home"]["spread"], {"net_impact": -1.25})
+        self.assertEqual(contributions["home"]["total"], {"net_impact": 0.5})
 
     def test_null_pruning_preserves_non_null_public_values(self):
         runtime = self.fixture()
