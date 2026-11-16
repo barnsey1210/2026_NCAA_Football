@@ -51,6 +51,20 @@ def source_build_time(paths: tuple[Path, ...]) -> str:
     return datetime.fromtimestamp(modified, timezone.utc).isoformat()
 
 
+def domain_is_current(domain: dict, current_hours: float = 24.0) -> bool:
+    pulled_at = domain.get("pulled_at")
+    if not pulled_at:
+        return False
+    try:
+        parsed = datetime.fromisoformat(str(pulled_at).replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    age_hours = (datetime.now(timezone.utc) - parsed.astimezone(timezone.utc)).total_seconds() / 3600
+    return 0 <= age_hours <= current_hours
+
+
 def read_csv(path: Path) -> list[dict]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
@@ -345,6 +359,7 @@ def main() -> None:
         raise SystemExit("Missing read-only inputs: " + ", ".join(missing))
     action = json.loads(ACTION.read_text())
     view = json.loads(FUTURES_VIEW.read_text())
+    contract = json.loads(CONTRACT.read_text())
     by_norm, _ = team_meta(view.get("rows", []))
     pulled = action.get("pulled_at")
     playoff, playoff_audit = build_action(action, "make_cfp", by_norm, pulled)
@@ -352,7 +367,16 @@ def main() -> None:
     title_open_count = attach_title_open(national, read_csv(TITLE_OPEN))
     conference, conference_audit = build_conference(read_csv(CONF_CURRENT), read_csv(CONF_HISTORY), by_norm)
     wins, wins_audit = build_wins(read_csv(WINS_CURRENT), read_csv(WINS_HISTORY), by_norm)
-    contract = json.loads(CONTRACT.read_text())
+    # Do not let retained CSVs or Action responses repopulate a stale market
+    # domain after the canonical contract has declared it non-current.
+    if not domain_is_current(contract.get("win_totals", {})):
+        wins = []
+    if not domain_is_current(contract.get("conference_titles", {})):
+        conference = []
+    if not domain_is_current(contract.get("make_cfp", {})):
+        playoff = []
+    if not domain_is_current(contract.get("national_title", {})):
+        national = []
     merge_contract_policy(national, contract.get("national_title", {}).get("rows", []))
     merge_contract_policy(playoff, contract.get("make_cfp", {}).get("rows", []))
     merge_contract_policy(conference, contract.get("conference_titles", {}).get("rows", []))

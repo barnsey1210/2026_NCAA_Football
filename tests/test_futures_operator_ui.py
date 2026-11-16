@@ -35,6 +35,12 @@ class FuturesMarketFreshnessTests(unittest.TestCase):
         self.assertIn('(("win_totals", WIN), ("conference_titles", CONF))', scheduler)
         self.assertIn('restore(saved, [path])', scheduler)
 
+    def test_odds_payload_also_filters_stale_domains(self):
+        source = (ROOT / "scripts/site/build_odds_futures_v2.py").read_text()
+        for domain in ("win_totals", "conference_titles", "make_cfp", "national_title"):
+            self.assertIn(f'contract.get("{domain}", {{}})', source)
+        self.assertIn("def domain_is_current", source)
+
 
 class FuturesWeeklyBaselineTests(unittest.TestCase):
     def test_uses_latest_successful_checkpoint_strictly_before_prior_week_kickoff(self):
