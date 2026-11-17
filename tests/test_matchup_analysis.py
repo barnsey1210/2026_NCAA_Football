@@ -80,6 +80,8 @@ class MatchupAnalysisTest(unittest.TestCase):
         public = (ROOT / "scripts/site/build_public_site.py").read_text()
         self.assertIn("matchup-analysis.html?game_id=", command)
         self.assertIn("setMatchupLink(away.team,home.team,-homeMargin,total)", public)
+        self.assertIn('target="_blank" rel="noopener" href="matchup-analysis.html?game_id=', command)
+        self.assertIn('id="matchupCardLink" class="matchup-card-link" target="_blank" rel="noopener"', public)
 
     def test_matchup_assets_cannot_remain_stale(self):
         page = (ROOT / "matchup-analysis.html").read_text()

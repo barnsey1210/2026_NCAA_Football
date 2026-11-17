@@ -4551,7 +4551,7 @@ function renderMobileMatrix(rows){
         <div class="mobile-command-game-top">${live.active
           ? `<span class="game-live-state">${esc(live.label)}</span>`
           : `<span>${esc(fmtKickoffDateET(game.kickoff_time))} · ${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
-        }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span><a class="matchup-card-link" data-no-game-select href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a></div>
+        }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span><a class="matchup-card-link" data-no-game-select target="_blank" rel="noopener" href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a></div>
         <div class="mobile-command-matchup">${mobileMatchupWithMarket(game,live,totSide)}</div>
       </button>
       <div class="mobile-command-edge spread-group ${recentEdgeCellClass(game,'spread')}">${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${mobileEdgeDisplay(game,'spread',sprSide,sprEdge)}</span></div>
@@ -4708,7 +4708,7 @@ function renderMatrix(){
           <span class="badge ${esc(game.state)}">
             ${esc(game.state)}
           </span>
-          <a class="matchup-card-link" data-no-game-select href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a>
+          <a class="matchup-card-link" data-no-game-select target="_blank" rel="noopener" href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a>
         </td>
 
       </tr>

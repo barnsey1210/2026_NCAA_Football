@@ -410,7 +410,7 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
         text=text.replace('</head>','<style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style></head>',1)
         text=text.replace(
             '<div class="matchup-note" id="matchupNote"></div></div></section>',
-            '<div class="matchup-note" id="matchupNote"></div><a id="matchupCardLink" class="matchup-card-link" hidden>OPEN FULL MATCHUP CARD →</a></div></section>',
+            '<div class="matchup-note" id="matchupNote"></div><a id="matchupCardLink" class="matchup-card-link" target="_blank" rel="noopener" hidden>OPEN FULL MATCHUP CARD →</a></div></section>',
             1,
         )
         text=text.replace("matchupNote.textContent='';\n    return;", "matchupNote.textContent='';\n    clearMatchupLink();\n    return;", 1)
