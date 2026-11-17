@@ -52,6 +52,29 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertTrue(sayin["availability"]["status"].startswith("OUT"))
         self.assertEqual(sayin["availability"]["replacement"], "Luke Fahey")
 
+    def test_all_fbs_profiles_are_derived_and_receivers_are_ranked(self):
+        payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
+        self.assertEqual(len(payload["teams"]), 138)
+        for team in ("LSU", "Tennessee"):
+            row = payload["teams"][team]
+            season = row["profile"]["season"]
+            recent = row["profile"]["recent"]
+            for key in ("talent", "coach", "draftables", "runRank", "passRank", "paceRank", "l2", "last2PerformanceVsModel", "last4PerformanceVsModel", "performanceVsModel"):
+                self.assertIsNotNone(season[key], f"{team}: {key}")
+            self.assertIsNotNone(recent["sos"], f"{team}: last-4 SOS")
+            self.assertIn(recent["trend"], {"Improving", "Stable", "Declining"})
+        populated = sum(
+            row["profile"]["season"]["last4PerformanceVsModel"] is not None
+            for row in payload["teams"].values()
+        )
+        self.assertEqual(populated, 137)
+        lsu_receiver = payload["teams"]["LSU"]["players"]["receiving"][0]
+        self.assertEqual(lsu_receiver["metric"], "Receiving PPA")
+        self.assertIn(lsu_receiver["position"], {"WR", "TE"})
+        self.assertGreaterEqual(lsu_receiver["usage"], 0.05)
+        self.assertLessEqual(lsu_receiver["rank"], lsu_receiver["population"])
+        self.assertIn("PPA", payload["definitions"]["receivingPPA"])
+
     def test_command_center_and_ratings_link_to_card(self):
         command = (ROOT / "scripts/site/build_war_room_page.py").read_text()
         public = (ROOT / "scripts/site/build_public_site.py").read_text()

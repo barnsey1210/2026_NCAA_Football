@@ -7,6 +7,7 @@ import json
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from statistics import mean
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,6 +15,21 @@ DEFAULT_AUDIT = ROOT / "research/cfbd_tier1_adjusted_preview_audit_2026w12"
 OUT = ROOT / "data/site/matchup_analysis_2026.json"
 PROFILE_OVERLAYS = ROOT / "data/canonical/matchup_analysis_profile_overlays_2026.json"
 CFBDEPTH_TEAMS = ROOT / "data/site/cfbdepth_teams_2026.json"
+RECEIVING = ROOT / "data/canonical/cfbd_receiving_impact_2026.json"
+DRAFT_COUNTS = ROOT / "data/canonical/nfl_draft_2027_top175_team_counts.json"
+RATINGS = ROOT / "data/site/ratings_view.json"
+MODEL_FIT = ROOT / "data/site/team_game_evaluations_2026.json"
+MARKET_MATRIX = ROOT / "data/site/war_room_market_matrix.json"
+SITE_TO_CFBD = {
+    "Appalachian State": "App State",
+    "Central Florida": "UCF",
+    "Connecticut": "UConn",
+    "Hawaii": "Hawai'i",
+    "Miami-FL": "Miami",
+    "Miami-OH": "Miami (OH)",
+    "San Jose State": "San José State",
+    "UL-Monroe": "UL Monroe",
+}
 
 
 def load(path: Path):
@@ -81,6 +97,23 @@ def player_ranks(rows, metric, group_name):
     return ranked
 
 
+def completed_games_by_team(games, through_week):
+    rows = defaultdict(list)
+    for row in games:
+        value = row.get("performance_vs_model")
+        if row.get("week", 999) > through_week or not isinstance(value, (int, float)):
+            continue
+        rows[SITE_TO_CFBD.get(row["team"], row["team"])].append(row)
+    for team in rows:
+        rows[team].sort(key=lambda row: (row.get("kickoff") or "", row.get("week") or 0))
+    return rows
+
+
+def rolling_average(rows, count):
+    values = [row["performance_vs_model"] for row in rows[-count:]]
+    return mean(values) if values else None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
@@ -95,9 +128,24 @@ def main():
     advanced = load(args.audit_dir / "related/advanced_season_2026_fbs.json")
     profile_overlays = load(PROFILE_OVERLAYS) if PROFILE_OVERLAYS.exists() else {"profiles": {}}
     cfbdepth = load(CFBDEPTH_TEAMS).get("teams", {}) if CFBDEPTH_TEAMS.exists() else {}
+    receiving_source = load(RECEIVING).get("players", []) if RECEIVING.exists() else []
+    fbs_teams = {row["team"] for row in adjusted}
+    receiving_by_team = defaultdict(list)
+    for row in receiving_source:
+        if row.get("team") in fbs_teams:
+            receiving_by_team[row["team"]].append(row)
+    receiving_source = [
+        row
+        for team_rows in receiving_by_team.values()
+        for row in sorted(team_rows, key=lambda item: item.get("usage", 0), reverse=True)[:5]
+    ]
+    draft_source = load(DRAFT_COUNTS) if DRAFT_COUNTS.exists() else {"team_counts": {}}
+    ratings_source = load(RATINGS).get("teams", [])
+    model_fit_source = load(MODEL_FIT)
     passing = player_ranks(load(args.passing), "wepa", "Passing WEPA")
     rushing = player_ranks(load(args.rushing), "wepa", "Rushing WEPA")
     kicking = player_ranks(load(args.kicking), "paar", "Kicking PAAR")
+    receiving = player_ranks(receiving_source, "averagePPA", "Receiving PPA")
 
     metric_specs = [
         ("Adjusted EPA", "epa.total", "epaAllowed.total", "EPA/play"),
@@ -129,23 +177,65 @@ def main():
     ]
     talent_rank = rank_rows(talent_rows, "value")
     coach_rank = rank_rows(coach_rows, "value")
+    ratings_by_team = {SITE_TO_CFBD.get(row["team"], row["team"]): row for row in ratings_source}
+    fit_by_team = {
+        SITE_TO_CFBD.get(row["team"], row["team"]): row
+        for row in model_fit_source.get("team_aggregates", [])
+    }
+    recent_games = completed_games_by_team(model_fit_source.get("team_games", []), 11)
+    last2_rank = rank_rows(
+        [{"team": team, "value": rolling_average(rows, 2)} for team, rows in recent_games.items()],
+        "value",
+    )
+    last4_rank = rank_rows(
+        [{"team": team, "value": rolling_average(rows, 4)} for team, rows in recent_games.items()],
+        "value",
+    )
+    core_values = {row["team"]: row.get("overall") for row in core}
+    sos_rows = []
+    for team, rows in recent_games.items():
+        values = [core_values.get(SITE_TO_CFBD.get(row.get("opponent"), row.get("opponent"))) for row in rows[-4:]]
+        values = [value for value in values if isinstance(value, (int, float))]
+        sos_rows.append({"team": team, "value": mean(values) if values else None})
+    sos_rank = rank_rows(sos_rows, "value")
+
+    games_payload = load(MARKET_MATRIX)
+    scheduled_counts = defaultdict(int)
+    for game in games_payload.get("games", []):
+        if (game.get("week") or 999) <= 11:
+            scheduled_counts[SITE_TO_CFBD.get(game["away_team"], game["away_team"])] += 1
+            scheduled_counts[SITE_TO_CFBD.get(game["home_team"], game["home_team"])] += 1
+    pace_rows = []
+    for row in advanced:
+        count = scheduled_counts.get(row["team"], 0)
+        plays = value_at(row, "offense.plays")
+        pace_rows.append({"team": row["team"], "value": plays / count if count and isinstance(plays, (int, float)) else None})
+    pace_rank = rank_rows(pace_rows, "value")
+
+    draft_counts = draft_source.get("team_counts", {})
+    draft_rank = rank_rows(
+        [{"team": row["team"], "value": int(draft_counts.get(row["team"], 0))} for row in adjusted],
+        "value",
+    )
+    for item in draft_rank.values():
+        if item["value"] == 0:
+            item.update(rank=len(adjusted), band="poor")
     advanced_by_team = {row["team"]: row for row in advanced}
     core_by_team = {row["team"]: row for row in core}
     adjusted_by_team = {row["team"]: row for row in adjusted}
-    by_team_players = defaultdict(lambda: {"passing": [], "rushing": [], "kicking": []})
-    for key, rows in (("passing", passing), ("rushing", rushing), ("kicking", kicking)):
+    by_team_players = defaultdict(lambda: {"passing": [], "rushing": [], "receiving": [], "kicking": []})
+    for key, rows in (("passing", passing), ("rushing", rushing), ("receiving", receiving), ("kicking", kicking)):
         for row in rows:
             by_team_players[row["team"]][key].append(row)
 
-    games_payload = load(ROOT / "data/site/war_room_market_matrix.json")
     games = {}
     for game in games_payload.get("games", []):
         spread = value_at(game, "authority.spread.value")
         total = value_at(game, "authority.total.value")
         games[str(game["game_id"])] = {
             "game_id": game["game_id"],
-            "away": game["away_team"],
-            "home": game["home_team"],
+            "away": SITE_TO_CFBD.get(game["away_team"], game["away_team"]),
+            "home": SITE_TO_CFBD.get(game["home_team"], game["home_team"]),
             "week": game.get("week"),
             "kickoff": game.get("kickoff_time"),
             "spread": spread,
@@ -168,40 +258,74 @@ def main():
                 "defense": metric_ranks[defense_path].get(team),
             })
         players = by_team_players[team]
-        for group in players.values():
-            group.sort(key=lambda row: row.get("wepa", row.get("paar", -999)), reverse=True)
+        for key, group in players.items():
+            sort_key = "usage" if key == "receiving" else "wepa" if key in {"passing", "rushing"} else "paar"
+            group.sort(key=lambda row: row.get(sort_key, -999), reverse=True)
         overlay = profile_overlays.get("profiles", {}).get(team)
         if overlay:
             for group in players.values():
                 for player in group:
                     player["availability"] = overlay.get("availability", {}).get(player.get("athleteName"))
+        rating = ratings_by_team.get(team, {})
+        fit = fit_by_team.get(team, {})
+        season_fit = None
+        if isinstance(fit.get("performance_vs_model"), (int, float)):
+            fit_rank = fit.get("performance_vs_model_rank")
+            fit_population = fit.get("rank_population", 138)
+            season_fit = {
+                "value": fit["performance_vs_model"],
+                "rank": fit_rank,
+                "population": fit_population,
+                "band": band(fit_rank, fit_population) if fit_rank else None,
+                "games": fit.get("performance_games_available"),
+            }
+        l2 = None
+        if isinstance(rating.get("l2_change"), (int, float)):
+            l2_rank = rating.get("l2_movement_rank")
+            l2 = {
+                "value": rating["l2_change"],
+                "rank": l2_rank,
+                "population": len(ratings_source),
+                "band": band(l2_rank, len(ratings_source)) if l2_rank else None,
+            }
+        last2 = last2_rank.get(team)
+        last4 = last4_rank.get(team)
+        pace = pace_rank.get(team)
+        season_value = season_fit.get("value") if season_fit else None
+        recent_value = last4.get("value") if last4 else None
+        trend_delta = recent_value - season_value if isinstance(recent_value, (int, float)) and isinstance(season_value, (int, float)) else None
+        trend = "Stable"
+        if isinstance(trend_delta, (int, float)):
+            trend = "Improving" if trend_delta > 1 else "Declining" if trend_delta < -1 else "Stable"
         generic_profile = {
             "season": {
                 "talent": talent_rank.get(team),
                 "coach": coach_rank.get(team),
-                "draftables": None,
+                "draftables": draft_rank.get(team),
                 "runRank": run_rank.get(team),
                 "passRank": pass_rank.get(team),
-                "paceRank": None,
-                "playsPerGame": None,
-                "l2": None,
-                "last2PerformanceVsModel": None,
-                "last4PerformanceVsModel": None,
-                "performanceVsModel": None,
+                "paceRank": pace,
+                "playsPerGame": pace.get("value") if pace else None,
+                "l2": l2,
+                "last2PerformanceVsModel": last2,
+                "last4PerformanceVsModel": last4,
+                "performanceVsModel": season_fit,
             },
             "recent": {
-                "performance": None,
-                "sos": None,
-                "trend": "Unavailable",
-                "trendDelta": None,
-                "opponents": [],
+                "performance": last4,
+                "sos": sos_rank.get(team),
+                "trend": trend,
+                "trendDelta": trend_delta,
+                "opponents": [
+                    {
+                        "team": SITE_TO_CFBD.get(row.get("opponent"), row.get("opponent")),
+                        "week": row.get("week"),
+                        "core": core_values.get(SITE_TO_CFBD.get(row.get("opponent"), row.get("opponent"))),
+                    }
+                    for row in recent_games.get(team, [])[-4:]
+                ],
             },
         }
-        if overlay:
-            generic_profile = {
-                "season": overlay.get("season", generic_profile["season"]),
-                "recent": overlay.get("recent", generic_profile["recent"]),
-            }
         teams[team] = {
             "metrics": metrics,
             "core": core_rank.get(team),
@@ -225,9 +349,14 @@ def main():
         "definitions": {
             "wepa": "CFBD opponent-adjusted model efficiency. Higher is better; plays show qualifying sample size.",
             "paar": "CFBD Points Added Above Replacement for kickers. Higher is better; attempts show qualifying sample size.",
+            "receivingPPA": "CFBD receiving average PPA per pass involvement, shown with pass usage and total PPA. This is not WEPA.",
         },
         "profile_sources": {
-            "draft": profile_overlays.get("draft_source"),
+            "draft": {
+                "name": "TheDraftroom consensus top 175",
+                "asOf": draft_source.get("source_updated_at"),
+                "url": draft_source.get("source"),
+            },
             "availability_note": profile_overlays.get("availability_note"),
         },
         "games": games,

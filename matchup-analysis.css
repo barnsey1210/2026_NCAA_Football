@@ -13,4 +13,6 @@
 .player-row{grid-template-columns:minmax(150px,1fr) 70px 145px 80px minmax(210px,1.1fr)}
 .availability{padding:6px 9px;border-radius:8px;background:#effaf5;color:var(--elite)}.availability b{font-size:10px}.availability.out{background:var(--poor-bg);color:var(--poor)}
 .player-out>span:first-child b{text-decoration:line-through;text-decoration-color:#d66}
+.player-group{margin:12px -18px 0;padding:8px 18px;background:#f3f6fa;border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.player-group:first-child{margin-top:-10px;border-top:0}
 @media(max-width:800px){.profile-body{grid-template-columns:1fr;padding:0}.profile-body section+section{border-left:0;border-top:1px solid var(--line)}.player-row{grid-template-columns:1fr auto auto}.availability{grid-column:1/-1}.identity-strip>div{padding:7px 3px}}

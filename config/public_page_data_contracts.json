@@ -129,8 +129,10 @@
       "schema_version": "matchup-analysis-v1",
       "owner": "CFBD_ADJUSTED_MATCHUP_PROJECTOR",
       "rank_policy": "team ranks are metric-specific FBS ranks; player ranks are metric-and-position-specific qualified-player ranks",
-      "player_metrics": ["Passing WEPA", "Rushing WEPA", "Kicking PAAR"],
-      "depends_on": ["game_projections", "ratings", "schedule"]
+      "player_metrics": ["Passing WEPA", "Rushing WEPA", "Receiving PPA", "Kicking PAAR"],
+      "receiving_contract": "CFBD season receiving average/total PPA plus pass usage; receiving is not labeled WEPA",
+      "profile_contract": "all-team projection of canonical CFBD season, ratings, model-fit, schedule and draft-board counts",
+      "depends_on": ["game_projections", "ratings", "schedule", "model_fit"]
     },
     "model_performance": {
       "standard_artifact": "data/site/model_performance_view.json",
