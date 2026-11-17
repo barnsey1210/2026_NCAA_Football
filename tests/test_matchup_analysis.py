@@ -26,6 +26,31 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertIn("params.get('home')", page)
         self.assertIn("playerCard", page)
         self.assertIn("${r.rank}/${r.population}", page)
+        for marker in (
+            "NFL DRAFT · 2027 TOP-175",
+            "Last-2 Perf vs Model",
+            "Last-4 Perf vs Model",
+            "Last-4 SOS",
+            "L2 Rating Change",
+            "Season Perf vs Model",
+            "replacementSummary",
+        ):
+            self.assertIn(marker, page)
+
+    def test_approved_preview_profile_is_preserved(self):
+        payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
+        ohio = payload["teams"]["Ohio State"]
+        season = ohio["profile"]["season"]
+        recent = ohio["profile"]["recent"]
+        self.assertEqual(season["talent"]["rank"], 2)
+        self.assertEqual(season["coach"]["rank"], 1)
+        self.assertEqual(season["draftables"]["value"], 8)
+        self.assertIsNotNone(season["last2PerformanceVsModel"]["value"])
+        self.assertIsNotNone(season["last4PerformanceVsModel"]["value"])
+        self.assertIsNotNone(recent["sos"]["value"])
+        sayin = next(row for row in ohio["players"]["passing"] if row["athleteName"] == "Julian Sayin")
+        self.assertTrue(sayin["availability"]["status"].startswith("OUT"))
+        self.assertEqual(sayin["availability"]["replacement"], "Luke Fahey")
 
     def test_command_center_and_ratings_link_to_card(self):
         command = (ROOT / "scripts/site/build_war_room_page.py").read_text()

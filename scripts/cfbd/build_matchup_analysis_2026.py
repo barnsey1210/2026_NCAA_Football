@@ -12,6 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_AUDIT = ROOT / "research/cfbd_tier1_adjusted_preview_audit_2026w12"
 OUT = ROOT / "data/site/matchup_analysis_2026.json"
+PROFILE_OVERLAYS = ROOT / "data/canonical/matchup_analysis_profile_overlays_2026.json"
+CFBDEPTH_TEAMS = ROOT / "data/site/cfbdepth_teams_2026.json"
 
 
 def load(path: Path):
@@ -91,6 +93,8 @@ def main():
     adjusted = load(args.audit_dir / "related/wepa_team_season_2026.json")
     core = load(args.audit_dir / "related/core_ratings_2026.json")
     advanced = load(args.audit_dir / "related/advanced_season_2026_fbs.json")
+    profile_overlays = load(PROFILE_OVERLAYS) if PROFILE_OVERLAYS.exists() else {"profiles": {}}
+    cfbdepth = load(CFBDEPTH_TEAMS).get("teams", {}) if CFBDEPTH_TEAMS.exists() else {}
     passing = player_ranks(load(args.passing), "wepa", "Passing WEPA")
     rushing = player_ranks(load(args.rushing), "wepa", "Rushing WEPA")
     kicking = player_ranks(load(args.kicking), "paar", "Kicking PAAR")
@@ -113,6 +117,18 @@ def main():
         metric_ranks[defense_path] = rank_rows(adjusted, defense_path, lower_better=True)
 
     core_rank = rank_rows(core, "overall")
+    run_rank = rank_rows(advanced, "offense.rushingPlays.rate")
+    pass_rank = rank_rows(advanced, "offense.passingPlays.rate")
+    talent_rows = [
+        {"team": team, "value": value_at(row, "rotation.overall")}
+        for team, row in cfbdepth.items()
+    ]
+    coach_rows = [
+        {"team": team, "value": value_at(row, "coaching.overall_impact")}
+        for team, row in cfbdepth.items()
+    ]
+    talent_rank = rank_rows(talent_rows, "value")
+    coach_rank = rank_rows(coach_rows, "value")
     advanced_by_team = {row["team"]: row for row in advanced}
     core_by_team = {row["team"]: row for row in core}
     adjusted_by_team = {row["team"]: row for row in adjusted}
@@ -154,6 +170,38 @@ def main():
         players = by_team_players[team]
         for group in players.values():
             group.sort(key=lambda row: row.get("wepa", row.get("paar", -999)), reverse=True)
+        overlay = profile_overlays.get("profiles", {}).get(team)
+        if overlay:
+            for group in players.values():
+                for player in group:
+                    player["availability"] = overlay.get("availability", {}).get(player.get("athleteName"))
+        generic_profile = {
+            "season": {
+                "talent": talent_rank.get(team),
+                "coach": coach_rank.get(team),
+                "draftables": None,
+                "runRank": run_rank.get(team),
+                "passRank": pass_rank.get(team),
+                "paceRank": None,
+                "playsPerGame": None,
+                "l2": None,
+                "last2PerformanceVsModel": None,
+                "last4PerformanceVsModel": None,
+                "performanceVsModel": None,
+            },
+            "recent": {
+                "performance": None,
+                "sos": None,
+                "trend": "Unavailable",
+                "trendDelta": None,
+                "opponents": [],
+            },
+        }
+        if overlay:
+            generic_profile = {
+                "season": overlay.get("season", generic_profile["season"]),
+                "recent": overlay.get("recent", generic_profile["recent"]),
+            }
         teams[team] = {
             "metrics": metrics,
             "core": core_rank.get(team),
@@ -161,6 +209,7 @@ def main():
             "pass_split": pass_rate / total_rate if total_rate else None,
             "plays": value_at(adv, "offense.plays"),
             "players": players,
+            "profile": generic_profile,
         }
 
     payload = {
@@ -176,6 +225,10 @@ def main():
         "definitions": {
             "wepa": "CFBD opponent-adjusted model efficiency. Higher is better; plays show qualifying sample size.",
             "paar": "CFBD Points Added Above Replacement for kickers. Higher is better; attempts show qualifying sample size.",
+        },
+        "profile_sources": {
+            "draft": profile_overlays.get("draft_source"),
+            "availability_note": profile_overlays.get("availability_note"),
         },
         "games": games,
         "teams": teams,
