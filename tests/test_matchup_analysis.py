@@ -40,9 +40,11 @@ class MatchupAnalysisTest(unittest.TestCase):
             "keyMetrics",
             "key-star",
             "summary-tooltip",
-            "Averages all three starred tendency factors",
-            "Scale: Small 1–4.9; Medium 5–14.9; High 15+",
-            "Scale: Small 0.03–0.09; Medium 0.10–0.29; High 0.30+ WEPA",
+            "Run-heavy tendencies",
+            "Last-4 PVM:",
+            "L2 rating:",
+            "document.addEventListener('pointerdown'",
+            "tip-rows",
             "Drives / Game",
             "ATS ",
             "O/U ",
@@ -53,6 +55,7 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertNotIn("${r.tied?'T-':''}", page)
         self.assertNotIn("PROJECTED WINNER", page)
         self.assertNotIn("PROJECTED SCORE", page)
+        self.assertNotIn("Scale: Small", page)
 
     def test_approved_preview_profile_is_preserved(self):
         payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
