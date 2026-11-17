@@ -1,6 +1,6 @@
 {
   "schema_version": "page-health-status-v1",
-  "built_at": "2026-11-16T17:17:00+00:00",
+  "built_at": "2026-11-17T13:37:00+00:00",
   "pages": [
     {
       "page_id": "dashboard",
@@ -8,10 +8,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": -0.6,
-      "age_hours": -0.01,
+      "last_success_at": "2026-11-17T13:37:05.965317+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": -0.1,
+      "age_hours": -0.0,
       "metrics": [
         {
           "label": "Slate games",
@@ -20,7 +20,7 @@
         },
         {
           "label": "Betting signals",
-          "value": 110,
+          "value": 157,
           "detail": ""
         },
         {
@@ -39,8 +39,8 @@
           "detail": ""
         },
         {
-          "label": "Last completed run",
-          "value": "FAILED \u00b7 Nov 16, 2026 at 8:32 AM ET",
+          "label": "Current run at build",
+          "value": "RUNNING \u00b7 Nov 17, 2026 at 8:00 AM ET",
           "detail": ""
         }
       ],
@@ -60,10 +60,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T00:00:00+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": 1037.0,
-      "age_hours": 17.28,
+      "last_success_at": "2026-11-17T00:00:00+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": 817.0,
+      "age_hours": 13.62,
       "metrics": [
         {
           "label": "Composite",
@@ -114,29 +114,29 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T13:06:22+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": 250.6,
-      "age_hours": 4.18,
+      "last_success_at": "2026-11-17T13:02:13+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": 34.8,
+      "age_hours": 0.58,
       "metrics": [
         {
           "label": "Games",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
           "label": "Spread openers",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
           "label": "Total openers",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
           "label": "History",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
@@ -146,7 +146,7 @@
         },
         {
           "label": "Market updated",
-          "value": "Nov 16, 2026 at 8:06 AM ET",
+          "value": "Nov 17, 2026 at 8:02 AM ET",
           "detail": ""
         }
       ],
@@ -166,10 +166,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": -0.6,
-      "age_hours": -0.01,
+      "last_success_at": "2026-11-17T13:37:05.965317+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": -0.1,
+      "age_hours": -0.0,
       "metrics": [
         {
           "label": "Matchups",
@@ -193,7 +193,7 @@
         },
         {
           "label": "Odds",
-          "value": 814,
+          "value": 827,
           "detail": ""
         },
         {
@@ -219,29 +219,29 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T13:06:22+00:00",
-      "artifact_built_at": "2026-11-16T17:00:54.248109+00:00",
-      "age_minutes": 250.6,
-      "age_hours": 4.18,
+      "last_success_at": "2026-11-17T13:02:13+00:00",
+      "artifact_built_at": "2026-11-17T13:02:16.227688+00:00",
+      "age_minutes": 34.8,
+      "age_hours": 0.58,
       "metrics": [
         {
           "label": "Games",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
           "label": "Spreads",
-          "value": 66,
+          "value": 79,
           "detail": ""
         },
         {
           "label": "Totals",
-          "value": 66,
+          "value": 80,
           "detail": ""
         },
         {
           "label": "Moneylines",
-          "value": 66,
+          "value": 79,
           "detail": ""
         },
         {
@@ -257,7 +257,9 @@
       ],
       "warnings": [],
       "critical_failures": [],
-      "unavailable_reasons": [],
+      "unavailable_reasons": [
+        "Current spread quotes are posted for 79/80 provider games."
+      ],
       "page_url": "odds.html",
       "source_artifacts": [
         "data/site/odds_screen_v2.json",
@@ -273,10 +275,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": -0.6,
-      "age_hours": -0.01,
+      "last_success_at": "2026-11-17T13:37:05.965317+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": -0.1,
+      "age_hours": -0.0,
       "metrics": [
         {
           "label": "Games",
@@ -295,7 +297,7 @@
         },
         {
           "label": "Odds",
-          "value": 814,
+          "value": 827,
           "detail": ""
         },
         {
@@ -325,10 +327,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Win-total market data unavailable.",
-      "last_success_at": "2026-11-16T17:00:31.993002+00:00",
-      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
-      "age_minutes": 16.5,
-      "age_hours": 0.27,
+      "last_success_at": "2026-11-17T13:00:22.957784+00:00",
+      "artifact_built_at": "2026-11-17T13:00:22.957784+00:00",
+      "age_minutes": 36.6,
+      "age_hours": 0.61,
       "metrics": [
         {
           "label": "Teams",
@@ -342,7 +344,7 @@
         },
         {
           "label": "Conference title",
-          "value": 103,
+          "value": 97,
           "detail": ""
         },
         {
@@ -364,10 +366,10 @@
       "warnings": [
         "Win-total market data unavailable.",
         "win_totals: 138 expected teams have no quote",
-        "conference_titles: seasonal provider coverage contraction accepted: {'BetMGM': {'previous': 73, 'current': 55}, 'Caesars': {'previous': 64, 'current': 54}}",
-        "kalshi: 3 ambiguous or unmatched markets excluded",
+        "conference_titles: seasonal provider coverage contraction accepted: {'BetMGM': {'previous': 73, 'current': 55}, 'Caesars': {'previous': 64, 'current': 43}}",
+        "kalshi: 2 ambiguous or unmatched markets excluded",
         "make_cfp: material provider coverage drop: {'Caesars': {'previous': 37, 'current': 29}, 'DraftKings': {'previous': 16, 'current': 9}}",
-        "national_title: material provider coverage drop: {'BetMGM': {'previous': 33, 'current': 25}, 'Caesars': {'previous': 41, 'current': 34}}"
+        "national_title: material provider coverage drop: {'BetMGM': {'previous': 33, 'current': 24}, 'Caesars': {'previous': 41, 'current': 31}}"
       ],
       "critical_failures": [],
       "unavailable_reasons": [
@@ -387,10 +389,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Conference title market data is stale.",
-      "last_success_at": "2026-11-16T14:25:10.952431+00:00",
-      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
-      "age_minutes": 171.8,
-      "age_hours": 2.86,
+      "last_success_at": "2026-11-17T13:33:59.487564+00:00",
+      "artifact_built_at": "2026-11-17T13:33:59.487564+00:00",
+      "age_minutes": 3.0,
+      "age_hours": 0.05,
       "metrics": [
         {
           "label": "Conferences",
@@ -419,7 +421,7 @@
         },
         {
           "label": "Title markets",
-          "value": 107,
+          "value": 97,
           "detail": ""
         }
       ],
@@ -441,10 +443,10 @@
       "status": "yellow",
       "status_label": "Usable with warnings",
       "summary": "Eligible-team playoff market coverage is partial.",
-      "last_success_at": "2026-11-16T17:00:31.993002+00:00",
-      "artifact_built_at": "2026-11-16T17:00:31.993002+00:00",
-      "age_minutes": 16.5,
-      "age_hours": 0.27,
+      "last_success_at": "2026-11-17T13:12:09.253837+00:00",
+      "artifact_built_at": "2026-11-17T13:12:09.253837+00:00",
+      "age_minutes": 24.8,
+      "age_hours": 0.41,
       "metrics": [
         {
           "label": "Simulations",
@@ -489,13 +491,13 @@
     {
       "page_id": "simulations",
       "display_name": "Simulations",
-      "status": "green",
-      "status_label": "Healthy",
-      "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T14:25:10.952431+00:00",
-      "artifact_built_at": "2026-11-16T14:25:10.952431+00:00",
-      "age_minutes": 171.8,
-      "age_hours": 2.86,
+      "status": "yellow",
+      "status_label": "Usable with warnings",
+      "summary": "No latest successful daily-run record is available to verify simulation completion.",
+      "last_success_at": "2026-11-17T13:33:59.487564+00:00",
+      "artifact_built_at": "2026-11-17T13:33:59.487564+00:00",
+      "age_minutes": 3.0,
+      "age_hours": 0.05,
       "metrics": [
         {
           "label": "Simulations",
@@ -528,7 +530,9 @@
           "detail": ""
         }
       ],
-      "warnings": [],
+      "warnings": [
+        "No latest successful daily-run record is available to verify simulation completion."
+      ],
       "critical_failures": [],
       "unavailable_reasons": [],
       "page_url": "simulations.html",
@@ -544,10 +548,10 @@
       "status": "green",
       "status_label": "Healthy",
       "summary": "Critical data is current and expected coverage checks passed.",
-      "last_success_at": "2026-11-16T17:17:37.399999+00:00",
-      "artifact_built_at": "2026-11-16T17:17:37.399999+00:00",
-      "age_minutes": -0.6,
-      "age_hours": -0.01,
+      "last_success_at": "2026-11-17T13:37:05.965317+00:00",
+      "artifact_built_at": "2026-11-17T13:37:05.965317+00:00",
+      "age_minutes": -0.1,
+      "age_hours": -0.0,
       "metrics": [
         {
           "label": "Games evaluated",
@@ -556,7 +560,7 @@
         },
         {
           "label": "Active signals",
-          "value": 110,
+          "value": 157,
           "detail": ""
         },
         {
