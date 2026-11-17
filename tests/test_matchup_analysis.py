@@ -45,6 +45,8 @@ class MatchupAnalysisTest(unittest.TestCase):
             "L2 rating:",
             "document.addEventListener('pointerdown'",
             "tip-rows",
+            "trendDefinition",
+            "trend-tooltip",
             "Drives / Game",
             "ATS ",
             "O/U ",
