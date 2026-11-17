@@ -34,8 +34,14 @@ class MatchupAnalysisTest(unittest.TestCase):
             "L2 Rating Change",
             "Season Perf vs Model",
             "replacementSummary",
+            "MATCHUP ADVANTAGE",
+            "RECENT FORM",
+            "QB ADVANTAGE",
+            "keyMetrics",
+            "key-star",
         ):
             self.assertIn(marker, page)
+        self.assertNotIn("${r.tied?'T-':''}", page)
 
     def test_approved_preview_profile_is_preserved(self):
         payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())

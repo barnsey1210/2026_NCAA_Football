@@ -21,3 +21,15 @@
 .metric-section-head{display:flex;align-items:baseline;justify-content:center;gap:10px;padding:10px 22px;border-top:1px solid var(--line);background:#eef3f9;color:var(--ink);font-size:11px;letter-spacing:.06em}
 .metric-section-head small{color:var(--muted);font-size:9px;letter-spacing:0}
 @media(max-width:800px){.metric-section-head{display:block;text-align:center;padding:10px}.metric-section-head small{display:block;margin-top:2px}}
+
+/* Tendency-driven matchup factors and quick-read summary ribbon. */
+.insight-ribbon{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0}
+.insight-ribbon .legend{margin:0;flex:0 0 auto}
+.summary-bubbles{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:8px;flex:1;max-width:720px}
+.summary-bubble{display:grid;grid-template-columns:1fr auto;grid-template-areas:"label size" "team size";align-items:center;min-height:52px;padding:7px 10px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 4px 14px #1b2c4d0a}
+.summary-bubble small{grid-area:label;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.07em}
+.summary-bubble span{grid-area:team;display:flex;align-items:center;gap:6px;font-weight:900}.summary-bubble span img{width:20px;height:20px;object-fit:contain}
+.summary-bubble>b{grid-area:size;color:var(--muted);font-size:10px;letter-spacing:.06em}
+.key-metric{background:linear-gradient(90deg,#fffdf3,#fff)}.key-star{display:inline-block;margin-right:6px;color:#e1a900;font-size:15px;line-height:1;filter:drop-shadow(0 1px 0 #fff)}
+@media(max-width:1000px){.insight-ribbon{align-items:stretch;flex-direction:column}.summary-bubbles{max-width:none;width:100%}}
+@media(max-width:620px){.summary-bubbles{grid-template-columns:1fr}.summary-bubble{min-height:46px}.insight-ribbon .legend{overflow-x:auto}.key-star{font-size:14px}}
