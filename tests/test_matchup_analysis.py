@@ -27,7 +27,7 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertIn("playerCard", page)
         self.assertIn("${r.rank}/${r.population}", page)
         for marker in (
-            "NFL DRAFT · 2027 TOP-175",
+            "NFL DRAFT · 2027 TOP-175 PLAYERS",
             "Last-2 Perf vs Model",
             "Last-4 Perf vs Model",
             "Last-4 SOS",
@@ -41,7 +41,7 @@ class MatchupAnalysisTest(unittest.TestCase):
             "key-star",
             "summary-tooltip",
             "Run-heavy tendencies",
-            "Last-4 PVM:",
+            "Last-4 Performance vs Model:",
             "L2 rating:",
             "document.addEventListener('pointerdown'",
             "tip-rows",
@@ -52,20 +52,30 @@ class MatchupAnalysisTest(unittest.TestCase):
             "O/U ",
             "composite-rank",
             "signal-${level}",
-            "metric-center",
-            "METRIC · EDGE",
+            "draftTooltip",
+            "OFFENSE · RANK OUT OF 138",
+            "--offense-color",
         ):
             self.assertIn(marker, page)
         self.assertNotIn("${r.tied?'T-':''}", page)
         self.assertNotIn("PROJECTED WINNER", page)
         self.assertNotIn("PROJECTED SCORE", page)
         self.assertNotIn("Scale: Small", page)
+        self.assertIn("metricRank(m.offense)", page)
 
     def test_desktop_matchups_use_compact_side_by_side_layout(self):
         css = (ROOT / "matchup-analysis.css").read_text()
         self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", css)
         self.assertIn("@media(max-width:1100px){.matchups{grid-template-columns:1fr}}", css)
         self.assertIn("min-height:42px", css)
+
+    def test_team_colors_and_top175_player_details_are_complete(self):
+        payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
+        self.assertEqual(sum(bool(row.get("brand")) for row in payload["teams"].values()), 138)
+        draft = json.loads((ROOT / "data/canonical/nfl_draft_2027_top175_team_counts.json").read_text())
+        players = [player for rows in draft["players_by_team"].values() for player in rows]
+        self.assertEqual(len(players), 175)
+        self.assertEqual({"rank", "name", "position"}, set(players[0]))
 
     def test_approved_preview_profile_is_preserved(self):
         payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
@@ -75,6 +85,9 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertEqual(season["talent"]["rank"], 2)
         self.assertEqual(season["coach"]["rank"], 1)
         self.assertEqual(season["draftables"]["value"], 8)
+        self.assertTrue(season["draftables"]["players"])
+        self.assertEqual(season["draftables"]["players"][0]["name"], "Jeremiah Smith")
+        self.assertEqual(ohio["brand"]["primary"], "#ba0c2f")
         self.assertIsNotNone(season["last2PerformanceVsModel"]["value"])
         self.assertIsNotNone(season["last4PerformanceVsModel"]["value"])
         self.assertIsNotNone(recent["sos"]["value"])

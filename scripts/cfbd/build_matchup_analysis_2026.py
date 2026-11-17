@@ -17,6 +17,7 @@ PROFILE_OVERLAYS = ROOT / "data/canonical/matchup_analysis_profile_overlays_2026
 CFBDEPTH_TEAMS = ROOT / "data/site/cfbdepth_teams_2026.json"
 RECEIVING = ROOT / "data/canonical/cfbd_receiving_impact_2026.json"
 DRAFT_COUNTS = ROOT / "data/canonical/nfl_draft_2027_top175_team_counts.json"
+BRAND_COLORS = ROOT / "data/canonical/espn_team_brand_colors.json"
 RATINGS = ROOT / "data/site/ratings_view.json"
 MODEL_FIT = ROOT / "data/site/team_game_evaluations_2026.json"
 MARKET_MATRIX = ROOT / "data/site/war_room_market_matrix.json"
@@ -144,6 +145,7 @@ def main():
         for row in sorted(team_rows, key=lambda item: item.get("usage", 0), reverse=True)[:5]
     ]
     draft_source = load(DRAFT_COUNTS) if DRAFT_COUNTS.exists() else {"team_counts": {}}
+    brand_source = load(BRAND_COLORS).get("teams", {}) if BRAND_COLORS.exists() else {}
     ratings_source = load(RATINGS).get("teams", [])
     model_fit_source = load(MODEL_FIT)
     matchup_view_source = load(MATCHUPS_VIEW) if MATCHUPS_VIEW.exists() else {"games": []}
@@ -246,6 +248,7 @@ def main():
                 team_context[team] = row
 
     draft_counts = draft_source.get("team_counts", {})
+    draft_players = draft_source.get("players_by_team", {})
     draft_rank = rank_rows(
         [{"team": row["team"], "value": int(draft_counts.get(row["team"], 0))} for row in adjusted],
         "value",
@@ -346,11 +349,15 @@ def main():
         trend = "Stable"
         if isinstance(trend_delta, (int, float)):
             trend = "Improving" if trend_delta > 1 else "Declining" if trend_delta < -1 else "Stable"
+        draftables = draft_rank.get(team)
+        if draftables:
+            draftables = dict(draftables, players=draft_players.get(team, []))
+        source_team = next((name for name, canonical in SITE_TO_CFBD.items() if canonical == team), team)
         generic_profile = {
             "season": {
                 "talent": talent_rank.get(team),
                 "coach": coach_rank.get(team),
-                "draftables": draft_rank.get(team),
+                "draftables": draftables,
                 "runRank": run_rank.get(team),
                 "passRank": pass_rank.get(team),
                 "paceRank": pace,
@@ -381,6 +388,7 @@ def main():
             },
         }
         teams[team] = {
+            "brand": brand_source.get(source_team, brand_source.get(team)),
             "metrics": metrics,
             "raw_metrics": raw_metrics,
             "core": core_rank.get(team),
