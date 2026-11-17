@@ -16,3 +16,8 @@
 .player-group{margin:12px -18px 0;padding:8px 18px;background:#f3f6fa;border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .player-group:first-child{margin-top:-10px;border-top:0}
 @media(max-width:800px){.profile-body{grid-template-columns:1fr;padding:0}.profile-body section+section{border-left:0;border-top:1px solid var(--line)}.player-row{grid-template-columns:1fr auto auto}.availability{grid-column:1/-1}.identity-strip>div{padding:7px 3px}}
+
+/* Separate raw CFBD team efficiency from opponent-adjusted metrics. */
+.metric-section-head{display:flex;align-items:baseline;justify-content:center;gap:10px;padding:10px 22px;border-top:1px solid var(--line);background:#eef3f9;color:var(--ink);font-size:11px;letter-spacing:.06em}
+.metric-section-head small{color:var(--muted);font-size:9px;letter-spacing:0}
+@media(max-width:800px){.metric-section-head{display:block;text-align:center;padding:10px}.metric-section-head small{display:block;margin-top:2px}}

@@ -52,6 +52,29 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertTrue(sayin["availability"]["status"].startswith("OUT"))
         self.assertEqual(sayin["availability"]["replacement"], "Luke Fahey")
 
+    def test_raw_and_adjusted_cfbd_metrics_are_distinct_and_complete(self):
+        payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
+        ohio = payload["teams"]["Ohio State"]
+        adjusted_labels = [row["label"] for row in ohio["metrics"]]
+        raw_labels = [row["label"] for row in ohio["raw_metrics"]]
+        self.assertIn("Adjusted Rushing Explosiveness", adjusted_labels)
+        self.assertNotIn("Explosiveness", adjusted_labels)
+        self.assertEqual(raw_labels, [
+            "EPA / Play",
+            "Success Rate",
+            "Explosiveness (Successful-Play EPA)",
+            "Points / Opportunity",
+            "Havoc (OFF Allowed / DEF Created)",
+            "Standard-Down Success",
+            "Passing-Down Success",
+        ])
+        raw = {row["label"]: row for row in ohio["raw_metrics"]}
+        self.assertAlmostEqual(raw["EPA / Play"]["offense"]["value"], 0.23508157416079065)
+        self.assertEqual(raw["EPA / Play"]["offense"]["rank"], 16)
+        self.assertEqual(raw["Points / Opportunity"]["offense"]["rank"], 20)
+        self.assertEqual(raw["Havoc (OFF Allowed / DEF Created)"]["offense"]["rank"], 36)
+        self.assertTrue(raw["Havoc (OFF Allowed / DEF Created)"]["offense"]["tied"])
+
     def test_all_fbs_profiles_are_derived_and_receivers_are_ranked(self):
         payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
         self.assertEqual(len(payload["teams"]), 138)

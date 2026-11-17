@@ -72,6 +72,7 @@ def rank_rows(rows, value_path, *, lower_better=False, key="team"):
             "value": value,
             "rank": rank,
             "population": len(values),
+            "tied": sum(other == value for _, other in values) > 1,
             "band": band(rank, len(values)),
         }
     return result
@@ -117,15 +118,17 @@ def rolling_average(rows, count):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
+    parser.add_argument("--adjusted", type=Path)
+    parser.add_argument("--advanced", type=Path)
     parser.add_argument("--passing", type=Path, required=True)
     parser.add_argument("--rushing", type=Path, required=True)
     parser.add_argument("--kicking", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=OUT)
     args = parser.parse_args()
 
-    adjusted = load(args.audit_dir / "related/wepa_team_season_2026.json")
+    adjusted = load(args.adjusted or args.audit_dir / "related/wepa_team_season_2026.json")
     core = load(args.audit_dir / "related/core_ratings_2026.json")
-    advanced = load(args.audit_dir / "related/advanced_season_2026_fbs.json")
+    advanced = load(args.advanced or args.audit_dir / "related/advanced_season_2026_fbs.json")
     profile_overlays = load(PROFILE_OVERLAYS) if PROFILE_OVERLAYS.exists() else {"profiles": {}}
     cfbdepth = load(CFBDEPTH_TEAMS).get("teams", {}) if CFBDEPTH_TEAMS.exists() else {}
     receiving_source = load(RECEIVING).get("players", []) if RECEIVING.exists() else []
@@ -147,22 +150,36 @@ def main():
     kicking = player_ranks(load(args.kicking), "paar", "Kicking PAAR")
     receiving = player_ranks(receiving_source, "averagePPA", "Receiving PPA")
 
-    metric_specs = [
-        ("Adjusted EPA", "epa.total", "epaAllowed.total", "EPA/play"),
-        ("Passing EPA", "epa.passing", "epaAllowed.passing", "EPA/pass"),
-        ("Rushing EPA", "epa.rushing", "epaAllowed.rushing", "EPA/rush"),
-        ("Success Rate", "successRate.total", "successRateAllowed.total", "percent"),
-        ("Standard Down Success", "successRate.standardDowns", "successRateAllowed.standardDowns", "percent"),
-        ("Passing Down Success", "successRate.passingDowns", "successRateAllowed.passingDowns", "percent"),
-        ("Explosiveness", "explosiveness", "explosivenessAllowed", "number"),
-        ("Line Yards", "rushing.lineYards", "rushingAllowed.lineYards", "yards"),
-        ("Second-Level Yards", "rushing.secondLevelYards", "rushingAllowed.secondLevelYards", "yards"),
-        ("Open-Field Yards", "rushing.openFieldYards", "rushingAllowed.openFieldYards", "yards"),
+    adjusted_metric_specs = [
+        ("Adjusted EPA / Play", "epa.total", "epaAllowed.total", "decimal"),
+        ("Adjusted Passing EPA", "epa.passing", "epaAllowed.passing", "decimal"),
+        ("Adjusted Rushing EPA", "epa.rushing", "epaAllowed.rushing", "decimal"),
+        ("Adjusted Success Rate", "successRate.total", "successRateAllowed.total", "percent"),
+        ("Adjusted Standard-Down Success", "successRate.standardDowns", "successRateAllowed.standardDowns", "percent"),
+        ("Adjusted Passing-Down Success", "successRate.passingDowns", "successRateAllowed.passingDowns", "percent"),
+        ("Adjusted Rushing Explosiveness", "explosiveness", "explosivenessAllowed", "decimal"),
+        ("Adjusted Line Yards", "rushing.lineYards", "rushingAllowed.lineYards", "yards"),
+        ("Adjusted Second-Level Yards", "rushing.secondLevelYards", "rushingAllowed.secondLevelYards", "yards"),
+        ("Adjusted Open-Field Yards", "rushing.openFieldYards", "rushingAllowed.openFieldYards", "yards"),
+        ("Adjusted Highlight Yards", "rushing.highlightYards", "rushingAllowed.highlightYards", "yards"),
+    ]
+    raw_metric_specs = [
+        ("EPA / Play", "offense.ppa", "defense.ppa", "decimal", False, True),
+        ("Success Rate", "offense.successRate", "defense.successRate", "percent", False, True),
+        ("Explosiveness (Successful-Play EPA)", "offense.explosiveness", "defense.explosiveness", "decimal", False, True),
+        ("Points / Opportunity", "offense.pointsPerOpportunity", "defense.pointsPerOpportunity", "decimal2", False, True),
+        ("Havoc (OFF Allowed / DEF Created)", "offense.havoc.total", "defense.havoc.total", "percent", True, False),
+        ("Standard-Down Success", "offense.standardDowns.successRate", "defense.standardDowns.successRate", "percent", False, True),
+        ("Passing-Down Success", "offense.passingDowns.successRate", "defense.passingDowns.successRate", "percent", False, True),
     ]
     metric_ranks = {}
-    for _, offense_path, defense_path, _ in metric_specs:
+    for _, offense_path, defense_path, _ in adjusted_metric_specs:
         metric_ranks[offense_path] = rank_rows(adjusted, offense_path, lower_better=False)
         metric_ranks[defense_path] = rank_rows(adjusted, defense_path, lower_better=True)
+    raw_metric_ranks = {}
+    for _, offense_path, defense_path, _, offense_lower, defense_lower in raw_metric_specs:
+        raw_metric_ranks[offense_path] = rank_rows(advanced, offense_path, lower_better=offense_lower)
+        raw_metric_ranks[defense_path] = rank_rows(advanced, defense_path, lower_better=defense_lower)
 
     core_rank = rank_rows(core, "overall")
     run_rank = rank_rows(advanced, "offense.rushingPlays.rate")
@@ -250,12 +267,20 @@ def main():
         pass_rate = value_at(offense, "passingPlays.rate")
         total_rate = (run_rate or 0) + (pass_rate or 0)
         metrics = []
-        for label, offense_path, defense_path, unit in metric_specs:
+        for label, offense_path, defense_path, unit in adjusted_metric_specs:
             metrics.append({
                 "label": label,
                 "unit": unit,
                 "offense": metric_ranks[offense_path].get(team),
                 "defense": metric_ranks[defense_path].get(team),
+            })
+        raw_metrics = []
+        for label, offense_path, defense_path, unit, _, _ in raw_metric_specs:
+            raw_metrics.append({
+                "label": label,
+                "unit": unit,
+                "offense": raw_metric_ranks[offense_path].get(team),
+                "defense": raw_metric_ranks[defense_path].get(team),
             })
         players = by_team_players[team]
         for key, group in players.items():
@@ -328,6 +353,7 @@ def main():
         }
         teams[team] = {
             "metrics": metrics,
+            "raw_metrics": raw_metrics,
             "core": core_rank.get(team),
             "run_split": run_rate / total_rate if total_rate else None,
             "pass_split": pass_rate / total_rate if total_rate else None,
@@ -347,6 +373,8 @@ def main():
             "bands": "five percentile tiers calculated independently within each ranking population",
         },
         "definitions": {
+            "adjustedTeamMetrics": "CFBD opponent-adjusted season metrics from /wepa/team/season. These are not transformed for the specific opponent.",
+            "teamEfficiency": "CFBD unadjusted advanced-season team efficiency. Explosiveness is EPA on successful plays; offensive havoc is allowed and defensive havoc is created.",
             "wepa": "CFBD opponent-adjusted model efficiency. Higher is better; plays show qualifying sample size.",
             "paar": "CFBD Points Added Above Replacement for kickers. Higher is better; attempts show qualifying sample size.",
             "receivingPPA": "CFBD receiving average PPA per pass involvement, shown with pass usage and total PPA. This is not WEPA.",
