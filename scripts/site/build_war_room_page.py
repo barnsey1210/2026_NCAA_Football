@@ -1342,6 +1342,8 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
   text-align:center;
   box-sizing:border-box;
 }
+.matchup-card-link{display:block;margin-top:4px;color:var(--cyan);font-size:8px;font-weight:950;letter-spacing:.04em;text-decoration:none}
+.matchup-card-link:hover{text-decoration:underline}
 
 /* Canonical Priority Market Matrix header typography. Column classes also
    style body cells, so this late header-only rule prevents those body font
@@ -4593,7 +4595,7 @@ function renderMobileMatrix(rows){
         <div class="mobile-command-game-top">${live.active
           ? `<span class="game-live-state">${esc(live.label)}</span>`
           : `<span>${esc(fmtKickoffDateET(game.kickoff_time))} · ${esc(fmtKickoffTimeET(game.kickoff_time))}</span>`
-        }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span></div>
+        }${game.neutral_site?'<span class="neutral-marker">N</span>':''}${mobileRecentChangeBadge(game)}<span class="badge ${esc(game.state)}">${esc(game.state)}</span><a class="matchup-card-link" data-no-game-select href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a></div>
         <div class="mobile-command-matchup">${mobileMatchupWithMarket(game,live,totSide)}</div>
       </button>
       <div class="mobile-command-edge spread-group ${recentEdgeCellClass(game,'spread')}">${recentEdgeBadge(game,'spread')}<span class="edge ${edgeClass(sprEdge)}">${mobileEdgeDisplay(game,'spread',sprSide,sprEdge)}</span></div>
@@ -4750,6 +4752,7 @@ function renderMatrix(){
           <span class="badge ${esc(game.state)}">
             ${esc(game.state)}
           </span>
+          <a class="matchup-card-link" data-no-game-select href="matchup-analysis.html?game_id=${encodeURIComponent(game.game_id)}">MATCHUP</a>
         </td>
 
       </tr>

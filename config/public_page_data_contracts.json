@@ -8,7 +8,8 @@
   "pages": {
     "index.html": ["current_market", "market_history", "ratings", "schedule", "futures", "betting", "injuries", "coaches", "conference"],
     "war-room.html": ["war_room_market_matrix", "war_room_health", "war_room_activity", "game_projections", "current_market", "market_history", "ratings", "schedule", "betting", "injury_impact"],
-    "ratings.html": ["ratings"],
+    "ratings.html": ["ratings", "matchup_analysis"],
+    "matchup-analysis.html": ["matchup_analysis", "game_projections", "ratings", "schedule"],
     "openers.html": ["current_market", "market_history", "ratings", "schedule"],
     "matchups.html": ["current_market", "market_history", "ratings", "schedule", "betting", "injuries", "coaches"],
     "odds.html": ["current_market", "market_history"],
@@ -121,6 +122,15 @@
         "total_policy": "reuse shadow_total_enhanced_spplus_od_v1 exactly: 0.5*(home offense + away defense) + 0.5*(away offense + home defense); HFA has zero total effect",
         "forbidden_sources": ["Sagarin", "DRatings"]
       }
+    },
+    "matchup_analysis": {
+      "artifact": "data/site/matchup_analysis_2026.json",
+      "builder": "scripts/cfbd/build_matchup_analysis_2026.py",
+      "schema_version": "matchup-analysis-v1",
+      "owner": "CFBD_ADJUSTED_MATCHUP_PROJECTOR",
+      "rank_policy": "team ranks are metric-specific FBS ranks; player ranks are metric-and-position-specific qualified-player ranks",
+      "player_metrics": ["Passing WEPA", "Rushing WEPA", "Kicking PAAR"],
+      "depends_on": ["game_projections", "ratings", "schedule"]
     },
     "model_performance": {
       "standard_artifact": "data/site/model_performance_view.json",

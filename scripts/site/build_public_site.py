@@ -7,6 +7,7 @@ import json, os, re, shutil, subprocess, sys
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build/public_site"
 PAGES = {
+    "matchup-analysis.html":"matchup-analysis.html",
     "openers.html":"openers.html",
     "matchups.html":"matchups.html",
     "matchup.html":"matchup.html",
@@ -21,6 +22,7 @@ PAGES = {
     "coaches.html":"coaches.html",
 }
 PAGE_HEALTH_ASSETS = ('page_health.css', 'page_health.js')
+MATCHUP_ANALYSIS_ASSETS = ('matchup-analysis.css', 'matchup-analysis.js')
 PLAYOFF_CUSTOM_ASSETS = ('playoff_custom.css', 'playoff_custom.js')
 BUILD_VERSION = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 PUBLIC_ALIASES = {"simulations.html": "sim_lab.html"}
@@ -401,6 +403,23 @@ fetch('data/site/postgame_shadow_updates.json').then(r=>r.json()).then(d=>{const
     if target == 'ratings.html':
         text=text.replace('teams=[...m.values()];conf.innerHTML', 'teams=[...m.values()].filter(t=>t.rating!=null&&t.overall_rank!=null);conf.innerHTML')
         text=text.replace('</head>','<style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style></head>',1)
+        text=text.replace(
+            '<div class="matchup-note" id="matchupNote"></div></div></section>',
+            '<div class="matchup-note" id="matchupNote"></div><a id="matchupCardLink" class="matchup-card-link" hidden>OPEN FULL MATCHUP CARD →</a></div></section>',
+            1,
+        )
+        text=text.replace("matchupNote.textContent='';\n    return;", "matchupNote.textContent='';\n    clearMatchupLink();\n    return;", 1)
+        text=text.replace(
+            "matchupScore.textContent=`${away.team} ${awayScore.toFixed(1)} · ${home.team} ${homeScore.toFixed(1)}`;",
+            "matchupScore.textContent=`${away.team} ${awayScore.toFixed(1)} · ${home.team} ${homeScore.toFixed(1)}`;setMatchupLink(away.team,home.team,-homeMargin,total);",
+            1,
+        )
+        text=text.replace("matchupScore.textContent='Unavailable';\n    }", "matchupScore.textContent='Unavailable';\n      clearMatchupLink();\n    }", 1)
+        text=text.replace('</head>','<style id="matchup-card-link-css">.matchup-card-link{grid-column:1/-1;justify-self:end;display:inline-flex;color:#061126;background:#61ddf3;text-decoration:none;font-weight:950;font-size:9px;letter-spacing:.06em;padding:7px 10px;border-radius:6px}.matchup-card-link[hidden]{display:none!important}@media(max-width:620px){.matchup-card-link{justify-self:stretch;justify-content:center}}</style></head>',1)
+        text=text.replace('</body>', '''<script id="ratings-matchup-card-link-js">
+function clearMatchupLink(){const link=document.getElementById('matchupCardLink');if(link)link.hidden=true}
+function setMatchupLink(away,home,awayMargin,total){const link=document.getElementById('matchupCardLink');if(!link)return;const query=new URLSearchParams({away,home,spread:Number(awayMargin).toFixed(3),total:Number(total).toFixed(3),source:'ratings'});link.href=`matchup-analysis.html?${query}`;link.hidden=false}
+</script></body>''',1)
     if target == 'simulations.html':
         text=text.replace('<div class="stamp" id="stamp">Loading model…</div>','')
         text=text.replace('stamp.textContent=`${P.trials.toLocaleString()} trials · ${P.schema_version}`;','')
@@ -450,6 +469,8 @@ def main():
         cache_bust_public_assets((ROOT/'war-room.html').read_text())
     )
     for asset in PAGE_HEALTH_ASSETS:
+        shutil.copy2(ROOT/asset, OUT/asset)
+    for asset in MATCHUP_ANALYSIS_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)
     for asset in PLAYOFF_CUSTOM_ASSETS:
         shutil.copy2(ROOT/asset, OUT/asset)

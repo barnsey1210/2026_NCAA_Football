@@ -157,7 +157,7 @@ td:nth-child(6){
 }
 </style>
 
-<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style><style id="shared-war-room-shell-v2">
+<link rel="stylesheet" href="page_health.css"><script defer src="page_health.js"></script><style id="team-link-css">.teamLink,.team,.match a,.opp{color:inherit!important;text-decoration:none!important}</style><style id="canonical-composite-css">.canonical-composite{display:block!important;max-width:620px;text-align:right}.canonical-composite b{display:block;color:#fff;margin-bottom:5px}.canonical-composite span{display:block;color:#bcd8f5;font-size:11px;white-space:nowrap}</style><style id="matchup-card-link-css">.matchup-card-link{grid-column:1/-1;justify-self:end;display:inline-flex;color:#061126;background:#61ddf3;text-decoration:none;font-weight:950;font-size:9px;letter-spacing:.06em;padding:7px 10px;border-radius:6px}.matchup-card-link[hidden]{display:none!important}@media(max-width:620px){.matchup-card-link{justify-self:stretch;justify-content:center}}</style><style id="shared-war-room-shell-v2">
 :root{--wr-blue:#3caaff;--wr-gold:#ffc83d;--wr-green:#32e89f;--wr-line:#214a70}
 .war-room-global{width:100%!important;max-width:none!important;min-height:82px!important;display:grid!important;grid-template-columns:280px minmax(0,1fr) max-content!important;gap:14px!important;align-items:center!important;padding:0 22px!important;margin:0!important;background:#020914!important;border-bottom:1px solid #17395d!important}
 .war-room-global .war-room-brand{min-width:0!important}.war-room-global .war-room-brand a{display:block!important;color:#fff!important;text-decoration:none!important}.war-room-global .war-room-brand strong{display:block!important;font:900 42px/.88 Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif!important;letter-spacing:.025em!important}.war-room-global .war-room-brand strong span{color:var(--wr-blue)!important;margin-left:4px!important}.war-room-global .war-room-brand small{display:block!important;margin-top:9px!important;color:var(--wr-gold)!important;font-size:9px!important;font-weight:1000!important;letter-spacing:.16em!important;white-space:nowrap!important}
@@ -169,8 +169,7 @@ td:nth-child(6){
 @media(max-width:1050px){.war-room-global{grid-template-columns:205px minmax(0,1fr)!important}.war-room-global .war-room-meta{display:none!important}}
 @media(max-width:700px){.war-room-global{min-height:70px!important;grid-template-columns:155px minmax(0,1fr)!important;padding:0 9px!important;gap:6px!important}.war-room-global .war-room-brand strong{font-size:28px!important}.war-room-global .war-room-brand small{font-size:7px!important;letter-spacing:.09em!important}.war-room-global .war-room-nav{height:70px!important}.war-room-global .war-room-nav a{font-size:11px!important;padding:0 7px!important}.war-room-sports{display:grid;grid-template-columns:1fr 1fr}.war-room-sports b{grid-column:1/-1}.war-room-sports a{text-align:center}}
 </style></head><body>
-<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a><a href="ncaab/">NCAAB</a></nav><div class="war-room-meta"><span class="war-room-context">Ratings</span><div class="war-room-health"><i></i>Data Healthy</div></div></header>
-<main class="shell"><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp canonical-composite" id="stamp"><b>Canonical Composite</b><br><span>SP+ 25% · FPI 25% · TeamRankings 25% · Sagarin 25%</span></div></section><div class="fresh" id="freshness"></div><section class="matchup-estimator" data-total-formula="shadow_total_enhanced_spplus_od_v1" aria-labelledby="matchupEstimatorTitle"><div class="matchup-title"><b id="matchupEstimatorTitle">MATCHUP ESTIMATE</b><span>3-source spread · SP+ total</span></div><div class="matchup-grid"><label>Visitor / Away<select id="matchupAway"></select></label><label>Home<select id="matchupHome"></select></label><label class="neutral-toggle"><input id="matchupNeutral" type="checkbox"> Neutral Site</label><div class="matchup-result"><small>PREDICTED SPREAD</small><b id="matchupSpread">—</b></div><div class="matchup-result"><small>PREDICTED TOTAL</small><b id="matchupTotal">—</b></div><div class="matchup-result"><small>PROJECTED SCORE</small><b id="matchupScore">—</b></div><div class="matchup-note" id="matchupNote"></div></div></section><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
+<header class="war-room-global"><div class="brand war-room-brand"><a href="index.html"><strong>WAR<span>ROOM</span></strong><small>COLLEGE FOOTBALL INTELLIGENCE</small></a></div><nav class="nav war-room-nav"><a href="index.html">Home</a><a href="ratings.html" class="active">Ratings</a><a href="matchups.html">Matchups</a><a href="openers.html">Openers</a><a href="war-room.html">Command Center</a><a href="odds.html">Odds</a><a href="schedule.html">Schedule</a><a href="futures.html">Futures</a><a href="conferences.html">Conferences</a><a href="coaches.html">Coaches</a><a href="playoff.html">Playoff</a><a href="sim_lab.html">Sim Lab</a><a href="betting.html">Betting</a><a href="ncaab/">NCAAB</a></nav><div class="war-room-meta"><span class="war-room-context">Ratings</span><div class="war-room-health"><i></i>Data Healthy</div></div></header><main class="shell"><section class="hero"><div><h1>Ratings</h1><p>Canonical 25% composite with source values, source ranks, and disagreement.</p></div><div class="stamp canonical-composite" id="stamp"><b>Canonical Composite</b><br><span>SP+ 25% · FPI 25% · TeamRankings 25% · Sagarin 25%</span></div></section><div class="fresh" id="freshness"></div><section class="matchup-estimator" data-total-formula="shadow_total_enhanced_spplus_od_v1" aria-labelledby="matchupEstimatorTitle"><div class="matchup-title"><b id="matchupEstimatorTitle">MATCHUP ESTIMATE</b><span>3-source spread · SP+ total</span></div><div class="matchup-grid"><label>Visitor / Away<select id="matchupAway"></select></label><label>Home<select id="matchupHome"></select></label><label class="neutral-toggle"><input id="matchupNeutral" type="checkbox"> Neutral Site</label><div class="matchup-result"><small>PREDICTED SPREAD</small><b id="matchupSpread">—</b></div><div class="matchup-result"><small>PREDICTED TOTAL</small><b id="matchupTotal">—</b></div><div class="matchup-result"><small>PROJECTED SCORE</small><b id="matchupScore">—</b></div><div class="matchup-note" id="matchupNote"></div><a id="matchupCardLink" class="matchup-card-link" hidden>OPEN FULL MATCHUP CARD →</a></div></section><div class="filters"><input id="search" placeholder="Find a team"><select id="conf"><option value="all">All conferences</option></select></div><div class="card"><div class="wrap"><table>
 <thead>
 <tr>
   <th data-k="overall_rank">Rank</th>
@@ -466,6 +465,7 @@ function renderMatchupEstimate(ratingView){
     matchupTotal.textContent='—';
     matchupScore.textContent='—';
     matchupNote.textContent='';
+    clearMatchupLink();
     return;
   }
 
@@ -496,12 +496,13 @@ function renderMatchupEstimate(ratingView){
       const awayScore=(total-homeMargin)/2;
       const homeScore=(total+homeMargin)/2;
       matchupTotal.textContent=total.toFixed(1);
-      matchupScore.textContent=`${away.team} ${awayScore.toFixed(1)} · ${home.team} ${homeScore.toFixed(1)}`;
+      matchupScore.textContent=`${away.team} ${awayScore.toFixed(1)} · ${home.team} ${homeScore.toFixed(1)}`;setMatchupLink(away.team,home.team,-homeMargin,total);
       matchupTotal.classList.remove('unavailable');
       matchupScore.classList.remove('unavailable');
     }else{
       matchupTotal.textContent='Unavailable';
       matchupScore.textContent='Unavailable';
+      clearMatchupLink();
     }
     matchupNote.textContent=`${matchupNeutral.checked?'Neutral':'Home field'} · HFA ${hfa.toFixed(1)} · ${components.map(x=>`${x.label} ${(x.value+hfa).toFixed(1)}`).join(' · ')}`;
   }
@@ -746,4 +747,7 @@ img.v2-dark-logo-badge.v2-dark-logo-large{
 </script>
 <!-- V2_DARK_LOGO_BADGES_END -->
 
-</body></html>
+<script id="ratings-matchup-card-link-js">
+function clearMatchupLink(){const link=document.getElementById('matchupCardLink');if(link)link.hidden=true}
+function setMatchupLink(away,home,awayMargin,total){const link=document.getElementById('matchupCardLink');if(!link)return;const query=new URLSearchParams({away,home,spread:Number(awayMargin).toFixed(3),total:Number(total).toFixed(3),source:'ratings'});link.href=`matchup-analysis.html?${query}`;link.hidden=false}
+</script></body></html>
