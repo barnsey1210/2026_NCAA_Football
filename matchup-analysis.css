@@ -82,3 +82,10 @@
 .draft-tooltip span+span{border-top:1px solid #ffffff20}
 .draft-wrap:hover .draft-tooltip,.draft-wrap:focus .draft-tooltip,.draft-wrap:focus-within .draft-tooltip{display:block}
 @media(max-width:800px){.metric-row{grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);grid-template-areas:"label label label" "left edge right";gap:3px 4px;padding:5px 6px}.metric-row>.metric-label{grid-area:label;font-size:10px}.metric-row>.value.left{grid-area:left;justify-content:flex-end}.metric-row>.value.right{grid-area:right;justify-content:flex-start}.metric-row>.edge-left,.metric-row>.edge-right{grid-area:edge}.metric-row>.edge-left{z-index:2}.metric-row>.edge-right{z-index:1}.metric-row>.edge-cell .edge-logos{height:22px}.metric-row>.edge-cell .edge-logos img{width:12px;height:12px}.draft-tooltip{right:-45px}}
+
+/* Dense player rows and team-side mobile edges. */
+.player-body{padding:6px 14px}
+.player-row{grid-template-columns:minmax(140px,1fr) 52px 115px minmax(115px,.7fr);gap:6px;padding:6px 0}
+.player-row small{line-height:1.2}.player-row .rank{padding:4px 6px}.player-row .rank small{display:none}.volume{font-size:11px;line-height:1.2}
+.player-group{margin:8px -14px 0;padding:6px 14px}.player-group:first-child{margin-top:-6px}
+@media(max-width:800px){.metric-row{grid-template-columns:42px minmax(68px,1fr) minmax(100px,1.25fr) minmax(68px,1fr) 42px;grid-template-areas:none;gap:2px;padding:5px 3px}.metric-row>.metric-label,.metric-row>.value.left,.metric-row>.value.right,.metric-row>.edge-left,.metric-row>.edge-right{grid-area:auto}.metric-row>.edge-left,.metric-row>.edge-right{z-index:auto}.metric-row>.edge-cell .edge-logos{height:22px}.metric-row>.edge-cell .edge-logos img{width:10px;height:10px}.player-row{grid-template-columns:minmax(0,1fr) 42px 88px;gap:4px;padding:6px 0}.player-row .rank{padding:3px 5px}.player-body{padding:5px 10px}.player-group{margin:7px -10px 0;padding:5px 10px}.player-group:first-child{margin-top:-5px}}

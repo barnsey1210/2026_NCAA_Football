@@ -33,7 +33,6 @@ class MatchupAnalysisTest(unittest.TestCase):
             "Last-4 SOS",
             "L2 Rating Change",
             "Season Perf vs Model",
-            "replacementSummary",
             "MATCHUP ADVANTAGE",
             "RECENT FORM",
             "QB ADVANTAGE",
@@ -62,6 +61,9 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertNotIn("PROJECTED SCORE", page)
         self.assertNotIn("Scale: Small", page)
         self.assertIn("metricRank(m.offense)", page)
+        self.assertIn("teamRank(s.talent)", page)
+        self.assertNotIn("NO ABSENCE FLAGGED", page)
+        self.assertNotIn("availability ${", page)
 
     def test_desktop_matchups_use_compact_side_by_side_layout(self):
         css = (ROOT / "matchup-analysis.css").read_text()
