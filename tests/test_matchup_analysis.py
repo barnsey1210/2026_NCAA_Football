@@ -43,6 +43,11 @@ class MatchupAnalysisTest(unittest.TestCase):
             "Averages all three starred tendency factors",
             "Scale: Small 1–4.9; Medium 5–14.9; High 15+",
             "Scale: Small 0.03–0.09; Medium 0.10–0.29; High 0.30+ WEPA",
+            "Drives / Game",
+            "ATS ",
+            "O/U ",
+            "composite-rank",
+            "signal-${level}",
         ):
             self.assertIn(marker, page)
         self.assertNotIn("${r.tied?'T-':''}", page)
@@ -60,6 +65,10 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertIsNotNone(season["last2PerformanceVsModel"]["value"])
         self.assertIsNotNone(season["last4PerformanceVsModel"]["value"])
         self.assertIsNotNone(recent["sos"]["value"])
+        self.assertIsNotNone(season["drivesRank"])
+        self.assertIsNotNone(season["compositeRank"])
+        self.assertIsNotNone(season["record"])
+        self.assertIsNotNone(season["bettingRecord"])
         sayin = next(row for row in ohio["players"]["passing"] if row["athleteName"] == "Julian Sayin")
         self.assertTrue(sayin["availability"]["status"].startswith("OUT"))
         self.assertEqual(sayin["availability"]["replacement"], "Luke Fahey")

@@ -20,6 +20,7 @@ DRAFT_COUNTS = ROOT / "data/canonical/nfl_draft_2027_top175_team_counts.json"
 RATINGS = ROOT / "data/site/ratings_view.json"
 MODEL_FIT = ROOT / "data/site/team_game_evaluations_2026.json"
 MARKET_MATRIX = ROOT / "data/site/war_room_market_matrix.json"
+MATCHUPS_VIEW = ROOT / "data/site/matchups_public_view.json"
 SITE_TO_CFBD = {
     "Appalachian State": "App State",
     "Central Florida": "UCF",
@@ -145,6 +146,7 @@ def main():
     draft_source = load(DRAFT_COUNTS) if DRAFT_COUNTS.exists() else {"team_counts": {}}
     ratings_source = load(RATINGS).get("teams", [])
     model_fit_source = load(MODEL_FIT)
+    matchup_view_source = load(MATCHUPS_VIEW) if MATCHUPS_VIEW.exists() else {"games": []}
     passing = player_ranks(load(args.passing), "wepa", "Passing WEPA")
     rushing = player_ranks(load(args.rushing), "wepa", "Rushing WEPA")
     kicking = player_ranks(load(args.kicking), "paar", "Kicking PAAR")
@@ -228,6 +230,20 @@ def main():
         plays = value_at(row, "offense.plays")
         pace_rows.append({"team": row["team"], "value": plays / count if count and isinstance(plays, (int, float)) else None})
     pace_rank = rank_rows(pace_rows, "value")
+    drive_rows = []
+    for row in advanced:
+        count = scheduled_counts.get(row["team"], 0)
+        drives = value_at(row, "offense.drives")
+        drive_rows.append({"team": row["team"], "value": drives / count if count and isinstance(drives, (int, float)) else None})
+    drive_rank = rank_rows(drive_rows, "value")
+
+    team_context = {}
+    for game in matchup_view_source.get("games", []):
+        for side in ("away", "home"):
+            row = value_at(game, f"teams.{side}") or {}
+            team = SITE_TO_CFBD.get(row.get("team"), row.get("team"))
+            if team:
+                team_context[team] = row
 
     draft_counts = draft_source.get("team_counts", {})
     draft_rank = rank_rows(
@@ -316,6 +332,14 @@ def main():
         last2 = last2_rank.get(team)
         last4 = last4_rank.get(team)
         pace = pace_rank.get(team)
+        drives = drive_rank.get(team)
+        context = team_context.get(team, {})
+        composite_rank = context.get("overall_rank") or rating.get("overall_rank")
+        composite = {
+            "rank": composite_rank,
+            "population": len(ratings_source),
+            "band": band(composite_rank, len(ratings_source)),
+        } if composite_rank else None
         season_value = season_fit.get("value") if season_fit else None
         recent_value = last4.get("value") if last4 else None
         trend_delta = recent_value - season_value if isinstance(recent_value, (int, float)) and isinstance(season_value, (int, float)) else None
@@ -331,6 +355,11 @@ def main():
                 "passRank": pass_rank.get(team),
                 "paceRank": pace,
                 "playsPerGame": pace.get("value") if pace else None,
+                "drivesPerGame": drives.get("value") if drives else None,
+                "drivesRank": drives,
+                "compositeRank": composite,
+                "record": context.get("record"),
+                "bettingRecord": context.get("betting_record"),
                 "l2": l2,
                 "last2PerformanceVsModel": last2,
                 "last4PerformanceVsModel": last4,
