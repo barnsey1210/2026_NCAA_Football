@@ -39,6 +39,8 @@ class MatchupAnalysisTest(unittest.TestCase):
             "QB ADVANTAGE",
             "keyMetrics",
             "key-star",
+            "summary-tooltip",
+            "Averages all three starred tendency factors",
         ):
             self.assertIn(marker, page)
         self.assertNotIn("${r.tied?'T-':''}", page)
