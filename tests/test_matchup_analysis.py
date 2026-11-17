@@ -58,6 +58,17 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertIn("matchup-analysis.html?game_id=", command)
         self.assertIn("setMatchupLink(away.team,home.team,-homeMargin,total)", public)
 
+    def test_matchup_assets_cannot_remain_stale(self):
+        page = (ROOT / "matchup-analysis.html").read_text()
+        headers = (ROOT / "deploy/cloudflare_pages/_headers").read_text()
+        builder = (ROOT / "scripts/site/build_public_site.py").read_text()
+        self.assertIn("matchup-analysis.js?v=", page)
+        self.assertIn("matchup-analysis.css?v=", page)
+        self.assertIn("/matchup-analysis.js", headers)
+        self.assertIn("/matchup-analysis.css", headers)
+        self.assertIn("/data/site/matchup_analysis_2026.json", headers)
+        self.assertIn("matchup-analysis\\.(?:js|css)", builder)
+
 
 if __name__ == "__main__":
     unittest.main()

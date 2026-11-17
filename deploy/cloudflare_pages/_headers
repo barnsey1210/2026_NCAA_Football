@@ -29,8 +29,17 @@
 /*.js
   Cache-Control: public, max-age=3600, must-revalidate
 
+/matchup-analysis.js
+  Cache-Control: no-store
+
 /*.css
   Cache-Control: public, max-age=3600, must-revalidate
+
+/matchup-analysis.css
+  Cache-Control: no-store
+
+/data/site/matchup_analysis_2026.json
+  Cache-Control: no-store
 
 /logos/*
   Cache-Control: public, max-age=86400, must-revalidate

@@ -302,8 +302,13 @@ def cache_bust_site_json(text):
 def cache_bust_public_assets(text):
     """Version the shared frontend bundle so restored drawer behavior is not cached."""
     text = cache_bust_site_json(text)
-    return re.sub(
+    text = re.sub(
         r'(matchup_workspace\.js)(?:\?v=[^\'"` )}>]+)?',
+        lambda match: f"{match.group(1)}?v={BUILD_VERSION}",
+        text,
+    )
+    return re.sub(
+        r'(matchup-analysis\.(?:js|css))(?:\?v=[^\'"` )}>]+)?',
         lambda match: f"{match.group(1)}?v={BUILD_VERSION}",
         text,
     )
