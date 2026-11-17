@@ -52,12 +52,20 @@ class MatchupAnalysisTest(unittest.TestCase):
             "O/U ",
             "composite-rank",
             "signal-${level}",
+            "metric-center",
+            "METRIC · EDGE",
         ):
             self.assertIn(marker, page)
         self.assertNotIn("${r.tied?'T-':''}", page)
         self.assertNotIn("PROJECTED WINNER", page)
         self.assertNotIn("PROJECTED SCORE", page)
         self.assertNotIn("Scale: Small", page)
+
+    def test_desktop_matchups_use_compact_side_by_side_layout(self):
+        css = (ROOT / "matchup-analysis.css").read_text()
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", css)
+        self.assertIn("@media(max-width:1100px){.matchups{grid-template-columns:1fr}}", css)
+        self.assertIn("min-height:42px", css)
 
     def test_approved_preview_profile_is_preserved(self):
         payload = json.loads((ROOT / "data/site/matchup_analysis_2026.json").read_text())
