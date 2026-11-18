@@ -59,14 +59,15 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v11", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v11", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v12", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v12", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
         cloudflare = json.loads((ROOT / "config/cloudflare_pages_manifest.json").read_text())
-        for asset in ("playoff_custom.css", "playoff_custom.js"):
+        for asset in ("playoff_custom.css", "playoff_custom.js", "data/site/playoff_market_odds_2026.json"):
             self.assertIn(asset, cloudflare["files"])
+        for asset in ("playoff_custom.css", "playoff_custom.js"):
             self.assertIn(asset, cloudflare["allowed_top_level"])
         for marker in ("CUSTOM MATCHUP", "playoffMatchupAway", "playoffMatchupHome", "playoffMatchupNeutral", "Ratings-page projection"):
             self.assertIn(marker, self.js)
@@ -84,11 +85,25 @@ class PlayoffCustomModeTest(unittest.TestCase):
             "conditional on the displayed field",
             "fairAmerican",
             "refreshOdds",
+            "Current Market Odds",
+            "marketFairProbabilities",
+            "simulation probability minus proportional de-vigged DraftKings probability",
+            "playoff_market_odds_2026.json",
         ):
             self.assertIn(marker, self.js)
         css = (ROOT / "playoff_custom.css").read_text()
         for marker in (".matchup-card-link", ".advance-odds", ".advance-odds-wrap", "overflow-x:auto"):
             self.assertIn(marker, css)
+
+    def test_market_snapshot_and_round_edge_contract(self):
+        market = json.loads((ROOT / "data/site/playoff_market_odds_2026.json").read_text())
+        self.assertEqual(market["book"], "DraftKings")
+        self.assertEqual(set(market["markets"]), {"quarterfinal", "semifinal", "championship", "title"})
+        self.assertEqual([market["markets"][x]["slots"] for x in ("quarterfinal", "semifinal", "championship", "title")], [8, 4, 2, 1])
+        self.assertEqual(market["markets"]["title"]["prices"]["Georgia"], 200)
+        self.assertEqual(market["markets"]["quarterfinal"]["prices"]["Georgia"], -8000)
+        for marker in ("edgeCell", "edge-positive", "edge-negative", "Edge</th>", "marketEdge"):
+            self.assertIn(marker, self.js)
 
     def test_drag_swap_inline_lines_and_variable_simulated_scores(self):
         for marker in ("swapSeeds", "drag-handle", "data-seed-row", "simulateGame", "normalRandom", "state.scores", "2000/(events.length+4)", "notre-dame", "Number(a.overall_rank)-Number(b.overall_rank)"):
