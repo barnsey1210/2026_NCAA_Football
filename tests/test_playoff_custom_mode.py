@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v13", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v13", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v14", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v14", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -136,6 +136,11 @@ class PlayoffCustomModeTest(unittest.TestCase):
         for marker in ("@media(min-width:1000px)", "grid-template-columns:310px minmax(0,1fr)", "height:1040px", "grid-row:5", "custom-game:after"):
             self.assertIn(marker, css)
 
+    def test_custom_is_default_and_first_out_extends_through_20(self):
+        self.assertIn("setMode('custom')", self.js)
+        self.assertIn("slice(0,8)", self.js)
+        self.assertIn("model teams 13–20", self.js)
+
     def test_current_record_coverage_including_independents(self):
         workspace = json.loads((ROOT / "data/site/conference_workspace.json").read_text())
         simulations = json.loads((ROOT / "data/site/season_simulations_2026.json").read_text())
@@ -171,7 +176,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("grid-template-columns:repeat(4,minmax(280px,84vw))", css)
         self.assertIn("overflow-x:auto", css)
         self.assertIn("scroll-snap-type:x mandatory", css)
-        for marker in ('grid-template-columns:minmax(0,1fr) minmax(0,1fr)', 'height:1100px', 'grid-row:3', 'grid-row:7', 'grid-row:5', '.champion-footer{position:static'):
+        for marker in ('grid-template-columns:minmax(0,1fr) minmax(0,1fr)', 'height:720px', 'grid-row:3', 'grid-row:7', 'grid-row:5', '.champion-footer{position:static', 'min-width:600px', 'min-width:500px'):
             self.assertIn(marker, css)
 
 

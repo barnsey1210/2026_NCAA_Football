@@ -27,17 +27,17 @@ html,body{max-width:100%;overflow-x:hidden}
 .advance-odds-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 10px;background:#0b213c;border-bottom:1px solid var(--l)}
 .advance-odds-head h2{margin:0;font-size:17px}.advance-odds-head p{margin:2px 0 0;color:var(--m);font-size:9px}.advance-odds-head>span{color:#61ddf3;font-size:9px;font-weight:950;letter-spacing:.05em;white-space:nowrap}
 .advance-odds-wrap{width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
-.advance-odds table{width:100%;min-width:940px;border-collapse:collapse;table-layout:fixed}.market-odds table{width:100%;min-width:720px;border-collapse:collapse;table-layout:fixed}
-.advance-odds .seed-col,.market-odds .seed-col{width:42px}.advance-odds .team-col{width:170px}.market-odds .team-col{width:190px}.advance-odds .sim-col{width:86px}.advance-odds .edge-col{width:58px}
-.advance-odds th,.advance-odds td,.market-odds th,.market-odds td{padding:4px 6px;border-top:1px solid #1f3d60;text-align:center;line-height:1.05}
+.advance-odds table{width:100%;min-width:760px;border-collapse:collapse;table-layout:fixed}.market-odds table{width:100%;min-width:600px;border-collapse:collapse;table-layout:fixed}
+.advance-odds .seed-col,.market-odds .seed-col{width:34px}.advance-odds .team-col{width:135px}.market-odds .team-col{width:145px}.advance-odds .sim-col{width:68px}.advance-odds .edge-col{width:48px}
+.advance-odds th,.advance-odds td,.market-odds th,.market-odds td{padding:3px 4px;border-top:1px solid #1f3d60;text-align:center;line-height:1.02}
 .advance-odds thead th,.market-odds thead th{border-top:0;background:#09192e;color:var(--m);font-size:8px;text-transform:uppercase;letter-spacing:.04em}.advance-odds thead tr+tr th{border-top:1px solid #183654}
 .advance-odds td,.market-odds td{font-size:11px}.advance-odds td:first-child,.market-odds td:first-child{color:var(--gold);font-weight:950}
-.odds-team{text-align:left!important;overflow:hidden}.odds-team>span{display:flex;align-items:center;gap:6px;min-width:0;white-space:nowrap}.odds-team img{width:20px;height:20px;object-fit:contain;flex:0 0 auto}.odds-team b{display:block;overflow:hidden;text-overflow:ellipsis}
+.odds-team{text-align:left!important;overflow:hidden}.odds-team>span{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap}.odds-team img{width:17px;height:17px;object-fit:contain;flex:0 0 auto}.odds-team b{display:block;overflow:hidden;text-overflow:ellipsis}
 .advance-odds .sim-cell b{display:block;color:#fff;font-size:12px;font-weight:950}.advance-odds .sim-cell small{display:block;color:var(--m);font-size:12px;font-weight:500;margin-top:1px}
 .advance-odds .edge-positive b{color:#43e6a8}.advance-odds .edge-negative b{color:#ff667a}.advance-odds .edge-positive b,.advance-odds .edge-negative b{font-size:11px}.advance-odds .edge-positive small,.advance-odds .edge-negative small{display:inline;color:var(--m);font-size:8px;margin-left:1px}.edge-na{color:var(--m)}
 .edge-note{margin:0;padding:5px 10px;color:var(--m);font-size:8px;border-top:1px solid #1f3d60}.market-odds th a{color:#61ddf3;text-decoration:none}.market-odds th a:hover{text-decoration:underline}.market-odds td:not(:nth-child(-n+2)) b{font-size:11px;color:#fff}
 @media(max-width:900px){.matchup-card-link{grid-column:1/-1}.advance-odds-head{align-items:flex-start}.advance-odds-head>span{white-space:normal;text-align:right}}
-@media(max-width:620px){.advance-odds,.market-odds{margin:8px 0}.advance-odds-head{display:block;padding:7px 8px}.advance-odds-head h2{font-size:15px}.advance-odds-head>span{display:block;text-align:left;margin-top:4px}.advance-odds th,.advance-odds td,.market-odds th,.market-odds td{padding:4px 5px}.advance-odds table{min-width:900px}.market-odds table{min-width:690px}}
+@media(max-width:620px){.advance-odds,.market-odds{margin:6px 0}.advance-odds-head{display:block;padding:5px 7px}.advance-odds-head h2{font-size:14px}.advance-odds-head p{font-size:8px}.advance-odds-head>span{display:block;text-align:left;margin-top:3px;font-size:8px}.advance-odds th,.advance-odds td,.market-odds th,.market-odds td{padding:2px 3px}.advance-odds table{min-width:600px}.market-odds table{min-width:500px}.advance-odds .seed-col,.market-odds .seed-col{width:30px}.advance-odds .team-col{width:112px}.market-odds .team-col{width:120px}.advance-odds .sim-col{width:62px}.advance-odds .edge-col{width:44px}.advance-odds td,.market-odds td{font-size:10px}.advance-odds .sim-cell b,.advance-odds .sim-cell small{font-size:10px}.advance-odds .edge-positive b,.advance-odds .edge-negative b{font-size:9px}.odds-team img{width:15px;height:15px}.edge-note{padding:4px 7px;font-size:7px}}
 
 /* Portrait: keep the matchup controls inside the card and preserve a traditional bracket path. */
 @media(max-width:620px){
@@ -48,8 +48,8 @@ html,body{max-width:100%;overflow-x:hidden}
  .matchup-output{grid-template-columns:minmax(0,1fr) auto}
  .matchup-output b,.matchup-output span{white-space:normal;overflow-wrap:anywhere}
  .matchup-card-link{white-space:normal;text-align:center;padding-inline:6px}
- .custom-rounds{align-items:stretch}
- .custom-round{height:1100px;grid-template-rows:32px repeat(8,minmax(0,1fr));gap:0;align-content:stretch;position:relative}
+ .custom-rounds{grid-template-columns:repeat(4,minmax(250px,74vw));gap:6px;align-items:stretch;padding-inline:6px}
+ .custom-round{height:720px;grid-template-rows:28px repeat(8,minmax(0,1fr));gap:0;align-content:stretch;position:relative}
  .custom-round>h3{grid-row:1;align-self:start}
  .custom-round[data-round="first"] .custom-game:nth-of-type(1),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(1){grid-row:2}
  .custom-round[data-round="first"] .custom-game:nth-of-type(2),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(2){grid-row:4}
@@ -58,9 +58,14 @@ html,body{max-width:100%;overflow-x:hidden}
  .custom-round[data-round="semifinal"] .custom-game:nth-of-type(1){grid-row:3}
  .custom-round[data-round="semifinal"] .custom-game:nth-of-type(2){grid-row:7}
  .custom-round[data-round="championship"] .custom-game:nth-of-type(1){grid-row:5}
- .custom-game{align-self:center;position:relative;margin-bottom:0}
- .custom-round:not([data-round="championship"]) .custom-game:after{content:"";position:absolute;left:100%;top:50%;width:10px;border-top:1px solid #3a6a99}
- .custom-round[data-round="quarterfinal"] .custom-game:before,.custom-round[data-round="semifinal"] .custom-game:before,.custom-round[data-round="championship"] .custom-game:before{content:"";position:absolute;right:100%;top:50%;width:10px;border-top:1px solid #3a6a99}
+ .custom-game{align-self:center;position:relative;margin-bottom:0;padding:4px}
+ .custom-game>header{margin-bottom:2px;font-size:8px}
+ .advance{min-height:38px;margin:2px 0;padding:3px 5px}
+ .empty-slot{min-height:38px;margin:2px 0}
+ .projection{margin-top:3px;padding-top:4px}.projection b{font-size:10px}.projection span{font-size:9px}
+ .game-meta{padding-top:1px}
+ .custom-round:not([data-round="championship"]) .custom-game:after{content:"";position:absolute;left:100%;top:50%;width:6px;border-top:1px solid #3a6a99}
+ .custom-round[data-round="quarterfinal"] .custom-game:before,.custom-round[data-round="semifinal"] .custom-game:before,.custom-round[data-round="championship"] .custom-game:before{content:"";position:absolute;right:100%;top:50%;width:6px;border-top:1px solid #3a6a99}
  .champion-footer{position:static;left:auto;bottom:auto;transform:none;width:auto;min-height:0;margin:12px 10px 0;box-shadow:none}
  #customMode:not([hidden]) .custom-bracket{padding-bottom:10px}
 }
