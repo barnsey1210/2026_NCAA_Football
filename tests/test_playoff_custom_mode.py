@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v16", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v16", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v17", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v17", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -125,9 +125,9 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("function paintLiveGame", self.js)
         self.assertIn("scrollLeft=left", self.js)
         self.assertNotIn("scrollIntoView", self.js)
-        self.assertIn("champion-footer", self.js)
+        self.assertIn("champion-inline", self.js)
         css = (ROOT / "playoff_custom.css").read_text()
-        self.assertIn("position:fixed;left:50%;bottom:8px", css)
+        self.assertIn(".champion-inline{grid-row:7", css)
 
     def test_desktop_sidebar_records_and_staggered_bracket(self):
         for marker in ("custom-desktop-layout", "firstOut", "first-out-row", "current_wins", "current_losses", "season_simulations_2026.json", "data-round"):
@@ -180,7 +180,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(marker, css)
 
     def test_first_out_promotion_and_round_edge_highlights(self):
-        for marker in ('data-first-out-team', 'data-promote-team', 'replaceSeed', 'bestEdges', 'top-round-edge', 'round-edge-pick', 'round-join', 'MODEL', 'MARKET'):
+        for marker in ('data-first-out-team', 'data-promote-team', 'replaceSeed', 'bindFirstOutTouch', 'bestEdges', 'top-round-edge', 'round-edge-pick', 'round-edge-stack', 'champion-inline', 'REACH QUARTERFINAL', 'round-join', 'MODEL', 'MARKET'):
             self.assertIn(marker, self.js + (ROOT / "playoff_custom.css").read_text())
 
 
