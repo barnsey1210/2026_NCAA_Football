@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v10", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v10", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v11", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v11", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -72,6 +72,23 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(marker, self.js)
         for marker in ("overall_rank", "ratingClass", "decorateModelRanks", "decorateCustomRanks"):
             self.assertIn(marker, self.js)
+
+    def test_matchup_card_link_and_advancement_odds(self):
+        for marker in (
+            "OPEN FULL MATCHUP CARD →",
+            'target="_blank"',
+            "source:'playoff'",
+            "ODDS_TRIALS=20000",
+            "simulateBracketOdds",
+            "Bracket Advancement Odds",
+            "conditional on the displayed field",
+            "fairAmerican",
+            "refreshOdds",
+        ):
+            self.assertIn(marker, self.js)
+        css = (ROOT / "playoff_custom.css").read_text()
+        for marker in (".matchup-card-link", ".advance-odds", ".advance-odds-wrap", "overflow-x:auto"):
+            self.assertIn(marker, css)
 
     def test_drag_swap_inline_lines_and_variable_simulated_scores(self):
         for marker in ("swapSeeds", "drag-handle", "data-seed-row", "simulateGame", "normalRandom", "state.scores", "2000/(events.length+4)", "notre-dame", "Number(a.overall_rank)-Number(b.overall_rank)"):
@@ -116,7 +133,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
                 low, high = min(wins), max(wins)
                 records[row["team"]] = f"{low}-{max(0, 12 - (high - low) - low)}"
         self.assertEqual(len(records), 138)
-        self.assertEqual(records["Notre Dame"], "8-1")
+        self.assertEqual(records["Notre Dame"], "9-1")
 
     def test_two_row_team_cards_and_colored_field_metadata(self):
         for marker in ("team-card-meta", "seed-meta", "recordClass", "record-good", "record-mid", "record-low"):
