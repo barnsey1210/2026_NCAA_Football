@@ -639,6 +639,7 @@ fi
 if stage_enabled "playoff_simulations"; then
 
 stage_start "playoff_simulations"
+run_py "scripts/simulations/pull_cfp_committee_rankings_2026.py" "pull_cfp_committee_rankings_2026.py"
 if python3 scripts/simulations/simulation_input_gate.py playoff; then
   python3 scripts/simulations/run_playoff_model_2026.py \
     --scenario-output data/site/futures_scenario_universe_2026.json

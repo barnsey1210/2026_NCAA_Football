@@ -127,7 +127,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertNotIn("scrollIntoView", self.js)
         self.assertIn("champion-inline", self.js)
         css = (ROOT / "playoff_custom.css").read_text()
-        self.assertIn(".champion-inline{grid-row:7", css)
+        self.assertIn('.custom-round[data-round="championship"] .champion-inline{grid-row:4', css)
 
     def test_desktop_sidebar_records_and_staggered_bracket(self):
         for marker in ("custom-desktop-layout", "firstOut", "first-out-row", "current_wins", "current_losses", "season_simulations_2026.json", "data-round"):
@@ -138,8 +138,24 @@ class PlayoffCustomModeTest(unittest.TestCase):
 
     def test_custom_is_default_and_first_out_extends_through_20(self):
         self.assertIn("setMode('custom')", self.js)
-        self.assertIn("slice(0,8)", self.js)
-        self.assertIn("next teams out", self.js)
+        self.assertIn("CURRENT_CFP_FIELD", self.js)
+        self.assertIn("CURRENT_CFP_NEXT_OUT", self.js)
+        self.assertIn("currentCfpSeeds(committeeSnapshot)", self.js)
+        self.assertIn("Reset to Current CFP Field", self.js)
+        self.assertIn("next teams out 13–20", self.js)
+        self.assertIn("cfp_committee_rankings_2026.json", self.js)
+        self.assertNotIn("Browser-local only", self.js)
+
+    def test_weekly_committee_snapshot_and_top_twenty_market_contract(self):
+        snapshot = json.loads((ROOT / "data/site/cfp_committee_rankings_2026.json").read_text())
+        self.assertEqual(snapshot["poll"], "Playoff Committee Rankings")
+        self.assertEqual(len(snapshot["rankings"]), 25)
+        self.assertEqual(len(snapshot["field"]), 12)
+        self.assertEqual(len(snapshot["next_out"]), 8)
+        self.assertEqual(snapshot["field"][-1]["team"], "Boise State")
+        self.assertIn("slice(0,20)", self.js)
+        self.assertIn("oddsTable(state.odds)+marketTable(state.odds)", self.js)
+        self.assertIn("game-matchup-link", self.js)
 
     def test_current_record_coverage_including_independents(self):
         workspace = json.loads((ROOT / "data/site/conference_workspace.json").read_text())
@@ -182,6 +198,13 @@ class PlayoffCustomModeTest(unittest.TestCase):
     def test_first_out_promotion_and_round_edge_highlights(self):
         for marker in ('data-first-out-team', 'data-promote-team', 'replaceSeed', 'bindFirstOutTouch', 'bestEdges', 'top-round-edge', 'round-edge-pick', 'round-edge-stack', 'champion-inline', 'REACH QUARTERFINAL', 'round-join', 'MODEL', 'MARKET'):
             self.assertIn(marker, self.js + (ROOT / "playoff_custom.css").read_text())
+
+    def test_current_committee_field_is_the_custom_default(self):
+        module = self.js
+        for seed, team in enumerate(("Georgia", "Utah", "Alabama", "UCLA", "Texas", "Notre Dame", "Miami-FL", "Indiana", "Tennessee", "BYU", "Wake Forest", "Boise State"), 1):
+            self.assertIn(f"{seed}:'{team}'", module)
+        for team in ("Texas Tech", "Oregon", "Ohio State", "Iowa", "Kentucky", "USC", "Arizona", "Houston"):
+            self.assertIn(f"'{team}'", module)
 
 
 if __name__ == "__main__":

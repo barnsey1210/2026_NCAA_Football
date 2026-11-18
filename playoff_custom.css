@@ -90,4 +90,22 @@ html,body{max-width:100%;overflow-x:hidden}
 @media(max-width:620px){.matchup-controls select{font-size:13px}.matchup-output b{font-size:14px}.matchup-output span{font-size:12px}.seed-grid,.first-out-list{grid-template-columns:1fr;gap:6px}.first-out-row{grid-template-columns:24px 18px 22px minmax(0,1fr);padding:5px;background:var(--p2);border:1px solid #294d76;border-radius:8px}.first-out-row>img{width:22px;height:22px}.round-edge-stack{gap:3px}.champion-inline{padding:6px}.champion-inline .champion-team b{font-size:15px}}
 @media(min-width:621px) and (max-width:1150px){.first-out-list{grid-template-columns:repeat(4,minmax(140px,1fr));gap:8px}.first-out-row{padding:5px;background:var(--p2);border:1px solid #294d76;border-radius:8px}}
 @media(min-width:1000px){.custom-field .first-out-list{grid-template-columns:1fr;gap:0}.custom-field .first-out-row{padding:4px 2px;background:transparent;border-width:0 0 1px;border-radius:0}}
+.custom-game header small{display:flex;align-items:center;gap:7px}.game-matchup-link{color:#62e6ff;font-size:9px;font-weight:950;letter-spacing:.05em;text-decoration:none}.game-matchup-link:hover,.game-matchup-link:focus{text-decoration:underline}
+.first-out-row>.seed-meta .rating-rank,.first-out-row>.seed-meta .team-record{font-size:12px!important;font-weight:950!important}.first-out-row>select{font-size:14px!important}
 @media(max-width:620px){.custom-round[data-round="first"] .custom-game:nth-of-type(1),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(1){align-self:start}}
+
+/* Put every value edge immediately beneath its round and frame the title game. */
+.custom-round[data-round="quarterfinal"] .round-edge-stack{grid-row:9;align-self:start}
+.custom-round[data-round="semifinal"] .round-edge-stack{grid-row:8;align-self:start}
+.custom-round[data-round="championship"] .champion-inline{grid-row:4;align-self:end;margin-bottom:8px}
+.custom-round[data-round="championship"] .round-edge-stack{grid-row:6;align-self:start;margin-top:8px}
+.round-edge-pick{min-height:60px;grid-template-columns:auto 24px minmax(0,1fr) auto;gap:4px 7px;padding:7px 9px;font-size:12px}
+.round-edge-pick span{font-size:9px;letter-spacing:.03em}.round-edge-pick img{width:24px;height:24px}.round-edge-pick b,.round-edge-pick strong{font-size:12px}.round-edge-pick small{font-size:9px;line-height:1.2}
+@media(max-width:620px){
+ .custom-rounds{padding-bottom:38px}
+ .custom-round[data-round="quarterfinal"] .round-edge-stack,.custom-round[data-round="semifinal"] .round-edge-stack{transform:translateY(24px)}
+ .custom-round[data-round="championship"] .champion-inline{grid-row:4;margin:0 0 5px;transform:translateY(-20px)}
+ .custom-round[data-round="championship"] .round-edge-stack{grid-row:6;margin-top:5px;transform:translateY(24px)}
+ .round-edge-pick{min-height:54px;grid-template-columns:auto 22px minmax(0,1fr) auto;padding:5px 6px;gap:3px 5px}
+ .round-edge-pick span{font-size:8px}.round-edge-pick img{width:22px;height:22px}.round-edge-pick b,.round-edge-pick strong{font-size:11px}.round-edge-pick small{font-size:8px}
+}
