@@ -26,7 +26,7 @@
 /* Tendency-driven matchup factors and quick-read summary ribbon. */
 .insight-ribbon{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0}
 .insight-ribbon .legend{margin:0;flex:0 0 auto}
-.summary-bubbles{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:8px;flex:1;max-width:720px}
+.summary-bubbles{display:grid;grid-template-columns:repeat(5,minmax(145px,1fr));gap:8px;flex:1;max-width:1120px}
 .summary-bubble{position:relative;display:grid;grid-template-columns:1fr auto;grid-template-areas:"label size" "team size";align-items:center;min-height:52px;padding:7px 10px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 4px 14px #1b2c4d0a;cursor:help;outline:none}
 .summary-bubble small{grid-area:label;color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.07em}
 .summary-bubble small i{display:inline-grid;place-items:center;width:13px;height:13px;border:1px solid #aeb8c8;border-radius:50%;font-style:normal;letter-spacing:0}.summary-team{grid-area:team;display:flex;align-items:center;gap:6px;font-weight:900}.summary-team img{width:20px;height:20px;object-fit:contain}
@@ -35,7 +35,7 @@
 .edge-logos{height:46px;padding-bottom:18px}.edge-logos small{bottom:1px;font-size:14px;line-height:1;font-variant-numeric:tabular-nums}
 .key-metric{background:#fff6cf;border-left:5px solid #e1a900}.key-metric .metric-label{color:#5f4900}.key-star{display:inline-block;margin-right:6px;color:#d49d00;font-size:16px;line-height:1;filter:drop-shadow(0 1px 0 #fff)}
 @media(max-width:1000px){.insight-ribbon{align-items:stretch;flex-direction:column}.summary-bubbles{max-width:none;width:100%}}
-@media(max-width:620px){.summary-bubbles{grid-template-columns:1fr}.summary-bubble{min-height:46px}.insight-ribbon .legend{overflow-x:auto}.key-star{font-size:14px}}
+@media(max-width:620px){.summary-bubbles{grid-template-columns:1fr 1fr}.summary-bubble:first-child{grid-column:1/-1}.summary-bubble{min-height:46px}.summary-bubble small{font-size:7px}.insight-ribbon .legend{overflow-x:auto}.key-star{font-size:14px}}
 
 /* Team context in the score ribbon and five-state summary signal colors. */
 .projection-identity{display:flex;align-items:center;gap:8px}.composite-rank{font-size:18px!important;background:none!important}.team-records{display:grid;flex:0 0 92px;gap:1px;justify-items:center;text-align:center;color:var(--muted);font-weight:800}.team-records b{color:var(--ink);font-size:15px}.team-records small{font-size:12px;line-height:1.25;white-space:nowrap}

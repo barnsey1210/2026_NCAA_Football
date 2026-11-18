@@ -86,5 +86,5 @@ if(typeof document!=='undefined')new MutationObserver(()=>document.querySelector
  const header=game.querySelector('header small'),names=[...game.querySelectorAll('.advance[data-team]')].map(x=>x.dataset.team);
  if(!header||names.length!==2||header.querySelector('.game-matchup-link'))return;
  const link=document.createElement('a');link.className='game-matchup-link';link.target='_blank';link.rel='noopener';link.textContent='MATCHUP LINK';
- link.href=`matchup-analysis.html?${new URLSearchParams({away:names[1],home:names[0],source:'playoff-bracket'})}`;header.textContent='';header.append(link);
+ const neutral=/NEUTRAL/.test(header.textContent);link.href=`matchup-analysis.html?${new URLSearchParams({away:names[1],home:names[0],neutral:neutral?'1':'0',source:'playoff-bracket'})}`;header.textContent='';header.append(link);
 })).observe(document.documentElement,{childList:true,subtree:true});
