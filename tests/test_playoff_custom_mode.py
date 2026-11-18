@@ -156,6 +156,10 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("slice(0,20)", self.js)
         self.assertIn("oddsTable(state.odds)+marketTable(state.odds)", self.js)
         self.assertIn("game-matchup-link", self.js)
+        self.assertIn("MATCHUP LINK", self.js)
+        self.assertIn("header.textContent=''", self.js)
+        self.assertIn("championship-results", self.js)
+        self.assertIn("${edgeBubble('championship','REACH CHAMPIONSHIP')}${championCard()}${edgeBubble('title','WIN CHAMPIONSHIP')}", self.js)
 
     def test_current_record_coverage_including_independents(self):
         workspace = json.loads((ROOT / "data/site/conference_workspace.json").read_text())
