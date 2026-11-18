@@ -38,3 +38,29 @@ html,body{max-width:100%;overflow-x:hidden}
 .edge-note{margin:0;padding:5px 10px;color:var(--m);font-size:8px;border-top:1px solid #1f3d60}.market-odds th a{color:#61ddf3;text-decoration:none}.market-odds th a:hover{text-decoration:underline}.market-odds td:not(:nth-child(-n+2)) b{font-size:11px;color:#fff}
 @media(max-width:900px){.matchup-card-link{grid-column:1/-1}.advance-odds-head{align-items:flex-start}.advance-odds-head>span{white-space:normal;text-align:right}}
 @media(max-width:620px){.advance-odds,.market-odds{margin:8px 0}.advance-odds-head{display:block;padding:7px 8px}.advance-odds-head h2{font-size:15px}.advance-odds-head>span{display:block;text-align:left;margin-top:4px}.advance-odds th,.advance-odds td,.market-odds th,.market-odds td{padding:4px 5px}.advance-odds table{min-width:900px}.market-odds table{min-width:690px}}
+
+/* Portrait: keep the matchup controls inside the card and preserve a traditional bracket path. */
+@media(max-width:620px){
+ .playoff-matchup{max-width:100%;overflow:hidden}
+ .matchup-controls{width:100%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .matchup-controls>*{min-width:0;max-width:100%}
+ .neutral-check,.matchup-output,.matchup-card-link{grid-column:1/-1;width:100%}
+ .matchup-output{grid-template-columns:minmax(0,1fr) auto}
+ .matchup-output b,.matchup-output span{white-space:normal;overflow-wrap:anywhere}
+ .matchup-card-link{white-space:normal;text-align:center;padding-inline:6px}
+ .custom-rounds{align-items:stretch}
+ .custom-round{height:1100px;grid-template-rows:32px repeat(8,minmax(0,1fr));gap:0;align-content:stretch;position:relative}
+ .custom-round>h3{grid-row:1;align-self:start}
+ .custom-round[data-round="first"] .custom-game:nth-of-type(1),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(1){grid-row:2}
+ .custom-round[data-round="first"] .custom-game:nth-of-type(2),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(2){grid-row:4}
+ .custom-round[data-round="first"] .custom-game:nth-of-type(3),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(3){grid-row:6}
+ .custom-round[data-round="first"] .custom-game:nth-of-type(4),.custom-round[data-round="quarterfinal"] .custom-game:nth-of-type(4){grid-row:8}
+ .custom-round[data-round="semifinal"] .custom-game:nth-of-type(1){grid-row:3}
+ .custom-round[data-round="semifinal"] .custom-game:nth-of-type(2){grid-row:7}
+ .custom-round[data-round="championship"] .custom-game:nth-of-type(1){grid-row:5}
+ .custom-game{align-self:center;position:relative;margin-bottom:0}
+ .custom-round:not([data-round="championship"]) .custom-game:after{content:"";position:absolute;left:100%;top:50%;width:10px;border-top:1px solid #3a6a99}
+ .custom-round[data-round="quarterfinal"] .custom-game:before,.custom-round[data-round="semifinal"] .custom-game:before,.custom-round[data-round="championship"] .custom-game:before{content:"";position:absolute;right:100%;top:50%;width:10px;border-top:1px solid #3a6a99}
+ .champion-footer{position:static;left:auto;bottom:auto;transform:none;width:auto;min-height:0;margin:12px 10px 0;box-shadow:none}
+ #customMode:not([hidden]) .custom-bracket{padding-bottom:10px}
+}

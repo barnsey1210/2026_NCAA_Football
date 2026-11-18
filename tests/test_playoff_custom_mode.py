@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v12", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v12", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v13", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v13", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -171,6 +171,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("grid-template-columns:repeat(4,minmax(280px,84vw))", css)
         self.assertIn("overflow-x:auto", css)
         self.assertIn("scroll-snap-type:x mandatory", css)
+        for marker in ('grid-template-columns:minmax(0,1fr) minmax(0,1fr)', 'height:1100px', 'grid-row:3', 'grid-row:7', 'grid-row:5', '.champion-footer{position:static'):
+            self.assertIn(marker, css)
 
 
 if __name__ == "__main__":
