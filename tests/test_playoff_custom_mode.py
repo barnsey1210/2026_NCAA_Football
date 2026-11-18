@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v15", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v15", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v16", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v16", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -87,7 +87,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
             "refreshOdds",
             "Current Market Odds",
             "marketFairProbabilities",
-            "simulation probability minus proportional de-vigged DraftKings probability",
+            "Market % is proportional de-vigged probability",
             "playoff_market_odds_2026.json",
         ):
             self.assertIn(marker, self.js)
@@ -180,7 +180,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(marker, css)
 
     def test_first_out_promotion_and_round_edge_highlights(self):
-        for marker in ('data-first-out-team', 'data-promote-team', 'replaceSeed', 'bestEdges', 'top-round-edge', 'round-edge-pick'):
+        for marker in ('data-first-out-team', 'data-promote-team', 'replaceSeed', 'bestEdges', 'top-round-edge', 'round-edge-pick', 'round-join', 'MODEL', 'MARKET'):
             self.assertIn(marker, self.js + (ROOT / "playoff_custom.css").read_text())
 
 
