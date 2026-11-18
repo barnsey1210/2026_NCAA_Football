@@ -89,3 +89,20 @@
 .player-row small{line-height:1.2}.player-row .rank{padding:4px 6px}.player-row .rank small{display:none}.volume{font-size:11px;line-height:1.2}
 .player-group{margin:8px -14px 0;padding:6px 14px}.player-group:first-child{margin-top:-6px}
 @media(max-width:800px){.metric-row{grid-template-columns:62px minmax(68px,1fr) minmax(96px,1.2fr) minmax(68px,1fr) 62px;grid-template-areas:none;gap:2px;padding:5px 3px}.metric-row>.metric-label,.metric-row>.value.left,.metric-row>.value.right,.metric-row>.edge-left,.metric-row>.edge-right{grid-area:auto}.metric-row>.edge-left,.metric-row>.edge-right{z-index:auto}.metric-row>.edge-cell .edge-logos{height:22px}.metric-row>.edge-cell .edge-logos img{width:12px;height:12px}.metric-row>.edge-cell .edge-logos img+img{display:block;margin-left:0}.player-row{grid-template-columns:minmax(0,1fr) 42px 88px;gap:4px;padding:6px 0}.player-row .rank{padding:3px 5px}.player-body{padding:5px 10px}.player-group{margin:7px -10px 0;padding:5px 10px}.player-group:first-child{margin-top:-5px}}
+
+/* Mobile score alignment and compact, readable metric labels. */
+.projection-center{display:grid;gap:4px;align-content:center;background:var(--ink);color:#fff;padding:12px 24px}
+.projection-line{display:flex;align-items:baseline;justify-content:space-between;gap:8px;white-space:nowrap}
+.projection-line span,.projection-line b{font-size:12px}.projection-line span{color:#aeb8cb;font-weight:800}
+.metric-label-compact{display:none}
+@media(max-width:800px){
+  .projection-center{grid-template-columns:1fr;padding:11px 16px;text-align:left}
+  .projection-line{justify-content:flex-start;gap:4px}.projection-line span,.projection-line b{font-size:13px;color:#fff}
+  .projection-team{display:grid;grid-template-columns:auto auto;justify-content:start;align-items:center;column-gap:6px}
+  .projection-team .projection-identity{order:1}.projection-team .score{order:2;margin:0!important}.projection-team .team-records{order:3;grid-column:1/-1}
+  .projection-team:last-child{justify-content:end}.projection-team:last-child .score{order:1}.projection-team:last-child .projection-identity{order:2}.projection-team:last-child .team-records{order:3}
+  .metric-row{grid-template-columns:58px minmax(67px,1fr) minmax(112px,1.45fr) minmax(67px,1fr) 58px}
+  .metric-label{display:flex;align-items:center;justify-content:center;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.05;max-height:2.1em;text-align:center}
+  .metric-label-full{display:none}.metric-label-compact{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .metric-row>.edge-cell .edge-logos img{width:15px;height:15px}.metric-row>.edge-cell .edge-logos img+img{margin-left:-4px}
+}

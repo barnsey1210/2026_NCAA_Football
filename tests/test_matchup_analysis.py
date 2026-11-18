@@ -33,6 +33,11 @@ class MatchupAnalysisTest(unittest.TestCase):
             "Last-4 SOS",
             "L2 Rating Change",
             "Season Perf vs Model",
+            "RECENT FORM",
+            " games)",
+            "Projected Spread:",
+            "Projected Total:",
+            "compactMetricLabel",
             "MATCHUP ADVANTAGE",
             "RECENT FORM",
             "QB ADVANTAGE",
@@ -59,6 +64,7 @@ class MatchupAnalysisTest(unittest.TestCase):
         self.assertNotIn("${r.tied?'T-':''}", page)
         self.assertNotIn("PROJECTED WINNER", page)
         self.assertNotIn("PROJECTED SCORE", page)
+        self.assertNotIn("LAST 4 + COMMAND CENTER SIGNALS", page)
         self.assertNotIn("Scale: Small", page)
         self.assertIn("metricRank(m.offense)", page)
         self.assertIn("teamRank(s.talent)", page)
