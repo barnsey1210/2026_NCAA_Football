@@ -88,3 +88,27 @@ if(typeof document!=='undefined')new MutationObserver(()=>document.querySelector
  const link=document.createElement('a');link.className='game-matchup-link';link.target='_blank';link.rel='noopener';link.textContent='MATCHUP LINK';
  const neutral=/NEUTRAL/.test(header.textContent);link.href=`matchup-analysis.html?${new URLSearchParams({away:names[1],home:names[0],neutral:neutral?'1':'0',source:'playoff-bracket'})}`;header.textContent='';header.append(link);
 })).observe(document.documentElement,{childList:true,subtree:true});
+
+if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()=>{
+ const customStylesheet=[...document.querySelectorAll('link[rel="stylesheet"]')].find(link=>/playoff_custom\.css/.test(link.href));
+ if(customStylesheet)customStylesheet.href='playoff_custom.css?v=cfp-custom-v20';
+ const hero=document.querySelector('.hero');
+ const title=hero?.querySelector('h1');
+ const intro=hero?.querySelector('p');
+ if(title)title.textContent='College Football Playoff Simulator';
+ if(intro)intro.innerHTML='Customize and simulate your CFP bracket to find betting edges.<br>See custom matchup details and projections.';
+ hero?.querySelector('.stamp')?.remove();
+ const enhanceMatchup=()=>{
+  const controls=document.querySelector('.matchup-controls'),neutral=document.getElementById('playoffMatchupNeutral');
+  if(neutral&&!neutral.dataset.defaulted){neutral.dataset.defaulted='1';neutral.checked=true;neutral.dispatchEvent(new Event('change',{bubbles:true}))}
+  const output=document.getElementById('playoffMatchupOutput'),away=document.getElementById('playoffMatchupAway'),home=document.getElementById('playoffMatchupHome'),score=output?.querySelector('span');
+  if(!controls||!score||score.dataset.logosAdded==='1')return;
+  const srcFor=team=>{const seed=[...document.querySelectorAll('[data-seed]')].find(x=>x.value===team);return seed?.closest('[data-seed-row]')?.querySelector('img')?.getAttribute('src')||`logos/${String(team).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}.png`};
+  const parts=score.textContent.match(/^(.+?)\s+([\d.]+)\s+[–-]\s+(.+?)\s+([\d.]+)$/);
+  if(!parts)return;
+  score.dataset.logosAdded='1';
+  score.innerHTML=`<span class="custom-score-team"><img src="${srcFor(away.value)}" alt="">${parts[1]} <b>${parts[2]}</b></span><i>–</i><span class="custom-score-team"><img src="${srcFor(home.value)}" alt="">${parts[3]} <b>${parts[4]}</b></span>`;
+ };
+ new MutationObserver(enhanceMatchup).observe(document.documentElement,{childList:true,subtree:true});
+ setTimeout(enhanceMatchup,0);
+});

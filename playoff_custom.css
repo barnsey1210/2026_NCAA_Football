@@ -74,6 +74,20 @@ html,body{max-width:100%;overflow-x:hidden}
  #customMode:not([hidden]) .custom-bracket{padding-bottom:10px}
 }
 
+/* Simulator introduction, larger field controls, and mobile championship clearance. */
+.hero{align-items:flex-start}.hero h1{white-space:nowrap}.hero p{font-size:15px;line-height:1.45;margin-top:7px}.hero .stamp{display:none!important}
+.neutral-check{order:-1;grid-column:1/-1;min-height:38px;font-size:12px!important}.neutral-check input{width:20px;height:20px}
+.matchup-controls>label:not(.neutral-check){min-width:0}.matchup-output span{display:flex;align-items:center;gap:8px}.matchup-output span>i{font-style:normal;color:var(--m)}.custom-score-team{display:inline-flex!important;align-items:center;gap:5px!important;white-space:nowrap!important}.custom-score-team img{width:24px;height:24px;object-fit:contain}.custom-score-team b{font-size:inherit!important}
+.seed-grid label{position:relative;grid-template-columns:26px 42px 30px minmax(0,1fr);min-height:68px}.drag-handle{width:42px;height:52px;border:1px solid #365b85;border-radius:7px;background:#102746;font-size:20px}.seed-grid img{width:30px;height:30px}.seed-grid select{grid-row:1/3!important;min-height:56px!important;padding:7px 28px 7px 9px!important;font-size:14px!important}.seed-meta{position:absolute;left:107px;bottom:7px;z-index:2;pointer-events:none}.seed-grid select{padding-bottom:24px!important}.seed-grid label:focus-within{border-color:var(--g);box-shadow:0 0 0 2px #40e5a544}
+.custom-round[data-round="championship"] .round-edge-stack{grid-row:7/10!important;margin-top:18px!important;align-self:start!important}.championship-results{gap:12px!important}
+@media(max-width:620px){
+ .hero{margin:14px 0}.hero h1{font-size:27px!important;letter-spacing:-.035em;white-space:nowrap}.hero p{font-size:14px;margin-top:7px}
+ .matchup-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.neutral-check{grid-row:1}.matchup-controls>label:not(.neutral-check){grid-row:2}
+ .matchup-output span{justify-content:space-between;gap:5px}.custom-score-team{font-size:12px}.custom-score-team img{width:22px;height:22px}
+ .seed-grid label{grid-template-columns:25px 44px 30px minmax(0,1fr);min-height:72px;padding:5px}.drag-handle{width:44px;height:58px}.seed-meta{left:109px;bottom:9px}.seed-grid select{min-height:60px!important}
+ .custom-round{height:830px}.custom-round[data-round="championship"] .round-edge-stack{grid-row:7/10!important;margin-top:28px!important;transform:none!important}.championship-results{gap:14px!important}
+}
+
 @media(min-width:621px){.custom-round:not([data-round="championship"]) .custom-game:after,.custom-round[data-round="quarterfinal"] .custom-game:before,.custom-round[data-round="semifinal"] .custom-game:before,.custom-round[data-round="championship"] .custom-game:before{border-top-color:#fff!important;border-top-width:3px!important}}
 
 /* Readable field list and continuous traditional bracket connectors. */
@@ -109,4 +123,20 @@ html,body{max-width:100%;overflow-x:hidden}
  .custom-round[data-round="championship"] .round-edge-stack{grid-row:6;margin-top:5px;transform:translateY(24px)}
  .round-edge-pick{min-height:54px;grid-template-columns:auto 22px minmax(0,1fr) auto;padding:5px 6px;gap:3px 5px}
  .round-edge-pick span{font-size:8px}.round-edge-pick img{width:22px;height:22px}.round-edge-pick b,.round-edge-pick strong{font-size:11px}.round-edge-pick small{font-size:8px}
+}
+
+/* Final responsive overrides for the simulator controls and title lane. */
+.hero{align-items:flex-start}.hero h1{white-space:nowrap}.hero p{font-size:15px;line-height:1.45;margin-top:7px}.hero .stamp{display:none!important}
+.matchup-controls{grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(330px,1.45fr) auto!important}
+.matchup-output{grid-template-columns:minmax(0,1fr) auto!important;min-height:54px}.matchup-output>b{grid-column:1;grid-row:1}.matchup-output>small{grid-column:2;grid-row:1}.matchup-output>span{grid-column:1/-1;grid-row:2}
+.neutral-check{order:-1;grid-column:1/-1!important;min-height:38px;font-size:12px!important}.neutral-check input{width:20px;height:20px}
+.matchup-output span{display:flex;align-items:center;gap:8px}.matchup-output span>i{font-style:normal;color:var(--m)}.custom-score-team{display:inline-flex!important;align-items:center;gap:5px!important;white-space:nowrap!important}.custom-score-team img{width:24px;height:24px;object-fit:contain}.custom-score-team b{font-size:inherit!important}
+.seed-grid label{position:relative;grid-template-columns:26px 42px 30px minmax(0,1fr)!important;min-height:68px!important}.drag-handle{width:42px!important;height:52px!important;border:1px solid #365b85!important;border-radius:7px!important;background:#102746!important;font-size:20px!important}.seed-grid img{width:30px!important;height:30px!important}.seed-grid select{grid-row:1/3!important;min-height:56px!important;padding:7px 28px 24px 9px!important;font-size:14px!important}.seed-meta{position:absolute;left:107px;bottom:7px;z-index:2;pointer-events:none}
+.custom-round[data-round="championship"] .round-edge-stack{grid-row:7/10!important;margin-top:22px!important;align-self:start!important}.championship-results{gap:14px!important}
+@media(max-width:620px){
+ .hero{margin:14px 0}.hero h1{font-size:21px!important;letter-spacing:-.04em;white-space:nowrap}.hero p{font-size:14px;margin-top:7px}
+ .matchup-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.neutral-check{grid-row:1}.matchup-controls>label:not(.neutral-check){grid-row:2}
+ .matchup-output span{justify-content:space-between;gap:5px}.custom-score-team{font-size:12px}.custom-score-team img{width:22px;height:22px}
+ .seed-grid label{grid-template-columns:25px 44px 30px minmax(0,1fr)!important;min-height:72px!important;padding:5px!important}.drag-handle{width:44px!important;height:58px!important}.seed-meta{left:109px;bottom:9px}.seed-grid select{min-height:60px!important}
+ .custom-round{height:850px!important}.custom-round[data-round="championship"] .round-edge-stack{grid-row:7/10!important;margin-top:34px!important;transform:none!important}.championship-results{gap:16px!important}
 }
