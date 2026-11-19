@@ -115,7 +115,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
     def test_quarter_scoring_seed_labels_and_champion_banner(self):
         for marker in ("scoreChunks", "scoreEvents", "period:'1Q'", "`${q}Q`", "period:'FINAL'", "champion-team", "🏆"):
             self.assertIn(marker, self.js)
-        self.assertIn('<span class="seed-number">${s}</span>', self.js)
+        self.assertIn('class="seed-number seed-picker-button"', self.js)
+        self.assertIn('data-open-seed="${s}"', self.js)
         self.assertIn("${seedOf(name)||''}", self.js)
         self.assertNotIn("`Proj ${projected.toFixed(1)}`", self.js)
         css = (ROOT / "playoff_custom.css").read_text()
@@ -143,6 +144,12 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("currentCfpSeeds(committeeSnapshot)", self.js)
         self.assertIn("Reset to Current CFP Field", self.js)
         self.assertIn("next teams out 13–20", self.js)
+        self.assertIn('class="team-first-picker"', self.js)
+        self.assertIn('id="teamFirstTeam"', self.js)
+        self.assertIn('id="teamFirstSeed"', self.js)
+        self.assertIn("committeeSnapshot?.rankings", self.js)
+        self.assertIn("National Champion", self.js)
+        self.assertNotIn("Custom National Champion", self.js)
         self.assertIn("cfp_committee_rankings_2026.json", self.js)
         self.assertNotIn("Browser-local only", self.js)
 
@@ -159,7 +166,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("MATCHUP LINK", self.js)
         self.assertIn("header.textContent=''", self.js)
         self.assertIn("championship-results", self.js)
-        self.assertIn("${edgeBubble('championship','REACH CHAMPIONSHIP')}${championCard()}${edgeBubble('title','WIN CHAMPIONSHIP')}", self.js)
+        self.assertIn("${edgeBubble('championship','REACH CHAMPIONSHIP')}<div class=\"championship-bottom\">${championCard()}${edgeBubble('title','WIN CHAMPIONSHIP')}", self.js)
 
     def test_current_record_coverage_including_independents(self):
         workspace = json.loads((ROOT / "data/site/conference_workspace.json").read_text())
