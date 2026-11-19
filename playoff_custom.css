@@ -163,12 +163,12 @@ html,body{max-width:100%;overflow-x:hidden}
 .trophy-panel{display:flex;align-items:center;justify-content:center;min-height:250px;overflow:hidden;border:1px solid var(--l);border-radius:12px;background:#000}
 .trophy-panel img{display:block;width:100%;height:270px;object-fit:contain;object-position:center}
 .matchup-label{display:flex!important;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0}
-.matchup-label .neutral-check{display:inline-flex!important;order:0;grid-column:auto!important;width:auto!important;min-height:0!important;margin-top:11px;padding:3px 7px;border:1px solid #36536e;border-radius:5px;background:#071426;font-size:9px!important;line-height:1;color:#fff!important}
-.matchup-label .neutral-check input{width:14px;height:14px;margin:0}
+.matchup-label .neutral-check{display:inline-flex!important;order:0;grid-column:auto!important;width:auto!important;min-height:0!important;margin-top:11px;padding:6px 9px;border:1px solid #36536e;border-radius:5px;background:#071426;font-size:11px!important;line-height:1;color:#fff!important}
+.matchup-label .neutral-check input{width:18px;height:18px;margin:0}
 .matchup-controls{grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(280px,1.45fr)!important;align-items:end}
 .matchup-controls>label{display:flex;flex-direction:column;min-width:0}
 .matchup-controls select{min-height:54px!important;height:54px;margin-top:3px;padding:8px 12px;font-size:15px!important}
-.matchup-output{min-height:54px!important;height:54px}.matchup-card-link{grid-column:1/-1;min-height:34px!important;height:34px}
+.matchup-output{min-height:68px!important;height:auto!important;padding-top:8px!important;padding-bottom:8px!important;row-gap:5px!important}.matchup-card-link{grid-column:1/-1;min-height:34px!important;height:34px}
 
 @media(max-width:900px){
  .playoff-intro-grid{grid-template-columns:1fr;position:relative;margin-top:14px}
