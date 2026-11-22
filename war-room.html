@@ -1896,6 +1896,11 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
   }
   .mobile-controls-toggle{color:var(--yellow);cursor:pointer}
 
+  @media(max-width:360px){
+    .mobile-sticky-controls{grid-template-columns:50px 60px minmax(0,1fr) 64px}
+    .mobile-control-select,.mobile-controls-toggle{font-size:8px;padding-left:2px;padding-right:2px}
+  }
+
   .wr-top{padding-bottom:5px}
   .wr-top-right{display:none;width:100%;margin-left:0;flex-wrap:wrap;padding-top:3px}
   .wr-top-right.mobile-open{display:flex}
@@ -2585,10 +2590,10 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
 </div>
 
 <script>
-const MATRIX_URL = 'data/site/war_room_market_matrix.json?v=20261122T144432Z';
-const HEALTH_URL = 'data/site/war_room_health.json?v=20261122T144432Z';
-const ACTIVITY_URL = 'data/site/war_room_activity.json?v=20261122T144432Z';
-const MATCHUPS_CONTEXT_URL = 'data/site/matchups_public_view.json?v=20261122T144432Z';
+const MATRIX_URL = 'data/site/war_room_market_matrix.json';
+const HEALTH_URL = 'data/site/war_room_health.json';
+const ACTIVITY_URL = 'data/site/war_room_activity.json';
+const MATCHUPS_CONTEXT_URL = 'data/site/matchups_view.json';
 const LIVE_VERSION_URL = 'https://control.barnseywr.com/war-room/live/version';
 const LIVE_MATRIX_URL = 'https://control.barnseywr.com/war-room/live/market-matrix';
 const LIVE_HEALTH_URL = 'https://control.barnseywr.com/war-room/live/health';
