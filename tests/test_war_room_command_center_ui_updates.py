@@ -122,6 +122,7 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("grid-template-columns:minmax(0,1fr) auto !important", mobile)
         self.assertIn("grid-column:1 / -1", mobile)
         self.assertIn("grid-template-columns:94px minmax(0,1fr)", mobile)
+        self.assertIn("width:calc(100% - 8px) !important", mobile)
         self.assertIn(".mobile-game-foot{", mobile)
         self.assertIn("grid-template-columns:minmax(0,1fr)", mobile)
         self.assertIn(".mobile-foot-injury + .mobile-foot-injury", mobile)

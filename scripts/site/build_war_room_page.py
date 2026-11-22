@@ -2286,6 +2286,7 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
     overflow:visible !important;
     position:relative !important;
     z-index:45 !important;
+    width:calc(100% - 8px) !important;
   }
 
   .ratings-health-content{
