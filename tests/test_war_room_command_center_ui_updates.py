@@ -127,6 +127,10 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
         self.assertIn("grid-template-columns:minmax(0,1fr)", mobile)
         self.assertIn(".mobile-foot-injury + .mobile-foot-injury", mobile)
 
+    def test_team_context_date_only_values_do_not_shift_time_zones(self):
+        self.assertIn("raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/)", self.source)
+        self.assertIn("`${Number(dateOnly[2])}/${Number(dateOnly[3])}`", self.source)
+
     def test_mobile_command_center_uses_condensed_sortable_edge_table(self):
         source = self.source
         self.assertIn('class="mobile-command-table"', source)

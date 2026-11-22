@@ -5520,7 +5520,10 @@ function renderSignalsPanel(game){
 
 function fmtContextDate(value){
   if(!value) return '—';
-  const d=new Date(value);
+  const raw=String(value);
+  const dateOnly=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(dateOnly) return `${Number(dateOnly[2])}/${Number(dateOnly[3])}`;
+  const d=new Date(raw);
   if(Number.isNaN(d.getTime())) return String(value).slice(5,10);
   return new Intl.DateTimeFormat('en-US',{
     timeZone:'America/New_York',
