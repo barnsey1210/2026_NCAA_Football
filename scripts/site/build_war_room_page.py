@@ -1955,6 +1955,7 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
   @media(max-width:360px){
     .mobile-sticky-controls{grid-template-columns:50px 60px minmax(0,1fr) 64px}
     .mobile-control-select,.mobile-controls-toggle{font-size:8px;padding-left:2px;padding-right:2px}
+    .ratings-health-strip,.ratings-health-content{overflow:hidden !important}
   }
 
   .wr-top{padding-bottom:5px}
