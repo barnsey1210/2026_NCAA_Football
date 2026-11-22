@@ -130,6 +130,8 @@ class WarRoomCommandCenterUiUpdatesTests(unittest.TestCase):
     def test_mobile_command_center_uses_condensed_sortable_edge_table(self):
         source = self.source
         self.assertIn('class="mobile-command-table"', source)
+        self.assertIn("@media(max-width:360px)", source)
+        self.assertIn("grid-template-columns:50px 60px minmax(0,1fr) 64px", source)
         self.assertIn('data-mobile-sort="spread_edge"', source)
         self.assertIn('data-mobile-sort="total_edge"', source)
         self.assertIn("grid-template-columns:minmax(0,55fr) minmax(0,22.5fr) minmax(0,22.5fr)", source)

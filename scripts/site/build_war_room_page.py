@@ -1952,6 +1952,11 @@ td.model-fit-col,td.state-col{border-left:1px solid rgba(220,230,238,.42)}
   }
   .mobile-controls-toggle{color:var(--yellow);cursor:pointer}
 
+  @media(max-width:360px){
+    .mobile-sticky-controls{grid-template-columns:50px 60px minmax(0,1fr) 64px}
+    .mobile-control-select,.mobile-controls-toggle{font-size:8px;padding-left:2px;padding-right:2px}
+  }
+
   .wr-top{padding-bottom:5px}
   .wr-top-right{display:none;width:100%;margin-left:0;flex-wrap:wrap;padding-top:3px}
   .wr-top-right.mobile-open{display:flex}
