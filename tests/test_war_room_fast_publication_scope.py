@@ -12,6 +12,11 @@ AUDIT = ROOT / "scripts/audit/audit_war_room_fast_publication.py"
 
 
 class WarRoomFastPublicationScopeTest(unittest.TestCase):
+    def test_matrix_summary_counts_distinct_unmatched_games(self):
+        source = (ROOT / "scripts/war_room/build_war_room_market_matrix.py").read_text()
+        self.assertIn('row.get("provider_game_id")', source)
+        self.assertIn('row.get("commence_time")', source)
+
     def build_bundle(self, *, health_matched=76, health_unmatched=2, matrix_unmatched=2):
         temporary = tempfile.TemporaryDirectory()
         bundle = Path(temporary.name)

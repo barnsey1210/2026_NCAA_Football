@@ -3722,7 +3722,15 @@ def main():
                 games_out,
                 fast_board_game_ids,
             ),
-            "unmatched_fast_rows": len(unmatched),
+            "unmatched_fast_rows": len({
+                row.get("provider_game_id")
+                or (
+                    row.get("commence_time"),
+                    row.get("away_team"),
+                    row.get("home_team"),
+                )
+                for row in unmatched
+            }),
             "invalid_fast_rows": len(invalid_rows),
             "invalid_book_pairs": len(
                 pair_validation_failures
