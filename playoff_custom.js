@@ -94,7 +94,7 @@ if(typeof document!=='undefined')new MutationObserver(()=>document.querySelector
 
 if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()=>{
  const customStylesheet=[...document.querySelectorAll('link[rel="stylesheet"]')].find(link=>/playoff_custom\.css/.test(link.href));
- if(customStylesheet)customStylesheet.href='playoff_custom.css?v=cfp-custom-v30';
+ if(customStylesheet)customStylesheet.href='playoff_custom.css?v=cfp-custom-v31';
  const hero=document.querySelector('.hero');
  const title=hero?.querySelector('h1');
  const intro=hero?.querySelector('p');
