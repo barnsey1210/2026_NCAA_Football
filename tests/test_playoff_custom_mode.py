@@ -59,8 +59,8 @@ class PlayoffCustomModeTest(unittest.TestCase):
         page = (ROOT / "playoff_v2.html").read_text()
         self.assertIn("playoff_custom.css", page)
         self.assertIn("playoff_custom.js", page)
-        self.assertIn("playoff_custom.css?v=cfp-custom-v17", page)
-        self.assertIn("playoff_custom.js?v=cfp-custom-v17", page)
+        self.assertIn("playoff_custom.css?v=cfp-custom-v29", page)
+        self.assertIn("playoff_custom.js?v=cfp-custom-v29", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
@@ -139,6 +139,9 @@ class PlayoffCustomModeTest(unittest.TestCase):
 
     def test_custom_is_default_and_first_out_extends_through_20(self):
         self.assertIn("setMode('custom')", self.js)
+        self.assertIn('MODEL PREDICTIONS', self.js)
+        self.assertIn('CUSTOM VIEW', self.js)
+        self.assertNotIn('mode.remove()', self.js)
         self.assertIn("CURRENT_CFP_FIELD", self.js)
         self.assertIn("CURRENT_CFP_NEXT_OUT", self.js)
         self.assertIn("currentCfpSeeds(committeeSnapshot)", self.js)
