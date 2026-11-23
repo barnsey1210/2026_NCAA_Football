@@ -1,22 +1,27 @@
 {
   "betting": {
-    "built_at": "2026-11-14T13:36:57.673646+00:00",
-    "latest_completed_week": 11,
-    "latest_represented_week": 12,
-    "results_generated_at": "2026-11-14T13:07:45.999945+00:00",
+    "built_at": "2026-11-22T13:35:52.299920+00:00",
+    "latest_completed_week": 12,
+    "latest_represented_week": 13,
+    "results_generated_at": "2026-11-22T13:28:29.115872+00:00",
     "status": "CURRENT"
   },
   "errors": [],
   "futures": {
-    "built_at": "2026-11-14T14:08:22.746777+00:00",
-    "market_contract_built_at": "2026-11-14T14:08:16.658773+00:00",
-    "market_reliability_errors": [],
-    "market_reliability_status": "warn",
-    "playoff_simulation_built_at": "2026-11-14T13:36:22.322973+00:00",
-    "season_simulation_built_at": "2026-11-14T13:26:50.653369+00:00",
-    "status": "CURRENT"
+    "built_at": "2026-11-22T13:08:56.062021+00:00",
+    "market_contract_built_at": "2026-11-22T13:06:25.845000+00:00",
+    "market_reliability_errors": [
+      "win_totals: no normalized rows dated 2026-11-22",
+      "win_totals: normalized market acquisition is stale or unavailable",
+      "win_totals: provider-wide disappearance: FanDuel",
+      "win_totals: material provider coverage drop"
+    ],
+    "market_reliability_status": "fail",
+    "playoff_simulation_built_at": "2026-11-22T13:35:24.535877+00:00",
+    "season_simulation_built_at": "2026-11-22T13:30:56.200787+00:00",
+    "status": "DEGRADED_PRIOR_ACCEPTED_ARTIFACT_PRESERVED"
   },
-  "generated_at": "2026-11-14T14:10:16.671559+00:00",
+  "generated_at": "2026-11-22T13:52:28.460675+00:00",
   "schema_version": "derived-page-status-v1",
-  "status": "PASS"
+  "status": "DEGRADED"
 }
