@@ -63,6 +63,9 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertIn("playoff_custom.js?v=cfp-custom-v30", page)
         self.assertIn("Projected CFP Field", page)
         self.assertIn("P.projected_field", page)
+        self.assertIn("document.getElementById('rankings')", page)
+        self.assertIn("document.getElementById('tree')", page)
+        self.assertIn("document.getElementById('stamp')", page)
         self.assertIn("data/site/playoff_model_2026.json", page)
         cloudflare = json.loads((ROOT / "config/cloudflare_pages_manifest.json").read_text())
         for asset in ("playoff_custom.css", "playoff_custom.js", "data/site/playoff_market_odds_2026.json"):
@@ -73,6 +76,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
             self.assertIn(marker, self.js)
         for marker in ("RATINGS / MODEL HEALTH", "SPREAD <strong>3-SOURCE", "TOTAL <strong>SP+ ONLY", "source_meta", "America/New_York"):
             self.assertIn(marker, self.js)
+        self.assertIn(".war-room-global", self.js)
         for marker in ("overall_rank", "ratingClass", "decorateModelRanks", "decorateCustomRanks"):
             self.assertIn(marker, self.js)
 
@@ -187,7 +191,7 @@ class PlayoffCustomModeTest(unittest.TestCase):
                 low, high = min(wins), max(wins)
                 records[row["team"]] = f"{low}-{max(0, 12 - (high - low) - low)}"
         self.assertEqual(len(records), 138)
-        self.assertEqual(records["Notre Dame"], "9-1")
+        self.assertEqual(records["Notre Dame"], "10-1")
 
     def test_two_row_team_cards_and_colored_field_metadata(self):
         for marker in ("team-card-meta", "seed-meta", "recordClass", "record-good", "record-mid", "record-low"):
