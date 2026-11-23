@@ -102,8 +102,10 @@ class PlayoffCustomModeTest(unittest.TestCase):
         self.assertEqual(market["book"], "DraftKings")
         self.assertEqual(set(market["markets"]), {"quarterfinal", "semifinal", "championship", "title"})
         self.assertEqual([market["markets"][x]["slots"] for x in ("quarterfinal", "semifinal", "championship", "title")], [8, 4, 2, 1])
-        self.assertEqual(market["markets"]["title"]["prices"]["Georgia"], 200)
-        self.assertEqual(market["markets"]["quarterfinal"]["prices"]["Georgia"], -8000)
+        self.assertEqual(market["captured_at"][:10], "2026-11-23")
+        self.assertEqual(market["capture_method"], "manual_visual_capture")
+        self.assertEqual(market["markets"]["title"]["prices"]["Georgia"], 190)
+        self.assertEqual(market["markets"]["quarterfinal"]["prices"]["Utah"], -1500)
         for marker in ("edgeCell", "edge-positive", "edge-negative", "Edge</th>", "marketEdge"):
             self.assertIn(marker, self.js)
 
